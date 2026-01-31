@@ -126,6 +126,43 @@ const initDb = async () => {
             console.error('Migration error:', migError);
         }
 
+        // Migration for ph_settings (Sync with Controller)
+        try {
+            // 1. Rename contact_email to support_email if it exists
+            const [emailCols] = await pool.query("SHOW COLUMNS FROM ph_settings LIKE 'contact_email'");
+            if (emailCols.length > 0) {
+                console.log('Migrating: Renaming contact_email to support_email in ph_settings...');
+                await pool.query("ALTER TABLE ph_settings CHANGE contact_email support_email VARCHAR(255)");
+            }
+
+            // 2. Add support_email if it doesn't exist
+            const [supportEmailCols] = await pool.query("SHOW COLUMNS FROM ph_settings LIKE 'support_email'");
+            if (supportEmailCols.length === 0) {
+                console.log('Migrating: Adding support_email column to ph_settings...');
+                await pool.query("ALTER TABLE ph_settings ADD COLUMN support_email VARCHAR(255)");
+            }
+
+            // 3. Add other missing columns
+            const settingColumns = [
+                { name: 'site_description', type: 'TEXT' },
+                { name: 'facebook_url', type: 'VARCHAR(255)' },
+                { name: 'youtube_url', type: 'VARCHAR(255)' },
+                { name: 'website_url', type: 'VARCHAR(255)' },
+                { name: 'address_text', type: 'TEXT' }
+            ];
+
+            for (const col of settingColumns) {
+                const [cols] = await pool.query(`SHOW COLUMNS FROM ph_settings LIKE '${col.name}'`);
+                if (cols.length === 0) {
+                    console.log(`Migrating: Adding ${col.name} column to ph_settings...`);
+                    await pool.query(`ALTER TABLE ph_settings ADD COLUMN ${col.name} ${col.type}`);
+                }
+            }
+
+        } catch (settingMigError) {
+            console.error('Settings Migration error:', settingMigError);
+        }
+
         // Seed Admin
         await seedAdmin();
 

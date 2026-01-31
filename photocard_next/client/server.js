@@ -36,7 +36,7 @@ nextApp.prepare().then(() => {
     };
 
     app.use(cors(corsOptions));
-    app.options("(.*)", cors(corsOptions));
+
 
     // Middleware
     app.use(express.json());
@@ -56,7 +56,7 @@ nextApp.prepare().then(() => {
     app.use("/api/categories", categoryRoutes);
 
     // Next.js Request Handler (Catch-all)
-    app.all("(.*)", (req, res) => {
+    app.all(/(.*)/, (req, res) => {
         return handle(req, res);
     });
 

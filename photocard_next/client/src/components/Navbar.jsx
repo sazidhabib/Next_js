@@ -90,7 +90,7 @@ const Navbar = () => {
                             {!user || user.role === 'admin' ? (
                                 <Link
                                     href="/login"
-                                    className="flex items-center gap-2 bg-primary hover:bg-blue-600 text-white px-6 py-2.5 rounded-full font-bold transition-colors shadow-lg shadow-blue-200"
+                                    className="flex items-center gap-2 bg-blue-800 hover:bg-blue-600 text-white px-6 py-2.5 rounded-full font-bold transition-colors shadow-lg shadow-blue-200"
                                 >
                                     <User size={18} />
                                     লগইন

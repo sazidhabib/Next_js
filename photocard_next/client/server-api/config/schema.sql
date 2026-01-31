@@ -33,9 +33,14 @@ CREATE TABLE IF NOT EXISTS ph_settings (
     site_name VARCHAR(255) DEFAULT 'Photo Card BD',
     logo_url TEXT,
     favicon_url TEXT,
-    contact_email VARCHAR(255),
+    support_email VARCHAR(255),
     helpline_number VARCHAR(50) DEFAULT '01880578893',
     footer_text VARCHAR(255) DEFAULT '© 2026 Photo Card BD. All rights reserved.',
+    site_description TEXT,
+    facebook_url VARCHAR(255),
+    youtube_url VARCHAR(255),
+    website_url VARCHAR(255),
+    address_text TEXT,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 

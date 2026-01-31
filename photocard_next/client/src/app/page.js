@@ -65,7 +65,7 @@ const Home = () => {
               </p>
 
               <div className="flex flex-wrap items-center justify-center md:justify-start gap-4">
-                <Link href="/all-frames" className="px-8 py-3.5 bg-primary hover:bg-green-700 text-white font-bold rounded-lg shadow-lg shadow-green-200 transition-all transform hover:-translate-y-1">
+                <Link href="/all-frames" className="px-8 py-3.5 bg-blue-800 hover:bg-blue-700 text-white font-bold rounded-lg shadow-lg shadow-blue-200 transition-all transform hover:-translate-y-1">
                   তৈরি করুন
                 </Link>
                 <button className="px-8 py-3.5 bg-white border border-gray-200 text-gray-700 font-bold rounded-lg hover:bg-gray-50 transition-all flex items-center gap-2">
