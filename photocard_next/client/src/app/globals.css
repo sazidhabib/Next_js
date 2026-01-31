@@ -1,51 +1,60 @@
 @import "tailwindcss";
 
+@theme {
+  --color-primary: #1d4ed8;
+  --color-primary-foreground: #605f5f;
+}
+
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #f0f6fdff;
+  --primary: #1d4ed8;
+  --primary-foreground: #605f5f;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #f0f6fdff;
+    /* Force light mode background for now as design seems light-themed */
+    --foreground: #f0f6fdff;
+    --primary: #1d4ed8;
   }
 }
 
 /* Custom Fonts */
 @font-face {
-    font-family: 'Hind Siliguri';
-    src: url('../assets/fonts/HindSiliguri-Light.ttf') format('truetype');
-    font-weight: 300;
-    font-style: normal;
+  font-family: 'Hind Siliguri';
+  src: url('../assets/fonts/HindSiliguri-Light.ttf') format('truetype');
+  font-weight: 300;
+  font-style: normal;
 }
 
 @font-face {
-    font-family: 'Hind Siliguri';
-    src: url('../assets/fonts/HindSiliguri-Regular.ttf') format('truetype');
-    font-weight: 400;
-    font-style: normal;
+  font-family: 'Hind Siliguri';
+  src: url('../assets/fonts/HindSiliguri-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
 }
 
 @font-face {
-    font-family: 'Hind Siliguri';
-    src: url('../assets/fonts/HindSiliguri-Medium.ttf') format('truetype');
-    font-weight: 500;
-    font-style: normal;
+  font-family: 'Hind Siliguri';
+  src: url('../assets/fonts/HindSiliguri-Medium.ttf') format('truetype');
+  font-weight: 500;
+  font-style: normal;
 }
 
 @font-face {
-    font-family: 'Hind Siliguri';
-    src: url('../assets/fonts/HindSiliguri-SemiBold.ttf') format('truetype');
-    font-weight: 600;
-    font-style: normal;
+  font-family: 'Hind Siliguri';
+  src: url('../assets/fonts/HindSiliguri-SemiBold.ttf') format('truetype');
+  font-weight: 600;
+  font-style: normal;
 }
 
 @font-face {
-    font-family: 'Hind Siliguri';
-    src: url('../assets/fonts/HindSiliguri-Bold.ttf') format('truetype');
-    font-weight: 700;
-    font-style: normal;
+  font-family: 'Hind Siliguri';
+  src: url('../assets/fonts/HindSiliguri-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
 }
 
 body {

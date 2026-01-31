@@ -34,7 +34,7 @@ const Navbar = () => {
                         {settings.logo_url ? (
                             <img src={settings.logo_url} alt={settings.site_name} className="h-10 w-auto" />
                         ) : (
-                            <span className="text-xl font-bold text-green-700 flex items-center gap-2">
+                            <span className="text-xl font-bold text-blue-800 flex items-center gap-2">
                                 <span className="text-2xl">📷</span> {settings.site_name}
                             </span>
                         )}
@@ -48,7 +48,7 @@ const Navbar = () => {
                         <Link href="/" className="text-gray-600 hover:text-primary font-medium">
                             হোম
                         </Link>
-                        <Link href="/add-frame" className="flex items-center gap-2 bg-primary hover:bg-green-700 text-white px-5 py-2.5 rounded-full font-bold transition-colors shadow-lg shadow-green-200">
+                        <Link href="/add-frame" className="flex items-center gap-2 bg-primary hover:bg-blue-800 text-white px-5 py-2.5 rounded-full font-bold transition-colors shadow-lg shadow-blue-200">
                             <Plus size={18} />
                             ফ্রেম যুক্ত করুন
                         </Link>
@@ -69,7 +69,7 @@ const Navbar = () => {
                         ) : (
                             <>
                                 <div className="w-8 h-8 bg-primary rounded lg:hidden"></div>
-                                <span className="text-xl font-bold text-green-700 flex items-center gap-2">
+                                <span className="text-xl font-bold text-primary flex items-center gap-2">
                                     <span className="text-2xl">📷</span> {settings.site_name}
                                 </span>
                             </>
@@ -139,18 +139,18 @@ const Navbar = () => {
             {isOpen && (
                 <div className="md:hidden bg-white border-t">
                     <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-                        <Link href="/" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-primary hover:bg-green-50">হোম</Link>
-                        <Link href="/popular-frames" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-primary hover:bg-green-50">জনপ্রিয় ফ্রেম</Link>
-                        <Link href="/text-frames" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-primary hover:bg-green-50">টেক্সট ফ্রেম</Link>
-                        <Link href="/all-frames" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-primary hover:bg-green-50">সকল ফ্রেম</Link>
+                        <Link href="/" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-primary hover:bg-blue-50">হোম</Link>
+                        <Link href="/popular-frames" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-primary hover:bg-blue-50">জনপ্রিয় ফ্রেম</Link>
+                        <Link href="/text-frames" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-primary hover:bg-blue-50">টেক্সট ফ্রেম</Link>
+                        <Link href="/all-frames" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-primary hover:bg-blue-50">সকল ফ্রেম</Link>
 
                         {!user || user.role === 'admin' ? (
-                            <Link href="/login" className="block px-3 py-2 rounded-md text-base font-medium text-primary hover:bg-green-50 mt-4">
+                            <Link href="/login" className="block px-3 py-2 rounded-md text-base font-medium text-primary hover:bg-blue-50 mt-4">
                                 লগইন
                             </Link>
                         ) : (
                             <>
-                                <Link href="/dashboard" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-primary hover:bg-green-50">
+                                <Link href="/dashboard" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-primary hover:bg-blue-50">
                                     ড্যাশবোর্ড ({user.username})
                                 </Link>
                                 <button onClick={handleLogout} className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-red-600 hover:bg-red-50">

@@ -229,12 +229,12 @@ export default function FramesPage() {
                 <table className="w-full text-left">
                     <thead className="bg-gray-50 border-b">
                         <tr>
-                            <th className="p-4">Preview</th>
-                            <th className="p-4">Title</th>
-                            <th className="p-4">Stats</th>
-                            <th className="p-4">Category</th>
-                            <th className="p-4">Status</th>
-                            <th className="p-4 text-right">Actions</th>
+                            <th className="p-4 text-primary-foreground">Preview</th>
+                            <th className="p-4 text-primary-foreground">Title</th>
+                            <th className="p-4 text-primary-foreground">Stats</th>
+                            <th className="p-4 text-primary-foreground">Category</th>
+                            <th className="p-4 text-primary-foreground">Status</th>
+                            <th className="p-4 text-right text-primary-foreground">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -254,7 +254,7 @@ export default function FramesPage() {
                                             <img src={frame.image_url} alt="" className="w-full h-full object-contain" />
                                         </div>
                                     </td>
-                                    <td className="p-4 font-medium">
+                                    <td className="p-4 font-medium text-primary-foreground">
                                         {frame.title}
                                         {frame.is_popular === 1 && <span className="ml-2 text-xs bg-yellow-100 text-yellow-800 px-1.5 py-0.5 rounded">Popular</span>}
                                     </td>

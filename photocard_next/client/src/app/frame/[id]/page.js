@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Download, Upload, ZoomIn, ZoomOut, Image as ImageIcon, ArrowLeft } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { API_URL } from '../../config';
+import { API_URL } from '../../../config';
 
 export default function FrameDetailsPage() {
     const { id } = useParams();

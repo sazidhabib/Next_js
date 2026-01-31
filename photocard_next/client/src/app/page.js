@@ -53,7 +53,7 @@ const Home = () => {
           <div className="flex flex-col md:flex-row items-center gap-12">
             {/* Left Content */}
             <div className="flex-1 text-center md:text-left space-y-6">
-              <span className="inline-block px-4 py-1.5 rounded-full bg-background text-primary text-sm font-semibold mb-2">
+              <span className="inline-block px-4 py-1.5 rounded-full bg-blue-100 text-primary text-sm font-semibold mb-2">
                 ✨ ২০০০+ ডিজিটাল ফ্রেম
               </span>
               <h1 className="text-4xl md:text-6xl font-bold text-gray-900 leading-tight">
