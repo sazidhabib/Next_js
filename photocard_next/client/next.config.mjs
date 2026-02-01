@@ -1,17 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  async rewrites() {
-    return [
-      {
-        source: '/api/:path*',
-        destination: 'http://localhost:5000/api/:path*',
-      },
-      {
-        source: '/uploads/:path*',
-        destination: 'http://localhost:5000/uploads/:path*',
-      },
-    ];
-  },
+  /* 
+   * Rewrites are not needed since server.js handles API and Uploads routing 
+   * before passing requests to Next.js.
+   */
 };
 
 export default nextConfig;

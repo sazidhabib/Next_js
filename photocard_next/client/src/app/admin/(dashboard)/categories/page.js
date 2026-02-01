@@ -131,7 +131,7 @@ export default function CategoriesPage() {
                     <tbody>
                         {filtered.map(cat => (
                             <tr key={cat.id} className="border-b hover:bg-gray-50">
-                                <td className="p-3 font-medium">{cat.name}</td>
+                                <td className="p-3 font-medium text-gray-500">{cat.name}</td>
                                 <td className="p-3 text-gray-500">{cat.slug}</td>
                                 <td className="p-3 text-gray-500">{cat.description}</td>
                                 <td className="p-3 text-right space-x-2">
