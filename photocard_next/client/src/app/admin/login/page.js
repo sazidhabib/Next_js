@@ -44,7 +44,7 @@ const AdminLoginPage = () => {
                         <input
                             type="email"
                             placeholder="admin@photocard.com"
-                            className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-gray-900 focus:ring-1 focus:ring-gray-900"
+                            className="w-full px-4 py-3 rounded-lg border text-black border-gray-200 focus:outline-none focus:border-gray-900 focus:ring-1 focus:ring-gray-900"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                         />
@@ -56,7 +56,7 @@ const AdminLoginPage = () => {
                             <input
                                 type="password"
                                 placeholder="********"
-                                className="w-full pl-4 pr-10 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-gray-900 focus:ring-1 focus:ring-gray-900"
+                                className="w-full pl-4 pr-10 py-3 rounded-lg border text-black border-gray-200 focus:outline-none focus:border-gray-900 focus:ring-1 focus:ring-gray-900"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                             />

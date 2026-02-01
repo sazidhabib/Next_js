@@ -196,17 +196,17 @@ export default function SettingsPage() {
                         <div className="space-y-2">
                             <label className="text-sm font-medium text-gray-700">ওয়েবসাইট লোগো</label>
                             {currentLogoUrl && (
-                                <div className="mb-2">
-                                    <img src={currentLogoUrl} alt="Current Logo" className="h-16 object-contain border p-2 rounded" />
+                                <div className="mb-2 text-black">
+                                    <img src={currentLogoUrl} alt="Current Logo" className="h-16 object-contain border p-2 rounded " />
                                 </div>
                             )}
                             <input
                                 type="file"
                                 accept="image/*"
                                 onChange={handleLogoChange}
-                                className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:border-primary"
+                                className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none text-gray-400 focus:border-primary"
                             />
-                            {logoFile && <p className="text-xs text-green-600">নতুন লোগো নির্বাচিত: {logoFile.name}</p>}
+                            {logoFile && <p className="text-xs text-black">নতুন লোগো নির্বাচিত: {logoFile.name}</p>}
                         </div>
                         <div className="space-y-2">
                             <label className="text-sm font-medium text-gray-700">ফেভিকন</label>
@@ -219,7 +219,7 @@ export default function SettingsPage() {
                                 type="file"
                                 accept="image/*"
                                 onChange={handleFaviconChange}
-                                className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:border-primary"
+                                className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none text-gray-400 focus:border-primary"
                             />
                             {faviconFile && <p className="text-xs text-green-600">নতুন ফেভিকন নির্বাচিত: {faviconFile.name}</p>}
                         </div>
@@ -240,7 +240,7 @@ export default function SettingsPage() {
                                 type="text"
                                 value={siteTitle}
                                 onChange={(e) => setSiteTitle(e.target.value)}
-                                className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                                className="w-full px-4 py-2.5 rounded-lg border text-black border-gray-200 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                             />
                         </div>
                         <div className="space-y-2">
@@ -249,7 +249,7 @@ export default function SettingsPage() {
                                 type="email"
                                 value={supportEmail}
                                 onChange={(e) => setSupportEmail(e.target.value)}
-                                className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                                className="w-full px-4 py-2.5 rounded-lg border text-black border-gray-200 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                             />
                         </div>
                         <div className="space-y-2">
@@ -258,7 +258,7 @@ export default function SettingsPage() {
                                 type="text"
                                 value={helplineNumber}
                                 onChange={(e) => setHelplineNumber(e.target.value)}
-                                className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                                className="w-full px-4 py-2.5 rounded-lg border text-black border-gray-200 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                             />
                         </div>
                         <div className="space-y-2">
@@ -267,7 +267,7 @@ export default function SettingsPage() {
                                 type="text"
                                 value={footerText}
                                 onChange={(e) => setFooterText(e.target.value)}
-                                className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                                className="w-full px-4 py-2.5 rounded-lg border text-black border-gray-200 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                             />
                         </div>
                     </div>
@@ -287,7 +287,7 @@ export default function SettingsPage() {
                                 value={siteDescription}
                                 onChange={(e) => setSiteDescription(e.target.value)}
                                 rows="3"
-                                className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                                className="w-full px-4 py-2.5 rounded-lg border text-black border-gray-200 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                                 placeholder="ওয়েবসাইট সম্পর্কে সংক্ষিপ্ত বিবরণ..."
                             />
                         </div>
@@ -300,7 +300,7 @@ export default function SettingsPage() {
                                     value={facebookUrl}
                                     onChange={(e) => setFacebookUrl(e.target.value)}
                                     placeholder="https://facebook.com/..."
-                                    className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                                    className="w-full px-4 py-2.5 rounded-lg border text-black border-gray-200 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                                 />
                             </div>
                             <div className="space-y-2">
@@ -310,7 +310,7 @@ export default function SettingsPage() {
                                     value={youtubeUrl}
                                     onChange={(e) => setYoutubeUrl(e.target.value)}
                                     placeholder="https://youtube.com/..."
-                                    className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                                    className="w-full px-4 py-2.5 rounded-lg border text-black border-gray-200 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                                 />
                             </div>
                             <div className="space-y-2">
@@ -320,7 +320,7 @@ export default function SettingsPage() {
                                     value={websiteUrl}
                                     onChange={(e) => setWebsiteUrl(e.target.value)}
                                     placeholder="https://..."
-                                    className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                                    className="w-full px-4 py-2.5 rounded-lg border text-black border-gray-200 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                                 />
                             </div>
                         </div>
@@ -332,7 +332,7 @@ export default function SettingsPage() {
                                 value={addressText}
                                 onChange={(e) => setAddressText(e.target.value)}
                                 placeholder="মিরপুর, ঢাকা, বাংলাদেশ - ১২১৬"
-                                className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                                className="w-full px-4 py-2.5 rounded-lg border text-black border-gray-200 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                             />
                         </div>
                     </div>

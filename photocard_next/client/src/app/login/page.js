@@ -41,7 +41,7 @@ const Login = () => {
                             <input
                                 type="email"
                                 placeholder="example@email.com"
-                                className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                                className="w-full pl-10 pr-4 py-3 rounded-lg border text-gray-500 border-gray-200 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                             />
@@ -55,7 +55,7 @@ const Login = () => {
                             <input
                                 type="password"
                                 placeholder="********"
-                                className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                                className="w-full pl-10 pr-4 py-3 rounded-lg border text-gray-500 border-gray-200 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                             />
