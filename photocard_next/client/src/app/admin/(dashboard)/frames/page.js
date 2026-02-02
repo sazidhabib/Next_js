@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 import { Search, Trash2, Plus, Edit2, CheckCircle, XCircle, Clock, RotateCcw } from 'lucide-react';
 import Modal from '../../../../components/Modal';
 import { API_URL } from '../../../../config';
+import { toHttps } from '../../../../utils/imageUtils';
 
 export default function FramesPage() {
     const [frames, setFrames] = useState([]);
@@ -251,7 +252,7 @@ export default function FramesPage() {
                                 <tr key={frame.id} className="border-b hover:bg-gray-50 last:border-0">
                                     <td className="p-4">
                                         <div className="w-12 h-12 bg-gray-100 rounded overflow-hidden border">
-                                            <img src={frame.image_url} alt="" className="w-full h-full object-contain" />
+                                            <img src={toHttps(frame.image_url)} alt="" className="w-full h-full object-contain" />
                                         </div>
                                     </td>
                                     <td className="p-4 font-medium text-primary-foreground">
@@ -314,7 +315,7 @@ export default function FramesPage() {
                     </div>
                     <div>
                         <label className="block text-sm font-medium mb-1">Image</label>
-                        {currentImageUrl && <img src={currentImageUrl} alt="Current" className="h-20 mb-2 rounded border" />}
+                        {currentImageUrl && <img src={toHttps(currentImageUrl)} alt="Current" className="h-20 mb-2 rounded border" />}
                         <input type="file" accept="image/*" className="w-full border rounded p-2" onChange={e => setImageFile(e.target.files[0])} />
                     </div>
                     <div>

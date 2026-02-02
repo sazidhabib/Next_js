@@ -19,8 +19,8 @@ export const useSettings = () => {
                     const data = await response.json();
                     setSettings({
                         site_name: data.site_name || 'ফটো কার্ড বিডি',
-                        logo_url: data.logo_url,
-                        favicon_url: data.favicon_url,
+                        logo_url: data.logo_url?.replace('http:', 'https:'),
+                        favicon_url: data.favicon_url?.replace('http:', 'https:'),
                         helpline_number: data.helpline_number || '01880578893',
                         support_email: data.support_email || 'contact@photocardbd.com'
                     });

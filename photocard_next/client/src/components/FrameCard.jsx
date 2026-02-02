@@ -1,6 +1,7 @@
 import React from 'react';
 import { ArrowRight, Eye } from 'lucide-react';
 import Link from 'next/link';
+import { toHttps } from '../utils/imageUtils';
 
 const FrameCard = ({
     id,
@@ -32,7 +33,7 @@ const FrameCard = ({
                 {/* Frame Image Container - Scaling effect on hover */}
                 <div className="relative w-full h-full flex items-center justify-center transition-transform duration-500 group-hover:scale-105">
                     {image ? (
-                        <img src={image} alt={title} className="max-w-full max-h-full object-contain" />
+                        <img src={toHttps(image)} alt={title} className="max-w-full max-h-full object-contain" />
                     ) : (
                         <div className="w-32 h-32 rounded-full border-4 border-green-600 border-dashed flex items-center justify-center bg-gray-100 text-gray-400">
                             Frame
