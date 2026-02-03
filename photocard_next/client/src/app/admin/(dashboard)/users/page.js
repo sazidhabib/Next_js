@@ -206,8 +206,9 @@ export default function UsersPage() {
                         <input
                             type="text"
                             required
-                            className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:border-primary"
+                            className="w-full text-gray-500 px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:border-primary"
                             value={username}
+                            placeholder="Enter username"
                             onChange={(e) => setUsername(e.target.value)}
                         />
                     </div>
@@ -216,8 +217,9 @@ export default function UsersPage() {
                         <input
                             type="email"
                             required
-                            className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:border-primary"
+                            className="w-full text-gray-500 px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:border-primary"
                             value={email}
+                            placeholder="Enter email"
                             onChange={(e) => setEmail(e.target.value)}
                         />
                     </div>
@@ -226,15 +228,16 @@ export default function UsersPage() {
                         <input
                             type="password"
                             required={!editingId}
-                            className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:border-primary"
+                            className="w-full text-gray-500 px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:border-primary"
                             value={password}
+                            placeholder="Enter password"
                             onChange={(e) => setPassword(e.target.value)}
                         />
                     </div>
                     <div className="space-y-2">
                         <label className="text-sm font-medium text-gray-700">রোল</label>
                         <select
-                            className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:border-primary"
+                            className="w-full text-gray-500 px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:border-primary"
                             value={role}
                             onChange={(e) => setRole(e.target.value)}
                         >

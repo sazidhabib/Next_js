@@ -1,46 +1,12 @@
 'use client';
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import Link from 'next/link';
 import { Facebook, Youtube, Globe, MapPin, Phone, Mail } from 'lucide-react';
-import { API_URL } from '../config';
+import { useSettings } from '../hooks/useSettings';
+import Image from 'next/image';
 
 const Footer = () => {
-    const [settings, setSettings] = useState({
-        site_name: 'ফটো কার্ড বিডি',
-        site_description: 'বাংলাদেশের যেকোনো জাতীয় দিবস বা বিশেষ দিনে নিজের ছবি দিয়ে সবাইকে শুভেচ্ছা জানানোর জন্য ডিজিটাল কার্ড তৈরি করুন খুব সহজে।',
-        helpline_number: '01880578893',
-        support_email: 'contact@photocardbd.com',
-        address_text: 'মিরপুর, ঢাকা, বাংলাদেশ - ১২১৬',
-        facebook_url: '#',
-        youtube_url: '#',
-        website_url: '#',
-        footer_text: '© 2026 Photo Card BD. All rights reserved. Developed by Sazid.js Dev'
-    });
-
-    useEffect(() => {
-        const fetchSettings = async () => {
-            try {
-                const response = await fetch(`${API_URL}/settings`);
-                if (response.ok) {
-                    const data = await response.json();
-                    setSettings({
-                        site_name: data.site_name || 'ফটো কার্ড বিডি',
-                        site_description: data.site_description || 'বাংলাদেশের যেকোনো জাতীয় দিবস বা বিশেষ দিনে নিজের ছবি দিয়ে সবাইকে শুভেচ্ছা জানানোর জন্য ডিজিটাল কার্ড তৈরি করুন খুব সহজে।',
-                        helpline_number: data.helpline_number || '01880578893',
-                        support_email: data.support_email || 'contact@photocardbd.com',
-                        address_text: data.address_text || 'মিরপুর, ঢাকা, বাংলাদেশ - ১২১৬',
-                        facebook_url: data.facebook_url || '#',
-                        youtube_url: data.youtube_url || '#',
-                        website_url: data.website_url || '#',
-                        footer_text: data.footer_text || '© 2026 Photo Card BD. All rights reserved. Developed by Sazid.js Dev'
-                    });
-                }
-            } catch (error) {
-                console.error('Error fetching footer settings:', error);
-            }
-        };
-        fetchSettings();
-    }, []);
+    const { settings } = useSettings();
 
     return (
         <footer className="bg-[#0f172a] text-white pt-12 pb-6">
@@ -49,10 +15,22 @@ const Footer = () => {
                     {/* Brand & Description */}
                     <div>
                         <div className="text-xl font-bold text-white flex items-center gap-2 mb-4">
-                            <span className="text-2xl">📷</span> {settings.site_name}
+                            {settings.logo_url ? (
+                                <Image
+                                    src={settings.logo_url}
+                                    alt={settings.site_name}
+                                    width={40}
+                                    height={40}
+                                    className="h-10 w-auto"
+                                />
+                            ) : (
+                                <>
+                                    <span className="text-2xl">📷</span> {settings.site_name}
+                                </>
+                            )}
                         </div>
                         <p className="text-gray-400 text-sm leading-relaxed mb-6">
-                            {settings.site_description}
+                            {settings.site_description || 'বাংলাদেশের যেকোনো জাতীয় দিবস বা বিশেষ দিনে নিজের ছবি দিয়ে সবাইকে শুভেচ্ছা জানানোর জন্য ডিজিটাল কার্ড তৈরি করুন খুব সহজে।'}
                         </p>
                         <div className="flex space-x-4">
                             {settings.facebook_url && settings.facebook_url !== '#' && (
@@ -120,7 +98,7 @@ const Footer = () => {
                 </div>
 
                 <div className="border-t border-gray-800 mt-12 pt-6 text-center text-xs text-gray-500">
-                    <p>{settings.footer_text}</p>
+                    <p>{settings.footer_text || '© 2026 Photo Card BD. All rights reserved. Developed by Sazid.js Dev'}</p>
                 </div>
             </div>
         </footer>

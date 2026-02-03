@@ -5,6 +5,9 @@ import { useParams, useRouter } from 'next/navigation';
 import { Download, Upload, ZoomIn, ZoomOut, Image as ImageIcon, ArrowLeft } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { API_URL } from '../../../config';
+import ShareButtons from '../../../components/ShareButtons';
+import { toHttps } from '../../../utils/imageUtils';
+import FrameCard from '../../../components/FrameCard';
 
 export default function FrameDetailsPage() {
     const { id } = useParams();
@@ -12,6 +15,7 @@ export default function FrameDetailsPage() {
 
     // Data State
     const [frame, setFrame] = useState(null);
+    const [relatedFrames, setRelatedFrames] = useState([]);
     const [loading, setLoading] = useState(true);
 
     // Editor State
@@ -24,13 +28,16 @@ export default function FrameDetailsPage() {
     // Refs
     const fileInputRef = useRef(null);
     const canvasRef = useRef(null);
-    const frameImageRef = useRef(null);
 
-    // 1. Fetch Frame Data
+    // Editor State - Frame Image
+    const [loadedFrameImage, setLoadedFrameImage] = useState(null);
+
+    // 1. Fetch Frame Data & Related Frames
     useEffect(() => {
         if (!id) return;
-        const fetchFrame = async () => {
+        const fetchData = async () => {
             try {
+                // Fetch current frame
                 const response = await fetch(`${API_URL}/frames/${id}`);
                 if (response.ok) {
                     const data = await response.json();
@@ -38,7 +45,24 @@ export default function FrameDetailsPage() {
                 } else {
                     toast.error('ফ্রেম পাওয়া যায়নি');
                     router.push('/all-frames');
+                    return;
                 }
+
+                // Fetch related/popular frames (fetching 4 random/popular ones for now)
+                const relatedResponse = await fetch(`${API_URL}/frames?sort=popular&limit=4`);
+                if (relatedResponse.ok) {
+                    const relatedData = await relatedResponse.json();
+
+                    let framesList = [];
+                    if (Array.isArray(relatedData)) {
+                        framesList = relatedData;
+                    } else if (relatedData.frames && Array.isArray(relatedData.frames)) {
+                        framesList = relatedData.frames;
+                    }
+
+                    setRelatedFrames(framesList.filter(f => f.id !== parseInt(id)).slice(0, 4));
+                }
+
             } catch (error) {
                 console.error('Error:', error);
                 toast.error('সার্ভার এরর');
@@ -46,10 +70,29 @@ export default function FrameDetailsPage() {
                 setLoading(false);
             }
         };
-        fetchFrame();
+        fetchData();
     }, [id, router]);
 
-    // 2. Handle Image Upload
+    // 2. Load Frame Image Effect
+    useEffect(() => {
+        if (!frame) return;
+
+        setLoadedFrameImage(null); // Reset on frame change
+
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+        img.src = toHttps(frame.image_url);
+        img.onload = () => {
+            setLoadedFrameImage(img);
+        };
+        img.onerror = (e) => {
+            console.error("Failed to load frame image", e);
+            toast.error("ফ্রেম লোড করতে সমস্যা হয়েছে");
+        };
+
+    }, [frame]);
+
+    // 3. Handle Image Upload
     const handleImageUpload = (e) => {
         const file = e.target.files[0];
         if (file) {
@@ -68,9 +111,9 @@ export default function FrameDetailsPage() {
         }
     };
 
-    // 3. Canvas Drawing Logic
+    // 4. Canvas Drawing Logic
     useEffect(() => {
-        if (!frame || !canvasRef.current) return;
+        if (!canvasRef.current) return;
 
         const canvas = canvasRef.current;
         const ctx = canvas.getContext('2d');
@@ -111,30 +154,18 @@ export default function FrameDetailsPage() {
         }
 
         // B. Draw Frame (Overlay layer)
-        if (frameImageRef.current) {
-            ctx.drawImage(frameImageRef.current, 0, 0, CANVAS_SIZE, CANVAS_SIZE);
-        } else {
-            // Load frame image
-            const img = new Image();
-            img.crossOrigin = "anonymous"; // Important for download
-            img.onload = () => {
-                frameImageRef.current = img;
-                // Redraw to show frame immediately
-                ctx.drawImage(img, 0, 0, CANVAS_SIZE, CANVAS_SIZE);
-            };
-            img.src = frame.image_url;
+        if (loadedFrameImage) {
+            ctx.drawImage(loadedFrameImage, 0, 0, CANVAS_SIZE, CANVAS_SIZE);
         }
 
-    }, [frame, userImage, scale, position]);
+    }, [loadedFrameImage, userImage, scale, position]);
 
 
-    // 4. Drag Logic
+    // 5. Drag Logic
     const handleMouseDown = (e) => {
         if (!userImage) return;
         setIsDragging(true);
-        // Calculate start position relative to canvas
         const canvas = canvasRef.current;
-        // Check for touch or mouse
         const clientX = e.touches ? e.touches[0].clientX : e.clientX;
         const clientY = e.touches ? e.touches[0].clientY : e.clientY;
 
@@ -148,8 +179,6 @@ export default function FrameDetailsPage() {
         const clientX = e.touches ? e.touches[0].clientX : e.clientX;
         const clientY = e.touches ? e.touches[0].clientY : e.clientY;
 
-        // Note: We might need sensitivity adjustment here depending on screen vs canvas pixels
-        // But simplified logic:
         setPosition({
             x: clientX - dragStart.x,
             y: clientY - dragStart.y
@@ -171,13 +200,12 @@ export default function FrameDetailsPage() {
             document.body.removeChild(link);
             toast.success('ডাউনলোড সফল হয়েছে!');
 
-            // Increment Use Count
             fetch(`${API_URL}/frames/${frame.id}/use`, { method: 'POST' })
                 .catch(err => console.error('Failed to increment use count', err));
 
         } catch (err) {
             console.error(err);
-            toast.error('ডাউনলোড ব্যর্থ হয়েছে. দয়া করে আবার চেষ্টা করুন');
+            toast.error('ডাউনলোড ব্যর্থ হয়েছে');
         }
     };
 
@@ -186,19 +214,23 @@ export default function FrameDetailsPage() {
     if (!frame) return null;
 
     return (
-        <div className="min-h-screen bg-gray-50 py-10 pb-20">
-            <div className="container mx-auto px-4 max-w-5xl">
+        <div className="min-h-screen bg-green-50/30 py-8 pb-32">
+            <div className="container mx-auto px-4">
 
-                {/* Header / Back */}
-                <button onClick={() => router.back()} className="flex items-center gap-2 text-gray-500 hover:text-primary mb-6 transition-colors">
-                    <ArrowLeft size={20} /> ফিরে যান
-                </button>
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
 
-                    {/* Left: Canvas Editor */}
-                    <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
-                        <div className="relative aspect-square w-full bg-gray-100 rounded-lg overflow-hidden cursor-move touch-none"
+                <div className="max-w-4xl mx-auto text-center space-y-8">
+
+                    {/* Title Section */}
+                    <div>
+                        <h1 className="text-3xl font-bold text-blue-800 mb-2">{frame.title}</h1>
+                        <p className="text-gray-500 text-sm">{frame.category_name || 'General'}</p>
+                        <div className="w-16 h-1 bg-blue-200 mx-auto mt-4 rounded-full"></div>
+                    </div>
+
+                    {/* Canvas Editor */}
+                    <div className="relative max-w-[500px] mx-auto bg-white p-3 rounded-2xl shadow-xl border-4 border-white">
+                        <div className="relative aspect-square w-full bg-gray-100 rounded-lg overflow-hidden cursor-move touch-none shadow-inner"
                             onMouseDown={handleMouseDown}
                             onMouseMove={handleMouseMove}
                             onMouseUp={handleMouseUp}
@@ -210,60 +242,29 @@ export default function FrameDetailsPage() {
                             <canvas ref={canvasRef} className="w-full h-full object-contain pointer-events-none" />
                         </div>
 
-                        {/* Controls */}
+                        {/* Zoom Controls */}
                         {userImage && (
-                            <div className="mt-4 space-y-4">
-                                <div className="flex items-center gap-4">
-                                    <ZoomOut size={20} className="text-gray-500" />
-                                    <input
-                                        type="range"
-                                        min="0.1"
-                                        max="3"
-                                        step="0.1"
-                                        value={scale}
-                                        onChange={(e) => setScale(parseFloat(e.target.value))}
-                                        className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
-                                    />
-                                    <ZoomIn size={20} className="text-gray-500" />
-                                </div>
-                                <p className="text-center text-xs text-gray-400">ছবিটি সরাতে ড্র্যাগ করুন এবং জুম করতে স্লাইডার ব্যবহার করুন</p>
+                            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-3 bg-black/60 backdrop-blur-sm px-4 py-2 rounded-full text-white">
+                                <ZoomOut size={16} />
+                                <input
+                                    type="range"
+                                    min="0.1"
+                                    max="3"
+                                    step="0.1"
+                                    value={scale}
+                                    onChange={(e) => setScale(parseFloat(e.target.value))}
+                                    className="w-24 h-1.5 bg-white/30 rounded-lg appearance-none cursor-pointer accent-white"
+                                />
+                                <ZoomIn size={16} />
                             </div>
                         )}
                     </div>
 
-                    {/* Right: Actions */}
-                    <div className="space-y-6">
+                    {/* Actions Section */}
+                    <div className="max-w-md mx-auto space-y-6">
 
-                        <div>
-                            <h1 className="text-2xl font-bold text-gray-800 mb-2">{frame.title}</h1>
-                            <p className="text-gray-500 text-sm">ক্যাটাগরি: <span className="text-primary font-medium">{frame.category_name || 'General'}</span></p>
-
-                            <div className="flex gap-4 mt-2">
-                                <div className="flex items-center gap-1 text-gray-500 text-sm bg-gray-100 px-2 py-1 rounded">
-                                    <span>👁️</span> {frame.view_count || 0}
-                                </div>
-                                <div className="flex items-center gap-1 text-gray-500 text-sm bg-gray-100 px-2 py-1 rounded">
-                                    <span>⬇️</span> {frame.use_count || 0}
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 flex gap-4 items-start">
-                            <div className="bg-blue-100 p-2 rounded-full text-blue-600">
-                                <ImageIcon size={20} />
-                            </div>
-                            <div>
-                                <h3 className="font-bold text-gray-800 text-sm mb-1">নির্দেশনা</h3>
-                                <ul className="text-xs text-gray-600 space-y-1 list-disc list-inside">
-                                    <li>"ছবি নির্বাচন করুন" বাটনে ক্লিক করে আপনার ছবি আপলোড করুন।</li>
-                                    <li>ছবিটি ফ্রেমের মাঝে বসাতে ড্র্যাগ/মুভ করুন।</li>
-                                    <li>স্লাইডার ব্যবহার করে জুম ইন/আউট করুন।</li>
-                                    <li>সবশেষে "ডাউনলোড" বাটনে ক্লিক করে সেভ করুন।</li>
-                                </ul>
-                            </div>
-                        </div>
-
-                        <div className="space-y-3">
+                        {/* Upload Button */}
+                        <div className="relative">
                             <input
                                 type="file"
                                 accept="image/*"
@@ -271,28 +272,64 @@ export default function FrameDetailsPage() {
                                 onChange={handleImageUpload}
                                 className="hidden"
                             />
-
                             <button
                                 onClick={() => fileInputRef.current.click()}
-                                className="w-full py-3.5 rounded-xl font-bold bg-white border-2 border-dashed border-gray-300 text-gray-600 hover:border-primary hover:text-primary transition-all flex items-center justify-center gap-2"
+                                className="w-full py-4 rounded-full font-bold bg-blue-800 text-white shadow-lg shadow-blue-200 hover:bg-blue-900 transition-all flex items-center justify-center gap-3 text-lg"
                             >
-                                <Upload size={20} />
-                                {userImage ? 'অন্য ছবি পরিবর্তন করুন' : 'ছবি নির্বাচন করুন'}
-                            </button>
-
-                            <button
-                                onClick={handleDownload}
-                                disabled={!userImage}
-                                className="w-full py-3.5 rounded-xl font-bold bg-green-600 text-white shadow-lg shadow-green-200 hover:bg-green-700 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                                <Download size={20} />
-                                ফ্রেম ডাউনলোড করুন
+                                <Upload size={24} />
+                                {userImage ? 'অন্য ছবি পরিবর্তন করুন' : 'আপনার ছবি যুক্ত করুন'}
                             </button>
                         </div>
 
+                        {/* Instructions - Styled as requested */}
+                        <div className="bg-gray-100/50 rounded-xl p-3 flex items-center justify-center gap-2 text-xs text-gray-500">
+                            <div className="w-4 h-4 bg-gray-400 rounded-full flex items-center justify-center text-white font-bold text-[10px]">!</div>
+                            ছবি যুক্ত করার পর আঙ্গুল দিয়ে টেনে সঠিক স্থানে বসান।
+                        </div>
+
+                        {/* Download Button */}
+                        <button
+                            onClick={handleDownload}
+                            disabled={!userImage}
+                            className={`w-full py-3 rounded-xl font-bold border-2 transition-all flex items-center justify-center gap-2 ${!userImage
+                                ? 'border-gray-200 text-gray-400 cursor-not-allowed bg-gray-50'
+                                : 'border-blue-600 text-blue-700 hover:bg-blue-50'
+                                }`}
+                        >
+                            <Download size={20} />
+                            ডাউনলোড করুন
+                        </button>
+
+                        {/* Share Section */}
+                        <ShareButtons
+                            url={typeof window !== 'undefined' ? window.location.href : ''}
+                            title={`তৈরি করে ফেললাম দারুণ একটি ফটো কার্ড! - ${frame.title}`}
+                        />
+                    </div>
+                </div>
+
+                {/* Related Frames Section */}
+                <div className="mt-24 mb-10">
+                    <div className="text-center mb-10">
+                        <h2 className="text-2xl font-bold text-blue-800">আরো কিছু ডিজাইন দেখুন</h2>
+                        <div className="w-12 h-1 bg-blue-200 mx-auto mt-3 rounded-full"></div>
                     </div>
 
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+                        {relatedFrames.map((relatedFrame) => (
+                            <FrameCard
+                                key={relatedFrame.id}
+                                id={relatedFrame.id}
+                                title={relatedFrame.title}
+                                image_url={relatedFrame.image_url}
+                                category_name={relatedFrame.category_name}
+                                use_count={relatedFrame.use_count}
+                                view_count={relatedFrame.view_count}
+                            />
+                        ))}
+                    </div>
                 </div>
+
             </div>
         </div>
     );

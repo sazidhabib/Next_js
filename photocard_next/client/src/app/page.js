@@ -8,19 +8,9 @@ import Link from 'next/link';
 import { API_URL } from '../config';
 
 const Home = () => {
-  // Mock Data for "Recent Frames"
-  const recentFrames = [
-    { id: 1, title: 'এ.বি.এম. মাজেদুল হাসান', subtitle: 'সদর, বগুড়া', image: null }, // Using placeholder
-    { id: 2, title: 'Justice For Hadi', subtitle: 'আমরা ন্যায় বিচার চাই', image: null },
-    { id: 3, title: 'এডভোকেট আব্দুল কালাম', subtitle: 'বগুড়া বার সভাপতি নির্বাচনে', image: null },
-  ];
-
-  // Mock Data for "Popular Designs"
-  const popularFrames = [
-    { id: 4, title: '২৬শে মার্চ স্বাধীনতা দিবস', subtitle: '', image: null },
-    { id: 5, title: '২১শে ফেব্রুয়ারি', subtitle: '', image: null },
-    { id: 6, title: 'ঈদুল ফিতর', subtitle: '', image: null },
-  ];
+  const [recentFrames, setRecentFrames] = React.useState([]);
+  const [popularFrames, setPopularFrames] = React.useState([]);
+  const [loading, setLoading] = React.useState(true);
 
   const [settings, setSettings] = React.useState({
     helpline_number: '01880578893',
@@ -42,7 +32,41 @@ const Home = () => {
         console.error('Error fetching settings:', error);
       }
     };
+
+    const fetchFrames = async () => {
+      try {
+        // Fetch all frames (assuming API returns sorted by newest, or we reverse)
+        // Adjust API params as per actual backend if needed (e.g. ?limit=20)
+        const response = await fetch(`${API_URL}/frames`);
+        if (response.ok) {
+          const data = await response.json();
+
+          let allFrames = [];
+          if (Array.isArray(data)) {
+            allFrames = data;
+          } else if (data.frames && Array.isArray(data.frames)) {
+            allFrames = data.frames;
+          }
+
+          // Filter for active frames only
+          const activeFrames = allFrames.filter(f => f.status === 'active');
+
+          // Recent: Take first 6
+          setRecentFrames(activeFrames.slice(0, 6));
+
+          // Popular: Filter by is_popular flag among active frames
+          const popular = activeFrames.filter(f => f.is_popular);
+          setPopularFrames(popular.slice(0, 6));
+        }
+      } catch (error) {
+        console.error('Error fetching frames:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchSettings();
+    fetchFrames();
   }, []);
 
   return (
@@ -102,19 +126,28 @@ const Home = () => {
       <section className="container mx-auto px-4">
         <SectionHeader title="সকল ফটো ফ্রেম" subtitle="আমাদের কালেকশন" />
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 mb-12">
-          {recentFrames.map(frame => (
-            <FrameCard key={frame.id} {...frame} />
-          ))}
-        </div>
-
-        {/* Second row / mock more */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
-          {/* Reusing for visual density */}
-          {recentFrames.map((frame) => (
-            <FrameCard key={`dup-${frame.id}`} {...frame} title={`${frame.title} (Copy)`} />
-          ))}
-        </div>
+        {loading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 mb-12 animate-pulse">
+            {[1, 2, 3].map(i => (
+              <div key={i} className="h-64 bg-gray-200 rounded-xl"></div>
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 mb-12">
+            {recentFrames.map(frame => (
+              <FrameCard
+                key={frame.id}
+                id={frame.id}
+                title={frame.title}
+                // Map backend fields to component props if needed
+                subtitle={frame.category_name}
+                image={frame.image_url}
+                viewCount={frame.view_count}
+                useCount={frame.use_count}
+              />
+            ))}
+          </div>
+        )}
 
         <div className="mt-12 text-center">
           <Link href="/all-frames" className="inline-flex items-center gap-2 px-8 py-3 rounded-full border border-gray-300 text-gray-700 font-bold hover:border-primary hover:text-primary transition-all">
@@ -128,11 +161,25 @@ const Home = () => {
         <div className="container mx-auto px-4">
           <SectionHeader title="জনপ্রিয় ডিজাইন" subtitle="ট্রেন্ডিং" />
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {popularFrames.map(frame => (
-              <FrameCard key={frame.id} {...frame} />
-            ))}
-          </div>
+          {loading ? (
+            <div className="text-center">লোড হচ্ছে...</div>
+          ) : popularFrames.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+              {popularFrames.map(frame => (
+                <FrameCard
+                  key={frame.id}
+                  id={frame.id}
+                  title={frame.title}
+                  subtitle={frame.category_name}
+                  image={frame.image_url}
+                  viewCount={frame.view_count}
+                  useCount={frame.use_count}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center text-gray-500 py-10">কোনো জনপ্রিয় ফ্রেম পাওয়া যায়নি</div>
+          )}
         </div>
       </section>
 

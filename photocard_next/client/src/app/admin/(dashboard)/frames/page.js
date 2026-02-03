@@ -310,24 +310,24 @@ export default function FramesPage() {
             <Modal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} title={editingId ? "Edit Frame" : "Add Frame"}>
                 <form onSubmit={handleSaveFrame} className="space-y-4">
                     <div>
-                        <label className="block text-sm font-medium mb-1">Title</label>
-                        <input type="text" className="w-full border rounded p-2" value={title} onChange={e => setTitle(e.target.value)} required />
+                        <label className="block text-sm text-gray-700 font-medium mb-1">Title</label>
+                        <input type="text" className="w-full text-gray-500 border rounded p-2" value={title} placeholder="Enter title" onChange={e => setTitle(e.target.value)} required />
                     </div>
                     <div>
-                        <label className="block text-sm font-medium mb-1">Image</label>
+                        <label className="block text-sm text-gray-700 font-medium mb-1">Image</label>
                         {currentImageUrl && <img src={toHttps(currentImageUrl)} alt="Current" className="h-20 mb-2 rounded border" />}
-                        <input type="file" accept="image/*" className="w-full border rounded p-2" onChange={e => setImageFile(e.target.files[0])} />
+                        <input type="file" accept="image/*" className="w-full text-gray-500 border rounded p-2" onChange={e => setImageFile(e.target.files[0])} />
                     </div>
                     <div>
-                        <label className="block text-sm font-medium mb-1">Category</label>
-                        <select className="w-full border rounded p-2" value={categoryId} onChange={e => setCategoryId(e.target.value)}>
+                        <label className="block text-sm text-gray-700 font-medium mb-1">Category</label>
+                        <select className="w-full text-gray-500 border rounded p-2" value={categoryId} onChange={e => setCategoryId(e.target.value)}>
                             <option value="">Select Category (Optional)</option>
                             {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                         </select>
                     </div>
                     <div>
-                        <label className="block text-sm font-medium mb-1">Status</label>
-                        <select className="w-full border rounded p-2" value={status} onChange={e => setStatus(e.target.value)}>
+                        <label className="block text-sm text-gray-700 font-medium mb-1">Status</label>
+                        <select className="w-full text-gray-500 border rounded p-2" value={status} onChange={e => setStatus(e.target.value)}>
                             <option value="active">Active (Live)</option>
                             <option value="pending">Pending</option>
                             <option value="rejected">Rejected</option>
@@ -335,13 +335,13 @@ export default function FramesPage() {
                         </select>
                     </div>
                     <div>
-                        <label className="block text-sm font-medium mb-1">Description</label>
-                        <textarea className="w-full border rounded p-2" value={description} onChange={e => setDescription(e.target.value)} />
+                        <label className="block text-sm text-gray-700 font-medium mb-1">Description</label>
+                        <textarea className="w-full text-gray-500 border rounded p-2" value={description} placeholder="Enter description" onChange={e => setDescription(e.target.value)} />
                     </div>
                     <div className="flex gap-6">
                         <label className="flex items-center gap-2">
                             <input type="checkbox" checked={isPopular} onChange={e => setIsPopular(e.target.checked)} />
-                            <span className="text-sm">Popular Frame?</span>
+                            <span className="text-sm text-gray-700">Popular Frame?</span>
                         </label>
                     </div>
                     <button type="submit" className="w-full bg-primary text-white py-2 rounded hover:bg-green-700 transition">

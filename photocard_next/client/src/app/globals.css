@@ -7,7 +7,7 @@
 
 :root {
   --background: #ffffff;
-  --foreground: #f0f6fdff;
+  --foreground: rgb(193, 194, 196);
   --primary: #1d4ed8;
   --primary-foreground: #605f5f;
 }

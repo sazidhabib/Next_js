@@ -147,12 +147,12 @@ export default function CategoriesPage() {
             <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={editingId ? "Edit Category" : "Add Category"}>
                 <form onSubmit={handleSave} className="space-y-4">
                     <div>
-                        <label className="block text-sm font-medium mb-1">Category Name</label>
-                        <input className="w-full border rounded p-2" value={name} onChange={e => setName(e.target.value)} required />
+                        <label className="block text-sm text-gray-700 font-medium mb-1">Category Name</label>
+                        <input className="w-full border text-gray-500 rounded p-2" placeholder="Enter category name" value={name} onChange={e => setName(e.target.value)} required />
                     </div>
                     <div>
-                        <label className="block text-sm font-medium mb-1">Description</label>
-                        <textarea className="w-full border rounded p-2" value={description} onChange={e => setDescription(e.target.value)} />
+                        <label className="block text-sm text-gray-700 font-medium mb-1">Description</label>
+                        <textarea className="w-full border text-gray-500 rounded p-2" placeholder="Enter description" value={description} onChange={e => setDescription(e.target.value)} />
                     </div>
                     <button type="submit" className="w-full bg-primary text-white py-2 rounded">Save</button>
                 </form>

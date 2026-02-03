@@ -17,9 +17,11 @@ export default function AllFramesPage() {
         const fetchFrames = async () => {
             try {
                 const response = await fetch(`${API_URL}/frames`);
-                const data = await response.json();
                 if (response.ok) {
-                    setFrames(data);
+                    const allFrames = await response.json();
+                    // Filter for active frames only
+                    const activeFrames = (allFrames || []).filter(f => f.status === 'active');
+                    setFrames(activeFrames);
                 }
             } catch (error) {
                 console.error('Error fetching frames:', error);
@@ -61,7 +63,7 @@ export default function AllFramesPage() {
                         <input
                             type="text"
                             placeholder="ফ্রেম খুঁজুন..."
-                            className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                            className="w-full pl-10 pr-4 text-gray-500 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />

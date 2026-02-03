@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { API_URL } from '../config';
+import { toHttps } from '../utils/imageUtils';
 
 export const useSettings = () => {
     const [settings, setSettings] = useState({
@@ -7,7 +8,13 @@ export const useSettings = () => {
         logo_url: null,
         favicon_url: null,
         helpline_number: '01880578893',
-        support_email: 'contact@photocardbd.com'
+        support_email: 'contact@photocardbd.com',
+        site_description: '',
+        address_text: '',
+        facebook_url: '',
+        youtube_url: '',
+        website_url: '',
+        footer_text: ''
     });
     const [loading, setLoading] = useState(true);
 
@@ -18,9 +25,10 @@ export const useSettings = () => {
                 if (response.ok) {
                     const data = await response.json();
                     setSettings({
+                        ...data,
                         site_name: data.site_name || 'ফটো কার্ড বিডি',
-                        logo_url: data.logo_url?.replace('http:', 'https:'),
-                        favicon_url: data.favicon_url?.replace('http:', 'https:'),
+                        logo_url: toHttps(data.logo_url),
+                        favicon_url: toHttps(data.favicon_url),
                         helpline_number: data.helpline_number || '01880578893',
                         support_email: data.support_email || 'contact@photocardbd.com'
                     });
