@@ -73,7 +73,7 @@ const Home = () => {
     <div className="space-y-16 ">
       {/* Hero Section */}
       <section className="bg-gradient-to-b from-green-50 to-white pt-10 md:pt-20 pb-16">
-        <div className="container mx-auto px-4">
+        <div className="container max-w-[1280px] mx-auto px-4">
           <div className="flex flex-col md:flex-row items-center gap-12">
             {/* Left Content */}
             <div className="flex-1 text-center md:text-left space-y-6">
@@ -123,7 +123,7 @@ const Home = () => {
       </section>
 
       {/* Recent/All Frames Section */}
-      <section className="container mx-auto px-4">
+      <section className="container max-w-[1280px] mx-auto px-4">
         <SectionHeader title="সকল ফটো ফ্রেম" subtitle="আমাদের কালেকশন" />
 
         {loading ? (
@@ -158,7 +158,7 @@ const Home = () => {
 
       {/* Popular Designs Section */}
       <section className="bg-gray-50 py-16">
-        <div className="container mx-auto px-4">
+        <div className="container max-w-[1280px] mx-auto px-4">
           <SectionHeader title="জনপ্রিয় ডিজাইন" subtitle="ট্রেন্ডিং" />
 
           {loading ? (
@@ -185,34 +185,48 @@ const Home = () => {
 
       {/* CTA Section */}
       <section className="relative overflow-hidden bg-[#163285] py-20">
-        {/* Background Pattern */}
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute -top-24 -left-24 w-96 h-96 rounded-full bg-white blur-3xl"></div>
-          <div className="absolute -bottom-24 -right-24 w-96 h-96 rounded-full bg-primary blur-3xl"></div>
-        </div>
-
-        <div className="container mx-auto px-4 relative z-10 text-center">
-          <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">
-            নিজের ফ্রেম যুক্ত করতে চান?
-          </h2>
-          <p className="text-green-100 text-lg mb-10 max-w-2xl mx-auto">
-            আমাদের সাথে যোগাযোগ করুন এবং আপনার ব্যক্তিগত ডিজাইনটি তৈরি করে নিন।
-            সহজ এবং দ্রুততম উপায়ে।
-          </p>
-
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
-            <div className="flex items-center gap-2 text-white bg-white/10 px-6 py-3 rounded-lg backdrop-blur-sm">
-              <span className="font-bold">📞 {settings.helpline_number}</span>
-            </div>
-            <a href={`mailto:${settings.support_email}`} className="flex items-center gap-2 text-white bg-white/10 px-6 py-3 rounded-lg backdrop-blur-sm hover:bg-white/20 transition-colors">
-              <span>📧 {settings.support_email}</span>
-            </a>
+        <div className="container max-w-[1280px] mx-auto px-4">
+          {/* Background Pattern */}
+          <div className="absolute inset-0 opacity-10">
+            <div className="absolute -top-24 -left-24 w-96 h-96 rounded-full bg-white blur-3xl"></div>
+            <div className="absolute -bottom-24 -right-24 w-96 h-96 rounded-full bg-primary blur-3xl"></div>
           </div>
 
-          <div className="mt-10">
-            <Link href="/contact" className="inline-block bg-white text-green-900 font-bold px-10 py-4 rounded-full hover:bg-green-50 transition-transform hover:scale-105 shadow-xl">
-              যোগাযোগ করুন
-            </Link>
+          <div className="container mx-auto px-4 relative z-10 text-center">
+            <h2 className="text-3xl md:text-6xl font-bold text-white mb-6">
+              নিজের ফ্রেম যুক্ত করতে চান?
+            </h2>
+            <p className="text-green-100 text-xl mb-10 max-w-2xl mx-auto">
+              আমাদের সাথে যোগাযোগ করুন এবং আপনার ব্যক্তিগত ডিজাইনটি তৈরি করে নিন।
+              সহজ এবং দ্রুততম উপায়ে।
+            </p>
+
+            <div className="flex flex-col text-xl sm:flex-row items-start justify-center gap-6">
+              <div className="flex flex-col items-start text-white bg-white/10 px-6 py-3 rounded-3xl backdrop-blur-sm w-full sm:w-auto">
+                <div className="text-base">হটলাইন নম্বর</div>
+                <span className="font-bold mt-1 flex items-center gap-2">
+                  <span>📞</span>
+                  <span className="text-2xl">{settings.helpline_number}</span>
+                </span>
+              </div>
+
+              <a
+                href={`mailto:${settings.support_email}`}
+                className="flex flex-col items-start text-white bg-white/10 px-6 py-3 rounded-3xl backdrop-blur-sm hover:bg-white/20 transition-colors w-full sm:w-auto"
+              >
+                <div className="text-base">ইমেইল এড্রেস</div>
+                <span className="font-bold mt-1 flex items-center gap-2">
+                  <span>📧</span>
+                  <span className="text-2xl">{settings.support_email}</span>
+                </span>
+              </a>
+            </div>
+
+            <div className="mt-10">
+              <Link href="/contact" className="inline-block bg-white text-green-900 font-bold px-10 py-4 rounded-full hover:bg-green-50 transition-transform hover:scale-105 shadow-xl">
+                যোগাযোগ করুন
+              </Link>
+            </div>
           </div>
         </div>
       </section>

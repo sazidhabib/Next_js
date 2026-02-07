@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import SectionHeader from '../../components/SectionHeader';
 import FrameCard from '../../components/FrameCard';
-import { Search, Filter } from 'lucide-react';
+import { Search, Filter, X } from 'lucide-react';
 import { API_URL } from '../../config';
 
 export default function AllFramesPage() {

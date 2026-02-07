@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { AuthContext } from '../../context/AuthContext';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import toast from 'react-hot-toast';
 import { API_URL } from '../../config';
 import ProtectedRoute from '../../components/ProtectedRoute';

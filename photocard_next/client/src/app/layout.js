@@ -11,7 +11,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className="antialiased min-h-screen flex flex-col bg-background text-gray-900" suppressHydrationWarning>
+      <body className="antialiased min-h-screen .container flex flex-col bg-background text-gray-900" suppressHydrationWarning>
         <Providers>
           <Navbar />
           <main className="flex-grow">

@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState, useEffect, useContext } from 'react';
-import SectionHeader from '../../components/SectionHeader';
 import { Upload, Check, Loader } from 'lucide-react';
+import SectionHeader from '../../components/SectionHeader';
 import { AuthContext } from '../../context/AuthContext';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';

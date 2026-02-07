@@ -10,7 +10,7 @@ const Footer = () => {
 
     return (
         <footer className="bg-[#0f172a] text-white pt-12 pb-6">
-            <div className="container mx-auto px-4">
+            <div className="container max-w-[1280px] mx-auto px-4">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                     {/* Brand & Description */}
                     <div>
@@ -29,32 +29,32 @@ const Footer = () => {
                                 </>
                             )}
                         </div>
-                        <p className="text-gray-400 text-sm leading-relaxed mb-6">
+                        <p className="text-gray-400 text-sm md:text-xl leading-relaxed mb-6">
                             {settings.site_description || 'বাংলাদেশের যেকোনো জাতীয় দিবস বা বিশেষ দিনে নিজের ছবি দিয়ে সবাইকে শুভেচ্ছা জানানোর জন্য ডিজিটাল কার্ড তৈরি করুন খুব সহজে।'}
                         </p>
                         <div className="flex space-x-4">
                             {settings.facebook_url && settings.facebook_url !== '#' && (
-                                <a href={settings.facebook_url} target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center hover:bg-primary transition-colors">
-                                    <Facebook size={16} />
+                                <a href={settings.facebook_url} target="_blank" rel="noopener noreferrer" className="w-12 h-12 rounded-full bg-slate-800 flex items-center justify-center hover:bg-primary transition-colors">
+                                    <Facebook size={24} />
                                 </a>
                             )}
                             {settings.youtube_url && settings.youtube_url !== '#' && (
-                                <a href={settings.youtube_url} target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center hover:bg-primary transition-colors">
-                                    <Youtube size={16} />
+                                <a href={settings.youtube_url} target="_blank" rel="noopener noreferrer" className="w-12 h-12 rounded-full bg-slate-800 flex items-center justify-center hover:bg-primary transition-colors">
+                                    <Youtube size={24} />
                                 </a>
                             )}
                             {settings.website_url && settings.website_url !== '#' && (
-                                <a href={settings.website_url} target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center hover:bg-primary transition-colors">
-                                    <Globe size={16} />
+                                <a href={settings.website_url} target="_blank" rel="noopener noreferrer" className="w-12 h-12 rounded-full bg-slate-800 flex items-center justify-center hover:bg-primary transition-colors">
+                                    <Globe size={24} />
                                 </a>
                             )}
                         </div>
                     </div>
 
                     {/* Quick Links */}
-                    <div>
+                    <div className="text-sm md:text-xl">
                         <h3 className="text-white font-semibold mb-4 border-b border-gray-700 pb-2 inline-block">প্রয়োজনীয় লিংক</h3>
-                        <ul className="space-y-2 text-sm text-gray-400">
+                        <ul className="space-y-2  text-gray-400">
                             <li><Link href="/" className="hover:text-primary transition-colors">হোম পেজ</Link></li>
                             <li><Link href="/all-frames" className="hover:text-primary transition-colors">সকল ফ্রেম</Link></li>
                             <li><Link href="/dashboard" className="hover:text-primary transition-colors">ড্যাশবোর্ড</Link></li>
@@ -63,12 +63,12 @@ const Footer = () => {
                     </div>
 
                     {/* Contact Info */}
-                    <div>
+                    <div className="text-sm md:text-xl">
                         <h3 className="text-white font-semibold mb-4 border-b border-gray-700 pb-2 inline-block">যোগাযোগ করুন</h3>
-                        <ul className="space-y-3 text-sm text-gray-400">
+                        <ul className="space-y-3  text-gray-400">
                             {settings.helpline_number && (
                                 <li className="flex items-start gap-3">
-                                    <Phone size={16} className="text-primary mt-1" />
+                                    <Phone size={24} className="text-primary mt-1" />
                                     <div>
                                         <span className="block font-medium text-gray-300">হটলাইন:</span>
                                         {settings.helpline_number}
@@ -77,7 +77,7 @@ const Footer = () => {
                             )}
                             {settings.support_email && (
                                 <li className="flex items-start gap-3">
-                                    <Mail size={16} className="text-primary mt-1" />
+                                    <Mail size={24} className="text-primary mt-1" />
                                     <div>
                                         <span className="block font-medium text-gray-300">ইমেইল:</span>
                                         {settings.support_email}
@@ -86,7 +86,7 @@ const Footer = () => {
                             )}
                             {settings.address_text && (
                                 <li className="flex items-start gap-3">
-                                    <MapPin size={16} className="text-primary mt-1" />
+                                    <MapPin size={24} className="text-primary mt-1" />
                                     <div>
                                         <span className="block font-medium text-gray-300">ঠিকানা:</span>
                                         {settings.address_text}
