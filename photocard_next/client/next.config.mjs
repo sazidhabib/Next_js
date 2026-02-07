@@ -19,7 +19,7 @@ const nextConfig = {
       },
       {
         protocol: 'https',
-        hostname: 'card.deshprobaho.com',
+        hostname: 'photoframe.nextideasolution.com',
       },
     ],
   },

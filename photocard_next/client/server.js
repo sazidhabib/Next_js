@@ -26,7 +26,7 @@ nextApp.prepare().then(() => {
     // CORS Configuration
     const corsOptions = {
         origin: [
-            "https://photocard.nextideasolution.com",
+            "https://photoframe.nextideasolution.com",
             "http://localhost:3000",
             "http://localhost:5000", // Keep for safety if accessed directly
         ],

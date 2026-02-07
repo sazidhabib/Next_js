@@ -1,5 +1,5 @@
 const getApiUrl = () => {
-    const configuredUrl = process.env.NEXT_PUBLIC_API_URL || 'https://card.deshprobaho.com/api';
+    const configuredUrl = process.env.NEXT_PUBLIC_API_URL || 'https://photoframe.nextideasolution.com/api';
 
     // Check if running in browser
     if (typeof window !== 'undefined') {
@@ -13,7 +13,7 @@ const getApiUrl = () => {
 
         // If we are NOT on localhost, but the API URL IS localhost, force the production URL
         if (!isLocalhost && configuredUrl.includes('localhost')) {
-            return 'https://card.deshprobaho.com/api';
+            return 'https://photoframe.nextideasolution.com/api';
         }
     }
 
