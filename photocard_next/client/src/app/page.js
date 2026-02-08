@@ -6,6 +6,7 @@ import FrameCard from '../components/FrameCard';
 import { PlayCircle, ArrowRight, Grid2x2Plus } from 'lucide-react';
 import Link from 'next/link';
 import { API_URL } from '../config';
+import { toHttps } from '../utils/imageUtils';
 
 const Home = () => {
   const [recentFrames, setRecentFrames] = React.useState([]);
@@ -14,7 +15,10 @@ const Home = () => {
 
   const [settings, setSettings] = React.useState({
     helpline_number: '01880578893',
-    support_email: 'contact@photocardbd.com'
+    support_email: 'contact@photocardbd.com',
+    hero_frame_id: null,
+    hero_frame_title: null,
+    hero_frame_image_url: null
   });
 
   React.useEffect(() => {
@@ -24,6 +28,7 @@ const Home = () => {
         if (response.ok) {
           const data = await response.json();
           setSettings({
+            ...data,
             helpline_number: data.helpline_number || '01880578893',
             support_email: data.support_email || 'contact@photocardbd.com'
           });
@@ -89,7 +94,7 @@ const Home = () => {
               </p>
 
               <div className="flex flex-wrap items-center justify-center md:justify-start gap-4">
-                <Link href="/all-frames" className="px-8 py-3.5 bg-blue-800 hover:bg-blue-700 text-white font-bold rounded-lg shadow-lg shadow-blue-200 transition-all transform hover:-translate-y-1">
+                <Link href={`/frame/${settings.hero_frame_id}`} className="px-8 py-3.5 bg-blue-800 hover:bg-blue-700 text-white font-bold rounded-lg shadow-lg shadow-blue-200 transition-all transform hover:-translate-y-1">
                   তৈরি করুন
                 </Link>
                 <Link href="/all-frames" className="px-8 py-3.5 bg-white border border-gray-200 text-gray-700 font-bold rounded-lg hover:bg-gray-50 transition-all flex items-center gap-2">
@@ -102,19 +107,34 @@ const Home = () => {
             {/* Right Content - Hero Image Placeholder */}
             <div className="flex-1 relative">
               {/* Decorative background shape */}
-              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-green-500/10 rounded-full blur-3xl -z-10"></div>
+              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-blue-500/10 rounded-full blur-3xl -z-10"></div>
 
-              <div className="relative z-10 bg-gradient-to-br from-green-600 to-green-800 rounded-3xl p-1 shadow-2xl rotate-3 hover:rotate-0 transition-transform duration-500">
-                <div className="bg-white rounded-[20px] overflow-hidden aspect-video flex items-center justify-center relative">
-                  {/* Mocking the Hero Frame Design */}
-                  <div className="w-full h-full bg-[#1a4d2e] relative overflow-hidden flex items-center justify-center">
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-[#22c55e] rounded-bl-full opacity-20"></div>
-                    <div className="text-center text-white p-6">
-                      <div className="w-40 h-40 mx-auto bg-white/20 rounded-full border-4 border-white/40 mb-4 backdrop-blur-sm"></div>
-                      <h3 className="text-2xl font-bold mb-2">ইনসাফের প্রতীক</h3>
-                      <div className="inline-block bg-red-600 text-white px-3 py-1 rounded font-bold">দাঁড়িপাল্লা</div>
+              <div className="relative z-10 bg-gradient-to-br from-blue-600 to-blue-800 rounded-3xl p-1 shadow-2xl rotate-3 hover:rotate-0 transition-transform duration-500">
+                <div className="bg-white rounded-[20px] overflow-hidden aspect-square flex items-center justify-center relative">
+                  {settings.hero_frame_id ? (
+                    <div className="w-full h-full relative group block">
+                      <img
+                        src={toHttps(settings.hero_frame_image_url)}
+                        alt={settings.hero_frame_title}
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                      />
+                      {/* <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <span className="bg-white text-primary px-4 py-2 rounded-full font-bold shadow-lg transform translate-y-4 group-hover:translate-y-0 transition-transform">
+                          তৈরি করুন
+                        </span>
+                      </div> */}
                     </div>
-                  </div>
+                  ) : (
+                    /* Mocking the Hero Frame Design if no frame selected */
+                    <div className="w-full h-full bg-[#1a4d2e] relative overflow-hidden flex items-center justify-center">
+                      <div className="absolute top-0 right-0 w-32 h-32 bg-[#22c55e] rounded-bl-full opacity-20"></div>
+                      <div className="text-center text-white p-6">
+                        <div className="w-40 h-40 mx-auto bg-white/20 rounded-full border-4 border-white/40 mb-4 backdrop-blur-sm"></div>
+                        <h3 className="text-2xl font-bold mb-2">ইনসাফের প্রতীক</h3>
+                        <div className="inline-block bg-red-600 text-white px-3 py-1 rounded font-bold">দাঁড়িপাল্লা</div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

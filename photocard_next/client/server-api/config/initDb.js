@@ -122,6 +122,29 @@ const initDb = async () => {
                 await pool.query("ALTER TABLE ph_users ADD COLUMN phone_number VARCHAR(20)");
             }
 
+            // Check if 'parent_id' column exists in ph_categories
+            const [parentCols] = await pool.query("SHOW COLUMNS FROM ph_categories LIKE 'parent_id'");
+            if (parentCols.length === 0) {
+                console.log('Migrating: Adding parent_id column to ph_categories...');
+                await pool.query("ALTER TABLE ph_categories ADD COLUMN parent_id INT DEFAULT NULL");
+                await pool.query("ALTER TABLE ph_categories ADD CONSTRAINT fk_category_parent FOREIGN KEY (parent_id) REFERENCES ph_categories(id) ON DELETE SET NULL");
+            }
+
+            // Create ph_menu_items table if not exists
+            await pool.query(`
+                CREATE TABLE IF NOT EXISTS ph_menu_items (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    title VARCHAR(255) NOT NULL,
+                    category_id INT DEFAULT NULL,
+                    url VARCHAR(255) DEFAULT NULL,
+                    parent_id INT DEFAULT NULL,
+                    item_order INT DEFAULT 0,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (category_id) REFERENCES ph_categories(id) ON DELETE SET NULL,
+                    FOREIGN KEY (parent_id) REFERENCES ph_menu_items(id) ON DELETE SET NULL
+                )
+            `);
+
         } catch (migError) {
             console.error('Migration error:', migError);
         }
@@ -148,7 +171,8 @@ const initDb = async () => {
                 { name: 'facebook_url', type: 'VARCHAR(255)' },
                 { name: 'youtube_url', type: 'VARCHAR(255)' },
                 { name: 'website_url', type: 'VARCHAR(255)' },
-                { name: 'address_text', type: 'TEXT' }
+                { name: 'address_text', type: 'TEXT' },
+                { name: 'hero_frame_id', type: 'INT' }
             ];
 
             for (const col of settingColumns) {

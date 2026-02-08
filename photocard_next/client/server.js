@@ -16,6 +16,7 @@ const frameRoutes = require("./server-api/routes/frameRoutes");
 const userRoutes = require("./server-api/routes/userRoutes");
 const settingRoutes = require("./server-api/routes/settingRoutes");
 const categoryRoutes = require("./server-api/routes/categoryRoutes");
+const menuRoutes = require("./server-api/routes/menuRoutes");
 
 nextApp.prepare().then(() => {
     const app = express();
@@ -54,6 +55,7 @@ nextApp.prepare().then(() => {
     app.use("/api/users", userRoutes);
     app.use("/api/settings", settingRoutes);
     app.use("/api/categories", categoryRoutes);
+    app.use("/api/menu", menuRoutes);
 
     // Next.js Request Handler (Catch-all)
     app.all(/(.*)/, (req, res) => {

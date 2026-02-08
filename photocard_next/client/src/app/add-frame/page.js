@@ -19,19 +19,27 @@ const AddFrameContent = () => {
     const [formData, setFormData] = useState({
         title: '',
         description: '',
+        category_id: '',
         image: null
     });
+    const [categories, setCategories] = useState([]);
     const [previewUrl, setPreviewUrl] = useState(null);
 
-    // Auth Check
+    // Auth & Categories Check
     useEffect(() => {
         if (!authLoading && !user) {
             toast.error('অনুগ্রহ করে লগইন করুন');
-            // setTimeout(() => {
-            //     router.push('/login');
-            // }, 2000); 
-            // ProtectedRoute handles the redirect, but this adds a toast.
         }
+
+        const fetchCategories = async () => {
+            try {
+                const response = await fetch(`${API_URL}/categories`);
+                if (response.ok) setCategories(await response.json());
+            } catch (error) {
+                console.error("Error fetching categories:", error);
+            }
+        };
+        fetchCategories();
     }, [user, authLoading, router]);
 
     const handleDrag = (e) => {
@@ -85,6 +93,7 @@ const AddFrameContent = () => {
         const data = new FormData();
         data.append('title', formData.title);
         data.append('description', formData.description);
+        data.append('category_id', formData.category_id);
         data.append('image', formData.image);
 
         try {
@@ -184,6 +193,32 @@ const AddFrameContent = () => {
                                     className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                                     required
                                 />
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="block text-sm font-bold text-gray-700">ক্যাটাগরি</label>
+                                <select
+                                    name="category_id"
+                                    value={formData.category_id}
+                                    onChange={handleInputChange}
+                                    className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-gray-600"
+                                >
+                                    <option value="">ক্যাটাগরি নির্ধারণ করুন (ঐচ্ছিক)</option>
+                                    {categories
+                                        .filter(c => !c.parent_id)
+                                        .map(parent => (
+                                            <React.Fragment key={parent.id}>
+                                                <option value={parent.id}>{parent.name}</option>
+                                                {categories
+                                                    .filter(child => child.parent_id === parent.id)
+                                                    .map(child => (
+                                                        <option key={child.id} value={child.id}>&nbsp;&nbsp;↳ {child.name}</option>
+                                                    ))
+                                                }
+                                            </React.Fragment>
+                                        ))
+                                    }
+                                </select>
                             </div>
 
                             <div className="space-y-2">

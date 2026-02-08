@@ -18,6 +18,8 @@ export default function SettingsPage() {
     const [faviconFile, setFaviconFile] = useState(null);
     const [currentLogoUrl, setCurrentLogoUrl] = useState('');
     const [currentFaviconUrl, setCurrentFaviconUrl] = useState('');
+    const [heroFrameId, setHeroFrameId] = useState('');
+    const [frames, setFrames] = useState([]);
 
     // Password change state
     const [currentPassword, setCurrentPassword] = useState('');
@@ -34,7 +36,20 @@ export default function SettingsPage() {
 
     useEffect(() => {
         fetchSettings();
+        fetchFrames();
     }, []);
+
+    const fetchFrames = async () => {
+        try {
+            const response = await fetch(`${API_URL}/frames`);
+            if (response.ok) {
+                const data = await response.json();
+                setFrames(data.filter(f => f.status === 'active'));
+            }
+        } catch (error) {
+            console.error('Error fetching frames:', error);
+        }
+    };
 
     const fetchSettings = async () => {
         try {
@@ -52,6 +67,7 @@ export default function SettingsPage() {
                 setYoutubeUrl(data.youtube_url || '');
                 setWebsiteUrl(data.website_url || '');
                 setAddressText(data.address_text || '');
+                setHeroFrameId(data.hero_frame_id || '');
             }
         } catch (error) {
             console.error('Error fetching settings:', error);
@@ -91,6 +107,7 @@ export default function SettingsPage() {
             formData.append('youtube_url', youtubeUrl);
             formData.append('website_url', websiteUrl);
             formData.append('address_text', addressText);
+            formData.append('hero_frame_id', heroFrameId);
 
             if (logoFile) {
                 formData.append('logo', logoFile);
@@ -269,6 +286,21 @@ export default function SettingsPage() {
                                 onChange={(e) => setFooterText(e.target.value)}
                                 className="w-full px-4 py-2.5 rounded-lg border text-black border-gray-200 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                             />
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium text-gray-700">হিরো ফ্রেম (Hero Frame)</label>
+                            <select
+                                value={heroFrameId}
+                                onChange={(e) => setHeroFrameId(e.target.value)}
+                                className="w-full px-4 py-2.5 rounded-lg border text-black border-gray-200 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                            >
+                                <option value="">একটি ফ্রেম নির্বাচন করুন</option>
+                                {frames.map(frame => (
+                                    <option key={frame.id} value={frame.id}>
+                                        {frame.title} {frame.category_name ? `(${frame.category_name})` : ''}
+                                    </option>
+                                ))}
+                            </select>
                         </div>
                     </div>
                 </div>

@@ -12,7 +12,9 @@ CREATE TABLE IF NOT EXISTS ph_categories (
     name VARCHAR(255) NOT NULL UNIQUE,
     slug VARCHAR(255) NOT NULL UNIQUE,
     description TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    parent_id INT DEFAULT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (parent_id) REFERENCES ph_categories(id) ON DELETE SET NULL
 );
 
 CREATE TABLE IF NOT EXISTS ph_frames (
@@ -41,7 +43,21 @@ CREATE TABLE IF NOT EXISTS ph_settings (
     youtube_url VARCHAR(255),
     website_url VARCHAR(255),
     address_text TEXT,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    hero_frame_id INT,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (hero_frame_id) REFERENCES ph_frames(id) ON DELETE SET NULL
+);
+
+CREATE TABLE IF NOT EXISTS ph_menu_items (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    category_id INT DEFAULT NULL,
+    url VARCHAR(255) DEFAULT NULL,
+    parent_id INT DEFAULT NULL,
+    item_order INT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (category_id) REFERENCES ph_categories(id) ON DELETE SET NULL,
+    FOREIGN KEY (parent_id) REFERENCES ph_menu_items(id) ON DELETE SET NULL
 );
 
 -- Initial Settings

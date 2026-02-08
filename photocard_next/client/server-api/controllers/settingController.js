@@ -3,7 +3,12 @@ const pool = require('../config/db');
 // Get settings (only one row exists)
 exports.getSettings = async (req, res) => {
     try {
-        const [rows] = await pool.query('SELECT * FROM ph_settings WHERE id = 1');
+        const [rows] = await pool.query(`
+            SELECT s.*, f.title as hero_frame_title, f.image_url as hero_frame_image_url 
+            FROM ph_settings s
+            LEFT JOIN ph_frames f ON s.hero_frame_id = f.id
+            WHERE s.id = 1
+        `);
         if (rows.length === 0) return res.status(404).json({ message: 'Settings not found' });
         res.status(200).json(rows[0]);
     } catch (error) {
@@ -14,7 +19,7 @@ exports.getSettings = async (req, res) => {
 // Update settings
 exports.updateSettings = async (req, res) => {
     // Map frontend fields (site_title, support_email) to DB columns (site_name, contact_email)
-    const { site_title, support_email, helpline_number, footer_text, site_description, facebook_url, youtube_url, website_url, address_text } = req.body;
+    const { site_title, support_email, helpline_number, footer_text, site_description, facebook_url, youtube_url, website_url, address_text, hero_frame_id } = req.body;
 
     // DB columns: site_name, contact_email, helpline_number, footer_text, logo_url, favicon_url
 
@@ -43,7 +48,7 @@ exports.updateSettings = async (req, res) => {
         }
 
         const [result] = await pool.query(
-            'UPDATE ph_settings SET site_name = ?, support_email = ?, helpline_number = ?, footer_text = ?, logo_url = ?, favicon_url = ?, site_description = ?, facebook_url = ?, youtube_url = ?, website_url = ?, address_text = ? WHERE id = 1',
+            'UPDATE ph_settings SET site_name = ?, support_email = ?, helpline_number = ?, footer_text = ?, logo_url = ?, favicon_url = ?, site_description = ?, facebook_url = ?, youtube_url = ?, website_url = ?, address_text = ?, hero_frame_id = ? WHERE id = 1',
             [
                 site_title || current.site_name,
                 support_email || current.support_email,
@@ -55,7 +60,8 @@ exports.updateSettings = async (req, res) => {
                 facebook_url || current.facebook_url,
                 youtube_url || current.youtube_url,
                 website_url || current.website_url,
-                address_text || current.address_text
+                address_text || current.address_text,
+                hero_frame_id || current.hero_frame_id
             ]
         );
 

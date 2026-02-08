@@ -6,12 +6,36 @@ import { Menu, X, Bell, Plus, User, LogOut } from "lucide-react";
 import { AuthContext } from "../context/AuthContext";
 import { useSettings } from "../hooks/useSettings";
 import Image from "next/image";
+import { API_URL } from "../config";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { user, logout } = useContext(AuthContext);
   const router = useRouter();
   const { settings } = useSettings();
+  const [menuItems, setMenuItems] = useState([]);
+  const [activeDropdown, setActiveDropdown] = useState(null);
+
+  React.useEffect(() => {
+    const fetchMenu = async () => {
+      try {
+        const response = await fetch(`${API_URL}/menu`);
+        if (response.ok) {
+          const data = await response.json();
+          // Organize into tree
+          const parents = data.filter(i => !i.parent_id);
+          const tree = parents.map(p => ({
+            ...p,
+            children: data.filter(c => c.parent_id === p.id)
+          }));
+          setMenuItems(tree);
+        }
+      } catch (error) {
+        console.error("Error fetching menu:", error);
+      }
+    };
+    fetchMenu();
+  }, []);
 
   const pathname = usePathname();
 
@@ -101,42 +125,40 @@ const Navbar = () => {
 
           {/* Desktop Menu */}
           <div className="hidden md:flex items-center text-lg space-x-8">
-            <Link
-              href="/"
-              className={isActive("/")}
-            >
-              হোম
-            </Link>
-            <Link
-              href="/popular-frames"
-              className={isActive("/popular-frames")}
-            >
-              জনপ্রিয় ফ্রেম
-            </Link>
-            <Link
-              href="/text-frames"
-              className={isActive("/text-frames")}
-            >
-              টেক্সট ফ্রেম
-            </Link>
-            <Link
-              href="/all-frames"
-              className={isActive("/all-frames")}
-            >
-              সকল ফ্রেম
-            </Link>
-            <Link
-              href="/add-frame"
-              className={isActive("/add-frame")}
-            >
-              যুক্ত করুন
-            </Link>
-            <Link
-              href="/contact"
-              className={isActive("/contact")}
-            >
-              যোগাযোগ
-            </Link>
+            {menuItems.map((item) => (
+              <div
+                key={item.id}
+                className="relative group h-full flex items-center"
+                onMouseEnter={() => setActiveDropdown(item.id)}
+                onMouseLeave={() => setActiveDropdown(null)}
+              >
+                <Link
+                  href={item.category_slug ? `/category/${item.category_slug}` : (item.url || "#")}
+                  className={`flex items-center gap-1 h-full px-2 ${isActive(item.url)}`}
+                >
+                  {item.title}
+                  {item.children.length > 0 && (
+                    <svg className={`w-4 h-4 transition-transform ${activeDropdown === item.id ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  )}
+                </Link>
+
+                {item.children.length > 0 && activeDropdown === item.id && (
+                  <div className="absolute top-full left-0 bg-white shadow-xl rounded-b-xl py-2 min-w-[200px] border-t-2 border-primary z-50">
+                    {item.children.map((child) => (
+                      <Link
+                        key={child.id}
+                        href={child.category_slug ? `/category/${child.category_slug}` : (child.url || "#")}
+                        className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-primary transition-colors"
+                      >
+                        {child.title}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
 
             {/* Right Side Actions */}
             <div className="flex items-center gap-4 ml-4">
@@ -198,31 +220,29 @@ const Navbar = () => {
       {isOpen && (
         <div className="md:hidden bg-white border-t">
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-            <Link
-              href="/"
-              className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-primary hover:bg-blue-50"
-            >
-              হোম
-            </Link>
-            <Link
-              href="/popular-frames"
-              className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-primary hover:bg-blue-50"
-            >
-              জনপ্রিয় ফ্রেম
-            </Link>
-            <Link
-              href="/text-frames"
-              className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-primary hover:bg-blue-50"
-            >
-              টেক্সট ফ্রেম
-            </Link>
-            <Link
-              href="/all-frames"
-              className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-primary hover:bg-blue-50"
-            >
-              সকল ফ্রেম
-            </Link>
+            {menuItems.map((item) => (
+              <div key={item.id} className="space-y-1">
+                <Link
+                  href={item.category_slug ? `/category/${item.category_slug}` : (item.url || "#")}
+                  className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-primary hover:bg-blue-50"
+                  onClick={() => setIsOpen(false)}
+                >
+                  {item.title}
+                </Link>
+                {item.children.map((child) => (
+                  <Link
+                    key={child.id}
+                    href={child.category_slug ? `/category/${child.category_slug}` : (child.url || "#")}
+                    className="block px-6 py-2 rounded-md text-sm font-medium text-gray-500 hover:text-primary hover:bg-blue-50"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    ↳ {child.title}
+                  </Link>
+                ))}
+              </div>
+            ))}
 
+            {/* Auth Links */}
             {!user || user.role === "admin" ? (
               <Link
                 href="/login"

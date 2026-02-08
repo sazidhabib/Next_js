@@ -322,7 +322,20 @@ export default function FramesPage() {
                         <label className="block text-sm text-gray-700 font-medium mb-1">Category</label>
                         <select className="w-full text-gray-500 border rounded p-2" value={categoryId} onChange={e => setCategoryId(e.target.value)}>
                             <option value="">Select Category (Optional)</option>
-                            {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                            {categories
+                                .filter(c => !c.parent_id)
+                                .map(parent => (
+                                    <React.Fragment key={parent.id}>
+                                        <option value={parent.id}>{parent.name}</option>
+                                        {categories
+                                            .filter(child => child.parent_id === parent.id)
+                                            .map(child => (
+                                                <option key={child.id} value={child.id}>&nbsp;&nbsp;↳ {child.name}</option>
+                                            ))
+                                        }
+                                    </React.Fragment>
+                                ))
+                            }
                         </select>
                     </div>
                     <div>

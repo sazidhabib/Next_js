@@ -11,6 +11,7 @@ import {
     ImageIcon,
     Grid,
     Settings,
+    Menu,
     LogOut
 } from 'lucide-react';
 
@@ -63,6 +64,13 @@ export default function AdminDashboardLayout({ children }) {
                         >
                             <Grid size={20} />
                             ক্যাটাগরি
+                        </Link>
+                        <Link
+                            href="/admin/menu"
+                            className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-colors ${isActive('/admin/menu') ? 'bg-primary text-white shadow-lg shadow-blue-200' : 'text-gray-600 hover:bg-gray-50'}`}
+                        >
+                            <Menu size={20} />
+                            মেনু ম্যানেজমেন্ট
                         </Link>
                         <Link
                             href="/admin/settings"

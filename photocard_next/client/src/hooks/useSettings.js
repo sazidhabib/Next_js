@@ -14,7 +14,10 @@ export const useSettings = () => {
         facebook_url: '',
         youtube_url: '',
         website_url: '',
-        footer_text: ''
+        footer_text: '',
+        hero_frame_id: null,
+        hero_frame_title: null,
+        hero_frame_image_url: null
     });
     const [loading, setLoading] = useState(true);
 

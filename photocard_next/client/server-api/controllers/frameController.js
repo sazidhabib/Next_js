@@ -6,7 +6,12 @@ const fs = require('fs');
 // Get all frames
 exports.getAllFrames = async (req, res) => {
     try {
-        const [rows] = await pool.query('SELECT f.*, c.name as category_name FROM ph_frames f LEFT JOIN ph_categories c ON f.category_id = c.id ORDER BY f.created_at DESC');
+        const [rows] = await pool.query(`
+            SELECT f.*, c.name as category_name, c.slug as category_slug 
+            FROM ph_frames f 
+            LEFT JOIN ph_categories c ON f.category_id = c.id 
+            ORDER BY f.created_at DESC
+        `);
         res.status(200).json(rows);
     } catch (error) {
         res.status(500).json({ message: error.message });

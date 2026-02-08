@@ -24,7 +24,10 @@ const authorize = (roles = []) => {
     }
 
     return (req, res, next) => {
-        if (roles.length && !roles.includes(req.user.role)) {
+        const userRole = req.user.role ? req.user.role.toLowerCase() : '';
+        const allowedRoles = roles.map(r => r.toLowerCase());
+
+        if (allowedRoles.length && !allowedRoles.includes(userRole)) {
             return res.status(403).json({ message: 'Access Denied: Insufficient Permissions' });
         }
         next();

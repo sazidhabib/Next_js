@@ -15,6 +15,7 @@ export default function CategoriesPage() {
     const [editingId, setEditingId] = useState(null);
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
+    const [parentId, setParentId] = useState('');
 
     const fetchCategories = async () => {
         try {
@@ -49,7 +50,7 @@ export default function CategoriesPage() {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify({ name, description })
+                body: JSON.stringify({ name, description, parent_id: parentId || null })
             });
 
             if (response.ok) {
@@ -94,6 +95,7 @@ export default function CategoriesPage() {
         setEditingId(cat.id);
         setName(cat.name);
         setDescription(cat.description || '');
+        setParentId(cat.parent_id || '');
         setIsModalOpen(true);
     };
 
@@ -101,6 +103,7 @@ export default function CategoriesPage() {
         setEditingId(null);
         setName('');
         setDescription('');
+        setParentId('');
         setIsModalOpen(true);
     };
 
@@ -123,6 +126,7 @@ export default function CategoriesPage() {
                     <thead>
                         <tr className="border-b text-gray-500 text-sm">
                             <th className="p-3">নাম</th>
+                            <th className="p-3">প্যারেন্ট</th>
                             <th className="p-3">Slug</th>
                             <th className="p-3">বর্ণনা</th>
                             <th className="p-3 text-right">অ্যাকশন</th>
@@ -132,6 +136,7 @@ export default function CategoriesPage() {
                         {filtered.map(cat => (
                             <tr key={cat.id} className="border-b hover:bg-gray-50">
                                 <td className="p-3 font-medium text-gray-500">{cat.name}</td>
+                                <td className="p-3 text-gray-500">{cat.parent_name || '-'}</td>
                                 <td className="p-3 text-gray-500">{cat.slug}</td>
                                 <td className="p-3 text-gray-500">{cat.description}</td>
                                 <td className="p-3 text-right space-x-2">
@@ -153,6 +158,22 @@ export default function CategoriesPage() {
                     <div>
                         <label className="block text-sm text-gray-700 font-medium mb-1">Description</label>
                         <textarea className="w-full border text-gray-500 rounded p-2" placeholder="Enter description" value={description} onChange={e => setDescription(e.target.value)} />
+                    </div>
+                    <div>
+                        <label className="block text-sm text-gray-700 font-medium mb-1">Parent Category</label>
+                        <select
+                            className="w-full border text-gray-500 rounded p-2"
+                            value={parentId}
+                            onChange={e => setParentId(e.target.value)}
+                        >
+                            <option value="">None (Primary Category)</option>
+                            {categories
+                                .filter(c => c.id !== editingId) // Prevent self-parenting
+                                .map(c => (
+                                    <option key={c.id} value={c.id}>{c.name}</option>
+                                ))
+                            }
+                        </select>
                     </div>
                     <button type="submit" className="w-full bg-primary text-white py-2 rounded">Save</button>
                 </form>
