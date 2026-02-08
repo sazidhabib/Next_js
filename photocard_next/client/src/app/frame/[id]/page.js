@@ -225,6 +225,7 @@ export default function FrameDetailsPage() {
                     <div>
                         <h1 className="text-3xl font-bold text-blue-800 mb-2">{frame.title}</h1>
                         <p className="text-gray-500 text-sm">{frame.category_name || 'General'}</p>
+                        {frame.description && <p className="text-gray-600 mt-2">{frame.description}</p>}
                         <div className="w-16 h-1 bg-blue-200 mx-auto mt-4 rounded-full"></div>
                     </div>
 
@@ -323,6 +324,7 @@ export default function FrameDetailsPage() {
                                 title={relatedFrame.title}
                                 image_url={relatedFrame.image_url}
                                 category_name={relatedFrame.category_name}
+                                description={relatedFrame.description}
                                 use_count={relatedFrame.use_count}
                                 view_count={relatedFrame.view_count}
                             />

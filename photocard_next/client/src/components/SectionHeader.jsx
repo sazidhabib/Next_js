@@ -4,7 +4,7 @@ const SectionHeader = ({ title, subtitle }) => {
     return (
         <div className="text-center mb-10">
             {subtitle && (
-                <span className="text-primary font-bold tracking-wider uppercase text-xs mb-2 block">
+                <span className="text-primary font-bold tracking-wider uppercase text-base mb-2 block">
                     {subtitle}
                 </span>
             )}

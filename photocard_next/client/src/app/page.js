@@ -3,7 +3,7 @@
 import React from 'react';
 import SectionHeader from '../components/SectionHeader';
 import FrameCard from '../components/FrameCard';
-import { PlayCircle, ArrowRight } from 'lucide-react';
+import { PlayCircle, ArrowRight, Grid2x2Plus } from 'lucide-react';
 import Link from 'next/link';
 import { API_URL } from '../config';
 
@@ -92,10 +92,10 @@ const Home = () => {
                 <Link href="/all-frames" className="px-8 py-3.5 bg-blue-800 hover:bg-blue-700 text-white font-bold rounded-lg shadow-lg shadow-blue-200 transition-all transform hover:-translate-y-1">
                   তৈরি করুন
                 </Link>
-                <button className="px-8 py-3.5 bg-white border border-gray-200 text-gray-700 font-bold rounded-lg hover:bg-gray-50 transition-all flex items-center gap-2">
-                  <PlayCircle size={20} className="text-primary" />
-                  কাজের নিয়ম
-                </button>
+                <Link href="/all-frames" className="px-8 py-3.5 bg-white border border-gray-200 text-gray-700 font-bold rounded-lg hover:bg-gray-50 transition-all flex items-center gap-2">
+                  <Grid2x2Plus size={20} className="text-primary" />
+                  কালেকশন দেখুন
+                </Link>
               </div>
             </div>
 
@@ -141,6 +141,7 @@ const Home = () => {
                 title={frame.title}
                 // Map backend fields to component props if needed
                 subtitle={frame.category_name}
+                description={frame.description}
                 image={frame.image_url}
                 viewCount={frame.view_count}
                 useCount={frame.use_count}
@@ -171,6 +172,7 @@ const Home = () => {
                   id={frame.id}
                   title={frame.title}
                   subtitle={frame.category_name}
+                  description={frame.description}
                   image={frame.image_url}
                   viewCount={frame.view_count}
                   useCount={frame.use_count}

@@ -100,7 +100,7 @@ const Navbar = () => {
           </Link>
 
           {/* Desktop Menu */}
-          <div className="hidden md:flex items-center space-x-8">
+          <div className="hidden md:flex items-center text-lg space-x-8">
             <Link
               href="/"
               className={isActive("/")}

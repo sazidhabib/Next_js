@@ -90,7 +90,7 @@ export default function AllFramesPage() {
                 ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                         {filteredFrames.map(frame => (
-                            <FrameCard key={frame.id} id={frame.id} title={frame.title} subtitle={frame.category_name || 'General'} image={frame.image_url} viewCount={frame.view_count} useCount={frame.use_count} />
+                            <FrameCard key={frame.id} id={frame.id} title={frame.title} description={frame.description} subtitle={frame.category_name || 'General'} image={frame.image_url} viewCount={frame.view_count} useCount={frame.use_count} />
                         ))}
                     </div>
                 )}
