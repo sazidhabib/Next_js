@@ -125,26 +125,78 @@ export default function CategoriesPage() {
                 <table className="w-full text-left">
                     <thead>
                         <tr className="border-b text-gray-500 text-sm">
-                            <th className="p-3">নাম</th>
-                            <th className="p-3">প্যারেন্ট</th>
+                            <th className="p-3">নাম (Name)</th>
+                            <th className="p-3">Parent</th>
                             <th className="p-3">Slug</th>
                             <th className="p-3">বর্ণনা</th>
                             <th className="p-3 text-right">অ্যাকশন</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {filtered.map(cat => (
-                            <tr key={cat.id} className="border-b hover:bg-gray-50">
-                                <td className="p-3 font-medium text-gray-500">{cat.name}</td>
-                                <td className="p-3 text-gray-500">{cat.parent_name || '-'}</td>
-                                <td className="p-3 text-gray-500">{cat.slug}</td>
-                                <td className="p-3 text-gray-500">{cat.description}</td>
-                                <td className="p-3 text-right space-x-2">
-                                    <button onClick={() => openEdit(cat)} className="text-blue-500"><Edit2 size={16} /></button>
-                                    <button onClick={() => handleDelete(cat.id)} className="text-red-500"><Trash2 size={16} /></button>
-                                </td>
-                            </tr>
-                        ))}
+                        {(() => {
+                            // 1. Build Tree
+                            const buildTree = (cats, parentId = null) => {
+                                return cats
+                                    .filter(c => c.parent_id === parentId) // Get direct children
+                                    .map(c => ({
+                                        ...c,
+                                        children: buildTree(cats, c.id) // Recursively get grandchildren
+                                    }));
+                            };
+
+                            const tree = buildTree(categories);
+
+                            // 2. Flatten for Table Display with Depth
+                            const flattenTree = (nodes, depth = 0) => {
+                                let result = [];
+                                nodes.forEach(node => {
+                                    // Add current node with depth info
+                                    result.push({ ...node, depth });
+                                    // Recursively add children
+                                    if (node.children && node.children.length > 0) {
+                                        result = result.concat(flattenTree(node.children, depth + 1));
+                                    }
+                                });
+                                return result;
+                            };
+
+                            const flatList = flattenTree(tree);
+
+                            // 3. Filter by Search (if any)
+                            // Note: Search breaks hierarchy display usually, so we either search flat or filter tree.
+                            // Simple approach: if search exists, just search the flatList ignoring hierarchy for now, or just show matches.
+                            const displayList = searchTerm
+                                ? categories.filter(c => c.name.toLowerCase().includes(searchTerm.toLowerCase()))
+                                : flatList;
+
+
+                            if (displayList.length === 0) {
+                                return <tr><td colSpan="5" className="p-4 text-center text-gray-500">No categories found.</td></tr>;
+                            }
+
+                            return displayList.map(cat => (
+                                <tr key={cat.id} className="border-b hover:bg-gray-50">
+                                    <td className="p-3 font-medium text-gray-500">
+                                        <div style={{ paddingLeft: searchTerm ? 0 : `${cat.depth * 20}px` }} className="flex items-center gap-2">
+                                            {cat.depth > 0 && <span className="text-gray-300">↳</span>}
+                                            {cat.name}
+                                        </div>
+                                    </td>
+                                    <td className="p-3 text-gray-500">
+                                        {cat.parent_id
+                                            ? categories.find(c => c.id === cat.parent_id)?.name || 'Unknown'
+                                            : <span className="text-xs bg-blue-50 text-blue-600 px-2 py-1 rounded">Root</span>
+                                        }
+                                    </td>
+                                    <td className="p-3 text-gray-500">{cat.slug}</td>
+                                    <td className="p-3 text-gray-500">{cat.description}</td>
+                                    <td className="p-3 text-right space-x-2">
+                                        <button onClick={() => openEdit(cat)} className="text-blue-500 hover:bg-blue-50 p-1 rounded"><Edit2 size={16} /></button>
+                                        <button onClick={() => handleDelete(cat.id)} className="text-red-500 hover:bg-red-50 p-1 rounded"><Trash2 size={16} /></button>
+                                    </td>
+                                </tr>
+                            ));
+                        })()}
                     </tbody>
                 </table>
             </div>
@@ -167,12 +219,23 @@ export default function CategoriesPage() {
                             onChange={e => setParentId(e.target.value)}
                         >
                             <option value="">None (Primary Category)</option>
-                            {categories
-                                .filter(c => c.id !== editingId) // Prevent self-parenting
-                                .map(c => (
-                                    <option key={c.id} value={c.id}>{c.name}</option>
-                                ))
-                            }
+                            <option value="">None (Root Category)</option>
+                            {(() => {
+                                // Reuse tree logic for dropdown
+                                const buildOptions = (cats, parentId = null, depth = 0) => {
+                                    return cats
+                                        .filter(c => c.parent_id === parentId)
+                                        .map(c => (
+                                            <React.Fragment key={c.id}>
+                                                <option value={c.id} disabled={c.id === editingId}>
+                                                    {'\u00A0'.repeat(depth * 4)}{depth > 0 ? '↳ ' : ''}{c.name}
+                                                </option>
+                                                {buildOptions(cats, c.id, depth + 1)}
+                                            </React.Fragment>
+                                        ));
+                                };
+                                return buildOptions(categories);
+                            })()}
                         </select>
                     </div>
                     <button type="submit" className="w-full bg-primary text-white py-2 rounded">Save</button>

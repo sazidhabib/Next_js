@@ -109,7 +109,7 @@ const Home = () => {
               {/* Decorative background shape */}
               <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-blue-500/10 rounded-full blur-3xl -z-10"></div>
 
-              <div className="relative z-10 bg-gradient-to-br from-blue-600 to-blue-800 rounded-3xl p-1 shadow-2xl rotate-3 hover:rotate-0 transition-transform duration-500">
+              <div className="relative z-10 bg-gradient-to-br from-white-600 to-blue-800 rounded-3xl p-1 shadow-2xl rotate-3 hover:rotate-0 transition-transform duration-500">
                 <div className="bg-white rounded-[20px] overflow-hidden aspect-square flex items-center justify-center relative">
                   {settings.hero_frame_id ? (
                     <div className="w-full h-full relative group block">

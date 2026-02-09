@@ -29,7 +29,7 @@ const Footer = () => {
                                 </>
                             )}
                         </div>
-                        <p className="text-gray-400 text-sm md:text-xl leading-relaxed mb-6">
+                        <p className="text-gray-400 text-sm md:text-base leading-relaxed mb-6">
                             {settings.site_description || 'বাংলাদেশের যেকোনো জাতীয় দিবস বা বিশেষ দিনে নিজের ছবি দিয়ে সবাইকে শুভেচ্ছা জানানোর জন্য ডিজিটাল কার্ড তৈরি করুন খুব সহজে।'}
                         </p>
                         <div className="flex space-x-4">
