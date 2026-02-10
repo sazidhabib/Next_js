@@ -50,8 +50,8 @@ export default function FrameDetailsClient({ initialFrame }) {
                     }
                 }
 
-                // Fetch related/popular frames (fetching 4 random/popular ones for now)
-                const relatedResponse = await fetch(`${API_URL}/frames?sort=popular&limit=4`);
+                // Fetch related/all active frames
+                const relatedResponse = await fetch(`${API_URL}/frames?status=active`);
                 if (relatedResponse.ok) {
                     const relatedData = await relatedResponse.json();
 
@@ -62,7 +62,8 @@ export default function FrameDetailsClient({ initialFrame }) {
                         framesList = relatedData.frames;
                     }
 
-                    setRelatedFrames(framesList.filter(f => f.id !== parseInt(id)).slice(0, 4));
+                    // Filter out current frame and take a larger set (e.g., 12)
+                    setRelatedFrames(framesList.filter(f => f.id !== parseInt(id)).slice(0, 12));
                 }
 
             } catch (error) {
@@ -326,11 +327,11 @@ export default function FrameDetailsClient({ initialFrame }) {
                                 key={relatedFrame.id}
                                 id={relatedFrame.id}
                                 title={relatedFrame.title}
-                                image_url={relatedFrame.image_url}
-                                category_name={relatedFrame.category_name}
+                                image={relatedFrame.image_url}
+                                subtitle={relatedFrame.category_name}
                                 description={relatedFrame.description}
-                                use_count={relatedFrame.use_count}
-                                view_count={relatedFrame.view_count}
+                                useCount={relatedFrame.use_count}
+                                viewCount={relatedFrame.view_count}
                             />
                         ))}
                     </div>
