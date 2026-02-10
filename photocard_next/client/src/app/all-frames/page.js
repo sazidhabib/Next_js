@@ -91,11 +91,11 @@ export default function AllFramesPage() {
                     <input
                         type="text"
                         placeholder="ফ্রেমের নাম লিখে খুঁজুন..."
-                        className="w-full pl-5 pr-12 py-3.5 rounded-full border border-gray-200 shadow-sm focus:outline-none focus:border-green-600 focus:ring-1 focus:ring-green-600 text-gray-700 placeholder-gray-400"
+                        className="w-full pl-5 pr-12 py-3.5 rounded-full border border-gray-200 shadow-sm focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 text-gray-700 placeholder-gray-400"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
-                    <div className="absolute right-2 top-1/2 -translate-y-1/2 bg-green-700 p-2 rounded-full text-white cursor-pointer hover:bg-green-800 transition">
+                    <div className="absolute right-2 top-1/2 -translate-y-1/2 bg-blue-700 p-2 rounded-full text-white cursor-pointer hover:bg-blue-800 transition">
                         <Search size={20} />
                     </div>
                 </div>
@@ -104,12 +104,12 @@ export default function AllFramesPage() {
                 <div className="flex flex-col items-center gap-4 mb-10">
 
                     {/* Parent Categories (Tabs) */}
-                    <div className="flex flex-wrap justify-center gap-3">
+                    <div className="flex flex-wrap justify-center  gap-3">
                         <button
                             onClick={() => handleParentChange('all')}
-                            className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium transition-all
+                            className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-base font-bold transition-all
                                 ${selectedParent === 'all'
-                                    ? 'bg-white shadow-md text-green-700 border-green-100 ring-1 ring-green-500/20'
+                                    ? 'bg-white shadow-md text-blue-700 border-blue-100 ring-1 ring-blue-500/20'
                                     : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'}`}
                         >
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="7" height="7" x="3" y="3" rx="1" /><rect width="7" height="7" x="14" y="3" rx="1" /><rect width="7" height="7" x="14" y="14" rx="1" /><rect width="7" height="7" x="3" y="14" rx="1" /></svg>
@@ -120,9 +120,9 @@ export default function AllFramesPage() {
                             <button
                                 key={cat.id}
                                 onClick={() => handleParentChange(cat.id)}
-                                className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium transition-all
+                                className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-base font-bold transition-all
                                     ${selectedParent === cat.id
-                                        ? 'bg-green-700 text-white shadow-lg shadow-green-700/20'
+                                        ? 'bg-blue-700 text-white shadow-lg shadow-blue-700/20'
                                         : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'}`}
                             >
                                 {/* Icons can be dynamic if we had them, for now standard icon or none */}
@@ -138,7 +138,7 @@ export default function AllFramesPage() {
                                 onClick={() => setSelectedSub('all')}
                                 className={`px-4 py-1.5 rounded-full text-sm transition-colors
                                     ${selectedSub === 'all'
-                                        ? 'bg-green-100 text-green-700 font-medium'
+                                        ? 'bg-blue-100 text-blue-700 font-medium'
                                         : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
                             >
                                 সব
@@ -149,7 +149,7 @@ export default function AllFramesPage() {
                                     onClick={() => setSelectedSub(sub.id)}
                                     className={`px-4 py-1.5 rounded-full text-sm transition-colors
                                         ${selectedSub === sub.id
-                                            ? 'bg-green-100 text-green-700 font-medium'
+                                            ? 'bg-blue-100 text-blue-700 font-medium'
                                             : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
                                 >
                                     {sub.name}
@@ -163,7 +163,7 @@ export default function AllFramesPage() {
                 {/* Frames Grid */}
                 {loading ? (
                     <div className="text-center py-20">
-                        <div className="w-10 h-10 border-4 border-green-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                        <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
                         <p className="text-gray-500">লোড হচ্ছে...</p>
                     </div>
                 ) : filteredFrames.length === 0 ? (

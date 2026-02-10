@@ -15,6 +15,12 @@ const getApiUrl = () => {
         if (!isLocalhost && configuredUrl.includes('localhost')) {
             return 'https://photoframe.nextideasolution.com/api';
         }
+    } else {
+        // SERVER SIDE (Next.js Server Components / Actions)
+        // If the URL is localhost but set as https, force http to avoid ERR_SSL_WRONG_VERSION_NUMBER
+        if (configuredUrl.includes('localhost') && configuredUrl.startsWith('https://')) {
+            return configuredUrl.replace('https://', 'http://');
+        }
     }
 
     return configuredUrl;
