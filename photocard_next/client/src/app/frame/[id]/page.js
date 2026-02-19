@@ -9,20 +9,20 @@ export async function generateMetadata({ params }) {
         const response = await fetch(`${API_URL}/frames/${id}`);
         if (!response.ok) {
             return {
-                title: 'Frame Not Found - Photo Card BD',
+                title: 'Frame Not Found - Photo frame BD',
             };
         }
 
         const frame = await response.json();
 
         return {
-            title: `${frame.title} - Photo Card BD`,
-            description: frame.description || `Create your own version of ${frame.title} photo card in just one click.`,
+            title: `${frame.title} - Photo frame BD`,
+            description: frame.description || `Create your own version of ${frame.title} photo frame in just one click.`,
             openGraph: {
-                title: `${frame.title} - Photo Card BD`,
-                description: frame.description || `Create your own version of ${frame.title} photo card in just one click.`,
-                url: `https://photocardbd.com/frame/${id}`,
-                siteName: 'Photo Card BD',
+                title: `${frame.title} - Photo frame BD`,
+                description: frame.description || `Create your own version of ${frame.title} photo frame in just one click.`,
+                url: `https://photoframe.nextideasolution.com/frame/${id}`,
+                siteName: 'Photo frame BD',
                 images: [
                     {
                         url: frame.image_url,
@@ -35,15 +35,15 @@ export async function generateMetadata({ params }) {
             },
             twitter: {
                 card: 'summary_large_image',
-                title: `${frame.title} - Photo Card BD`,
-                description: frame.description || `Create your own version of ${frame.title} photo card in just one click.`,
+                title: `${frame.title} - Photo frame BD`,
+                description: frame.description || `Create your own version of ${frame.title} photo frame in just one click.`,
                 images: [frame.image_url],
             },
         };
     } catch (error) {
         console.error('Error generating metadata:', error);
         return {
-            title: 'Photo Card BD',
+            title: 'Photo frame BD',
         };
     }
 }

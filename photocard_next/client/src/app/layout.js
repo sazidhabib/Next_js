@@ -4,14 +4,14 @@ import Footer from "../components/Footer";
 import { Providers } from "../components/Providers";
 
 export const metadata = {
-  title: "Photo Card BD - Digital Photo Card Generator",
-  description: "Create political and social photo cards in just one click. Bangladesh's most popular digital photo card generator.",
+  title: "Photo frame BD - Digital Photo frame Generator",
+  description: "Create political and social photo frame in just one click. Bangladesh's most popular digital photo frame generator.",
   keywords: ["photo card", "digital frame", "bangladesh", "political frame", "social media frame", "photo editor"],
   openGraph: {
-    title: "Photo Card BD",
-    description: "Create political and social photo cards in just one click.",
-    url: "https://photocardbd.com",
-    siteName: "Photo Card BD",
+    title: "Photo frame BD",
+    description: "Create political and social photo frames in just one click.",
+    url: "https://photoframe.nextideasolution.com",
+    siteName: "Photo frame BD",
     images: [
       {
         url: "/og-image.jpg", // Make sure this file exists in public folder or use a remote URL
@@ -24,8 +24,8 @@ export const metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Photo Card BD",
-    description: "Create political and social photo cards in just one click.",
+    title: "Photo frame BD",
+    description: "Create political and social photo frames in just one click.",
     images: ["/og-image.jpg"],
   },
 };
