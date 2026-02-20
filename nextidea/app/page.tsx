@@ -1,12 +1,12 @@
 import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
-import CredibilitySection from "./components/CredibilitySection";
 import ServicesSection from "./components/ServicesSection";
 import PortfolioSection from "./components/PortfolioSection";
 import CaseStudySection from "./components/CaseStudySection";
-import ClientLogosSection from "./components/ClientLogosSection";
+import StatsSection from "./components/StatsSection";
 import CTASection from "./components/CTASection";
 import Footer from "./components/Footer";
+import ClientsSection from "./components/ClientsSection";
 
 export default function Home() {
   return (
@@ -14,11 +14,11 @@ export default function Home() {
       <Navbar />
       <main className="pt-20">
         <Hero />
-        <CredibilitySection />
         <ServicesSection />
         <PortfolioSection />
         <CaseStudySection />
-        <ClientLogosSection />
+        <ClientsSection />
+        <StatsSection />
         <CTASection />
       </main>
       <Footer />

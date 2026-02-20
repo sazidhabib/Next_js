@@ -1,0 +1,107 @@
+@import "tailwindcss";
+
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --color-primary: #b8912e;
+    --color-primary-foreground: #ffffff;
+    --color-secondary: #f4f4f4;
+    --color-secondary-foreground: #1a1a1a;
+    --color-background: #ffffff;
+    --color-foreground: #0a0a0a;
+    --color-muted: #e5e5e5;
+    --color-muted-foreground: #6b7280;
+    --color-card: #f9f9f9;
+    --color-border: #e2e8f0;
+  }
+
+  .dark {
+    --color-primary: #d4af37;
+    --color-primary-foreground: #000000;
+    --color-secondary: #1a1a1a;
+    --color-secondary-foreground: #fafafa;
+    --color-background: #050505;
+    --color-foreground: #f0f0f0;
+    --color-muted: #171717;
+    --color-muted-foreground: #a1a1aa;
+    --color-card: #0a0a0a;
+    --color-border: #ffffff1a;
+  }
+}
+
+@theme {
+  --color-primary: var(--color-primary);
+  --color-primary-foreground: var(--color-primary-foreground);
+  --color-secondary: var(--color-secondary);
+  --color-secondary-foreground: var(--color-secondary-foreground);
+  --color-background: var(--color-background);
+  --color-foreground: var(--color-foreground);
+  --color-muted: var(--color-muted);
+  --color-muted-foreground: var(--color-muted-foreground);
+  --color-card: var(--color-card);
+  --color-border: var(--color-border);
+
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --font-serif: var(--font-playfair), ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+
+  --animate-accordion-down: accordion-down 0.2s ease-out;
+  --animate-accordion-up: accordion-up 0.2s ease-out;
+
+  @keyframes accordion-down {
+    from {
+      height: 0;
+    }
+
+    to {
+      height: var(--radix-accordion-content-height);
+    }
+  }
+
+  @keyframes accordion-up {
+    from {
+      height: var(--radix-accordion-content-height);
+    }
+
+    to {
+      height: 0;
+    }
+  }
+}
+
+@utility container {
+  margin-inline: auto;
+  padding-inline: 1rem;
+
+  @media (width >=1024px) {
+    max-width: 1024px;
+    padding-inline: 0;
+  }
+
+  @media (width >=1280px) {
+    max-width: 1216px;
+    padding-inline: 0;
+  }
+
+  @media (width >=1536px) {
+    max-width: 1408px;
+    padding-inline: 0;
+  }
+}
+
+@layer base {
+
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-muted, currentColor);
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    @apply font-sans antialiased transition-colors duration-500;
+  }
+}

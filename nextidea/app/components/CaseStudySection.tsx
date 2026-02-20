@@ -1,127 +1,77 @@
 "use client";
 
-import { useState } from "react";
-import { ChevronLeft, ChevronRight, TrendingUp, Users, Target } from "lucide-react";
+import Link from "next/link";
+import { ArrowUpRight } from "lucide-react";
 
 const caseStudies = [
   {
-    company: "TechStart",
-    industry: "SaaS / Technology",
-    title: "How We Increased Lead Generation by 300%",
-    results: [
-      { icon: TrendingUp, value: "300%", label: "More Leads" },
-      { icon: Users, value: "2.5M+", label: "Impressions" },
-      { icon: Target, value: "45%", label: "Conversion Rate" },
-    ],
-    description:
-      "Complete digital transformation including brand overhaul, website redesign, and targeted content marketing strategy.",
+    id: 1,
+    title: "Turning Conversations into Conversions: The Lead Generation Success Story of Western Consulting Firm",
+    category: "Lead Generation",
+    image: "https://geekysocial.com/wp-content/uploads/2026/01/Westerncf-home-slide-china.webp",
+    link: "/case-study/western-consulting",
   },
   {
-    company: "HealthFirst",
-    industry: "Healthcare",
-    title: "Building Trust Through Digital Excellence",
-    results: [
-      { icon: TrendingUp, value: "150%", label: "Patient Growth" },
-      { icon: Users, value: "89%", label: "Satisfaction" },
-      { icon: Target, value: "3x", label: "ROI" },
-    ],
-    description:
-      "Strategic brand positioning and patient-focused web experience that established trust and drove significant growth.",
+    id: 2,
+    title: "From Zero to High-Intent Traffic: How Mostofa Pipe Built SEO Visibility in Just 5 Months",
+    category: "SEO",
+    image: "https://geekysocial.com/wp-content/uploads/2026/01/Webiste-main-BG-1-08-scaled-1.webp",
+    link: "/case-study/mostofa-pipe",
   },
   {
-    company: "FinanceHub",
-    industry: "FinTech",
-    title: "Reimagining Financial Services for Digital Natives",
-    results: [
-      { icon: TrendingUp, value: "500%", label: "App Downloads" },
-      { icon: Users, value: "1M+", label: "Active Users" },
-      { icon: Target, value: "4.8★", label: "App Rating" },
-    ],
-    description:
-      "Mobile-first platform design and comprehensive digital strategy that disrupted the traditional finance space.",
+    id: 3,
+    title: "How GEEKY Social Drove 300X ROAS for Urban's Premium Real Estate Project in Dhaka",
+    category: "Real Estate",
+    image: "https://geekysocial.com/wp-content/uploads/2026/01/Imperial_Areal-view_01_Post-scaled-1.jpg",
+    link: "/case-study/urban-imperials",
   },
 ];
 
 export default function CaseStudySection() {
-  const [currentIndex, setCurrentIndex] = useState(0);
-
-  const prevSlide = () => {
-    setCurrentIndex((prev) => (prev - 1 + caseStudies.length) % caseStudies.length);
-  };
-
-  const nextSlide = () => {
-    setCurrentIndex((prev) => (prev + 1) % caseStudies.length);
-  };
-
-  const study = caseStudies[currentIndex];
-
   return (
-    <section className="py-24 bg-white border-t border-zinc-100">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="py-24 bg-white">
+      <div className="container mx-auto px-4">
         <div className="text-center mb-16">
-          <span className="inline-block px-4 py-1.5 bg-primary/10 text-primary text-sm font-medium rounded-full mb-4">
-            Success Stories
-          </span>
-          <h2 className="text-4xl md:text-5xl font-bold text-zinc-900">
+          <h2 className="text-4xl md:text-5xl font-bold text-zinc-900 mb-4">
             Case Studies
           </h2>
+          <p className="text-lg text-zinc-600">
+            Results that speak for themselves
+          </p>
         </div>
 
-        <div className="relative max-w-4xl mx-auto">
-          <div className="bg-zinc-900 rounded-3xl p-8 md:p-12 text-white">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
-              <div>
-                <div className="text-primary font-medium mb-1">
-                  {study.company}
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {caseStudies.map((study) => (
+            <Link
+              href={study.link}
+              key={study.id}
+              className="group block"
+            >
+              <div className="relative aspect-[4/3] rounded-2xl overflow-hidden mb-4">
+                <div
+                  className="absolute inset-0 bg-cover bg-center group-hover:scale-105 transition-transform duration-500"
+                  style={{ backgroundImage: `url(${study.image})` }}
+                />
+                <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors" />
+                <div className="absolute top-4 left-4 px-3 py-1 bg-white/90 rounded-full text-sm font-medium text-zinc-900">
+                  {study.category}
                 </div>
-                <div className="text-zinc-400 text-sm">{study.industry}</div>
               </div>
-              <div className="flex gap-2 mt-4 md:mt-0">
-                <button
-                  onClick={prevSlide}
-                  className="w-10 h-10 rounded-full border border-zinc-700 flex items-center justify-center hover:border-primary hover:text-primary transition-colors"
-                >
-                  <ChevronLeft className="w-5 h-5" />
-                </button>
-                <button
-                  onClick={nextSlide}
-                  className="w-10 h-10 rounded-full border border-zinc-700 flex items-center justify-center hover:border-primary hover:text-primary transition-colors"
-                >
-                  <ChevronRight className="w-5 h-5" />
-                </button>
-              </div>
-            </div>
+              <h3 className="text-lg font-semibold text-zinc-900 group-hover:text-primary transition-colors line-clamp-2">
+                {study.title}
+              </h3>
+            </Link>
+          ))}
+        </div>
 
-            <h3 className="text-2xl md:text-3xl font-bold mb-6">{study.title}</h3>
-
-            <div className="grid grid-cols-3 gap-6 mb-8">
-              {study.results.map((result, index) => (
-                <div key={index} className="text-center">
-                  <div className="flex justify-center mb-2">
-                    <result.icon className="w-6 h-6 text-primary" />
-                  </div>
-                  <div className="text-3xl md:text-4xl font-bold text-white mb-1">
-                    {result.value}
-                  </div>
-                  <div className="text-zinc-400 text-sm">{result.label}</div>
-                </div>
-              ))}
-            </div>
-
-            <p className="text-zinc-400">{study.description}</p>
-          </div>
-
-          <div className="flex justify-center gap-2 mt-6">
-            {caseStudies.map((_, index) => (
-              <button
-                key={index}
-                onClick={() => setCurrentIndex(index)}
-                className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                  index === currentIndex ? "w-8 bg-primary" : "bg-zinc-300"
-                }`}
-              />
-            ))}
-          </div>
+        <div className="text-center mt-12">
+          <Link
+            href="/case-study"
+            className="inline-flex items-center gap-2 px-8 py-4 bg-primary text-white font-semibold rounded-full hover:bg-primary-dark transition-colors"
+          >
+            See More Case Studies
+            <ArrowUpRight className="w-5 h-5" />
+          </Link>
         </div>
       </div>
     </section>
