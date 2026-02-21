@@ -3,7 +3,7 @@ import { ArrowRight } from "lucide-react";
 
 export default function CTASection() {
   return (
-    <section className="py-24 bg-zinc-900">
+    <section className="py-24 bg-[#242424]">
       <div className="container mx-auto px-4 text-center">
         <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
           Have Some Projects in <span className="text-primary">Mind?</span>

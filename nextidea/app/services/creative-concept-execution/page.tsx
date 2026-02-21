@@ -23,7 +23,7 @@ export default function CreativeConceptExecutionPage() {
           description: "Our Creative Concept & Execution service is the foundation of every successful marketing campaign. We combine strategic thinking with creative excellence to develop concepts that not only capture attention but also drive business results. From initial ideation to final execution, our team ensures every touchpoint reflects your brand's unique personality and communicates your key messages effectively.",
         }}
         features={{
-          title: "What&apos;s Included",
+          title: "What's Included",
           items: [
             "Brand Strategy Development",
             "Creative Concept Development",

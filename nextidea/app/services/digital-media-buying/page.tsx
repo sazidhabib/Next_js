@@ -1,6 +1,7 @@
 import { Sparkles, TrendingUp, Code2, Megaphone } from "lucide-react";
 import ServiceHero from "../../components/ServiceHero";
 import ServiceContent from "../../components/ServiceContent";
+import PackagesSection from "../../components/PackagesSection";
 import CTASection from "../../components/CTASection";
 
 export const metadata = {
@@ -23,7 +24,7 @@ export default function DigitalMediaBuyingPage() {
           description: "Our Digital Media Buying service is designed to amplify your brand's reach and drive conversions through strategically planned and optimized campaigns. We leverage advanced targeting capabilities, real-time bidding strategies, and continuous performance optimization to ensure every dollar of your advertising budget delivers maximum value.",
         }}
         features={{
-          title: "What&apos;s Included",
+          title: "What's Included",
           items: [
             "Media Strategy & Planning",
             "Campaign Setup & Configuration",
@@ -62,6 +63,7 @@ export default function DigitalMediaBuyingPage() {
           { title: "Event & Activation", link: "/services/event-and-activation", icon: Megaphone },
         ]}
       />
+      <PackagesSection />
       <CTASection />
     </>
   );
