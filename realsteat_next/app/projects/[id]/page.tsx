@@ -132,7 +132,7 @@ export default async function ProjectDetailsPage({ params }: { params: Promise<{
                         <div>
                             <h2 className="text-3xl font-serif text-foreground mb-6">Premium Amenities</h2>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                {project.amenities.map((amenity, idx) => (
+                                {project.amenities.map((amenity: string, idx: number) => (
                                     <div key={idx} className="flex items-center gap-3 text-muted-foreground">
                                         <CheckCircle2 className="text-primary shrink-0" size={20} />
                                         <span className="text-lg">{amenity}</span>
