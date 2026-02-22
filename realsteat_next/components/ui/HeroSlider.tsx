@@ -29,13 +29,13 @@ export function HeroSlider() {
                     alt={`Luxury Real Estate ${index + 1}`}
                     fill
                     className={`object-cover transition-all duration-[2000ms] ease-in-out ${index === currentIndex
-                            ? "opacity-100 scale-105"
-                            : "opacity-0 scale-100"
+                        ? "opacity-100 scale-105"
+                        : "opacity-0 scale-100"
                         }`}
                     priority={index === 0}
                 />
             ))}
-            <div className="absolute inset-0 bg-background/60 bg-gradient-to-t from-background via-background/40 to-background/60 z-10 transition-colors duration-500"></div>
+            <div className="absolute inset-0  bg-gradient-to-t from-background via-background/40 to-background/60 z-10 transition-colors duration-500"></div>
         </div>
     );
 }

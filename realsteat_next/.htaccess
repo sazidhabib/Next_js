@@ -1,0 +1,51 @@
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+
+  # Don't rewrite files or directories that exist
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+
+  # Rewrite all requests to index.js (Node.js app via reverse proxy)
+  RewriteRule ^(.*)$ - [L]
+</IfModule>
+
+<IfModule mod_proxy.c>
+  # Enable proxy
+  ProxyRequests Off
+  
+  # Reverse proxy to Node.js application
+  # Change localhost:3000 to your actual Node.js port
+  ProxyPass / http://localhost:3000/
+  ProxyPassReverse / http://localhost:3000/
+  
+  # Enable WebSocket support
+  RewriteEngine On
+  RewriteCond %{HTTP:Upgrade} websocket [NC]
+  RewriteCond %{HTTP:Connection} upgrade [NC]
+  RewriteRule ^/?(.*) "ws://localhost:3000/$1" [P,L]
+</IfModule>
+
+# Add proper cache headers for static files
+<FilesMatch "^(.*\.js|.*\.css|.*\.woff2?|.*\.ttf|.*\.png|.*\.jpg|.*\.jpeg|.*\.gif|.*\.svg)$">
+  <IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresDefault "access plus 1 year"
+  </IfModule>
+  <IfModule mod_headers.c>
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </IfModule>
+</FilesMatch>
+
+# Enable gzip compression
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript application/javascript application/json
+</IfModule>
+
+# Security headers
+<IfModule mod_headers.c>
+  Header set X-Content-Type-Options "nosniff"
+  Header set X-Frame-Options "SAMEORIGIN"
+  Header set X-XSS-Protection "1; mode=block"
+  Header set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>

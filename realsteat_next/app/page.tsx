@@ -56,11 +56,9 @@ export default function Home() {
             Discover a curated selection of exquisite residences and commercial spaces, designed for those who appreciate the extraordinary.
           </p>
           <div className="flex flex-col sm:flex-row gap-6">
-            <Button size="lg" className="px-12">
-              Explore Projects
+            <Button size="lg" className="px-12"><Link href="/projects">Explore Projects</Link>
             </Button>
-            <Button size="lg" variant="outline" className="px-12">
-              Contact Us
+            <Button size="lg" variant="outline" className="px-12"><Link href="/contact">Contact Us</Link>
             </Button>
           </div>
         </div>
@@ -118,7 +116,8 @@ export default function Home() {
               </p>
             </div>
             <Button variant="outline" className="shrink-0">
-              View All Projects
+              <Link href="/projects">View All Projects</Link>
+
             </Button>
           </div>
 
