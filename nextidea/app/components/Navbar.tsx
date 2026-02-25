@@ -23,6 +23,9 @@ const servicesDropdown = [
   { href: "/services/event-and-activation", label: "Event and Activation" },
   { href: "/services/video-production-photography", label: "Video Production & Photography" },
   { href: "/services/seo", label: "SEO" },
+  { href: "/services/seo/seo-audit", label: "SEO Audit" },
+  { href: "/services/seo/local-seo", label: "Local SEO" },
+  { href: "/services/seo/e-commerce-seo", label: "E-commerce SEO" },
   { href: "/services/digital-pr", label: "Digital PR" },
   { href: "/services/design-printing", label: "Design and Printing Solutions" },
 ];
@@ -72,7 +75,7 @@ export default function Navbar() {
               </button>
 
               {isServicesOpen && (
-                <div className="absolute top-full left-0 mt-2 w-64 bg-white rounded-xl shadow-xl border border-gray-100 py-2 max-h-96 overflow-y-auto">
+                <div className="absolute top-full left-0 mt-2 w-72 bg-white rounded-xl shadow-xl border border-gray-100 py-2 max-h-[500px] overflow-y-auto">
                   {servicesDropdown.map((service) => (
                     <Link
                       key={service.href}
