@@ -1,5 +1,5 @@
 "use client";
-
+import Image from "next/image";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Menu, X } from "lucide-react";
@@ -34,7 +34,7 @@ export function Navbar() {
             <div className="container mx-auto px-6 lg:px-12 flex items-center justify-between">
                 {/* Logo */}
                 <Link href="/" className="text-2xl font-serif font-bold tracking-widest text-primary">
-                    ESTATE<span className="text-foreground">PRO</span>
+                    <Image src="/logo.png" alt="Logo" className="object-cover" width={100} height={50} />
                 </Link>
 
                 {/* Desktop Navigation */}

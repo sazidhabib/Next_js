@@ -4,6 +4,9 @@ import { Button } from "@/components/ui/Button";
 import { PropertyCard } from "@/components/ui/PropertyCard";
 import { HeroSlider } from "@/components/ui/HeroSlider";
 import { ArrowRight, Trophy, Users, Building, ShieldCheck } from "lucide-react";
+import { LocationsSection } from "@/components/ui/LocationsSection";
+import { TopPropertiesSection } from "@/components/ui/TopPropertiesSection";
+import { TestimonialsSection } from "@/components/ui/TestimonialsSection";
 
 export default function Home() {
   const featuredProjects = [
@@ -28,6 +31,36 @@ export default function Home() {
     },
     {
       id: "3",
+      title: "Crescent Lake Villas",
+      location: "Bashundhara R/A",
+      image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?ixlib=rb-4.0.3&auto=format&fit=crop&w=1170&q=80",
+      price: "Sold Out",
+      beds: 5,
+      baths: 6,
+      sqft: 4800,
+      status: "Ready" as const,
+    },
+    {
+      id: "4",
+      title: "The Oasis Residences",
+      location: "Gulshan, Dhaka",
+      image: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&auto=format&fit=crop&w=2075&q=80",
+      price: "Start from $1,200,000",
+      beds: 4,
+      baths: 4,
+      sqft: 3500,
+      status: "Ongoing" as const,
+    },
+    {
+      id: "5",
+      title: "Azure Commercial Skyline",
+      location: "Banani, Dhaka",
+      image: "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?ixlib=rb-4.0.3&auto=format&fit=crop&w=1170&q=80",
+      price: "Contact for Details",
+      status: "Ready" as const,
+    },
+    {
+      id: "6",
       title: "Crescent Lake Villas",
       location: "Bashundhara R/A",
       image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?ixlib=rb-4.0.3&auto=format&fit=crop&w=1170&q=80",
@@ -129,6 +162,9 @@ export default function Home() {
         </div>
       </section>
 
+      <LocationsSection />
+
+
       {/* Statistics / Trust Indicators */}
       <section className="py-24 bg-background border-y border-border dark:border-white/10 relative overflow-hidden">
         {/* Decorative Grid Pattern */}
@@ -162,6 +198,9 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      <TopPropertiesSection />
+      <TestimonialsSection />
 
       {/* CTA Section */}
       <section className="py-24 lg:py-32 relative flex items-center justify-center overflow-hidden">
