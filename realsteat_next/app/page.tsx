@@ -7,6 +7,7 @@ import { ArrowRight, Trophy, Users, Building, ShieldCheck } from "lucide-react";
 import { LocationsSection } from "@/components/ui/LocationsSection";
 import { TopPropertiesSection } from "@/components/ui/TopPropertiesSection";
 import { TestimonialsSection } from "@/components/ui/TestimonialsSection";
+import { SearchSection } from "@/components/ui/SearchSection";
 
 export default function Home() {
   const featuredProjects = [
@@ -80,7 +81,7 @@ export default function Home() {
 
         <div className="relative z-10 container mx-auto px-6 lg:px-12 text-center flex flex-col items-center">
           <span className="text-primary font-bold tracking-[0.2em] uppercase text-sm mb-6 block border-b border-primary/30 pb-2">
-            Welcome to EstatePro
+            Welcome to PRESIDENT PROPERTIES
           </span>
           <h1 className="text-5xl md:text-7xl lg:text-8xl font-serif font-bold text-foreground leading-tight mb-8">
             Elevating <span className="text-primary italic">Luxury</span> <br /> Living
@@ -113,7 +114,7 @@ export default function Home() {
                 Crafting Architectural Masterpieces Since 1995
               </h2>
               <p className="text-muted-foreground text-lg leading-relaxed mb-6">
-                EstatePro is synonymous with innovation, quality, and architectural brilliance in the real estate sector. With over two decades of experience, we have transformed city skylines and delivered premium lifestyles.
+                PRESIDENT PROPERTIES is synonymous with innovation, quality, and architectural brilliance in the real estate sector. With over two decades of experience, we have transformed city skylines and delivered premium lifestyles.
               </p>
               <p className="text-muted-foreground text-lg leading-relaxed mb-10">
                 Our uncompromising commitment to perfection, use of high-end materials, and dedication to timely delivery make us the most trusted name in luxury real estate.
@@ -134,6 +135,8 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      <SearchSection />
 
       {/* Featured Projects */}
       <section className="py-24 lg:py-32 bg-background relative">

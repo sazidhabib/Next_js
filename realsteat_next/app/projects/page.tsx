@@ -1,12 +1,22 @@
 "use client";
 
 import { useState } from "react";
+import { Suspense } from "react";
 import { PropertyCard } from "@/components/ui/PropertyCard";
+import { ProjectsSearchHero } from "@/components/ui/ProjectsSearchHero";
 
-export default function ProjectsPage() {
-    const [filter, setFilter] = useState("All");
-
-    const categories = ["All", "Residential", "Commercial", "Land"];
+function ProjectsContent() {
+    const [view, setView] = useState<"grid" | "list">("grid");
+    const [perPage, setPerPage] = useState(12);
+    const [filters, setFilters] = useState({
+        keyword: "",
+        location: "",
+        category: "All",
+        minPrice: "",
+        maxPrice: "",
+        beds: "",
+        baths: "",
+    });
 
     const projects = [
         {
@@ -65,57 +75,89 @@ export default function ProjectsPage() {
         },
     ];
 
-    const filteredProjects = filter === "All"
-        ? projects
-        : projects.filter(p => p.category === filter);
+    // Filter projects based on search criteria
+    const filteredProjects = projects.filter((project) => {
+        if (filters.keyword) {
+            const kw = filters.keyword.toLowerCase();
+            if (
+                !project.title.toLowerCase().includes(kw) &&
+                !project.location.toLowerCase().includes(kw)
+            ) {
+                return false;
+            }
+        }
+        if (filters.location) {
+            if (
+                !project.location
+                    .toLowerCase()
+                    .includes(filters.location.toLowerCase())
+            ) {
+                return false;
+            }
+        }
+        if (filters.category !== "All") {
+            if (project.category !== filters.category) {
+                return false;
+            }
+        }
+        if (filters.beds && project.beds) {
+            if (project.beds < parseInt(filters.beds)) return false;
+        }
+        if (filters.baths && project.baths) {
+            if (project.baths < parseInt(filters.baths)) return false;
+        }
+        return true;
+    });
+
+    const displayedProjects = filteredProjects.slice(0, perPage);
 
     return (
-        <div className="pt-24 pb-20 min-h-screen bg-background">
-            {/* Page Header */}
-            <section className="bg-background py-20 border-b border-border">
-                <div className="container mx-auto px-6 lg:px-12 text-center">
-                    <h1 className="text-4xl md:text-6xl font-serif font-bold text-foreground mb-6">Our Portfolio</h1>
-                    <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                        Explore our diverse collection of premium residential, commercial, and land properties designed to redefine modern living.
-                    </p>
-                </div>
-            </section>
-
-            {/* Filter Section */}
-            <section className="py-8 border-b border-white/10 mb-12">
-                <div className="container mx-auto px-6 lg:px-12 flex justify-center">
-                    <div className="flex flex-wrap justify-center gap-4">
-                        {categories.map((cat) => (
-                            <button
-                                key={cat}
-                                onClick={() => setFilter(cat)}
-                                className={`px-6 py-2 rounded-full border text-sm uppercase tracking-wider font-semibold transition-all duration-300 ${filter === cat
-                                    ? "bg-primary border-primary text-primary-foreground"
-                                    : "bg-transparent border-border text-foreground hover:border-primary hover:text-primary"
-                                    }`}
-                            >
-                                {cat}
-                            </button>
-                        ))}
-                    </div>
-                </div>
-            </section>
+        <div className="min-h-screen bg-background">
+            {/* Hero with Map + Search */}
+            <div className="pt-20">
+                <ProjectsSearchHero
+                    onSearch={setFilters}
+                    onViewChange={setView}
+                    onPerPageChange={setPerPage}
+                    currentView={view}
+                    currentPerPage={perPage}
+                    totalResults={filteredProjects.length}
+                />
+            </div>
 
             {/* Projects Grid */}
-            <section className="container mx-auto px-6 lg:px-12">
-                {filteredProjects.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        {filteredProjects.map((project) => (
+            <section className="container mx-auto px-6 lg:px-12 py-12">
+                {displayedProjects.length > 0 ? (
+                    <div
+                        className={
+                            view === "grid"
+                                ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+                                : "flex flex-col gap-6"
+                        }
+                    >
+                        {displayedProjects.map((project) => (
                             <PropertyCard key={project.id} {...project} />
                         ))}
                     </div>
                 ) : (
                     <div className="text-center py-20">
-                        <h3 className="text-2xl font-serif text-foreground mb-4">No projects found</h3>
-                        <p className="text-muted-foreground">Try adjusting your filters to see more results.</p>
+                        <h3 className="text-2xl font-serif text-foreground mb-4">
+                            No projects found
+                        </h3>
+                        <p className="text-muted-foreground">
+                            Try adjusting your filters to see more results.
+                        </p>
                     </div>
                 )}
             </section>
         </div>
+    );
+}
+
+export default function ProjectsPage() {
+    return (
+        <Suspense fallback={<div className="min-h-screen bg-background" />}>
+            <ProjectsContent />
+        </Suspense>
     );
 }

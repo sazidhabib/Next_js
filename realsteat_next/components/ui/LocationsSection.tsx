@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { ChevronLeft, ChevronRight, Home } from "lucide-react";
 import { useRef, useEffect } from "react";
 
@@ -180,9 +181,10 @@ export function LocationsSection() {
                         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
                     >
                         {locations.map((loc) => (
-                            <div
+                            <Link
                                 key={loc.id}
-                                className="loc-slide relative shrink-0 w-[350px] sm:w-[400px] h-[450px] overflow-hidden snap-center group shadow-md transition-all duration-700 opacity-50 blur-[4px] scale-[0.95]"
+                                href={`/projects?location=${encodeURIComponent(loc.city)}`}
+                                className="loc-slide relative shrink-0 w-[350px] sm:w-[400px] h-[450px] overflow-hidden snap-center group shadow-md transition-all duration-700 opacity-50 blur-[4px] scale-[0.95] cursor-pointer block"
                             >
                                 {/* Top Labels */}
                                 <div className="absolute top-0 inset-x-0 h-12 flex z-20 font-bold text-xs">
@@ -248,7 +250,7 @@ export function LocationsSection() {
                                     </div>
                                     <h3 className="text-white text-2xl font-bold">{loc.city}</h3>
                                 </div>
-                            </div>
+                            </Link>
                         ))}
                     </div>
 

@@ -17,8 +17,8 @@ export function TopPropertiesSection() {
                         </h2>
                     </div>
                     <Link
-                        href="/properties"
-                        className="flex items-center gap-2 text-[#e13b3b] font-semibold text-sm hover:underline"
+                        href="/projects"
+                        className="inline-flex items-center gap-2 text-primary font-semibold uppercase tracking-widest hover:text-foreground transition-colors duration-300"
                     >
                         View All <ArrowRight className="w-4 h-4" />
                     </Link>
@@ -54,10 +54,10 @@ export function TopPropertiesSection() {
                         </div>
 
                         <div className="p-6 flex flex-col flex-1">
-                            <h3 className="text-2xl font-bold text-[#e13b3b] mb-2">Amberwood Apartments</h3>
-                            <p className="flex items-center text-slate-500 text-sm mb-4">
-                                <MapPin className="w-4 h-4 mr-1 pb-0.5" /> Copenhagen, Denmark
-                            </p>
+                            <h3 className="text-2xl font-serif text-foreground mb-4 group-hover:text-primary transition-colors">Amberwood Apartments</h3>
+                            <span className="flex items-center text-slate-500 text-sm mb-4">
+                                <MapPin size={16} className="text-primary mr-1" /> Copenhagen, Denmark
+                            </span>
                             <p className="text-slate-600 text-sm mb-6 line-clamp-2 leading-relaxed">
                                 Ut et sit rerum qui quo. Qui voluptatem optio unde illo est vero. Quia quasi neque et dolor veritati...
                             </p>
@@ -106,9 +106,9 @@ export function TopPropertiesSection() {
                             </div>
                             <div className="flex flex-col justify-between py-1 flex-1">
                                 <div>
-                                    <h4 className="font-bold text-[#e13b3b] text-lg mb-1 leading-tight">Golden Gate Residences</h4>
+                                    <h4 className="text-2xl font-serif text-foreground mb-4 group-hover:text-primary transition-colors">Golden Gate Residences</h4>
                                     <p className="flex items-center text-slate-400 text-xs mb-3">
-                                        <MapPin className="w-3 h-3 mr-1 pb-[1px]" /> Munich, Bavaria
+                                        <MapPin size={13} className="text-primary mr-1" /> Munich, Bavaria
                                     </p>
                                     <div className="flex items-center gap-4 text-slate-500 text-xs font-medium">
                                         <div className="flex items-center gap-1.5"><Bed className="w-4 h-4" /> 3</div>
@@ -150,9 +150,9 @@ export function TopPropertiesSection() {
                             </div>
                             <div className="flex flex-col justify-between py-1 flex-1">
                                 <div>
-                                    <h4 className="font-bold text-[#e13b3b] text-lg mb-1 leading-tight">Horizon Pointe</h4>
+                                    <h4 className="text-2xl font-serif text-foreground mb-4 group-hover:text-primary transition-colors">Horizon Pointe</h4>
                                     <p className="flex items-center text-slate-400 text-xs mb-3">
-                                        <MapPin className="w-3 h-3 mr-1 pb-[1px]" /> Paris, France
+                                        <MapPin size={13} className="text-primary mr-1" /> Paris, France
                                     </p>
                                     <div className="flex items-center gap-4 text-slate-500 text-xs font-medium">
                                         <div className="flex items-center gap-1.5"><Bed className="w-4 h-4" /> 9</div>
@@ -194,9 +194,9 @@ export function TopPropertiesSection() {
                             </div>
                             <div className="flex flex-col justify-between py-1 flex-1">
                                 <div>
-                                    <h4 className="font-bold text-[#e13b3b] text-lg mb-1 leading-tight">Timberline Estates</h4>
+                                    <h4 className="text-2xl font-serif text-foreground mb-4 group-hover:text-primary transition-colors">Timberline Estates</h4>
                                     <p className="flex items-center text-slate-400 text-xs mb-3">
-                                        <MapPin className="w-3 h-3 mr-1 pb-[1px]" /> Munich, Bavaria
+                                        <MapPin size={13} className="text-primary mr-1" /> Munich, Bavaria
                                     </p>
                                     <div className="flex items-center gap-4 text-slate-500 text-xs font-medium">
                                         <div className="flex items-center gap-1.5"><Bed className="w-4 h-4" /> 2</div>
