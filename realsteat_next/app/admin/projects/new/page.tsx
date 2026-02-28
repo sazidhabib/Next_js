@@ -3,11 +3,34 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { ArrowLeft, UploadCloud, Plus, X } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+
+interface Category {
+    id: number;
+    name: string;
+}
 
 export default function NewProjectForm() {
     const [amenities, setAmenities] = useState<string[]>(["Infinity Pool", "Gymnasium"]);
     const [newAmenity, setNewAmenity] = useState("");
+    const [categories, setCategories] = useState<Category[]>([]);
+    const [selectedCategoryId, setSelectedCategoryId] = useState<string>("");
+
+    useEffect(() => {
+        const fetchCategories = async () => {
+            try {
+                const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+                const res = await fetch(`${apiUrl}/categories`);
+                if (res.ok) {
+                    const data = await res.json();
+                    setCategories(data);
+                }
+            } catch (err) {
+                console.error("Failed to fetch categories", err);
+            }
+        };
+        fetchCategories();
+    }, []);
 
     const handleAddAmenity = () => {
         if (newAmenity.trim()) {
@@ -64,6 +87,20 @@ export default function NewProjectForm() {
                                     <option value="Ongoing">Ongoing</option>
                                     <option value="Ready">Ready</option>
                                     <option value="Sold Out">Sold Out</option>
+                                </select>
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-foreground">Category</label>
+                                <select
+                                    className="w-full p-3 bg-background border border-border rounded-lg focus:outline-none focus:border-primary text-foreground cursor-pointer"
+                                    value={selectedCategoryId}
+                                    onChange={(e) => setSelectedCategoryId(e.target.value)}
+                                >
+                                    <option value="">Select Category</option>
+                                    {categories.map((cat) => (
+                                        <option key={cat.id} value={cat.id}>{cat.name}</option>
+                                    ))}
                                 </select>
                             </div>
 

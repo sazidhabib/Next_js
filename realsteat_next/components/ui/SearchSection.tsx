@@ -71,6 +71,7 @@ export function SearchSection() {
                 src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80"
                 alt="Modern city skyline"
                 fill
+                sizes="100vw"
                 className="object-cover"
                 priority
             />

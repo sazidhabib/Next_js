@@ -33,6 +33,7 @@ export function ProjectHero({ title, location, image, status }: ProjectHeroProps
                 src={image}
                 alt={title}
                 fill
+                sizes="100vw"
                 className="object-cover"
                 priority
             />

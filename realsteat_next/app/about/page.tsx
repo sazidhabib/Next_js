@@ -10,6 +10,7 @@ export default function AboutPage() {
                         src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80"
                         alt="Corporate"
                         fill
+                        sizes="100vw"
                         className="object-cover"
                     />
                 </div>
@@ -35,10 +36,10 @@ export default function AboutPage() {
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                         <div className="relative h-64 w-full">
-                            <Image src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Work 1" fill className="object-cover" />
+                            <Image src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Work 1" fill sizes="(max-width: 1024px) 50vw, 25vw" className="object-cover" />
                         </div>
                         <div className="relative h-64 w-full translate-y-8">
-                            <Image src="https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Work 2" fill className="object-cover" />
+                            <Image src="https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Work 2" fill sizes="(max-width: 1024px) 50vw, 25vw" className="object-cover" />
                         </div>
                     </div>
                 </div>

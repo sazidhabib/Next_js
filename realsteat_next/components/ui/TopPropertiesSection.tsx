@@ -33,6 +33,7 @@ export function TopPropertiesSection() {
                                 src="https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=1200&q=80"
                                 alt="Amberwood Apartments"
                                 fill
+                                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                                 className="object-cover transition-transform duration-700 group-hover:scale-105"
                             />
                             <div className="absolute top-4 left-4 flex gap-2 z-10">
@@ -91,6 +92,7 @@ export function TopPropertiesSection() {
                                     src="https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=400&q=80"
                                     alt="Golden Gate Residences"
                                     fill
+                                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                                     className="object-cover transition-transform duration-700 group-hover:scale-105"
                                 />
                                 <div className="absolute top-2 left-2 flex flex-col gap-1 z-10">
@@ -119,7 +121,7 @@ export function TopPropertiesSection() {
                                 <div className="flex items-center justify-between mt-4">
                                     <div className="flex items-center gap-2">
                                         <div className="w-6 h-6 rounded-full bg-slate-200 overflow-hidden relative">
-                                            <Image src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=100&q=80" alt="Agent" fill className="object-cover" />
+                                            <Image src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=100&q=80" alt="Agent" fill sizes="40px" className="object-cover" />
                                         </div>
                                         <span className="text-xs text-slate-500 font-medium">Robyn Schultz</span>
                                     </div>
@@ -135,6 +137,7 @@ export function TopPropertiesSection() {
                                     src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=400&q=80"
                                     alt="Horizon Pointe"
                                     fill
+                                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                                     className="object-cover transition-transform duration-700 group-hover:scale-105"
                                 />
                                 <div className="absolute top-2 left-2 flex flex-col gap-1 z-10">
@@ -163,7 +166,7 @@ export function TopPropertiesSection() {
                                 <div className="flex items-center justify-between mt-4">
                                     <div className="flex items-center gap-2">
                                         <div className="w-6 h-6 rounded-full bg-slate-200 overflow-hidden relative">
-                                            <Image src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=100&q=80" alt="Agent" fill className="object-cover" />
+                                            <Image src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=100&q=80" alt="Agent" fill sizes="40px" className="object-cover" />
                                         </div>
                                         <span className="text-xs text-slate-500 font-medium">Amara Wisozk</span>
                                     </div>
@@ -179,6 +182,7 @@ export function TopPropertiesSection() {
                                     src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=400&q=80"
                                     alt="Timberline Estates"
                                     fill
+                                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                                     className="object-cover transition-transform duration-700 group-hover:scale-105"
                                 />
                                 <div className="absolute top-2 left-2 flex flex-col gap-1 z-10">
@@ -207,7 +211,7 @@ export function TopPropertiesSection() {
                                 <div className="flex items-center justify-between mt-4">
                                     <div className="flex items-center gap-2">
                                         <div className="w-6 h-6 rounded-full bg-slate-200 overflow-hidden relative">
-                                            <Image src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=100&q=80" alt="Agent" fill className="object-cover" />
+                                            <Image src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=100&q=80" alt="Agent" fill sizes="40px" className="object-cover" />
                                         </div>
                                         <span className="text-xs text-slate-500 font-medium">Amara Wisozk</span>
                                     </div>

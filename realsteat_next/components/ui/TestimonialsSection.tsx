@@ -124,7 +124,7 @@ export function TestimonialsSection() {
                                     </p>
                                     <div className="flex items-center gap-4 mt-auto">
                                         <div className="relative w-12 h-12 rounded-full overflow-hidden shrink-0">
-                                            <Image src={t.avatar} alt={t.name} fill className="object-cover" />
+                                            <Image src={t.avatar} alt={t.name} fill sizes="48px" className="object-cover" />
                                         </div>
                                         <div>
                                             <h4 className="font-bold text-slate-900 text-sm">{t.name}</h4>
