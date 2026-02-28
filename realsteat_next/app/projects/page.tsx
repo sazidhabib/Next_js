@@ -111,6 +111,8 @@ function ProjectsContent() {
 
     const displayedProjects = filteredProjects.slice(0, perPage);
 
+    const categories = ["All", ...Array.from(new Set(projects.map(p => p.category)))];
+
     return (
         <div className="min-h-screen bg-background">
             {/* Hero with Map + Search */}
@@ -127,6 +129,22 @@ function ProjectsContent() {
 
             {/* Projects Grid */}
             <section className="container mx-auto px-6 lg:px-12 py-12">
+                {/* Category Filter */}
+                <div className="flex flex-wrap items-center justify-center gap-4 mb-12">
+                    {categories.map((cat) => (
+                        <button
+                            key={cat}
+                            onClick={() => setFilters(prev => ({ ...prev, category: cat }))}
+                            className={`px-6 py-2 rounded-full border text-sm font-medium transition-colors ${filters.category === cat
+                                    ? "bg-primary text-black border-primary"
+                                    : "bg-background text-foreground border-border hover:border-primary"
+                                }`}
+                        >
+                            {cat}
+                        </button>
+                    ))}
+                </div>
+
                 {displayedProjects.length > 0 ? (
                     <div
                         className={

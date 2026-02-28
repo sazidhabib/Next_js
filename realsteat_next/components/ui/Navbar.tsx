@@ -4,10 +4,12 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Menu, X } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
+import { usePathname } from "next/navigation";
 
 export function Navbar() {
     const [isScrolled, setIsScrolled] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const pathname = usePathname();
 
     useEffect(() => {
         const handleScroll = () => {
@@ -23,6 +25,10 @@ export function Navbar() {
         { name: "About Us", href: "/about" },
         { name: "Contact", href: "/contact" },
     ];
+
+    if (pathname?.startsWith("/admin")) {
+        return null;
+    }
 
     return (
         <header

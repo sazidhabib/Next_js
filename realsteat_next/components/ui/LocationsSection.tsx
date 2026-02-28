@@ -25,7 +25,7 @@ const locations = [
     {
         id: 3,
         city: "Paris",
-        rentImage: "https://images.unsplash.com/photo-1502602898657-3e90760b2695?auto=format&fit=crop&w=800&q=80",
+        rentImage: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=800&q=80",
         saleImage: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=800&q=80",
         rentLabel: "CABIN RETREATS",
         saleLabel: "URBAN APARTMENTS",
@@ -57,7 +57,7 @@ const locations = [
     {
         id: 7,
         city: "Paris",
-        rentImage: "https://images.unsplash.com/photo-1502602898657-3e90760b2695?auto=format&fit=crop&w=800&q=80",
+        rentImage: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=800&q=80",
         saleImage: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=800&q=80",
         rentLabel: "CABIN RETREATS",
         saleLabel: "URBAN APARTMENTS",
