@@ -61,19 +61,27 @@ const processImage = async (file) => {
     const outputFilename = `${nameWithoutExt}.webp`;
     const outputPath = path.join(destination, outputFilename);
 
-    await sharp(inputPath)
-        .webp({ quality: 80 })
-        .toFile(outputPath);
+    // Read file into buffer first to avoid Windows file-locking issues
+    const inputBuffer = fs.readFileSync(inputPath);
 
-    // Remove original file
-    fs.unlinkSync(inputPath);
+    const outputBuffer = await sharp(inputBuffer)
+        .webp({ quality: 80 })
+        .toBuffer();
+
+    // Write processed image
+    fs.writeFileSync(outputPath, outputBuffer);
+
+    // Remove original file if it's different from the output
+    if (inputPath !== outputPath && fs.existsSync(inputPath)) {
+        fs.unlinkSync(inputPath);
+    }
 
     return outputFilename;
 };
 
 // Create new frame
 exports.createFrame = async (req, res) => {
-    const { title, category_id, description, is_popular, status, video_url } = req.body;
+    const { title, category_id, description, is_popular, status, video_url, location, price, bedrooms, bathrooms, sqft, floors, amenities } = req.body;
 
     try {
         let image_url = null;
@@ -96,11 +104,14 @@ exports.createFrame = async (req, res) => {
         const userRole = req.user ? req.user.role : 'user';
         const initialStatus = userRole === 'admin' ? (status || 'active') : 'pending';
 
+        // Handle amenities - store as JSON string
+        const amenitiesJson = amenities ? (typeof amenities === 'string' ? amenities : JSON.stringify(amenities)) : null;
+
         const [result] = await pool.query(
-            'INSERT INTO re_projects (title, image_url, images, video_url, category_id, description, is_popular, status, user_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
-            [title, image_url, imagesJson, video_url || null, category_id || null, description, is_popular === 'true' || is_popular === true, initialStatus, req.user ? req.user.id : null]
+            'INSERT INTO re_projects (title, image_url, images, video_url, category_id, description, is_popular, status, user_id, location, price, bedrooms, bathrooms, sqft, floors, amenities) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            [title, image_url, imagesJson, video_url || null, category_id || null, description, is_popular === 'true' || is_popular === true, initialStatus, req.user ? req.user.id : null, location || null, price || null, bedrooms || null, bathrooms || null, sqft || null, floors || null, amenitiesJson]
         );
-        res.status(201).json({ id: result.insertId, title, image_url, images: imagesJson ? JSON.parse(imagesJson) : [], video_url: video_url || null, category_id, description, is_popular, status: initialStatus, user_id: req.user ? req.user.id : null });
+        res.status(201).json({ id: result.insertId, title, image_url, images: imagesJson ? JSON.parse(imagesJson) : [], video_url: video_url || null, category_id, description, is_popular, status: initialStatus, user_id: req.user ? req.user.id : null, location, price, bedrooms, bathrooms, sqft, floors, amenities: amenitiesJson });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: error.message });
@@ -109,7 +120,7 @@ exports.createFrame = async (req, res) => {
 
 // Update frame
 exports.updateFrame = async (req, res) => {
-    const { title, category_id, description, is_popular, status, video_url } = req.body;
+    const { title, category_id, description, is_popular, status, video_url, location, price, bedrooms, bathrooms, sqft, floors, amenities } = req.body;
     const userId = req.user.id;
     const userRole = req.user.role;
 
@@ -155,9 +166,12 @@ exports.updateFrame = async (req, res) => {
         // 5. Handle video_url
         const newVideoUrl = video_url !== undefined ? (video_url || null) : frame.video_url;
 
+        // 6. Handle amenities
+        const amenitiesJson = amenities !== undefined ? (amenities ? (typeof amenities === 'string' ? amenities : JSON.stringify(amenities)) : null) : frame.amenities;
+
         const [result] = await pool.query(
-            'UPDATE re_projects SET title = ?, image_url = ?, images = ?, video_url = ?, category_id = ?, description = ?, is_popular = ?, status = ? WHERE id = ?',
-            [title, image_url, imagesJson, newVideoUrl, category_id || null, description, is_popular === 'true' || is_popular === true, newStatus, req.params.id]
+            'UPDATE re_projects SET title = ?, image_url = ?, images = ?, video_url = ?, category_id = ?, description = ?, is_popular = ?, status = ?, location = ?, price = ?, bedrooms = ?, bathrooms = ?, sqft = ?, floors = ?, amenities = ? WHERE id = ?',
+            [title, image_url, imagesJson, newVideoUrl, category_id || null, description, is_popular === 'true' || is_popular === true, newStatus, location || null, price || null, bedrooms || null, bathrooms || null, sqft || null, floors || null, amenitiesJson, req.params.id]
         );
 
         res.status(200).json({ message: 'Frame updated successfully', image_url, images: imagesJson ? JSON.parse(imagesJson) : [], video_url: newVideoUrl, status: newStatus });

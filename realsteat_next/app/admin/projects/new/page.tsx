@@ -115,6 +115,13 @@ export default function NewProjectForm() {
             formData.append("category_id", selectedCategoryId || "");
             formData.append("is_popular", "false");
             formData.append("status", "active");
+            formData.append("location", location);
+            formData.append("price", price);
+            formData.append("bedrooms", bedrooms);
+            formData.append("bathrooms", bathrooms);
+            formData.append("sqft", sqft);
+            formData.append("floors", floors);
+            formData.append("amenities", JSON.stringify(amenities));
 
             if (videoUrl.trim()) {
                 formData.append("video_url", videoUrl.trim());

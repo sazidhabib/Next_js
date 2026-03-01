@@ -126,6 +126,25 @@ const initDb = async () => {
                 await pool.query("ALTER TABLE re_projects ADD COLUMN use_count INT DEFAULT 0");
             }
 
+            // Property detail columns migration
+            const projectDetailColumns = [
+                { name: 'location', type: 'VARCHAR(500)' },
+                { name: 'price', type: 'VARCHAR(255)' },
+                { name: 'bedrooms', type: 'INT' },
+                { name: 'bathrooms', type: 'INT' },
+                { name: 'sqft', type: 'INT' },
+                { name: 'floors', type: 'INT' },
+                { name: 'amenities', type: 'TEXT' },
+            ];
+
+            for (const col of projectDetailColumns) {
+                const [cols] = await pool.query(`SHOW COLUMNS FROM re_projects LIKE '${col.name}'`);
+                if (cols.length === 0) {
+                    console.log(`Migrating: Adding ${col.name} column to re_projects...`);
+                    await pool.query(`ALTER TABLE re_projects ADD COLUMN ${col.name} ${col.type}`);
+                }
+            }
+
             // Check if 'phone_number' column exists in re_users
             const [phoneCols] = await pool.query("SHOW COLUMNS FROM re_users LIKE 'phone_number'");
             if (phoneCols.length === 0) {

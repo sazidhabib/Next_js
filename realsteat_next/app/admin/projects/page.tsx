@@ -1,31 +1,129 @@
+"use client";
+
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
-import { Plus, Search, Edit2, Trash2, MoreHorizontal } from "lucide-react";
+import { Plus, Search, Edit2, Trash2, Eye, RefreshCw } from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
 
-// Mock Data
-const mockProjects = [
-    { id: "1", title: "The Oasis Residences", location: "Gulshan, Dhaka", status: "Ongoing", price: "$1,200,000" },
-    { id: "2", title: "Azure Commercial Skyline", location: "Banani, Dhaka", status: "Ready", price: "Contact for Details" },
-    { id: "3", title: "Crescent Lake Villas", location: "Bashundhara R/A", status: "Sold Out", price: "$3,500,000" },
-    { id: "4", title: "Pinnacle Business Center", location: "Motijheel, Dhaka", status: "Upcoming", price: "Contact for Details" },
-    { id: "5", title: "Serenity Heights", location: "Uttara, Dhaka", status: "Ongoing", price: "$850,000" },
-];
+interface Project {
+    id: number;
+    title: string;
+    image_url: string | null;
+    status: string;
+    category_name: string | null;
+    view_count: number;
+    created_at: string;
+    description: string | null;
+}
 
 export default function ProjectsList() {
+    const [projects, setProjects] = useState<Project[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState("");
+    const [searchQuery, setSearchQuery] = useState("");
+    const [statusFilter, setStatusFilter] = useState("");
+    const [deletingId, setDeletingId] = useState<number | null>(null);
+
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+
+    const fetchProjects = useCallback(async () => {
+        setIsLoading(true);
+        setError("");
+        try {
+            const token = localStorage.getItem("token");
+            const res = await fetch(`${apiUrl}/frames`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            if (!res.ok) throw new Error("Failed to fetch projects");
+            const data = await res.json();
+            setProjects(data);
+        } catch (err: any) {
+            setError(err.message);
+        } finally {
+            setIsLoading(false);
+        }
+    }, [apiUrl]);
+
+    useEffect(() => {
+        fetchProjects();
+    }, [fetchProjects]);
+
+    const handleDelete = async (id: number) => {
+        if (!confirm("Are you sure you want to delete this project?")) return;
+        setDeletingId(id);
+        try {
+            const token = localStorage.getItem("token");
+            const res = await fetch(`${apiUrl}/frames/${id}`, {
+                method: "DELETE",
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            if (!res.ok) {
+                const data = await res.json();
+                throw new Error(data.message || "Failed to delete");
+            }
+            setProjects((prev) => prev.filter((p) => p.id !== id));
+        } catch (err: any) {
+            alert(err.message);
+        } finally {
+            setDeletingId(null);
+        }
+    };
+
+    const getStatusStyle = (status: string) => {
+        switch (status) {
+            case "active":
+                return "bg-emerald-500/10 text-emerald-500 border-emerald-500/20";
+            case "pending":
+                return "bg-amber-500/10 text-amber-500 border-amber-500/20";
+            case "inactive":
+                return "bg-slate-500/10 text-slate-400 border-slate-500/20";
+            case "rejected":
+                return "bg-rose-500/10 text-rose-500 border-rose-500/20";
+            case "trash":
+                return "bg-red-500/10 text-red-400 border-red-500/20";
+            default:
+                return "bg-blue-500/10 text-blue-500 border-blue-500/20";
+        }
+    };
+
+    const filteredProjects = projects.filter((p) => {
+        const matchesSearch =
+            !searchQuery ||
+            p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            (p.category_name && p.category_name.toLowerCase().includes(searchQuery.toLowerCase()));
+        const matchesStatus = !statusFilter || p.status === statusFilter;
+        return matchesSearch && matchesStatus;
+    });
+
     return (
         <div className="space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                     <h1 className="text-3xl font-serif font-bold text-foreground">Projects</h1>
-                    <p className="text-muted-foreground mt-1">Manage all your real estate projects from here.</p>
+                    <p className="text-muted-foreground mt-1">
+                        Manage all your real estate projects from here.{" "}
+                        <span className="text-sm">({filteredProjects.length} total)</span>
+                    </p>
                 </div>
-                <Link href="/admin/projects/new" className="flex items-center gap-2">
-                    <Button>
-                        <Plus size={18} />
-                        Add New Project
+                <div className="flex items-center gap-3">
+                    <Button variant="outline" size="sm" onClick={fetchProjects} disabled={isLoading} className="gap-2">
+                        <RefreshCw size={16} className={isLoading ? "animate-spin" : ""} />
+                        Refresh
                     </Button>
-                </Link>
+                    <Link href="/admin/projects/new">
+                        <Button className="gap-2">
+                            <Plus size={18} />
+                            Add New Project
+                        </Button>
+                    </Link>
+                </div>
             </div>
+
+            {error && (
+                <div className="p-4 bg-destructive/10 border border-destructive/20 text-destructive rounded-lg text-sm text-center">
+                    {error}
+                </div>
+            )}
 
             <div className="bg-card border border-border rounded-xl shadow-sm overflow-hidden">
                 {/* Toolbar */}
@@ -34,77 +132,126 @@ export default function ProjectsList() {
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
                         <input
                             type="text"
-                            placeholder="Search projects by title or location..."
+                            placeholder="Search projects by title or category..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
                             className="w-full pl-10 pr-4 py-2 bg-background border border-border rounded-lg text-sm focus:outline-none focus:border-primary transition-colors text-foreground"
                         />
                     </div>
-                    <select className="bg-background border border-border rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-primary text-foreground cursor-pointer">
+                    <select
+                        value={statusFilter}
+                        onChange={(e) => setStatusFilter(e.target.value)}
+                        className="bg-background border border-border rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-primary text-foreground cursor-pointer"
+                    >
                         <option value="">All Statuses</option>
-                        <option value="ongoing">Ongoing</option>
-                        <option value="ready">Ready</option>
-                        <option value="sold">Sold Out</option>
-                        <option value="upcoming">Upcoming</option>
+                        <option value="active">Active</option>
+                        <option value="pending">Pending</option>
+                        <option value="inactive">Inactive</option>
+                        <option value="rejected">Rejected</option>
+                        <option value="trash">Trash</option>
                     </select>
                 </div>
 
                 {/* Table */}
                 <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse">
-                        <thead>
-                            <tr className="bg-secondary/30 text-muted-foreground text-sm uppercase tracking-wider">
-                                <th className="px-6 py-4 font-medium border-b border-border">Title</th>
-                                <th className="px-6 py-4 font-medium border-b border-border">Location</th>
-                                <th className="px-6 py-4 font-medium border-b border-border">Price</th>
-                                <th className="px-6 py-4 font-medium border-b border-border">Status</th>
-                                <th className="px-6 py-4 font-medium border-b border-border text-right">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-border">
-                            {mockProjects.map((project) => (
-                                <tr key={project.id} className="hover:bg-secondary/10 transition-colors group">
-                                    <td className="px-6 py-4">
-                                        <div className="font-medium text-foreground">{project.title}</div>
-                                        <div className="text-xs text-muted-foreground mt-1 text-primary">ID: {project.id}</div>
-                                    </td>
-                                    <td className="px-6 py-4 text-muted-foreground">{project.location}</td>
-                                    <td className="px-6 py-4 text-muted-foreground">{project.price}</td>
-                                    <td className="px-6 py-4">
-                                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border
-                      ${project.status === 'Ongoing' ? 'bg-blue-500/10 text-blue-500 border-blue-500/20' : ''}
-                      ${project.status === 'Ready' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : ''}
-                      ${project.status === 'Sold Out' ? 'bg-rose-500/10 text-rose-500 border-rose-500/20' : ''}
-                      ${project.status === 'Upcoming' ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' : ''}
-                    `}>
-                                            {project.status}
-                                        </span>
-                                    </td>
-                                    <td className="px-6 py-4 text-right">
-                                        <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary">
-                                                <Edit2 size={16} />
-                                            </Button>
-                                            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive">
-                                                <Trash2 size={16} />
-                                            </Button>
-                                            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground">
-                                                <MoreHorizontal size={16} />
-                                            </Button>
-                                        </div>
-                                    </td>
+                    {isLoading ? (
+                        <div className="p-12 text-center text-muted-foreground">
+                            <RefreshCw size={24} className="animate-spin mx-auto mb-3" />
+                            Loading projects...
+                        </div>
+                    ) : filteredProjects.length === 0 ? (
+                        <div className="p-12 text-center text-muted-foreground">
+                            <p className="text-lg font-medium mb-1">No projects found</p>
+                            <p className="text-sm">
+                                {projects.length === 0
+                                    ? "Create your first project to get started."
+                                    : "Try adjusting your search or filter."}
+                            </p>
+                        </div>
+                    ) : (
+                        <table className="w-full text-left border-collapse">
+                            <thead>
+                                <tr className="bg-secondary/30 text-muted-foreground text-sm uppercase tracking-wider">
+                                    <th className="px-6 py-4 font-medium border-b border-border">Thumbnail</th>
+                                    <th className="px-6 py-4 font-medium border-b border-border">Title</th>
+                                    <th className="px-6 py-4 font-medium border-b border-border">Category</th>
+                                    <th className="px-6 py-4 font-medium border-b border-border">Views</th>
+                                    <th className="px-6 py-4 font-medium border-b border-border">Status</th>
+                                    <th className="px-6 py-4 font-medium border-b border-border text-right">Actions</th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody className="divide-y divide-border">
+                                {filteredProjects.map((project) => (
+                                    <tr key={project.id} className="hover:bg-secondary/10 transition-colors group">
+                                        <td className="px-6 py-3">
+                                            {project.image_url ? (
+                                                <img
+                                                    src={project.image_url}
+                                                    alt={project.title}
+                                                    className="w-14 h-10 object-cover rounded-md border border-border"
+                                                />
+                                            ) : (
+                                                <div className="w-14 h-10 rounded-md border border-border bg-secondary/30 flex items-center justify-center text-muted-foreground text-xs">
+                                                    N/A
+                                                </div>
+                                            )}
+                                        </td>
+                                        <td className="px-6 py-3">
+                                            <div className="font-medium text-foreground">{project.title}</div>
+                                            <div className="text-xs text-muted-foreground mt-0.5">ID: {project.id}</div>
+                                        </td>
+                                        <td className="px-6 py-3 text-muted-foreground text-sm">
+                                            {project.category_name || "—"}
+                                        </td>
+                                        <td className="px-6 py-3 text-muted-foreground text-sm">
+                                            <span className="flex items-center gap-1">
+                                                <Eye size={14} /> {project.view_count ?? 0}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-3">
+                                            <span
+                                                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border capitalize ${getStatusStyle(project.status)}`}
+                                            >
+                                                {project.status}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-3 text-right">
+                                            <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <Link href={`/admin/projects/${project.id}/edit`}>
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        className="h-8 w-8 text-muted-foreground hover:text-primary"
+                                                        title="Edit"
+                                                    >
+                                                        <Edit2 size={16} />
+                                                    </Button>
+                                                </Link>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                                                    title="Delete"
+                                                    onClick={() => handleDelete(project.id)}
+                                                    disabled={deletingId === project.id}
+                                                >
+                                                    <Trash2 size={16} />
+                                                </Button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    )}
                 </div>
 
-                {/* Pagination mock */}
-                <div className="p-4 border-t border-border flex items-center justify-between bg-background/50 text-sm text-muted-foreground">
-                    <span>Showing 1 to 5 of 24 results</span>
-                    <div className="flex gap-2">
-                        <Button variant="outline" size="sm" disabled>Previous</Button>
-                        <Button variant="outline" size="sm">Next</Button>
+                {/* Footer */}
+                {!isLoading && filteredProjects.length > 0 && (
+                    <div className="p-4 border-t border-border bg-background/50 text-sm text-muted-foreground">
+                        Showing {filteredProjects.length} of {projects.length} projects
                     </div>
-                </div>
+                )}
             </div>
         </div>
     );
