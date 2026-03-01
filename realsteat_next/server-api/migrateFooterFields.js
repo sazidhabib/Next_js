@@ -12,7 +12,7 @@ async function migrate() {
 
     for (const col of columns) {
         try {
-            await pool.query(`ALTER TABLE ph_settings ADD COLUMN ${col.name} ${col.type}`);
+            await pool.query(`ALTER TABLE re_settings ADD COLUMN ${col.name} ${col.type}`);
             console.log(`✓ Added ${col.name}`);
         } catch (error) {
             if (error.code === 'ER_DUP_FIELDNAME') {

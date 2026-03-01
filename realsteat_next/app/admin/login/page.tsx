@@ -1,7 +1,51 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 
 export default function AdminLogin() {
+    const router = useRouter();
+    const [email, setEmail] = useState("admin@admin.com");
+    const [password, setPassword] = useState("admin123");
+    const [error, setError] = useState("");
+    const [isLoading, setIsLoading] = useState(false);
+
+    const handleLogin = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setError("");
+        setIsLoading(true);
+
+        try {
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+            const res = await fetch(`${apiUrl}/users/login`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email, password }),
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                throw new Error(data.message || "Login failed");
+            }
+
+            // Save token to localStorage for client-side API requests
+            localStorage.setItem("token", data.token);
+
+            // Save token to cookie for Next.js middleware route protection (30 days)
+            document.cookie = `admin_token=${data.token}; path=/; max-age=2592000; SameSite=Lax`;
+
+            // Redirect to admin dashboard
+            router.push("/admin");
+        } catch (err: any) {
+            setError(err.message);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     return (
         <div className="min-h-screen flex items-center justify-center bg-background px-4">
             {/* Decorative Background */}
@@ -16,14 +60,22 @@ export default function AdminLogin() {
                 </div>
 
                 <div className="bg-card border border-border p-8 rounded-2xl shadow-xl">
-                    <form className="space-y-6">
+                    <form onSubmit={handleLogin} className="space-y-6">
+                        {error && (
+                            <div className="p-3 bg-destructive/10 border border-destructive/20 text-destructive rounded-lg text-sm text-center">
+                                {error}
+                            </div>
+                        )}
+
                         <div className="space-y-2">
                             <label className="text-sm font-medium text-foreground">Email Address</label>
                             <input
                                 type="email"
                                 placeholder="admin@presidentproperties.com"
                                 className="w-full p-4 bg-background border border-border rounded-xl focus:outline-none focus:border-primary transition-colors text-foreground"
-                                defaultValue="admin@admin.com"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                required
                             />
                         </div>
 
@@ -36,7 +88,9 @@ export default function AdminLogin() {
                                 type="password"
                                 placeholder="••••••••"
                                 className="w-full p-4 bg-background border border-border rounded-xl focus:outline-none focus:border-primary transition-colors text-foreground"
-                                defaultValue="password123"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                required
                             />
                         </div>
 
@@ -45,9 +99,9 @@ export default function AdminLogin() {
                             <label htmlFor="remember" className="text-sm text-muted-foreground">Remember me for 30 days</label>
                         </div>
 
-                        <Link href="/admin">
-                            <Button type="button" size="lg" className="w-full h-12">Sign In</Button>
-                        </Link>
+                        <Button type="submit" size="lg" className="w-full h-12" disabled={isLoading}>
+                            {isLoading ? "Signing In..." : "Sign In"}
+                        </Button>
                     </form>
                 </div>
 

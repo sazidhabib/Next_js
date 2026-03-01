@@ -3,7 +3,7 @@ const pool = require('./config/db');
 
 async function migrate() {
     try {
-        await pool.query("ALTER TABLE ph_settings ADD COLUMN logo_url TEXT");
+        await pool.query("ALTER TABLE re_settings ADD COLUMN logo_url TEXT");
         console.log("✓ Added logo_url");
         process.exit(0);
     } catch (error) {

@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
-import { ArrowLeft, UploadCloud, Plus, X } from "lucide-react";
-import { useState, useEffect } from "react";
+import { ArrowLeft, UploadCloud, Plus, X, Video, ImageIcon } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 
 interface Category {
     id: number;
@@ -11,10 +12,31 @@ interface Category {
 }
 
 export default function NewProjectForm() {
+    const router = useRouter();
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
     const [amenities, setAmenities] = useState<string[]>(["Infinity Pool", "Gymnasium"]);
     const [newAmenity, setNewAmenity] = useState("");
     const [categories, setCategories] = useState<Category[]>([]);
     const [selectedCategoryId, setSelectedCategoryId] = useState<string>("");
+    const [videoUrl, setVideoUrl] = useState("");
+
+    // Image state
+    const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+    const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+
+    // Form state
+    const [title, setTitle] = useState("");
+    const [location, setLocation] = useState("");
+    const [price, setPrice] = useState("");
+    const [status, setStatus] = useState("Upcoming");
+    const [description, setDescription] = useState("");
+    const [bedrooms, setBedrooms] = useState("");
+    const [bathrooms, setBathrooms] = useState("");
+    const [sqft, setSqft] = useState("");
+    const [floors, setFloors] = useState("");
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [error, setError] = useState("");
 
     useEffect(() => {
         const fetchCategories = async () => {
@@ -43,6 +65,88 @@ export default function NewProjectForm() {
         setAmenities(amenities.filter((_, idx) => idx !== indexToRemove));
     };
 
+    const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files) {
+            const newFiles = Array.from(e.target.files);
+            const allFiles = [...selectedFiles, ...newFiles];
+            setSelectedFiles(allFiles);
+
+            // Generate previews for new files
+            const newPreviews = newFiles.map(file => URL.createObjectURL(file));
+            setImagePreviews(prev => [...prev, ...newPreviews]);
+        }
+    };
+
+    const handleRemoveImage = (indexToRemove: number) => {
+        // Revoke the object URL to free memory
+        URL.revokeObjectURL(imagePreviews[indexToRemove]);
+        setSelectedFiles(prev => prev.filter((_, idx) => idx !== indexToRemove));
+        setImagePreviews(prev => prev.filter((_, idx) => idx !== indexToRemove));
+    };
+
+    const handleDrop = (e: React.DragEvent) => {
+        e.preventDefault();
+        if (e.dataTransfer.files) {
+            const newFiles = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith("image/"));
+            if (newFiles.length > 0) {
+                setSelectedFiles(prev => [...prev, ...newFiles]);
+                const newPreviews = newFiles.map(file => URL.createObjectURL(file));
+                setImagePreviews(prev => [...prev, ...newPreviews]);
+            }
+        }
+    };
+
+    const handleSubmit = async () => {
+        if (!title.trim()) {
+            setError("Project title is required.");
+            return;
+        }
+
+        setError("");
+        setIsSubmitting(true);
+
+        try {
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+            const token = localStorage.getItem("token");
+
+            const formData = new FormData();
+            formData.append("title", title);
+            formData.append("description", description);
+            formData.append("category_id", selectedCategoryId || "");
+            formData.append("is_popular", "false");
+            formData.append("status", "active");
+
+            if (videoUrl.trim()) {
+                formData.append("video_url", videoUrl.trim());
+            }
+
+            // Append all selected images
+            for (const file of selectedFiles) {
+                formData.append("images", file);
+            }
+
+            const res = await fetch(`${apiUrl}/frames`, {
+                method: "POST",
+                headers: {
+                    "Authorization": `Bearer ${token}`,
+                },
+                body: formData,
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                throw new Error(data.message || "Failed to create project");
+            }
+
+            router.push("/admin");
+        } catch (err: any) {
+            setError(err.message);
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
     return (
         <div className="max-w-4xl mx-auto space-y-6 pb-12">
             <div className="flex items-center gap-4">
@@ -58,7 +162,14 @@ export default function NewProjectForm() {
             </div>
 
             <div className="bg-card border border-border rounded-xl shadow-sm overflow-hidden">
-                <form className="divide-y divide-border">
+                <form className="divide-y divide-border" onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
+
+                    {/* Error Message */}
+                    {error && (
+                        <div className="p-4 mx-6 mt-6 bg-destructive/10 border border-destructive/20 text-destructive rounded-lg text-sm text-center">
+                            {error}
+                        </div>
+                    )}
 
                     {/* Basic Information */}
                     <div className="p-6 md:p-8 space-y-6">
@@ -67,22 +178,22 @@ export default function NewProjectForm() {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div className="space-y-2">
                                 <label className="text-sm font-medium text-foreground">Project Title <span className="text-destructive">*</span></label>
-                                <input type="text" placeholder="e.g. The Oasis Residences" className="w-full p-3 bg-background border border-border rounded-lg focus:outline-none focus:border-primary text-foreground" />
+                                <input type="text" placeholder="e.g. The Oasis Residences" value={title} onChange={(e) => setTitle(e.target.value)} className="w-full p-3 bg-background border border-border rounded-lg focus:outline-none focus:border-primary text-foreground" required />
                             </div>
 
                             <div className="space-y-2">
                                 <label className="text-sm font-medium text-foreground">Location <span className="text-destructive">*</span></label>
-                                <input type="text" placeholder="e.g. Gulshan, Dhaka" className="w-full p-3 bg-background border border-border rounded-lg focus:outline-none focus:border-primary text-foreground" />
+                                <input type="text" placeholder="e.g. Gulshan, Dhaka" value={location} onChange={(e) => setLocation(e.target.value)} className="w-full p-3 bg-background border border-border rounded-lg focus:outline-none focus:border-primary text-foreground" />
                             </div>
 
                             <div className="space-y-2">
                                 <label className="text-sm font-medium text-foreground">Price</label>
-                                <input type="text" placeholder="e.g. $1,200,000 or 'Contact for Price'" className="w-full p-3 bg-background border border-border rounded-lg focus:outline-none focus:border-primary text-foreground" />
+                                <input type="text" placeholder="e.g. $1,200,000 or 'Contact for Price'" value={price} onChange={(e) => setPrice(e.target.value)} className="w-full p-3 bg-background border border-border rounded-lg focus:outline-none focus:border-primary text-foreground" />
                             </div>
 
                             <div className="space-y-2">
                                 <label className="text-sm font-medium text-foreground">Status</label>
-                                <select className="w-full p-3 bg-background border border-border rounded-lg focus:outline-none focus:border-primary text-foreground cursor-pointer">
+                                <select value={status} onChange={(e) => setStatus(e.target.value)} className="w-full p-3 bg-background border border-border rounded-lg focus:outline-none focus:border-primary text-foreground cursor-pointer">
                                     <option value="Upcoming">Upcoming</option>
                                     <option value="Ongoing">Ongoing</option>
                                     <option value="Ready">Ready</option>
@@ -106,7 +217,7 @@ export default function NewProjectForm() {
 
                             <div className="space-y-2 md:col-span-2">
                                 <label className="text-sm font-medium text-foreground">Description</label>
-                                <textarea rows={4} placeholder="Detailed description of the property..." className="w-full p-3 bg-background border border-border rounded-lg focus:outline-none focus:border-primary text-foreground resize-y"></textarea>
+                                <textarea rows={4} placeholder="Detailed description of the property..." value={description} onChange={(e) => setDescription(e.target.value)} className="w-full p-3 bg-background border border-border rounded-lg focus:outline-none focus:border-primary text-foreground resize-y"></textarea>
                             </div>
                         </div>
                     </div>
@@ -118,22 +229,22 @@ export default function NewProjectForm() {
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                             <div className="space-y-2">
                                 <label className="text-sm font-medium text-foreground">Bedrooms</label>
-                                <input type="number" min="0" placeholder="0" className="w-full p-3 bg-background border border-border rounded-lg focus:outline-none focus:border-primary text-foreground" />
+                                <input type="number" min="0" placeholder="0" value={bedrooms} onChange={(e) => setBedrooms(e.target.value)} className="w-full p-3 bg-background border border-border rounded-lg focus:outline-none focus:border-primary text-foreground" />
                             </div>
 
                             <div className="space-y-2">
                                 <label className="text-sm font-medium text-foreground">Bathrooms</label>
-                                <input type="number" min="0" placeholder="0" className="w-full p-3 bg-background border border-border rounded-lg focus:outline-none focus:border-primary text-foreground" />
+                                <input type="number" min="0" placeholder="0" value={bathrooms} onChange={(e) => setBathrooms(e.target.value)} className="w-full p-3 bg-background border border-border rounded-lg focus:outline-none focus:border-primary text-foreground" />
                             </div>
 
                             <div className="space-y-2">
                                 <label className="text-sm font-medium text-foreground">Square Feet</label>
-                                <input type="number" min="0" placeholder="e.g. 2500" className="w-full p-3 bg-background border border-border rounded-lg focus:outline-none focus:border-primary text-foreground" />
+                                <input type="number" min="0" placeholder="e.g. 2500" value={sqft} onChange={(e) => setSqft(e.target.value)} className="w-full p-3 bg-background border border-border rounded-lg focus:outline-none focus:border-primary text-foreground" />
                             </div>
 
                             <div className="space-y-2">
                                 <label className="text-sm font-medium text-foreground">Total Floors</label>
-                                <input type="number" min="0" placeholder="0" className="w-full p-3 bg-background border border-border rounded-lg focus:outline-none focus:border-primary text-foreground" />
+                                <input type="number" min="0" placeholder="0" value={floors} onChange={(e) => setFloors(e.target.value)} className="w-full p-3 bg-background border border-border rounded-lg focus:outline-none focus:border-primary text-foreground" />
                             </div>
                         </div>
                     </div>
@@ -168,16 +279,91 @@ export default function NewProjectForm() {
                             </div>
                         </div>
 
-                        {/* Image Upload mock */}
+                        {/* Multi-Image Upload */}
                         <div className="space-y-4">
-                            <h3 className="text-lg font-bold text-foreground border-b border-border pb-2">Property Images</h3>
-                            <div className="border-2 border-dashed border-border rounded-xl p-8 flex flex-col items-center justify-center text-center bg-background/50 hover:bg-secondary/20 transition-colors cursor-pointer">
+                            <h3 className="text-lg font-bold text-foreground border-b border-border pb-2 flex items-center gap-2">
+                                <ImageIcon size={20} className="text-primary" />
+                                Property Images
+                            </h3>
+
+                            {/* Image Previews */}
+                            {imagePreviews.length > 0 && (
+                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                                    {imagePreviews.map((preview, idx) => (
+                                        <div key={idx} className="relative group aspect-square rounded-lg overflow-hidden border border-border bg-secondary/20">
+                                            <img src={preview} alt={`Preview ${idx + 1}`} className="w-full h-full object-cover" />
+                                            {idx === 0 && (
+                                                <span className="absolute top-2 left-2 bg-primary text-primary-foreground text-xs font-bold px-2 py-0.5 rounded">
+                                                    Thumbnail
+                                                </span>
+                                            )}
+                                            <button
+                                                type="button"
+                                                onClick={() => handleRemoveImage(idx)}
+                                                className="absolute top-2 right-2 bg-destructive text-destructive-foreground p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-md"
+                                            >
+                                                <X size={14} />
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+
+                            {/* Drop Zone */}
+                            <div
+                                onClick={() => fileInputRef.current?.click()}
+                                onDragOver={(e) => e.preventDefault()}
+                                onDrop={handleDrop}
+                                className="border-2 border-dashed border-border rounded-xl p-8 flex flex-col items-center justify-center text-center bg-background/50 hover:bg-secondary/20 transition-colors cursor-pointer"
+                            >
                                 <UploadCloud size={40} className="text-muted-foreground mb-4" />
-                                <h4 className="font-medium text-foreground mb-1">Upload Property Images</h4>
+                                <h4 className="font-medium text-foreground mb-1">
+                                    {imagePreviews.length > 0 ? "Add More Images" : "Upload Property Images"}
+                                </h4>
                                 <p className="text-sm text-muted-foreground mb-4">Drag and drop images here, or click to browse</p>
                                 <Button type="button" variant="outline" size="sm">Select Files</Button>
-                                <p className="text-xs text-muted-foreground mt-4">JPG, PNG, WEBP up to 5MB each</p>
+                                <p className="text-xs text-muted-foreground mt-4">JPG, PNG, WEBP up to 5MB each · Max 10 images</p>
                             </div>
+
+                            <input
+                                ref={fileInputRef}
+                                type="file"
+                                accept="image/*"
+                                multiple
+                                onChange={handleFileSelect}
+                                className="hidden"
+                            />
+                        </div>
+
+                        {/* YouTube Video URL */}
+                        <div className="space-y-4">
+                            <h3 className="text-lg font-bold text-foreground border-b border-border pb-2 flex items-center gap-2">
+                                <Video size={20} className="text-primary" />
+                                Video Tour
+                            </h3>
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-foreground">YouTube Video URL</label>
+                                <input
+                                    type="url"
+                                    value={videoUrl}
+                                    onChange={(e) => setVideoUrl(e.target.value)}
+                                    placeholder="https://www.youtube.com/watch?v=..."
+                                    className="w-full p-3 bg-background border border-border rounded-lg focus:outline-none focus:border-primary text-foreground"
+                                />
+                                <p className="text-xs text-muted-foreground">Paste a YouTube video URL to add a virtual tour or walkthrough video.</p>
+                            </div>
+
+                            {/* Video Preview */}
+                            {videoUrl && videoUrl.includes("youtube") && (
+                                <div className="aspect-video rounded-lg overflow-hidden border border-border bg-black">
+                                    <iframe
+                                        src={`https://www.youtube.com/embed/${videoUrl.includes("v=") ? videoUrl.split("v=")[1]?.split("&")[0] : videoUrl.split("/").pop()}`}
+                                        className="w-full h-full"
+                                        allowFullScreen
+                                        title="Video preview"
+                                    />
+                                </div>
+                            )}
                         </div>
                     </div>
 
@@ -186,7 +372,9 @@ export default function NewProjectForm() {
                         <Link href="/admin/projects">
                             <Button variant="outline" type="button">Cancel</Button>
                         </Link>
-                        <Button type="button">Save Project</Button>
+                        <Button type="submit" disabled={isSubmitting}>
+                            {isSubmitting ? "Saving..." : "Save Project"}
+                        </Button>
                     </div>
 
                 </form>

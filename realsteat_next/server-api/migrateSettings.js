@@ -4,7 +4,7 @@ const pool = require('./config/db');
 async function migrate() {
     try {
         // Try adding the column directly. If it fails, check error code.
-        await pool.query("ALTER TABLE ph_settings ADD COLUMN favicon_url TEXT");
+        await pool.query("ALTER TABLE re_settings ADD COLUMN favicon_url TEXT");
         console.log("Migration successful: favicon_url added.");
         process.exit(0);
     } catch (error) {

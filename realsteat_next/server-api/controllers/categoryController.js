@@ -5,8 +5,8 @@ exports.getAllCategories = async (req, res) => {
     try {
         const [rows] = await pool.query(`
             SELECT c1.*, c2.name as parent_name 
-            FROM ph_categories c1 
-            LEFT JOIN ph_categories c2 ON c1.parent_id = c2.id 
+            FROM re_categories c1 
+            LEFT JOIN re_categories c2 ON c1.parent_id = c2.id 
             ORDER BY c1.created_at DESC
         `);
         res.status(200).json(rows);
@@ -21,7 +21,7 @@ exports.createCategory = async (req, res) => {
     const slug = name.toLowerCase().split(' ').join('-');
     try {
         const [result] = await pool.query(
-            'INSERT INTO ph_categories (name, slug, description, parent_id) VALUES (?, ?, ?, ?)',
+            'INSERT INTO re_categories (name, slug, description, parent_id) VALUES (?, ?, ?, ?)',
             [name, slug, description, parent_id || null]
         );
         res.status(201).json({ id: result.insertId, name, slug, description, parent_id });
@@ -39,7 +39,7 @@ exports.updateCategory = async (req, res) => {
     const slug = name.toLowerCase().split(' ').join('-');
     try {
         const [result] = await pool.query(
-            'UPDATE ph_categories SET name = ?, slug = ?, description = ?, parent_id = ? WHERE id = ?',
+            'UPDATE re_categories SET name = ?, slug = ?, description = ?, parent_id = ? WHERE id = ?',
             [name, slug, description, parent_id || null, req.params.id]
         );
         if (result.affectedRows === 0) return res.status(404).json({ message: 'Category not found' });
@@ -52,7 +52,7 @@ exports.updateCategory = async (req, res) => {
 // Delete category
 exports.deleteCategory = async (req, res) => {
     try {
-        const [result] = await pool.query('DELETE FROM ph_categories WHERE id = ?', [req.params.id]);
+        const [result] = await pool.query('DELETE FROM re_categories WHERE id = ?', [req.params.id]);
         if (result.affectedRows === 0) return res.status(404).json({ message: 'Category not found' });
         res.status(200).json({ message: 'Category deleted successfully' });
     } catch (error) {

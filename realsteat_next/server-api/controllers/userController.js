@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken');
 // Get all users
 exports.getAllUsers = async (req, res) => {
     try {
-        const [rows] = await pool.query('SELECT id, username, email, role, phone_number, created_at FROM ph_users');
+        const [rows] = await pool.query('SELECT id, username, email, role, phone_number, created_at FROM re_users');
         res.status(200).json(rows);
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -15,7 +15,7 @@ exports.getAllUsers = async (req, res) => {
 // Get current user (me)
 exports.getMe = async (req, res) => {
     try {
-        const [rows] = await pool.query('SELECT id, username, email, role, phone_number, created_at FROM ph_users WHERE id = ?', [req.user.id]);
+        const [rows] = await pool.query('SELECT id, username, email, role, phone_number, created_at FROM re_users WHERE id = ?', [req.user.id]);
         if (rows.length === 0) return res.status(404).json({ message: 'User not found' });
         res.status(200).json(rows[0]);
     } catch (error) {
@@ -27,7 +27,7 @@ exports.getMe = async (req, res) => {
 exports.login = async (req, res) => {
     const { email, password } = req.body;
     try {
-        const [rows] = await pool.query('SELECT * FROM ph_users WHERE email = ?', [email]);
+        const [rows] = await pool.query('SELECT * FROM re_users WHERE email = ?', [email]);
         if (rows.length === 0) return res.status(401).json({ message: 'Invalid credentials' });
 
         const user = rows[0];
@@ -46,12 +46,12 @@ exports.register = async (req, res) => {
     const { username, email, password, phone } = req.body;
     try {
         // Check if user already exists
-        const [existing] = await pool.query('SELECT * FROM ph_users WHERE email = ?', [email]);
+        const [existing] = await pool.query('SELECT * FROM re_users WHERE email = ?', [email]);
         if (existing.length > 0) return res.status(400).json({ message: 'Email already exists' });
 
         const hashedPassword = await bcrypt.hash(password, 10);
         const [result] = await pool.query(
-            'INSERT INTO ph_users (username, email, password, role, phone_number) VALUES (?, ?, ?, ?, ?)',
+            'INSERT INTO re_users (username, email, password, role, phone_number) VALUES (?, ?, ?, ?, ?)',
             [username, email, hashedPassword, 'user', phone || null]
         );
         res.status(201).json({ id: result.insertId, username, email, role: 'user', phone_number: phone });
@@ -66,7 +66,7 @@ exports.createUser = async (req, res) => {
     try {
         const hashedPassword = await bcrypt.hash(password, 10);
         const [result] = await pool.query(
-            'INSERT INTO ph_users (username, email, password, role) VALUES (?, ?, ?, ?)',
+            'INSERT INTO re_users (username, email, password, role) VALUES (?, ?, ?, ?)',
             [username, email, hashedPassword, role || 'user']
         );
         res.status(201).json({ id: result.insertId, username, email, role });
@@ -79,7 +79,7 @@ exports.createUser = async (req, res) => {
 exports.updateUser = async (req, res) => {
     const { username, email, password, role } = req.body;
     try {
-        let query = 'UPDATE ph_users SET username = ?, email = ?, role = ?';
+        let query = 'UPDATE re_users SET username = ?, email = ?, role = ?';
         let params = [username, email, role];
 
         if (password) {
@@ -103,7 +103,7 @@ exports.updateUser = async (req, res) => {
 // Delete user
 exports.deleteUser = async (req, res) => {
     try {
-        const [result] = await pool.query('DELETE FROM ph_users WHERE id = ?', [req.params.id]);
+        const [result] = await pool.query('DELETE FROM re_users WHERE id = ?', [req.params.id]);
         if (result.affectedRows === 0) return res.status(404).json({ message: 'User not found' });
         res.status(200).json({ message: 'User deleted successfully' });
     } catch (error) {
@@ -118,7 +118,7 @@ exports.changePassword = async (req, res) => {
 
     try {
         // Fetch current user
-        const [rows] = await pool.query('SELECT * FROM ph_users WHERE id = ?', [userId]);
+        const [rows] = await pool.query('SELECT * FROM re_users WHERE id = ?', [userId]);
         if (rows.length === 0) return res.status(404).json({ message: 'User not found' });
 
         const user = rows[0];
@@ -131,7 +131,7 @@ exports.changePassword = async (req, res) => {
         const hashedPassword = await bcrypt.hash(newPassword, 10);
 
         // Update password
-        await pool.query('UPDATE ph_users SET password = ? WHERE id = ?', [hashedPassword, userId]);
+        await pool.query('UPDATE re_users SET password = ? WHERE id = ?', [hashedPassword, userId]);
 
         res.status(200).json({ message: 'Password changed successfully' });
     } catch (error) {

@@ -5,8 +5,8 @@ exports.getAllMenuItems = async (req, res) => {
     try {
         const [rows] = await pool.query(`
             SELECT m.*, c.name as category_name, c.slug as category_slug 
-            FROM ph_menu_items m 
-            LEFT JOIN ph_categories c ON m.category_id = c.id 
+            FROM re_menu_items m 
+            LEFT JOIN re_categories c ON m.category_id = c.id 
             ORDER BY m.item_order ASC
         `);
         res.status(200).json(rows);
@@ -20,7 +20,7 @@ exports.createMenuItem = async (req, res) => {
     const { title, category_id, url, parent_id, item_order } = req.body;
     try {
         const [result] = await pool.query(
-            'INSERT INTO ph_menu_items (title, category_id, url, parent_id, item_order) VALUES (?, ?, ?, ?, ?)',
+            'INSERT INTO re_menu_items (title, category_id, url, parent_id, item_order) VALUES (?, ?, ?, ?, ?)',
             [title, category_id || null, url || null, parent_id || null, item_order || 0]
         );
         res.status(201).json({ id: result.insertId, title, category_id, url, parent_id, item_order });
@@ -34,7 +34,7 @@ exports.updateMenuItem = async (req, res) => {
     const { title, category_id, url, parent_id, item_order } = req.body;
     try {
         const [result] = await pool.query(
-            'UPDATE ph_menu_items SET title = ?, category_id = ?, url = ?, parent_id = ?, item_order = ? WHERE id = ?',
+            'UPDATE re_menu_items SET title = ?, category_id = ?, url = ?, parent_id = ?, item_order = ? WHERE id = ?',
             [title, category_id || null, url || null, parent_id || null, item_order || 0, req.params.id]
         );
         if (result.affectedRows === 0) return res.status(404).json({ message: 'Menu item not found' });
@@ -47,7 +47,7 @@ exports.updateMenuItem = async (req, res) => {
 // Delete menu item
 exports.deleteMenuItem = async (req, res) => {
     try {
-        const [result] = await pool.query('DELETE FROM ph_menu_items WHERE id = ?', [req.params.id]);
+        const [result] = await pool.query('DELETE FROM re_menu_items WHERE id = ?', [req.params.id]);
         if (result.affectedRows === 0) return res.status(404).json({ message: 'Menu item not found' });
         res.status(200).json({ message: 'Menu item deleted successfully' });
     } catch (error) {
