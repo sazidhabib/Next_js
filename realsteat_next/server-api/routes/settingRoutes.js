@@ -19,6 +19,10 @@ const upload = multer({ storage });
 const { verifyToken, authorize } = require('../middleware/authMiddleware');
 
 router.get('/', settingController.getSettings);
-router.put('/', verifyToken, authorize('admin'), upload.fields([{ name: 'logo', maxCount: 1 }, { name: 'favicon', maxCount: 1 }]), settingController.updateSettings);
+router.put('/', verifyToken, authorize('admin'), upload.fields([
+    { name: 'logo', maxCount: 1 },
+    { name: 'favicon', maxCount: 1 },
+    { name: 'hero_images', maxCount: 10 }
+]), settingController.updateSettings);
 
 module.exports = router;

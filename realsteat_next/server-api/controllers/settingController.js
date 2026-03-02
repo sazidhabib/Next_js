@@ -19,7 +19,12 @@ exports.getSettings = async (req, res) => {
 // Update settings
 exports.updateSettings = async (req, res) => {
     // Map frontend fields (site_title, support_email) to DB columns (site_name, contact_email)
-    const { site_title, support_email, helpline_number, footer_text, site_description, facebook_url, youtube_url, website_url, address_text, hero_frame_id } = req.body;
+    const {
+        site_title, support_email, helpline_number, footer_text, site_description,
+        facebook_url, youtube_url, website_url, address_text, hero_frame_id,
+        hero_title, hero_description, instagram_url, x_url,
+        hotline_number, secondary_email, business_hours, existing_hero_images
+    } = req.body;
 
     // DB columns: site_name, contact_email, helpline_number, footer_text, logo_url, favicon_url
 
@@ -45,10 +50,36 @@ exports.updateSettings = async (req, res) => {
             if (req.files.favicon) {
                 favicon_url = `${serverUrl}/uploads/${req.files.favicon[0].filename}`;
             }
+            if (req.files.hero_images) {
+                const newImages = req.files.hero_images.map(file => `${serverUrl}/uploads/${file.filename}`);
+                let baseImages = [];
+                if (existing_hero_images) {
+                    try {
+                        baseImages = JSON.parse(existing_hero_images);
+                    } catch (e) {
+                        baseImages = [];
+                    }
+                } else if (current.hero_images) {
+                    try {
+                        baseImages = JSON.parse(current.hero_images);
+                    } catch (e) {
+                        baseImages = [];
+                    }
+                }
+                hero_images = JSON.stringify([...baseImages, ...newImages]);
+            }
+        } else if (existing_hero_images) {
+            hero_images = existing_hero_images;
         }
 
         const [result] = await pool.query(
-            'UPDATE re_settings SET site_name = ?, support_email = ?, helpline_number = ?, footer_text = ?, logo_url = ?, favicon_url = ?, site_description = ?, facebook_url = ?, youtube_url = ?, website_url = ?, address_text = ?, hero_frame_id = ? WHERE id = 1',
+            `UPDATE re_settings SET 
+                site_name = ?, support_email = ?, helpline_number = ?, footer_text = ?, 
+                logo_url = ?, favicon_url = ?, site_description = ?, facebook_url = ?, 
+                youtube_url = ?, website_url = ?, address_text = ?, hero_frame_id = ?,
+                hero_title = ?, hero_description = ?, instagram_url = ?, x_url = ?,
+                hotline_number = ?, secondary_email = ?, business_hours = ?, hero_images = ?
+            WHERE id = 1`,
             [
                 site_title || current.site_name,
                 support_email || current.support_email,
@@ -61,7 +92,15 @@ exports.updateSettings = async (req, res) => {
                 youtube_url || current.youtube_url,
                 website_url || current.website_url,
                 address_text || current.address_text,
-                hero_frame_id || current.hero_frame_id
+                hero_frame_id !== undefined ? hero_frame_id : current.hero_frame_id,
+                hero_title !== undefined ? hero_title : current.hero_title,
+                hero_description !== undefined ? hero_description : current.hero_description,
+                instagram_url !== undefined ? instagram_url : current.instagram_url,
+                x_url !== undefined ? x_url : current.x_url,
+                hotline_number !== undefined ? hotline_number : current.hotline_number,
+                secondary_email !== undefined ? secondary_email : current.secondary_email,
+                business_hours !== undefined ? business_hours : current.business_hours,
+                hero_images !== undefined ? hero_images : current.hero_images
             ]
         );
 
@@ -71,15 +110,7 @@ exports.updateSettings = async (req, res) => {
             settings: {
                 site_name: site_title || current.site_name,
                 support_email: support_email || current.support_email,
-                helpline_number: helpline_number || current.helpline_number,
-                footer_text: footer_text || current.footer_text,
-                logo_url,
-                favicon_url,
-                site_description: site_description || current.site_description,
-                facebook_url: facebook_url || current.facebook_url,
-                youtube_url: youtube_url || current.youtube_url,
-                website_url: website_url || current.website_url,
-                address_text: address_text || current.address_text
+                hero_images: hero_images ? (typeof hero_images === 'string' ? JSON.parse(hero_images) : hero_images) : []
             }
         });
     } catch (error) {

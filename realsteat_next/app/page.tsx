@@ -1,3 +1,5 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
@@ -8,8 +10,38 @@ import { LocationsSection } from "@/components/ui/LocationsSection";
 import { TopPropertiesSection } from "@/components/ui/TopPropertiesSection";
 import { TestimonialsSection } from "@/components/ui/TestimonialsSection";
 import { SearchSection } from "@/components/ui/SearchSection";
+import { useState, useEffect } from "react";
 
 export default function Home() {
+  const [settings, setSettings] = useState<any>(null);
+  const [heroImages, setHeroImages] = useState<string[]>([]);
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/settings`);
+        if (res.ok) {
+          const data = await res.json();
+          setSettings(data);
+
+          if (data.hero_images) {
+            try {
+              const imgs = typeof data.hero_images === 'string'
+                ? JSON.parse(data.hero_images)
+                : data.hero_images;
+              setHeroImages(Array.isArray(imgs) ? imgs : []);
+            } catch (e) {
+              setHeroImages([]);
+            }
+          }
+        }
+      } catch (err) {
+        console.error("Failed to fetch settings", err);
+      }
+    };
+    fetchSettings();
+  }, []);
+
   const featuredProjects = [
     {
       id: "1",
@@ -77,17 +109,21 @@ export default function Home() {
     <div className="flex flex-col min-h-screen">
       {/* Hero Section */}
       <section className="relative h-screen flex items-center justify-center overflow-hidden">
-        <HeroSlider />
+        <HeroSlider images={heroImages} />
 
         <div className="relative z-10 container mx-auto px-6 lg:px-12 text-center flex flex-col items-center">
           <span className="text-primary font-bold tracking-[0.2em] uppercase text-sm mb-6 block border-b border-primary/30 pb-2">
-            Welcome to PRESIDENT PROPERTIES
+            Welcome to {settings?.site_name || "PRESIDENT PROPERTIES"}
           </span>
           <h1 className="text-5xl md:text-7xl lg:text-8xl font-serif font-bold text-foreground leading-tight mb-8">
-            Elevating <span className="text-primary italic">Luxury</span> <br /> Living
+            {settings?.hero_title ? (
+              <span dangerouslySetInnerHTML={{ __html: settings.hero_title.replace(/\n/g, '<br />') }} />
+            ) : (
+              <>Elevating <span className="text-primary italic">Luxury</span> <br /> Living</>
+            )}
           </h1>
           <p className="text-lg md:text-xl text-foreground/80 max-w-2xl mx-auto mb-12 font-light tracking-wide leading-relaxed">
-            Discover a curated selection of exquisite residences and commercial spaces, designed for those who appreciate the extraordinary.
+            {settings?.hero_description || "Discover a curated selection of exquisite residences and commercial spaces, designed for those who appreciate the extraordinary."}
           </p>
           <div className="flex flex-col sm:flex-row gap-6">
             <Button size="lg" className="px-12"><Link href="/projects">Explore Projects</Link>

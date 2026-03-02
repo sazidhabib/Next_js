@@ -202,7 +202,15 @@ const initDb = async () => {
                 { name: 'youtube_url', type: 'VARCHAR(255)' },
                 { name: 'website_url', type: 'VARCHAR(255)' },
                 { name: 'address_text', type: 'TEXT' },
-                { name: 'hero_frame_id', type: 'INT' }
+                { name: 'hero_frame_id', type: 'INT' },
+                { name: 'hero_title', type: 'TEXT' },
+                { name: 'hero_description', type: 'TEXT' },
+                { name: 'instagram_url', type: 'VARCHAR(255)' },
+                { name: 'x_url', type: 'VARCHAR(255)' },
+                { name: 'hotline_number', type: 'VARCHAR(255)' },
+                { name: 'secondary_email', type: 'VARCHAR(255)' },
+                { name: 'business_hours', type: 'TEXT' },
+                { name: 'hero_images', type: 'LONGTEXT' }
             ];
 
             for (const col of settingColumns) {

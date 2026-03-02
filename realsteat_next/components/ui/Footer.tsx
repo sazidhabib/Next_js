@@ -1,11 +1,28 @@
 "use client";
 
 import Link from "next/link";
-import { Facebook, Instagram, Linkedin, Twitter, MapPin, Phone, Mail } from "lucide-react";
+import { Facebook, Instagram, Linkedin, Twitter, Youtube, MapPin, Phone, Mail, Globe } from "lucide-react";
 import { usePathname } from "next/navigation";
+import { useState, useEffect } from "react";
 
 export function Footer() {
     const pathname = usePathname();
+    const [settings, setSettings] = useState<any>(null);
+
+    useEffect(() => {
+        const fetchSettings = async () => {
+            try {
+                const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/settings`);
+                if (res.ok) {
+                    const data = await res.json();
+                    setSettings(data);
+                }
+            } catch (err) {
+                console.error("Failed to fetch settings", err);
+            }
+        };
+        fetchSettings();
+    }, []);
 
     if (pathname?.startsWith("/admin")) {
         return null;
@@ -16,26 +33,34 @@ export function Footer() {
             <div className="container mx-auto px-6 lg:px-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-8">
                 {/* Brand Column */}
                 <div className="space-y-6">
-                    <Link href="/" className="text-3xl font-serif font-bold tracking-widest text-primary inline-block">
-                        ESTATE<span className="text-foreground">PRO</span>
+                    <Link href="/" className="text-3xl font-serif font-bold tracking-widest text-primary inline-block uppercase">
+                        {settings?.site_name || "ESTATEPRO"}
                     </Link>
                     <p className="text-muted-foreground text-sm leading-relaxed">
-                        Crafting luxury living spaces and commercial hubs that stand the test of time.
-                        Experience unparalleled elegance and quality with every project.
+                        {settings?.site_description || "Crafting luxury living spaces and commercial hubs that stand the test of time. Experience unparalleled elegance and quality with every project."}
                     </p>
                     <div className="flex gap-4">
-                        <a href="#" className="p-2 bg-secondary dark:bg-white/5 hover:bg-primary hover:text-black dark:hover:text-black transition-colors rounded-full text-foreground">
-                            <Facebook size={20} />
-                        </a>
-                        <a href="#" className="p-2 bg-secondary dark:bg-white/5 hover:bg-primary hover:text-black dark:hover:text-black transition-colors rounded-full text-foreground">
-                            <Instagram size={20} />
-                        </a>
-                        <a href="#" className="p-2 bg-secondary dark:bg-white/5 hover:bg-primary hover:text-black dark:hover:text-black transition-colors rounded-full text-foreground">
-                            <Linkedin size={20} />
-                        </a>
-                        <a href="#" className="p-2 bg-secondary dark:bg-white/5 hover:bg-primary hover:text-black dark:hover:text-black transition-colors rounded-full text-foreground">
-                            <Twitter size={20} />
-                        </a>
+                        {settings?.facebook_url && (
+                            <a href={settings.facebook_url} target="_blank" rel="noopener noreferrer" className="p-2 bg-secondary dark:bg-white/5 hover:bg-primary hover:text-black dark:hover:text-black transition-colors rounded-full text-foreground">
+                                <Facebook size={20} />
+                            </a>
+                        )}
+                        {settings?.instagram_url && (
+                            <a href={settings.instagram_url} target="_blank" rel="noopener noreferrer" className="p-2 bg-secondary dark:bg-white/5 hover:bg-primary hover:text-black dark:hover:text-black transition-colors rounded-full text-foreground">
+                                <Instagram size={20} />
+                            </a>
+                        )}
+                        {/* Use X icon or Twitter */}
+                        {settings?.x_url && (
+                            <a href={settings.x_url} target="_blank" rel="noopener noreferrer" className="p-2 bg-secondary dark:bg-white/5 hover:bg-primary hover:text-black dark:hover:text-black transition-colors rounded-full text-foreground">
+                                <Twitter size={20} />
+                            </a>
+                        )}
+                        {settings?.youtube_url && (
+                            <a href={settings.youtube_url} target="_blank" rel="noopener noreferrer" className="p-2 bg-secondary dark:bg-white/5 hover:bg-primary hover:text-black dark:hover:text-black transition-colors rounded-full text-foreground">
+                                <Youtube size={20} />
+                            </a>
+                        )}
                     </div>
                 </div>
 
@@ -47,7 +72,6 @@ export function Footer() {
                         <li><Link href="/projects" className="text-muted-foreground hover:text-primary transition-colors text-sm">Our Projects</Link></li>
                         <li><Link href="/about" className="text-muted-foreground hover:text-primary transition-colors text-sm">About Us</Link></li>
                         <li><Link href="/contact" className="text-muted-foreground hover:text-primary transition-colors text-sm">Contact Us</Link></li>
-                        <li><Link href="#" className="text-muted-foreground hover:text-primary transition-colors text-sm">Careers</Link></li>
                     </ul>
                 </div>
 
@@ -55,18 +79,24 @@ export function Footer() {
                 <div>
                     <h4 className="text-lg font-serif font-semibold mb-6 text-foreground uppercase tracking-wider">Contact Us</h4>
                     <ul className="space-y-4">
-                        <li className="flex items-start gap-3">
-                            <MapPin className="text-primary mt-1 shrink-0" size={18} />
-                            <span className="text-muted-foreground text-sm">123 Luxury Avenue, Premium District, City name, Country</span>
-                        </li>
-                        <li className="flex items-center gap-3">
-                            <Phone className="text-primary shrink-0" size={18} />
-                            <span className="text-muted-foreground text-sm">+1 (800) 123-4567</span>
-                        </li>
-                        <li className="flex items-center gap-3">
-                            <Mail className="text-primary shrink-0" size={18} />
-                            <span className="text-muted-foreground text-sm">inquiries@estatepro.com</span>
-                        </li>
+                        {settings?.address_text && (
+                            <li className="flex items-start gap-3">
+                                <MapPin className="text-primary mt-1 shrink-0" size={18} />
+                                <span className="text-muted-foreground text-sm">{settings.address_text}</span>
+                            </li>
+                        )}
+                        {settings?.helpline_number && (
+                            <li className="flex items-center gap-3">
+                                <Phone className="text-primary shrink-0" size={18} />
+                                <span className="text-muted-foreground text-sm">{settings.helpline_number}</span>
+                            </li>
+                        )}
+                        {settings?.support_email && (
+                            <li className="flex items-center gap-3">
+                                <Mail className="text-primary shrink-0" size={18} />
+                                <span className="text-muted-foreground text-sm">{settings.support_email}</span>
+                            </li>
+                        )}
                     </ul>
                 </div>
 
@@ -94,8 +124,8 @@ export function Footer() {
             </div>
 
             <div className="container mx-auto px-6 lg:px-12 mt-16 pt-8 border-t border-border flex flex-col md:flex-row justify-between items-center gap-4">
-                <p className="text-muted-foreground text-xs">
-                    &copy; {new Date().getFullYear()} EstatePro Real Estate. All rights reserved.
+                <p className="text-muted-foreground text-xs whitespace-pre-line text-center md:text-left">
+                    {settings?.footer_text || `© ${new Date().getFullYear()} EstatePro Real Estate. All rights reserved.`}
                 </p>
                 <div className="flex gap-6">
                     <Link href="#" className="text-muted-foreground hover:text-foreground dark:hover:text-white text-xs transition-colors">Privacy Policy</Link>

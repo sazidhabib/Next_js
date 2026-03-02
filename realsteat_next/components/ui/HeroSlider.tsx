@@ -3,26 +3,31 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 
-const heroImages = [
+const defaultImages = [
     "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&auto=format&fit=crop&w=2075&q=80",
     "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
     "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
 ];
 
-export function HeroSlider() {
+interface HeroSliderProps {
+    images?: string[];
+}
+
+export function HeroSlider({ images }: HeroSliderProps) {
+    const slideImages = images && images.length > 0 ? images : defaultImages;
     const [currentIndex, setCurrentIndex] = useState(0);
 
     useEffect(() => {
         const interval = setInterval(() => {
-            setCurrentIndex((prevIndex) => (prevIndex + 1) % heroImages.length);
+            setCurrentIndex((prevIndex) => (prevIndex + 1) % slideImages.length);
         }, 5000); // Change image every 5 seconds
 
         return () => clearInterval(interval);
-    }, []);
+    }, [slideImages]);
 
     return (
         <div className="absolute inset-0 z-0 overflow-hidden">
-            {heroImages.map((src, index) => (
+            {slideImages.map((src, index) => (
                 <Image
                     key={src}
                     src={src}

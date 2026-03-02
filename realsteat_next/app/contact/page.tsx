@@ -1,7 +1,27 @@
+"use client";
+
 import { Button } from "@/components/ui/Button";
 import { MapPin, Phone, Mail, Clock } from "lucide-react";
+import { useState, useEffect } from "react";
 
 export default function ContactPage() {
+    const [settings, setSettings] = useState<any>(null);
+
+    useEffect(() => {
+        const fetchSettings = async () => {
+            try {
+                const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/settings`);
+                if (res.ok) {
+                    const data = await res.json();
+                    setSettings(data);
+                }
+            } catch (err) {
+                console.error("Failed to fetch settings", err);
+            }
+        };
+        fetchSettings();
+    }, []);
+
     return (
         <div className="pt-24 pb-20 min-h-screen bg-background">
             {/* Header */}
@@ -29,7 +49,9 @@ export default function ContactPage() {
                                         <MapPin className="text-primary mt-1 shrink-0" size={24} />
                                         <div>
                                             <h4 className="text-foreground font-medium mb-1">Address</h4>
-                                            <p className="text-muted-foreground">Level 10, Premium Tower<br />123 Luxury Avenue, Business District<br />Dhaka 1212, Bangladesh</p>
+                                            <p className="text-muted-foreground whitespace-pre-line">
+                                                {settings?.address_text || "123 Luxury Avenue, Business District\nDhaka 1212, Bangladesh"}
+                                            </p>
                                         </div>
                                     </div>
 
@@ -37,7 +59,10 @@ export default function ContactPage() {
                                         <Phone className="text-primary mt-1 shrink-0" size={24} />
                                         <div>
                                             <h4 className="text-foreground font-medium mb-1">Phone</h4>
-                                            <p className="text-muted-foreground">+880 2 1234567-8<br />+880 171 2345678 (Hotline)</p>
+                                            <p className="text-muted-foreground">
+                                                {settings?.helpline_number || "+880 2 1234567-8"} (Helpline)
+                                                {settings?.hotline_number && <><br />{settings.hotline_number} (Hotline)</>}
+                                            </p>
                                         </div>
                                     </div>
 
@@ -45,7 +70,10 @@ export default function ContactPage() {
                                         <Mail className="text-primary mt-1 shrink-0" size={24} />
                                         <div>
                                             <h4 className="text-foreground font-medium mb-1">Email</h4>
-                                            <p className="text-muted-foreground">info@estatepro.com<br />sales@estatepro.com</p>
+                                            <p className="text-muted-foreground">
+                                                {settings?.support_email || "info@example.com"}
+                                                {settings?.secondary_email && <><br />{settings.secondary_email}</>}
+                                            </p>
                                         </div>
                                     </div>
 
@@ -53,7 +81,9 @@ export default function ContactPage() {
                                         <Clock className="text-primary mt-1 shrink-0" size={24} />
                                         <div>
                                             <h4 className="text-foreground font-medium mb-1">Business Hours</h4>
-                                            <p className="text-muted-foreground">Sunday - Thursday: 10:00 AM - 6:00 PM<br />Friday & Saturday: Closed</p>
+                                            <p className="text-muted-foreground whitespace-pre-line">
+                                                {settings?.business_hours || "Sunday - Thursday: 10:00 AM - 6:00 PM\nFriday & Saturday: Closed"}
+                                            </p>
                                         </div>
                                     </div>
                                 </div>
