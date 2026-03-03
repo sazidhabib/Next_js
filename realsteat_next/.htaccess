@@ -15,15 +15,15 @@
   ProxyRequests Off
   
   # Reverse proxy to Node.js application
-  # Change localhost:3000 to your actual Node.js port
-  ProxyPass / http://localhost:3000/
-  ProxyPassReverse / http://localhost:3000/
+  # Change localhost:5000 to your actual Node.js port
+  ProxyPass / http://localhost:5000/
+  ProxyPassReverse / http://localhost:5000/
   
   # Enable WebSocket support
   RewriteEngine On
   RewriteCond %{HTTP:Upgrade} websocket [NC]
   RewriteCond %{HTTP:Connection} upgrade [NC]
-  RewriteRule ^/?(.*) "ws://localhost:3000/$1" [P,L]
+  RewriteRule ^/?(.*) "ws://localhost:5000/$1" [P,L]
 </IfModule>
 
 # Add proper cache headers for static files

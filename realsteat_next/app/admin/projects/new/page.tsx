@@ -41,7 +41,7 @@ export default function NewProjectForm() {
     useEffect(() => {
         const fetchCategories = async () => {
             try {
-                const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+                const apiUrl = process.env.NEXT_PUBLIC_API_URL || "/api";
                 const res = await fetch(`${apiUrl}/categories`);
                 if (res.ok) {
                     const data = await res.json();
@@ -106,7 +106,7 @@ export default function NewProjectForm() {
         setIsSubmitting(true);
 
         try {
-            const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || "/api";
             const token = localStorage.getItem("token");
 
             const formData = new FormData();

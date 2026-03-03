@@ -92,7 +92,7 @@ exports.updateSettings = async (req, res) => {
                 youtube_url || current.youtube_url,
                 website_url || current.website_url,
                 address_text || current.address_text,
-                hero_frame_id !== undefined ? hero_frame_id : current.hero_frame_id,
+                hero_frame_id !== undefined ? (hero_frame_id || null) : current.hero_frame_id,
                 hero_title !== undefined ? hero_title : current.hero_title,
                 hero_description !== undefined ? hero_description : current.hero_description,
                 instagram_url !== undefined ? instagram_url : current.instagram_url,

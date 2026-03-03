@@ -24,7 +24,7 @@ export default function ProjectsList() {
     const [statusFilter, setStatusFilter] = useState("");
     const [deletingId, setDeletingId] = useState<number | null>(null);
 
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "/api";
 
     const fetchProjects = useCallback(async () => {
         setIsLoading(true);

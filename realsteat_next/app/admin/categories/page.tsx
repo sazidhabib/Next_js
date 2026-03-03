@@ -30,7 +30,7 @@ export default function CategoriesList() {
     const fetchCategories = async () => {
         setIsLoading(true);
         try {
-            const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || "/api";
             const res = await fetch(`${apiUrl}/categories`);
             if (!res.ok) throw new Error("Failed to fetch categories");
             const data = await res.json();
@@ -64,7 +64,7 @@ export default function CategoriesList() {
     const handleSaveCategory = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || "/api";
             const token = localStorage.getItem("token"); // Assuming token is stored here
 
             const method = modalMode === "add" ? "POST" : "PUT";
@@ -101,7 +101,7 @@ export default function CategoriesList() {
         if (!confirm("Are you sure you want to delete this category?")) return;
 
         try {
-            const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || "/api";
             const token = localStorage.getItem("token");
 
             const res = await fetch(`${apiUrl}/categories/${id}`, {

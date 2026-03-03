@@ -18,7 +18,7 @@ export default function AdminLogin() {
         setIsLoading(true);
 
         try {
-            const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || "/api";
             const res = await fetch(`${apiUrl}/users/login`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },

@@ -97,7 +97,7 @@ export default function AdminSettingsPage() {
     const [secondaryEmail, setSecondaryEmail] = useState("");
     const [businessHours, setBusinessHours] = useState("");
 
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "/api";
 
     useEffect(() => {
         fetchSettings();
@@ -864,25 +864,7 @@ export default function AdminSettingsPage() {
                                 </p>
                             </div>
 
-                            <hr className="border-border" />
 
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium text-foreground">
-                                    Featured Project (Fallback)
-                                </label>
-                                <select
-                                    value={heroFrameId}
-                                    onChange={(e) => setHeroFrameId(e.target.value)}
-                                    className="w-full max-w-lg p-3 bg-background border border-border rounded-lg focus:outline-none focus:border-primary text-foreground cursor-pointer"
-                                >
-                                    <option value="">None — No featured project</option>
-                                    {projects.map((project) => (
-                                        <option key={project.id} value={project.id}>
-                                            {project.title}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
                         </div>
                     </div>
                 )}

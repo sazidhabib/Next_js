@@ -47,7 +47,7 @@ export default function EditProjectPage() {
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
 
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "/api";
 
     // Fetch project data and categories
     useEffect(() => {

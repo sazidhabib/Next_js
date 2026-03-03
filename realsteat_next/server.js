@@ -27,9 +27,10 @@ nextApp.prepare().then(() => {
     // CORS Configuration
     const corsOptions = {
         origin: [
-
             "http://localhost:3000",
-            "http://localhost:5000", // Keep for safety if accessed directly
+            "http://localhost:5000",
+            "https://presidentpropertiesltd.com",
+            "http://presidentpropertiesltd.com"
         ],
         credentials: true,
         methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],

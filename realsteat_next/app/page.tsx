@@ -19,7 +19,7 @@ export default function Home() {
   useEffect(() => {
     const fetchSettings = async () => {
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/settings`);
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "/api"}/settings`);
         if (res.ok) {
           const data = await res.json();
           setSettings(data);
