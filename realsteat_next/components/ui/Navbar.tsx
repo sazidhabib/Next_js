@@ -40,7 +40,7 @@ export function Navbar() {
             <div className="container mx-auto px-6 lg:px-12 flex items-center justify-between">
                 {/* Logo */}
                 <Link href="/" className="text-2xl font-serif font-bold tracking-widest text-primary">
-                    <Image src="/logo.png" alt="Logo" className="object-cover" width={100} height={50} />
+                    <Image src="/logo.png" alt="Logo" className="object-cover" width={100} height={30} style={{ width: "30%", height: "100%" }} priority />
                 </Link>
 
                 {/* Desktop Navigation */}

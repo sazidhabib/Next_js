@@ -39,6 +39,10 @@ CREATE TABLE IF NOT EXISTS re_projects (
     FOREIGN KEY (category_id) REFERENCES re_categories(id) ON DELETE SET NULL
 );
 
+SET FOREIGN_KEY_CHECKS=0;
+DROP TABLE IF EXISTS re_settings;
+SET FOREIGN_KEY_CHECKS=1;
+
 CREATE TABLE IF NOT EXISTS re_settings (
     id INT AUTO_INCREMENT PRIMARY KEY,
     site_name VARCHAR(255) DEFAULT 'PRESIDENT PROPERTIES',
@@ -54,6 +58,14 @@ CREATE TABLE IF NOT EXISTS re_settings (
     address_text TEXT,
     hero_frame_id INT,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    hero_title TEXT,
+    hero_description TEXT,
+    hero_images LONGTEXT,
+    instagram_url VARCHAR(255),
+    x_url VARCHAR(255),
+    hotline_number VARCHAR(255),
+    secondary_email VARCHAR(255),
+    business_hours TEXT,
     FOREIGN KEY (hero_frame_id) REFERENCES re_projects(id) ON DELETE SET NULL
 );
 
