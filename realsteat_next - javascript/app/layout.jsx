@@ -7,11 +7,15 @@ import { ThemeProvider } from "@/components/ui/ThemeProvider";
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
+  display: "swap",
+  preload: false,
 });
 
 const playfair = Playfair_Display({
   variable: "--font-playfair",
   subsets: ["latin"],
+  display: "swap",
+  preload: false,
 });
 
 export const metadata = {

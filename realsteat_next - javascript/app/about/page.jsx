@@ -16,7 +16,7 @@ export default function AboutPage() {
                 </div>
                 <div className="relative z-10 px-6">
                     <span className="text-primary font-bold tracking-[0.2em] uppercase text-sm mb-4 block">Corporate Profile</span>
-                    <h1 className="text-5xl md:text-7xl font-serif font-bold text-foreground">About EstatePro</h1>
+                    <h1 className="text-5xl md:text-7xl font-serif font-bold text-foreground">About President Properties</h1>
                 </div>
             </section>
 
@@ -28,7 +28,7 @@ export default function AboutPage() {
                             A Legacy Built on Trust, Quality, and Perfection.
                         </h2>
                         <p className="text-muted-foreground text-lg leading-relaxed mb-6">
-                            Founded in 1995, EstatePro embarked on a journey to redefine the real estate landscape. From our humble beginnings to becoming a leading property developer, our sole focus has been on delivering uncompromised quality and bringing architectural visions to life.
+                            Founded in 1995, President Properties embarked on a journey to redefine the real estate landscape. From our humble beginnings to becoming a leading property developer, our sole focus has been on delivering uncompromised quality and bringing architectural visions to life.
                         </p>
                         <p className="text-muted-foreground text-lg leading-relaxed">
                             We don&apos;t just build structures; we build communities. Every project is meticulously planned to ensure sustainability, aesthetic brilliance, and maximum return on investment for our clients.

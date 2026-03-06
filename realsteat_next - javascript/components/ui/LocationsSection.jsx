@@ -119,7 +119,7 @@ export function LocationsSection() {
                             <Link
                                 key={loc.id}
                                 href={`/projects?location=${encodeURIComponent(loc.city)}`}
-                                className="loc-slide relative shrink-0 w-[350px] sm:w-[400px] h-[450px] overflow-hidden snap-center group shadow-md transition-all duration-700 opacity-50 blur-[4px] scale-[0.95] cursor-pointer block"
+                                className="loc-slide relative shrink-0 w-[350px] sm:w-[400px] h-[450px] overflow-hidden snap-center group shadow-md transition-all duration-700 opacity-100 blur-0 scale-100 cursor-pointer block"
                             >
                                 <div className="absolute top-0 inset-x-0 h-12 flex z-20 font-bold text-xs">
                                     <div className="flex-1 bg-[#1e3250] text-white flex items-center justify-center tracking-wider">

@@ -1,5 +1,25 @@
 import { NextResponse } from 'next/server';
 
+// Helper function to decode JWT payload without library
+function decodeJwt(token) {
+    try {
+        const base64Url = token.split('.')[1];
+        if (!base64Url) return null;
+
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        // Decode base64 to string
+        const jsonPayload = decodeURIComponent(
+            atob(base64)
+                .split('')
+                .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+                .join('')
+        );
+        return JSON.parse(jsonPayload);
+    } catch (e) {
+        return null;
+    }
+}
+
 export function middleware(request) {
     const { pathname } = request.nextUrl;
 
@@ -7,10 +27,29 @@ export function middleware(request) {
     if (pathname.startsWith('/admin') && pathname !== '/admin/login') {
         const token = request.cookies.get('admin_token')?.value;
 
-        if (!token) {
-            // Redirect to login page if no token is found
+        let isExpired = true;
+
+        if (token) {
+            const decodedPayload = decodeJwt(token);
+            if (decodedPayload && decodedPayload.exp) {
+                // Check if the current time is less than expiration time
+                const currentTime = Math.floor(Date.now() / 1000);
+                if (currentTime < decodedPayload.exp) {
+                    isExpired = false;
+                }
+            }
+        }
+
+        if (isExpired) {
+            // Redirect to login page and clear the cookie if needed
             const loginUrl = new URL('/admin/login', request.url);
-            return NextResponse.redirect(loginUrl);
+            const response = NextResponse.redirect(loginUrl);
+
+            // If there's a token but it's expired/invalid, clear it from browser
+            if (token) {
+                response.cookies.delete('admin_token');
+            }
+            return response;
         }
     }
 

@@ -40,6 +40,7 @@ exports.updateSettings = async (req, res) => {
 
         let logo_url = current.logo_url;
         let favicon_url = current.favicon_url;
+        let hero_images = current.hero_images;
 
         const serverUrl = process.env.SERVER_URL || `${req.protocol}://${req.get('host')}`;
 
@@ -67,8 +68,10 @@ exports.updateSettings = async (req, res) => {
                     }
                 }
                 hero_images = JSON.stringify([...baseImages, ...newImages]);
+            } else if (existing_hero_images !== undefined) {
+                hero_images = existing_hero_images;
             }
-        } else if (existing_hero_images) {
+        } else if (existing_hero_images !== undefined) {
             hero_images = existing_hero_images;
         }
 
