@@ -1,3 +1,4 @@
+"use client";
 import Link from "next/link";
 import {
     LayoutDashboard,
@@ -10,6 +11,15 @@ import {
 import { Button } from "@/components/ui/Button";
 
 export default function AdminLayout({ children }) {
+    const handleLogout = () => {
+        // Clear token from localStorage
+        localStorage.removeItem("token");
+        // Clear token from cookies
+        document.cookie = "admin_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax";
+        // Redirect to login page
+        window.location.href = "/admin/login";
+    };
+
     return (
         <div className="flex min-h-screen bg-secondary/10 dark:bg-background">
             {/* Sidebar */}
@@ -44,10 +54,13 @@ export default function AdminLayout({ children }) {
                 </nav>
 
                 <div className="p-4 border-t border-border">
-                    <Link href="/admin/login" className="flex items-center gap-3 px-4 py-3 rounded-lg text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors w-full">
+                    <button 
+                        onClick={handleLogout}
+                        className="flex items-center gap-3 px-4 py-3 rounded-lg text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors w-full text-left"
+                    >
                         <LogOut size={20} />
                         Logout
-                    </Link>
+                    </button>
                 </div>
             </aside>
 

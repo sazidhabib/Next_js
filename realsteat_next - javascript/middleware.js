@@ -41,14 +41,10 @@ export function middleware(request) {
         }
 
         if (isExpired) {
-            // Redirect to login page and clear the cookie if needed
+            // Redirect to login page and clear the cookie if illegal/expired
             const loginUrl = new URL('/admin/login', request.url);
             const response = NextResponse.redirect(loginUrl);
-
-            // If there's a token but it's expired/invalid, clear it from browser
-            if (token) {
-                response.cookies.delete('admin_token');
-            }
+            response.cookies.delete('admin_token');
             return response;
         }
     }

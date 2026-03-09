@@ -30,11 +30,16 @@ nextApp.prepare().then(() => {
             "http://localhost:3000",
             "http://localhost:5000",
             "https://presidentpropertiesltd.com",
-            "http://presidentpropertiesltd.com"
+            "https://www.presidentpropertiesltd.com",
+            "https://president.deshprobaho.com",
+            "http://presidentpropertiesltd.com",
+            "http://www.presidentpropertiesltd.com",
+            "http://president.deshprobaho.com"
         ],
         credentials: true,
         methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-        allowedHeaders: ["Content-Type", "Authorization"],
+        allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept"],
+        optionsSuccessStatus: 200 // Some legacy browsers (IE11, various SmartTVs) choke on 204
     };
 
     app.use(cors(corsOptions));
@@ -45,9 +50,17 @@ nextApp.prepare().then(() => {
 
     // Security Headers (CSP) - Required for Custom Server
     app.use((req, res, next) => {
+        const origin = req.headers.origin;
+        const allowedOrigins = corsOptions.origin;
+        
+        if (allowedOrigins.includes(origin)) {
+            res.setHeader("Access-Control-Allow-Origin", origin);
+            res.setHeader("Access-Control-Allow-Credentials", "true");
+        }
+
         res.setHeader(
             "Content-Security-Policy",
-            "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://static.cloudflareinsights.com https://presidentpropertiesltd.com https://maps.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://presidentpropertiesltd.com; frame-src 'self' https://www.google.com;"
+            "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://static.cloudflareinsights.com https://presidentpropertiesltd.com https://www.presidentpropertiesltd.com https://maps.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://presidentpropertiesltd.com https://www.presidentpropertiesltd.com https://president.deshprobaho.com; frame-src 'self' https://www.google.com https://www.youtube.com https://youtube.com;"
         );
         next();
     });

@@ -32,7 +32,7 @@ export default function AdminLogin() {
             }
 
             localStorage.setItem("token", data.token);
-            document.cookie = `admin_token=${data.token}; path=/; max-age=2592000; SameSite=Lax`;
+            document.cookie = `admin_token=${data.token}; path=/; max-age=18000; SameSite=Lax`;
             router.push("/admin");
         } catch (err) {
             setError(err.message);
