@@ -7,6 +7,15 @@ const nextConfig = {
       },
     ],
   },
+  async redirects() {
+    return [
+      {
+        source: '/portfolio',
+        destination: '/protfolio',
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default nextConfig;

@@ -1,5 +1,8 @@
 "use client";
 
+import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
+
 import { useState } from "react";
 import { Mail, Phone, MapPin, Send } from "lucide-react";
 
@@ -24,6 +27,7 @@ export default function ContactPage() {
 
   return (
     <>
+      <Navbar />
       <section className="relative py-24 md:py-32 bg-surface-dark overflow-hidden">
         <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-primary/10 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-primary/5 rounded-full blur-3xl pointer-events-none" />
@@ -223,6 +227,7 @@ export default function ContactPage() {
           </div>
         </div>
       </section>
+      <Footer />
     </>
   );
 }
