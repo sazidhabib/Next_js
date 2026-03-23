@@ -17,6 +17,7 @@ export default function LocalSEOPage() {
         title="Local SEO"
         tagline="Find Customers Near You Consistently"
         description="Be the first one to show up when your customers search your product or service in your local area. Whether you're a retail store, service provider, or multi-location business, our local SEO strategy is customized to grow your visibility where it matters most."
+        image="/creative_concept.png"
       />
       <ServiceContent
         overview={{

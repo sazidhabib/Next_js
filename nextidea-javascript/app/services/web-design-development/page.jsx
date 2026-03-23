@@ -16,6 +16,7 @@ export default function WebDesignDevelopmentPage() {
         title="Web Design & Development"
         tagline="Building Digital Experiences That Convert"
         description="We excel at creating user-friendly, high-converting websites, landing pages, and applications that deliver exceptional user experiences."
+        image="/Web-Design.png"
       />
       <ServiceContent
         overview={{

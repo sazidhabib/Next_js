@@ -1,4 +1,4 @@
-const BASE_URL = "https://demo.nextideasolution.com/api";
+const BASE_URL = "/api-proxy";
 export const IMAGE_BASE_URL = "https://demo.nextideasolution.com/uploads/demos/";
 
 /**
@@ -11,15 +11,15 @@ export const IMAGE_BASE_URL = "https://demo.nextideasolution.com/uploads/demos/"
  * @param {string} [params.lang='en'] - Language ('en' or 'bn').
  */
 export async function getDemos({ page = 1, limit = 10, category_id, search, lang = 'en' } = {}) {
-    const url = new URL(`${BASE_URL}/get-demos.php`);
-    url.searchParams.append("page", page);
-    url.searchParams.append("limit", limit);
-    if (category_id) url.searchParams.append("category_id", category_id);
-    if (search) url.searchParams.append("search", search);
-    if (lang) url.searchParams.append("lang", lang);
+    const params = new URLSearchParams();
+    params.append("page", page);
+    params.append("limit", limit);
+    if (category_id) params.append("category_id", category_id);
+    if (search) params.append("search", search);
+    if (lang) params.append("lang", lang);
 
     try {
-        const response = await fetch(url.toString(), {
+        const response = await fetch(`${BASE_URL}/get-demos.php?${params.toString()}`, {
             cache: 'no-store' // Ensure fresh data
         });
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);

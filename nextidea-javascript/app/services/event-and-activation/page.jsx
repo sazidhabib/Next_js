@@ -16,6 +16,7 @@ export default function EventAndActivationPage() {
         title="Event & Activation"
         tagline="Creating Unforgettable Brand Experiences"
         description="We have the power to create impactful events and activations that drive maximum engagement and create lasting brand memories."
+        image="/Event-Activation.png"
       />
       <ServiceContent
         overview={{

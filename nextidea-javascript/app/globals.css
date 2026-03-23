@@ -3,16 +3,17 @@
 :root {
     --background: #ffffff;
     --foreground: #18181b;
-    --primary: #FF3B30;
-    /* Updated to Red/Orange from reference */
-    --primary-dark: #D63025;
+    --primary: #2895CD;
+    /* Updated to Light Blue */
+    --primary-dark: #1E74A2;
     --secondary: #64748b;
-    --accent: #FF3B30;
+    --accent: #1B345D;
+    /* Updated to Deep Blue */
     --surface: #f8fafc;
     --surface-dark: #1F1F1F;
     /* Dark grey used in services/footer */
-    --orange-light: #ffb730;
-    --orange-subtle: #fff3e0;
+    --orange-light: #4AADE0;
+    --orange-subtle: #E6F3FA;
 }
 
 @theme inline {
@@ -26,9 +27,17 @@
     --color-surface-dark: var(--surface-dark);
     --color-orange-light: var(--orange-light);
     --color-orange-subtle: var(--orange-subtle);
+    --color-white: #ffffff;
+    --color-black: #000000;
+    --color-transparent: transparent;
+    --color-current: currentColor;
     --font-sans: "Inter", system-ui, -apple-system, sans-serif;
     --font-serif: "Playfair Display", serif;
     /* Added for Hero if needed */
+}
+
+.text-white {
+    color: #ffffff !important;
 }
 
 @media (prefers-color-scheme: dark) {

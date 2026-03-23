@@ -17,6 +17,7 @@ export default function SocialMediaMarketingPage() {
         title="Social Media Marketing"
         tagline="Connect With Your Audience Where They Spend Their Time"
         description="Every 6 out of 11 people use social media to research products before making a purchase decision. We help brands tell their story with strategic, creative social media posts, videos, stories, and reels that generate engagement and drive results."
+        image="/Social-Media.png"
       />
       <ServiceContent
         overview={{

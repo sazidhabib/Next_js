@@ -17,6 +17,7 @@ export default function DesignPrintingPage() {
         title="Design and Printing Solutions"
         tagline="Redefine Your Corporate Image"
         description="Elevate your brand presence with custom-designed diaries, calendars, notebooks, annual reports, and corporate gifts—perfect tools to keep your brand top-of-mind and make a lasting impression."
+        image="/creative_concept.png"
       />
       <ServiceContent
         overview={{

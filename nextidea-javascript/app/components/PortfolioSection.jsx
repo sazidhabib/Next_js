@@ -1,45 +1,50 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 
 const portfolioCategories = [
   {
     id: 1,
     title: "Campaigns",
+    image: "https://images.unsplash.com/photo-1557804506-669a67965ba0?w=800&q=80",
     color: "from-orange-500 to-amber-400",
-    link: "/campaigns",
+    link: "/protfolio?category=Campaigns",
   },
   {
     id: 2,
     title: "Audio Visuals",
+    image: "https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?w=800&q=80",
     color: "from-purple-500 to-pink-400",
-    link: "/audio-visuals",
+    link: "/protfolio?category=Audio%20Visuals",
   },
   {
     id: 3,
     title: "Creatives",
+    image: "https://images.unsplash.com/photo-1561070791-2526d30994b5?w=800&q=80",
     color: "from-blue-500 to-cyan-400",
-    link: "/creatives",
+    link: "/protfolio?category=Creatives",
   },
   {
     id: 4,
     title: "Printing and Packaging",
+    image: "https://images.unsplash.com/photo-1586075010923-2dd4570fb338?w=800&q=80",
     color: "from-green-500 to-emerald-400",
-    link: "/printing-and-packaging",
+    link: "/protfolio?category=Printing%20%26%20Packaging",
   },
   {
     id: 5,
     title: "Events and Activations",
+    image: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&q=80",
     color: "from-rose-500 to-red-400",
-    link: "/events-and-activations",
+    link: "/protfolio?category=Events%20and%20Activations",
   },
   {
     id: 6,
     title: "Website",
+    image: "https://images.unsplash.com/photo-1467232004584-a241de8bcf5d?w=800&q=80",
     color: "from-indigo-500 to-violet-400",
-    link: "/website",
+    link: "/protfolio?category=Website",
   },
 ];
 
@@ -73,8 +78,13 @@ export default function PortfolioSection() {
               onMouseEnter={() => setHoveredIndex(index)}
               onMouseLeave={() => setHoveredIndex(null)}
             >
-              {/* Background Image Placeholder */}
-              <div className={`absolute inset-0 bg-gradient-to-br ${category.color} opacity-90 transition-transform duration-700 group-hover:scale-105`} />
+              {/* Background Image */}
+              <div
+                className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
+                style={{ backgroundImage: `url(${category.image})` }}
+              />
+              {/* Overlay */}
+              <div className={`absolute inset-0 bg-gradient-to-br ${category.color} opacity-50`} />
 
               {/* Text Overlay */}
               <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
@@ -95,8 +105,13 @@ export default function PortfolioSection() {
               onMouseEnter={() => setHoveredIndex(index + 2)}
               onMouseLeave={() => setHoveredIndex(null)}
             >
-              {/* Background Image Placeholder */}
-              <div className={`absolute inset-0 bg-gradient-to-br ${category.color} opacity-90 transition-transform duration-700 group-hover:scale-105`} />
+              {/* Background Image */}
+              <div
+                className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
+                style={{ backgroundImage: `url(${category.image})` }}
+              />
+              {/* Overlay */}
+              <div className={`absolute inset-0 bg-gradient-to-br ${category.color} opacity-50`} />
 
               {/* Text Overlay */}
               <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center">

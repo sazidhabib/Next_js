@@ -26,7 +26,20 @@ export default function PortfolioPage() {
       setSearch(query);
       setPage(1); // Reset to first page when search changes
     }
-  }, [searchParams]);
+
+    const categoryParam = searchParams.get("category");
+    if (categoryParam && categories.length > 0) {
+      const match = categories.find(c => {
+        const title = c.title || c.name || "";
+        const normalize = (str) => str.toLowerCase().replace(/&/g, 'and').replace(/\s+/g, ' ').trim();
+        return normalize(title) === normalize(categoryParam);
+      });
+      if (match) {
+        setSelectedCategory(match.id);
+        setPage(1);
+      }
+    }
+  }, [searchParams, categories]);
 
   const fetchData = async () => {
     setLoading(true);
@@ -116,7 +129,7 @@ export default function PortfolioPage() {
               <option value="">All Categories</option>
               {categories.map((cat) => (
                 <option key={cat.id} value={cat.id}>
-                  {cat.name}
+                  {cat.title || cat.name}
                 </option>
               ))}
             </select>

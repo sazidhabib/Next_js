@@ -16,6 +16,7 @@ export default function VideoProductionPhotographyPage() {
         title="Video Production & Photography"
         tagline="Professional Content That Tells Your Story"
         description="We provide engaging, high-end video and photography services that capture your brand's essence and communicate your message effectively."
+        image="/Video-Production.png"
       />
       <ServiceContent
         overview={{

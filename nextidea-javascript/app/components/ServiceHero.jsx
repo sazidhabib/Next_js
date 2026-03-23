@@ -3,11 +3,25 @@ export default function ServiceHero({
   title,
   tagline,
   description,
+  image,
 }) {
   return (
-    <section className="relative py-24 md:py-32 bg-surface-dark overflow-hidden">
-      <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-primary/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-primary/5 rounded-full blur-3xl pointer-events-none" />
+    <section className="relative py-24 md:py-32 overflow-hidden">
+      {image && (
+        <>
+          <div 
+            className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+            style={{ backgroundImage: `url(${image})` }}
+          />
+          <div className="absolute inset-0 bg-black/50" />
+        </>
+      )}
+      {!image && (
+        <>
+          <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-primary/10 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-primary/5 rounded-full blur-3xl pointer-events-none" />
+        </>
+      )}
 
       <div className="container mx-auto px-4 relative z-10">
         <div className="max-w-4xl mx-auto text-center">

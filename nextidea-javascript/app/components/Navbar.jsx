@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { Menu, X, ChevronDown } from "lucide-react";
@@ -15,10 +16,10 @@ const navLinks = [
 
 const portfolioDropdown = [
   { href: "/protfolio", label: "All Demos" },
-  { href: "/protfolio?search=creatives", label: "Creatives" },
-  { href: "/protfolio?search=campaigns", label: "Campaigns" },
-  { href: "/protfolio?search=printing", label: "Printing & Packaging" },
-  { href: "/protfolio?search=website", label: "Website" },
+  { href: "/protfolio?category=Creatives", label: "Creatives" },
+  { href: "/protfolio?category=Campaigns", label: "Campaigns" },
+  { href: "/protfolio?category=Printing%20%26%20Packaging", label: "Printing & Packaging" },
+  { href: "/protfolio?category=Website", label: "Website" },
 ];
 
 const servicesDropdown = [
@@ -51,7 +52,7 @@ export default function Navbar() {
             href="/"
             className="text-2xl font-bold text-zinc-900 hover:text-primary transition-colors"
           >
-            GEEKY <span className="text-primary">Social</span>
+            <Image src="/nextlogo.png" alt="Logo" width={100} height={100} />
           </Link>
 
           <div className="hidden lg:flex items-center gap-8">
@@ -59,11 +60,10 @@ export default function Navbar() {
               <Link
                 key={link.href}
                 href={link.href}
-                className={`text-sm font-medium transition-colors hover:text-primary ${
-                  pathname === link.href
-                    ? "text-primary"
-                    : "text-zinc-600"
-                }`}
+                className={`text-sm font-medium transition-colors hover:text-primary ${pathname === link.href
+                  ? "text-primary"
+                  : "text-zinc-600"
+                  }`}
               >
                 {link.label}
               </Link>
@@ -75,15 +75,13 @@ export default function Navbar() {
                   setIsPortfolioOpen(!isPortfolioOpen);
                   setIsServicesOpen(false);
                 }}
-                className={`flex items-center gap-1 text-sm font-medium transition-colors hover:text-primary ${
-                  pathname.startsWith("/protfolio") ? "text-primary" : "text-zinc-600"
-                }`}
+                className={`flex items-center gap-1 text-sm font-medium transition-colors hover:text-primary ${pathname.startsWith("/protfolio") ? "text-primary" : "text-zinc-600"
+                  }`}
               >
                 Portfolio
                 <ChevronDown
-                  className={`w-4 h-4 transition-transform ${
-                    isPortfolioOpen ? "rotate-180" : ""
-                  }`}
+                  className={`w-4 h-4 transition-transform ${isPortfolioOpen ? "rotate-180" : ""
+                    }`}
                 />
               </button>
 
@@ -113,9 +111,8 @@ export default function Navbar() {
               >
                 Services
                 <ChevronDown
-                  className={`w-4 h-4 transition-transform ${
-                    isServicesOpen ? "rotate-180" : ""
-                  }`}
+                  className={`w-4 h-4 transition-transform ${isServicesOpen ? "rotate-180" : ""
+                    }`}
                 />
               </button>
 
@@ -161,11 +158,10 @@ export default function Navbar() {
                 key={link.href}
                 href={link.href}
                 onClick={() => setIsMenuOpen(false)}
-                className={`block py-3 text-sm font-medium transition-colors hover:text-primary ${
-                  pathname === link.href
-                    ? "text-primary"
-                    : "text-zinc-600"
-                }`}
+                className={`block py-3 text-sm font-medium transition-colors hover:text-primary ${pathname === link.href
+                  ? "text-primary"
+                  : "text-zinc-600"
+                  }`}
               >
                 {link.label}
               </Link>

@@ -17,6 +17,7 @@ export default function DigitalMediaBuyingPage() {
         title="Digital Media Buying"
         tagline="Data-Driven Campaigns That Deliver Results"
         description="We specialize in funnel-driven media buying solutions that maximize your ROI. Our strategic approach ensures your message reaches the right audience at the right time."
+        image="/Digital-Media.png"
       />
       <ServiceContent
         overview={{

@@ -17,6 +17,7 @@ export default function SEOPage() {
         title="SEO Services"
         tagline="Future-Proof Your Visibility"
         description="We don't believe in chasing quick wins that disappear with the next algorithm update. We focus on sustainable strategies that build a solid foundation for long-term growth. We understand how search engines work and how they're evolving."
+        image="/SEO-Services.png"
       />
       <ServiceContent
         overview={{

@@ -16,6 +16,7 @@ export default function BrandIdentityPage() {
         title="Brand Identity"
         tagline="Building Brands That Stand Out"
         description="We help create a strong, distinctive brand identity that sets you apart from the competition and resonates with your target audience."
+        image="/Brand-Identity.png"
       />
       <ServiceContent
         overview={{

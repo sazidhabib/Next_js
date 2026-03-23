@@ -2,20 +2,19 @@
 
 import Image from "next/image";
 
-// Placeholder data for clients - ideally these would be actual logo images
 const clients = [
-    { name: "Client 1", logo: null },
-    { name: "Client 2", logo: null },
-    { name: "Client 3", logo: null },
-    { name: "Client 4", logo: null },
-    { name: "Client 5", logo: null },
-    { name: "Client 6", logo: null },
-    { name: "Client 7", logo: null },
-    { name: "Client 8", logo: null },
-    { name: "Client 9", logo: null },
-    { name: "Client 10", logo: null },
-    { name: "Client 11", logo: null },
-    { name: "Client 12", logo: null },
+    { name: "TechCorp", logo: "https://dummyimage.com/120x60/2563eb/ffffff&text=TechCorp" },
+    { name: "Global Media", logo: "https://dummyimage.com/120x60/dc2626/ffffff&text=Global+Media" },
+    { name: "Innovate Labs", logo: "https://dummyimage.com/120x60/16a34a/ffffff&text=Innovate" },
+    { name: "Bright Solutions", logo: "https://dummyimage.com/120x60/9333ea/ffffff&text=Bright" },
+    { name: "Prime Digital", logo: "https://dummyimage.com/120x60/db2777/ffffff&text=Prime" },
+    { name: "NextGen Systems", logo: "https://dummyimage.com/120x60/0891b2/ffffff&text=NextGen" },
+    { name: "Urban Brand", logo: "https://dummyimage.com/120x60/ca8a04/ffffff&text=Urban" },
+    { name: "Peak Performance", logo: "https://dummyimage.com/120x60/4f46e5/ffffff&text=Peak" },
+    { name: "Creative Hub", logo: "https://dummyimage.com/120x60/ea580c/ffffff&text=Creative" },
+    { name: "Future Works", logo: "https://dummyimage.com/120x60/65a30d/ffffff&text=Future" },
+    { name: "Vertex Agency", logo: "https://dummyimage.com/120x60/7c3aed/ffffff&text=Vertex" },
+    { name: "Core Industries", logo: "https://dummyimage.com/120x60/0d9488/ffffff&text=Core" },
 ];
 
 export default function ClientsSection() {
@@ -32,10 +31,20 @@ export default function ClientsSection() {
                 <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-8 items-center justify-items-center opacity-70 grayscale hover:grayscale-0 transition-all duration-500">
                     {clients.map((client, index) => (
                         <div key={index} className="w-32 h-20 flex items-center justify-center bg-gray-50 border border-gray-100 rounded-lg p-4 hover:shadow-md transition-shadow">
-                            {/* Placeholder for Logo */}
-                            <span className="text-zinc-400 font-semibold text-sm">
-                                {client.name}
-                            </span>
+                            {client.logo ? (
+                                <Image 
+                                    src={client.logo} 
+                                    alt={client.name}
+                                    width={80}
+                                    height={40}
+                                    className="object-contain"
+                                    unoptimized
+                                />
+                            ) : (
+                                <span className="text-zinc-400 font-semibold text-sm">
+                                    {client.name}
+                                </span>
+                            )}
                         </div>
                     ))}
                 </div>
