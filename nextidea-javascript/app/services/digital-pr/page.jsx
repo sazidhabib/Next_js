@@ -17,7 +17,7 @@ export default function DigitalPRPage() {
         title="Digital PR"
         tagline="Elevate Your Brand's Online Visibility"
         description="Our Digital PR Services help you earn media coverage, build reputation, trust and backlinks while improving your SEO and online authority. We connect your brand with top journalists, bloggers, and online publications."
-        image="/nextlogo.png"
+        image="/Digital-PR.png"
       />
       <ServiceContent
         overview={{

@@ -17,7 +17,7 @@ export default function SEOAuditPage() {
         title="SEO Audit Service"
         tagline="Uncover What's Holding You Back"
         description="Is your website struggling to generate organic traffic or leads? Our SEO Audit Service helps you identify what's wrong and gives you a roadmap to fix it fast. No automated report—you get human insights and actionable steps."
-        image="/home.png"
+        image="/SEO-Audit.png"
       />
       <ServiceContent
         overview={{

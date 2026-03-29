@@ -17,7 +17,7 @@ export default function EcommerceSEOPage() {
         title="E-commerce SEO"
         tagline="Turn Product Views Into Sales"
         description="Selling products online? Then you need more than just a good-looking website. Our E-commerce SEO Services help you rank higher, get discovered by buyers, and turn product pages into conversion machines."
-        image="/nextlogo.png"
+        image="/E-commerce-SEO.png"
       />
       <ServiceContent
         overview={{
