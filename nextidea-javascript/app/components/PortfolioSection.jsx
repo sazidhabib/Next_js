@@ -28,7 +28,7 @@ const portfolioCategories = [
   {
     id: 4,
     title: "Printing and Packaging",
-    image: "https://images.unsplash.com/photo-1586075010923-2dd4570fb338?w=800&q=80",
+    image: "/Printing-packagi.png",
     color: "from-green-500 to-emerald-400",
     link: "/protfolio?category=Printing%20%26%20Packaging",
   },

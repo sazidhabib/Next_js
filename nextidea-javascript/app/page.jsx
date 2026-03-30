@@ -7,6 +7,7 @@ import StatsSection from "./components/StatsSection";
 import CTASection from "./components/CTASection";
 import Footer from "./components/Footer";
 import ClientsSection from "./components/ClientsSection";
+import FAQSection from "./components/FAQSection";
 
 export default function Home() {
   return (
@@ -19,6 +20,7 @@ export default function Home() {
         <CaseStudySection />
         <ClientsSection />
         {/* <StatsSection /> */}
+        <FAQSection />
         <CTASection />
       </main>
       <Footer />

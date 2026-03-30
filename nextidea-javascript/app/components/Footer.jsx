@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { MapPin, Mail, ArrowRight, Facebook, Linkedin, Youtube, Instagram } from "lucide-react";
+import { MapPin, Mail, Phone, ArrowRight, Facebook, Linkedin, Youtube, Instagram } from "lucide-react";
 
 const services = [
   { name: "Creative Concept & Execution", href: "/services/creative-concept-execution" },
@@ -24,10 +24,10 @@ const usefulLinks = [
 ];
 
 const socials = [
-  { name: "Facebook", icon: Facebook, href: "https://www.facebook.com/GEEKYSMM/" },
-  { name: "LinkedIn", icon: Linkedin, href: "https://www.linkedin.com/company/geeky/" },
-  { name: "Youtube", icon: Youtube, href: "https://www.youtube.com/channel/UCq_3LDhtuXEcdMedYPAH59w" },
-  { name: "Instagram", icon: Instagram, href: "https://www.instagram.com/geeky.social/" },
+  { name: "Facebook", icon: Facebook, href: "https://www.facebook.com/NextIdeaSolution" },
+  { name: "LinkedIn", icon: Linkedin, href: "https://www.linkedin.com/company/next-idea-solution" },
+  { name: "Youtube", icon: Youtube, href: "#" },
+  { name: "Instagram", icon: Instagram, href: "#" },
 ];
 
 export default function Footer() {
@@ -65,22 +65,22 @@ export default function Footer() {
           <div>
             <Link href="/" className="inline-block mb-6">
               {/* Logo Placeholder or Image */}
-              <h2 className="text-2xl font-bold text-white flex items-center gap-2">
-                <span className="text-primary">GEEKY</span> Social
+              <h2 className="text-2xl font-bold text-white flex items-center gap-2">Next Idea
+                <span className="text-primary">Solution</span>
               </h2>
             </Link>
             <div className="space-y-4 text-sm text-zinc-400">
               <div className="flex items-start gap-3">
                 <MapPin className="w-4 h-4 text-primary flex-shrink-0 mt-1" />
-                <span>Road 3, House 62(Level 4) Niketon, Gulshan 1, Dhaka</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <MapPin className="w-4 h-4 text-primary flex-shrink-0" />
-                <span>20 Samuel Wood Way, Etobicoke, ON, M9B 0C8, Canada</span>
+                <span>House# 14 (2nd Floor), Road# 04, block# A, Section# 11, Mirpur, Dhaka, Bangladesh</span>
               </div>
               <div className="flex items-center gap-3">
                 <Mail className="w-4 h-4 text-primary flex-shrink-0" />
-                <span>contact@geekysocial.com</span>
+                <span>support@nextideasolution.com</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <Phone className="w-4 h-4 text-primary flex-shrink-0" />
+                <span>+8801714787250</span>
               </div>
             </div>
           </div>
@@ -163,7 +163,7 @@ export default function Footer() {
 
         <div className="mt-16 pt-8 border-t border-zinc-800">
           <p className="text-zinc-500 text-sm text-center">
-            &copy; {new Date().getFullYear()} GEEKY Social. All rights reserved.
+            &copy; {new Date().getFullYear()} Next Idea Solution. All rights reserved.
           </p>
         </div>
       </div>
