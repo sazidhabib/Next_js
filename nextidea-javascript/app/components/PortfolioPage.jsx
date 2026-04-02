@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 import { Search, ChevronLeft, ChevronRight, Filter, Loader2 } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { getDemos, getCategories } from "../lib/api";

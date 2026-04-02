@@ -13,7 +13,7 @@ export default function DigitalMediaBuyingPage() {
   return (
     <>
       <ServiceHero
-        icon={TrendingUp}
+        icon={<TrendingUp />}
         title="Digital Media Buying"
         tagline="Data-Driven Campaigns That Deliver Results"
         description="We specialize in funnel-driven media buying solutions that maximize your ROI. Our strategic approach ensures your message reaches the right audience at the right time."
@@ -59,9 +59,9 @@ export default function DigitalMediaBuyingPage() {
           ],
         }}
         relatedServices={[
-          { title: "Creative Concept", link: "/services/creative-concept-execution", icon: Sparkles },
-          { title: "Web Development", link: "/services/web-design-development", icon: Code2 },
-          { title: "Event & Activation", link: "/services/event-and-activation", icon: Megaphone },
+          { title: "Creative Concept", link: "/services/creative-concept-execution", icon: <TrendingUp /> },
+          { title: "Web Development", link: "/services/web-design-development", icon: <Code2 /> },
+          { title: "Event & Activation", link: "/services/event-and-activation", icon: <Megaphone /> },
         ]}
       />
       <PackagesSection />

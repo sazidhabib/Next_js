@@ -12,7 +12,7 @@ export default function CreativeConceptExecutionPage() {
   return (
     <>
       <ServiceHero
-        icon={Sparkles}
+        icon={<Palette />}
         title="Creative Concept & Execution"
         tagline="Transforming Ideas Into Impactful Campaigns"
         description="We bring your brand vision to life through expert conceptualization and impeccable execution. Our creative team crafts compelling narratives that resonate with your audience and drive measurable results."
@@ -58,9 +58,9 @@ export default function CreativeConceptExecutionPage() {
           ],
         }}
         relatedServices={[
-          { title: "Brand Identity", link: "/services/brand-identity", icon: Palette },
-          { title: "Digital Media Buying", link: "/services/digital-media-buying", icon: TrendingUp },
-          { title: "Video Production", link: "/services/video-production-photography", icon: Headphones },
+          { title: "Brand Identity", link: "/services/brand-identity", icon: <Palette /> },
+          { title: "Digital Media Buying", link: "/services/digital-media-buying", icon: <TrendingUp /> },
+          { title: "Video Production", link: "/services/video-production-photography", icon: <Headphones /> },
         ]}
       />
       <CTASection />

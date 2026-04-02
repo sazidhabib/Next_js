@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { motion } from "framer-motion";
 import { ChevronDown } from "lucide-react";
 
 const faqs = [
@@ -36,19 +37,29 @@ export default function FAQSection() {
   return (
     <section className="py-24 bg-zinc-50">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-16">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+          className="text-center mb-16"
+        >
           <h2 className="text-4xl lg:text-5xl font-bold text-zinc-900 mb-4">
             Frequently Asked <span className="text-primary">Questions</span>
           </h2>
           <p className="text-lg text-zinc-600 max-w-2xl mx-auto">
             Find answers to common questions about our services, process, and how we can help transform your business.
           </p>
-        </div>
+        </motion.div>
 
         <div className="max-w-3xl mx-auto space-y-4">
           {faqs.map((faq, index) => (
-            <div
+            <motion.div
               key={index}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.4, delay: index * 0.08, ease: "easeOut" }}
               className="bg-white rounded-2xl border border-zinc-200 overflow-hidden hover:border-primary/30 transition-colors"
             >
               <button
@@ -62,14 +73,20 @@ export default function FAQSection() {
                   }`}
                 />
               </button>
-              <div
-                className={`px-6 overflow-hidden transition-all duration-300 ${
-                  openIndex === index ? "pb-5 max-h-96" : "max-h-0"
-                }`}
+              <motion.div
+                initial={false}
+                animate={{
+                  height: openIndex === index ? "auto" : 0,
+                  opacity: openIndex === index ? 1 : 0,
+                }}
+                transition={{ duration: 0.3, ease: "easeInOut" }}
+                className="overflow-hidden"
               >
-                <p className="text-zinc-600 leading-relaxed">{faq.answer}</p>
-              </div>
-            </div>
+                <div className="px-6 pb-5">
+                  <p className="text-zinc-600 leading-relaxed">{faq.answer}</p>
+                </div>
+              </motion.div>
+            </motion.div>
           ))}
         </div>
       </div>

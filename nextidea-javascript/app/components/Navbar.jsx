@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, ChevronDown } from "lucide-react";
 
 const navLinks = [
@@ -90,8 +91,8 @@ export default function Navbar() {
                 />
               </button>
 
-              {isPortfolioOpen && (
-                <div className="absolute top-full left-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-gray-100 py-2">
+              <AnimatePresence>{isPortfolioOpen && (
+                <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }} className="absolute top-full left-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-gray-100 py-2">
                   {portfolioDropdown.map((item) => (
                     <Link
                       key={item.href}
@@ -102,8 +103,8 @@ export default function Navbar() {
                       {item.label}
                     </Link>
                   ))}
-                </div>
-              )}
+                </motion.div>
+              )}</AnimatePresence>
             </div>
 
             <div className="relative">
@@ -121,8 +122,8 @@ export default function Navbar() {
                 />
               </button>
 
-              {isServicesOpen && (
-                <div className="absolute top-full left-0 mt-2 w-72 bg-white rounded-xl shadow-xl border border-gray-100 py-2 max-h-[500px] overflow-y-auto">
+              <AnimatePresence>{isServicesOpen && (
+                <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }} className="absolute top-full left-0 mt-2 w-72 bg-white rounded-xl shadow-xl border border-gray-100 py-2 max-h-[500px] overflow-y-auto">
                   {servicesDropdown.map((service) => (
                     <div key={service.href}>
                       <Link
@@ -148,13 +149,11 @@ export default function Navbar() {
                       )}
                     </div>
                   ))}
-                </div>
-              )}
+                </motion.div>
+              )}</AnimatePresence>
             </div>
-
             <a
               href="https://www.facebook.com/NextIdeaSolution"
-              target="_blank"
               rel="noopener noreferrer"
               className="px-4 py-2 bg-primary text-white text-sm font-medium rounded-full hover:bg-primary-dark transition-colors"
             >

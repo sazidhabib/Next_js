@@ -1,5 +1,7 @@
 const nextConfig = {
+  output: 'standalone',
   images: {
+    unoptimized: true,
     remotePatterns: [
       {
         protocol: "https",
@@ -10,23 +12,6 @@ const nextConfig = {
         hostname: "dummyimage.com",
       },
     ],
-  },
-  async redirects() {
-    return [
-      {
-        source: '/portfolio',
-        destination: '/protfolio',
-        permanent: true,
-      },
-    ];
-  },
-  async rewrites() {
-    return [
-      {
-        source: '/api-proxy/:path*',
-        destination: 'https://demo.nextideasolution.com/api/:path*',
-      },
-    ];
   },
 };
 

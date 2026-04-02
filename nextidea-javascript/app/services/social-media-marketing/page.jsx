@@ -13,7 +13,7 @@ export default function SocialMediaMarketingPage() {
   return (
     <>
       <ServiceHero
-        icon={Share2}
+        icon={<Share2 />}
         title="Social Media Marketing"
         tagline="Connect With Your Audience Where They Spend Their Time"
         description="Every 6 out of 11 people use social media to research products before making a purchase decision. We help brands tell their story with strategic, creative social media posts, videos, stories, and reels that generate engagement and drive results."
@@ -63,9 +63,9 @@ export default function SocialMediaMarketingPage() {
           ],
         }}
         relatedServices={[
-          { title: "Digital Media Buying", link: "/services/digital-media-buying", icon: Megaphone },
-          { title: "Creative Concept", link: "/services/creative-concept-execution", icon: Globe },
-          { title: "Brand Identity", link: "/services/brand-identity", icon: Target },
+          { title: "Digital Media Buying", link: "/services/digital-media-buying", icon: <TrendingUp /> },
+          { title: "Creative Concept", link: "/services/creative-concept-execution", icon: <Target /> },
+          { title: "Brand Identity", link: "/services/brand-identity", icon: <Users /> },
         ]}
       />
       <PackagesSection />

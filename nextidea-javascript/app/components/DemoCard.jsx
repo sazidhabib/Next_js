@@ -1,5 +1,6 @@
 "use client";
 
+import { motion } from "framer-motion";
 import { ExternalLink, Layers, Eye } from "lucide-react";
 import { IMAGE_BASE_URL } from "../lib/api";
 
@@ -7,7 +8,7 @@ export default function DemoCard({ demo }) {
   const imageUrl = `${IMAGE_BASE_URL}${demo.image}`;
 
   return (
-    <div className="group bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-500 flex flex-col h-full animate-fade-in-up">
+    <div className="group bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-500 flex flex-col h-full">
       {/* Image Container */}
       <div className="relative aspect-[16/10] overflow-hidden bg-gray-100">
         <img

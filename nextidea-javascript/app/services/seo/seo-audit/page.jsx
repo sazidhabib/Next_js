@@ -1,4 +1,4 @@
-import { ClipboardList, Search, BarChart, FileText, Settings, Link2 } from "lucide-react";
+import { ClipboardList, Search, BarChart, FileText, Settings, Link2, MapPin, ShoppingCart } from "lucide-react";
 import ServiceHero from "../../../components/ServiceHero";
 import ServiceContent from "../../../components/ServiceContent";
 import PackagesSection from "../../../components/PackagesSection";
@@ -13,7 +13,7 @@ export default function SEOAuditPage() {
   return (
     <>
       <ServiceHero
-        icon={ClipboardList}
+        icon={<ClipboardList />}
         title="SEO Audit Service"
         tagline="Uncover What's Holding You Back"
         description="Is your website struggling to generate organic traffic or leads? Our SEO Audit Service helps you identify what's wrong and gives you a roadmap to fix it fast. No automated report—you get human insights and actionable steps."
@@ -67,9 +67,9 @@ export default function SEOAuditPage() {
           ],
         }}
         relatedServices={[
-          { title: "SEO Services", link: "/services/seo", icon: Search },
-          { title: "Local SEO", link: "/services/seo/local-seo", icon: BarChart },
-          { title: "E-commerce SEO", link: "/services/seo/e-commerce-seo", icon: FileText },
+          { title: "SEO Services", link: "/services/seo", icon: <Search />},
+          { title: "Local SEO", link: "/services/seo/local-seo", icon: <MapPin />},
+          { title: "E-commerce SEO", link: "/services/seo/e-commerce-seo", icon: <ShoppingCart />},
         ]}
       />
       <PackagesSection />

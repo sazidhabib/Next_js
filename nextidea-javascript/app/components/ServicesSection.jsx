@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { motion } from "framer-motion";
 import {
   Sparkles,
   TrendingUp,
@@ -58,17 +61,34 @@ export default function ServicesSection() {
   return (
     <section id="services" className="py-24 bg-surface-dark text-white">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-16">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+          className="text-center mb-16"
+        >
           <h2 className="text-4xl md:text-5xl font-bold mb-4 uppercase tracking-widest text-[#Eaeaea]">
             What We Do
           </h2>
-          <div className="w-24 h-1 bg-primary mx-auto rounded-full" />
-        </div>
+          <motion.div
+            initial={{ scaleX: 0 }}
+            whileInView={{ scaleX: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="w-24 h-1 bg-primary mx-auto rounded-full origin-center"
+          />
+        </motion.div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {services.map((service, index) => (
-            <div
+            <motion.div
               key={index}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: index * 0.1, ease: "easeOut" }}
+              whileHover={{ y: -5 }}
               className="group p-8 rounded-2xl bg-[#27272a] hover:bg-[#3f3f46] transition-all duration-300 border border-zinc-800 hover:border-primary/50 relative overflow-hidden"
             >
               <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
@@ -93,7 +113,7 @@ export default function ServicesSection() {
               >
                 View Details <ArrowRight className="w-4 h-4 ml-1" />
               </Link>
-            </div>
+            </motion.div>
           ))}
         </div>
       </div>

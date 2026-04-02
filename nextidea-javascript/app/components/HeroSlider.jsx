@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
@@ -84,25 +85,37 @@ export default function HeroSlider() {
           {/* Content */}
           <div className="container mx-auto px-4 relative z-10 h-full flex items-center">
             <div className="flex flex-col items-center text-center w-full">
-              <h1 className="text-5xl md:text-7xl lg:text-8xl font-black text-white leading-[1.1] mb-8">
-                <span className="block text-2xl md:text-3xl font-normal text-white/80 mb-2 italic font-serif">
-                  It&apos;s
-                </span>
-                {slide.headline}
-                <span className="text-primary"> {slide.subheadline}</span>
-              </h1>
+              <AnimatePresence mode="wait">
+                {index === currentSlide && (
+                  <motion.div
+                    key={`slide-content-${slide.id}`}
+                    initial={{ opacity: 0, y: 40 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    transition={{ duration: 0.7, ease: "easeOut" }}
+                  >
+                    <h1 className="text-5xl md:text-7xl lg:text-8xl font-black text-white leading-[1.1] mb-8">
+                      <span className="block text-2xl md:text-3xl font-normal text-white/80 mb-2 italic font-serif">
+                        It&apos;s
+                      </span>
+                      {slide.headline}
+                      <span className="text-primary"> {slide.subheadline}</span>
+                    </h1>
 
-              <p className="max-w-2xl text-white/80 text-lg md:text-xl mb-12">
-                {slide.description}
-              </p>
+                    <p className="max-w-2xl text-white/80 text-lg md:text-xl mb-12">
+                      {slide.description}
+                    </p>
 
-              <Link
-                href="#contact"
-                className="inline-flex items-center gap-2 bg-primary text-white px-8 py-4 rounded-full font-semibold text-lg hover:bg-primary/90 transition-colors"
-              >
-                {slide.ctaText}
-                <ArrowRight className="w-5 h-5" />
-              </Link>
+                    <Link
+                      href="#contact"
+                      className="inline-flex items-center gap-2 bg-primary text-white px-8 py-4 rounded-full font-semibold text-lg hover:bg-primary/90 transition-colors"
+                    >
+                      {slide.ctaText}
+                      <ArrowRight className="w-5 h-5" />
+                    </Link>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           </div>
         </div>

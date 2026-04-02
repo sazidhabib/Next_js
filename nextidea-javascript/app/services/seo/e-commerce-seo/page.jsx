@@ -1,4 +1,4 @@
-import { ShoppingBag, Tag, CreditCard, TrendingUp, Search, BarChart2, Globe } from "lucide-react";
+import { ShoppingBag, Tag, CreditCard, TrendingUp, Search, BarChart2, Globe, MapPin, FileText } from "lucide-react";
 import ServiceHero from "../../../components/ServiceHero";
 import ServiceContent from "../../../components/ServiceContent";
 import PackagesSection from "../../../components/PackagesSection";
@@ -13,7 +13,7 @@ export default function EcommerceSEOPage() {
   return (
     <>
       <ServiceHero
-        icon={ShoppingBag}
+        icon={<ShoppingBag />}
         title="E-commerce SEO"
         tagline="Turn Product Views Into Sales"
         description="Selling products online? Then you need more than just a good-looking website. Our E-commerce SEO Services help you rank higher, get discovered by buyers, and turn product pages into conversion machines."
@@ -59,9 +59,9 @@ export default function EcommerceSEOPage() {
           ],
         }}
         relatedServices={[
-          { title: "SEO Services", link: "/services/seo", icon: TrendingUp },
-          { title: "SEO Audit", link: "/services/seo/seo-audit", icon: BarChart2 },
-          { title: "Local SEO", link: "/services/seo/local-seo", icon: Globe },
+          { title: "SEO Services", link: "/services/seo", icon: <Search />},
+          { title: "SEO Audit", link: "/services/seo/seo-audit", icon: <FileText />},
+          { title: "Local SEO", link: "/services/seo/local-seo", icon: <MapPin />},
         ]}
       />
       <PackagesSection />

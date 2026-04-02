@@ -12,7 +12,7 @@ export default function WebDesignDevelopmentPage() {
   return (
     <>
       <ServiceHero
-        icon={Code2}
+        icon={<Code2 />}
         title="Web Design & Development"
         tagline="Building Digital Experiences That Convert"
         description="We excel at creating user-friendly, high-converting websites, landing pages, and applications that deliver exceptional user experiences."
@@ -59,9 +59,9 @@ export default function WebDesignDevelopmentPage() {
           ],
         }}
         relatedServices={[
-          { title: "Brand Identity", link: "/services/brand-identity", icon: Palette },
-          { title: "Creative Concept", link: "/services/creative-concept-execution", icon: Sparkles },
-          { title: "Digital Media Buying", link: "/services/digital-media-buying", icon: TrendingUp },
+          { title: "Brand Identity", link: "/services/brand-identity", icon: <Sparkles /> },
+          { title: "Creative Concept", link: "/services/creative-concept-execution", icon: <Palette /> },
+          { title: "Digital Media Buying", link: "/services/digital-media-buying", icon: <TrendingUp /> },
         ]}
       />
       <CTASection />

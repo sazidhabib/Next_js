@@ -12,7 +12,7 @@ export default function BrandIdentityPage() {
   return (
     <>
       <ServiceHero
-        icon={Palette}
+        icon={<Sparkles />}
         title="Brand Identity"
         tagline="Building Brands That Stand Out"
         description="We help create a strong, distinctive brand identity that sets you apart from the competition and resonates with your target audience."
@@ -58,9 +58,9 @@ export default function BrandIdentityPage() {
           ],
         }}
         relatedServices={[
-          { title: "Creative Concept", link: "/services/creative-concept-execution", icon: Sparkles },
-          { title: "Web Development", link: "/services/web-design-development", icon: Code2 },
-          { title: "Video Production", link: "/services/video-production-photography", icon: Headphones },
+          { title: "Creative Concept", link: "/services/creative-concept-execution", icon: <Palette /> },
+          { title: "Web Development", link: "/services/web-design-development", icon: <Code2 /> },
+          { title: "Video Production", link: "/services/video-production-photography", icon: <Headphones /> },
         ]}
       />
       <CTASection />

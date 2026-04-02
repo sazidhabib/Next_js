@@ -1,4 +1,9 @@
+"use client";
+
+"use client";
+
 import Link from "next/link";
+import { motion } from "framer-motion";
 import { Check, X } from "lucide-react";
 
 const packages = [
@@ -50,18 +55,23 @@ export default function PackagesSection() {
   return (
     <section className="py-20 md:py-28 bg-white">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-16">
+        <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }} className="text-center mb-16">
           <h2 className="text-3xl md:text-5xl font-bold text-black mb-4">
             Our Packages
           </h2>
           <p className="text-zinc-400 text-lg max-w-2xl mx-auto">
             Choose the perfect package for your business needs
           </p>
-        </div>
+        </motion.div>
 
-        <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+        <motion.div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
           {packages.map((pkg, index) => (
-            <div
+            <motion.div
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: index * 0.15 }}
+              whileHover={{ y: -8 }}
               key={pkg.name}
               className={`relative bg-zinc-50 border border-zinc-800 rounded-2xl p-8 hover:border-primary/50 hover:bg-zinc-100 transition-all duration-300 ${index === 1 ? "md:-mt-4 md:mb-8" : ""
                 }`}
@@ -124,13 +134,13 @@ export default function PackagesSection() {
               >
                 Choose Plan
               </Link>
-            </div>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
 
-        <p className="text-center text-zinc-500 text-sm mt-8">
+        <motion.p initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.5 }} className="text-center text-zinc-500 text-sm mt-8">
           *Media payments are paid in advance
-        </p>
+        </motion.p>
       </div>
     </section>
   );

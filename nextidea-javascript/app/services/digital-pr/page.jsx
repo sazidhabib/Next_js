@@ -1,4 +1,4 @@
-import { Newspaper, Megaphone, Globe, Award, TrendingUp, Shield } from "lucide-react";
+import { Newspaper, Megaphone, Globe, Award, TrendingUp, Shield, Search, Share2, Palette } from "lucide-react";
 import ServiceHero from "../../components/ServiceHero";
 import ServiceContent from "../../components/ServiceContent";
 import PackagesSection from "../../components/PackagesSection";
@@ -13,7 +13,7 @@ export default function DigitalPRPage() {
   return (
     <>
       <ServiceHero
-        icon={Newspaper}
+        icon={<Newspaper />}
         title="Digital PR"
         tagline="Elevate Your Brand's Online Visibility"
         description="Our Digital PR Services help you earn media coverage, build reputation, trust and backlinks while improving your SEO and online authority. We connect your brand with top journalists, bloggers, and online publications."
@@ -59,9 +59,9 @@ export default function DigitalPRPage() {
           ],
         }}
         relatedServices={[
-          { title: "SEO Services", link: "/services/seo", icon: TrendingUp },
-          { title: "Social Media Marketing", link: "/services/social-media-marketing", icon: Megaphone },
-          { title: "Brand Identity", link: "/services/brand-identity", icon: Shield },
+          { title: "SEO Services", link: "/services/seo", icon: <Search />},
+          { title: "Social Media Marketing", link: "/services/social-media-marketing", icon: <Share2 />},
+          { title: "Brand Identity", link: "/services/brand-identity", icon: <Palette />},
         ]}
       />
       <PackagesSection />

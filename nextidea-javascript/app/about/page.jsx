@@ -1,3 +1,9 @@
+"use client";
+
+
+
+import { motion } from "framer-motion";
+
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import CTASection from "../components/CTASection";
@@ -6,10 +12,6 @@ import { Target, Lightbulb, Users, Award, Shield, Zap, ArrowRight, CheckCircle2 
 import Image from "next/image";
 import Link from "next/link";
 
-export const metadata = {
-  title: "About Us | NextIdea Solution",
-  description: "Learn more about NextIdea Solution, our mission, vision, and the core values that drive our team to deliver exceptional digital services.",
-};
 
 export default function AboutPage() {
   return (
@@ -179,13 +181,13 @@ export default function AboutPage() {
                   desc: "The digital world evolves rapidly, and so do we, through constant education and adaptation."
                 }
               ].map((value, idx) => (
-                <div key={idx} className="group p-8 rounded-3xl bg-white border border-zinc-100 hover:border-primary/20 hover:shadow-2xl hover:shadow-primary/5 transition-all duration-300">
+                <motion.div key={idx} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: idx * 0.1 }} whileHover={{ y: -5 }} className="group p-8 rounded-3xl bg-white border border-zinc-100 hover:border-primary/20 hover:shadow-2xl hover:shadow-primary/5 transition-all duration-300">
                   <div className="w-12 h-12 rounded-xl bg-zinc-50 group-hover:bg-primary group-hover:text-white text-primary flex items-center justify-center transition-colors duration-300 mb-6">
                     {value.icon}
                   </div>
                   <h4 className="text-xl font-bold mb-3 text-zinc-900">{value.title}</h4>
                   <p className="text-zinc-600">{value.desc}</p>
-                </div>
+                </motion.div>
               ))}
             </div>
           </div>

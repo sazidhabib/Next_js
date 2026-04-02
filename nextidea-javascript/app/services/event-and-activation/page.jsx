@@ -12,7 +12,7 @@ export default function EventAndActivationPage() {
   return (
     <>
       <ServiceHero
-        icon={Megaphone}
+        icon={<Megaphone />}
         title="Event & Activation"
         tagline="Creating Unforgettable Brand Experiences"
         description="We have the power to create impactful events and activations that drive maximum engagement and create lasting brand memories."
@@ -58,9 +58,9 @@ export default function EventAndActivationPage() {
           ],
         }}
         relatedServices={[
-          { title: "Creative Concept", link: "/services/creative-concept-execution", icon: Sparkles },
-          { title: "Video Production", link: "/services/video-production-photography", icon: Headphones },
-          { title: "Digital Media Buying", link: "/services/digital-media-buying", icon: TrendingUp },
+          { title: "Creative Concept", link: "/services/creative-concept-execution", icon: <Headphones /> },
+          { title: "Video Production", link: "/services/video-production-photography", icon: <Sparkles /> },
+          { title: "Digital Media Buying", link: "/services/digital-media-buying", icon: <TrendingUp /> },
         ]}
       />
       <CTASection />

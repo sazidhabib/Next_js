@@ -1,4 +1,4 @@
-import { BookOpen, Calendar, FileText, Gift, Truck, Palette } from "lucide-react";
+import { BookOpen, Calendar, FileText, Gift, Truck, Palette, Code2 } from "lucide-react";
 import ServiceHero from "../../components/ServiceHero";
 import ServiceContent from "../../components/ServiceContent";
 import PackagesSection from "../../components/PackagesSection";
@@ -13,7 +13,7 @@ export default function DesignPrintingPage() {
   return (
     <>
       <ServiceHero
-        icon={BookOpen}
+        icon={<Palette />}
         title="Design and Printing Solutions"
         tagline="Redefine Your Corporate Image"
         description="Elevate your brand presence with custom-designed diaries, calendars, notebooks, annual reports, and corporate gifts—perfect tools to keep your brand top-of-mind and make a lasting impression."
@@ -59,9 +59,9 @@ export default function DesignPrintingPage() {
           ],
         }}
         relatedServices={[
-          { title: "Brand Identity", link: "/services/brand-identity", icon: Palette },
-          { title: "Creative Concept", link: "/services/creative-concept-execution", icon: FileText },
-          { title: "Web Design", link: "/services/web-design-development", icon: BookOpen },
+          { title: "Brand Identity", link: "/services/brand-identity", icon: <Palette />},
+          { title: "Creative Concept", link: "/services/creative-concept-execution", icon: <FileText />},
+          { title: "Web Design", link: "/services/web-design-development", icon: <Code2 />},
         ]}
       />
       <PackagesSection />

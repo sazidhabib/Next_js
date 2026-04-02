@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { motion } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
 
 const caseStudies = [
@@ -31,40 +32,59 @@ export default function CaseStudySection() {
   return (
     <section className="py-24 bg-white">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-16">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+          className="text-center mb-16"
+        >
           <h2 className="text-4xl md:text-5xl font-bold text-zinc-900 mb-4">
             Case Studies
           </h2>
           <p className="text-lg text-zinc-600">
             Results that speak for themselves
           </p>
-        </div>
+        </motion.div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {caseStudies.map((study) => (
-            <Link
-              href={study.link}
+          {caseStudies.map((study, index) => (
+            <motion.div
               key={study.id}
-              className="group block"
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: index * 0.15, ease: "easeOut" }}
             >
-              <div className="relative aspect-[4/3] rounded-2xl overflow-hidden mb-4">
-                <div
-                  className="absolute inset-0 bg-cover bg-center group-hover:scale-105 transition-transform duration-500"
-                  style={{ backgroundImage: `url(${study.image})` }}
-                />
-                <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors" />
-                <div className="absolute top-4 left-4 px-3 py-1 bg-white/90 rounded-full text-sm font-medium text-zinc-900">
-                  {study.category}
+              <Link
+                href={study.link}
+                className="group block"
+              >
+                <div className="relative aspect-[4/3] rounded-2xl overflow-hidden mb-4">
+                  <div
+                    className="absolute inset-0 bg-cover bg-center group-hover:scale-105 transition-transform duration-500"
+                    style={{ backgroundImage: `url(${study.image})` }}
+                  />
+                  <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors" />
+                  <div className="absolute top-4 left-4 px-3 py-1 bg-white/90 rounded-full text-sm font-medium text-zinc-900">
+                    {study.category}
+                  </div>
                 </div>
-              </div>
-              <h3 className="text-lg font-semibold text-zinc-900 group-hover:text-primary transition-colors line-clamp-2">
-                {study.title}
-              </h3>
-            </Link>
+                <h3 className="text-lg font-semibold text-zinc-900 group-hover:text-primary transition-colors line-clamp-2">
+                  {study.title}
+                </h3>
+              </Link>
+            </motion.div>
           ))}
         </div>
 
-        <div className="text-center mt-12">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, delay: 0.4 }}
+          className="text-center mt-12"
+        >
           <Link
             href="/case-study"
             className="inline-flex items-center gap-2 px-8 py-4 bg-primary text-white font-semibold rounded-full hover:bg-primary-dark transition-colors"
@@ -72,7 +92,7 @@ export default function CaseStudySection() {
             See More Case Studies
             <ArrowUpRight className="w-5 h-5" />
           </Link>
-        </div>
+        </motion.div>
       </div>
     </section>
   );

@@ -1,4 +1,4 @@
-import { Search, BarChart2, Code, MapPin, ShoppingCart, Smartphone, Youtube, Mic, MessageSquare } from "lucide-react";
+import { Search, BarChart2, Code, MapPin, ShoppingCart, Smartphone, Youtube, Mic, MessageSquare, FileText } from "lucide-react";
 import ServiceHero from "../../components/ServiceHero";
 import ServiceContent from "../../components/ServiceContent";
 import PackagesSection from "../../components/PackagesSection";
@@ -13,7 +13,7 @@ export default function SEOPage() {
   return (
     <>
       <ServiceHero
-        icon={Search}
+        icon={<Search />}
         title="SEO Services"
         tagline="Future-Proof Your Visibility"
         description="We don't believe in chasing quick wins that disappear with the next algorithm update. We focus on sustainable strategies that build a solid foundation for long-term growth. We understand how search engines work and how they're evolving."
@@ -62,9 +62,9 @@ export default function SEOPage() {
           ],
         }}
         relatedServices={[
-          { title: "SEO Audit", link: "/services/seo/seo-audit", icon: BarChart2 },
-          { title: "Local SEO", link: "/services/seo/local-seo", icon: MapPin },
-          { title: "E-commerce SEO", link: "/services/seo/e-commerce-seo", icon: ShoppingCart },
+          { title: "SEO Audit", link: "/services/seo/seo-audit", icon: <FileText />},
+          { title: "Local SEO", link: "/services/seo/local-seo", icon: <MapPin />},
+          { title: "E-commerce SEO", link: "/services/seo/e-commerce-seo", icon: <ShoppingCart />},
         ]}
       />
       <PackagesSection />

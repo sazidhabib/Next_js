@@ -12,7 +12,7 @@ export default function VideoProductionPhotographyPage() {
   return (
     <>
       <ServiceHero
-        icon={Headphones}
+        icon={<Sparkles />}
         title="Video Production & Photography"
         tagline="Professional Content That Tells Your Story"
         description="We provide engaging, high-end video and photography services that capture your brand's essence and communicate your message effectively."
@@ -58,9 +58,9 @@ export default function VideoProductionPhotographyPage() {
           ],
         }}
         relatedServices={[
-          { title: "Creative Concept", link: "/services/creative-concept-execution", icon: Sparkles },
-          { title: "Event & Activation", link: "/services/event-and-activation", icon: Megaphone },
-          { title: "Web Development", link: "/services/web-design-development", icon: Code2 },
+          { title: "Creative Concept", link: "/services/creative-concept-execution", icon: <Headphones /> },
+          { title: "Event & Activation", link: "/services/event-and-activation", icon: <Megaphone /> },
+          { title: "Web Development", link: "/services/web-design-development", icon: <Code2 /> },
         ]}
       />
       <CTASection />

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { motion } from "framer-motion";
 
 const portfolioCategories = [
   {
@@ -51,73 +52,84 @@ const portfolioCategories = [
 export default function PortfolioSection() {
   const [hoveredIndex, setHoveredIndex] = useState(null);
 
-  // Split categories for the specific grid layout from reference
-  // Top row: Campaigns, Audio Visuals (Wide + Wide)
-  // Middle row: Creatives, Printing, Events (3 columns) -> Actually ref looks like:
-  // Row 1: Campaigns (Wide Image L), Audio Visuals (Wide Image R)
-  // Row 2: Creatives (Wide), Printing (Wide), Events (Wide) - 3 cols
-  // Let's stick to a responsive grid that works well.
-
   return (
     <section id="portfolio" className="py-24 bg-white text-zinc-900">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-16">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+          className="text-center mb-16"
+        >
           <h2 className="text-4xl md:text-5xl font-bold text-zinc-800 mb-4 uppercase tracking-wider">
             Our Work
           </h2>
-          <div className="w-24 h-1 bg-primary mx-auto rounded-full" />
-        </div>
+          <motion.div
+            initial={{ scaleX: 0 }}
+            whileInView={{ scaleX: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="w-24 h-1 bg-primary mx-auto rounded-full origin-center"
+          />
+        </motion.div>
 
         <div className="grid md:grid-cols-2 gap-8 mb-8">
-          {/* Row 1 - Large Cards */}
           {portfolioCategories.slice(0, 2).map((category, index) => (
-            <Link
-              href={category.link}
+            <motion.div
               key={category.id}
-              className="group relative h-[300px] md:h-[400px] rounded-sm overflow-hidden block"
-              onMouseEnter={() => setHoveredIndex(index)}
-              onMouseLeave={() => setHoveredIndex(null)}
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: index * 0.15, ease: "easeOut" }}
             >
-              {/* Background Image */}
-              <div
-                className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
-                style={{ backgroundImage: `url(${category.image})` }}
-              />
-              {/* Overlay */}
-              <div className={`absolute inset-0 bg-gradient-to-br ${category.color} opacity-50`} />
+              <Link
+                href={category.link}
+                className="group relative h-[300px] md:h-[400px] rounded-sm overflow-hidden block"
+                onMouseEnter={() => setHoveredIndex(index)}
+                onMouseLeave={() => setHoveredIndex(null)}
+              >
+                <div
+                  className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
+                  style={{ backgroundImage: `url(${category.image})` }}
+                />
+                <div className={`absolute inset-0 bg-gradient-to-br ${category.color} opacity-50`} />
 
-              {/* Text Overlay */}
-              <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
-                <h3 className="text-3xl md:text-4xl font-bold text-white mb-2 drop-shadow-md">{category.title}</h3>
-                <div className="w-12 h-1 bg-white/50 rounded-full mt-2 group-hover:w-20 transition-all" />
-              </div>
-            </Link>
+                <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
+                  <h3 className="text-3xl md:text-4xl font-bold text-white mb-2 drop-shadow-md">{category.title}</h3>
+                  <div className="w-12 h-1 bg-white/50 rounded-full mt-2 group-hover:w-20 transition-all" />
+                </div>
+              </Link>
+            </motion.div>
           ))}
         </div>
 
         <div className="grid md:grid-cols-3 gap-8">
-          {/* Row 2 - Smaller Cards */}
           {portfolioCategories.slice(2).map((category, index) => (
-            <Link
-              href={category.link}
+            <motion.div
               key={category.id}
-              className="group relative h-[250px] md:h-[300px] rounded-sm overflow-hidden block"
-              onMouseEnter={() => setHoveredIndex(index + 2)}
-              onMouseLeave={() => setHoveredIndex(null)}
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: (index + 2) * 0.1, ease: "easeOut" }}
             >
-              {/* Background Image */}
-              <div
-                className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
-                style={{ backgroundImage: `url(${category.image})` }}
-              />
-              {/* Overlay */}
-              <div className={`absolute inset-0 bg-gradient-to-br ${category.color} opacity-50`} />
+              <Link
+                href={category.link}
+                className="group relative h-[250px] md:h-[300px] rounded-sm overflow-hidden block"
+                onMouseEnter={() => setHoveredIndex(index + 2)}
+                onMouseLeave={() => setHoveredIndex(null)}
+              >
+                <div
+                  className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
+                  style={{ backgroundImage: `url(${category.image})` }}
+                />
+                <div className={`absolute inset-0 bg-gradient-to-br ${category.color} opacity-50`} />
 
-              {/* Text Overlay */}
-              <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
-                <h3 className="text-2xl font-bold text-white mb-2 drop-shadow-md">{category.title}</h3>
-              </div>
-            </Link>
+                <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
+                  <h3 className="text-2xl font-bold text-white mb-2 drop-shadow-md">{category.title}</h3>
+                </div>
+              </Link>
+            </motion.div>
           ))}
         </div>
 

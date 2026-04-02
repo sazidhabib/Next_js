@@ -4,6 +4,7 @@ import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 
 import { useState } from "react";
+import { motion } from "framer-motion";
 import { Mail, Phone, MapPin, Send } from "lucide-react";
 
 export default function ContactPage() {
@@ -63,7 +64,7 @@ export default function ContactPage() {
                   <div>
                     <h3 className="text-white font-semibold mb-1">Dhaka</h3>
                     <p className="text-zinc-400 text-sm">
-                      Road 3, House 62 (Level 4) Niketon, Gulshan 1, Dhaka
+                      House# 14 (2nd Floor), Road# 04, block# A, Section# 11, Mirpur, Dhaka, Bangladesh
                     </p>
                   </div>
                 </div>
@@ -74,7 +75,7 @@ export default function ContactPage() {
                   </div>
                   <div>
                     <h3 className="text-white font-semibold mb-1">Email</h3>
-                    <p className="text-zinc-400 text-sm">contact@geekysocial.com</p>
+                    <p className="text-zinc-400 text-sm">support@nextideasolution.com</p>
                   </div>
                 </div>
 
@@ -84,7 +85,7 @@ export default function ContactPage() {
                   </div>
                   <div>
                     <h3 className="text-white font-semibold mb-1">Phone</h3>
-                    <p className="text-zinc-400 text-sm">+880 1234 567890</p>
+                    <p className="text-zinc-400 text-sm">+8801714787250</p>
                   </div>
                 </div>
               </div>

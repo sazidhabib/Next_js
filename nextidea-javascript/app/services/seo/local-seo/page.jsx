@@ -1,4 +1,4 @@
-import { MapPin, Building2, Phone, Star, Globe, TrendingUp } from "lucide-react";
+import { MapPin, Building2, Phone, Star, Globe, TrendingUp, Search, FileText, ShoppingBag } from "lucide-react";
 import ServiceHero from "../../../components/ServiceHero";
 import ServiceContent from "../../../components/ServiceContent";
 import PackagesSection from "../../../components/PackagesSection";
@@ -13,7 +13,7 @@ export default function LocalSEOPage() {
   return (
     <>
       <ServiceHero
-        icon={MapPin}
+        icon={<MapPin />}
         title="Local SEO"
         tagline="Find Customers Near You Consistently"
         description="Be the first one to show up when your customers search your product or service in your local area. Whether you're a retail store, service provider, or multi-location business, our local SEO strategy is customized to grow your visibility where it matters most."
@@ -59,9 +59,9 @@ export default function LocalSEOPage() {
           ],
         }}
         relatedServices={[
-          { title: "SEO Services", link: "/services/seo", icon: TrendingUp },
-          { title: "SEO Audit", link: "/services/seo/seo-audit", icon: Globe },
-          { title: "E-commerce SEO", link: "/services/seo/e-commerce-seo", icon: Star },
+          { title: "SEO Services", link: "/services/seo", icon: <Search />},
+          { title: "SEO Audit", link: "/services/seo/seo-audit", icon: <FileText />},
+          { title: "E-commerce SEO", link: "/services/seo/e-commerce-seo", icon: <ShoppingBag />},
         ]}
       />
       <PackagesSection />
