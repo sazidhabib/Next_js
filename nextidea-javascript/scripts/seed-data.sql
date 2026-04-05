@@ -1,14 +1,14 @@
 -- Seed Data for Next Idea Solutions
 -- Run this after init-db.sql to populate with initial data
 
-USE nextidea_db;
+USE nextidea;
 
 -- Insert default admin user (password: Admin@12345 - change after first login)
 -- Password hash generated with bcryptjs, 12 rounds
 INSERT INTO users (username, email, password_hash, role, is_active) VALUES
-('admin', 'admin@nextideasolution.com', '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5GyYILp92S.0i', 'admin', TRUE),
-('editor', 'editor@nextideasolution.com', '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5GyYILp92S.0i', 'editor', TRUE)
-ON DUPLICATE KEY UPDATE username=username;
+('admin', 'admin@nextideasolution.com', '$2b$12$MA027GcExCkV4/vPNOHrXe4m7YvqZlPq.oKXjmBhcg3SuEd5O7Y.m', 'admin', TRUE),
+('editor', 'editor@nextideasolution.com', '$2b$12$MA027GcExCkV4/vPNOHrXe4m7YvqZlPq.oKXjmBhcg3SuEd5O7Y.m', 'editor', TRUE)
+ON DUPLICATE KEY UPDATE password_hash='$2b$12$MA027GcExCkV4/vPNOHrXe4m7YvqZlPq.oKXjmBhcg3SuEd5O7Y.m';
 
 -- Insert default categories
 INSERT INTO categories (title, slug, description, sort_order, is_active) VALUES

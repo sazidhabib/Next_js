@@ -2,8 +2,8 @@
 -- Run this script to create the database and all tables
 
 -- Create database if not exists
-CREATE DATABASE IF NOT EXISTS nextidea_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE nextidea_db;
+CREATE DATABASE IF NOT EXISTS nextidea CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE nextidea;
 
 -- Users table
 CREATE TABLE IF NOT EXISTS users (
