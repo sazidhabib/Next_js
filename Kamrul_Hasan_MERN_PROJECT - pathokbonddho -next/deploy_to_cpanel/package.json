@@ -7,7 +7,7 @@
     "dev:next": "next dev",
     "dev:server": "nodemon server.js",
     "build": "next build",
-    "start": "NODE_ENV=production node server.js",
+    "start": "cross-env NODE_ENV=production node server.js",
     "lint": "next lint",
     "migrate:up": "npx dotenv sequelize-cli db:migrate",
     "migrate:down": "npx dotenv sequelize-cli db:migrate:undo",

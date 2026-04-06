@@ -298,26 +298,7 @@ const createNews = async (req, res) => {
 // ✅ Get All News Posts - UPDATED VERSION
 const getAllNews = async (req, res) => {
 
-    console.log('=== DEBUG: Checking News model associations ===');
-    console.log('News model associations:', Object.keys(News.associations || {}));
-
-    try {
-        const testNews = await News.findOne();
-        console.log('Test news ID:', testNews?.id);
-
-        // Try to get categories using different aliases
-        const withMenus = await News.findByPk(testNews?.id, {
-            include: [{ model: Menu, as: 'Menus' }]
-        });
-        console.log('With Menus alias:', withMenus?.Menus?.length || 0);
-
-        const withCategories = await News.findByPk(testNews?.id, {
-            include: [{ model: Menu, as: 'Categories' }]
-        });
-        console.log('With Categories alias:', withCategories?.Categories?.length || 0);
-    } catch (debugErr) {
-        console.log('Association debug error:', debugErr.message);
-    }
+    console.log('=== NEWS CONTROLLER READY ===');
 
     try {
         const {
@@ -364,17 +345,6 @@ const getAllNews = async (req, res) => {
 
         console.log('Where clause:', whereClause);
 
-        // Add this debug code in your getAllNews function
-        console.log('Debug: Checking News model associations:');
-        try {
-            // Access the internal associations object
-            console.log('Available associations for News model:');
-            for (const assocAlias in News.associations) {
-                console.log(`- ${assocAlias}`);
-            }
-        } catch (debugErr) {
-            console.log('Could not access associations:', debugErr.message);
-        }
 
         // Get news WITH associations
         const { count, rows } = await News.findAndCountAll({
