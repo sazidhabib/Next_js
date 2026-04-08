@@ -31,7 +31,9 @@ nextApp.prepare().then(() => {
             "http://localhost:3000",
             "http://localhost:5000",
             "https://pathakbondhu.com",
-            "http://pathakbondhu.com"
+            "http://pathakbondhu.com",
+            "https://pathokbonddhu.kamrulhasan.info",
+            "http://pathokbonddhu.kamrulhasan.info"
         ],
         methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS"],
         credentials: true,
@@ -44,7 +46,7 @@ nextApp.prepare().then(() => {
     app.use((req, res, next) => {
         res.setHeader(
             "Content-Security-Policy",
-            "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://static.cloudflareinsights.com https://pathakbondhu.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://pathakbondhu.com; frame-src 'self' https://www.google.com https://www.youtube.com https://youtube.com;"
+            "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://static.cloudflareinsights.com https://pathakbondhu.com https://pathokbonddhu.kamrulhasan.info; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://pathakbondhu.com https://pathokbonddhu.kamrulhasan.info; frame-src 'self' https://www.google.com https://www.youtube.com https://youtube.com;"
         );
         next();
     });

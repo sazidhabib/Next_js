@@ -33,7 +33,11 @@ export async function generateMetadata() {
 
   // Ensure favicon is a valid file path, not a data URL
   const isValidPath = faviconPath && !faviconPath.startsWith('data:');
-  const favicon = isValidPath ? faviconPath : '/favicon.ico';
+  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';
+  const resolvedFaviconPath = isValidPath 
+    ? (faviconPath.startsWith('http') ? faviconPath : `${baseUrl}${faviconPath}`) 
+    : '/favicon.ico';
+  const favicon = resolvedFaviconPath;
 
   return {
     title: `${siteName} - সংবাদ পোর্টাল`,
@@ -48,8 +52,6 @@ export default function RootLayout({ children }) {
   return (
     <html lang="bn">
       <head>
-        <link rel="icon" href="/favicon.ico" type="image/x-icon" />
-        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
       </head>
       <body suppressHydrationWarning>
         <CustomHelmetProvider>

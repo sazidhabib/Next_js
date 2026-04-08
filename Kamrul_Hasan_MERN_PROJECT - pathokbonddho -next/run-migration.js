@@ -33,7 +33,7 @@ async function runMigrations() {
         // Get all migration files
         const migrationsPath = path.join(__dirname, 'migrations');
         const migrationFiles = fs.readdirSync(migrationsPath)
-            .filter(file => file.endsWith('.js') && file.includes('add-meta-and-hierarchy-to-menus'))
+            .filter(file => file.endsWith('.js'))
             .sort();
 
         console.log(`Found ${migrationFiles.length} migration file(s) to run`);

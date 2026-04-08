@@ -53,7 +53,9 @@ export function FaviconUpdater() {
         mainLink.type = isIco ? 'image/x-icon' : 'image/png';
 
         // Set href with cache busting to force refresh
-        const newHref = `${path}?time=${Date.now()}`;
+        const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';
+        const finalPath = path.startsWith('http') ? path : `${baseUrl}${path}`;
+        const newHref = `${finalPath}?time=${Date.now()}`;
         mainLink.href = newHref;
         console.log('FaviconUpdater: Updated main favicon link to:', newHref);
 
