@@ -8,6 +8,26 @@ const nextConfig = {
         hostname: 'kamrulhasan.info',
       },
       {
+        protocol: 'https',
+        hostname: '*.kamrulhasan.info',
+      },
+      {
+        protocol: 'https',
+        hostname: 'pathokbonddhu.kamrulhasan.info',
+      },
+      {
+        protocol: 'http',
+        hostname: 'pathokbonddhu.kamrulhasan.info',
+      },
+      {
+        protocol: 'https',
+        hostname: 'pathakbondhu.com',
+      },
+      {
+        protocol: 'http',
+        hostname: 'pathakbondhu.com',
+      },
+      {
         protocol: 'http',
         hostname: 'localhost',
         port: '5000',

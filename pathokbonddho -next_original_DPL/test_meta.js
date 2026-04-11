@@ -1,0 +1,1 @@
+fetch('http://localhost:3000/about-us').then(r=>r.text()).then(t=>{ const tf=t.match(/<title>([^<]*)<\/title>/); const df=t.match(/<meta[^>]*name="description"[^>]*content="([^>"]*)"/); const kf=t.match(/<meta[^>]*name="keywords"[^>]*content="([^>"]*)"/); console.log('TITLE:', tf?tf[1]:null); console.log('DESC:', df?df[1]:null); console.log('KEY:', kf?kf[1]:null); })
