@@ -52,9 +52,15 @@ const NewsWidget = ({ cell }) => {
         fetchNews();
     }, [cell.contentId, cell.tag, cell.resolvedContent, STATIC_BASE]);
 
-    const getImageUrl = (newsItem) => {
+    const getImageUrl = (newsItem, preferHighRes = false) => {
         if (!newsItem) return null;
-        let imagePath = newsItem.thumbImage || newsItem.leadImage || newsItem.metaImage;
+        
+        let imagePath;
+        if (preferHighRes) {
+            imagePath = newsItem.leadImage || newsItem.thumbImage || newsItem.metaImage;
+        } else {
+            imagePath = newsItem.thumbImage || newsItem.leadImage || newsItem.metaImage;
+        }
         
         if (!imagePath && newsItem.newsType === 'video' && newsItem.videoLink) {
             const videoId = getYoutubeId(newsItem.videoLink);
@@ -98,9 +104,9 @@ const NewsWidget = ({ cell }) => {
 
     if (!news) return null;
 
-    const imageUrl = getImageUrl(news);
-    const newsLink = `/news/${news._id || news.id}`;
     const design = cell.design || 'title-image-top';
+    const imageUrl = getImageUrl(news, design === 'text-inside-image' || cell.rowSpan > 1 || cell.colSpan > 1);
+    const newsLink = `/news/${news._id || news.id}`;
     const imageHeight = getImageHeight();
 
     const NewsImage = ({ className, currentDesign }) => {
@@ -126,6 +132,7 @@ const NewsWidget = ({ cell }) => {
                     className={`${className} object-fit-cover`}
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                     priority={cell.rowSpan > 1 || cell.colSpan > 1} // Prioritize larger widgets
+                    quality={90}
                 />
             </div>
         );

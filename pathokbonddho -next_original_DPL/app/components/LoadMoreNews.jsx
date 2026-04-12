@@ -68,9 +68,15 @@ const LoadMoreNews = ({ slug, excludeIds }) => {
         fetchNews(nextPage);
     };
 
-    const getImageUrl = (newsItem) => {
+    const getImageUrl = (newsItem, preferHighRes = false) => {
         if (!newsItem) return null;
-        let imagePath = newsItem.thumbImage || newsItem.leadImage || newsItem.metaImage;
+        
+        let imagePath;
+        if (preferHighRes) {
+            imagePath = newsItem.leadImage || newsItem.thumbImage || newsItem.metaImage;
+        } else {
+            imagePath = newsItem.thumbImage || newsItem.leadImage || newsItem.metaImage;
+        }
         
         if (!imagePath && newsItem.newsType === 'video' && newsItem.videoLink) {
             const videoId = getYoutubeId(newsItem.videoLink);
@@ -117,16 +123,17 @@ const LoadMoreNews = ({ slug, excludeIds }) => {
                                         </h5>
                                     </Link>
                                     <div className="d-flex gap-3">
-                                        {imageUrl && (
+                                        {getImageUrl(item, false) && (
                                             <div className="news-side-image-wrapper flex-shrink-0 position-relative" style={{ width: '140px', height: '95px' }}>
 
                                                 <Link href={newsLink} className="d-block w-100 h-100">
                                                     <Image
-                                                        src={imageUrl}
+                                                        src={getImageUrl(item, false)}
                                                         alt={item.newsHeadline}
                                                         fill
                                                         className="object-fit-cover news-side-image"
                                                         sizes="140px"
+                                                        quality={90}
                                                     />
                                                 </Link>
                                             </div>
@@ -147,15 +154,16 @@ const LoadMoreNews = ({ slug, excludeIds }) => {
 
                                 {/* Mobile Layout: Image Top */}
                                 <div className="d-flex d-md-none flex-column h-100 p-2 border shadow-sm bg-white hover-shadow transition" style={{ transition: 'all 0.3s ease' }}>
-                                    {imageUrl && (
+                                    {getImageUrl(item, true) && (
                                         <div className="mb-2 w-100 position-relative" style={{ aspectRatio: '16/9' }}>
                                             <Link href={newsLink} className="d-block w-100 h-100">
                                                 <Image
-                                                    src={imageUrl}
+                                                    src={getImageUrl(item, true)}
                                                     alt={item.newsHeadline}
                                                     fill
                                                     className="object-fit-cover"
                                                     sizes="(max-width: 768px) 50vw, 33vw"
+                                                    quality={90}
                                                 />
                                             </Link>
                                         </div>

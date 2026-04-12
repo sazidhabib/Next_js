@@ -2413,7 +2413,7 @@ footer {
 .news-design-side-layout,
 .news-design-title-only {
     transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease !important;
-    border-radius: 8px;
+
     background-color: transparent;
 }
 
@@ -2431,6 +2431,7 @@ footer {
 .news-design-side-layout {
     padding: 8px;
 }
+
 .news-design-side-layout:hover {
     transform: translateX(4px);
     background-color: #f8f9fa;
@@ -2452,7 +2453,7 @@ footer {
 .side-image-container,
 .text-inside-image-img {
     overflow: hidden;
-    border-radius: 6px;
+
     background-color: #f8f9fa;
 }
 

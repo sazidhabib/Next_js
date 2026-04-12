@@ -35,7 +35,7 @@ const ImageWidget = ({ cell }) => {
 
     if (loading && !imageData) return <div className="h-100 w-100 bg-light animate-pulse"></div>;
 
-    const imageUrl = imageData?.imageUrl 
+    const imageUrl = imageData?.imageUrl
         ? (imageData.imageUrl.startsWith('http') ? imageData.imageUrl : `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000'}/${imageData.imageUrl.replace(/^\//, '')}`)
         : (cell.contentId && (cell.contentId.startsWith('http') || cell.contentId.startsWith('/')) ? cell.contentId : null);
 
@@ -50,6 +50,7 @@ const ImageWidget = ({ cell }) => {
                 className="object-fit-cover rounded group-hover-scale transition-all"
                 sizes="(max-width: 768px) 100vw, 50vw"
                 priority={cell.rowSpan > 1 || cell.colSpan > 1}
+                quality={90}
             />
             {(imageData?.title || cell.title) && (
                 <div className="position-absolute bottom-0 start-0 end-0 p-2 bg-gradient-dark text-white small font-bangla">

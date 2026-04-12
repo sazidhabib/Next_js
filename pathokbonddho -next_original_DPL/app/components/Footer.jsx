@@ -29,7 +29,7 @@ const Footer = () => {
                         <p className="text-light opacity-75 medium lh-lg">
                             {settings?.footerDescription || ''}
                         </p>
-                        <div className="d-flex justify-content-between gap-3 mt-4">
+                        <div className="d-flex justify-content-center gap-3 mt-4">
                             {settings?.social?.facebook && (
                                 <a href={settings.social.facebook} target="_blank" rel="noopener noreferrer" className="text-white hover-opacity transition" style={{ transition: 'opacity 0.2s', opacity: 0.8 }} onMouseOver={e => e.currentTarget.style.opacity = 1} onMouseOut={e => e.currentTarget.style.opacity = 0.8}>
                                     <i className="fab fa-facebook-f fs-5"></i>
