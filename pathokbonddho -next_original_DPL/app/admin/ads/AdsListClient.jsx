@@ -46,31 +46,43 @@ const AdFilters = ({ filters, onFilterChange, loading }) => {
                     <option value="false">Inactive</option>
                 </Form.Select>
             </Col>
-            <Col md={3} className="d-flex align-items-end">
-                <Button variant="outline-secondary" className="w-100" onClick={() => onFilterChange({ search: '', type: '', position: '', isActive: '' })} disabled={loading}>Clear Filters</Button>
+            <Col md={2}>
+                <Form.Label>Page</Form.Label>
+                <Form.Control placeholder="Home, details..." value={filters.page} onChange={(e) => handleFilterChange('page', e.target.value)} disabled={loading} />
+            </Col>
+            <Col md={2} className="d-flex align-items-end">
+                <Button variant="outline-secondary" className="w-100" onClick={() => onFilterChange({ search: '', type: '', position: '', isActive: '', page: '' })} disabled={loading}>Clear Filters</Button>
             </Col>
         </Row>
+
     );
 };
 
-const AdForm = ({ ad, onClose, onSuccess }) => {
+const AdForm = ({ ad, onClose, onSuccess, categories = [] }) => {
     const [formData, setFormData] = useState({
         name: '', slug: '', type: 'image', position: 'sidebar',
-        imageUrl: '', headCode: '', bodyCode: '', displayPages: '',
+        imageUrl: '', headCode: '', bodyCode: '', displayPages: [],
         startDate: '', endDate: '', isActive: true, maxImpressions: ''
     });
     const [imageFile, setImageFile] = useState(null);
     const [imagePreview, setImagePreview] = useState(null);
     const [loading, setLoading] = useState(false);
+
     const [errors, setErrors] = useState({});
 
     useEffect(() => {
         if (ad) {
+            let pages = ad.displayPages || [];
+            if (typeof pages === 'string') {
+                try { pages = JSON.parse(pages); } catch(e) { pages = [pages]; }
+            }
+            if (!Array.isArray(pages)) pages = [pages];
+
             setFormData({
                 name: ad.name || '', slug: ad.slug || '', type: ad.type || 'image',
                 position: ad.position || 'sidebar', imageUrl: ad.imageUrl || '',
                 headCode: ad.headCode || '', bodyCode: ad.bodyCode || '',
-                displayPages: Array.isArray(ad.displayPages) ? ad.displayPages.join(', ') : (ad.displayPages || ''),
+                displayPages: pages,
                 startDate: ad.startDate ? ad.startDate.split('T')[0] : '',
                 endDate: ad.endDate ? ad.endDate.split('T')[0] : '',
                 isActive: ad.isActive !== undefined ? ad.isActive : true,
@@ -78,6 +90,7 @@ const AdForm = ({ ad, onClose, onSuccess }) => {
             });
             if (ad.image) setImagePreview(`${IMG_URL}/${ad.image}`);
         }
+
     }, [ad]);
 
     const handleInputChange = (e) => {
@@ -102,10 +115,11 @@ const AdForm = ({ ad, onClose, onSuccess }) => {
             Object.keys(formData).forEach(key => {
                 let value = formData[key];
                 if (key === 'displayPages') {
-                    submitData.append(key, JSON.stringify(value ? [value] : []));
+                    submitData.append(key, JSON.stringify(formData.displayPages || []));
                 } else if (key === 'maxImpressions') {
                     submitData.append(key, value || 'null');
                 } else if (value !== '' && value !== null) {
+
                     submitData.append(key, value);
                 }
             });
@@ -159,7 +173,106 @@ const AdForm = ({ ad, onClose, onSuccess }) => {
                         <Col md={4}><Form.Group className="mb-3"><Form.Label>Start Date</Form.Label><Form.Control type="date" name="startDate" value={formData.startDate} onChange={handleInputChange} /></Form.Group></Col>
                         <Col md={4}><Form.Group className="mb-3"><Form.Label>End Date</Form.Label><Form.Control type="date" name="endDate" value={formData.endDate} onChange={handleInputChange} /></Form.Group></Col>
                     </Row>
-                    <Form.Check type="checkbox" label="Active" name="isActive" checked={formData.isActive} onChange={handleInputChange} className="mb-3" />
+                    <Row>
+                        <Col md={12}>
+                            <Form.Group className="mb-3">
+                                <Form.Label>Targeting (Display Pages)</Form.Label>
+                                <div className="border rounded p-3 bg-white" style={{ maxHeight: '200px', overflowY: 'auto' }}>
+                                    <Row className="mb-2">
+                                        <Col md={12}>
+                                            <div className="p-2 bg-light rounded mb-2 border">
+                                                <Form.Check 
+                                                    type="checkbox" 
+                                                    id="check-all" 
+                                                    label={<strong>SITE-WIDE (Show on every single page)</strong>}
+                                                    className="fw-bold text-primary"
+                                                    checked={formData.displayPages.includes('all')}
+                                                    onChange={(e) => {
+                                                        if (e.target.checked) {
+                                                            setFormData(prev => ({ ...prev, displayPages: ['all'] }));
+                                                        } else {
+                                                            setFormData(prev => ({ ...prev, displayPages: [] }));
+                                                        }
+                                                    }}
+                                                />
+                                            </div>
+                                        </Col>
+                                    </Row>
+                                    <Row>
+                                        <Col md={3}>
+                                            <Form.Check 
+                                                type="checkbox" 
+                                                id="check-home" 
+                                                label="Home Page" 
+                                                disabled={formData.displayPages.includes('all')}
+                                                checked={formData.displayPages.includes('all') || formData.displayPages.includes('home')}
+                                                onChange={(e) => {
+                                                    const pages = e.target.checked ? [...formData.displayPages, 'home'] : formData.displayPages.filter(p => p !== 'home');
+                                                    setFormData(prev => ({ ...prev, displayPages: pages }));
+                                                }}
+                                            />
+                                        </Col>
+                                        <Col md={3}>
+                                            <Form.Check 
+                                                type="checkbox" 
+                                                id="check-details" 
+                                                label="News Details" 
+                                                disabled={formData.displayPages.includes('all')}
+                                                checked={formData.displayPages.includes('all') || formData.displayPages.includes('details')}
+                                                onChange={(e) => {
+                                                    const pages = e.target.checked ? [...formData.displayPages, 'details'] : formData.displayPages.filter(p => p !== 'details');
+                                                    setFormData(prev => ({ ...prev, displayPages: pages }));
+                                                }}
+                                            />
+                                        </Col>
+                                        <Col md={3}>
+                                            <Form.Check 
+                                                type="checkbox" 
+                                                id="check-section" 
+                                                label="Section Page" 
+                                                disabled={formData.displayPages.includes('all')}
+                                                checked={formData.displayPages.includes('all') || formData.displayPages.includes('section')}
+                                                onChange={(e) => {
+                                                    const pages = e.target.checked ? [...formData.displayPages, 'section'] : formData.displayPages.filter(p => p !== 'section');
+                                                    setFormData(prev => ({ ...prev, displayPages: pages }));
+                                                }}
+                                            />
+                                        </Col>
+                                    </Row>
+                                    <hr className="my-2" />
+                                    <Row>
+                                        <Col md={12} className="mb-1"><small className="text-muted fw-bold">Specific Categories:</small></Col>
+                                        {categories.map((cat, idx) => (
+                                            <Col md={4} key={cat.id || idx}>
+                                                <Form.Check 
+                                                    type="checkbox" 
+                                                    id={`check-cat-${cat.id}`} 
+                                                    label={<span style={{fontSize: '0.85rem'}}>{cat.name}</span>} 
+                                                    disabled={formData.displayPages.includes('all')}
+                                                    checked={formData.displayPages.includes('all') || (cat.path && formData.displayPages.includes(cat.path.replace(/^\//, '')))}
+                                                    onChange={(e) => {
+                                                        const cleanPath = cat.path.replace(/^\//, '');
+                                                        const pages = e.target.checked 
+                                                            ? [...formData.displayPages, cleanPath] 
+                                                            : formData.displayPages.filter(p => p !== cleanPath);
+                                                        setFormData(prev => ({ ...prev, displayPages: pages }));
+                                                    }}
+                                                />
+                                            </Col>
+                                        ))}
+                                    </Row>
+                                </div>
+
+                            </Form.Group>
+                        </Col>
+                    </Row>
+                    <Row>
+                        <Col md={12} className="d-flex align-items-center mb-3">
+                            <Form.Check type="checkbox" label="Active" name="isActive" checked={formData.isActive} onChange={handleInputChange} />
+                        </Col>
+                    </Row>
+
+
                     <div className="d-flex justify-content-end gap-2"><Button variant="secondary" onClick={onClose}>Cancel</Button><Button type="submit" disabled={loading}>{loading ? 'Saving...' : 'Save Ad'}</Button></div>
                 </Form>
             </Card.Body>
@@ -171,7 +284,8 @@ const AdsListClient = ({ initialAds, initialTotalCount, isAdmin }) => {
     const [showForm, setShowForm] = useState(false);
     const [editingAd, setEditingAd] = useState(null);
     const [selectedAds, setSelectedAds] = useState([]);
-    const [filters, setFilters] = useState({ search: '', type: '', position: '', isActive: '' });
+    const [filters, setFilters] = useState({ search: '', type: '', position: '', isActive: '', page: '' });
+
     const [page, setPage] = useState(1);
     const limit = 10;
 
@@ -182,7 +296,11 @@ const AdsListClient = ({ initialAds, initialTotalCount, isAdmin }) => {
     }).toString();
 
     const swrKey = isAdmin ? `/ads?${queryString}` : null;
+    const { data: menuData } = useSWR('/menu', fetcher);
+    const categories = Array.isArray(menuData) ? menuData : (menuData?.data || []);
+
     const { data: swrData, error, isLoading: loading } = useSWR(swrKey, fetcher, {
+
         fallbackData: page === 1 && Object.values(filters).every(v => v === '') ? { ads: initialAds, totalCount: initialTotalCount } : undefined,
         keepPreviousData: true
     });
@@ -222,8 +340,14 @@ const AdsListClient = ({ initialAds, initialTotalCount, isAdmin }) => {
             </div>
 
             {showForm ? (
-                <AdForm ad={editingAd} onClose={() => setShowForm(false)} onSuccess={() => { setShowForm(false); refreshData(); }} />
+                <AdForm 
+                    ad={editingAd} 
+                    categories={categories}
+                    onClose={() => setShowForm(false)} 
+                    onSuccess={() => { setShowForm(false); refreshData(); }} 
+                />
             ) : (
+
                 <Card className="shadow-sm">
                     <Card.Body>
                         <AdFilters filters={filters} onFilterChange={setFilters} loading={loading} />
@@ -236,10 +360,12 @@ const AdsListClient = ({ initialAds, initialTotalCount, isAdmin }) => {
                                         <th>Ad</th>
                                         <th>Type</th>
                                         <th>Position</th>
+                                        <th>Display Pages</th>
                                         <th>Status</th>
                                         <th>Stats (Imp/Clk)</th>
                                         <th className="text-center">Actions</th>
                                     </tr>
+
                                 </thead>
                                 <tbody>
                                     {loading ? <tr><td colSpan="7" className="text-center py-5"><Spinner animation="border" /></td></tr> : ads.map(ad => (
@@ -264,8 +390,14 @@ const AdsListClient = ({ initialAds, initialTotalCount, isAdmin }) => {
                                             </td>
                                             <td><Badge bg={ad.type === 'image' ? 'primary' : 'success'}>{ad.type === 'image' ? 'Image' : 'Adsense'}</Badge></td>
                                             <td><Badge bg="secondary" className="text-capitalize">{ad.position}</Badge></td>
+                                            <td>
+                                                {ad.displayPages && Array.isArray(ad.displayPages) ? (
+                                                    ad.displayPages.map((p, i) => <Badge key={i} bg="info" className="me-1 mb-1">{p}</Badge>)
+                                                ) : <small className="text-muted">All Pages</small>}
+                                            </td>
                                             <td><Badge bg={ad.isActive ? 'success' : 'danger'}>{ad.isActive ? 'Active' : 'Inactive'}</Badge></td>
                                             <td>{ad.currentImpressions || 0} / {ad.clickCount || 0}</td>
+
                                             <td className="text-center">
                                                 <div className="btn-group">
                                                     <Button variant="outline-primary" size="sm" onClick={() => { setEditingAd(ad); setShowForm(true); }}>Edit</Button>

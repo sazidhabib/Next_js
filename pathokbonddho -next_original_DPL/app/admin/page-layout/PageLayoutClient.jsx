@@ -61,10 +61,28 @@ const PageLayoutClient = ({ initialPages, initialTags, initialMenus, initialDesi
                             contentType: c.contentType || 'text',
                             contentId: c.contentId || null,
                             contentTitle: c.contentTitle || null,
-                            merged: c.merged || false,
-                            rowSpan: c.rowSpan || 1,
-                            colSpan: c.colSpan || 1
+                            merged: !!(c.merged || c.Merged),
+                            masterCell: !!(c.masterCell || c.MasterCell),
+                            rowSpan: c.rowSpan || c.RowSpan || 1,
+                            colSpan: c.colSpan || c.ColSpan || 1,
+                            masterCellKey: c.masterCellKey || c.MasterCellKey || null,
+                            mergedCells: (() => {
+                                const mc = c.mergedCells || c.MergedCells;
+                                if (!mc) return null;
+                                if (Array.isArray(mc)) return mc;
+                                if (typeof mc === 'string') {
+                                    try {
+                                        const p = JSON.parse(mc);
+                                        return Array.isArray(p) ? p : (p ? Object.values(p) : null);
+                                    } catch (e) { return null; }
+                                }
+                                if (typeof mc === 'object') return Object.values(mc);
+                                return null;
+                            })()
                         }))
+
+
+
                     }))
                 }));
             }
@@ -221,20 +239,37 @@ const PageLayoutClient = ({ initialPages, initialTags, initialMenus, initialDesi
             master.colSpan = endCol - startCol + 1;
             master.mergedCells = cells.slice(1);
             cells.slice(1).forEach(c => {
-                const cell = section.rows[c.row].columns[c.col];
-                cell.merged = true; cell.masterCell = false; cell.masterCellKey = `${startRow}-${startCol}`;
+                const row = section.rows && section.rows[c.row];
+                const cell = row && row.columns ? row.columns[c.col] : null;
+                if (cell) {
+                    cell.merged = true; 
+                    cell.masterCell = false; 
+                    cell.masterCellKey = `${startRow}-${startCol}`;
+                }
             });
         } else if (mergeData.action === 'split') {
-            const { row, col } = mergeData;
-            const master = section.rows[row].columns[col];
-            if (master.merged && master.masterCell) {
-                (master.mergedCells || []).forEach(c => {
-                    const cell = section.rows[c.row].columns[c.col];
-                    cell.merged = false; delete cell.masterCellKey;
+            const { row: rIdx, col: cIdx } = mergeData;
+            const masterRow = section.rows && section.rows[rIdx];
+            const master = masterRow && masterRow.columns ? masterRow.columns[cIdx] : null;
+            
+            if (master && master.merged && master.masterCell) {
+                const cellsToRestore = Array.isArray(master.mergedCells) 
+                    ? master.mergedCells 
+                    : (master.mergedCells && typeof master.mergedCells === 'object' ? Object.values(master.mergedCells) : []);
+                
+                cellsToRestore.forEach(c => {
+                    const row = section.rows && section.rows[c.row];
+                    const cell = row && row.columns ? row.columns[c.col] : null;
+                    if (cell) {
+                        cell.merged = false; 
+                        delete cell.masterCellKey;
+                    }
                 });
                 master.merged = false; master.masterCell = false; master.rowSpan = 1; master.colSpan = 1; delete master.mergedCells;
             }
         }
+
+
         setEditPage(newData);
     };
 
@@ -424,7 +459,16 @@ const PageLayoutClient = ({ initialPages, initialTags, initialMenus, initialDesi
                             onAddColumn={idx => { const ss = [...editPage.PageSections]; ss[idx].rows.forEach(r => r.columns.push({colOrder: r.columns.length+1, contentType: 'text', width: Math.floor(12/(r.columns.length+1))})); setEditPage({...editPage, PageSections: ss}); }}
                             onDeleteRow={(si, ri) => { const ss = [...editPage.PageSections]; ss[si].rows.splice(ri, 1); setEditPage({...editPage, PageSections: ss}); }}
                             onDeleteColumn={(si, ci) => { const ss = [...editPage.PageSections]; ss[si].rows.forEach(r => r.columns.splice(ci, 1)); setEditPage({...editPage, PageSections: ss}); }}
+                            onDeleteSection={(si) => {
+                                if (window.confirm('Are you sure you want to delete this ENTIRE section? This cannot be undone.')) {
+                                    const ss = [...editPage.PageSections];
+                                    ss.splice(si, 1);
+                                    setEditPage({ ...editPage, PageSections: ss });
+                                    toast.info("Section removed (Save Layout to commit changes)");
+                                }
+                            }}
                             onUpdateCell={updateGridCell}
+
                             onUpdateCellContent={updateCellContent}
                             onMergeCells={mergeGridCells}
                             availableTags={availableTags}

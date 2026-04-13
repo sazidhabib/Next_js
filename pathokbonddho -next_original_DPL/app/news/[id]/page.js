@@ -4,7 +4,7 @@ import Footer from '../../components/Footer';
 import NewsDetails from '../../components/NewsDetails';
 
 async function getSettings() {
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5000/api';
   try {
     const res = await fetch(`${API_URL}/designs?search=site-settings`, { next: { revalidate: 60 } });
     const data = res.ok ? await res.json() : null;
@@ -17,7 +17,7 @@ async function getSettings() {
 }
 
 async function getNewsData(id) {
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5000/api';
   try {
     const [newsRes, headerAdsRes, sidebarAdsRes, footerAdsRes] = await Promise.all([
       fetch(`${API_URL}/news/${id}`, { next: { revalidate: 60 } }),
@@ -43,7 +43,7 @@ async function getNewsData(id) {
 
 export async function generateMetadata({ params }) {
   const { id } = await params;
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5000/api';
   const settings = await getSettings();
 
   try {

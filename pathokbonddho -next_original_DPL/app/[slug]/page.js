@@ -4,7 +4,7 @@ import Footer from '../components/Footer';
 import PageRenderer from '../components/PageRenderer';
 
 async function getPageData(slug) {
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5000/api';
   try {
     const listRes = await fetch(`${API_URL}/layout`, { next: { revalidate: 60 } });
     if (!listRes.ok) return null;
@@ -97,7 +97,7 @@ async function getPageData(slug) {
 
 export async function generateMetadata({ params }) {
     const { slug } = await params;
-    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5000/api';
     
     try {
         const response = await fetch(`${API_URL}/menus`, { next: { revalidate: 60 } });

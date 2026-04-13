@@ -4,7 +4,7 @@ import ScrollToSection from './components/ScrollToSection';
 import PageRenderer from './components/PageRenderer';
 
 export async function generateMetadata() {
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5000/api';
   
   try {
       const response = await fetch(`${API_URL}/menus`, { next: { revalidate: 60 } });
@@ -33,18 +33,30 @@ export async function generateMetadata() {
 }
 
 async function getPageData(slug = 'home') {
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5000/api';
   try {
     // 1. Resolve page ID from slug
+    console.log(`[DEBUG] Attempting to resolve layout for slug: "${slug}"`);
     const listRes = await fetch(`${API_URL}/layout`, { next: { revalidate: 60 } });
-    if (!listRes.ok) return null;
+    if (!listRes.ok) {
+        console.error(`[DEBUG] Failed to fetch layout list. Status: ${listRes.status}`);
+        return null;
+    }
     const allPages = await listRes.json();
+    console.log(`[DEBUG] Found ${allPages.length} total pages in database.`);
 
     const matchPage = allPages.find(p => p.name.toLowerCase() === slug.toLowerCase()) ||
       allPages.find(p => p.name.toLowerCase() === 'home') ||
-      allPages[0];
+      (allPages.length > 0 ? allPages[0] : null);
 
-    if (!matchPage) return null;
+    if (!matchPage) {
+      console.warn(`[DEBUG] No page layout found for "${slug}" or fallback. Existing pages:`, allPages.map(p => p.name));
+      return null;
+    }
+
+    console.log(`[DEBUG] Resolved layout: "${matchPage.name}" (ID: ${matchPage.id})`);
+
+
 
     // 2. Fetch full layout details
     const layoutRes = await fetch(`${API_URL}/layout/${matchPage.id}`, { next: { revalidate: 60 } });

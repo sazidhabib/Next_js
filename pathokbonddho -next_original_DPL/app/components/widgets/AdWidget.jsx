@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import api from '@/app/lib/api';
 import { usePathname } from 'next/navigation';
-import Image from 'next/image';
+import NextImage from 'next/image';
 
 const AdWidget = ({ cell }) => {
     const pathname = usePathname();
@@ -39,6 +39,10 @@ const AdWidget = ({ cell }) => {
     // Check if ad should be visible on current page
     const shouldShowAd = useMemo(() => {
         if (!ad) return false;
+        
+        // If 'all' is selected, show it everywhere
+        if (displayPages.includes('all')) return true;
+
         if (currentPage === 'details') {
             return displayPages.includes('details');
         }
@@ -46,6 +50,7 @@ const AdWidget = ({ cell }) => {
         if (displayPages.includes('none')) return false;
         return displayPages.includes(currentPage);
     }, [ad, displayPages, currentPage]);
+
 
     // Fetch ad data if not provided by server
     useEffect(() => {
@@ -103,19 +108,33 @@ const AdWidget = ({ cell }) => {
     }
 
     const content = (
-        <div className="ad-widget h-100 w-100 overflow-hidden position-relative" style={{ backgroundColor: '#ffffffff', minHeight: '100px' }}>
-            {imgSrc && (
-                <Image
+        <div 
+            className="ad-widget w-100 overflow-hidden position-relative" 
+            style={{ 
+                backgroundColor: '#f8f9fa', 
+                minHeight: '120px',
+                height: '100%',
+                display: 'block'
+            }}
+        >
+            {imgSrc ? (
+                <NextImage
                     src={imgSrc}
                     alt={adTitle}
                     fill
-                    className="w-100"
+                    className="w-100 h-100"
                     style={{ objectFit: 'contain' }}
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    priority={currentPage === 'home'}
                 />
+            ) : (
+                <div className="d-flex align-items-center justify-content-center h-100 text-muted small">
+                    Advertisement
+                </div>
             )}
         </div>
     );
+
 
     if (adLink && adLink !== '#') {
         return (

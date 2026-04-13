@@ -250,16 +250,16 @@ const getAdsByPosition = async (req, res) => {
 
         // If page is specified, check displayPages
         if (page) {
-            if (page === 'details') {
-                // Special rule: details page MUST be explicitly listed
-                whereClause.displayPages = { [Op.like]: `%details%` };
-            } else {
-                whereClause[Op.or] = [
-                    { displayPages: null },
-                    { displayPages: { [Op.like]: `%${page}%` } }
-                ];
-            }
+            whereClause[Op.or] = [
+                { displayPages: null },
+                { displayPages: "" },
+                { displayPages: "[]" },
+                { displayPages: { [Op.like]: `%all%` } },
+                { displayPages: { [Op.like]: `%${page}%` } }
+            ];
         }
+
+
 
         const ads = await Ad.findAll({
             where: whereClause,

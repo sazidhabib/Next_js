@@ -369,7 +369,7 @@ const MergeControls = ({ selectedCells, selectedRange, onMerge, onClearSelection
 
 // Excel Grid Section
 export const ExcelGridSection = ({
-    section, sectionIndex, onUpdateSection, onAddRow, onAddColumn, onDeleteRow, onDeleteColumn,
+    section, sectionIndex, onUpdateSection, onAddRow, onAddColumn, onDeleteRow, onDeleteColumn, onDeleteSection,
     onUpdateCell, onUpdateCellContent, onMergeCells, availableTags, availableDesigns = [], menus = [],
     globalAutoNewsSelection = false, autoNewsData = {}
 }) => {
@@ -484,16 +484,31 @@ export const ExcelGridSection = ({
 
     return (
         <Card className="mb-4 shadow-sm">
-            <Card.Header className="d-flex justify-content-between align-items-center bg-white">
-                <div className="d-flex align-items-center">
+            <Card.Header className="d-flex justify-content-between align-items-center bg-white py-2">
+                <div className="d-flex align-items-center flex-grow-1">
                     <h6 className="mb-0 me-3">{section.name || `Section ${sectionIndex + 1}`}</h6>
-                    <Form.Check type="switch" label="Auto News" checked={section.autoNewsSelection || false} onChange={e => onUpdateSection(sectionIndex, 'autoNewsSelection', e.target.checked)} />
+                    <Form.Check 
+                        type="switch" 
+                        id={`auto-news-switch-${sectionIndex}`}
+                        label="Auto News" 
+                        checked={section.autoNewsSelection || false} 
+                        onChange={e => onUpdateSection(sectionIndex, 'autoNewsSelection', e.target.checked)} 
+                    />
                 </div>
-                <div>
-                    <Button variant="outline-primary" size="sm" className="me-2" onClick={() => onAddRow(sectionIndex)}>+ Row</Button>
+                <div className="d-flex gap-2">
+                    <Button variant="outline-primary" size="sm" onClick={() => onAddRow(sectionIndex)}>+ Row</Button>
                     <Button variant="outline-primary" size="sm" onClick={() => onAddColumn(sectionIndex)}>+ Col</Button>
+                    <Button 
+                        variant="outline-danger" 
+                        size="sm" 
+                        onClick={() => onDeleteSection(sectionIndex)}
+                        title="Delete this entire section"
+                    >
+                        🗑️ Delete Section
+                    </Button>
                 </div>
             </Card.Header>
+
             <Card.Body>
                 {/* Section Name from Menu Selection - like old React project */}
                 <Form.Group className="mb-3">

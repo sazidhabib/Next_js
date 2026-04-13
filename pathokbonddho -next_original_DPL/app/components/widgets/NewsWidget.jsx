@@ -140,13 +140,13 @@ const NewsWidget = ({ cell }) => {
 
     if (design === 'text-inside-image') {
         return (
-            <div className="custom-font news-design-text-inside-image h-100 pb-2 overflow-hidden position-relative">
+            <div className="custom-font news-design-text-inside-image h-100 overflow-hidden position-relative" style={{ minHeight: '350px' }}>
                 <Link href={newsLink} className="text-decoration-none h-100 d-block">
                     <NewsImage className="text-inside-image-img h-100" currentDesign={design} />
-                    <div className="text-inside-image-overlay position-absolute bottom-0 start-0 end-0 p-3 bg-gradient-dark">
-                        <h5 className="text-white mb-1 fw-bold font-bangla">
+                    <div className="text-inside-image-overlay position-absolute bottom-0 start-0 end-0 p-3">
+                        <h4 className="text-white mb-2 fw-bold font-bangla text-inside-image-title">
                             {news.alternativeHeadline || news.newsHeadline}
-                        </h5>
+                        </h4>
                         <small className="text-light opacity-75">{formatDate(news.createdAt)}</small>
                     </div>
                 </Link>
@@ -158,6 +158,7 @@ const NewsWidget = ({ cell }) => {
             </div>
         );
     }
+
 
     if (design === 'title-only') {
         return (
