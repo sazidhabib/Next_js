@@ -5,7 +5,7 @@ import ImageWidget from './widgets/ImageWidget';
 import VideoWidget from './widgets/VideoWidget';
 import AdWidget from './widgets/AdWidget';
 
-const GridCell = ({ cell }) => {
+const GridCell = ({ cell, isPriority }) => {
     const { contentType } = cell;
 
     if (!contentType || contentType === 'text') {
@@ -15,14 +15,14 @@ const GridCell = ({ cell }) => {
     const renderContent = () => {
         switch (contentType) {
             case 'news':
-                return <NewsWidget cell={cell} />;
+                return <NewsWidget cell={cell} isPriority={isPriority} />;
             case 'image':
-                return <ImageWidget cell={cell} />;
+                return <ImageWidget cell={cell} isPriority={isPriority} />;
             case 'video':
                 return <VideoWidget cell={cell} />;
             case 'ads':
             case 'ad':
-                return <AdWidget cell={cell} />;
+                return <AdWidget cell={cell} isPriority={isPriority} />;
             default:
                 return null;
         }

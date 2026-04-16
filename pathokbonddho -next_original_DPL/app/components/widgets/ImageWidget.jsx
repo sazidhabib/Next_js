@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import api from '@/app/lib/api';
 import Image from 'next/image';
 
-const ImageWidget = ({ cell }) => {
+const ImageWidget = ({ cell, isPriority }) => {
     const [imageData, setImageData] = useState(cell.resolvedContent || null);
     const [loading, setLoading] = useState(!cell.resolvedContent);
     const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
@@ -36,7 +36,15 @@ const ImageWidget = ({ cell }) => {
     if (loading && !imageData) return <div className="h-100 w-100 bg-light animate-pulse"></div>;
 
     const imageUrl = imageData?.imageUrl
-        ? (imageData.imageUrl.startsWith('http') ? imageData.imageUrl : `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000'}/${imageData.imageUrl.replace(/^\//, '')}`)
+        ? (() => {
+            const rawUrl = imageData.imageUrl.startsWith('http') ? imageData.imageUrl : `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000'}/${imageData.imageUrl.replace(/^\//, '')}`;
+            if (rawUrl.startsWith('http')) {
+                const isLocal = rawUrl.includes('127.0.0.1') || rawUrl.includes('localhost');
+                if (isLocal) return rawUrl;
+                return rawUrl.replace(/^http:\/\//, 'https://');
+            }
+            return rawUrl;
+        })()
         : (cell.contentId && (cell.contentId.startsWith('http') || cell.contentId.startsWith('/')) ? cell.contentId : null);
 
     if (!imageUrl) return null;
@@ -49,7 +57,7 @@ const ImageWidget = ({ cell }) => {
                 fill
                 className="object-fit-cover rounded group-hover-scale transition-all"
                 sizes="(max-width: 768px) 100vw, 50vw"
-                priority={cell.rowSpan > 1 || cell.colSpan > 1}
+                priority={isPriority !== undefined ? isPriority : (cell.rowSpan > 1 || cell.colSpan > 1)}
                 quality={90}
             />
             {(imageData?.title || cell.title) && (

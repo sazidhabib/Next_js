@@ -5,7 +5,7 @@ import { Card, Badge, Spinner } from 'react-bootstrap';
 import Link from 'next/link';
 import Image from 'next/image';
 
-const NewsWidget = ({ cell }) => {
+const NewsWidget = ({ cell, isPriority }) => {
     const [news, setNews] = useState(cell.resolvedContent || null);
     const [loading, setLoading] = useState(!cell.resolvedContent);
     const STATIC_BASE = STATIC_URL || 'http://localhost:5000';
@@ -69,6 +69,9 @@ const NewsWidget = ({ cell }) => {
 
         if (!imagePath) return null;
         if (imagePath.startsWith('http')) {
+            // Only force https if not on a local environment
+            const isLocal = imagePath.includes('127.0.0.1') || imagePath.includes('localhost');
+            if (isLocal) return imagePath;
             return imagePath.replace(/^http:\/\//, 'https://');
         }
         return `${STATIC_BASE}/${imagePath.replace(/^\//, '')}`;
@@ -131,7 +134,7 @@ const NewsWidget = ({ cell }) => {
                     fill
                     className={`${className} object-fit-cover`}
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                    priority={cell.rowSpan > 1 || cell.colSpan > 1} // Prioritize larger widgets
+                    priority={isPriority !== undefined ? isPriority : (cell.rowSpan > 1 || cell.colSpan > 1)} // Strictly use isPriority if provided, otherwise fallback to span logic
                     quality={90}
                 />
             </div>

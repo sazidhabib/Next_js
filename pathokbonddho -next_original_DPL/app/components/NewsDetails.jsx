@@ -4,8 +4,6 @@ import Link from 'next/link';
 import api, { STATIC_URL } from '@/app/lib/api';
 import { Container, Row, Col, Spinner, Alert, Badge } from 'react-bootstrap';
 import Image from 'next/image';
-import { Helmet } from 'react-helmet-async';
-
 const NewsDetails = ({ id, initialData, initialAds }) => {
     const [news, setNews] = useState(initialData || null);
     const [loading, setLoading] = useState(!initialData);
@@ -92,6 +90,9 @@ const NewsDetails = ({ id, initialData, initialAds }) => {
     const getImageUrl = (imagePath) => {
         if (!imagePath) return null;
         if (imagePath.startsWith('http')) {
+            // Only force https if not on a local environment
+            const isLocal = imagePath.includes('127.0.0.1') || imagePath.includes('localhost');
+            if (isLocal) return imagePath;
             return imagePath.replace(/^http:\/\//, 'https://');
         }
         return `${STATIC_BASE}/${imagePath.replace(/^\//, '')}`;
@@ -145,17 +146,7 @@ const NewsDetails = ({ id, initialData, initialAds }) => {
 
     return (
         <article className="news-details-page bg-white pb-5">
-            {/* SEO Helmet - Dynamic meta tags only (title is handled by generateMetadata) */}
-            {news && (
-                <Helmet>
-                    <meta name="description" content={news.metaDescription || news.shortDescription || ''} />
-                    {news.metaKeywords && <meta name="keywords" content={news.metaKeywords} />}
-                    {leadImageUrl && <meta property="og:image" content={leadImageUrl} />}
-                    {leadImageUrl && <meta property="twitter:image" content={leadImageUrl} />}
-                    <meta property="og:title" content={news.newsHeadline || 'News'} />
-                    <meta property="og:description" content={news.metaDescription || news.shortDescription || ''} />
-                </Helmet>
-            )}
+
             <Container className="pt-3">
                 {headerAds.map((ad, idx) => (
                     <div key={ad.id || idx} className="mb-4 text-center">
@@ -179,7 +170,15 @@ const NewsDetails = ({ id, initialData, initialAds }) => {
                                 >
                                     <div style={{ position: 'relative', height: '120px', width: '100%', maxWidth: '728px', margin: '0 auto' }}>
                                         <Image
-                                            src={ad.image.startsWith('http') ? ad.image : `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000'}/uploads/ads/${ad.image}`}
+                                            src={(() => {
+                                                const rawUrl = ad.image.startsWith('http') ? ad.image : `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000'}/uploads/ads/${ad.image}`;
+                                                if (rawUrl.startsWith('http')) {
+                                                    const isLocal = rawUrl.includes('127.0.0.1') || rawUrl.includes('localhost');
+                                                    if (isLocal) return rawUrl;
+                                                    return rawUrl.replace(/^http:\/\//, 'https://');
+                                                }
+                                                return rawUrl;
+                                            })()}
                                             alt={ad.name || 'Advertisement'}
                                             fill
                                             className="rounded shadow-sm"
@@ -304,7 +303,7 @@ const NewsDetails = ({ id, initialData, initialAds }) => {
                                             width={800}
                                             height={500}
                                             className="w-100 h-auto object-fit-cover"
-                                            priority
+                                            priority={news.newsType !== 'video'} // Only prioritize if not a video post
                                             sizes="(max-width: 800px) 100vw, 800px"
                                         />
                                     </div>
@@ -418,7 +417,15 @@ const NewsDetails = ({ id, initialData, initialAds }) => {
                                                     >
                                                         <div style={{ position: 'relative', height: '250px', width: '100%' }}>
                                                             <Image
-                                                                src={imgSrc}
+                                                                src={(() => {
+                                                                    const rawUrl = ad.image.startsWith('http') ? ad.image : `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000'}/uploads/ads/${ad.image}`;
+                                                                    if (rawUrl.startsWith('http')) {
+                                                                        const isLocal = rawUrl.includes('127.0.0.1') || rawUrl.includes('localhost');
+                                                                        if (isLocal) return rawUrl;
+                                                                        return rawUrl.replace(/^http:\/\//, 'https://');
+                                                                    }
+                                                                    return rawUrl;
+                                                                })()}
                                                                 alt={ad.name || 'Advertisement'}
                                                                 fill
                                                                 className="rounded shadow-sm"
@@ -451,7 +458,7 @@ const NewsDetails = ({ id, initialData, initialAds }) => {
                                         <div key={item.id || idx} className="d-flex align-items-start gap-3 mb-4 pb-3 border-bottom hover-bg-light transition rounded p-2">
                                             {rImg && (
                                                 <div className="flex-shrink-0" style={{ width: '100px', height: '70px', overflow: 'hidden', borderRadius: '4px', position: 'relative' }}>
-                                                    <Link href={`/news/${item.id || item._id}`} className="d-block w-100 h-100">
+                                                    <Link href={`/news/${item.id || item._id}`} className="d-block w-100 h-100 position-relative">
                                                         <Image
                                                             src={rImg}
                                                             alt={item.newsHeadline}
@@ -502,7 +509,15 @@ const NewsDetails = ({ id, initialData, initialAds }) => {
                                 >
                                     <div style={{ position: 'relative', height: '120px', width: '100%', maxWidth: '728px', margin: '0 auto' }}>
                                         <Image
-                                            src={ad.image.startsWith('http') ? ad.image : `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000'}/uploads/ads/${ad.image}`}
+                                            src={(() => {
+                                                const rawUrl = ad.image.startsWith('http') ? ad.image : `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000'}/uploads/ads/${ad.image}`;
+                                                if (rawUrl.startsWith('http')) {
+                                                    const isLocal = rawUrl.includes('127.0.0.1') || rawUrl.includes('localhost');
+                                                    if (isLocal) return rawUrl;
+                                                    return rawUrl.replace(/^http:\/\//, 'https://');
+                                                }
+                                                return rawUrl;
+                                            })()}
                                             alt={ad.name || 'Advertisement'}
                                             fill
                                             className="rounded shadow-sm"

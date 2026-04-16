@@ -116,10 +116,9 @@ const AdForm = ({ ad, onClose, onSuccess, categories = [] }) => {
                 let value = formData[key];
                 if (key === 'displayPages') {
                     submitData.append(key, JSON.stringify(formData.displayPages || []));
-                } else if (key === 'maxImpressions') {
-                    submitData.append(key, value || 'null');
+                } else if (key === 'maxImpressions' || key === 'startDate' || key === 'endDate') {
+                    submitData.append(key, value || '');
                 } else if (value !== '' && value !== null) {
-
                     submitData.append(key, value);
                 }
             });

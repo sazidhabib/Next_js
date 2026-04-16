@@ -392,8 +392,8 @@ const updateAd = async (req, res) => {
             headCode: headCode !== undefined ? headCode : existingAd.headCode,
             bodyCode: bodyCode !== undefined ? bodyCode : existingAd.bodyCode,
             displayPages: displayPagesToSave,
-            startDate: startDate !== undefined ? startDate : existingAd.startDate,
-            endDate: endDate !== undefined ? endDate : existingAd.endDate,
+            startDate: startDate !== undefined ? (startDate === '' ? null : startDate) : existingAd.startDate,
+            endDate: endDate !== undefined ? (endDate === '' ? null : endDate) : existingAd.endDate,
             isActive: parsedIsActive,
             maxImpressions: parsedMaxImpressions,
         };

@@ -174,7 +174,7 @@ const GridSection = ({ section }) => {
                         alignItems: 'stretch',
                     }}
                 >
-                    {gridCells.map(({ col, gridRow, gridColumn, key }, index) => {
+                    {gridCells.map(({ col, gridRow, gridColumn, key, rowIndex }, index) => {
                         const colStart = parseInt(gridColumn.split(' / ')[0]);
                         const colSpan = parseInt(gridColumn.split('span ')[1] || 1);
                         const isLastCol = (colStart - 1 + colSpan) >= totalCols;
@@ -195,7 +195,7 @@ const GridSection = ({ section }) => {
                                     position: 'relative'
                                 }}
                             >
-                                <GridCell cell={col} />
+                                <GridCell cell={col} isPriority={rowIndex === 0} />
 
                                 {/* Vertical Separator Line */}
                                 {!isLastCol && (
@@ -238,7 +238,7 @@ const GridSection = ({ section }) => {
                     {/* 1. Merged cells always at the top */}
                     {mergedCells.map(({ col, key }) => (
                         <div key={`mobile-merged-${key}`} className="mb-3">
-                            <GridCell cell={{ ...col, design: 'image-top' }} />
+                            <GridCell cell={{ ...col, design: 'image-top' }} isPriority={false} />
                         </div>
                     ))}
 
@@ -248,7 +248,7 @@ const GridSection = ({ section }) => {
                             return (
                                 <div key={`mobile-row-${rowIdx}`} className="mb-3">
                                     {row.cells.map(({ col, key }) => (
-                                        <GridCell key={`mobile-ad-${key}`} cell={col} />
+                                        <GridCell key={`mobile-ad-${key}`} cell={col} isPriority={false} />
                                     ))}
                                 </div>
                             );
@@ -257,7 +257,7 @@ const GridSection = ({ section }) => {
                             return (
                                 <div key={`mobile-row-${rowIdx}`} className="mb-3 mobile-row-title-image-left">
                                     {row.cells.map(({ col, key }) => (
-                                        <GridCell key={`mobile-til-${key}`} cell={{ ...col, design: 'title-image-left' }} />
+                                        <GridCell key={`mobile-til-${key}`} cell={{ ...col, design: 'title-image-left' }} isPriority={false} />
                                     ))}
                                 </div>
                             );
@@ -267,7 +267,7 @@ const GridSection = ({ section }) => {
                             <div key={`mobile-row-${rowIdx}`} className="row g-2 mb-3 mobile-row-image-top">
                                 {row.cells.map(({ col, key }) => (
                                     <div key={`mobile-it-${key}`} className="col-6">
-                                        <GridCell cell={{ ...col, design: 'image-top' }} />
+                                        <GridCell cell={{ ...col, design: 'image-top' }} isPriority={false} />
                                     </div>
                                 ))}
                             </div>

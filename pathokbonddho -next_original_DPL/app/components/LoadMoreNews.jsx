@@ -85,6 +85,9 @@ const LoadMoreNews = ({ slug, excludeIds }) => {
 
         if (!imagePath) return null;
         if (imagePath.startsWith('http')) {
+            // Only force https if not on a local environment
+            const isLocal = imagePath.includes('127.0.0.1') || imagePath.includes('localhost');
+            if (isLocal) return imagePath;
             return imagePath.replace(/^http:\/\//, 'https://');
         }
         return `${API_BASE_URL}/${imagePath.replace(/^\//, '')}`;
@@ -126,7 +129,7 @@ const LoadMoreNews = ({ slug, excludeIds }) => {
                                         {getImageUrl(item, false) && (
                                             <div className="news-side-image-wrapper flex-shrink-0 position-relative" style={{ width: '140px', height: '95px' }}>
 
-                                                <Link href={newsLink} className="d-block w-100 h-100">
+                                                <Link href={newsLink} className="d-block w-100 h-100 position-relative">
                                                     <Image
                                                         src={getImageUrl(item, false)}
                                                         alt={item.newsHeadline}
@@ -156,7 +159,7 @@ const LoadMoreNews = ({ slug, excludeIds }) => {
                                 <div className="d-flex d-md-none flex-column h-100 p-2 border shadow-sm bg-white hover-shadow transition" style={{ transition: 'all 0.3s ease' }}>
                                     {getImageUrl(item, true) && (
                                         <div className="mb-2 w-100 position-relative" style={{ aspectRatio: '16/9' }}>
-                                            <Link href={newsLink} className="d-block w-100 h-100">
+                                            <Link href={newsLink} className="d-block w-100 h-100 position-relative">
                                                 <Image
                                                     src={getImageUrl(item, true)}
                                                     alt={item.newsHeadline}
