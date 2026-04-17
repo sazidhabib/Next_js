@@ -1,59 +1,63 @@
-import { Sparkles, TrendingUp, Palette, Headphones } from "lucide-react";
+import { Target, Cpu, Settings, Trophy, FileText, Star, Palette, TrendingUp, Headphones, Sparkles } from "lucide-react";
 import ServiceHero from "../../components/ServiceHero";
 import ServiceContent from "../../components/ServiceContent";
 import CTASection from "../../components/CTASection";
+import CaseStudySection from "../../components/CaseStudySection";
 
 export const metadata = {
   title: "Creative Concept & Execution | Next Idea Solutions",
-  description: "Expert conceptualization and impeccable execution for your brand. We create award-winning campaigns that deliver measurable results.",
+  description: "Elevate your brand with Next Idea Solutions' creative service that blends strategy, design, and technology to bring your concept to life.",
 };
 
 export default function CreativeConceptExecutionPage() {
   return (
     <>
       <ServiceHero
-        icon={<Palette />}
+        icon={<Sparkles />}
         title="Creative Concept & Execution"
-        tagline="Transforming Ideas Into Impactful Campaigns"
-        description="We bring your brand vision to life through expert conceptualization and impeccable execution. Our creative team crafts compelling narratives that resonate with your audience and drive measurable results."
+        tagline="Elevate your brand with Next Idea Solutions' creative service that blends strategy, design, and technology to bring your concept to life."
+        description="At Next Idea Solutions, we believe in the power of creativity to transform brands. Our Creative Concept & Execution service is tailored to craft innovative, impactful, and memorable campaigns that resonate with your audience."
         image="/creative-concepth.png"
       />
       <ServiceContent
         overview={{
           title: "About This Service",
-          description: "Our Creative Concept & Execution service is the foundation of every successful marketing campaign. We combine strategic thinking with creative excellence to develop concepts that not only capture attention but also drive business results. From initial ideation to final execution, our team ensures every touchpoint reflects your brand's unique personality and communicates your key messages effectively.",
+          description: "At Next Idea Solutions, we believe in the power of creativity to transform brands. Our Creative Concept & Execution service is tailored to craft innovative, impactful, and memorable campaigns that resonate with your audience. We merge creativity with strategic insights to develop concepts that align with your brand's goals and values.",
         }}
         features={{
-          title: "What's Included",
+          title: "WHAT SETS US APART",
           items: [
-            "Brand Strategy Development",
-            "Creative Concept Development",
-            "Campaign Theme & Messaging",
-            "Visual Identity Creation",
-            "Content Strategy & Production",
-            "Multi-channel Campaign Execution",
-            "Creative Direction & Oversight",
-            "Performance Optimization",
+            {
+              icon: <Target className="w-4 h-4" />,
+              text: "Strategic Creativity: We merge creativity with strategic insights to develop concepts that align with your brand's goals and values."
+            },
+            {
+              icon: <Cpu className="w-4 h-4" />,
+              text: "Holistic Approach: From ideation to execution, our team ensures a seamless creative process, encompassing diverse media channels and platforms."
+            },
+            {
+              icon: <Settings className="w-4 h-4" />,
+              text: "Tailored Solutions: Every brand is unique, and we customize our creative strategies to meet your specific needs and capture your audience's attention."
+            },
           ],
         }}
         process={{
-          title: "Our Process",
+          title: "WHAT WE OFFER",
           steps: [
             {
-              title: "Discovery & Research",
-              description: "We dive deep into understanding your brand, audience, competitors, and market landscape to identify unique opportunities.",
+              title: "Creative Campaigns",
+              description: "Our team designs captivating campaigns that engage your audience across digital and traditional platforms.",
+              icon: <Trophy className="w-6 h-6" />,
             },
             {
-              title: "Strategy & Concept Development",
-              description: "Our creative team develops multiple concept directions aligned with your brand objectives and audience insights.",
+              title: "Content Creation",
+              description: "We craft compelling content, including visuals, copy, and multimedia, to convey your brand's story effectively.",
+              icon: <FileText className="w-6 h-6" />,
             },
             {
-              title: "Refinement & Approval",
-              description: "We refine the selected concept based on your feedback, ensuring every detail aligns with your vision.",
-            },
-            {
-              title: "Execution & Delivery",
-              description: "Our team executes the approved concept across all chosen channels, maintaining quality and consistency throughout.",
+              title: "Brand Messaging",
+              description: "We refine your brand's messaging to deliver a clear, consistent, and impactful narrative.",
+              icon: <Star className="w-6 h-6" />,
             },
           ],
         }}
@@ -63,7 +67,12 @@ export default function CreativeConceptExecutionPage() {
           { title: "Video Production", link: "/services/video-production-photography", icon: <Headphones /> },
         ]}
       />
-      <CTASection />
+      <CaseStudySection />
+      <CTASection
+        title="Embark on a creative journey with Next Idea Solutions."
+        description="Let's craft a narrative that captivates and converts."
+        buttonText="Ask for A Proposal"
+      />
     </>
   );
 }

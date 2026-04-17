@@ -4,7 +4,11 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 
-export default function CTASection() {
+export default function CTASection({ 
+  title = "Have Some Projects in Mind?", 
+  description = "Let's discuss how we can help you achieve your business goals with strategic creative solutions.",
+  buttonText = "Ask for a quote"
+}) {
   return (
     <section className="py-24 bg-[#242424]">
       <div className="container mx-auto px-4 text-center">
@@ -15,7 +19,7 @@ export default function CTASection() {
           transition={{ duration: 0.6, ease: "easeOut" }}
         >
           <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-            Have Some Projects in <span className="text-primary">Mind?</span>
+            {title}
           </h2>
         </motion.div>
 
@@ -26,8 +30,7 @@ export default function CTASection() {
           transition={{ duration: 0.6, delay: 0.15, ease: "easeOut" }}
           className="text-xl text-zinc-400 mb-10 max-w-2xl mx-auto"
         >
-          Let&apos;s discuss how we can help you achieve your business goals
-          with strategic creative solutions.
+          {description}
         </motion.p>
 
         <motion.div
@@ -41,7 +44,7 @@ export default function CTASection() {
             href="/contact"
             className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-primary text-white font-semibold rounded-full hover:bg-primary-dark transition-all duration-300 hover:scale-105 shadow-lg shadow-primary/25"
           >
-            Ask for a quote
+            {buttonText}
             <ArrowRight className="w-5 h-5" />
           </Link>
           <Link

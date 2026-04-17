@@ -1,66 +1,67 @@
 "use client";
 
-"use client";
-
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Check, X } from "lucide-react";
 
-const packages = [
-  {
-    name: "Starter",
-    features: [
-      { name: "Digital Audit & Strategy", included: true },
-      { name: "Tracking Integration", included: true },
-      { name: "Funnel Development", included: true },
-      { name: "Campaign Automation", included: false },
-      { name: "Analytics", included: false },
-    ],
-    channels: "Facebook",
-    mediaSpending: "Depends on client's budget",
-    setupCost: "10,000 TK",
-    managementFee: "30,000 TK",
-  },
-  {
-    name: "Growth Hacker",
-    features: [
-      { name: "Digital Audit & Strategy", included: true },
-      { name: "Tracking Integration", included: true },
-      { name: "Funnel Development", included: true },
-      { name: "Campaign Automation", included: true },
-      { name: "Analytics", included: true },
-    ],
-    channels: "Facebook, LinkedIn, Google Display, Google Search, YouTube, Programmatic Ads",
-    mediaSpending: "Up to $1K",
-    setupCost: "20,000 TK",
-    managementFee: "45,000 TK",
-  },
-  {
-    name: "Progressive",
-    features: [
-      { name: "Digital Audit & Strategy", included: true },
-      { name: "Tracking Integration", included: true },
-      { name: "Funnel Development", included: true },
-      { name: "Campaign Automation", included: true },
-      { name: "Analytics", included: true },
-    ],
-    channels: "Facebook, Google Search, Google Display, Email",
-    mediaSpending: "$1K-$3K",
-    setupCost: "25,000 TK",
-    managementFee: "Starting at 60,000 TK",
-  },
-];
-
-export default function PackagesSection() {
+export default function PackagesSection({ 
+  title = "Our Packages",
+  subtitle = "Choose the perfect package for your business needs",
+  footerText = "*Media payments are paid in advance",
+  packages = [
+    {
+      name: "Starter",
+      features: [
+        { name: "Digital Audit & Strategy", included: true },
+        { name: "Tracking Integration", included: true },
+        { name: "Funnel Development", included: true },
+        { name: "Campaign Automation", included: false },
+        { name: "Analytics", included: false },
+      ],
+      channels: "Facebook",
+      mediaSpending: "Depends on client's budget",
+      setupCost: "10,000 TK",
+      managementFee: "30,000 TK",
+    },
+    {
+      name: "Growth Hacker",
+      features: [
+        { name: "Digital Audit & Strategy", included: true },
+        { name: "Tracking Integration", included: true },
+        { name: "Funnel Development", included: true },
+        { name: "Campaign Automation", included: true },
+        { name: "Analytics", included: true },
+      ],
+      channels: "Facebook, LinkedIn, Google Display, Google Search, YouTube, Programmatic Ads",
+      mediaSpending: "Up to $1K",
+      setupCost: "20,000 TK",
+      managementFee: "45,000 TK",
+    },
+    {
+      name: "Progressive",
+      features: [
+        { name: "Digital Audit & Strategy", included: true },
+        { name: "Tracking Integration", included: true },
+        { name: "Funnel Development", included: true },
+        { name: "Campaign Automation", included: true },
+        { name: "Analytics", included: true },
+      ],
+      channels: "Facebook, Google Search, Google Display, Email",
+      mediaSpending: "$1K-$3K",
+      setupCost: "25,000 TK",
+      managementFee: "Starting at 60,000 TK",
+    },
+  ]
+}) {
   return (
     <section className="py-20 md:py-28 bg-white">
       <div className="container mx-auto px-4">
         <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }} className="text-center mb-16">
           <h2 className="text-3xl md:text-5xl font-bold text-black mb-4">
-            Our Packages
+            {title}
           </h2>
           <p className="text-zinc-400 text-lg max-w-2xl mx-auto">
-            Choose the perfect package for your business needs
+            {subtitle}
           </p>
         </motion.div>
 
@@ -84,7 +85,7 @@ export default function PackagesSection() {
 
               <div className="text-center mb-8">
                 <h3 className="text-2xl font-bold text-black mb-2">{pkg.name}</h3>
-                <p className="text-zinc-500 text-sm">{pkg.mediaSpending}</p>
+                {pkg.mediaSpending && <p className="text-zinc-500 text-sm">{pkg.mediaSpending}</p>}
               </div>
 
               <div className="space-y-4 mb-8">
@@ -109,37 +110,45 @@ export default function PackagesSection() {
                 ))}
               </div>
 
-              <div className="border-t border-zinc-800 pt-6 mb-6">
-                <div className="mb-4">
-                  <p className="text-zinc-500 text-sm mb-1">Channel Coverage</p>
-                  <p className="text-black text-sm">{pkg.channels}</p>
+              {(pkg.channels || pkg.setupCost || pkg.managementFee) && (
+                <div className="border-t border-zinc-800 pt-6 mb-6">
+                  {pkg.channels && (
+                    <div className="mb-4">
+                      <p className="text-zinc-500 text-sm mb-1">Channel Coverage</p>
+                      <p className="text-black text-sm">{pkg.channels}</p>
+                    </div>
+                  )}
+                  {pkg.setupCost && (
+                    <div className="mb-4">
+                      <p className="text-zinc-500 text-sm mb-1">
+                        Tracking Integration & Funnel Setup
+                      </p>
+                      <p className="text-black font-semibold">{pkg.setupCost}</p>
+                      <p className="text-zinc-600 text-xs">(One-time Cost)</p>
+                    </div>
+                  )}
+                  {pkg.managementFee && (
+                    <div>
+                      <p className="text-zinc-500 text-sm mb-1">Campaign Management Fee</p>
+                      <p className="text-black font-semibold text-lg">{pkg.managementFee}</p>
+                      <p className="text-zinc-600 text-xs">(Monthly)</p>
+                    </div>
+                  )}
                 </div>
-                <div className="mb-4">
-                  <p className="text-zinc-500 text-sm mb-1">
-                    Tracking Integration & Funnel Setup
-                  </p>
-                  <p className="text-black font-semibold">{pkg.setupCost}</p>
-                  <p className="text-zinc-600 text-xs">(One-time Cost)</p>
-                </div>
-                <div>
-                  <p className="text-zinc-500 text-sm mb-1">Campaign Management Fee</p>
-                  <p className="text-black font-semibold text-lg">{pkg.managementFee}</p>
-                  <p className="text-zinc-600 text-xs">(Monthly)</p>
-                </div>
-              </div>
+              )}
 
               <Link
                 href="/contact#packages"
                 className="block w-full py-3 px-6 bg-primary hover:bg-primary-dark text-white font-semibold rounded-xl text-center transition-colors"
               >
-                Choose Plan
+                {pkg.buttonText || "Choose Plan"}
               </Link>
             </motion.div>
           ))}
         </motion.div>
 
         <motion.p initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.5 }} className="text-center text-zinc-500 text-sm mt-8">
-          *Media payments are paid in advance
+          {footerText}
         </motion.p>
       </div>
     </section>
