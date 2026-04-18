@@ -1404,14 +1404,14 @@ footer {
 
 .text-inside-image-title {
     font-weight: 700;
-    line-height: 1.3;
+    line-height: 1.7;
+    padding-top: 5px;
+    padding-bottom: 5px;
     margin-bottom: 8px;
     color: #fff;
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
     display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
+
 }
 
 .text-inside-image-date {
@@ -2503,7 +2503,7 @@ footer {
 .hover-primary,
 .news-design-side-layout h5,
 .news-design-title-only h5,
-.news-design-text-inside-image h5 {
+.news-design-text-inside-image .text-inside-image-title {
     transition: color 0.3s ease !important;
 }
 
@@ -2512,7 +2512,7 @@ footer {
 .hover-shadow:hover .hover-primary,
 .news-design-side-layout:hover h5,
 .news-design-title-only:hover h5,
-.news-design-text-inside-image:hover h5 {
+.news-design-text-inside-image:hover .text-inside-image-title {
     color: #E67E22 !important;
     /* Brand orange for high attention */
 }

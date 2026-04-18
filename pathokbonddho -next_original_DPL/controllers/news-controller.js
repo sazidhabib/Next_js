@@ -639,6 +639,8 @@ const updateNews = async (req, res) => {
                 'news',
                 req.params.id
             );
+        } else if (req.body.leadImagePath) {
+            updateData.leadImage = req.body.leadImagePath;
         }
 
         // Handle thumb image
@@ -666,6 +668,8 @@ const updateNews = async (req, res) => {
                 'news',
                 req.params.id
             );
+        } else if (req.body.thumbImagePath) {
+            updateData.thumbImage = req.body.thumbImagePath;
         }
 
         // Handle meta image
@@ -693,6 +697,8 @@ const updateNews = async (req, res) => {
                 'news',
                 req.params.id
             );
+        } else if (req.body.metaImagePath) {
+            updateData.metaImage = req.body.metaImagePath;
         }
 
         // If no thumbImage is set but leadImage is, use leadImage as thumbImage

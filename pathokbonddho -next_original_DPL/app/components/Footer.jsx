@@ -97,10 +97,22 @@ const Footer = () => {
                                     {settings?.contact?.email || 'me@kamrulhasan.info'}
                                 </a>
                             </li>
-                            <li className="d-flex align-items-center">
+                            <li className="d-flex align-items-center mb-3">
                                 <i className="fas fa-phone-alt me-3 text-white fs-5 opacity-100"></i>
                                 <span>{settings?.contact?.phone || 'যোগাযোগের নম্বর শীঘ্রই আসছে...'}</span>
                             </li>
+                            {settings?.contact?.extension && (
+                                <li className="d-flex align-items-center mb-3">
+                                    <i className="fas fa-tty me-3 text-white fs-5 opacity-100" style={{ marginLeft: '1px' }}></i>
+                                    <span>{settings.contact.extension}</span>
+                                </li>
+                            )}
+                            {settings?.contact?.mobile && (
+                                <li className="d-flex align-items-center">
+                                    <i className="fas fa-mobile-alt me-3 text-white fs-5 opacity-100" style={{ marginLeft: '2px' }}></i>
+                                    <span>{settings.contact.mobile}</span>
+                                </li>
+                            )}
                         </ul>
                     </div>
                 </div>

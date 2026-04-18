@@ -54,14 +54,14 @@ const NewsWidget = ({ cell, isPriority }) => {
 
     const getImageUrl = (newsItem, preferHighRes = false) => {
         if (!newsItem) return null;
-        
+
         let imagePath;
         if (preferHighRes) {
             imagePath = newsItem.leadImage || newsItem.thumbImage || newsItem.metaImage;
         } else {
             imagePath = newsItem.thumbImage || newsItem.leadImage || newsItem.metaImage;
         }
-        
+
         if (!imagePath && newsItem.newsType === 'video' && newsItem.videoLink) {
             const videoId = getYoutubeId(newsItem.videoLink);
             if (videoId) return `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
@@ -147,7 +147,7 @@ const NewsWidget = ({ cell, isPriority }) => {
                 <Link href={newsLink} className="text-decoration-none h-100 d-block">
                     <NewsImage className="text-inside-image-img h-100" currentDesign={design} />
                     <div className="text-inside-image-overlay position-absolute bottom-0 start-0 end-0 p-3">
-                        <h4 className="text-white mb-2 fw-bold font-bangla text-inside-image-title">
+                        <h4 className="text-white mb-2 fw-bold font-bangla text-inside-image-title ">
                             {news.alternativeHeadline || news.newsHeadline}
                         </h4>
                         <small className="text-light opacity-75">{formatDate(news.createdAt)}</small>
@@ -176,50 +176,118 @@ const NewsWidget = ({ cell, isPriority }) => {
         );
     }
 
-    if (design === 'title-image-left' || design === 'image-left') {
+    if (design === 'title-image-left') {
         return (
-            <div className="custom-font news-design-side-layout d-flex gap-3 pb-3">
-                <div className="flex-grow-1">
-                    <Link href={newsLink} className="text-decoration-none text-dark">
-                        <h5 className="fw-bold mb-2 font-bangla line-clamp-2">
-                            {news.alternativeHeadline || news.newsHeadline}
-                        </h5>
-                    </Link>
-                    {news.shortDescription && (
-                        <p className="small text-muted mb-2 line-clamp-2 d-none d-sm-block font-bangla">{news.shortDescription}</p>
+            <div className="custom-font news-design-side-layout pb-3">
+                <Link href={newsLink} className="text-decoration-none text-dark d-block mb-2">
+                    <h5 className="fw-bold font-bangla mb-1">
+                        {news.alternativeHeadline || news.newsHeadline}
+                    </h5>
+                </Link>
+                <div className="d-flex gap-3">
+                    {imageUrl && (
+                        <div className="side-image-container flex-shrink-0 position-relative" style={{ width: '120px', height: '90px' }}>
+                            <Link href={newsLink} className="d-block h-100">
+                                <NewsImage className="" currentDesign={design} />
+                            </Link>
+                            {news.Categories && news.Categories[0] && (
+                                <Badge bg="danger" className="position-absolute top-0 start-0 m-1" style={{ zIndex: 2 }}>
+                                    {renderCategoryBadgeContent(news.Categories[0])}
+                                </Badge>
+                            )}
+                        </div>
                     )}
-                    <small className="text-muted">{formatDate(news.createdAt)}</small>
-                </div>
-                {imageUrl && (
-                    <div className="side-image-container flex-shrink-0" style={{ width: '120px', height: '90px' }}>
-                        <Link href={newsLink} className="d-block h-100">
-                            <NewsImage className="" currentDesign={design} />
-                        </Link>
+                    <div className="flex-grow-1">
+                        {news.shortDescription && (
+                            <p className="small text-muted mb-2 line-clamp-2 d-none d-sm-block font-bangla">{news.shortDescription}</p>
+                        )}
+                        <small className="text-muted">{formatDate(news.createdAt)}</small>
                     </div>
-                )}
+                </div>
             </div>
         );
     }
 
-    if (design === 'title-image-right' || design === 'image-right') {
+    if (design === 'image-left') {
         return (
-            <div className="custom-font news-design-side-layout d-flex flex-row-reverse gap-3 pb-3">
+            <div className="custom-font news-design-side-layout d-flex gap-3 pb-3">
+                {imageUrl && (
+                    <div className="side-image-container flex-shrink-0 position-relative" style={{ width: '120px', height: '90px' }}>
+                        <Link href={newsLink} className="d-block h-100">
+                            <NewsImage className="" currentDesign={design} />
+                        </Link>
+                        {news.Categories && news.Categories[0] && (
+                            <Badge bg="danger" className="position-absolute top-0 start-0 m-2" style={{ zIndex: 2 }}>
+                                {renderCategoryBadgeContent(news.Categories[0])}
+                            </Badge>
+                        )}
+                    </div>
+                )}
                 <div className="flex-grow-1">
                     <Link href={newsLink} className="text-decoration-none text-dark">
                         <h5 className="fw-bold mb-2 font-bangla line-clamp-2">
                             {news.alternativeHeadline || news.newsHeadline}
                         </h5>
                     </Link>
-                    {news.shortDescription && (
-                        <p className="small text-muted mb-2 line-clamp-2 d-none d-sm-block font-bangla">{news.shortDescription}</p>
+                    <small className="text-muted">{formatDate(news.createdAt)}</small>
+                </div>
+            </div>
+        );
+    }
+
+    if (design === 'title-image-right') {
+        return (
+            <div className="custom-font news-design-side-layout pb-3">
+                <Link href={newsLink} className="text-decoration-none text-dark d-block mb-2">
+                    <h5 className="fw-bold font-bangla mb-1">
+                        {news.alternativeHeadline || news.newsHeadline}
+                    </h5>
+                </Link>
+                <div className="d-flex gap-3">
+                    <div className="flex-grow-1">
+                        {news.shortDescription && (
+                            <p className="small text-muted mb-2 line-clamp-2 d-none d-sm-block font-bangla">{news.shortDescription}</p>
+                        )}
+                        <small className="text-muted">{formatDate(news.createdAt)}</small>
+                    </div>
+                    {imageUrl && (
+                        <div className="side-image-container flex-shrink-0 position-relative" style={{ width: '120px', height: '90px' }}>
+                            <Link href={newsLink} className="d-block h-100">
+                                <NewsImage className="" currentDesign={design} />
+                            </Link>
+                            {news.Categories && news.Categories[0] && (
+                                <Badge bg="danger" className="position-absolute top-0 end-0 m-1" style={{ zIndex: 2 }}>
+                                    {renderCategoryBadgeContent(news.Categories[0])}
+                                </Badge>
+                            )}
+                        </div>
                     )}
+                </div>
+            </div>
+        );
+    }
+
+    if (design === 'image-right') {
+        return (
+            <div className="custom-font news-design-side-layout d-flex gap-3 pb-3">
+                <div className="flex-grow-1">
+                    <Link href={newsLink} className="text-decoration-none text-dark">
+                        <h5 className="fw-bold mb-2 font-bangla ">
+                            {news.alternativeHeadline || news.newsHeadline}
+                        </h5>
+                    </Link>
                     <small className="text-muted">{formatDate(news.createdAt)}</small>
                 </div>
                 {imageUrl && (
-                    <div className="side-image-container flex-shrink-0" style={{ width: '120px', height: '90px' }}>
+                    <div className="side-image-container flex-shrink-0 position-relative" style={{ width: '120px', height: '90px' }}>
                         <Link href={newsLink} className="d-block h-100">
-                            <NewsImage className="  " currentDesign={design} />
+                            <NewsImage className="" currentDesign={design} />
                         </Link>
+                        {news.Categories && news.Categories[0] && (
+                            <Badge bg="danger" className="position-absolute top-0 end-0 m-2" style={{ zIndex: 2 }}>
+                                {renderCategoryBadgeContent(news.Categories[0])}
+                            </Badge>
+                        )}
                     </div>
                 )}
             </div>

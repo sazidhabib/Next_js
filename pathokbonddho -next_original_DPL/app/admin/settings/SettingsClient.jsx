@@ -25,6 +25,8 @@ const SettingsClient = ({ isAdmin }) => {
         contact: {
             email: 'info@pathokbonddho.com',
             phone: '+880 1XXX-XXXXXX',
+            mobile: '+880 1XXX-XXXXXX',
+            extension: '',
             address: 'Dhaka, Bangladesh'
         },
         social: {
@@ -318,10 +320,29 @@ const SettingsClient = ({ isAdmin }) => {
                                 </Col>
                                 <Col md={6}>
                                     <Form.Group className="mb-3">
-                                        <Form.Label className="fw-bold">Phone Number</Form.Label>
+                                        <Form.Label className="fw-bold">Telephone Number</Form.Label>
                                         <Form.Control
                                             value={settings.contact.phone}
                                             onChange={e => handleChange('contact', 'phone', e.target.value)}
+                                        />
+                                    </Form.Group>
+                                </Col>
+                                <Col md={6}>
+                                    <Form.Group className="mb-3">
+                                        <Form.Label className="fw-bold">Extension Number</Form.Label>
+                                        <Form.Control
+                                            value={settings.contact.extension || ''}
+                                            onChange={e => handleChange('contact', 'extension', e.target.value)}
+                                            placeholder="e.g. Ext: 101"
+                                        />
+                                    </Form.Group>
+                                </Col>
+                                <Col md={6}>
+                                    <Form.Group className="mb-3">
+                                        <Form.Label className="fw-bold">Mobile Number</Form.Label>
+                                        <Form.Control
+                                            value={settings.contact.mobile || ''}
+                                            onChange={e => handleChange('contact', 'mobile', e.target.value)}
                                         />
                                     </Form.Group>
                                 </Col>
