@@ -12,7 +12,7 @@ export function getPool() {
     port: parseInt(process.env.DATABASE_PORT, 10) || 3306,
     user: process.env.DATABASE_USER || 'root',
     password: process.env.DATABASE_PASSWORD || '',
-    database: process.env.DATABASE_NAME || 'nextidea_db',
+    database: process.env.DATABASE_NAME || 'nextidea',
     waitForConnections: true,
     connectionLimit: parseInt(process.env.DATABASE_CONNECTION_LIMIT, 10) || 10,
     queueLimit: 0,

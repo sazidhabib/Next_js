@@ -1,7 +1,11 @@
-import { Sparkles, TrendingUp, Code2, Megaphone } from "lucide-react";
+import { TrendingUp, Code2, Megaphone, Sparkles } from "lucide-react";
 import ServiceHero from "../../components/ServiceHero";
 import ServiceContent from "../../components/ServiceContent";
 import PackagesSection from "../../components/PackagesSection";
+import CaseStudySection from "../../components/CaseStudySection";
+import ClientsSection from "../../components/ClientsSection";
+import PartnerSection from "../../components/PartnerSection";
+import FAQSection from "../../components/FAQSection";
 import CTASection from "../../components/CTASection";
 
 export const metadata = {
@@ -15,47 +19,24 @@ export default function DigitalMediaBuyingPage() {
       <ServiceHero
         icon={<TrendingUp />}
         title="Digital Media Buying"
-        tagline="Data-Driven Campaigns That Deliver Results"
-        description="We specialize in funnel-driven media buying solutions that maximize your ROI. Our strategic approach ensures your message reaches the right audience at the right time."
+        tagline="Funnel-driven media buying solutions that generate higher ROI."
+        description="We specialize in data-driven media buying solutions that maximize your ROI. Our strategic approach ensures your message reaches the right audience at the right time through advanced funnel optimization."
         image="/Digital-Media.png"
       />
       <ServiceContent
         overview={{
-          title: "About This Service",
-          description: "Our Digital Media Buying service is designed to amplify your brand's reach and drive conversions through strategically planned and optimized campaigns. We leverage advanced targeting capabilities, real-time bidding strategies, and continuous performance optimization to ensure every dollar of your advertising budget delivers maximum value.",
+          title: "About Digital Media Buying",
+          description: "Digital media buying is an important and very performant marketing strategy. It's the most effective way to reach your target audience and generate conversions. Through the use of funnel-based media buying, we are able to target the right sort of audience more effectively. By analyzing their behavior and identifying key traits such as demographic profiles, psychographics, and past purchasing behavior, we are able to reach out to them and grow your brand. This results in higher ROI.",
         }}
         features={{
-          title: "What's Included",
+          title: "Why Choose Us",
           items: [
-            "Media Strategy & Planning",
-            "Campaign Setup & Configuration",
-            "Audience Targeting & Segmentation",
-            "A/B Testing & Creative Optimization",
-            "Budget Allocation & Bidding Strategy",
-            "Cross-platform Campaign Management",
-            "Performance Tracking & Reporting",
-            "Conversion Rate Optimization",
-          ],
-        }}
-        process={{
-          title: "Our Process",
-          steps: [
-            {
-              title: "Audience Analysis",
-              description: "We identify and segment your target audience based on demographics, behaviors, and conversion intent.",
-            },
-            {
-              title: "Channel Selection",
-              description: "We recommend the most effective platforms based on your audience and business objectives.",
-            },
-            {
-              title: "Campaign Launch",
-              description: "We set up and launch campaigns with optimized targeting and bidding strategies.",
-            },
-            {
-              title: "Continuous Optimization",
-              description: "We monitor performance and make data-driven adjustments to improve results over time.",
-            },
+            "Data-driven Audience Targeting",
+            "Multi-channel Campaign Management",
+            "Real-time Performance Optimization",
+            "Advanced Funnel Development",
+            "Comprehensive Analytics & Reporting",
+            "Strategic Budget Allocation",
           ],
         }}
         relatedServices={[
@@ -65,6 +46,29 @@ export default function DigitalMediaBuyingPage() {
         ]}
       />
       <PackagesSection />
+      <CaseStudySection />
+      <ClientsSection />
+      <PartnerSection />
+      <FAQSection 
+        items={[
+          {
+            question: "What is digital media buying?",
+            answer: "Digital media buying is the process of purchasing placements for advertisements on websites, apps and other digital platforms. In Bangladesh by Digital Media Buying we mostly refer to Facebook boosting & paid ads in Google or youtube."
+          },
+          {
+            question: "What are the benefits of digital media buying?",
+            answer: "Digital media buying allows for precise targeting, measurable results, and cost-effective scaling. It helps brands reach their specific audience based on demographics, interests, and behaviors, leading to higher conversion rates."
+          },
+          {
+            question: "How does digital media buying work?",
+            answer: "The process involves identifying campaign goals, selecting the right platforms, setting up advanced targeting, and continuous optimization of ad creative and spend to maximize performance."
+          },
+          {
+            question: "What are most used digital media buying platforms in Bangladesh?",
+            answer: "In Bangladesh, the most widely used platforms are Facebook, Google (Search & Display), YouTube, Instagram, and LinkedIn. Programmatic platforms like Eskimi are also popular for local reach."
+          }
+        ]}
+      />
       <CTASection />
     </>
   );

@@ -1,6 +1,8 @@
-import { Sparkles, Palette, Code2, Headphones } from "lucide-react";
+import { Palette, Box, Layers, Package, BookOpen, Sparkles } from "lucide-react";
 import ServiceHero from "../../components/ServiceHero";
 import ServiceContent from "../../components/ServiceContent";
+import PortfolioSection from "../../components/PortfolioSection";
+import BlogsSection from "../../components/BlogsSection";
 import CTASection from "../../components/CTASection";
 
 export const metadata = {
@@ -12,58 +14,46 @@ export default function BrandIdentityPage() {
   return (
     <>
       <ServiceHero
-        icon={<Sparkles />}
+        icon={<Palette />}
         title="Brand Identity"
-        tagline="Building Brands That Stand Out"
-        description="We help create a strong, distinctive brand identity that sets you apart from the competition and resonates with your target audience."
+        tagline="We help creating strong brand identity that will separate you from the noise."
+        description="Your brand is more than a logo; it's an experience. Our design service goes beyond aesthetics, diving deep into the core of your brand to create a visual and emotional identity that speaks to your audience."
         image="/Brand-Identity.png"
       />
       <ServiceContent
         overview={{
-          title: "About This Service",
-          description: "Your brand is more than just a logo - it's the entire perception customers have of your business. Our Brand Identity service encompasses everything from visual elements to brand voice and messaging. We work closely with you to develop a cohesive brand identity that communicates your values, differentiates you from competitors, and creates lasting impressions in the minds of your audience.",
+          title: "Your brand is unique—let's make sure it stands out. Elevate your brand identity with Next Idea Solution",
+          description: "Your brand is more than a logo; it's an experience. Next Idea Solution's Brand identity design service goes beyond aesthetics, diving deep into the core of your brand to create a visual and emotional identity that speaks to your audience.",
         }}
         features={{
-          title: "What&apos;s Included",
+          title: "WHAT WE OFFER",
           items: [
-            "Logo Design & Visual Identity",
-            "Brand Color Palette & Typography",
-            "Brand Guidelines & Style Guide",
-            "Brand Messaging & Voice",
-            "Tagline & Slogan Development",
-            "Brand Application (Stationery, etc.)",
-            "Brand Strategy & Positioning",
-            "Brand Identity Guidelines",
-          ],
-        }}
-        process={{
-          title: "Our Process",
-          steps: [
             {
-              title: "Brand Discovery",
-              description: "We conduct in-depth interviews and research to understand your brand's essence, values, and goals.",
+              title: "Logo Design & Visual Elements",
+              description: "Craft a distinctive and memorable logo that embodies your brand essence.",
+              icon: <Palette />,
             },
             {
-              title: "Visual Exploration",
-              description: "Our design team creates multiple visual directions exploring different ways to express your brand.",
+              title: "Branding Material & Packaging",
+              description: "Design & print your unique branding materials with out of the box design and execution.",
+              icon: <Package />,
             },
             {
-              title: "Refinement",
-              description: "We refine the chosen direction based on your feedback, perfecting every detail.",
-            },
-            {
-              title: "Delivery & Guidelines",
-              description: "We deliver all brand assets and create comprehensive guidelines for consistent application.",
+              title: "Brand Guidelines",
+              description: "Establish a cohesive visual identity with comprehensive brand guidelines.",
+              icon: <BookOpen />,
             },
           ],
         }}
-        relatedServices={[
-          { title: "Creative Concept", link: "/services/creative-concept-execution", icon: <Palette /> },
-          { title: "Web Development", link: "/services/web-design-development", icon: <Code2 /> },
-          { title: "Video Production", link: "/services/video-production-photography", icon: <Headphones /> },
-        ]}
+        gridCols={3}
       />
-      <CTASection />
+      <PortfolioSection />
+      <CTASection
+        title="Embark on a creative journey with Next Idea Solution."
+        description="Let's craft a narrative that captivates and converts."
+        buttonText="Ask for A Proposal"
+      />
+      <BlogsSection />
     </>
   );
 }

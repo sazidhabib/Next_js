@@ -4,34 +4,28 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { ChevronDown } from "lucide-react";
 
-const faqs = [
-  {
-    question: "How quickly can I launch my project?",
-    answer: "Project timelines vary based on complexity. A simple website can launch in 2-4 weeks, while complex enterprise solutions may take 3-6 months. We provide detailed timelines during our initial consultation."
-  },
-  {
-    question: "What technologies do you use?",
-    answer: "We use cutting-edge technologies including React, Next.js, Node.js, Python, AWS, and more. Our team stays current with industry trends to deliver the best solutions for your needs."
-  },
-  {
-    question: "Do you provide ongoing support?",
-    answer: "Yes! We offer comprehensive post-launch support including maintenance, updates, security monitoring, and performance optimization to ensure your project continues to succeed."
-  },
-  {
-    question: "Can you integrate with existing systems?",
-    answer: "Absolutely. We specialize in seamless integrations with existing databases, APIs, CRMs, ERPs, and third-party services. We ensure smooth data flow and unified experiences."
-  },
-  {
-    question: "What's your pricing model?",
-    answer: "We offer flexible pricing models including fixed-price projects, time and materials, and dedicated team arrangements. Every solution is tailored to your budget and requirements."
-  },
-  {
-    question: "How do you ensure data security?",
-    answer: "We implement industry-standard security practices including encryption, secure authentication, regular audits, and compliance with GDPR, SOC 2, and other regulations."
-  }
-];
-
-export default function FAQSection() {
+export default function FAQSection({ 
+  title = "Frequently Asked Questions",
+  description = "Find answers to common questions about our services, process, and how we can help transform your business.",
+  items = [
+    {
+      question: "What services does Next Idea Solutions provide?",
+      answer: "We offer a comprehensive range of digital services including Digital Media Buying, Creative Concept & Execution, Brand Identity, Web Design & Development, SEO, and Social Media Marketing."
+    },
+    {
+      question: "How do you measure the success of a campaign?",
+      answer: "We use data-driven metrics such as ROI, ROAS, conversion rates, and engagement levels. We provide detailed monthly reports so you can see exactly how your investment is performing."
+    },
+    {
+      question: "How quickly can we start a new project?",
+      answer: "Typically, we can kick off a new project within 3-5 business days of contract signing and initial discovery meeting."
+    },
+    {
+      question: "Do you work with international clients?",
+      answer: "Yes, we work with clients globally, leveraging digital communication tools to ensure seamless collaboration regardless of time zones."
+    }
+  ]
+}) {
   const [openIndex, setOpenIndex] = useState(null);
 
   return (
@@ -45,15 +39,15 @@ export default function FAQSection() {
           className="text-center mb-16"
         >
           <h2 className="text-4xl lg:text-5xl font-bold text-zinc-900 mb-4">
-            Frequently Asked <span className="text-primary">Questions</span>
+            {title}
           </h2>
           <p className="text-lg text-zinc-600 max-w-2xl mx-auto">
-            Find answers to common questions about our services, process, and how we can help transform your business.
+            {description}
           </p>
         </motion.div>
 
         <div className="max-w-3xl mx-auto space-y-4">
-          {faqs.map((faq, index) => (
+          {items.map((faq, index) => (
             <motion.div
               key={index}
               initial={{ opacity: 0, y: 20 }}

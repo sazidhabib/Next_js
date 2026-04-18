@@ -1,26 +1,57 @@
 "use client";
 
-import Image from "next/image";
 import { motion } from "framer-motion";
+import { useState } from "react";
 
 const clients = [
-    { name: "president", logo: "/president.png" },
-    { name: "maxmy", logo: "/maxmy.png" },
-    { name: "Innovate Labs", logo: "https://dummyimage.com/120x60/16a34a/ffffff&text=Innovate" },
-    { name: "Bright Solutions", logo: "https://dummyimage.com/120x60/9333ea/ffffff&text=Bright" },
-    { name: "Prime Digital", logo: "https://dummyimage.com/120x60/db2777/ffffff&text=Prime" },
-    { name: "NextGen Systems", logo: "https://dummyimage.com/120x60/0891b2/ffffff&text=NextGen" },
-    { name: "Urban Brand", logo: "https://dummyimage.com/120x60/ca8a04/ffffff&text=Urban" },
-    { name: "Peak Performance", logo: "https://dummyimage.com/120x60/4f46e5/ffffff&text=Peak" },
-    { name: "Creative Hub", logo: "https://dummyimage.com/120x60/ea580c/ffffff&text=Creative" },
-    { name: "Future Works", logo: "https://dummyimage.com/120x60/65a30d/ffffff&text=Future" },
-    { name: "Vertex Agency", logo: "https://dummyimage.com/120x60/7c3aed/ffffff&text=Vertex" },
-    { name: "Core Industries", logo: "https://dummyimage.com/120x60/0d9488/ffffff&text=Core" },
+    { name: "Nova IVF", logo: "/clients/nova-ivf.svg" },
+    { name: "Fosroc", logo: "/clients/fosroc.svg" },
+    { name: "Priyo Shop", logo: "/clients/priyo-shop.svg" },
+    { name: "Stygen", logo: "/clients/stygen.svg" },
+    { name: "Orbit", logo: "/clients/orbit.svg" },
+    { name: "Fresh", logo: "/clients/fresh.svg" },
+    { name: "Bashundhara", logo: "/clients/bashundhara.svg" },
+    { name: "Energypac", logo: "/clients/energypac.svg" },
+    { name: "Prime Bank", logo: "/clients/prime-bank.svg" },
+    { name: "ACI", logo: "/clients/aci.svg" },
+    { name: "Yamaha", logo: "/clients/yamaha.svg" },
+    { name: "Haier", logo: "/clients/haier.svg" },
+    { name: "Nagad", logo: "/clients/nagad.svg" },
+    { name: "Sheba", logo: "/clients/sheba.svg" },
+    { name: "Pickaboo", logo: "/clients/pickaboo.svg" },
+    { name: "DBL Ceramics", logo: "/clients/dbl-ceramics.svg" },
 ];
+
+function ClientLogo({ client }) {
+    const [imageError, setImageError] = useState(false);
+
+    return (
+        <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            whileHover={{ scale: 1.05 }}
+            className="w-full h-20 flex items-center justify-center bg-gray-50 border border-gray-200 rounded-xl p-3 hover:shadow-lg hover:border-primary/30 transition-all duration-300 cursor-pointer"
+        >
+            {imageError || !client.logo ? (
+                <span className="text-zinc-600 font-bold text-sm text-center px-2">
+                    {client.name}
+                </span>
+            ) : (
+                <img
+                    src={client.logo}
+                    alt={client.name}
+                    className="w-full h-full object-contain"
+                    onError={() => setImageError(true)}
+                />
+            )}
+        </motion.div>
+    );
+}
 
 export default function ClientsSection() {
     return (
-        <section className="py-20 bg-white">
+        <section className="py-20 bg-gradient-to-b from-white to-gray-50">
             <div className="container mx-auto px-4">
                 <motion.div
                     initial={{ opacity: 0, y: 30 }}
@@ -41,31 +72,16 @@ export default function ClientsSection() {
                     />
                 </motion.div>
 
-                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-8 items-center justify-items-center opacity-70 grayscale hover:grayscale-0 transition-all duration-500">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-4">
                     {clients.map((client, index) => (
                         <motion.div
                             key={index}
                             initial={{ opacity: 0, scale: 0.8 }}
                             whileInView={{ opacity: 1, scale: 1 }}
                             viewport={{ once: true }}
-                            transition={{ duration: 0.4, delay: index * 0.05, ease: "easeOut" }}
-                            whileHover={{ scale: 1.05 }}
-                            className="w-32 h-20 flex items-center justify-center bg-gray-50 border border-gray-100 rounded-lg p-4 hover:shadow-md transition-shadow"
+                            transition={{ duration: 0.4, delay: index * 0.03, ease: "easeOut" }}
                         >
-                            {client.logo ? (
-                                <Image
-                                    src={client.logo}
-                                    alt={client.name}
-                                    width={80}
-                                    height={40}
-                                    className="object-contain"
-                                    unoptimized
-                                />
-                            ) : (
-                                <span className="text-zinc-400 font-semibold text-sm">
-                                    {client.name}
-                                </span>
-                            )}
+                            <ClientLogo client={client} />
                         </motion.div>
                     ))}
                 </div>
