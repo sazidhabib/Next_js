@@ -8,10 +8,21 @@ import { MenuProvider } from './providers/MenuProvider';
 import { SettingsProvider } from './providers/SettingsProvider';
 import { ToastContainer } from 'react-toastify';
 
+async function fetchWithTimeout(url, options = {}, timeoutMs = 5000) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const response = await fetch(url, { ...options, signal: controller.signal });
+    return response;
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
 async function getSiteSettings() {
   const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
   try {
-    const res = await fetch(`${API_URL}/designs?search=site-settings`, {
+    const res = await fetchWithTimeout(`${API_URL}/designs?search=site-settings`, {
       next: { revalidate: 3600 },
       cache: 'force-cache'
     });

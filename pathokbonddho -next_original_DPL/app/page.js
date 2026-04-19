@@ -3,31 +3,43 @@ import Footer from './components/Footer';
 import ScrollToSection from './components/ScrollToSection';
 import PageRenderer from './components/PageRenderer';
 
+// Helper to prevent fetch from hanging when backend isn't ready
+async function fetchWithTimeout(url, options = {}, timeoutMs = 5000) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const response = await fetch(url, { ...options, signal: controller.signal });
+    return response;
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
 export async function generateMetadata() {
   const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5000/api';
-  
+
   try {
-      const response = await fetch(`${API_URL}/menus`, { next: { revalidate: 60 } });
-      if (response.ok) {
-          const data = await response.json();
-          const menus = data.data || data || [];
-          
-          const menu = menus.find(m => m.path === '/' || m.name.toLowerCase() === 'home' || m.path.toLowerCase() === 'home' || m.order === 1);
-          
-          if (menu) {
-              return {
-                  title: menu.metaTitle || menu.name || 'পাঠকবন্ধু',
-                  ...(menu.metaDescription ? { description: menu.metaDescription } : { description: 'Welcome to পাঠকবন্ধু, the news portal.' }),
-                  ...(menu.metaKeywords && { keywords: menu.metaKeywords }),
-              };
-          }
+    const response = await fetchWithTimeout(`${API_URL}/menus`, { next: { revalidate: 60 } });
+    if (response.ok) {
+      const data = await response.json();
+      const menus = data.data || data || [];
+
+      const menu = menus.find(m => m.path === '/' || m.name.toLowerCase() === 'home' || m.path.toLowerCase() === 'home' || m.order === 1);
+
+      if (menu) {
+        return {
+          title: menu.metaTitle || menu.name || 'পাঠকবন্ধু',
+          ...(menu.metaDescription ? { description: menu.metaDescription } : { description: 'Welcome to পাঠকবন্ধু, the news portal.' }),
+          ...(menu.metaKeywords && { keywords: menu.metaKeywords }),
+        };
       }
+    }
   } catch (error) {
-      console.error('Error fetching home metadata:', error);
+    // Silently fall back to defaults — backend may not be ready yet
   }
-  
+
   return {
-    title: 'পাঠকবন্ধু',
+    title: 'পাঠকবন্ধু | Largest friends community by Ajker Patrika',
     description: 'Welcome to পাঠকবন্ধু, the news portal.',
   };
 }
@@ -36,30 +48,22 @@ async function getPageData(slug = 'home') {
   const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5000/api';
   try {
     // 1. Resolve page ID from slug
-    console.log(`[DEBUG] Attempting to resolve layout for slug: "${slug}"`);
-    const listRes = await fetch(`${API_URL}/layout`, { next: { revalidate: 60 } });
+    const listRes = await fetchWithTimeout(`${API_URL}/layout`, { next: { revalidate: 60 } });
     if (!listRes.ok) {
-        console.error(`[DEBUG] Failed to fetch layout list. Status: ${listRes.status}`);
-        return null;
+      return null;
     }
     const allPages = await listRes.json();
-    console.log(`[DEBUG] Found ${allPages.length} total pages in database.`);
 
     const matchPage = allPages.find(p => p.name.toLowerCase() === slug.toLowerCase()) ||
       allPages.find(p => p.name.toLowerCase() === 'home') ||
       (allPages.length > 0 ? allPages[0] : null);
 
     if (!matchPage) {
-      console.warn(`[DEBUG] No page layout found for "${slug}" or fallback. Existing pages:`, allPages.map(p => p.name));
       return null;
     }
 
-    console.log(`[DEBUG] Resolved layout: "${matchPage.name}" (ID: ${matchPage.id})`);
-
-
-
     // 2. Fetch full layout details
-    const layoutRes = await fetch(`${API_URL}/layout/${matchPage.id}`, { next: { revalidate: 60 } });
+    const layoutRes = await fetchWithTimeout(`${API_URL}/layout/${matchPage.id}`, { next: { revalidate: 60 } });
     if (!layoutRes.ok) return null;
     const layout = await layoutRes.json();
 
@@ -77,13 +81,13 @@ async function getPageData(slug = 'home') {
                 try {
                   let newsItem = null;
                   if (cell.contentId) {
-                    const nRes = await fetch(`${API_URL}/news/${cell.contentId}`, { next: { revalidate: 60 } });
+                    const nRes = await fetchWithTimeout(`${API_URL}/news/${cell.contentId}`, { next: { revalidate: 60 } });
                     if (nRes.ok) {
                       const data = await nRes.json();
                       newsItem = data.data || data.news || data;
                     }
                   } else if (cell.tag) {
-                    const nRes = await fetch(`${API_URL}/news?tag=${cell.tag}&limit=1`, { next: { revalidate: 60 } });
+                    const nRes = await fetchWithTimeout(`${API_URL}/news?tag=${cell.tag}&limit=1`, { next: { revalidate: 60 } });
                     if (nRes.ok) {
                       const data = await nRes.json();
                       const items = data.news || data.rows || [];
@@ -92,32 +96,32 @@ async function getPageData(slug = 'home') {
                   }
                   cell.resolvedContent = newsItem;
                 } catch (e) {
-                  console.error('Error pre-fetching news for cell:', e);
+                  // Silently skip — will be fetched client-side
                 }
               };
               fetchPromises.push(fetchNews());
             } else if (cell.contentType === 'image' && cell.contentId) {
               const fetchImage = async () => {
                 try {
-                  const iRes = await fetch(`${API_URL}/photos/${cell.contentId}`, { next: { revalidate: 60 } });
+                  const iRes = await fetchWithTimeout(`${API_URL}/photos/${cell.contentId}`, { next: { revalidate: 60 } });
                   if (iRes.ok) {
                     cell.resolvedContent = await iRes.json();
                   }
                 } catch (e) {
-                  console.error('Error pre-fetching image for cell:', e);
+                  // Silently skip
                 }
               };
               fetchPromises.push(fetchImage());
             } else if ((cell.contentType === 'ads' || cell.contentType === 'ad') && cell.contentId) {
               const fetchAd = async () => {
                 try {
-                  const aRes = await fetch(`${API_URL}/ads/${cell.contentId}`, { next: { revalidate: 60 } });
+                  const aRes = await fetchWithTimeout(`${API_URL}/ads/${cell.contentId}`, { next: { revalidate: 60 } });
                   if (aRes.ok) {
                     const data = await aRes.json();
                     cell.resolvedContent = data.data || data;
                   }
                 } catch (e) {
-                  console.error('Error pre-fetching ad for cell:', e);
+                  // Silently skip
                 }
               };
               fetchPromises.push(fetchAd());
@@ -134,7 +138,6 @@ async function getPageData(slug = 'home') {
 
     return layout;
   } catch (err) {
-    console.error('Server-side fetch error:', err);
     return null;
   }
 }
@@ -153,3 +156,4 @@ export default async function HomePage() {
     </>
   );
 }
+

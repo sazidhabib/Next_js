@@ -1,11 +1,11 @@
-import { Sparkles, TrendingUp, Megaphone, Headphones } from "lucide-react";
+import { Sparkles, TrendingUp, Megaphone, Headphones, Palette, Target, CheckCircle } from "lucide-react";
 import ServiceHero from "../../components/ServiceHero";
 import ServiceContent from "../../components/ServiceContent";
 import CTASection from "../../components/CTASection";
 
 export const metadata = {
-  title: "Event & Activation | Next Idea Solutions",
-  description: "We have the power to create happening events that guarantee maximum footfall. Create memorable brand experiences.",
+  title: "Event & Activation | Next Idea Solution",
+  description: "Next Idea Solution is the power to create happening events to guarantee you the maximum footfall. Experience unforgettable events with our comprehensive event & activation service.",
 };
 
 export default function EventAndActivationPage() {
@@ -14,46 +14,49 @@ export default function EventAndActivationPage() {
       <ServiceHero
         icon={<Megaphone />}
         title="Event & Activation"
-        tagline="Creating Unforgettable Brand Experiences"
-        description="We have the power to create impactful events and activations that drive maximum engagement and create lasting brand memories."
+        tagline="Next Idea Solution is the power to create happening events to guarantee you the maximum footfall"
+        description="At Next Idea Solution, we specialize in turning concepts into remarkable events and activations that leave a lasting impression on your audience ensuring your brand stands out in the crowd."
         image="/Event-Activation.png"
       />
       <ServiceContent
         overview={{
-          title: "About This Service",
-          description: "Our Event & Activation service brings your brand to life through immersive experiences that engage audiences on a deeper level. From corporate events to product launches and experiential marketing activations, we handle every aspect of planning and execution. Our team creates memorable moments that not only generate immediate buzz but also build long-term brand loyalty and advocacy.",
+          title: "Experience Unforgettable Events with Next Idea Solution's Event & Activation Service",
+          description: "At Next Idea Solution, we specialize in turning concepts into remarkable events and activations that leave a lasting impression on your audience ensuring your brand stands out in the crowd.",
         }}
         features={{
-          title: "What&apos;s Included",
+          title: "Why Choose Us",
           items: [
-            "Event Strategy & Planning",
-            "Venue Selection & Management",
-            "Event Design & Production",
-            "Brand Activation Experiences",
-            "Experiential Marketing",
-            "Event Marketing & Promotion",
-            "On-site Management",
-            "Post-event Analysis & Reporting",
+            {
+              icon: <Palette className="w-6 h-6" />,
+              title: "Creative Approach",
+              description: "We infuse creativity into every event, ensuring it aligns with your brand's identity and goals.",
+            },
+            {
+              icon: <Target className="w-6 h-6" />,
+              title: "Strategic Planning",
+              description: "Our meticulous planning and execution guarantees flawless events that resonate with your audience.",
+            },
+            {
+              icon: <CheckCircle className="w-6 h-6" />,
+              title: "Diverse Offerings",
+              description: "From product launches to brand activations, we cater to a wide range of event needs.",
+            },
           ],
         }}
         process={{
-          title: "Our Process",
+          title: "What We Bring to the Table",
           steps: [
             {
-              title: "Event Strategy",
-              description: "We define clear objectives and develop a strategic approach aligned with your brand goals.",
+              title: "Strategic Planning",
+              description: "We plan every detail with your objectives in mind, ensuring seamless execution.",
             },
             {
-              title: "Creative Concept",
-              description: "Our team develops innovative concepts that will create memorable experiences for attendees.",
+              title: "Engagement Strategies",
+              description: "From product launches to brand activations, we design experiences that captivate your audience.",
             },
             {
-              title: "Planning & Production",
-              description: "We handle all logistics, vendor management, and production details.",
-            },
-            {
-              title: "Execution & Management",
-              description: "Our team ensures flawless on-site execution and guest experience.",
+              title: "Measurable Impact",
+              description: "We track and analyze event performance, providing valuable insights for future strategies.",
             },
           ],
         }}

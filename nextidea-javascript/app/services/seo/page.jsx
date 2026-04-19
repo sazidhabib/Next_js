@@ -1,13 +1,12 @@
-import { Search, BarChart2, Code, MapPin, ShoppingCart, Smartphone, Youtube, Mic, MessageSquare, FileText } from "lucide-react";
+"use client";
+
+import { Search, BarChart2, Code, MapPin, ShoppingCart, Smartphone, Youtube, Mic, MessageSquare, FileText, TrendingUp, Award, Zap, Target, CheckCircle, Star } from "lucide-react";
 import ServiceHero from "../../components/ServiceHero";
 import ServiceContent from "../../components/ServiceContent";
 import PackagesSection from "../../components/PackagesSection";
 import CTASection from "../../components/CTASection";
-
-export const metadata = {
-  title: "SEO Services | Next Idea Solutions",
-  description: "Future-proof your visibility with professional SEO services. We offer SEO audits, local SEO, e-commerce SEO, and comprehensive search engine optimization strategies.",
-};
+import FAQSection from "../../components/FAQSection";
+import BlogsSection from "../../components/BlogsSection";
 
 export default function SEOPage() {
   return (
@@ -15,33 +14,17 @@ export default function SEOPage() {
       <ServiceHero
         icon={<Search />}
         title="SEO Services"
-        tagline="Future-Proof Your Visibility"
-        description="We don't believe in chasing quick wins that disappear with the next algorithm update. We focus on sustainable strategies that build a solid foundation for long-term growth. We understand how search engines work and how they're evolving."
+        tagline="Future-Proof Your Visibility With The Best SEO Agency in Bangladesh"
+        description="At GEEKY Social, we specialize in turning concepts into remarkable SEO strategies that leave a lasting impression on your visibility ensuring your brand stands out in search results."
         image="/SEO-Services.png"
       />
       <ServiceContent
         overview={{
-          title: "About This Service",
-          description: "Whether you are an online or an offline business, in this age of customers searching online to gather information and then make a purchase, you're losing sales if you're not present in front of their eyes when they're searching. Our SEO strategies are built to align with search engine priorities: helpfulness, authority, and relevance.",
-        }}
-        features={{
-          title: "Our SEO Services",
-          items: [
-            "SEO Audits & Analysis",
-            "Keyword Research",
-            "On-Page SEO Optimization",
-            "Off-Page SEO & Link Building",
-            "Technical SEO",
-            "Local SEO",
-            "E-commerce SEO",
-            "App Store Optimization (ASO)",
-            "YouTube SEO",
-            "Voice Search Optimization",
-            "Ask Engine Optimization (AEO)",
-          ],
+          title: "Your Customers Are Searching For You On Google, But You Don't Know",
+          description: "In this age where customers search online to gather information and then make a purchase decision, you're losing sales if you're not present in front of their eyes when they're searching. Our SEO strategies are built to align with search engine priorities: helpfulness, authority, and relevance.",
         }}
         process={{
-          title: "How We Work",
+          title: "How We Work?",
           steps: [
             {
               title: "Research and Analysis",
@@ -62,12 +45,329 @@ export default function SEOPage() {
           ],
         }}
         relatedServices={[
-          { title: "SEO Audit", link: "/services/seo/seo-audit", icon: <FileText />},
-          { title: "Local SEO", link: "/services/seo/local-seo", icon: <MapPin />},
-          { title: "E-commerce SEO", link: "/services/seo/e-commerce-seo", icon: <ShoppingCart />},
+          { title: "SEO Audit", link: "/services/seo/seo-audit", icon: <FileText /> },
+          { title: "Local SEO", link: "/services/seo/local-seo", icon: <MapPin /> },
+          { title: "E-commerce SEO", link: "/services/seo/e-commerce-seo", icon: <ShoppingCart /> },
         ]}
       />
-      <PackagesSection />
+
+      {/* Marquee Services Section */}
+      <section className="py-12 bg-zinc-900 text-white overflow-hidden">
+        <div className="container mx-auto px-4">
+          <h2 className="text-center mb-8 text-lg font-semibold text-zinc-400">OUR SEO SERVICES</h2>
+          <div className="flex overflow-hidden">
+            <div className="flex gap-8 animate-scroll whitespace-nowrap">
+              {[
+                { icon: <Search className="w-6 h-6" />, text: "SEO Audits & Analysis" },
+                { icon: <BarChart2 className="w-6 h-6" />, text: "Keyword Research" },
+                { icon: <Code className="w-6 h-6" />, text: "On-Page SEO Optimization" },
+                { icon: <TrendingUp className="w-6 h-6" />, text: "Off-Page SEO & Link Building" },
+                { icon: <Zap className="w-6 h-6" />, text: "Technical SEO" },
+                { icon: <MapPin className="w-6 h-6" />, text: "Local SEO" },
+                { icon: <ShoppingCart className="w-6 h-6" />, text: "E-commerce SEO" },
+                { icon: <Smartphone className="w-6 h-6" />, text: "App Store Optimization (ASO)" },
+              ].map((service, index) => (
+                <div key={index} className="px-6 py-3 border border-primary/40 rounded-full text-primary font-medium hover:border-primary transition-colors flex items-center gap-2">
+                  {service.icon}
+                  {service.text}
+                </div>
+              ))}
+              {[
+                { icon: <Search className="w-6 h-6" />, text: "SEO Audits & Analysis" },
+                { icon: <BarChart2 className="w-6 h-6" />, text: "Keyword Research" },
+                { icon: <Code className="w-6 h-6" />, text: "On-Page SEO Optimization" },
+                { icon: <TrendingUp className="w-6 h-6" />, text: "Off-Page SEO & Link Building" },
+              ].map((service, index) => (
+                <div key={`repeat-${index}`} className="px-6 py-3 border border-primary/40 rounded-full text-primary font-medium hover:border-primary transition-colors flex items-center gap-2">
+                  {service.icon}
+                  {service.text}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+        <style jsx>{`
+          @keyframes scroll {
+            0% {
+              transform: translateX(0);
+            }
+            100% {
+              transform: translateX(-50%);
+            }
+          }
+          .animate-scroll {
+            animation: scroll 40s linear infinite;
+          }
+        `}</style>
+      </section>
+
+      {/* Stay Visible Section */}
+      <section className="py-20 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="grid md:grid-cols-2 gap-12 items-center">
+            <div>
+              <h2 className="text-4xl font-bold text-zinc-900 mb-6">Stay Visible In A Search Landscape Shaped By AI</h2>
+              <p className="text-lg text-zinc-600 mb-8 leading-relaxed">
+                Search is evolving faster than ever. With AI-powered results and personalization, ranking on Google is no longer just about keywords. It's about delivering real value and being visible where your customers search.
+              </p>
+              <ul className="space-y-4">
+                {[
+                  "AI-driven search optimization for emerging platforms",
+                  "Future-ready strategies that adapt to algorithm changes",
+                  "Content that ranks in both traditional and AI-powered results",
+                  "Competitive analysis in the AI era",
+                ].map((item, index) => (
+                  <li key={index} className="flex gap-3">
+                    <CheckCircle className="w-6 h-6 text-primary flex-shrink-0 mt-1" />
+                    <span className="text-zinc-700">{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="relative">
+              <img src="/SEO-Services.png" alt="Stay Visible" className="w-full rounded-2xl shadow-2xl" />
+              <div className="absolute bottom-4 left-4 right-4 bg-white/95 backdrop-blur p-6 rounded-xl">
+                <div className="text-center">
+                  <div className="text-5xl font-bold text-primary mb-2">93%</div>
+                  <p className="text-sm text-zinc-700">of online experiences begin with a search engine</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* End-to-End SEO Services Section */}
+      <section className="py-20 bg-zinc-50">
+        <div className="container mx-auto px-4">
+          <div className="max-w-3xl mx-auto text-center mb-16">
+            <h2 className="text-4xl font-bold text-zinc-900 mb-4">End-To-End SEO Services Built For The AI-Powered Search Era</h2>
+            <p className="text-lg text-zinc-600">From strategy to execution, we provide comprehensive SEO solutions that cover every aspect of your digital visibility.</p>
+          </div>
+          <div className="grid md:grid-cols-3 gap-8">
+            {[
+              {
+                title: "Technical SEO",
+                description: "Website speed, mobile optimization, indexation, and crawlability. We ensure your site is technically perfect for search engines.",
+                items: ["Site speed optimization", "Mobile optimization", "XML sitemaps", "Robots.txt optimization", "Core Web Vitals"],
+                image: "/SEO-Audit.png",
+              },
+              {
+                title: "Content Optimization",
+                description: "Strategic content creation and optimization for target keywords and search intent. We write content that ranks and converts.",
+                items: ["Keyword targeting", "Content strategy", "On-page optimization", "Content distribution", "Content updates"],
+                image: "/E-commerce-SEO.png",
+              },
+              {
+                title: "Link Building & Authority",
+                description: "Earn high-quality backlinks and build domain authority through strategic outreach and content marketing.",
+                items: ["Link building campaigns", "Guest posting", "Competitor analysis", "Authority building", "Brand mentions"],
+                image: "/Local-SEO.png",
+              },
+            ].map((service, index) => (
+              <div key={index} className="bg-white rounded-2xl border border-zinc-200 hover:shadow-xl transition-all overflow-hidden">
+                <div className="h-48 bg-gradient-to-br from-primary/10 to-primary/5 overflow-hidden flex items-center justify-center">
+                  {service.image && (
+                    <img src={service.image} alt={service.title} className="w-full h-full object-cover" />
+                  )}
+                </div>
+                <div className="p-8">
+                  <h3 className="text-2xl font-bold text-zinc-900 mb-3">{service.title}</h3>
+                  <p className="text-zinc-600 mb-6">{service.description}</p>
+                  <ul className="space-y-2">
+                    {service.items.map((item, idx) => (
+                      <li key={idx} className="flex gap-2 text-zinc-700">
+                        <CheckCircle className="w-5 h-5 text-primary flex-shrink-0" />
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Hire The Best SEO Agency Section */}
+      <section className="py-20 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="max-w-3xl mx-auto text-center mb-16">
+            <h2 className="text-4xl font-bold text-zinc-900 mb-4">Hire The Best SEO Agency in Bangladesh</h2>
+            <p className="text-lg text-zinc-600">Trusted by leading brands and startups alike, we've helped hundreds of businesses achieve top search rankings and drive sustainable growth.</p>
+          </div>
+          <div className="grid md:grid-cols-3 gap-8">
+            {[
+              {
+                company: "Clutch",
+                rating: 5,
+                reviews: 15,
+                feedback: "GEEKY Social is one of the top-rated SEO agencies. Their team delivered exceptional results and maintained great communication throughout.",
+              },
+              {
+                company: "Google",
+                rating: 4.9,
+                reviews: 42,
+                feedback: "Consistent quality in delivering SEO results. Their AI-powered approach to modern search is what sets them apart from competitors.",
+              },
+              {
+                company: "Upwork",
+                rating: 5,
+                reviews: 28,
+                feedback: "The best SEO partner we've worked with. They understood our business goals and delivered measurable results within the timeline.",
+              },
+            ].map((item, index) => (
+              <div key={index} className="bg-gradient-to-br from-zinc-50 to-zinc-100 p-8 rounded-xl border border-zinc-200 hover:border-primary/50 transition-all">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-bold text-zinc-900">{item.company}</h3>
+                  <div className="flex gap-1">
+                    {[...Array(5)].map((_, i) => (
+                      <Star
+                        key={i}
+                        className={`w-4 h-4 ${i < Math.floor(item.rating) ? "fill-primary text-primary" : "text-zinc-300"}`}
+                      />
+                    ))}
+                  </div>
+                </div>
+                <p className="text-sm text-zinc-600 mb-4">{item.reviews} verified reviews</p>
+                <p className="text-zinc-700 italic">{item.feedback}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Case Studies Section */}
+      <section className="py-20 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="max-w-3xl mx-auto text-center mb-16">
+            <h2 className="text-4xl font-bold text-zinc-900 mb-4">See GEEKY Has Helped Clients</h2>
+            <p className="text-lg text-zinc-600">Our portfolio showcases successful SEO projects across various industries with measurable results.</p>
+          </div>
+          <div className="grid md:grid-cols-3 gap-8">
+            {[
+              {
+                title: "E-commerce SEO",
+                description: "Increased organic traffic by 270% for e-commerce platforms",
+                image: "/E-commerce-SEO.png",
+                stats: "270% Traffic Growth",
+              },
+              {
+                title: "Local SEO",
+                description: "Improved local search rankings and customer acquisition",
+                image: "/Local-SEO.png",
+                stats: "Top Local Rankings",
+              },
+              {
+                title: "SEO Audit & Strategy",
+                description: "Comprehensive audits leading to strategic optimization",
+                image: "/SEO-Audit.png",
+                stats: "40% Higher Rankings",
+              },
+            ].map((project, index) => (
+              <div key={index} className="rounded-xl overflow-hidden border border-zinc-200 hover:shadow-xl transition-all group">
+                <div className="h-64 bg-gradient-to-br from-primary/10 to-primary/5 overflow-hidden flex items-center justify-center">
+                  {project.image && (
+                    <img src={project.image} alt={project.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" />
+                  )}
+                </div>
+                <div className="p-6 bg-white">
+                  <h3 className="text-xl font-bold text-zinc-900 mb-2">{project.title}</h3>
+                  <p className="text-zinc-600 mb-4">{project.description}</p>
+                  <div className="flex items-center gap-2 text-primary font-semibold">
+                    <TrendingUp className="w-4 h-4" />
+                    {project.stats}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Why Choose Us Section */}
+      <section className="py-20 bg-zinc-50">
+        <div className="container mx-auto px-4">
+          <div className="max-w-3xl mx-auto text-center mb-16">
+            <h2 className="text-4xl font-bold text-zinc-900 mb-4">Why Choose Us As Your SEO Company in Bangladesh</h2>
+            <p className="text-lg text-zinc-600">We combine expertise, innovation, and proven results to deliver SEO strategies that drive sustainable growth for your business.</p>
+          </div>
+          <div className="grid md:grid-cols-4 gap-6">
+            {[
+              { icon: <TrendingUp />, title: "Proven Results", description: "GEEKY helped Dhgate with a 270% increase in organic traffic, leading to lower cost per acquisition (CPA) within 6 months." },
+              { icon: <Target />, title: "Strategic Approach", description: "Our meticulous planning and execution guarantees flawless strategies that resonate with your target audience." },
+              { icon: <Award />, title: "Industry Expertise", description: "With years of experience, our team understands the evolving search landscape and AI-powered search algorithms." },
+              { icon: <Zap />, title: "AI-Ready Solutions", description: "We build SEO strategies optimized for the AI-powered search era, ensuring long-term visibility." },
+            ].map((item, index) => (
+              <div key={index} className="p-6 bg-white rounded-xl border border-zinc-200 hover:border-primary/50 hover:shadow-lg transition-all text-center">
+                <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mx-auto mb-4 text-primary">
+                  {item.icon}
+                </div>
+                <h3 className="text-lg font-bold text-zinc-900 mb-2">{item.title}</h3>
+                <p className="text-sm text-zinc-600">{item.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* What's Unique Section */}
+      <section className="py-20 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="max-w-3xl mx-auto text-center mb-16">
+            <h2 className="text-4xl font-bold text-zinc-900 mb-4">What's Unique About GEEKY's SEO? As An SEO Agency in Bangladesh?</h2>
+            <p className="text-lg text-zinc-600">We leverage cutting-edge tools and strategies to ensure your business thrives in the AI-powered search landscape.</p>
+          </div>
+          <div className="grid md:grid-cols-3 gap-8">
+            {[
+              { title: "AI-Optimized SEO Strategy", description: "We optimize for both traditional search and AI-powered results like SGE, ensuring your content is discovered through all search methods." },
+              { title: "End-To-End SEO Services", description: "From technical SEO to content optimization and link building, we handle every aspect of your SEO needs under one roof." },
+              { title: "Transparent Reporting", description: "Monthly detailed reports with clear metrics, actionable insights, and transparent communication about your SEO performance." },
+            ].map((item, index) => (
+              <div key={index} className="bg-gradient-to-br from-primary/5 to-primary/10 p-8 rounded-xl border border-primary/20">
+                <h3 className="text-2xl font-bold text-zinc-900 mb-3">{item.title}</h3>
+                <p className="text-zinc-600 leading-relaxed">{item.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <PackagesSection title="Let's Grow Your Visibility" subtitle="Choose the SEO strategy that fits your growth goals" />
+
+      {/* FAQ Section */}
+      <FAQSection
+        items={[
+          {
+            question: "Why is SEO important for my business?",
+            answer: "SEO is crucial because 93% of online experiences begin with a search engine. If you're not ranking well, you're missing potential customers who are actively searching for your products or services.",
+          },
+          {
+            question: "How long does it take to see SEO results?",
+            answer: "SEO is a long-term strategy. While you may see some improvements within 3-6 months, significant results typically take 6-12 months depending on competition and current website status. We focus on sustainable growth.",
+          },
+          {
+            question: "What's the difference between organic SEO and paid search?",
+            answer: "Organic SEO involves optimizing your website to rank naturally in search results without paying per click. Paid search (PPC) means you pay for each click. Both are valuable and often work best together.",
+          },
+          {
+            question: "Do you guarantee first page rankings?",
+            answer: "No legitimate SEO agency can guarantee rankings. Anyone promising guaranteed positions is not being honest. We guarantee our best efforts using white-hat techniques to improve your visibility.",
+          },
+          {
+            question: "How is your SEO different from other agencies?",
+            answer: "We focus on AI-ready SEO strategies, transparent reporting, and sustainable growth. We don't chase quick wins but build a solid foundation for long-term success in evolving search landscapes.",
+          },
+          {
+            question: "What tools do you use for SEO?",
+            answer: "We use industry-leading tools like SEMrush, Ahrefs, Google Search Console, and more to analyze, optimize, and track your SEO performance.",
+          },
+        ]}
+      />
+
+      {/* Blog Section */}
+      <BlogsSection />
+
       <CTASection />
     </>
   );

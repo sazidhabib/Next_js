@@ -68,7 +68,7 @@ const AdWidget = ({ cell, isPriority }) => {
         // 0. Check validity (active, unexpired, impression limit not reached)
         if (ad.isActive === false) return false;
         if (isExpired) return false;
-        
+
         // 1. If 'all' is selected, show it everywhere
         if (displayPages.includes('all')) return true;
 
@@ -150,10 +150,10 @@ const AdWidget = ({ cell, isPriority }) => {
     }
 
     const content = (
-        <div 
-            className="ad-widget w-100 overflow-hidden position-relative" 
-            style={{ 
-                backgroundColor: '#f8f9fa', 
+        <div
+            className="ad-widget w-100 overflow-hidden position-relative"
+            style={{
+                // backgroundColor: '#f8f9fa', 
                 minHeight: '120px',
                 height: '100%',
                 display: 'block'

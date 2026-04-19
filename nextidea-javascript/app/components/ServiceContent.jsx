@@ -29,53 +29,55 @@ export default function ServiceContent({
           </p>
         </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="max-w-6xl mx-auto mb-20"
-        >
-          <h2 className="text-3xl font-bold text-zinc-900 mb-8 text-center uppercase tracking-widest">
-            {features.title}
-          </h2>
-          <div className={`grid md:grid-cols-${gridCols} gap-8`}>
-            {features.items.map((item, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, x: -20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: index * 0.05 }}
-                className="flex flex-col items-center text-center p-8 rounded-2xl bg-white border border-zinc-100 hover:shadow-xl hover:border-primary/20 transition-all duration-300"
-              >
-                <div className="flex-shrink-0 w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mb-6 group-hover:bg-primary/20 transition-colors">
-                  {item.icon ? (
-                    <div className="text-primary w-8 h-8">{item.icon}</div>
-                  ) : (
-                    <Check className="w-6 h-6 text-primary" />
-                  )}
-                </div>
-                <div>
-                  {item.title ? (
-                    <>
-                      <h3 className="text-xl font-bold text-zinc-900 mb-3 uppercase tracking-tight">
-                        {item.title}
-                      </h3>
-                      <p className="text-zinc-600 leading-relaxed text-sm">
-                        {item.description}
-                      </p>
-                    </>
-                  ) : (
-                    <span className="text-zinc-700 font-medium">
-                      {item.text || item}
-                    </span>
-                  )}
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </motion.div>
+        {features && (
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="max-w-6xl mx-auto mb-20"
+          >
+            <h2 className="text-3xl font-bold text-zinc-900 mb-8 text-center uppercase tracking-widest">
+              {features.title}
+            </h2>
+            <div className={`grid md:grid-cols-${gridCols} gap-8`}>
+              {features.items.map((item, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, x: -20 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.4, delay: index * 0.05 }}
+                  className="flex flex-col items-center text-center p-8 rounded-2xl bg-white border border-zinc-100 hover:shadow-xl hover:border-primary/20 transition-all duration-300"
+                >
+                  <div className="flex-shrink-0 w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mb-6 group-hover:bg-primary/20 transition-colors">
+                    {item.icon ? (
+                      <div className="text-primary w-8 h-8">{item.icon}</div>
+                    ) : (
+                      <Check className="w-6 h-6 text-primary" />
+                    )}
+                  </div>
+                  <div>
+                    {item.title ? (
+                      <>
+                        <h3 className="text-xl font-bold text-zinc-900 mb-3 uppercase tracking-tight">
+                          {item.title}
+                        </h3>
+                        <p className="text-zinc-600 leading-relaxed text-sm">
+                          {item.description}
+                        </p>
+                      </>
+                    ) : (
+                      <span className="text-zinc-700 font-medium">
+                        {item.text || item}
+                      </span>
+                    )}
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+        )}
 
         {process && (
           <motion.div

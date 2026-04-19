@@ -13,11 +13,11 @@ export default function ServiceHero({
     <section className="relative py-24 md:py-32 overflow-hidden">
       {image && (
         <>
-          <div 
+          <div
             className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-            style={{ backgroundImage: `url(${image})` }}
+
           />
-          <div className="absolute inset-0 bg-black/50" />
+          <div className="absolute inset-0 bg-black/80" />
         </>
       )}
       {!image && (

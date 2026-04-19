@@ -779,6 +779,13 @@ body {
     object-fit: cover;
 }
 
+/* Desktop minimum height for 'image-top' design */
+@media (min-width: 992px) {
+    .news-design-image-top {
+        min-height: 350px !important;
+    }
+}
+
 .helloi {
     color: #87c26b;
     font-size: 50px;

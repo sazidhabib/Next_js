@@ -87,7 +87,7 @@ const NewsWidget = ({ cell, isPriority }) => {
     const getImageHeight = () => {
         const rowSpan = cell.rowSpan || 1;
         const colSpan = cell.colSpan || 1;
-        const baseHeight = 240;
+        const baseHeight = 160;
         return rowSpan > 1 || colSpan > 1
             ? baseHeight * rowSpan + (rowSpan - 1) * 20
             : baseHeight;
@@ -124,7 +124,7 @@ const NewsWidget = ({ cell, isPriority }) => {
         // Side layout images are smaller (90px), top layout images are taller (180px)
         const minHeight = (currentDesign === 'title-image-left' || currentDesign === 'image-left' || currentDesign === 'title-image-right' || currentDesign === 'image-right')
             ? '90px'
-            : '180px';
+            : '120px';
 
         return (
             <div className="news-image-container" style={{ position: 'relative', width: '100%', height: '100%', minHeight }}>
@@ -225,7 +225,7 @@ const NewsWidget = ({ cell, isPriority }) => {
                 )}
                 <div className="flex-grow-1">
                     <Link href={newsLink} className="text-decoration-none text-dark">
-                        <h5 className="fw-bold mb-2 font-bangla line-clamp-2">
+                        <h5 className="fw-bold mb-2 font-bangla">
                             {news.alternativeHeadline || news.newsHeadline}
                         </h5>
                     </Link>
@@ -299,10 +299,10 @@ const NewsWidget = ({ cell, isPriority }) => {
     return (
         <Card className="h-100 custom-font border-0 news-widget-card group shadow-sm-hover transition-all" style={{ display: 'flex', flexDirection: 'column' }}>
             <div
-                className="card-img-wrapper position-relative overflow-hidden mb-2"
+                className={`card-img-wrapper position-relative overflow-hidden mb-2 ${design === 'image-top' || !design ? 'news-design-image-top' : ''}`}
                 style={isMerged
                     ? { flex: '1 1 auto', minHeight: '200px', display: 'flex', flexDirection: 'column' }
-                    : { height: `${imageHeight}px`, display: 'flex', flexDirection: 'column' }
+                    : { minHeight: `${imageHeight}px`, display: 'flex', flexDirection: 'column' }
                 }
             >
                 <Link href={newsLink} className="d-block h-100">
