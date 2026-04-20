@@ -101,6 +101,9 @@ const PageLayoutClient = ({ initialPages, initialTags, initialMenus, initialDesi
         pageData.PageSections.forEach((section, sIdx) => {
             (section.rows || section.Rows || []).forEach((row, rIdx) => {
                 (row.columns || row.Columns || []).forEach((col, cIdx) => {
+                    // Skip cells that are merged into another cell (not the master cell)
+                    if (col.merged && !col.masterCell) return;
+
                     if (col.tag) {
                         tagCounts[col.tag] = (tagCounts[col.tag] || 0) + 1;
                         cellMap.push({ sIdx, rIdx, cIdx, tag: col.tag });
@@ -113,8 +116,17 @@ const PageLayoutClient = ({ initialPages, initialTags, initialMenus, initialDesi
         try {
             await Promise.all(Object.keys(tagCounts).map(async (tag) => {
                 const count = tagCounts[tag];
-                const res = await api.get(`/news?tag=${tag}&limit=${count}`);
-                fetchedNewsByTag[tag] = res.data.news || res.data.rows || res.data.data || [];
+                // Try by tag name first
+                let res = await api.get(`/news?tag=${tag}&limit=${count}`);
+                let news = res.data.news || res.data.rows || res.data.data || [];
+
+                // If no results by tag, fallback to category/menu name
+                if (news.length === 0) {
+                    res = await api.get(`/news?categories=${encodeURIComponent(tag)}&limit=${count}`);
+                    news = res.data.news || res.data.rows || res.data.data || [];
+                }
+
+                fetchedNewsByTag[tag] = news;
             }));
 
             const newAutoNewsData = {};
@@ -163,10 +175,15 @@ const PageLayoutClient = ({ initialPages, initialTags, initialMenus, initialDesi
                                 let contentId = col.contentId || null;
                                 let contentTitle = col.contentTitle || null;
 
-                                if (isAutoActive && autoItem && col.tag) {
-                                    contentType = 'news';
-                                    contentId = String(autoItem.id || autoItem._id);
-                                    contentTitle = autoItem.newsHeadline || `News ${autoItem.id || autoItem._id}`;
+                                // Hide and clear slave cells to prevent zombie data
+                                if (col.merged && !col.masterCell) {
+                                    contentId = null;
+                                    contentTitle = null;
+                                } else if (isAutoActive && autoItem && col.tag && contentType === 'news') {
+                                    // Make sure we DON'T bake the contentId for dynamic auto-news into the database!
+                                    // This allows the frontend (app/page.js) to accurately pull the latest item at runtime based on the tag distribution.
+                                    contentId = null;
+                                    contentTitle = null;
                                 }
 
                                 // Ensure contentId is always a string if present
@@ -419,9 +436,25 @@ const PageLayoutClient = ({ initialPages, initialTags, initialMenus, initialDesi
                         </Col>
                         <Col md={4} className="d-flex align-items-end">
                             <Form.Check type="switch" id="auto-news-page-switch" label="Global Auto News Selection" checked={editPage?.autoNewsSelection || false} onChange={e => {
-                                const newEditPage = {...editPage, autoNewsSelection: e.target.checked};
+                                const checked = e.target.checked;
+                                const newEditPage = JSON.parse(JSON.stringify(editPage));
+                                newEditPage.autoNewsSelection = checked;
+                                // When disabling global auto news, clear auto-filled content from all sections
+                                if (!checked) {
+                                    (newEditPage.PageSections || []).forEach(section => {
+                                        (section.rows || []).forEach(row => {
+                                            (row.columns || []).forEach(col => {
+                                                if (col.tag && col.contentType === 'news') {
+                                                    col.contentId = null;
+                                                    col.contentTitle = null;
+                                                }
+                                            });
+                                        });
+                                    });
+                                    setAutoNewsData({});
+                                }
                                 setEditPage(newEditPage);
-                                if (e.target.checked) fetchAutoNewsForPage(newEditPage);
+                                if (checked) fetchAutoNewsForPage(newEditPage);
                             }} />
                         </Col>
                     </Row>

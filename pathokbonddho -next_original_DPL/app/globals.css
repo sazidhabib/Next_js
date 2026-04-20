@@ -782,7 +782,7 @@ body {
 /* Desktop minimum height for 'image-top' design */
 @media (min-width: 992px) {
     .news-design-image-top {
-        min-height: 350px !important;
+        min-height: 250px !important;
     }
 }
 

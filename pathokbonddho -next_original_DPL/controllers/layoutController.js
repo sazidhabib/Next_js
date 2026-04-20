@@ -152,7 +152,7 @@ exports.updatePageLayout = async (req, res) => {
                                 colOrder: column.colOrder || colIndex + 1,
                                 width: column.width || 12,
                                 contentType: column.contentType || 'text',
-                                tag: column.tag || `col-${colIndex + 1}`,
+                                tag: column.tag || null,
                                 design: column.design || null,
                                 contentId: column.contentId || null,
                                 contentTitle: column.contentTitle || null,

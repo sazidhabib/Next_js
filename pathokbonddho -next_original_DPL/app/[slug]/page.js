@@ -31,39 +31,37 @@ async function getPageData(slug) {
     if (!layoutRes.ok) return null;
     const layout = await layoutRes.json();
 
-    // 2. Pre-resolve news data for all cells in parallel
+    // 2. Pre-resolve news data for all cells using dynamic tagging where needed
     if (layout?.PageSections) {
       const fetchPromises = [];
+      const dynamicTagsMap = {}; // { [tag]: [cell1, cell2, ...] }
 
       for (const section of layout.PageSections) {
         const rows = section.rows || section.Rows || [];
         for (const row of rows) {
           const columns = row.columns || row.Columns || [];
           for (const cell of columns) {
-            if (cell.contentType === 'news' && (cell.contentId || cell.tag)) {
-              const fetchNews = async () => {
-                try {
-                  let newsItem = null;
-                  if (cell.contentId) {
+            // Skip data fetching for cells that are merged into another cell
+            if (cell.merged && !cell.masterCell) continue;
+
+            if (cell.contentType === 'news') {
+              if (cell.contentId) {
+                const fetchNews = async () => {
+                  try {
                     const nRes = await fetchWithTimeout(`${API_URL}/news/${cell.contentId}`, { next: { revalidate: 60 } });
                     if (nRes.ok) {
                       const data = await nRes.json();
-                      newsItem = data.data || data.news || data;
+                      cell.resolvedContent = data.data || data.news || data;
                     }
-                  } else if (cell.tag) {
-                    const nRes = await fetchWithTimeout(`${API_URL}/news?tag=${cell.tag}&limit=1`, { next: { revalidate: 60 } });
-                    if (nRes.ok) {
-                      const data = await nRes.json();
-                      const items = data.news || data.rows || [];
-                      if (items.length > 0) newsItem = items[0];
-                    }
+                  } catch (e) {
+                    // Silently skip
                   }
-                  cell.resolvedContent = newsItem;
-                } catch (e) {
-                  // Silently skip — will be fetched client-side
-                }
-              };
-              fetchPromises.push(fetchNews());
+                };
+                fetchPromises.push(fetchNews());
+              } else if (cell.tag) {
+                if (!dynamicTagsMap[cell.tag]) dynamicTagsMap[cell.tag] = [];
+                dynamicTagsMap[cell.tag].push(cell);
+              }
             } else if (cell.contentType === 'image' && cell.contentId) {
               const fetchImage = async () => {
                 try {
@@ -92,6 +90,38 @@ async function getPageData(slug) {
             }
           }
         }
+      }
+
+      // Handle dynamic tag fetches natively across the entire layout
+      for (const [tag, cells] of Object.entries(dynamicTagsMap)) {
+        const count = cells.length;
+        const fetchDynamicTag = async () => {
+          try {
+            const nRes = await fetchWithTimeout(`${API_URL}/news?tag=${encodeURIComponent(tag)}&limit=${count}`, { next: { revalidate: 60 } });
+            let fetchedItems = [];
+            if (nRes.ok) {
+              const data = await nRes.json();
+              fetchedItems = data.news || data.rows || [];
+            }
+            
+            // Fallback by category if tag is empty
+            if (fetchedItems.length === 0) {
+              const cRes = await fetchWithTimeout(`${API_URL}/news?categories=${encodeURIComponent(tag)}&limit=${count}`, { next: { revalidate: 60 } });
+              if (cRes.ok) {
+                const cData = await cRes.json();
+                fetchedItems = cData.news || cData.rows || [];
+              }
+            }
+
+            // Distribute sequentially across assigned layout grid cells
+            cells.forEach((cell, idx) => {
+              cell.resolvedContent = fetchedItems[idx] || null;
+            });
+          } catch (e) {
+            // Silently skip
+          }
+        };
+        fetchPromises.push(fetchDynamicTag());
       }
 
       // Execute all fetches in parallel
