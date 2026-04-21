@@ -390,7 +390,7 @@ const VideoNewsCreate = () => {
                                                 <Form.Control placeholder="Search tags..." value={tagSearch} onChange={e => { setTagSearch(e.target.value); setShowTagDropdown(true); }} onFocus={() => setShowTagDropdown(true)} onBlur={() => setTimeout(() => setShowTagDropdown(false), 200)} />
                                                 {showTagDropdown && filteredTags.length > 0 && (
                                                     <div className="dropdown-menu show w-100" style={{ zIndex: 1060, maxHeight: '300px', overflowY: 'auto' }}>
-                                                        {filteredTags.map(tag => <button key={tag.id} type="button" className="dropdown-item" onClick={() => handleTagSelect(tag)}>{tag.name}</button>)}
+                                                        {filteredTags.map(tag => <button key={tag.id} type="button" className="dropdown-item" onMouseDown={(e) => { e.preventDefault(); handleTagSelect(tag); }}>{tag.name}</button>)}
                                                     </div>
                                                 )}
                                             </div>
@@ -415,7 +415,7 @@ const VideoNewsCreate = () => {
                                         <Form.Control required value={authorSearch} placeholder="Search author..." onChange={e => { setAuthorSearch(e.target.value); setShowAuthorDropdown(true); }} onFocus={() => setShowAuthorDropdown(true)} onBlur={() => setTimeout(() => setShowAuthorDropdown(false), 200)} />
                                         {showAuthorDropdown && filteredAuthors.length > 0 && (
                                             <div className="dropdown-menu show w-100" style={{ zIndex: 1060, maxHeight: '300px', overflowY: 'auto' }}>
-                                                {filteredAuthors.map(a => <button key={a.id} type="button" className="dropdown-item" onClick={() => handleAuthorSelect(a)}>{a.name}</button>)}
+                                                {filteredAuthors.map(a => <button key={a.id} type="button" className="dropdown-item" onMouseDown={(e) => { e.preventDefault(); handleAuthorSelect(a); }}>{a.name}</button>)}
                                             </div>
                                         )}
                                     </div>
