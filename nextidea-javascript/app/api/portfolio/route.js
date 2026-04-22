@@ -39,10 +39,10 @@ export async function GET(request) {
       `SELECT COUNT(*) as total FROM portfolio_items pi WHERE ${whereClause}`,
       params
     );
-    const total = countResult[0].total;
+    const total = Number(countResult[0].total);
 
     const items = await query(
-      `SELECT pi.id, pi.title, pi.slug, pi.description, pi.client_name, 
+      `SELECT pi.id, pi.title, pi.slug, pi.description, pi.client_name, pi.client_website,
               pi.project_date, pi.featured, pi.meta_title,
               c.title as category_title, c.slug as category_slug,
               (SELECT image_url FROM portfolio_images WHERE portfolio_item_id = pi.id ORDER BY is_primary DESC, sort_order ASC LIMIT 1) as thumbnail_url

@@ -25,21 +25,26 @@ export default function PortfolioPage() {
     const query = searchParams.get("search");
     if (query !== null) {
       setSearch(query);
-      setPage(1); // Reset to first page when search changes
+    } else {
+      setSearch("");
     }
 
     const categoryParam = searchParams.get("category");
-    if (categoryParam && categories.length > 0) {
-      const match = categories.find(c => {
-        const title = c.title || c.name || "";
-        const normalize = (str) => str.toLowerCase().replace(/&/g, 'and').replace(/\s+/g, ' ').trim();
-        return normalize(title) === normalize(categoryParam);
-      });
-      if (match) {
-        setSelectedCategory(match.id);
-        setPage(1);
+    if (categoryParam) {
+      if (categories.length > 0) {
+        const match = categories.find(c => {
+          const title = c.title || c.name || "";
+          const normalize = (str) => str.toLowerCase().replace(/&/g, 'and').replace(/\s+/g, ' ').trim();
+          return normalize(title) === normalize(categoryParam);
+        });
+        if (match) {
+          setSelectedCategory(match.id);
+        }
       }
+    } else {
+      setSelectedCategory("");
     }
+    setPage(1); // Reset to first page when search or category changes via URL
   }, [searchParams, categories]);
 
   const fetchData = async () => {

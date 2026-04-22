@@ -102,7 +102,7 @@ export default function HeroSlider() {
                       <span className="text-primary"> {slide.subheadline}</span>
                     </h1>
 
-                    <p className="max-w-2xl text-white/80 text-lg md:text-xl mb-12">
+                    <p className="max-w-2xl mx-auto text-white/80 text-lg md:text-xl mb-12">
                       {slide.description}
                     </p>
 
