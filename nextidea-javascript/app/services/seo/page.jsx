@@ -15,8 +15,8 @@ export default function SEOPage() {
         icon={<Search />}
         title="SEO Services"
         tagline="Future-Proof Your Visibility With The Best SEO Agency in Bangladesh"
-        description="At GEEKY Social, we specialize in turning concepts into remarkable SEO strategies that leave a lasting impression on your visibility ensuring your brand stands out in search results."
-        image="/SEO-Services.png"
+        description="At Next Idea solution, we specialize in turning concepts into remarkable SEO strategies that leave a lasting impression on your visibility ensuring your brand stands out in search results."
+        image="/SEO-Services.jpg"
       />
       <ServiceContent
         overview={{
@@ -125,7 +125,7 @@ export default function SEOPage() {
               </ul>
             </div>
             <div className="relative">
-              <img src="/SEO-Services.png" alt="Stay Visible" className="w-full rounded-2xl shadow-2xl" />
+              <img src="/SEO-Services.jpg" alt="Stay Visible" className="w-full rounded-2xl shadow-2xl" />
               <div className="absolute bottom-4 left-4 right-4 bg-white/95 backdrop-blur p-6 rounded-xl">
                 <div className="text-center">
                   <div className="text-5xl font-bold text-primary mb-2">93%</div>
@@ -150,19 +150,19 @@ export default function SEOPage() {
                 title: "Technical SEO",
                 description: "Website speed, mobile optimization, indexation, and crawlability. We ensure your site is technically perfect for search engines.",
                 items: ["Site speed optimization", "Mobile optimization", "XML sitemaps", "Robots.txt optimization", "Core Web Vitals"],
-                image: "/SEO-Audit.png",
+                image: "/SEO-Audit.jpg",
               },
               {
                 title: "Content Optimization",
                 description: "Strategic content creation and optimization for target keywords and search intent. We write content that ranks and converts.",
                 items: ["Keyword targeting", "Content strategy", "On-page optimization", "Content distribution", "Content updates"],
-                image: "/E-commerce-SEO.png",
+                image: "/E-commerce-SEO.jpg",
               },
               {
                 title: "Link Building & Authority",
                 description: "Earn high-quality backlinks and build domain authority through strategic outreach and content marketing.",
                 items: ["Link building campaigns", "Guest posting", "Competitor analysis", "Authority building", "Brand mentions"],
-                image: "/Local-SEO.png",
+                image: "/Local-SEO.jpg",
               },
             ].map((service, index) => (
               <div key={index} className="bg-white rounded-2xl border border-zinc-200 hover:shadow-xl transition-all overflow-hidden">
@@ -202,7 +202,7 @@ export default function SEOPage() {
                 company: "Clutch",
                 rating: 5,
                 reviews: 15,
-                feedback: "GEEKY Social is one of the top-rated SEO agencies. Their team delivered exceptional results and maintained great communication throughout.",
+                feedback: "Next Idea solution is one of the top-rated SEO agencies. Their team delivered exceptional results and maintained great communication throughout.",
               },
               {
                 company: "Google",
@@ -241,7 +241,7 @@ export default function SEOPage() {
       <section className="py-20 bg-white">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center mb-16">
-            <h2 className="text-4xl font-bold text-zinc-900 mb-4">See GEEKY Has Helped Clients</h2>
+            <h2 className="text-4xl font-bold text-zinc-900 mb-4">See Next Idea Has Helped Clients</h2>
             <p className="text-lg text-zinc-600">Our portfolio showcases successful SEO projects across various industries with measurable results.</p>
           </div>
           <div className="grid md:grid-cols-3 gap-8">
@@ -249,19 +249,19 @@ export default function SEOPage() {
               {
                 title: "E-commerce SEO",
                 description: "Increased organic traffic by 270% for e-commerce platforms",
-                image: "/E-commerce-SEO.png",
+                image: "/E-commerce-SEO.jpg",
                 stats: "270% Traffic Growth",
               },
               {
                 title: "Local SEO",
                 description: "Improved local search rankings and customer acquisition",
-                image: "/Local-SEO.png",
+                image: "/Local-SEO.jpg",
                 stats: "Top Local Rankings",
               },
               {
                 title: "SEO Audit & Strategy",
                 description: "Comprehensive audits leading to strategic optimization",
-                image: "/SEO-Audit.png",
+                image: "/SEO-Audit.jpg",
                 stats: "40% Higher Rankings",
               },
             ].map((project, index) => (
@@ -294,7 +294,7 @@ export default function SEOPage() {
           </div>
           <div className="grid md:grid-cols-4 gap-6">
             {[
-              { icon: <TrendingUp />, title: "Proven Results", description: "GEEKY helped Dhgate with a 270% increase in organic traffic, leading to lower cost per acquisition (CPA) within 6 months." },
+              { icon: <TrendingUp />, title: "Proven Results", description: "Next Idea helped Dhgate with a 270% increase in organic traffic, leading to lower cost per acquisition (CPA) within 6 months." },
               { icon: <Target />, title: "Strategic Approach", description: "Our meticulous planning and execution guarantees flawless strategies that resonate with your target audience." },
               { icon: <Award />, title: "Industry Expertise", description: "With years of experience, our team understands the evolving search landscape and AI-powered search algorithms." },
               { icon: <Zap />, title: "AI-Ready Solutions", description: "We build SEO strategies optimized for the AI-powered search era, ensuring long-term visibility." },
@@ -315,7 +315,7 @@ export default function SEOPage() {
       <section className="py-20 bg-white">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center mb-16">
-            <h2 className="text-4xl font-bold text-zinc-900 mb-4">What's Unique About GEEKY's SEO? As An SEO Agency in Bangladesh?</h2>
+            <h2 className="text-4xl font-bold text-zinc-900 mb-4">What's Unique About Next Idea's SEO? As An SEO Agency in Bangladesh?</h2>
             <p className="text-lg text-zinc-600">We leverage cutting-edge tools and strategies to ensure your business thrives in the AI-powered search landscape.</p>
           </div>
           <div className="grid md:grid-cols-3 gap-8">

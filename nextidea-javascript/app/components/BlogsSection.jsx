@@ -22,7 +22,7 @@ const blogs = [
     {
         title: "Unlock Local SEO Success: A step-by-step guide",
         category: "SEO",
-        image: "https://images.unsplash.com/photo-1432888622747-4eb9a8f2c20e?w=800&q=80",
+        image: "/blog3.jpg",
         link: "#",
         date: "Guide"
     }
