@@ -355,7 +355,14 @@ const getAllNews = async (req, res) => {
                     through: { attributes: [] },
                     attributes: ['id', 'name', 'slug'],
                     as: 'Tags',
-                    ...(tag && { where: { name: tag } })
+                    ...(tag && {
+                        where: {
+                            [Op.or]: [
+                                { name: tag },
+                                { slug: tag }
+                            ]
+                        }
+                    })
                 },
                 {
                     model: Menu,

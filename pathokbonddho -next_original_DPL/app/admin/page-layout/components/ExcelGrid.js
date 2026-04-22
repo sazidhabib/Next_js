@@ -16,11 +16,17 @@ const getImageUrl = (path) => {
 };
 
 // Preview Cell Content Component
-export const PreviewCellContent = ({ contentType, contentId, contentTitle }) => {
-    const [data, setData] = useState(null);
-    const [loading, setLoading] = useState(true);
+export const PreviewCellContent = ({ contentType, contentId, contentTitle, autoNewsItem }) => {
+    const [data, setData] = useState(autoNewsItem || null);
+    const [loading, setLoading] = useState(!autoNewsItem);
 
     useEffect(() => {
+        if (autoNewsItem) {
+            setData(autoNewsItem);
+            setLoading(false);
+            return;
+        }
+
         const fetchContent = async () => {
             if (!contentId || contentType === 'text') {
                 setLoading(false);
@@ -43,7 +49,7 @@ export const PreviewCellContent = ({ contentType, contentId, contentTitle }) => 
             }
         };
         fetchContent();
-    }, [contentId, contentType]);
+    }, [contentId, contentType, autoNewsItem]);
 
     if (loading) return <Spinner animation="border" size="sm" />;
     if (contentType === 'text') return <div className="small text-muted">{contentTitle || 'Text Content'}</div>;

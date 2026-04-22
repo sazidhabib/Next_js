@@ -43,6 +43,7 @@ const PageLayoutClient = ({ initialPages, initialTags, initialMenus, initialDesi
     const [availableDesigns] = useState(initialDesigns || []);
     const [menus] = useState(initialMenus || []);
     const [autoNewsData, setAutoNewsData] = useState({});
+    const [previewAutoNewsData, setPreviewAutoNewsData] = useState({});
     const [newPage, setNewPage] = useState({ name: '', autoNewsSelection: false, sections: [createNewSection(3, 3)] });
 
     const refreshData = () => mutate('/layout');
@@ -148,6 +149,68 @@ const PageLayoutClient = ({ initialPages, initialTags, initialMenus, initialDesi
         }
     };
 
+    const fetchPreviewAutoNews = async (pageData) => {
+        if (!pageData?.PageSections) {
+            setPreviewAutoNewsData({});
+            return;
+        }
+
+        const isGlobalAutoActive = pageData.autoNewsSelection;
+        const tagCounts = {};
+        const cellMap = [];
+
+        pageData.PageSections.forEach((section, sIdx) => {
+            const isSectionAutoActive = isGlobalAutoActive || section.autoNewsSelection;
+            if (!isSectionAutoActive) return;
+
+            (section.rows || section.Rows || []).forEach((row, rIdx) => {
+                (row.columns || row.Columns || []).forEach((col, cIdx) => {
+                    if (col.merged && !col.masterCell) return;
+                    if (col.tag && col.contentType === 'news') {
+                        tagCounts[col.tag] = (tagCounts[col.tag] || 0) + 1;
+                        cellMap.push({ sIdx, rIdx, cIdx, tag: col.tag });
+                    }
+                });
+            });
+        });
+
+        if (Object.keys(tagCounts).length === 0) {
+            setPreviewAutoNewsData({});
+            return;
+        }
+
+        const fetchedNewsByTag = {};
+        try {
+            await Promise.all(Object.keys(tagCounts).map(async (tag) => {
+                const count = tagCounts[tag];
+                let res = await api.get(`/news?tag=${tag}&limit=${count}`);
+                let news = res.data.news || res.data.rows || res.data.data || [];
+                if (news.length === 0) {
+                    res = await api.get(`/news?categories=${encodeURIComponent(tag)}&limit=${count}`);
+                    news = res.data.news || res.data.rows || res.data.data || [];
+                }
+                fetchedNewsByTag[tag] = news;
+            }));
+
+            const newAutoNewsData = {};
+            const tagUsageCounter = {};
+
+            cellMap.forEach(({ sIdx, rIdx, cIdx, tag }) => {
+                const availableNews = fetchedNewsByTag[tag] || [];
+                const usageCount = tagUsageCounter[tag] || 0;
+                const newsItem = availableNews[usageCount] || null;
+                if (newsItem) {
+                    newAutoNewsData[`${sIdx}-${rIdx}-${cIdx}`] = newsItem;
+                    tagUsageCounter[tag] = usageCount + 1;
+                }
+            });
+            setPreviewAutoNewsData(newAutoNewsData);
+        } catch (err) {
+            console.error("Failed to fetch auto news for preview:", err);
+            setPreviewAutoNewsData({});
+        }
+    };
+
     const handleSave = async () => {
         try {
             // Deep clone the data for save
@@ -220,9 +283,11 @@ const PageLayoutClient = ({ initialPages, initialTags, initialMenus, initialDesi
             try {
                 const res = await api.get(`/layout/${saveData.id}`);
                 setSelectedPage(res.data);
+                fetchPreviewAutoNews(res.data);
             } catch (e) {
                 // If refresh fails, just clear selectedPage
                 setSelectedPage(null);
+                setPreviewAutoNewsData({});
             }
         } catch (err) {
             console.error("Save error:", err);
@@ -304,7 +369,7 @@ const PageLayoutClient = ({ initialPages, initialTags, initialMenus, initialDesi
                         <Card.Body className="p-0">
                             <div className="list-group list-group-flush">
                                 {pages.map(p => (
-                                    <div key={p.id} className={`list-group-item list-group-item-action d-flex justify-content-between align-items-center ${selectedPage?.id === p.id ? 'active' : ''}`} style={{cursor: 'pointer'}} onClick={() => api.get(`/layout/${p.id}`).then(r => setSelectedPage(r.data))}>
+                                    <div key={p.id} className={`list-group-item list-group-item-action d-flex justify-content-between align-items-center ${selectedPage?.id === p.id ? 'active' : ''}`} style={{cursor: 'pointer'}} onClick={() => api.get(`/layout/${p.id}`).then(r => { setSelectedPage(r.data); fetchPreviewAutoNews(r.data); })}>
                                         <span className="text-truncate" style={{maxWidth: '120px'}}>{p.name}</span>
                                         <div className="btn-group">
                                             <Button size="sm" variant={selectedPage?.id === p.id ? "light" : "outline-primary"} onClick={(e) => { e.stopPropagation(); handleFetchForEdit(p.id); }}>Edit</Button>
@@ -385,8 +450,16 @@ const PageLayoutClient = ({ initialPages, initialTags, initialMenus, initialDesi
                                                                                         />
                                                                                     )}
 
+                                                                                    {/* Auto News Preview (if auto active and no static contentId) */}
+                                                                                    {(!column.contentId && column.contentType === 'news' && column.tag && (selectedPage.autoNewsSelection || section.autoNewsSelection)) && (
+                                                                                        <PreviewCellContent
+                                                                                            contentType="news"
+                                                                                            autoNewsItem={previewAutoNewsData[`${sectionIndex}-${rowIndex}-${colIndex}`] || { newsHeadline: "Auto News Placeholder..." }}
+                                                                                        />
+                                                                                    )}
+
                                                                                     {/* Fallback: No content selected */}
-                                                                                    {(!column.contentId && column.contentType && column.contentType !== 'text') && (
+                                                                                    {(!column.contentId && column.contentType && column.contentType !== 'text' && !(column.contentType === 'news' && column.tag && (selectedPage.autoNewsSelection || section.autoNewsSelection))) && (
                                                                                         <div className="text-center text-muted small py-2" style={{ fontSize: '0.75rem' }}>
                                                                                             <em>No content selected</em>
                                                                                         </div>

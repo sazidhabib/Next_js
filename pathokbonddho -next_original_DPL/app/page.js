@@ -72,17 +72,30 @@ async function getPageData(slug = 'home') {
     if (layout?.PageSections) {
       const fetchPromises = [];
       const dynamicTagsMap = {}; // { [tag]: [cell1, cell2, ...] }
+      
+      const categoryName = matchPage?.name;
 
       for (const section of layout.PageSections) {
-        const rows = section.rows || section.Rows || [];
+        const rows = [...(section.rows || section.Rows || [])].sort((a, b) => (a.rowOrder || 0) - (b.rowOrder || 0));
         for (const row of rows) {
-          const columns = row.columns || row.Columns || [];
+          const columns = [...(row.columns || row.Columns || [])].sort((a, b) => (a.colOrder || 0) - (b.colOrder || 0));
           for (const cell of columns) {
-            // Skip data fetching for cells that are merged into another cell
             if (cell.merged && !cell.masterCell) continue;
 
             if (cell.contentType === 'news') {
-              if (cell.contentId) {
+              const isAuto = layout.autoNewsSelection || section.autoNewsSelection;
+              
+              if (isAuto) {
+                let effectiveTag = cell.tag || slug;
+                // If the tag is the category name (e.g. "সাহিত্য") or matches the slug (e.g. "literature"),
+                // or if it's a generic "col-X" tag, we canonicalize it to the slug so they are fetched together.
+                const isJunkTag = effectiveTag && effectiveTag.startsWith('col-');
+                if (isJunkTag || effectiveTag === categoryName || (effectiveTag && effectiveTag.toLowerCase() === slug.toLowerCase())) {
+                    effectiveTag = `_cat_${slug}`;
+                }
+                if (!dynamicTagsMap[effectiveTag]) dynamicTagsMap[effectiveTag] = [];
+                dynamicTagsMap[effectiveTag].push(cell);
+              } else if (cell.contentId) {
                 const fetchNews = async () => {
                   try {
                     const nRes = await fetchWithTimeout(`${API_URL}/news/${cell.contentId}`, { next: { revalidate: 60 } });
@@ -130,11 +143,19 @@ async function getPageData(slug = 'home') {
       }
 
       // Handle dynamic tag fetches natively across the entire layout
-      for (const [tag, cells] of Object.entries(dynamicTagsMap)) {
+      for (let [tag, cells] of Object.entries(dynamicTagsMap)) {
         const count = cells.length;
         const fetchDynamicTag = async () => {
           try {
-            const nRes = await fetchWithTimeout(`${API_URL}/news?tag=${encodeURIComponent(tag)}&limit=${count}`, { next: { revalidate: 60 } });
+            let url;
+            if (tag.startsWith('_cat_')) {
+                const actualSlug = tag.replace('_cat_', '');
+                url = `${API_URL}/news?categories=${encodeURIComponent(actualSlug)}&limit=${count}`;
+            } else {
+                url = `${API_URL}/news?tag=${encodeURIComponent(tag)}&limit=${count}`;
+            }
+
+            const nRes = await fetchWithTimeout(url, { next: { revalidate: 60 } });
             let fetchedItems = [];
             if (nRes.ok) {
               const data = await nRes.json();
@@ -142,7 +163,7 @@ async function getPageData(slug = 'home') {
             }
             
             // Fallback by category if tag is empty
-            if (fetchedItems.length === 0) {
+            if (fetchedItems.length === 0 && !tag.startsWith('_cat_')) {
               const cRes = await fetchWithTimeout(`${API_URL}/news?categories=${encodeURIComponent(tag)}&limit=${count}`, { next: { revalidate: 60 } });
               if (cRes.ok) {
                 const cData = await cRes.json();

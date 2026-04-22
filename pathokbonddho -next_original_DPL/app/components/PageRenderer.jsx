@@ -90,7 +90,11 @@ const PageRenderer = ({ pageId, slug, initialLayout }) => {
         if (!pageLayout?.PageSections) return [];
         return pageLayout.PageSections.flatMap(section => 
             (section.rows || section.Rows || []).flatMap(row => 
-                (row.columns || row.Columns || []).filter(col => col.contentType === 'news' && col.contentId).map(col => col.contentId)
+                (row.columns || row.Columns || []).filter(col => col.contentType === 'news').map(col => {
+                    const newsItem = col.resolvedContent;
+                    const id = col.contentId || newsItem?._id || newsItem?.id;
+                    return id ? String(id) : null;
+                }).filter(id => id !== null)
             )
         );
     };
