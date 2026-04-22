@@ -3,7 +3,9 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { getCategories } from "../lib/api";
+
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, ChevronDown } from "lucide-react";
 
@@ -14,13 +16,8 @@ const navLinks = [
   { href: "/contact", label: "Contact" },
 ];
 
-const portfolioDropdown = [
-  { href: "/protfolio", label: "All Demos" },
-  { href: "/protfolio?category=Creatives", label: "Creatives" },
-  { href: "/protfolio?category=Campaigns", label: "Campaigns" },
-  { href: "/protfolio?category=Printing%20%26%20Packaging", label: "Printing & Packaging" },
-  { href: "/protfolio?category=Website", label: "Website" },
-];
+// Portfolio dropdown will be populated dynamically from API
+
 
 const servicesDropdown = [
   { href: "/services/creative-concept-execution", label: "Creative Concept & Execution" },
@@ -49,6 +46,30 @@ export default function Navbar() {
   const [isServicesOpen, setIsServicesOpen] = useState(false);
   const [isPortfolioOpen, setIsPortfolioOpen] = useState(false);
   const [expandedMobileService, setExpandedMobileService] = useState("");
+  const [categories, setCategories] = useState([]);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const res = await getCategories();
+        if (res.success) {
+          setCategories(res.data);
+        }
+      } catch (error) {
+        console.error("Error fetching categories for navbar:", error);
+      }
+    };
+    fetchCategories();
+  }, []);
+
+  const portfolioDropdown = [
+    { href: "/protfolio", label: "All Demos" },
+    ...categories.map(cat => ({
+      href: `/protfolio?category=${encodeURIComponent(cat.title || cat.name)}`,
+      label: cat.title || cat.name
+    }))
+  ];
+
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-100">

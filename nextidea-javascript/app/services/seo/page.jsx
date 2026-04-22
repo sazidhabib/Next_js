@@ -7,6 +7,9 @@ import PackagesSection from "../../components/PackagesSection";
 import CTASection from "../../components/CTASection";
 import FAQSection from "../../components/FAQSection";
 import BlogsSection from "../../components/BlogsSection";
+import SEOProcess from "../../components/SEOProcess";
+import SEOTabbedServices from "../../components/SEOTabbedServices";
+
 
 export default function SEOPage() {
   return (
@@ -18,41 +21,8 @@ export default function SEOPage() {
         description="At Next Idea solution, we specialize in turning concepts into remarkable SEO strategies that leave a lasting impression on your visibility ensuring your brand stands out in search results."
         image="/SEO-Services.jpg"
       />
-      <ServiceContent
-        overview={{
-          title: "Your Customers Are Searching For You On Google, But You Don't Know",
-          description: "In this age where customers search online to gather information and then make a purchase decision, you're losing sales if you're not present in front of their eyes when they're searching. Our SEO strategies are built to align with search engine priorities: helpfulness, authority, and relevance.",
-        }}
-        process={{
-          title: "How We Work?",
-          steps: [
-            {
-              title: "Research and Analysis",
-              description: "We analyze top competitors, conduct SERP analysis, and study user intent to identify content gaps and opportunities.",
-            },
-            {
-              title: "Strategy Development",
-              description: "We create a customized SEO strategy aligned with your business goals, defining success metrics and timelines.",
-            },
-            {
-              title: "Implementation",
-              description: "Our SEO experts optimize your website content, improve technical health, and launch targeted link building campaigns.",
-            },
-            {
-              title: "Monitoring and Reporting",
-              description: "You receive monthly performance reports highlighting keyword rankings, organic traffic growth, and ROI metrics.",
-            },
-          ],
-        }}
-        relatedServices={[
-          { title: "SEO Audit", link: "/services/seo/seo-audit", icon: <FileText /> },
-          { title: "Local SEO", link: "/services/seo/local-seo", icon: <MapPin /> },
-          { title: "E-commerce SEO", link: "/services/seo/e-commerce-seo", icon: <ShoppingCart /> },
-        ]}
-      />
-
       {/* Marquee Services Section */}
-      <section className="py-12 bg-zinc-900 text-white overflow-hidden">
+      <section className="py-12 bg-white text-white overflow-hidden">
         <div className="container mx-auto px-4">
           <h2 className="text-center mb-8 text-lg font-semibold text-zinc-400">OUR SEO SERVICES</h2>
           <div className="flex overflow-hidden">
@@ -67,7 +37,7 @@ export default function SEOPage() {
                 { icon: <ShoppingCart className="w-6 h-6" />, text: "E-commerce SEO" },
                 { icon: <Smartphone className="w-6 h-6" />, text: "App Store Optimization (ASO)" },
               ].map((service, index) => (
-                <div key={index} className="px-6 py-3 border border-primary/40 rounded-full text-primary font-medium hover:border-primary transition-colors flex items-center gap-2">
+                <div key={index} className="px-6 py-3 border border-primary/40 rounded-full text-primary  font-bold hover:border-primary transition-colors flex items-center gap-2">
                   {service.icon}
                   {service.text}
                 </div>
@@ -100,6 +70,23 @@ export default function SEOPage() {
           }
         `}</style>
       </section>
+
+      <ServiceContent
+        overview={{
+          title: "Your Customers Are Searching For You On Google, But You Don't Know",
+          description: "In this age where customers search online to gather information and then make a purchase decision, you're losing sales if you're not present in front of their eyes when they're searching. Our SEO strategies are built to align with search engine priorities: helpfulness, authority, and relevance.",
+        }}
+        relatedServices={[
+          { title: "SEO Audit", link: "/services/seo/seo-audit", icon: <FileText /> },
+          { title: "Local SEO", link: "/services/seo/local-seo", icon: <MapPin /> },
+          { title: "E-commerce SEO", link: "/services/seo/e-commerce-seo", icon: <ShoppingCart /> },
+        ]}
+      />
+
+      <SEOProcess />
+
+
+
 
       {/* Stay Visible Section */}
       <section className="py-20 bg-white">
@@ -137,57 +124,8 @@ export default function SEOPage() {
         </div>
       </section>
 
-      {/* End-to-End SEO Services Section */}
-      <section className="py-20 bg-zinc-50">
-        <div className="container mx-auto px-4">
-          <div className="max-w-3xl mx-auto text-center mb-16">
-            <h2 className="text-4xl font-bold text-zinc-900 mb-4">End-To-End SEO Services Built For The AI-Powered Search Era</h2>
-            <p className="text-lg text-zinc-600">From strategy to execution, we provide comprehensive SEO solutions that cover every aspect of your digital visibility.</p>
-          </div>
-          <div className="grid md:grid-cols-3 gap-8">
-            {[
-              {
-                title: "Technical SEO",
-                description: "Website speed, mobile optimization, indexation, and crawlability. We ensure your site is technically perfect for search engines.",
-                items: ["Site speed optimization", "Mobile optimization", "XML sitemaps", "Robots.txt optimization", "Core Web Vitals"],
-                image: "/SEO-Audit.jpg",
-              },
-              {
-                title: "Content Optimization",
-                description: "Strategic content creation and optimization for target keywords and search intent. We write content that ranks and converts.",
-                items: ["Keyword targeting", "Content strategy", "On-page optimization", "Content distribution", "Content updates"],
-                image: "/E-commerce-SEO.jpg",
-              },
-              {
-                title: "Link Building & Authority",
-                description: "Earn high-quality backlinks and build domain authority through strategic outreach and content marketing.",
-                items: ["Link building campaigns", "Guest posting", "Competitor analysis", "Authority building", "Brand mentions"],
-                image: "/Local-SEO.jpg",
-              },
-            ].map((service, index) => (
-              <div key={index} className="bg-white rounded-2xl border border-zinc-200 hover:shadow-xl transition-all overflow-hidden">
-                <div className="h-48 bg-gradient-to-br from-primary/10 to-primary/5 overflow-hidden flex items-center justify-center">
-                  {service.image && (
-                    <img src={service.image} alt={service.title} className="w-full h-full object-cover" />
-                  )}
-                </div>
-                <div className="p-8">
-                  <h3 className="text-2xl font-bold text-zinc-900 mb-3">{service.title}</h3>
-                  <p className="text-zinc-600 mb-6">{service.description}</p>
-                  <ul className="space-y-2">
-                    {service.items.map((item, idx) => (
-                      <li key={idx} className="flex gap-2 text-zinc-700">
-                        <CheckCircle className="w-5 h-5 text-primary flex-shrink-0" />
-                        {item}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      <SEOTabbedServices />
+
 
       {/* Hire The Best SEO Agency Section */}
       <section className="py-20 bg-white">

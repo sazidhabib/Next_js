@@ -1,7 +1,5 @@
-// Use relative path for local development to hit Next.js API routes
-const BASE_URL = typeof window !== 'undefined' ? '' : (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000');
-
-export const IMAGE_BASE_URL = "/uploads/demos/"; // Local uploads path
+const BASE_URL = 'https://demo.nextideasolution.com/api';
+export const IMAGE_BASE_URL = "https://demo.nextideasolution.com/uploads/demos/";
 
 /**
  * Fetches demos from the API with optional filters.
@@ -12,11 +10,10 @@ export async function getDemos({ page = 1, limit = 10, category_id, search, lang
     params.append("limit", limit);
     if (category_id) params.append("category_id", category_id);
     if (search) params.append("search", search);
-    if (lang) params.append("lang", lang);
+    params.append("lang", lang);
 
     try {
-        // Updated to use local Next.js API route
-        const response = await fetch(`${BASE_URL}/api/portfolio?${params.toString()}`);
+        const response = await fetch(`${BASE_URL}/get-demos.php?${params.toString()}`);
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         return await response.json();
     } catch (error) {
@@ -30,9 +27,7 @@ export async function getDemos({ page = 1, limit = 10, category_id, search, lang
  */
 export async function getCategories() {
     try {
-        const response = await fetch(`${BASE_URL}/api/categories`, {
-            cache: 'no-store', // Categories should reflect local DB
-        });
+        const response = await fetch(`${BASE_URL}/get-categories.php`);
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         return await response.json();
     } catch (error) {
@@ -46,7 +41,7 @@ export async function getCategories() {
  */
 export async function getDemoById(id) {
     try {
-        const response = await fetch(`${BASE_URL}/api/portfolio/${id}`);
+        const response = await fetch(`${BASE_URL}/get-demo-by-id.php?id=${id}`);
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         return await response.json();
     } catch (error) {
@@ -54,3 +49,4 @@ export async function getDemoById(id) {
         return { success: false, error: error.message };
     }
 }
+
