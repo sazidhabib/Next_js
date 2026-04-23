@@ -12,6 +12,11 @@ const LoadMoreNews = ({ slug, excludeIds }) => {
     const [hasMore, setHasMore] = useState(true);
     const API_BASE_URL = STATIC_URL || 'http://localhost:5000';
 
+    const stripHtml = (html) => {
+        if (!html) return '';
+        return html.replace(/<[^>]*>?/gm, '');
+    };
+
     const getYoutubeId = (url) => {
         if (!url) return null;
         const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([^&\n?#]+)/);
@@ -144,7 +149,7 @@ const LoadMoreNews = ({ slug, excludeIds }) => {
                                         <div className="flex-grow-1 d-flex flex-column justify-content-between">
                                             {item.shortDescription && (
                                                 <p className="small custom-font text-muted mb-2 code-font-bangla" style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                                                    {item.shortDescription}
+                                                    {stripHtml(item.shortDescription)}
                                                 </p>
                                             )}
                                             <div className="small text-muted mt-auto" style={{ fontSize: '0.8rem' }}>

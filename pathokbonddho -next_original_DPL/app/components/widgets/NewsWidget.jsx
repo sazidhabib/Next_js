@@ -9,6 +9,11 @@ const NewsWidget = ({ cell, isPriority }) => {
     const [news, setNews] = useState(cell.resolvedContent || null);
     const [loading, setLoading] = useState(!cell.resolvedContent);
     const STATIC_BASE = STATIC_URL || 'http://localhost:5000';
+    
+    const stripHtml = (html) => {
+        if (!html) return '';
+        return html.replace(/<[^>]*>?/gm, '');
+    };
 
     const getYoutubeId = (url) => {
         if (!url) return null;
@@ -199,7 +204,7 @@ const NewsWidget = ({ cell, isPriority }) => {
                     )}
                     <div className="flex-grow-1">
                         {news.shortDescription && (
-                            <p className="small text-muted mb-2 line-clamp-2 d-none d-sm-block font-bangla">{news.shortDescription}</p>
+                            <p className="small text-muted mb-2 line-clamp-2 d-none d-sm-block font-bangla">{stripHtml(news.shortDescription)}</p>
                         )}
                         <small className="text-muted">{formatDate(news.createdAt)}</small>
                     </div>
@@ -246,7 +251,7 @@ const NewsWidget = ({ cell, isPriority }) => {
                 <div className="d-flex gap-3">
                     <div className="flex-grow-1">
                         {news.shortDescription && (
-                            <p className="small text-muted mb-2 line-clamp-2 d-none d-sm-block font-bangla">{news.shortDescription}</p>
+                            <p className="small text-muted mb-2 line-clamp-2 d-none d-sm-block font-bangla">{stripHtml(news.shortDescription)}</p>
                         )}
                         <small className="text-muted">{formatDate(news.createdAt)}</small>
                     </div>
@@ -321,7 +326,7 @@ const NewsWidget = ({ cell, isPriority }) => {
                     </h5>
                 </Link>
                 {cell.design !== 'image-top' && news.shortDescription && (
-                    <p className="small text-muted line-clamp-3 mb-2 font-bangla">{news.shortDescription}</p>
+                    <p className="small text-muted line-clamp-3 mb-2 font-bangla">{stripHtml(news.shortDescription)}</p>
                 )}
                 <div className="text-muted small mt-auto">
                     {formatDate(news.createdAt)}

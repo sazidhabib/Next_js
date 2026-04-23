@@ -395,6 +395,7 @@ const PhotoNewsEdit = () => {
                             </Card>
 
                             <Form.Group className="mb-3 mt-4"><Form.Label>Highlight</Form.Label><WYSIWYGEditor ref={editorRefs.highlight} value={formData.highlight} onChange={v => setFormData({...formData, highlight: v})} height={150} onImageClick={() => { setActiveEditor('highlight'); setModals({...modals, editor: true}); }} /></Form.Group>
+                            <Form.Group className="mb-3"><Form.Label>Short Description</Form.Label><Form.Control as="textarea" rows={3} value={formData.shortDescription} onChange={e => setFormData({...formData, shortDescription: e.target.value})} placeholder="Brief summary of the photo news (plain text)..." /></Form.Group>
                             <Form.Group className="mb-3"><Form.Label>Main Content</Form.Label><WYSIWYGEditor ref={editorRefs.content} value={formData.content} onChange={v => setFormData({...formData, content: v})} height={300} onImageClick={() => { setActiveEditor('content'); setModals({...modals, editor: true}); }} /></Form.Group>
                         </Card.Body></Card>
                     </Col>
