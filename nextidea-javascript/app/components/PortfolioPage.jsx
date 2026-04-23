@@ -34,7 +34,7 @@ export default function PortfolioPage() {
       if (categories.length > 0) {
         const match = categories.find(c => {
           const title = c.title || c.name || "";
-          const normalize = (str) => str.toLowerCase().replace(/&/g, 'and').replace(/\s+/g, ' ').trim();
+          const normalize = (str) => str.toString().toLowerCase().replace(/&/g, 'and').replace(/[^a-z0-9]/g, '').trim();
           return normalize(title) === normalize(categoryParam);
         });
         if (match) {
@@ -44,8 +44,9 @@ export default function PortfolioPage() {
     } else {
       setSelectedCategory("");
     }
-    setPage(1); // Reset to first page when search or category changes via URL
+    setPage(1); 
   }, [searchParams, categories]);
+
 
   const fetchData = async () => {
     setLoading(true);

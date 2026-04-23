@@ -5,7 +5,8 @@ import { ExternalLink, Layers, Eye } from "lucide-react";
 import { IMAGE_BASE_URL } from "../lib/api";
 
 export default function DemoCard({ demo }) {
-  const imageUrl = demo.thumbnail_url ? `${IMAGE_BASE_URL}${demo.thumbnail_url}` : "/placeholder-project.png";
+  const imageUrl = demo.image ? `${IMAGE_BASE_URL}${demo.image}` : "/placeholder-project.png";
+  const toolsArray = demo.tools ? demo.tools.split(',').map(t => t.trim()) : [];
 
   return (
     <div className="group bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-500 flex flex-col h-full">
@@ -26,15 +27,15 @@ export default function DemoCard({ demo }) {
             </span>
           )}
           <span className="px-3 py-1 bg-white/90 backdrop-blur-sm text-zinc-800 text-[10px] font-bold uppercase tracking-wider rounded-full shadow-sm">
-            {demo.category_title}
+            {demo.category_name}
           </span>
         </div>
 
         {/* Hover Overlay */}
         <div className="absolute inset-0 bg-primary/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-            {demo.client_website && (
+            {demo.demo_link && (
               <a 
-                href={demo.client_website} 
+                href={demo.demo_link} 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="w-12 h-12 bg-white rounded-full flex items-center justify-center text-primary shadow-xl transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300 hover:bg-primary hover:text-white"
@@ -52,7 +53,7 @@ export default function DemoCard({ demo }) {
             {demo.title}
           </h3>
           <p className="text-zinc-500 text-sm line-clamp-2 min-h-[40px]">
-            {demo.description}
+            {demo.details || demo.description}
           </p>
         </div>
 
@@ -60,13 +61,13 @@ export default function DemoCard({ demo }) {
           <div className="flex items-center gap-2 text-zinc-400">
             <Layers className="w-4 h-4" />
             <span className="text-xs font-medium uppercase truncate max-w-[150px]">
-              {demo.technologies?.join(", ") || "No tech listed"}
+              {toolsArray.join(", ") || "No tech listed"}
             </span>
           </div>
           
-          {demo.client_website && (
+          {demo.demo_link && (
             <a
-              href={demo.client_website}
+              href={demo.demo_link}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-2 text-primary font-bold text-sm group/link hover:underline"
@@ -87,3 +88,4 @@ export default function DemoCard({ demo }) {
     </div>
   );
 }
+
