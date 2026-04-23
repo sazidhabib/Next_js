@@ -2,18 +2,18 @@
 
 import { motion } from "framer-motion";
 
-const steps = [
+const defaultSteps = [
   {
     number: "1",
     title: "Research and Analysis",
     description: "We begin by analyzing the top competitors for your primary search terms. This includes detailed SERP analysis to uncover content gaps, backlink profiles and page structures. We also conduct a user intent study to identify what your customers are searching for and why.",
-    color: "red", // Red accent
+    color: "red",
   },
   {
     number: "2",
     title: "Strategy Development",
     description: "Based on our research, we create a customized SEO strategy that aligns with your business goals. We define success metrics, timelines and reporting cadence. You receive a clear roadmap that covers on-page, technical, off-page and local SEO services.",
-    color: "black", // Black accent
+    color: "black",
   },
   {
     number: "3",
@@ -29,14 +29,14 @@ const steps = [
   },
 ];
 
-export default function SEOProcess() {
+export default function SEOProcess({ steps = defaultSteps, title = "How We Work?" }) {
   return (
     <section className="py-24 bg-white">
       <div className="container mx-auto px-4">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold text-zinc-900 mb-4">
-              How We Work?
+              {title}
             </h2>
           </div>
 
@@ -62,7 +62,7 @@ export default function SEOProcess() {
                         <span className="text-4xl font-black">{step.number}</span>
                         <span className="text-xs font-bold uppercase tracking-widest mt-1 opacity-80">Step</span>
                       </div>
-                      <div className={`flex-grow p-8 flex flex-col justify-center border-l-8 border-zinc-900`}>
+                      <div className={`flex-grow p-8 flex flex-col justify-center border-l-8 ${step.color === 'red' ? 'border-[#c01b33]' : 'border-zinc-900'}`}>
                         <h3 className="text-2xl font-bold text-zinc-900 mb-3">{step.title}</h3>
                         <p className="text-zinc-600 leading-relaxed">{step.description}</p>
                       </div>
@@ -70,7 +70,7 @@ export default function SEOProcess() {
                   ) : (
                     // Step 1, 3 (Content Left)
                     <>
-                      <div className={`flex-grow p-8 flex flex-col justify-center border-r-8 border-[#c01b33]`}>
+                      <div className={`flex-grow p-8 flex flex-col justify-center border-r-8 ${step.color === 'red' ? 'border-[#c01b33]' : 'border-zinc-900'}`}>
                         <h3 className="text-2xl font-bold text-zinc-900 mb-3">{step.title}</h3>
                         <p className="text-zinc-600 leading-relaxed">{step.description}</p>
                       </div>
