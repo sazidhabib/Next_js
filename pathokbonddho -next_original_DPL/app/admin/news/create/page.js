@@ -402,7 +402,7 @@ const NewsCreate = () => {
                                 </Form.Group>
                                 <Form.Group className="mb-3">
                                     <Form.Label>Short Description</Form.Label>
-                                    <WYSIWYGEditor ref={editorRefs.shortDescription} value={formData.shortDescription} onChange={v => setFormData({...formData, shortDescription: v})} height={200} onImageClick={() => openEditorImageModal('shortDescription')} onEditImage={(data) => handleEditImage(data, 'shortDescription')} />
+                                    <Form.Control as="textarea" rows={3} value={formData.shortDescription} name="shortDescription" onChange={handleInputChange} placeholder="Brief summary of the news (plain text)..." />
                                 </Form.Group>
                                 <Form.Group className="mb-3">
                                     <Form.Label>Content *</Form.Label>
