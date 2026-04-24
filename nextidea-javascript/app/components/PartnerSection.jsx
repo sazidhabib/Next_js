@@ -12,7 +12,10 @@ const partners = [
     { name: "The Daily Star", logo: "https://upload.wikimedia.org/wikipedia/en/thumb/7/77/The_Daily_Star_%28Bangladesh%29_logo.png/220px-The_Daily_Star_%28Bangladesh%29_logo.png" },
 ];
 
-export default function PartnerSection() {
+export default function PartnerSection({
+    title = "Our Partners",
+    partnersList = partners
+}) {
     return (
         <section className="py-20 bg-white">
             <div className="container mx-auto px-4">
@@ -24,7 +27,7 @@ export default function PartnerSection() {
                     className="text-center mb-12"
                 >
                     <h2 className="text-3xl md:text-4xl font-bold text-zinc-800 uppercase tracking-widest mb-4">
-                        Our Partners
+                        {title}
                     </h2>
                     <motion.div
                         initial={{ scaleX: 0 }}
@@ -36,7 +39,7 @@ export default function PartnerSection() {
                 </motion.div>
 
                 <div className="flex flex-wrap justify-center gap-8 md:gap-12 opacity-60 grayscale hover:grayscale-0 transition-all duration-500">
-                    {partners.map((partner, index) => (
+                    {partnersList.map((partner, index) => (
                         <motion.div
                             key={index}
                             initial={{ opacity: 0, y: 20 }}

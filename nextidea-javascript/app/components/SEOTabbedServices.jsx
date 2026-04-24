@@ -39,7 +39,7 @@ const tabs = [
     label: "TECHNICAL SEO",
     title: "Technical SEO Optimization",
     description: "We ensure your website meets the technical requirements of modern search engines. From site speed and mobile-friendliness to crawlability and schema markup, we build a solid foundation for your SEO success.",
-    image: "/SEO-Services.png",
+    image: "/tecnicalseo.jpeg",
   },
   {
     id: "local-seo",
@@ -67,26 +67,30 @@ const tabs = [
     label: "YOUTUBE SEO",
     title: "YouTube Video SEO",
     description: "Get your videos in front of the right audience. We optimize video titles, tags, and descriptions to ensure your content ranks in both YouTube and Google search results.",
-    image: "/Video-Production.png",
+    image: "/youtubeseo.jpeg",
   },
   {
     id: "vso",
     label: "VOICE SEARCH OPTIMIZATION (VSO)",
     title: "Voice Search Optimization",
     description: "Prepare for the future of search. We optimize your content for conversational queries and long-tail keywords used in voice searches on Alexa, Siri, and Google Assistant.",
-    image: "/Social-Media.png",
+    image: "/voicesearch.jpeg",
   },
   {
     id: "aeo",
     label: "ASK ENGINE OPTIMIZATION (AEO)",
     title: "Ask Engine Optimization",
     description: "In the era of AI and Answer Engines, we optimize your content to be the preferred answer for LLMs and AI-powered search results like Perplexity and Google SGE.",
-    image: "/SEO-Services.png",
+    image: "/AEO.jpeg",
   },
 ];
 
-export default function SEOTabbedServices() {
-  const [activeTab, setActiveTab] = useState(tabs[1]); // Default to Keyword Research as in screenshot
+export default function SEOTabbedServices({
+  title = "End-To-End SEO Services Built For The AI-Powered Search Era",
+  description = "Search isn't just about blue links anymore. With AI Overviews and smarter search algorithms changing how people find answers, your brand needs more than traditional SEO—it needs strategy that's built for how search works now.",
+  servicesTabs = tabs,
+}) {
+  const [activeTab, setActiveTab] = useState(servicesTabs[1] || servicesTabs[0]); // Default to second tab or first if less than 2
 
   return (
     <section className="py-20 bg-white">
@@ -94,17 +98,17 @@ export default function SEOTabbedServices() {
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-5xl font-bold text-zinc-900 mb-6">
-              End-To-End SEO Services Built For The AI-Powered Search Era
+              {title}
             </h2>
             <p className="text-lg text-zinc-600 max-w-4xl mx-auto">
-              Search isn't just about blue links anymore. With AI Overviews and smarter search algorithms changing how people find answers, your brand needs more than traditional SEO—it needs strategy that's built for how search works now.
+              {description}
             </p>
           </div>
 
           <div className="flex flex-col lg:flex-row gap-8">
             {/* Tabs Sidebar */}
             <div className="w-full lg:w-1/3 flex flex-col gap-2">
-              {tabs.map((tab) => (
+              {servicesTabs.map((tab) => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab)}
