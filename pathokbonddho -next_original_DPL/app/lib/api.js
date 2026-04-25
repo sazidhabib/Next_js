@@ -54,7 +54,7 @@ async function fetchWrapper(url, options = {}) {
             }
             
             // Create an error object similar to Axios error
-            const error = new Error(data?.message || data?.msg || 'Request failed');
+            const error = new Error(data?.message || data?.msg || `Request failed with status ${response.status}`);
             error.response = {
                 status: response.status,
                 data: data
@@ -70,6 +70,11 @@ async function fetchWrapper(url, options = {}) {
             headers: response.headers
         };
     } catch (error) {
+        console.error(`API Fetch Error [${options.method || 'GET'}]:`, fullUrl, error.message);
+        // On client, also check if it's a network error
+        if (typeof window !== 'undefined' && error.name === 'TypeError' && error.message === 'Failed to fetch') {
+            console.warn('Network error detected. Is the backend server running at', API_BASE_URL, '?');
+        }
         throw error;
     }
 }

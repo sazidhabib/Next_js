@@ -4,7 +4,7 @@ import Footer from '../../components/Footer';
 import NewsDetails from '../../components/NewsDetails';
 
 async function getSettings() {
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5000/api';
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
   try {
     const res = await fetch(`${API_URL}/designs?search=site-settings`, { next: { revalidate: 60 } });
     const data = res.ok ? await res.json() : null;
@@ -17,8 +17,9 @@ async function getSettings() {
 }
 
 async function getNewsData(id) {
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5000/api';
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
   try {
+    console.log(`Server-side fetch: ${API_URL}/news/${id}`);
     const [newsRes, headerAdsRes, sidebarAdsRes, footerAdsRes] = await Promise.all([
       fetch(`${API_URL}/news/${id}`, { next: { revalidate: 60 } }),
       fetch(`${API_URL}/ads/position?position=header&page=details`, { next: { revalidate: 60 } }),
@@ -36,14 +37,14 @@ async function getNewsData(id) {
       ads: { header: headerAds, sidebar: sidebarAds, footer: footerAds }
     };
   } catch (err) {
-    console.error('Server-side fetch error (news details/ads):', err);
+    console.error(`❌ Server-side fetch error for ID ${id}:`, err.message);
     return { news: null, ads: { header: [], sidebar: [], footer: [] } };
   }
 }
 
 export async function generateMetadata({ params }) {
   const { id } = await params;
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5000/api';
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
   const settings = await getSettings();
 
   try {
