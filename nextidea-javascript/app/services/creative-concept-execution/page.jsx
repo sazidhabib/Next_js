@@ -16,28 +16,52 @@ export default function CreativeConceptExecutionPage() {
         icon={<Sparkles />}
         title="Creative Concept & Execution"
         tagline="Elevate your brand with Next Idea Solutions' creative service that blends strategy, design, and technology to bring your concept to life."
-        description="At Next Idea Solutions, we believe in the power of creativity to transform brands. Our Creative Concept & Execution service is tailored to craft innovative, impactful, and memorable campaigns that resonate with your audience."
-        image="/creative-concepth.png"
+        buttonText="Explore More"
+
       />
+      <section className="py-20 bg-white overflow-hidden">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col md:flex-row items-center gap-12">
+            <div className="md:w-1/2">
+              <h2 className="text-4xl md:text-5xl font-bold text-zinc-900 mb-6 leading-tight">
+                About This <span className="text-primary">Service</span>
+              </h2>
+              <p className="text-lg text-zinc-600 mb-8 leading-relaxed">
+                At Next Idea Solutions, we believe in the power of creativity to transform brands. Our Creative Concept & Execution service is tailored to craft innovative, impactful, and memorable campaigns that resonate with your audience. We merge creativity with strategic insights to develop concepts that align with your brand's goals and values.
+              </p>
+
+            </div>
+            <div className="md:w-1/2">
+              <img
+                src="/creative_concept.jpeg"
+                alt="Local SEO Illustration"
+                className="w-full h-auto drop-shadow-2xl"
+              />
+            </div>
+          </div>
+        </div>
+      </section>
       <ServiceContent
         overview={{
-          title: "About This Service",
-          description: "At Next Idea Solutions, we believe in the power of creativity to transform brands. Our Creative Concept & Execution service is tailored to craft innovative, impactful, and memorable campaigns that resonate with your audience. We merge creativity with strategic insights to develop concepts that align with your brand's goals and values.",
+
         }}
         features={{
           title: "WHAT SETS US APART",
           items: [
             {
-              icon: <Target className="w-4 h-4" />,
-              text: "Strategic Creativity: We merge creativity with strategic insights to develop concepts that align with your brand's goals and values."
+              icon: <Target className="w-6 h-6" />,
+              title: "Strategic Creativity",
+              description: "We merge creativity with strategic insights to develop concepts that align with your brand's goals and values."
             },
             {
-              icon: <Cpu className="w-4 h-4" />,
-              text: "Holistic Approach: From ideation to execution, our team ensures a seamless creative process, encompassing diverse media channels and platforms."
+              icon: <Cpu className="w-6 h-6" />,
+              title: "Holistic Approach",
+              description: "From ideation to execution, our team ensures a seamless creative process, encompassing diverse media channels and platforms."
             },
             {
-              icon: <Settings className="w-4 h-4" />,
-              text: "Tailored Solutions: Every brand is unique, and we customize our creative strategies to meet your specific needs and capture your audience's attention."
+              icon: <Settings className="w-6 h-6" />,
+              title: "Tailored Solutions",
+              description: "Every brand is unique, and we customize our creative strategies to meet your specific needs and capture your audience's attention."
             },
           ],
         }}

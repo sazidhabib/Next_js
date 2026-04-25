@@ -1,8 +1,9 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ExternalLink, Layers, Eye } from "lucide-react";
+import { ExternalLink, Layers, Eye, Info } from "lucide-react";
 import { IMAGE_BASE_URL } from "../lib/api";
+import Link from "next/link";
 
 export default function DemoCard({ demo }) {
   const imageUrl = demo.image ? `${IMAGE_BASE_URL}${demo.image}` : "/placeholder-project.png";
@@ -32,13 +33,21 @@ export default function DemoCard({ demo }) {
         </div>
 
         {/* Hover Overlay */}
-        <div className="absolute inset-0 bg-primary/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+        <div className="absolute inset-0 bg-primary/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-4">
+            <Link 
+              href={`/protfolio/${demo.id}`}
+              className="w-12 h-12 bg-white rounded-full flex items-center justify-center text-primary shadow-xl transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300 hover:bg-primary hover:text-white"
+              title="View Details"
+            >
+              <Info className="w-6 h-6" />
+            </Link>
             {demo.demo_link && (
               <a 
                 href={demo.demo_link} 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="w-12 h-12 bg-white rounded-full flex items-center justify-center text-primary shadow-xl transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300 hover:bg-primary hover:text-white"
+                className="w-12 h-12 bg-white rounded-full flex items-center justify-center text-primary shadow-xl transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300 delay-75 hover:bg-primary hover:text-white"
+                title="Live Demo"
               >
                 <Eye className="w-6 h-6" />
               </a>
@@ -49,9 +58,11 @@ export default function DemoCard({ demo }) {
       {/* Content */}
       <div className="p-6 flex flex-col flex-grow">
         <div className="mb-4">
-          <h3 className="text-xl font-bold text-zinc-900 group-hover:text-primary transition-colors line-clamp-1 mb-2">
-            {demo.title}
-          </h3>
+          <Link href={`/protfolio/${demo.id}`}>
+            <h3 className="text-xl font-bold text-zinc-900 group-hover:text-primary transition-colors line-clamp-1 mb-2 hover:underline cursor-pointer">
+              {demo.title}
+            </h3>
+          </Link>
           <p className="text-zinc-500 text-sm line-clamp-2 min-h-[40px]">
             {demo.details || demo.description}
           </p>

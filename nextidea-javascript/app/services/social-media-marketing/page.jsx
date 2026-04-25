@@ -29,12 +29,36 @@ export default function SocialMediaMarketingPage() {
         features={{
           title: "What's Included",
           items: [
-            { icon: <Target className="w-4 h-4" />, text: "Monthly Strategy Development" },
-            { icon: <Calendar className="w-4 h-4" />, text: "Monthly Content Calendar" },
-            { icon: <Megaphone className="w-4 h-4" />, text: "Media Buying (Running & Optimizing Paid Ads)" },
-            { icon: <TrendingUp className="w-4 h-4" />, text: "Sales Funnel Development & Monitoring" },
-            { icon: <Palette className="w-4 h-4" />, text: "Design, Video & Animation Strategies" },
-            { icon: <Users className="w-4 h-4" />, text: "Community Engagement & Management" },
+            { 
+                icon: <Target className="w-6 h-6" />, 
+                title: "Strategy Development",
+                description: "Comprehensive social media strategy tailored to your business goals."
+            },
+            { 
+                icon: <Calendar className="w-6 h-6" />, 
+                title: "Content Calendar",
+                description: "Planned out content for consistent posting and engagement." 
+            },
+            { 
+                icon: <Megaphone className="w-6 h-6" />, 
+                title: "Media Buying & Ads",
+                description: "Running and optimizing paid campaigns for maximum ROI."
+            },
+            { 
+                icon: <TrendingUp className="w-6 h-6" />, 
+                title: "Sales Funnel Monitoring",
+                description: "Continuous tracking and optimizing to drive more conversions."
+            },
+            { 
+                icon: <Palette className="w-6 h-6" />, 
+                title: "Design & Video",
+                description: "Engaging visuals, animations, and video content strategies."
+            },
+            { 
+                icon: <Users className="w-6 h-6" />, 
+                title: "Community Management",
+                description: "Active engagement with your followers to build brand loyalty."
+            },
           ],
         }}
         relatedServices={[
