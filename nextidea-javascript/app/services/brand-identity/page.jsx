@@ -17,13 +17,41 @@ export default function BrandIdentityPage() {
         icon={<Palette />}
         title="Brand Identity"
         tagline="We help creating strong brand identity that will separate you from the noise."
-        description="Your brand is more than a logo; it's an experience. Our design service goes beyond aesthetics, diving deep into the core of your brand to create a visual and emotional identity that speaks to your audience."
-        image="/Brand-Identity.png"
+        buttonText="Explore Our Service"
+
+
       />
+      <section className="py-20 bg-white overflow-hidden">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col md:flex-row items-center gap-12">
+            <div className="md:w-1/2">
+              <h2 className="text-4xl md:text-5xl font-bold text-zinc-900 mb-6 leading-tight">
+                About this <span className="text-primary">Service</span>
+              </h2>
+              <p className="text-lg font-bold text-zinc-600 mb-8 leading-relaxed">
+                Your brand is unique—let's make sure it stands out. Elevate your brand identity with Next Idea Solution
+              </p>
+              <p className="text-lg text-zinc-600 mb-8 leading-relaxed">
+                Your brand is more than a logo; it's an experience. Next Idea Solution's Brand identity design service goes beyond aesthetics, diving deep into the core of your brand to create a visual and emotional identity that speaks to your audience.
+              </p>
+              <button className="bg-primary text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20">
+                GET A FREE QUOTE
+              </button>
+            </div>
+            <div className="md:w-1/2">
+              <img
+                src="/brandidentity.jpeg"
+                alt="Local SEO Illustration"
+                className="w-full h-auto drop-shadow-2xl"
+              />
+            </div>
+          </div>
+        </div>
+      </section>
       <ServiceContent
         overview={{
-          title: "Your brand is unique—let's make sure it stands out. Elevate your brand identity with Next Idea Solution",
-          description: "Your brand is more than a logo; it's an experience. Next Idea Solution's Brand identity design service goes beyond aesthetics, diving deep into the core of your brand to create a visual and emotional identity that speaks to your audience.",
+          title: "",
+          description: "",
         }}
         features={{
           title: "WHAT WE OFFER",

@@ -18,13 +18,40 @@ export default function WebDesignDevelopmentPage() {
         icon={<Code2 />}
         title="Web Design & Development"
         tagline="Strong marketing your brand with high-converting landing page, website or app."
-        description="Our Web Design & Development service combines creativity, functionality, and cutting-edge technology to create digital experiences that resonate with your audience."
-        image="/Web-Design.png"
+
+
       />
+      <section className="py-20 bg-white overflow-hidden">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col md:flex-row items-center gap-12">
+            <div className="md:w-1/2">
+              <h2 className="text-4xl md:text-5xl font-bold text-zinc-900 mb-6 leading-tight">
+                About Web Design & <span className="text-primary">Development</span>
+              </h2>
+              <p className="text-lg font-bold text-zinc-600 mb-8 leading-relaxed">
+                Our Web Design & Development service combines creativity, functionality, and cutting-edge technology to create digital experiences that resonate with your audience.
+              </p>
+              <p className="text-lg text-zinc-600 mb-8 leading-relaxed">
+                If the stage of your website is small, we decide to customize it with our amazing custom web app development, the resulting development will make your business look like the next leading business.
+              </p>
+              <button className="bg-primary text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20">
+                GET A FREE QUOTE
+              </button>
+            </div>
+            <div className="md:w-1/2">
+              <img
+                src="/webdev.jpeg"
+                alt="Local SEO Illustration"
+                className="w-full h-auto drop-shadow-2xl"
+              />
+            </div>
+          </div>
+        </div>
+      </section>
       <ServiceContent
         overview={{
-          title: "Our Web Design & Development service combines creativity, functionality, and cutting-edge technology to create digital experiences that resonate with your audience.",
-          description: "If the stage of your website is small, we decide to customize it with our amazing custom web app development, the resulting development will make your business look like the next leading business.",
+          title: "",
+          description: "",
         }}
         features={{
           title: "OUR APPROACH",
@@ -78,9 +105,9 @@ export default function WebDesignDevelopmentPage() {
         </div>
       </div>
 
-      <ProjectGrid categoryId={4} title="OUR DESIGNED WEBSITES" />
+      <ProjectGrid categoryId={12} title="OUR DESIGNED WEBSITES" />
 
-      <PackagesSection 
+      <PackagesSection
         title="OUR WEBSITE PACKAGES"
         subtitle="Choose the perfect web solution to scale your online presence"
         footerText="*Prices are subject to project complexity and specific requirements"
@@ -128,7 +155,7 @@ export default function WebDesignDevelopmentPage() {
         ]}
       />
 
-      <CTASection 
+      <CTASection
         title="Ready to create your online presence?"
         description="Let's build a website that leaves a lasting impression and grows your business."
         buttonText="Contact Us"

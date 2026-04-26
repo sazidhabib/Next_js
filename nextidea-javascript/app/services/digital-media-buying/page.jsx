@@ -31,7 +31,7 @@ export default function DigitalMediaBuyingPage() {
                 About Digital Media <span className="text-primary">Buying</span>
               </h2>
               <p className="text-lg text-zinc-600 mb-8 leading-relaxed">
-                46% of all Google searches are for local information. If your business isn't showing up in the Local Pack or on Maps, you're losing customers to your competitors every single day. Our Local SEO services ensure you dominate your neighborhood.
+                Digital media buying is an important and very performant marketing strategy. It's the most effective way to reach your target audience and generate conversions. Through the use of funnel-based media buying, we are able to target the right sort of audience more effectively. By analyzing their behavior and identifying key traits such as demographic profiles, psychographics, and past purchasing behavior, we are able to reach out to them and grow your brand. This results in higher ROI.
               </p>
               <button className="bg-primary text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20">
                 GET A FREE QUOTE
@@ -39,7 +39,7 @@ export default function DigitalMediaBuyingPage() {
             </div>
             <div className="md:w-1/2">
               <img
-                src="/local-seo-hero.png"
+                src="/digitalmedia.jpeg"
                 alt="Local SEO Illustration"
                 className="w-full h-auto drop-shadow-2xl"
               />
@@ -49,8 +49,7 @@ export default function DigitalMediaBuyingPage() {
       </section>
       <ServiceContent
         overview={{
-          title: "About Digital Media Buying",
-          description: "Digital media buying is an important and very performant marketing strategy. It's the most effective way to reach your target audience and generate conversions. Through the use of funnel-based media buying, we are able to target the right sort of audience more effectively. By analyzing their behavior and identifying key traits such as demographic profiles, psychographics, and past purchasing behavior, we are able to reach out to them and grow your brand. This results in higher ROI.",
+
         }}
         features={{
           title: "Why Choose Us",
