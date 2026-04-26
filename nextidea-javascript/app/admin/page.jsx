@@ -79,7 +79,7 @@ export default function AdminDashboard() {
             >
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-zinc-400 text-sm">{stat.title}</p>
+                  <p className="text-zinc-300 text-sm">{stat.title}</p>
                   <p className="text-3xl font-bold text-white mt-2">{stat.value}</p>
                 </div>
                 <div className={`w-12 h-12 ${stat.color} rounded-xl flex items-center justify-center`}>
@@ -102,9 +102,9 @@ export default function AdminDashboard() {
               >
                 <div>
                   <p className="text-white font-medium">{submission.name}</p>
-                  <p className="text-zinc-400 text-sm">{submission.email}</p>
+                  <p className="text-zinc-300 text-sm">{submission.email}</p>
                   {submission.service && (
-                    <p className="text-zinc-500 text-xs mt-1">{submission.service}</p>
+                    <p className="text-zinc-400 text-xs mt-1">{submission.service}</p>
                   )}
                 </div>
                 <div className="text-right">

@@ -42,10 +42,10 @@ export async function GET(request) {
     const total = Number(countResult[0].total);
 
     const items = await query(
-      `SELECT pi.id, pi.title, pi.slug, pi.description, pi.client_name, pi.client_website,
+      `SELECT pi.id, pi.title, pi.slug, pi.description as details, pi.description, pi.client_name, pi.client_website as demo_link,
               pi.project_date, pi.featured, pi.meta_title,
-              c.title as category_title, c.slug as category_slug,
-              (SELECT image_url FROM portfolio_images WHERE portfolio_item_id = pi.id ORDER BY is_primary DESC, sort_order ASC LIMIT 1) as thumbnail_url
+              c.title as category_name, c.slug as category_slug,
+              (SELECT image_url FROM portfolio_images WHERE portfolio_item_id = pi.id ORDER BY is_primary DESC, sort_order ASC LIMIT 1) as image
        FROM portfolio_items pi
        LEFT JOIN categories c ON pi.category_id = c.id
        WHERE ${whereClause}
@@ -69,6 +69,7 @@ export async function GET(request) {
         return {
           ...item,
           images,
+          tools: technologies.map((t) => t.technology).join(', '),
           technologies: technologies.map((t) => t.technology),
         };
       })

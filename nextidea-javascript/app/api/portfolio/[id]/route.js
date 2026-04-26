@@ -8,7 +8,9 @@ export async function GET(request, { params }) {
     const { id } = await params;
 
     const items = await query(
-      `SELECT pi.*, c.title as category_title, c.slug as category_slug
+      `SELECT pi.*, pi.description as details, pi.client_website as demo_link, 
+              c.title as category_name, c.slug as category_slug,
+              (SELECT image_url FROM portfolio_images WHERE portfolio_item_id = pi.id ORDER BY is_primary DESC, sort_order ASC LIMIT 1) as image
        FROM portfolio_items pi
        LEFT JOIN categories c ON pi.category_id = c.id
        WHERE pi.id = ?`,

@@ -28,11 +28,16 @@ export function getPool() {
 }
 
 export async function query(sql, params = []) {
-  const pool = getPool();
   try {
+    const pool = getPool();
     const [rows] = await pool.execute(sql, params);
     return rows;
   } catch (error) {
+    if (error.code === 'ER_BAD_DB_ERROR' || error.code === 'ER_NO_SUCH_TABLE') {
+      const dbName = process.env.DATABASE_NAME || 'nextidea';
+      console.error(`DATABASE ERROR: The database or table is missing. Please visit http://localhost:3000/api/db-init to set up your database.`);
+      throw new Error(`Database setup required. Please visit /api/db-init to initialize your database '${dbName}'.`);
+    }
     console.error('Database query error:', error.message);
     throw error;
   }

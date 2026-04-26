@@ -1,14 +1,32 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 
 export default function CTASection({ 
-  title = "Have Some Projects in Mind?", 
-  description = "Let's discuss how we can help you achieve your business goals with strategic creative solutions.",
-  buttonText = "Ask for a quote"
+  title: propTitle, 
+  description: propDescription,
+  buttonText: propButtonText 
 }) {
+  const [settings, setSettings] = useState(null);
+
+  useEffect(() => {
+    fetch("/api/settings")
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          setSettings(data.data);
+        }
+      })
+      .catch(err => console.error("CTA fetch error:", err));
+  }, []);
+
+  const title = propTitle || settings?.home_cta_title || "Have Some Projects in Mind?";
+  const description = propDescription || "Let's discuss how we can help you achieve your business goals with strategic creative solutions.";
+  const buttonText = propButtonText || settings?.home_cta_button_text || "Ask for a quote";
+
   return (
     <section className="py-24 bg-[#242424]">
       <div className="container mx-auto px-4 text-center">

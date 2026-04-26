@@ -1,26 +1,8 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useState } from "react";
-
-const clients = [
-    { name: "Nova IVF", logo: "/clients/com1.png" },
-    { name: "Fosroc", logo: "/clients/com2.jpg" },
-    { name: "Priyo Shop", logo: "/clients/com3.jpg" },
-    { name: "Stygen", logo: "/clients/com4.jpg" },
-    { name: "Orbit", logo: "/clients/com5.jpg" },
-    { name: "Fresh", logo: "/clients/com6.jpg" },
-    { name: "Bashundhara", logo: "/clients/com7.jpg" },
-    { name: "Energypac", logo: "/clients/com8.jpg" },
-    { name: "Prime Bank", logo: "/clients/com9.jpg" },
-    { name: "ACI", logo: "/clients/com10.jpg" },
-    { name: "Yamaha", logo: "/clients/yamaha.svg" },
-    { name: "Haier", logo: "/clients/haier.svg" },
-    { name: "Nagad", logo: "/clients/nagad.svg" },
-    { name: "Sheba", logo: "/clients/sheba.svg" },
-    { name: "Pickaboo", logo: "/clients/pickaboo.svg" },
-    { name: "DBL Ceramics", logo: "/clients/dbl-ceramics.svg" },
-];
+import { useState, useEffect } from "react";
+import { usePathname } from "next/navigation";
 
 function ClientLogo({ client }) {
     const [imageError, setImageError] = useState(false);
@@ -31,17 +13,17 @@ function ClientLogo({ client }) {
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
             whileHover={{ scale: 1.05 }}
-            className="w-full h-20 flex items-center justify-center bg-gray-50 border border-gray-200 rounded-xl p-3 hover:shadow-lg hover:border-primary/30 transition-all duration-300 cursor-pointer"
+            className="w-full h-24 flex items-center justify-center bg-white border border-gray-100 shadow-sm rounded-2xl p-4 hover:shadow-xl hover:border-primary/20 transition-all duration-300 cursor-pointer"
         >
             {imageError || !client.logo ? (
-                <span className="text-zinc-600 font-bold text-sm text-center px-2">
+                <span className="text-zinc-600 font-bold text-xs text-center px-2">
                     {client.name}
                 </span>
             ) : (
                 <img
                     src={client.logo}
                     alt={client.name}
-                    className="w-full h-full object-contain"
+                    className="w-full h-full object-contain filter grayscale hover:grayscale-0 transition-all duration-500"
                     onError={() => setImageError(true)}
                 />
             )}
@@ -49,37 +31,65 @@ function ClientLogo({ client }) {
     );
 }
 
-export default function ClientsSection() {
+export default function ClientsSection({ pageId }) {
+    const [clients, setClients] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const pathname = usePathname();
+
+    useEffect(() => {
+        // Derive pageId from pathname if not provided
+        const pathSegments = pathname.split('/').filter(Boolean);
+        const lastSegment = pathSegments[pathSegments.length - 1] || 'home';
+        const derivedId = pageId || (pathname === '/' ? 'home' : lastSegment);
+        const settingKey = `${derivedId}_clients`;
+
+        fetch("/api/settings")
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    const clientData = data.data[settingKey];
+                    if (clientData) {
+                        setClients(JSON.parse(clientData));
+                    } else if (derivedId !== 'home') {
+                        // Fallback to home clients if service-specific ones don't exist
+                        if (data.data.home_clients) {
+                            setClients(JSON.parse(data.data.home_clients));
+                        }
+                    }
+                }
+            })
+            .catch(err => console.error("Clients fetch error:", err))
+            .finally(() => setLoading(false));
+    }, [pageId, pathname]);
+
+    if (loading || clients.length === 0) return null;
+
     return (
-        <section className="py-20 bg-gradient-to-b from-white to-gray-50">
+        <section className="py-24 bg-zinc-50/50">
             <div className="container mx-auto px-4">
                 <motion.div
                     initial={{ opacity: 0, y: 30 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
-                    transition={{ duration: 0.6, ease: "easeOut" }}
-                    className="text-center mb-12"
+                    transition={{ duration: 0.6 }}
+                    className="text-center mb-16"
                 >
-                    <h2 className="text-3xl md:text-4xl font-bold text-zinc-800 uppercase tracking-widest mb-4">
-                        Our Clients
+                    <h2 className="text-3xl md:text-5xl font-bold text-zinc-900 mb-4 tracking-tight">
+                        Our Trusted Clients
                     </h2>
-                    <motion.div
-                        initial={{ scaleX: 0 }}
-                        whileInView={{ scaleX: 1 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.6, delay: 0.2 }}
-                        className="w-16 h-1 bg-primary mx-auto rounded-full origin-center"
-                    />
+                    <p className="text-zinc-500 max-w-2xl mx-auto">
+                        We collaborate with ambitious brands to create digital excellence.
+                    </p>
                 </motion.div>
 
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
                     {clients.map((client, index) => (
                         <motion.div
                             key={index}
-                            initial={{ opacity: 0, scale: 0.8 }}
-                            whileInView={{ opacity: 1, scale: 1 }}
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
-                            transition={{ duration: 0.4, delay: index * 0.03, ease: "easeOut" }}
+                            transition={{ duration: 0.5, delay: index * 0.05 }}
                         >
                             <ClientLogo client={client} />
                         </motion.div>

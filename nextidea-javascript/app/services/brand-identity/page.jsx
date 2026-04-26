@@ -2,6 +2,8 @@ import { Palette, Box, Layers, Package, BookOpen, Sparkles } from "lucide-react"
 import ServiceHero from "../../components/ServiceHero";
 import ServiceContent from "../../components/ServiceContent";
 import PortfolioSection from "../../components/PortfolioSection";
+import ClientsSection from "../../components/ClientsSection";
+import FAQSection from "../../components/FAQSection";
 import BlogsSection from "../../components/BlogsSection";
 import CTASection from "../../components/CTASection";
 
@@ -81,6 +83,8 @@ export default function BrandIdentityPage() {
         description="Let's craft a narrative that captivates and converts."
         buttonText="Ask for A Proposal"
       />
+      <ClientsSection />
+      <FAQSection />
       <BlogsSection />
     </>
   );

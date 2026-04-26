@@ -1,11 +1,10 @@
 "use client";
 
+import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import { Mail, Phone, MapPin, Send, Loader2 } from "lucide-react";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-
-import { useState } from "react";
-import { motion } from "framer-motion";
-import { Mail, Phone, MapPin, Send } from "lucide-react";
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -16,6 +15,18 @@ export default function ContactPage() {
     service: "",
     message: "",
   });
+  const [settings, setSettings] = useState(null);
+
+  useEffect(() => {
+    fetch("/api/settings")
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          setSettings(data.data);
+        }
+      })
+      .catch(err => console.error("Contact settings fetch error:", err));
+  }, []);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -62,9 +73,9 @@ export default function ContactPage() {
                     <MapPin className="w-5 h-5 text-primary" />
                   </div>
                   <div>
-                    <h3 className="text-white font-semibold mb-1">Dhaka</h3>
+                    <h3 className="text-white font-semibold mb-1">Office Address</h3>
                     <p className="text-zinc-400 text-sm">
-                      House# 14 (2nd Floor), Road# 04, block# A, Section# 11, Mirpur, Dhaka, Bangladesh
+                      {settings?.address || "House# 14 (2nd Floor), Road# 04, block# A, Section# 11, Mirpur, Dhaka, Bangladesh"}
                     </p>
                   </div>
                 </div>
@@ -75,7 +86,9 @@ export default function ContactPage() {
                   </div>
                   <div>
                     <h3 className="text-white font-semibold mb-1">Email</h3>
-                    <p className="text-zinc-400 text-sm">support@nextideasolution.com</p>
+                    <p className="text-zinc-400 text-sm">
+                        {settings?.contact_email || "support@nextideasolution.com"}
+                    </p>
                   </div>
                 </div>
 
@@ -85,11 +98,14 @@ export default function ContactPage() {
                   </div>
                   <div>
                     <h3 className="text-white font-semibold mb-1">Phone</h3>
-                    <p className="text-zinc-400 text-sm">+8801714787250</p>
+                    <p className="text-zinc-400 text-sm">
+                        {settings?.contact_phone || "+8801714787250"}
+                    </p>
                   </div>
                 </div>
               </div>
             </div>
+...
 
             <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-8">
               <form onSubmit={handleSubmit} className="space-y-6">

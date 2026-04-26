@@ -6,7 +6,9 @@ import { IMAGE_BASE_URL } from "../lib/api";
 import Link from "next/link";
 
 export default function DemoCard({ demo }) {
-  const imageUrl = demo.image ? `${IMAGE_BASE_URL}${demo.image}` : "/placeholder-project.png";
+  const imageUrl = demo.image 
+    ? (demo.image.startsWith('http') ? demo.image : (demo.image.startsWith('/') ? demo.image : `${IMAGE_BASE_URL}${demo.image}`))
+    : "/placeholder-project.png";
   const toolsArray = demo.tools ? demo.tools.split(',').map(t => t.trim()) : [];
 
   return (

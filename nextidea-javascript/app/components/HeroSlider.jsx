@@ -4,56 +4,59 @@ import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
-
-const slides = [
-  {
-    id: 1,
-    headline: "Necessary To Have",
-    subheadline: "The Right Formula To Grow Big",
-    description: "We inject the right formula to grow your business with award-winning digital campaigns.",
-    ctaText: "Get Started",
-    imageUrl: "https://images.unsplash.com/photo-1557804506-669a67965ba0?w=1920&q=80",
-  },
-  {
-    id: 2,
-    headline: "Digital Excellence",
-    subheadline: "360-Degree Marketing Solutions",
-    description: "We create award-winning, certified, 360-degree digital-first advertising campaigns.",
-    ctaText: "Our Services",
-    imageUrl: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1920&q=80",
-  },
-  {
-    id: 3,
-    headline: "Measurable Results",
-    subheadline: "Data-Driven Growth Strategies",
-    description: "Our campaigns produce measurable results that impact your bottom line.",
-    ctaText: "View Portfolio",
-    imageUrl: "https://images.unsplash.com/photo-1551434678-e076c223a692?w=1920&q=80",
-  },
-];
+import { ArrowRight, Loader2 } from "lucide-react";
 
 export default function HeroSlider() {
+  const [slides, setSlides] = useState([]);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/settings")
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && data.data.home_hero_slides) {
+          try {
+            const parsedSlides = JSON.parse(data.data.home_hero_slides);
+            setSlides(parsedSlides);
+          } catch (e) {
+            console.error("Failed to parse hero slides", e);
+          }
+        }
+      })
+      .catch(err => console.error("Hero slides fetch error:", err))
+      .finally(() => setLoading(false));
+  }, []);
 
   const nextSlide = useCallback(() => {
+    if (slides.length === 0) return;
     setCurrentSlide((prev) => (prev + 1) % slides.length);
-  }, []);
+  }, [slides.length]);
 
   const goToSlide = (index) => {
     setCurrentSlide(index);
   };
 
   useEffect(() => {
-    if (isPaused) return;
+    if (isPaused || slides.length === 0) return;
 
     const interval = setInterval(() => {
       nextSlide();
     }, 5000);
 
     return () => clearInterval(interval);
-  }, [isPaused, nextSlide]);
+  }, [isPaused, nextSlide, slides.length]);
+
+  if (loading) {
+    return (
+      <div className="h-screen bg-zinc-950 flex items-center justify-center">
+        <Loader2 className="w-12 h-12 text-primary animate-spin" />
+      </div>
+    );
+  }
+
+  if (slides.length === 0) return null;
 
   return (
     <section
@@ -64,7 +67,7 @@ export default function HeroSlider() {
       {/* Slides */}
       {slides.map((slide, index) => (
         <div
-          key={slide.id}
+          key={slide.id || index}
           className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${
             index === currentSlide ? "opacity-100" : "opacity-0"
           }`}
@@ -88,7 +91,7 @@ export default function HeroSlider() {
               <AnimatePresence mode="wait">
                 {index === currentSlide && (
                   <motion.div
-                    key={`slide-content-${slide.id}`}
+                    key={`slide-content-${slide.id || index}`}
                     initial={{ opacity: 0, y: 40 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -20 }}
@@ -107,7 +110,7 @@ export default function HeroSlider() {
                     </p>
 
                     <Link
-                      href="#contact"
+                      href="/contact"
                       className="inline-flex items-center gap-2 bg-primary text-white px-8 py-4 rounded-full font-semibold text-lg hover:bg-primary/90 transition-colors"
                     >
                       {slide.ctaText}

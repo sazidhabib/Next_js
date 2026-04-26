@@ -90,7 +90,6 @@ export default function SocialMediaMarketingPage() {
           { title: "Brand Identity", link: "/services/brand-identity", icon: <Users /> },
         ]}
       />
-      <ClientsSection />
       <PackagesSection
         title="Let's Engage and Grow Together"
         subtitle="Choose the social media strategy that fits your growth goals"
@@ -128,30 +127,8 @@ export default function SocialMediaMarketingPage() {
           },
         ]}
       />
-      <FAQSection
-        items={[
-          {
-            question: "Why use social media advertising?",
-            answer: "Investing in social media advertising can help your company in several ways, including: 1. Reach your target audience effectively where they spend 30% of their time. 2. Generate brand awareness through smart funnel strategies. 3. Promote products or services with seasonal campaigns that drive immediate revenue."
-          },
-          {
-            question: "What is Social Media Marketing?",
-            answer: "Social media marketing is the use of social media platforms to connect with your audience to build your brand, increase sales, and drive website traffic. This involves publishing great content on your social media profiles, listening to and engaging your followers, analyzing your results, and running social media advertisements."
-          },
-          {
-            question: "Which social media channel has the most users?",
-            answer: "Facebook remains the platform with the highest number of active users worldwide and in Bangladesh, followed by platforms like YouTube, Instagram, and LinkedIn depending on the specific demographic target."
-          },
-          {
-            question: "How effective is social media marketing?",
-            answer: "It is highly effective for building trust, establishing brand authority, and maintaining a direct line of communication with customers. When combined with paid advertising, it offers one of the highest ROIs in digital marketing."
-          },
-          {
-            question: "What are top social media platforms in Bangladesh?",
-            answer: "The top platforms are Facebook, YouTube, Instagram, and LinkedIn. Increasingly, TikTok and Pinterest are also becoming valuable for specific niche markets."
-          }
-        ]}
-      />
+      <ClientsSection />
+      <FAQSection />
       <CTASection />
     </>
   );

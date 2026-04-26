@@ -2,7 +2,7 @@ const BASE_URL = 'https://demo.nextideasolution.com/api';
 export const IMAGE_BASE_URL = "https://demo.nextideasolution.com/uploads/demos/";
 
 /**
- * Fetches demos from the API with optional filters.
+ * Fetches demos from the external PHP API with optional filters.
  */
 export async function getDemos({ page = 1, limit = 10, category_id, search, lang = 'en' } = {}) {
     const params = new URLSearchParams();
@@ -23,7 +23,7 @@ export async function getDemos({ page = 1, limit = 10, category_id, search, lang
 }
 
 /**
- * Fetches all categories from the API.
+ * Fetches all categories from the external PHP API.
  */
 export async function getCategories() {
     try {
@@ -37,7 +37,7 @@ export async function getCategories() {
 }
 
 /**
- * Fetches a single demo by ID.
+ * Fetches a single demo by ID from the external PHP API.
  */
 export async function getDemoById(id) {
     try {
@@ -49,4 +49,3 @@ export async function getDemoById(id) {
         return { success: false, error: error.message };
     }
 }
-

@@ -16,7 +16,16 @@ export default function DemoDetailsClient({ id }) {
       try {
         const res = await getDemoById(id);
         if (res.success && res.data) {
-           const demoData = Array.isArray(res.data) ? res.data[0] : res.data;
+           let demoData = res.data;
+           // If it's an array, take the first element
+           if (Array.isArray(res.data)) {
+             demoData = res.data[0];
+           } 
+           // Some PHP APIs wrap the single result in a 'demo' or 'item' key
+           else if (res.data.demo) {
+             demoData = res.data.demo;
+           }
+           
            if (demoData) {
                setDemo(demoData);
            } else {
@@ -57,7 +66,9 @@ export default function DemoDetailsClient({ id }) {
     );
   }
 
-  const imageUrl = demo.image ? `${IMAGE_BASE_URL}${demo.image}` : "/placeholder-project.png";
+  const imageUrl = demo.image 
+    ? (demo.image.startsWith('http') ? demo.image : (demo.image.startsWith('/') ? demo.image : `${IMAGE_BASE_URL}${demo.image}`))
+    : "/placeholder-project.png";
   const toolsArray = demo.tools ? demo.tools.split(',').map(t => t.trim()) : [];
 
   return (

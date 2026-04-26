@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
-import { LayoutDashboard, Image, FolderOpen, BarChart3, Users, Mail, LogOut, Menu, X } from "lucide-react";
+import { LayoutDashboard, Image, FolderOpen, BarChart3, Users, Mail, LogOut, Menu, X, Settings, FileText, HelpCircle } from "lucide-react";
 
 export default function AdminLayout({ children }) {
   const router = useRouter();
@@ -18,12 +18,12 @@ export default function AdminLayout({ children }) {
         const res = await fetch('/api/admin/dashboard', {
           credentials: 'include',
         });
-        
+
         if (res.status === 401) {
           router.push('/admin/login');
           return;
         }
-        
+
         if (res.ok) {
           const data = await res.json();
           if (data.success) {
@@ -48,11 +48,13 @@ export default function AdminLayout({ children }) {
 
   const navItems = [
     { href: '/admin', icon: LayoutDashboard, label: 'Dashboard' },
-    { href: '/admin/portfolio', icon: Image, label: 'Portfolio' },
-    { href: '/admin/categories', icon: FolderOpen, label: 'Categories' },
+    { href: '/admin/pages', icon: FileText, label: 'Page Content' },
+    { href: '/admin/clients', icon: Users, label: 'Clients' },
+    { href: '/admin/faqs', icon: HelpCircle, label: 'FAQs' },
     { href: '/admin/analytics', icon: BarChart3, label: 'Analytics' },
     { href: '/admin/contact', icon: Mail, label: 'Contact Submissions' },
     { href: '/admin/users', icon: Users, label: 'Users' },
+    { href: '/admin/settings', icon: Settings, label: 'Settings' },
   ];
 
   if (loading) {
@@ -67,11 +69,10 @@ export default function AdminLayout({ children }) {
     <div className="min-h-screen bg-zinc-950">
       <div className="flex">
         <aside
-          className={`fixed inset-y-0 left-0 z-50 w-64 bg-zinc-900 border-r border-zinc-800 transform transition-transform duration-200 ease-in-out ${
-            sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-          } lg:translate-x-0 lg:static lg:inset-0`}
+          className={`fixed inset-y-0 left-0 z-50 w-64 bg-zinc-900 border-r border-zinc-800 transform transition-transform duration-200 ease-in-out flex flex-col ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+            } lg:translate-x-0 lg:static lg:inset-0`}
         >
-          <div className="flex items-center justify-between h-16 px-4 border-b border-zinc-800">
+          <div className="flex items-center justify-between h-16 px-4 border-b border-zinc-800 shrink-0">
             <h1 className="text-xl font-bold text-white">Admin Panel</h1>
             <button
               onClick={() => setSidebarOpen(false)}
@@ -81,7 +82,7 @@ export default function AdminLayout({ children }) {
             </button>
           </div>
 
-          <nav className="p-4 space-y-2">
+          <nav className="flex-1 p-4 space-y-2 overflow-y-auto scrollbar-hide">
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = pathname === item.href;
@@ -89,24 +90,23 @@ export default function AdminLayout({ children }) {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${
-                    isActive
-                      ? 'bg-primary text-white'
-                      : 'text-zinc-400 hover:bg-zinc-800 hover:text-white'
-                  }`}
+                  className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${isActive
+                    ? 'bg-primary text-white shadow-lg shadow-primary/20 font-bold'
+                    : 'text-zinc-100 hover:bg-zinc-800 hover:text-white'
+                    }`}
                 >
-                  <Icon className="w-5 h-5" />
-                  <span>{item.label}</span>
+                  <Icon className={`w-5 h-5 ${isActive ? 'text-white' : 'text-zinc-100'}`} />
+                  <span className="font-medium text-white">{item.label}</span>
                 </Link>
               );
             })}
           </nav>
 
-          <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-zinc-800">
+          <div className="p-4 border-t border-zinc-800 shrink-0 bg-zinc-900">
             <div className="mb-4">
-              <p className="text-sm text-zinc-400">Logged in as</p>
-              <p className="text-white font-medium">{user?.username || 'Admin'}</p>
-              <p className="text-xs text-zinc-500 capitalize">{user?.role || 'admin'}</p>
+              <p className="text-sm text-zinc-300">Logged in as</p>
+              <p className="text-white font-bold">{user?.username || 'Admin'}</p>
+              <p className="text-xs text-zinc-400 capitalize">{user?.role || 'admin'}</p>
             </div>
             <button
               onClick={handleLogout}

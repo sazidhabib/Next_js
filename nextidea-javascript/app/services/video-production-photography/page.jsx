@@ -1,6 +1,8 @@
 import { Sparkles, Code2, Megaphone, Headphones } from "lucide-react";
 import ServiceHero from "../../components/ServiceHero";
 import ServiceContent from "../../components/ServiceContent";
+import ClientsSection from "../../components/ClientsSection";
+import FAQSection from "../../components/FAQSection";
 import CTASection from "../../components/CTASection";
 
 export const metadata = {
@@ -63,6 +65,8 @@ export default function VideoProductionPhotographyPage() {
           { title: "Web Development", link: "/services/web-design-development", icon: <Code2 /> },
         ]}
       />
+      <ClientsSection />
+      <FAQSection />
       <CTASection />
     </>
   );

@@ -1,6 +1,8 @@
 import { Sparkles, TrendingUp, Megaphone, Headphones, Palette, Target, CheckCircle } from "lucide-react";
 import ServiceHero from "../../components/ServiceHero";
 import ServiceContent from "../../components/ServiceContent";
+import ClientsSection from "../../components/ClientsSection";
+import FAQSection from "../../components/FAQSection";
 import CTASection from "../../components/CTASection";
 
 export const metadata = {
@@ -66,6 +68,8 @@ export default function EventAndActivationPage() {
           { title: "Digital Media Buying", link: "/services/digital-media-buying", icon: <TrendingUp /> },
         ]}
       />
+      <ClientsSection />
+      <FAQSection />
       <CTASection />
     </>
   );

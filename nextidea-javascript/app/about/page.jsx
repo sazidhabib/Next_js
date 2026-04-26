@@ -1,19 +1,42 @@
 "use client";
 
-
-
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import CTASection from "../components/CTASection";
 import FAQSection from "../components/FAQSection";
-import { Target, Lightbulb, Users, Award, Shield, Zap, ArrowRight, CheckCircle2 } from "lucide-react";
+import { Target, Lightbulb, Users, Award, Shield, Zap, ArrowRight, CheckCircle2, Loader2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
-
 export default function AboutPage() {
+  const [settings, setSettings] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/settings")
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          setSettings(data.data);
+        }
+      })
+      .catch(err => console.error("About settings fetch error:", err))
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="w-12 h-12 text-primary animate-spin" />
+          <p className="text-zinc-400 font-medium">Loading About Page...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col min-h-screen bg-white">
       <Navbar />
@@ -32,10 +55,10 @@ export default function AboutPage() {
                 Who We Are
               </div>
               <h1 className="text-5xl lg:text-7xl font-bold tracking-tight mb-8">
-                Empowering your <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-orange-light">Digital Future</span>
+                {settings?.about_hero_title || "Empowering your Digital Future"}
               </h1>
               <p className="text-xl text-zinc-400 mb-10 leading-relaxed max-w-2xl mx-auto">
-                We are a passionate team of technologists, designers, and strategists dedicated to transforming ideas into impactful digital realities.
+                {settings?.about_hero_subtitle || "We are a passionate team of technologists, designers, and strategists dedicated to transforming ideas into impactful digital realities."}
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <Link href="/contact" className="w-full sm:w-auto px-8 py-4 bg-primary hover:bg-primary-dark transition-all rounded-full font-semibold text-white flex items-center justify-center gap-2 shadow-lg shadow-primary/25">
@@ -56,7 +79,7 @@ export default function AboutPage() {
             <div className="grid lg:grid-cols-2 gap-16 items-center">
               <div className="relative relative h-[500px] lg:h-[600px] rounded-3xl overflow-hidden shadow-2xl group animate-slide-in-left">
                 <Image 
-                  src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80" 
+                  src={settings?.about_story_image || "https://images.unsplash.com/photo-1522071820081-009f0129c71c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80"} 
                   alt="Our Team Collaborating" 
                   fill 
                   className="object-cover group-hover:scale-105 transition-transform duration-700"
@@ -64,7 +87,7 @@ export default function AboutPage() {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                 <div className="absolute bottom-8 left-8 right-8">
                   <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20 text-white">
-                    <div className="text-3xl font-bold mb-2">10+</div>
+                    <div className="text-3xl font-bold mb-2">{settings?.about_experience_years || "10+"}</div>
                     <div className="text-zinc-200">Years of driving digital excellence</div>
                   </div>
                 </div>
@@ -72,14 +95,14 @@ export default function AboutPage() {
 
               <div className="animate-fade-in-up delay-200">
                 <h2 className="text-4xl lg:text-5xl font-bold mb-6 text-zinc-900">
-                  Built on a foundation of <span className="text-primary">innovation</span>
+                  {settings?.about_story_title || "Built on a foundation of innovation"}
                 </h2>
                 <div className="space-y-6 text-lg text-zinc-600">
                   <p>
-                    Since our inception, NextIdea Solution has been driven by a singular mission: to bridge the gap between complex technology and tangible business success. We believe that every challenge is an opportunity to innovate.
+                    {settings?.about_story_desc_1 || "Since our inception, NextIdea Solution has been driven by a singular mission: to bridge the gap between complex technology and tangible business success."}
                   </p>
                   <p>
-                    What started as a small team of passionate developers has grown into a full-service digital agency. From robust enterprise software to captivating brand identities, we bring a wealth of expertise and a commitment to excellence to every project we touch.
+                    {settings?.about_story_desc_2 || "What started as a small team of passionate developers has grown into a full-service digital agency. From robust enterprise software to captivating brand identities."}
                   </p>
                 </div>
                 
@@ -117,7 +140,7 @@ export default function AboutPage() {
                 </div>
                 <h3 className="text-2xl font-bold mb-4 text-zinc-900">Our Mission</h3>
                 <p className="text-zinc-600 leading-relaxed text-lg">
-                  To empower businesses with cutting-edge digital solutions that drive growth, enhance user experiences, and solve complex challenges with elegance and efficiency.
+                  {settings?.about_mission_text || "To empower businesses with cutting-edge digital solutions that drive growth, enhance user experiences, and solve complex challenges with elegance and efficiency."}
                 </p>
               </div>
 
@@ -131,7 +154,7 @@ export default function AboutPage() {
                 </div>
                 <h3 className="text-2xl font-bold mb-4 text-zinc-900">Our Vision</h3>
                 <p className="text-zinc-600 leading-relaxed text-lg">
-                  To be the global benchmark for digital innovation, shaping the future of technology by delivering transformative experiences that leave a lasting impact.
+                  {settings?.about_vision_text || "To be the global benchmark for digital innovation, shaping the future of technology by delivering transformative experiences that leave a lasting impact."}
                 </p>
               </div>
             </div>

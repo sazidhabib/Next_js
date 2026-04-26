@@ -9,6 +9,7 @@ import FAQSection from "../../components/FAQSection";
 import BlogsSection from "../../components/BlogsSection";
 import SEOProcess from "../../components/SEOProcess";
 import SEOTabbedServices from "../../components/SEOTabbedServices";
+import ClientsSection from "../../components/ClientsSection";
 
 
 export default function SEOPage() {
@@ -273,35 +274,8 @@ export default function SEOPage() {
 
       <PackagesSection title="Let's Grow Your Visibility" subtitle="Choose the SEO strategy that fits your growth goals" />
 
-      {/* FAQ Section */}
-      <FAQSection
-        items={[
-          {
-            question: "Why is SEO important for my business?",
-            answer: "SEO is crucial because 93% of online experiences begin with a search engine. If you're not ranking well, you're missing potential customers who are actively searching for your products or services.",
-          },
-          {
-            question: "How long does it take to see SEO results?",
-            answer: "SEO is a long-term strategy. While you may see some improvements within 3-6 months, significant results typically take 6-12 months depending on competition and current website status. We focus on sustainable growth.",
-          },
-          {
-            question: "What's the difference between organic SEO and paid search?",
-            answer: "Organic SEO involves optimizing your website to rank naturally in search results without paying per click. Paid search (PPC) means you pay for each click. Both are valuable and often work best together.",
-          },
-          {
-            question: "Do you guarantee first page rankings?",
-            answer: "No legitimate SEO agency can guarantee rankings. Anyone promising guaranteed positions is not being honest. We guarantee our best efforts using white-hat techniques to improve your visibility.",
-          },
-          {
-            question: "How is your SEO different from other agencies?",
-            answer: "We focus on AI-ready SEO strategies, transparent reporting, and sustainable growth. We don't chase quick wins but build a solid foundation for long-term success in evolving search landscapes.",
-          },
-          {
-            question: "What tools do you use for SEO?",
-            answer: "We use industry-leading tools like SEMrush, Ahrefs, Google Search Console, and more to analyze, optimize, and track your SEO performance.",
-          },
-        ]}
-      />
+      <ClientsSection />
+      <FAQSection />
 
       {/* Blog Section */}
       <BlogsSection />

@@ -1,11 +1,20 @@
 import { NextResponse } from 'next/server';
 import { query } from '@/app/lib/db';
 import { authMiddleware, handleApiError } from '@/app/lib/middleware';
+import { DEFAULT_SETTINGS } from '@/app/lib/settings-defaults';
 
 export async function GET(request) {
   try {
     const auth = await authMiddleware(request, 'admin');
     if (!auth.success) return auth;
+
+    // Auto-sync missing settings
+    for (const def of DEFAULT_SETTINGS) {
+        await query(
+            'INSERT IGNORE INTO site_settings (setting_key, setting_value, setting_type, description) VALUES (?, ?, ?, ?)',
+            [def.key, def.value, def.type, def.description]
+        );
+    }
 
     const settings = await query('SELECT * FROM site_settings ORDER BY setting_key ASC');
 

@@ -20,7 +20,7 @@ export default function DigitalMediaBuyingPage() {
         icon={<TrendingUp />}
         title="Digital Media Buying"
         tagline="Funnel-driven media buying solutions that generate higher ROI."
-        description="We specialize in data-driven media buying solutions that maximize your ROI. Our strategic approach ensures your message reaches the right audience at the right time through advanced funnel optimization."
+
         image="/Digital-Media.png"
       />
       <section className="py-20 bg-white overflow-hidden">
@@ -31,6 +31,7 @@ export default function DigitalMediaBuyingPage() {
                 About Digital Media <span className="text-primary">Buying</span>
               </h2>
               <p className="text-lg text-zinc-600 mb-8 leading-relaxed">
+                We specialize in data-driven media buying solutions that maximize your ROI. Our strategic approach ensures your message reaches the right audience at the right time through advanced funnel optimization.
                 Digital media buying is an important and very performant marketing strategy. It's the most effective way to reach your target audience and generate conversions. Through the use of funnel-based media buying, we are able to target the right sort of audience more effectively. By analyzing their behavior and identifying key traits such as demographic profiles, psychographics, and past purchasing behavior, we are able to reach out to them and grow your brand. This results in higher ROI.
               </p>
               <button className="bg-primary text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20">
@@ -96,26 +97,7 @@ export default function DigitalMediaBuyingPage() {
       <CaseStudySection />
       <ClientsSection />
       <PartnerSection />
-      <FAQSection
-        items={[
-          {
-            question: "What is digital media buying?",
-            answer: "Digital media buying is the process of purchasing placements for advertisements on websites, apps and other digital platforms. In Bangladesh by Digital Media Buying we mostly refer to Facebook boosting & paid ads in Google or youtube."
-          },
-          {
-            question: "What are the benefits of digital media buying?",
-            answer: "Digital media buying allows for precise targeting, measurable results, and cost-effective scaling. It helps brands reach their specific audience based on demographics, interests, and behaviors, leading to higher conversion rates."
-          },
-          {
-            question: "How does digital media buying work?",
-            answer: "The process involves identifying campaign goals, selecting the right platforms, setting up advanced targeting, and continuous optimization of ad creative and spend to maximize performance."
-          },
-          {
-            question: "What are most used digital media buying platforms in Bangladesh?",
-            answer: "In Bangladesh, the most widely used platforms are Facebook, Google (Search & Display), YouTube, Instagram, and LinkedIn. Programmatic platforms like Eskimi are also popular for local reach."
-          }
-        ]}
-      />
+      <FAQSection />
       <CTASection />
     </>
   );

@@ -1,6 +1,7 @@
 import { MapPin, CheckCircle2, Building2, Utensils, Home, Scissors, Wifi, Briefcase, ChevronDown } from "lucide-react";
 import ServiceHero from "../../../components/ServiceHero";
 import PackagesSection from "../../../components/PackagesSection";
+import ClientsSection from "../../../components/ClientsSection";
 import FAQSection from "../../../components/FAQSection";
 
 export const metadata = {
@@ -202,15 +203,8 @@ export default function LocalSEOPage() {
         </div>
       </section>
 
-      <FAQSection 
-        title="Frequently Asked Questions"
-        items={[
-          { question: "What is Local SEO?", answer: "Local SEO is the process of optimizing your online presence to attract more business from relevant local searches." },
-          { question: "Why is Google Business Profile important?", answer: "GBP is the core of local SEO, as it controls your presence on Google Maps and the Local Pack." },
-          { question: "How long does it take to see results?", answer: "Local SEO typically shows results within 3-6 months depending on competition and current rankings." },
-          { question: "Do you offer multi-location support?", answer: "Yes, we specialize in managing Local SEO for businesses with multiple branches or service areas." }
-        ]}
-      />
+      <ClientsSection />
+      <FAQSection />
 
       <section className="py-20 bg-zinc-50">
         <div className="container mx-auto px-4">

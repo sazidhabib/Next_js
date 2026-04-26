@@ -4,6 +4,8 @@ import ServiceContent from "../../components/ServiceContent";
 import PackagesSection from "../../components/PackagesSection";
 import ProjectGrid from "../../components/ProjectGrid";
 import BlogsSection from "../../components/BlogsSection";
+import ClientsSection from "../../components/ClientsSection";
+import FAQSection from "../../components/FAQSection";
 import CTASection from "../../components/CTASection";
 
 export const metadata = {
@@ -155,11 +157,9 @@ export default function WebDesignDevelopmentPage() {
         ]}
       />
 
-      <CTASection
-        title="Ready to create your online presence?"
-        description="Let's build a website that leaves a lasting impression and grows your business."
-        buttonText="Contact Us"
-      />
+      <ClientsSection />
+      <FAQSection />
+      <CTASection />
       <BlogsSection />
     </>
   );

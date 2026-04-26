@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Search, ChevronLeft, ChevronRight, Filter, Loader2 } from "lucide-react";
+import { Search, ChevronLeft, ChevronRight, Filter, Loader2, LayoutGrid } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { getDemos, getCategories } from "../lib/api";
 import DemoCard from "./DemoCard";
@@ -112,34 +112,17 @@ export default function PortfolioPage() {
         </div>
 
         {/* Filters & Search */}
-        <div className="bg-white rounded-3xl p-4 shadow-sm border border-gray-100 mb-12 flex flex-col md:flex-row gap-4 items-center">
+        <div className="bg-white rounded-3xl p-4 shadow-sm border border-gray-100 mb-6 flex flex-col md:flex-row gap-4 items-center">
           {/* Search */}
           <div className="relative w-full md:flex-grow">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 w-5 h-5" />
             <input
               type="text"
-              placeholder="Search projects..."
-              className="w-full pl-12 pr-4 py-3 bg-zinc-50 border-none rounded-2xl focus:ring-2 focus:ring-primary/20 transition-all text-zinc-900"
+              placeholder={lang === "en" ? "Search projects..." : "প্রজেক্ট খুঁজুন..."}
+              className="w-full pl-12 pr-4 py-3 bg-zinc-50 border-none rounded-2xl focus:ring-2 focus:ring-primary/20 transition-all text-zinc-900 placeholder:text-zinc-400"
               value={search}
               onChange={(e) => { setSearch(e.target.value); setPage(1); }}
             />
-          </div>
-
-          {/* Category Filter */}
-          <div className="relative w-full md:w-64">
-            <Filter className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 w-5 h-5 pointer-events-none" />
-            <select
-              className="w-full pl-12 pr-10 py-3 bg-zinc-50 border-none rounded-2xl focus:ring-2 focus:ring-primary/20 appearance-none transition-all text-zinc-900"
-              value={selectedCategory}
-              onChange={(e) => { setSelectedCategory(e.target.value); setPage(1); }}
-            >
-              <option value="">All Categories</option>
-              {categories.map((cat) => (
-                <option key={cat.id} value={cat.id}>
-                  {cat.title || cat.name}
-                </option>
-              ))}
-            </select>
           </div>
 
           {/* Language Toggle */}
@@ -157,6 +140,34 @@ export default function PortfolioPage() {
               BN
             </button>
           </div>
+        </div>
+
+        {/* Category Pills */}
+        <div className="flex flex-wrap items-center justify-center mb-12 gap-3">
+          <button
+            onClick={() => { setSelectedCategory(""); setPage(1); }}
+            className={`whitespace-nowrap px-6 py-2.5 rounded-full text-sm font-semibold transition-all flex items-center gap-2 ${
+              selectedCategory === ""
+                ? "bg-primary text-white shadow-lg shadow-primary/25"
+                : "bg-white text-zinc-600 hover:bg-zinc-50 border border-zinc-200 shadow-sm"
+            }`}
+          >
+            <LayoutGrid className="w-4 h-4" />
+            {lang === "en" ? "All Categories" : "সব ফ্রেম"}
+          </button>
+          {categories.map((cat) => (
+            <button
+              key={cat.id}
+              onClick={() => { setSelectedCategory(cat.id); setPage(1); }}
+              className={`whitespace-nowrap px-6 py-2.5 rounded-full text-sm font-semibold transition-all ${
+                selectedCategory === cat.id
+                  ? "bg-primary text-white shadow-lg shadow-primary/25"
+                  : "bg-white text-zinc-600 hover:bg-zinc-50 border border-zinc-200 shadow-sm"
+              }`}
+            >
+              {cat.title || cat.name}
+            </button>
+          ))}
         </div>
 
         {/* Results Grid */}

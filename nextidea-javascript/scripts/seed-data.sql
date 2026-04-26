@@ -35,3 +35,27 @@ INSERT INTO site_settings (setting_key, setting_value, setting_type, description
 ('analytics_enabled', 'true', 'boolean', 'Enable analytics tracking')
 ON DUPLICATE KEY UPDATE setting_key=setting_key;
 
+-- Insert sample portfolio items
+INSERT INTO portfolio_items (title, slug, description, category_id, client_name, client_website, featured, project_date) VALUES
+('E-commerce Platform Redesign', 'ecommerce-redesign', 'A complete overhaul of a major fashion retailer''s online presence, focusing on user experience and conversion optimization.', 4, 'FashionHub', 'https://example.com', TRUE, '2023-10-15'),
+('Social Media Campaign: Summer Fest', 'summer-fest-campaign', 'Comprehensive social media strategy and execution for a city-wide music festival, resulting in 200% engagement growth.', 2, 'City Events', '#', TRUE, '2023-06-20'),
+('Brand Identity for Tech Startup', 'tech-brand-identity', 'Developing a modern, scalable brand identity for a disruptive AI startup, including logo, color palette, and brand guidelines.', 5, 'AI Pulse', 'https://aipulse.tech', FALSE, '2023-11-05'),
+('Real Estate Digital Marketing', 'real-estate-marketing', 'Data-driven lead generation campaign for a luxury real estate development project, achieving 5x ROI.', 1, 'Elite Properties', '#', TRUE, '2024-01-12')
+ON DUPLICATE KEY UPDATE title=title;
+
+-- Insert portfolio images
+INSERT INTO portfolio_images (portfolio_item_id, image_url, alt_text, sort_order, is_primary) VALUES
+(1, 'https://images.unsplash.com/photo-1557821552-17105176677c?w=800&q=80', 'E-commerce Redesign', 1, TRUE),
+(2, 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&q=80', 'Summer Fest Campaign', 1, TRUE),
+(3, 'https://images.unsplash.com/photo-1558655146-d09347e92766?w=800&q=80', 'Tech Brand Identity', 1, TRUE),
+(4, 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800&q=80', 'Real Estate Marketing', 1, TRUE)
+ON DUPLICATE KEY UPDATE image_url=image_url;
+
+-- Insert portfolio technologies
+INSERT INTO portfolio_technologies (portfolio_item_id, technology) VALUES
+(1, 'Next.js'), (1, 'Tailwind CSS'), (1, 'Node.js'),
+(2, 'Facebook Ads'), (2, 'Instagram Marketing'),
+(3, 'Adobe Illustrator'), (3, 'Figma'),
+(4, 'Google Ads'), (4, 'Real Estate Funnels')
+ON DUPLICATE KEY UPDATE technology=technology;
+
