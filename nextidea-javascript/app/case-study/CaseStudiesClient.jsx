@@ -10,13 +10,13 @@ export default function CaseStudiesClient() {
   return (
     <div className="flex flex-col min-h-screen bg-white">
       <Navbar />
-      
+
       {/* Hero Section */}
       <header className="relative pt-32 pb-20 overflow-hidden bg-zinc-900 text-white">
         <div className="absolute inset-0 bg-grid-white/[0.02] bg-[size:32px]" />
         <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-primary/20 rounded-full blur-[120px] opacity-50 translate-x-1/2 -translate-y-1/2 pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-accent/30 rounded-full blur-[100px] opacity-50 -translate-x-1/2 translate-y-1/2 pointer-events-none" />
-        
+
         <div className="container mx-auto px-4 relative z-10 text-center">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -53,7 +53,7 @@ export default function CaseStudiesClient() {
                   <div className="relative aspect-[4/3] rounded-3xl overflow-hidden mb-6 shadow-xl shadow-zinc-200/50">
                     <div
                       className="absolute inset-0 bg-cover bg-center group-hover:scale-110 transition-transform duration-700"
-                      style={{ backgroundImage: "url('https://geekysocial.com/wp-content/uploads/2026/01/Westerncf-home-slide-china.webp')" }}
+                      style={{ backgroundImage: "url('case-study.jpg')" }}
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60 group-hover:opacity-40 transition-opacity" />
                     <div className="absolute top-4 left-4">
@@ -87,7 +87,7 @@ export default function CaseStudiesClient() {
                   <div className="relative aspect-[4/3] rounded-3xl overflow-hidden mb-6 shadow-xl shadow-zinc-200/50">
                     <div
                       className="absolute inset-0 bg-cover bg-center group-hover:scale-110 transition-transform duration-700"
-                      style={{ backgroundImage: "url('https://geekysocial.com/wp-content/uploads/2026/01/Webiste-main-BG-1-08-scaled-1.webp')" }}
+                      style={{ backgroundImage: "url('CaseStudy2.jpg')" }}
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60 group-hover:opacity-40 transition-opacity" />
                     <div className="absolute top-4 left-4">
@@ -121,7 +121,7 @@ export default function CaseStudiesClient() {
                   <div className="relative aspect-[4/3] rounded-3xl overflow-hidden mb-6 shadow-xl shadow-zinc-200/50">
                     <div
                       className="absolute inset-0 bg-cover bg-center group-hover:scale-110 transition-transform duration-700"
-                      style={{ backgroundImage: "url('https://geekysocial.com/wp-content/uploads/2026/01/Imperial_Areal-view_01_Post-scaled-1.jpg')" }}
+                      style={{ backgroundImage: "url('case-study3.jpg')" }}
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60 group-hover:opacity-40 transition-opacity" />
                     <div className="absolute top-4 left-4">

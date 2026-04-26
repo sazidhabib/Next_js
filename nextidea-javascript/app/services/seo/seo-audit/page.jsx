@@ -92,7 +92,7 @@ export default function SEOAuditPage() {
         icon={<ClipboardList className="w-12 h-12 text-primary" />}
         title="SEO Audit Service"
         tagline="Uncover What's Holding Your Website Back from Ranking"
-        description="Is your website struggling to generate organic traffic or leads? Our SEO Audit Service helps you identify exactly what's wrong and gives you a clear roadmap to fix it fast. No automated reports—you get human-led insights and actionable steps."
+
         image="/SEO-Audit.png"
       />
       <section className="py-20 bg-white overflow-hidden">
@@ -113,9 +113,9 @@ export default function SEOAuditPage() {
               </button>
             </div>
             <div className="md:w-1/2">
-              <img 
-                src="/seo-audit-hero.png" 
-                alt="SEO Audit Illustration" 
+              <img
+                src="/seo-audit-hero.png"
+                alt="SEO Audit Illustration"
                 className="w-full h-auto drop-shadow-2xl"
               />
             </div>
@@ -141,9 +141,9 @@ export default function SEOAuditPage() {
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row items-center gap-12">
             <div className="md:w-1/2">
-              <img 
-                src="/who-needs-audit.png" 
-                alt="Who needs SEO Audit" 
+              <img
+                src="/who-needs-audit.png"
+                alt="Who needs SEO Audit"
                 className="w-full rounded-2xl shadow-xl"
               />
             </div>
@@ -207,7 +207,7 @@ export default function SEOAuditPage() {
         </div>
       </section>
 
-      <PackagesSection 
+      <PackagesSection
         title="SEO Audit Packages"
         subtitle="Transparent pricing for websites of all sizes. Choose the audit that fits your scale."
         packages={auditPackages}

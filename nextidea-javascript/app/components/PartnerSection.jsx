@@ -38,7 +38,7 @@ export default function PartnerSection({
                     />
                 </motion.div>
 
-                <div className="flex flex-wrap justify-center gap-8 md:gap-12 opacity-60 grayscale hover:grayscale-0 transition-all duration-500">
+                <div className="flex flex-wrap justify-center gap-8 md:gap-12 opacity-60 grayscale-0 hover:grayscale-0 transition-all duration-500">
                     {partnersList.map((partner, index) => (
                         <motion.div
                             key={index}

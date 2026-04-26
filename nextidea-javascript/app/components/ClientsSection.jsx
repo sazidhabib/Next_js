@@ -23,7 +23,7 @@ function ClientLogo({ client }) {
                 <img
                     src={client.logo}
                     alt={client.name}
-                    className="w-full h-full object-contain filter grayscale hover:grayscale-0 transition-all duration-500"
+                    className="w-full h-full object-contain filter grayscale-0 hover:grayscale-0 transition-all duration-500"
                     onError={() => setImageError(true)}
                 />
             )}
@@ -65,7 +65,7 @@ export default function ClientsSection({ pageId }) {
     if (loading || clients.length === 0) return null;
 
     return (
-        <section className="py-24 bg-zinc-50/50">
+        <section className="py-24  bg-white">
             <div className="container mx-auto px-4">
                 <motion.div
                     initial={{ opacity: 0, y: 30 }}

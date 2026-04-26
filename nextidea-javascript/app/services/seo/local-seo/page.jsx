@@ -61,7 +61,7 @@ export default function LocalSEOPage() {
         icon={<MapPin className="w-12 h-12 text-primary" />}
         title="Local SEO"
         tagline="Find Customers Near You Consistently"
-        description="Be the first one to show up when your customers search your product or service in your local area. Whether you're a retail store, service provider, or multi-location business, our local SEO strategy is customized to grow your visibility where it matters most."
+        description=""
         image="/Local-SEO.png"
       />
 
@@ -73,16 +73,16 @@ export default function LocalSEOPage() {
                 Local SEO Service In <span className="text-primary">Bangladesh</span>
               </h2>
               <p className="text-lg text-zinc-600 mb-8 leading-relaxed">
-                46% of all Google searches are for local information. If your business isn't showing up in the Local Pack or on Maps, you're losing customers to your competitors every single day. Our Local SEO services ensure you dominate your neighborhood.
+                46% of all Google searches are for local information. If your business isn't showing up in the Local Pack or on Maps, you're losing customers to your competitors every single day. Our Local SEO services ensure you dominate your neighborhood. Be the first one to show up when your customers search your product or service in your local area. Whether you're a retail store, service provider, or multi-location business, our local SEO strategy is customized to grow your visibility where it matters most.
               </p>
               <button className="bg-primary text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20">
                 GET A FREE QUOTE
               </button>
             </div>
             <div className="md:w-1/2">
-              <img 
-                src="/local-seo-hero.png" 
-                alt="Local SEO Illustration" 
+              <img
+                src="/local-seo-hero.png"
+                alt="Local SEO Illustration"
                 className="w-full h-auto drop-shadow-2xl"
               />
             </div>
@@ -116,9 +116,9 @@ export default function LocalSEOPage() {
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row items-center gap-12">
             <div className="md:w-1/2">
-              <img 
-                src="/local-seo-include.png" 
-                alt="Local SEO Services" 
+              <img
+                src="/local-seo-include.png"
+                alt="Local SEO Services"
                 className="w-full rounded-2xl shadow-xl"
               />
             </div>

@@ -17,13 +17,40 @@ export default function EventAndActivationPage() {
         icon={<Megaphone />}
         title="Event & Activation"
         tagline="Next Idea Solution is the power to create happening events to guarantee you the maximum footfall"
-        description="At Next Idea Solution, we specialize in turning concepts into remarkable events and activations that leave a lasting impression on your audience ensuring your brand stands out in the crowd."
+
         image="/Event-Activation.png"
       />
+      <section className="py-20 bg-white overflow-hidden">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col md:flex-row items-center gap-12">
+            <div className="md:w-1/2">
+              <h2 className="text-4xl md:text-5xl font-bold text-zinc-900 mb-6 leading-tight">
+                About Event & <span className="text-primary">Activation</span>
+              </h2>
+              <p className="text-lg font-bold text-zinc-600 mb-8 leading-relaxed">
+                Experience Unforgettable Events with Next Idea Solution's Event & Activation Service.
+              </p>
+              <p className="text-lg text-zinc-600 mb-8 leading-relaxed">
+                At Next Idea Solution, we specialize in turning concepts into remarkable events and activations that leave a lasting impression on your audience ensuring your brand stands out in the crowd.
+              </p>
+              <button className="bg-primary text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20">
+                GET A FREE QUOTE
+              </button>
+            </div>
+            <div className="md:w-1/2">
+              <img
+                src="/event2.jpeg"
+                alt="Local SEO Illustration"
+                className="w-full h-auto drop-shadow-2xl"
+              />
+            </div>
+          </div>
+        </div>
+      </section>
       <ServiceContent
         overview={{
-          title: "Experience Unforgettable Events with Next Idea Solution's Event & Activation Service",
-          description: "At Next Idea Solution, we specialize in turning concepts into remarkable events and activations that leave a lasting impression on your audience ensuring your brand stands out in the crowd.",
+          title: "",
+          description: "",
         }}
         features={{
           title: "Why Choose Us",

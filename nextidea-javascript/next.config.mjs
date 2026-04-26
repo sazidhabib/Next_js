@@ -15,9 +15,26 @@ const nextConfig = {
         protocol: "https",
         hostname: "geekysocial.com",
       },
+      {
+        protocol: "https",
+        hostname: "nextideasolution.com",
+      },
+      {
+        protocol: "https",
+        hostname: "www.nextideasolution.com",
+      },
     ],
   },
   serverExternalPackages: ['mysql2'],
+  // Reduce memory usage during build
+  experimental: {
+    workerThreads: false,
+    cpus: 1,
+  },
+  // Disable source maps in production to save memory
+  productionBrowserSourceMaps: false,
+  // Compress responses
+  compress: true,
 };
 
 export default nextConfig;

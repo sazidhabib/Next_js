@@ -1,0 +1,37 @@
+# Next.js Reverse Proxy Configuration for cPanel
+# Place this file in your public_html directory
+
+RewriteEngine On
+
+# Proxy all requests to the Node.js server
+RewriteRule ^(.*)$ http://127.0.0.1:3000/$1 [P,L]
+
+# If mod_proxy is not available, use this redirect-based approach instead:
+# Comment out the RewriteRule above and uncomment below:
+# RewriteCond %{REQUEST_URI} !^/\.well-known/
+# RewriteRule ^(.*)$ http://127.0.0.1:3000/$1 [P,L,QSA]
+
+# Security Headers
+<IfModule mod_headers.c>
+  Header set X-Content-Type-Options "nosniff"
+  Header set X-Frame-Options "SAMEORIGIN"
+  Header set X-XSS-Protection "1; mode=block"
+  Header set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
+
+# Compression
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/plain text/css application/json application/javascript text/xml application/xml
+</IfModule>
+
+# Cache static assets
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType image/jpeg "access plus 1 year"
+  ExpiresByType image/png "access plus 1 year"
+  ExpiresByType image/webp "access plus 1 year"
+  ExpiresByType image/svg+xml "access plus 1 year"
+  ExpiresByType text/css "access plus 1 month"
+  ExpiresByType application/javascript "access plus 1 month"
+  ExpiresByType font/woff2 "access plus 1 year"
+</IfModule>

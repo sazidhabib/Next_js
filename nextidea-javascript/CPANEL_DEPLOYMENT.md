@@ -1,78 +1,186 @@
-# cPanel Deployment Guide
+# cPanel Deployment Guide — Next Idea Solution
 
-## Project is Ready for cPanel Deployment
-
-The project has been configured for static export. All pages are pre-rendered as static HTML files.
+> **This is a Node.js app (not a static site).** It requires cPanel's "Setup Node.js App" feature or SSH access to run.
 
 ---
 
-## Files to Copy to cPanel
+## Prerequisites
 
-After running `npm run build`, copy the contents of the **`out`** folder to your cPanel's **`public_html`** directory.
-
-### What's in the `out` folder:
-```
-out/
-├── index.html                    # Home page
-├── about/index.html              # About page
-├── contact/index.html            # Contact page
-├── protfolio/index.html          # Portfolio page
-├── services/*/index.html         # Service pages
-├── _next/static/                 # JavaScript, CSS, and assets
-└── public assets                 # Images, icons, etc.
-```
+- cPanel with **Node.js Selector** (CloudLinux) or SSH access
+- **Node.js 18+** available on the server
+- **MySQL database** created in cPanel
+- At least **512MB RAM** available (app uses ~150-200MB)
 
 ---
 
-## Step-by-Step Deployment Instructions
+## Method 1: cPanel Node.js Selector (Recommended)
 
-### Step 1: Build the Project Locally
-Run this command in your project folder:
+### Step 1: Upload Project Files
+
+1. Compress your project folder into a **ZIP** (exclude `node_modules` and `.next`)
+2. Go to **cPanel → File Manager**
+3. Navigate to your desired directory (e.g., `/home/username/nextidea`)
+4. Upload and extract the ZIP file
+
+### Step 2: Create MySQL Database
+
+1. Go to **cPanel → MySQL Databases**
+2. Create a new database (e.g., `username_nextidea`)
+3. Create a database user and assign it to the database with **All Privileges**
+4. Import your database schema via **phpMyAdmin**
+
+### Step 3: Configure Environment Variables
+
+Create/edit `.env` file in your project directory:
+
+```env
+DATABASE_HOST=localhost
+DATABASE_PORT=3306
+DATABASE_USER=username_nextidea
+DATABASE_PASSWORD=your_secure_password
+DATABASE_NAME=username_nextidea
+
+JWT_ACCESS_SECRET=your_random_secret_here
+JWT_REFRESH_SECRET=your_random_secret_here
+JWT_ACCESS_EXPIRY=15m
+JWT_REFRESH_EXPIRY=7d
+
+SESSION_COOKIE_NAME=nextidea_session
+SESSION_SECURE=true
+
+NODE_ENV=production
+PORT=3000
+```
+
+### Step 4: Setup Node.js App in cPanel
+
+1. Go to **cPanel → Setup Node.js App**
+2. Click **Create Application**
+3. Configure:
+   - **Node.js version**: 18.x or higher
+   - **Application mode**: Production
+   - **Application root**: `/home/username/nextidea` (your project path)
+   - **Application URL**: your domain
+   - **Application startup file**: `server.js`
+4. Click **Create**
+
+### Step 5: Install Dependencies & Build
+
+In the Node.js App panel, click **Run NPM Install**, or via SSH:
+
 ```bash
-npm run build
+# Enter the virtual environment (shown in cPanel Node.js panel)
+source /home/username/nodevenv/nextidea/18/bin/activate
+
+# Install dependencies
+npm ci --omit=dev
+
+# Build with memory limit
+NODE_OPTIONS="--max-old-space-size=512" npm run build
+
+# Copy required files to standalone
+cp -r public .next/standalone/public
+cp -r .next/static .next/standalone/.next/static
+cp server.js .next/standalone/server.js
+cp .env .next/standalone/.env
 ```
-This creates the `out` folder with all static files.
 
-### Step 2: Access cPanel File Manager
-1. Log in to your cPanel account
-2. Go to **File Manager**
-3. Navigate to **public_html** (or your domain's root folder)
+### Step 6: Start the Application
 
-### Step 3: Upload Files
-**Option A - Using File Manager:**
-1. Compress the `out` folder contents into a ZIP file
-2. In File Manager, click **Upload**
-3. Upload the ZIP file to `public_html`
-4. Extract the ZIP file in `public_html`
-5. Move all files from the extracted folder to `public_html` root
+In the cPanel Node.js panel, click **Restart** or via SSH:
 
-**Option B - Using FTP:**
-1. Connect via FTP (FileZilla, etc.)
-2. Navigate to `public_html`
-3. Upload all contents from the `out` folder
-
-### Step 4: Verify Deployment
-Visit your domain (e.g., `https://yourdomain.com`) to verify the site is working.
+```bash
+# Start with memory limit
+NODE_OPTIONS="--max-old-space-size=256" node .next/standalone/server.js
+```
 
 ---
 
-## Important Notes
+## Method 2: SSH + PM2 (Advanced)
 
-1. **Static Site Only**: This is a static export. Features like API routes, server-side rendering, and rewrites are not available.
+If you have SSH access and PM2 installed:
 
-2. **API Calls**: If your site makes API calls to external services, those will still work from the browser.
+```bash
+# SSH into your server
+ssh username@your-server.com
 
-3. **Redirects**: The `/portfolio` to `/protfolio` redirect won't work with static export. You can add this in cPanel's **Redirects** section instead.
+# Navigate to project
+cd /home/username/nextidea
 
-4. **Future Updates**: To update the site:
-   - Make changes locally
-   - Run `npm run build`
-   - Re-upload the `out` folder contents
+# Run the deploy script
+chmod +x deploy.sh
+bash deploy.sh
+
+# Start with PM2 (auto-restarts, memory limits)
+cd .next/standalone
+pm2 start ecosystem.config.js
+pm2 save
+pm2 startup  # Auto-start on server reboot
+```
+
+---
+
+## Memory Optimization Details
+
+This project is configured for **low RAM usage**:
+
+| Setting | Value | Purpose |
+|---------|-------|---------|
+| V8 Heap Limit | 256MB | Prevents Node.js from using too much memory |
+| PM2 Max Memory | 200MB | Auto-restarts if exceeded |
+| MySQL Pool | 5 connections max | Reduces idle memory |
+| MySQL Idle Timeout | 30 seconds | Frees unused connections |
+| MySQL Max Idle | 3 connections | Minimum idle connections |
+| Source Maps | Disabled | Reduces build output size |
+| Image Optimization | Disabled | Uses less CPU/RAM at runtime |
+| Workers | Disabled | Single-threaded for low RAM |
+| Compression | Enabled | Smaller responses |
+
+**Expected memory usage**: ~120-200MB in production.
+
+---
+
+## .htaccess (If Using Apache Reverse Proxy)
+
+If your cPanel uses Apache and your Node.js app runs on port 3000, place the `.htaccess` file in `public_html`:
+
+```apache
+RewriteEngine On
+RewriteRule ^(.*)$ http://127.0.0.1:3000/$1 [P,L]
+```
+
+> **Note**: Most cPanel Node.js Selector setups handle the proxy automatically. You only need `.htaccess` if configuring manually.
+
+---
+
+## Updating the Site
+
+```bash
+# Pull latest code (if using Git)
+git pull origin main
+
+# Rebuild
+NODE_OPTIONS="--max-old-space-size=512" npm run build
+
+# Copy assets to standalone
+cp -r public .next/standalone/public
+cp -r .next/static .next/standalone/.next/static
+cp server.js .next/standalone/server.js
+
+# Restart
+pm2 restart nextidea
+# OR in cPanel: click Restart in Node.js App panel
+```
 
 ---
 
 ## Troubleshooting
 
-- **404 Errors**: Ensure all files from `out/` are in `public_html` root, not in a subfolder
-- **Missing Styles**: Check that `_next/static/` folder was uploaded
-- **Images Not Loading**: Verify the `public/` folder assets are included
+| Issue | Solution |
+|-------|----------|
+| **Build runs out of memory** | Use `NODE_OPTIONS="--max-old-space-size=1024" npm run build` |
+| **App crashes on start** | Check `logs/err.log` or cPanel error logs |
+| **Database connection refused** | Verify MySQL credentials in `.env` and that the DB exists |
+| **502 Bad Gateway** | App isn't running — restart via cPanel or PM2 |
+| **Static files not loading** | Ensure `public/` and `.next/static/` are copied to standalone |
+| **Port already in use** | Change PORT in `.env` or kill the existing process |

@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { ChevronDown, HelpCircle } from "lucide-react";
 import { usePathname } from "next/navigation";
 
-export default function FAQSection({ 
+export default function FAQSection({
   pageId,
   title,
   description,
@@ -34,7 +34,7 @@ export default function FAQSection({
           } else if (derivedId !== 'home') {
             // Fallback to global FAQs if service-specific ones don't exist
             if (data.data.global_faqs) {
-                setItems(JSON.parse(data.data.global_faqs));
+              setItems(JSON.parse(data.data.global_faqs));
             }
           }
         }
@@ -46,9 +46,9 @@ export default function FAQSection({
   if (loading || items.length === 0) return null;
 
   return (
-    <section className="py-24 bg-zinc-50/50 relative overflow-hidden">
+    <section className="py-24 bg-white relative overflow-hidden">
       <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-zinc-200 to-transparent opacity-50" />
-      
+
       <div className="container mx-auto px-4 relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -61,7 +61,7 @@ export default function FAQSection({
             <HelpCircle className="w-6 h-6" />
           </div>
           <h2 className="text-3xl md:text-5xl font-bold text-zinc-900 mb-4 tracking-tight">
-            {title || (type === "home" ? "Common Questions" : "Frequently Asked Questions")}
+            {title || (pathname === "/" ? "Common Questions" : "Frequently Asked Questions")}
           </h2>
           <p className="text-zinc-500 max-w-2xl mx-auto text-lg">
             {description || "Find answers to the most common inquiries about our process and services."}
@@ -76,9 +76,8 @@ export default function FAQSection({
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.4, delay: index * 0.05 }}
-              className={`bg-white rounded-2xl border transition-all duration-300 ${
-                openIndex === index ? "border-primary/30 shadow-xl shadow-primary/5" : "border-zinc-200 shadow-sm hover:border-zinc-300"
-              }`}
+              className={`bg-white rounded-2xl border transition-all duration-300 ${openIndex === index ? "border-primary/30 shadow-xl shadow-primary/5" : "border-zinc-200 shadow-sm hover:border-zinc-300"
+                }`}
             >
               <button
                 onClick={() => setOpenIndex(openIndex === index ? null : index)}
@@ -89,9 +88,8 @@ export default function FAQSection({
                 </span>
                 <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${openIndex === index ? "bg-primary text-white" : "bg-zinc-100 text-zinc-500"}`}>
                   <ChevronDown
-                    className={`w-4 h-4 transition-transform duration-500 ${
-                      openIndex === index ? "rotate-180" : ""
-                    }`}
+                    className={`w-4 h-4 transition-transform duration-500 ${openIndex === index ? "rotate-180" : ""
+                      }`}
                   />
                 </div>
               </button>

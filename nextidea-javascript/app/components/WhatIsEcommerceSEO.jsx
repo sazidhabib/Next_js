@@ -41,10 +41,10 @@ export default function WhatIsEcommerceSEO() {
           >
             {/* Using a placeholder or SVG if image not available */}
             <div className="relative w-full max-w-md aspect-square bg-zinc-50 rounded-3xl flex items-center justify-center p-8">
-               <Image 
-                src="/E-commerce-SEO.png" 
-                alt="Ecommerce SEO illustration" 
-                width={500} 
+              <Image
+                src="/E-commerce-SEO.jpg"
+                alt="Ecommerce SEO illustration"
+                width={500}
                 height={500}
                 className="w-full h-auto object-contain"
               />

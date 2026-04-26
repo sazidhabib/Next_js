@@ -22,6 +22,7 @@ export default function SEOPage() {
         description="At Next Idea solution, we specialize in turning concepts into remarkable SEO strategies that leave a lasting impression on your visibility ensuring your brand stands out in search results."
         image="/SEO-Services.jpg"
       />
+
       {/* Marquee Services Section */}
       <section className="py-12 bg-white text-white overflow-hidden">
         <div className="container mx-auto px-4">
@@ -72,10 +73,38 @@ export default function SEOPage() {
         `}</style>
       </section>
 
+      <section className="py-20 bg-white overflow-hidden">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col md:flex-row items-center gap-12">
+            <div className="md:w-1/2">
+              <h2 className="text-4xl md:text-5xl font-bold text-zinc-900 mb-6 leading-tight">
+                About SEO <span className="text-primary">Services</span>
+              </h2>
+              <p className="text-lg font-bold text-zinc-600 mb-8 leading-relaxed">
+                Your Customers Are Searching For You On Google, But You Don't Know
+              </p>
+              <p className="text-lg text-zinc-600 mb-8 leading-relaxed">
+                In this age where customers search online to gather information and then make a purchase decision, you're losing sales if you're not present in front of their eyes when they're searching. Our SEO strategies are built to align with search engine priorities: helpfulness, authority, and relevance.
+              </p>
+              <button className="bg-primary text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20">
+                GET A FREE QUOTE
+              </button>
+            </div>
+            <div className="md:w-1/2">
+              <img
+                src="/seo.jpeg"
+                alt="Local SEO Illustration"
+                className="w-full h-auto drop-shadow-2xl"
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
       <ServiceContent
         overview={{
-          title: "Your Customers Are Searching For You On Google, But You Don't Know",
-          description: "In this age where customers search online to gather information and then make a purchase decision, you're losing sales if you're not present in front of their eyes when they're searching. Our SEO strategies are built to align with search engine priorities: helpfulness, authority, and relevance.",
+          title: "",
+          description: "",
         }}
         relatedServices={[
           { title: "SEO Audit", link: "/services/seo/seo-audit", icon: <FileText /> },

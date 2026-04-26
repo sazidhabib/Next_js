@@ -13,14 +13,14 @@ export default function MostofaPipeCaseStudy() {
   return (
     <div className="flex flex-col min-h-screen bg-white">
       <Navbar />
-      
+
       <main className="flex-grow">
         <ServiceHero
           icon={<TrendingUp className="w-10 h-10" />}
           title="From Zero to High-Intent Traffic"
           tagline="SEO Success Story: Mostofa Pipe"
           description="How we helped Mostofa Pipe build SEO visibility from zero to high-intent traffic in just 5 months, increasing organic traffic by 480%."
-          image="https://geekysocial.com/wp-content/uploads/2026/01/Webiste-main-BG-1-08-scaled-1.webp"
+          image="case-study.jpg"
         />
 
         <ServiceContent
@@ -67,7 +67,7 @@ export default function MostofaPipeCaseStudy() {
             { title: "E-commerce SEO", link: "/services/seo/e-commerce-seo", icon: <ShoppingCart className="w-8 h-8 text-primary mb-4" /> },
           ]}
         />
-        
+
         {/* Results Highlights (Custom Section for Case Study) */}
         <section className="py-20 bg-zinc-50 border-t border-zinc-100">
           <div className="container mx-auto px-4">

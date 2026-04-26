@@ -7,10 +7,12 @@ const pool = mysql.createPool({
   password: process.env.DATABASE_PASSWORD || '',
   database: process.env.DATABASE_NAME || 'nextidea_db',
   waitForConnections: true,
-  connectionLimit: parseInt(process.env.DATABASE_CONNECTION_LIMIT, 10) || 10,
+  connectionLimit: parseInt(process.env.DATABASE_CONNECTION_LIMIT, 10) || 5,
   queueLimit: 0,
   enableKeepAlive: true,
   keepAliveInitialDelay: 0,
+  idleTimeout: 30000,
+  maxIdle: 3,
 });
 
 pool.on('error', (err) => {
