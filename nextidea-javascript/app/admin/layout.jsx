@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
-import { LayoutDashboard, Image, FolderOpen, BarChart3, Users, Mail, LogOut, Menu, X, Settings, FileText, HelpCircle } from "lucide-react";
+import { LayoutDashboard, Image, FolderOpen, BarChart3, Users, Mail, LogOut, Menu, X, Settings, FileText, HelpCircle, Package } from "lucide-react";
 
 export default function AdminLayout({ children }) {
   const router = useRouter();
@@ -51,6 +51,7 @@ export default function AdminLayout({ children }) {
     { href: '/admin/pages', icon: FileText, label: 'Page Content' },
     { href: '/admin/clients', icon: Users, label: 'Clients' },
     { href: '/admin/faqs', icon: HelpCircle, label: 'FAQs' },
+    { href: '/admin/packages', icon: Package, label: 'Packages' },
     { href: '/admin/analytics', icon: BarChart3, label: 'Analytics' },
     { href: '/admin/contact', icon: Mail, label: 'Contact Submissions' },
     { href: '/admin/users', icon: Users, label: 'Users' },

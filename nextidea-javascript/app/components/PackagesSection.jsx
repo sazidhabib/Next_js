@@ -1,58 +1,115 @@
 "use client";
 
+import { useState, useEffect } from "react";
+import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Check, X } from "lucide-react";
 
+const DEFAULT_PACKAGES = [
+  {
+    name: "Starter",
+    features: [
+      { name: "Digital Audit & Strategy", included: true },
+      { name: "Tracking Integration", included: true },
+      { name: "Funnel Development", included: true },
+      { name: "Campaign Automation", included: false },
+      { name: "Analytics", included: false },
+    ],
+    channels: "Facebook",
+    mediaSpending: "Depends on client's budget",
+    setupCost: "10,000 TK",
+    managementFee: "30,000 TK",
+  },
+  {
+    name: "Growth Hacker",
+    features: [
+      { name: "Digital Audit & Strategy", included: true },
+      { name: "Tracking Integration", included: true },
+      { name: "Funnel Development", included: true },
+      { name: "Campaign Automation", included: true },
+      { name: "Analytics", included: true },
+    ],
+    channels: "Facebook, LinkedIn, Google Display, Google Search, YouTube, Programmatic Ads",
+    mediaSpending: "Up to $1K",
+    setupCost: "20,000 TK",
+    managementFee: "45,000 TK",
+  },
+  {
+    name: "Progressive",
+    features: [
+      { name: "Digital Audit & Strategy", included: true },
+      { name: "Tracking Integration", included: true },
+      { name: "Funnel Development", included: true },
+      { name: "Campaign Automation", included: true },
+      { name: "Analytics", included: true },
+    ],
+    channels: "Facebook, Google Search, Google Display, Email",
+    mediaSpending: "$1K-$3K",
+    setupCost: "25,000 TK",
+    managementFee: "Starting at 60,000 TK",
+  },
+];
+
 export default function PackagesSection({ 
-  title = "Our Packages",
-  subtitle = "Choose the perfect package for your business needs",
-  footerText = "*Media payments are paid in advance",
-  packages = [
-    {
-      name: "Starter",
-      features: [
-        { name: "Digital Audit & Strategy", included: true },
-        { name: "Tracking Integration", included: true },
-        { name: "Funnel Development", included: true },
-        { name: "Campaign Automation", included: false },
-        { name: "Analytics", included: false },
-      ],
-      channels: "Facebook",
-      mediaSpending: "Depends on client's budget",
-      setupCost: "10,000 TK",
-      managementFee: "30,000 TK",
-    },
-    {
-      name: "Growth Hacker",
-      features: [
-        { name: "Digital Audit & Strategy", included: true },
-        { name: "Tracking Integration", included: true },
-        { name: "Funnel Development", included: true },
-        { name: "Campaign Automation", included: true },
-        { name: "Analytics", included: true },
-      ],
-      channels: "Facebook, LinkedIn, Google Display, Google Search, YouTube, Programmatic Ads",
-      mediaSpending: "Up to $1K",
-      setupCost: "20,000 TK",
-      managementFee: "45,000 TK",
-    },
-    {
-      name: "Progressive",
-      features: [
-        { name: "Digital Audit & Strategy", included: true },
-        { name: "Tracking Integration", included: true },
-        { name: "Funnel Development", included: true },
-        { name: "Campaign Automation", included: true },
-        { name: "Analytics", included: true },
-      ],
-      channels: "Facebook, Google Search, Google Display, Email",
-      mediaSpending: "$1K-$3K",
-      setupCost: "25,000 TK",
-      managementFee: "Starting at 60,000 TK",
-    },
-  ]
+  pageId,
+  title: propTitle,
+  subtitle: propSubtitle,
+  footerText: propFooterText,
+  packages: propPackages,
 }) {
+  const [packages, setPackages] = useState(propPackages || null);
+  const [title, setTitle] = useState(propTitle || "Our Packages");
+  const [subtitle, setSubtitle] = useState(propSubtitle || "Choose the perfect package for your business needs");
+  const [footerText, setFooterText] = useState(propFooterText || "*Media payments are paid in advance");
+  const [loaded, setLoaded] = useState(false);
+  const pathname = usePathname();
+
+  useEffect(() => {
+    // Derive the page ID from the URL if not provided
+    const pathSegments = pathname.split('/').filter(Boolean);
+    const lastSegment = pathSegments[pathSegments.length - 1] || '';
+    const derivedId = pageId || lastSegment;
+
+    if (!derivedId) {
+      setLoaded(true);
+      return;
+    }
+
+    const pkgKey = `${derivedId}_packages`;
+    const metaKey = `${derivedId}_packages_meta`;
+
+    fetch("/api/settings")
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          // Check for packages data from DB
+          const pkgData = data.data[pkgKey];
+          if (pkgData) {
+            const parsed = JSON.parse(pkgData);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              setPackages(parsed);
+            }
+          }
+
+          // Check for meta (title/subtitle/footer) from DB
+          const metaData = data.data[metaKey];
+          if (metaData) {
+            const meta = JSON.parse(metaData);
+            // Only override if the prop was not explicitly provided
+            if (!propTitle && meta.title) setTitle(meta.title);
+            if (!propSubtitle && meta.subtitle) setSubtitle(meta.subtitle);
+            if (!propFooterText && meta.footerText) setFooterText(meta.footerText);
+          }
+        }
+      })
+      .catch(err => console.error("Package fetch error:", err))
+      .finally(() => setLoaded(true));
+  }, [pageId, pathname]);
+
+  // Use prop packages, then DB packages, then defaults
+  const displayPackages = packages || propPackages || DEFAULT_PACKAGES;
+
   return (
     <section className="py-20 md:py-28 bg-white">
       <div className="container mx-auto px-4">
@@ -66,7 +123,7 @@ export default function PackagesSection({
         </motion.div>
 
         <motion.div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-          {packages.map((pkg, index) => (
+          {displayPackages.map((pkg, index) => (
             <motion.div
               initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
