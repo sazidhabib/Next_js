@@ -105,6 +105,14 @@ const LoadMoreNews = ({ slug, excludeIds }) => {
         });
     };
 
+    const renderCategoryBadgeContent = (category) => {
+        if (!category) return null;
+        const name = category.name?.trim();
+        if (name === 'ছবি') return <i className="fas fa-camera" title="ছবি"></i>;
+        if (name === 'ভিডিও') return <i className="fas fa-video" title="ভিডিও"></i>;
+        return name;
+    };
+
     if (news.length === 0 && !loading) return null;
 
     return (
@@ -144,6 +152,11 @@ const LoadMoreNews = ({ slug, excludeIds }) => {
                                                         quality={90}
                                                     />
                                                 </Link>
+                                                {item.Categories && item.Categories[0] && (
+                                                    <Badge bg="danger" className="position-absolute top-0 start-0 m-1" style={{ zIndex: 2, fontSize: '0.65rem' }}>
+                                                        {renderCategoryBadgeContent(item.Categories[0])}
+                                                    </Badge>
+                                                )}
                                             </div>
                                         )}
                                         <div className="flex-grow-1 d-flex flex-column justify-content-between">
@@ -174,6 +187,11 @@ const LoadMoreNews = ({ slug, excludeIds }) => {
                                                     quality={90}
                                                 />
                                             </Link>
+                                            {item.Categories && item.Categories[0] && (
+                                                <Badge bg="danger" className="position-absolute top-0 start-0 m-2" style={{ zIndex: 2 }}>
+                                                    {renderCategoryBadgeContent(item.Categories[0])}
+                                                </Badge>
+                                            )}
                                         </div>
                                     )}
                                     <Link href={newsLink} className="text-decoration-none text-dark flex-grow-1">

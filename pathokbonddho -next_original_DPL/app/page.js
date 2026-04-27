@@ -41,7 +41,7 @@ export async function generateMetadata() {
 
   return {
     title: 'পাঠকবন্ধু | Largest friends community by Ajker Patrika',
-    description: 'Welcome to পাঠকবন্ধু, the news portal.',
+    description: 'Welcome to পাঠকবন্ধু, the friends community by Ajker Patrika.',
   };
 }
 
@@ -72,7 +72,7 @@ async function getPageData(slug = 'home') {
     if (layout?.PageSections) {
       const fetchPromises = [];
       const dynamicTagsMap = {}; // { [tag]: [cell1, cell2, ...] }
-      
+
       const categoryName = matchPage?.name;
 
       for (const section of layout.PageSections) {
@@ -84,14 +84,14 @@ async function getPageData(slug = 'home') {
 
             if (cell.contentType === 'news') {
               const isAuto = layout.autoNewsSelection || section.autoNewsSelection;
-              
+
               if (isAuto) {
                 let effectiveTag = cell.tag || slug;
                 // If the tag is the category name (e.g. "সাহিত্য") or matches the slug (e.g. "literature"),
                 // or if it's a generic "col-X" tag, we canonicalize it to the slug so they are fetched together.
                 const isJunkTag = effectiveTag && effectiveTag.startsWith('col-');
                 if (isJunkTag || effectiveTag === categoryName || (effectiveTag && effectiveTag.toLowerCase() === slug.toLowerCase())) {
-                    effectiveTag = `_cat_${slug}`;
+                  effectiveTag = `_cat_${slug}`;
                 }
                 if (!dynamicTagsMap[effectiveTag]) dynamicTagsMap[effectiveTag] = [];
                 dynamicTagsMap[effectiveTag].push(cell);
@@ -149,10 +149,10 @@ async function getPageData(slug = 'home') {
           try {
             let url;
             if (tag.startsWith('_cat_')) {
-                const actualSlug = tag.replace('_cat_', '');
-                url = `${API_URL}/news?categories=${encodeURIComponent(actualSlug)}&limit=${count}`;
+              const actualSlug = tag.replace('_cat_', '');
+              url = `${API_URL}/news?categories=${encodeURIComponent(actualSlug)}&limit=${count}`;
             } else {
-                url = `${API_URL}/news?tag=${encodeURIComponent(tag)}&limit=${count}`;
+              url = `${API_URL}/news?tag=${encodeURIComponent(tag)}&limit=${count}`;
             }
 
             const nRes = await fetchWithTimeout(url, { next: { revalidate: 60 } });
@@ -161,7 +161,7 @@ async function getPageData(slug = 'home') {
               const data = await nRes.json();
               fetchedItems = data.news || data.rows || [];
             }
-            
+
             // Fallback by category if tag is empty
             if (fetchedItems.length === 0 && !tag.startsWith('_cat_')) {
               const cRes = await fetchWithTimeout(`${API_URL}/news?categories=${encodeURIComponent(tag)}&limit=${count}`, { next: { revalidate: 60 } });
