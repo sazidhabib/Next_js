@@ -1,4 +1,4 @@
-import { TrendingUp, Code2, Megaphone, Sparkles, Target, Layers, Zap, Filter, BarChart, Wallet } from "lucide-react";
+import { TrendingUp, Code2, Megaphone, Sparkles, Target, Layers, Zap, Filter, BarChart, Wallet, Check, ArrowRight } from "lucide-react";
 import ServiceHero from "../../components/ServiceHero";
 import ServiceContent from "../../components/ServiceContent";
 import PackagesSection from "../../components/PackagesSection";
@@ -7,13 +7,10 @@ import ClientsSection from "../../components/ClientsSection";
 import PartnerSection from "../../components/PartnerSection";
 import FAQSection from "../../components/FAQSection";
 import CTASection from "../../components/CTASection";
+import { query } from "@/app/lib/db";
+import { notFound } from "next/navigation";
 
-export const metadata = {
-  title: "Digital Media Buying | Next Idea Solutions",
-  description: "Funnel-driven media buying solutions that generate higher ROI. We optimize your ad spend across all digital platforms.",
-};
-
-export default function DigitalMediaBuyingPage() {
+export default async function DigitalMediaBuyingPage() {
   return (
     <>
       <ServiceHero

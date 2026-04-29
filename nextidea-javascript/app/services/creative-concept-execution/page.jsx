@@ -1,95 +1,106 @@
-import { Target, Cpu, Settings, Trophy, FileText, Star, Palette, TrendingUp, Headphones, Sparkles } from "lucide-react";
+import { Target, Cpu, Settings, Trophy, FileText, Star, Palette, TrendingUp, Headphones, Sparkles, Check, ArrowRight } from "lucide-react";
 import ServiceHero from "../../components/ServiceHero";
 import ServiceContent from "../../components/ServiceContent";
 import CTASection from "../../components/CTASection";
 import CaseStudySection from "../../components/CaseStudySection";
+import { query } from "@/app/lib/db";
+import { notFound } from "next/navigation";
 
-export const metadata = {
-  title: "Creative Concept & Execution | Next Idea Solutions",
-  description: "Elevate your brand with Next Idea Solutions' creative service that blends strategy, design, and technology to bring your concept to life.",
+// Icon mapping for rendering
+const ICON_MAP = {
+  Target: <Target />,
+  Cpu: <Cpu />,
+  Settings: <Settings />,
+  Trophy: <Trophy />,
+  FileText: <FileText />,
+  Star: <Star />,
+  Palette: <Palette />,
+  TrendingUp: <TrendingUp />,
+  Headphones: <Headphones />,
+  Sparkles: <Sparkles />,
+  Check: <Check />,
 };
 
-export default function CreativeConceptExecutionPage() {
+async function getService() {
+  const services = await query("SELECT * FROM services WHERE slug = 'creative-concept-execution' AND is_active = 1");
+  return services[0];
+}
+
+export async function generateMetadata() {
+  const service = await getService();
+  if (!service) return { title: "Creative Concept & Execution | Next Idea Solutions" };
+
+  return {
+    title: service.meta_title || "Creative Concept & Execution | Next Idea Solutions",
+    description: service.meta_description || service.tagline,
+  };
+}
+
+export default async function CreativeConceptExecutionPage() {
+  const service = await getService();
+  if (!service) return notFound();
+
+  // Parse JSON fields
+  const features_items = typeof service.features_items === 'string' ? JSON.parse(service.features_items || '[]') : service.features_items;
+  const process_steps = typeof service.process_steps === 'string' ? JSON.parse(service.process_steps || '[]') : service.process_steps;
+  const related_services = typeof service.related_services === 'string' ? JSON.parse(service.related_services || '[]') : service.related_services;
+
   return (
     <>
       <ServiceHero
-        icon={<Sparkles />}
-        title="Creative Concept & Execution"
-        tagline="Elevate your brand with Next Idea Solutions' creative service that blends strategy, design, and technology to bring your concept to life."
+        icon={ICON_MAP[service.hero_icon] || <Sparkles />}
+        title={service.title}
+        tagline={service.tagline}
         buttonText="Explore More"
-
+        image={service.hero_image}
       />
-      <section className="py-20 bg-white overflow-hidden">
-        <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row items-center gap-12">
-            <div className="md:w-1/2">
-              <h2 className="text-4xl md:text-5xl font-bold text-zinc-900 mb-6 leading-tight">
-                About This <span className="text-primary">Service</span>
-              </h2>
-              <p className="text-lg text-zinc-600 mb-8 leading-relaxed">
-                At Next Idea Solutions, we believe in the power of creativity to transform brands. Our Creative Concept & Execution service is tailored to craft innovative, impactful, and memorable campaigns that resonate with your audience. We merge creativity with strategic insights to develop concepts that align with your brand's goals and values.
-              </p>
-
-            </div>
-            <div className="md:w-1/2">
-              <img
-                src="/creative_concept.jpeg"
-                alt="Local SEO Illustration"
-                className="w-full h-auto drop-shadow-2xl"
-              />
+      
+      {service.about_title && (
+        <section className="py-20 bg-white overflow-hidden">
+          <div className="container mx-auto px-4">
+            <div className="flex flex-col md:flex-row items-center gap-12">
+              <div className="md:w-1/2">
+                <h2 className="text-4xl md:text-5xl font-bold text-zinc-900 mb-6 leading-tight">
+                  {service.about_title.split(' ').map((word, i, arr) => 
+                    i === arr.length - 1 ? <span key={i} className="text-primary">{word}</span> : word + ' '
+                  )}
+                </h2>
+                <div 
+                  className="text-lg text-zinc-600 mb-8 leading-relaxed whitespace-pre-line"
+                  dangerouslySetInnerHTML={{ __html: service.about_description }}
+                />
+              </div>
+              <div className="md:w-1/2">
+                {service.about_image && (
+                  <img
+                    src={service.about_image}
+                    alt={service.about_title}
+                    className="w-full h-auto drop-shadow-2xl rounded-2xl"
+                  />
+                )}
+              </div>
             </div>
           </div>
-        </div>
-      </section>
-      <ServiceContent
-        overview={{
+        </section>
+      )}
 
-        }}
+      <ServiceContent
+        overview={{}}
         features={{
-          title: "WHAT SETS US APART",
-          items: [
-            {
-              icon: <Target className="w-6 h-6" />,
-              title: "Strategic Creativity",
-              description: "We merge creativity with strategic insights to develop concepts that align with your brand's goals and values."
-            },
-            {
-              icon: <Cpu className="w-6 h-6" />,
-              title: "Holistic Approach",
-              description: "From ideation to execution, our team ensures a seamless creative process, encompassing diverse media channels and platforms."
-            },
-            {
-              icon: <Settings className="w-6 h-6" />,
-              title: "Tailored Solutions",
-              description: "Every brand is unique, and we customize our creative strategies to meet your specific needs and capture your audience's attention."
-            },
-          ],
+          title: service.features_title || "WHAT SETS US APART",
+          items: features_items.map(item => ({
+            ...item,
+            icon: ICON_MAP[item.icon_name] || <Check />
+          })),
         }}
         process={{
-          title: "WHAT WE OFFER",
-          steps: [
-            {
-              title: "Creative Campaigns",
-              description: "Our team designs captivating campaigns that engage your audience across digital and traditional platforms.",
-              icon: <Trophy className="w-6 h-6" />,
-            },
-            {
-              title: "Content Creation",
-              description: "We craft compelling content, including visuals, copy, and multimedia, to convey your brand's story effectively.",
-              icon: <FileText className="w-6 h-6" />,
-            },
-            {
-              title: "Brand Messaging",
-              description: "We refine your brand's messaging to deliver a clear, consistent, and impactful narrative.",
-              icon: <Star className="w-6 h-6" />,
-            },
-          ],
+          title: service.process_title || "WHAT WE OFFER",
+          steps: process_steps,
         }}
-        relatedServices={[
-          { title: "Brand Identity", link: "/services/brand-identity", icon: <Palette /> },
-          { title: "Digital Media Buying", link: "/services/digital-media-buying", icon: <TrendingUp /> },
-          { title: "Video Production", link: "/services/video-production-photography", icon: <Headphones /> },
-        ]}
+        relatedServices={related_services.map(s => ({
+          ...s,
+          icon: ICON_MAP[s.icon_name] || <ArrowRight />
+        }))}
       />
       <CaseStudySection />
       <CTASection

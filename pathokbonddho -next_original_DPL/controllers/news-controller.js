@@ -301,6 +301,21 @@ const getAllNews = async (req, res) => {
     console.log('=== NEWS CONTROLLER READY ===');
 
     try {
+        // Auto-publish scheduled news if due
+        try {
+            await News.update(
+                { status: 'published' },
+                {
+                    where: {
+                        status: 'scheduled',
+                        newsSchedule: { [Op.lte]: new Date() }
+                    }
+                }
+            );
+        } catch (updateErr) {
+            console.error("Error auto-publishing scheduled news:", updateErr);
+        }
+
         const {
             page = 1,
             limit = 10,
@@ -339,8 +354,11 @@ const getAllNews = async (req, res) => {
         }
 
         // Filter by status
-        if (status) {
+        if (status && status !== 'all') {
             whereClause.status = status;
+        } else if (!status) {
+            // Default to published if not explicitly requesting 'all'
+            whereClause.status = 'published';
         }
 
         console.log('Where clause:', whereClause);
@@ -460,6 +478,21 @@ const getCategories = async (req, res) => {
 // ✅ Get Single News Post
 const getNews = async (req, res) => {
     try {
+        // Auto-publish scheduled news if due
+        try {
+            await News.update(
+                { status: 'published' },
+                {
+                    where: {
+                        status: 'scheduled',
+                        newsSchedule: { [Op.lte]: new Date() }
+                    }
+                }
+            );
+        } catch (updateErr) {
+            console.error("Error auto-publishing scheduled news:", updateErr);
+        }
+
         console.log(`=== GET NEWS BY ID: ${req.params.id} ===`);
         const news = await News.findByPk(req.params.id, {
             include: [
@@ -505,6 +538,21 @@ const getNews = async (req, res) => {
 // ✅ Get News by Slug
 const getNewsBySlug = async (req, res) => {
     try {
+        // Auto-publish scheduled news if due
+        try {
+            await News.update(
+                { status: 'published' },
+                {
+                    where: {
+                        status: 'scheduled',
+                        newsSchedule: { [Op.lte]: new Date() }
+                    }
+                }
+            );
+        } catch (updateErr) {
+            console.error("Error auto-publishing scheduled news:", updateErr);
+        }
+
         const news = await News.findOne({
             where: { slug: req.params.slug },
             include: [

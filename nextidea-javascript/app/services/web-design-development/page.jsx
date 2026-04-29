@@ -1,4 +1,4 @@
-import { Code2, Smartphone, Shield, Zap, Layout, ShoppingCart, Building2, Target, Sparkles, Palette, TrendingUp } from "lucide-react";
+import { Code2, Smartphone, Shield, Zap, Layout, ShoppingCart, Building2, Target, Sparkles, Palette, TrendingUp, Check, ArrowRight } from "lucide-react";
 import ServiceHero from "../../components/ServiceHero";
 import ServiceContent from "../../components/ServiceContent";
 import PackagesSection from "../../components/PackagesSection";
@@ -7,75 +7,103 @@ import BlogsSection from "../../components/BlogsSection";
 import ClientsSection from "../../components/ClientsSection";
 import FAQSection from "../../components/FAQSection";
 import CTASection from "../../components/CTASection";
+import { query } from "@/app/lib/db";
+import { notFound } from "next/navigation";
 
-export const metadata = {
-  title: "Web Design & Development | Next Idea Solutions",
-  description: "We excel in creating user-friendly, high-converting landing pages, websites, and apps. Modern design meets powerful functionality.",
+// Icon mapping for rendering
+const ICON_MAP = {
+  Code2: <Code2 />,
+  Smartphone: <Smartphone />,
+  Shield: <Shield />,
+  Zap: <Zap />,
+  Layout: <Layout />,
+  ShoppingCart: <ShoppingCart />,
+  Building2: <Building2 />,
+  Target: <Target />,
+  Sparkles: <Sparkles />,
+  Palette: <Palette />,
+  TrendingUp: <TrendingUp />,
+  Check: <Check />,
 };
 
-export default function WebDesignDevelopmentPage() {
+async function getService() {
+  const services = await query("SELECT * FROM services WHERE slug = 'web-design-development' AND is_active = 1");
+  return services[0];
+}
+
+export async function generateMetadata() {
+  const service = await getService();
+  if (!service) return { title: "Web Design & Development | Next Idea Solutions" };
+
+  return {
+    title: service.meta_title || "Web Design & Development | Next Idea Solutions",
+    description: service.meta_description || service.tagline,
+  };
+}
+
+export default async function WebDesignDevelopmentPage() {
+  const service = await getService();
+  if (!service) return notFound();
+
+  // Parse JSON fields
+  const features_items = typeof service.features_items === 'string' ? JSON.parse(service.features_items || '[]') : service.features_items;
+  const related_services = typeof service.related_services === 'string' ? JSON.parse(service.related_services || '[]') : service.related_services;
+
   return (
     <>
       <ServiceHero
-        icon={<Code2 />}
-        title="Web Design & Development"
-        tagline="Strong marketing your brand with high-converting landing page, website or app."
-
-
+        icon={ICON_MAP[service.hero_icon] || <Code2 />}
+        title={service.title}
+        tagline={service.tagline}
+        image={service.hero_image}
       />
-      <section className="py-20 bg-white overflow-hidden">
-        <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row items-center gap-12">
-            <div className="md:w-1/2">
-              <h2 className="text-4xl md:text-5xl font-bold text-zinc-900 mb-6 leading-tight">
-                About Web Design & <span className="text-primary">Development</span>
-              </h2>
-              <p className="text-lg font-bold text-zinc-600 mb-8 leading-relaxed">
-                Our Web Design & Development service combines creativity, functionality, and cutting-edge technology to create digital experiences that resonate with your audience.
-              </p>
-              <p className="text-lg text-zinc-600 mb-8 leading-relaxed">
-                If the stage of your website is small, we decide to customize it with our amazing custom web app development, the resulting development will make your business look like the next leading business.
-              </p>
-              <button className="bg-primary text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20">
-                GET A FREE QUOTE
-              </button>
-            </div>
-            <div className="md:w-1/2">
-              <img
-                src="/webdev.jpeg"
-                alt="Local SEO Illustration"
-                className="w-full h-auto drop-shadow-2xl"
-              />
+      
+      {service.about_title && (
+        <section className="py-20 bg-white overflow-hidden">
+          <div className="container mx-auto px-4">
+            <div className="flex flex-col md:flex-row items-center gap-12">
+              <div className="md:w-1/2">
+                <h2 className="text-4xl md:text-5xl font-bold text-zinc-900 mb-6 leading-tight">
+                  {service.about_title.split(' ').map((word, i, arr) => 
+                    i === arr.length - 1 ? <span key={i} className="text-primary">{word}</span> : word + ' '
+                  )}
+                </h2>
+                <div 
+                  className="text-lg text-zinc-600 mb-8 leading-relaxed whitespace-pre-line"
+                  dangerouslySetInnerHTML={{ __html: service.about_description }}
+                />
+                <button className="bg-primary text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20">
+                  GET A FREE QUOTE
+                </button>
+              </div>
+              <div className="md:w-1/2">
+                {service.about_image && (
+                  <img
+                    src={service.about_image}
+                    alt={service.about_title}
+                    className="w-full h-auto drop-shadow-2xl rounded-2xl"
+                  />
+                )}
+              </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
+
       <ServiceContent
-        overview={{
-          title: "",
-          description: "",
-        }}
+        overview={{}}
         features={{
-          title: "OUR APPROACH",
-          items: [
-            {
-              title: "User-Centric Design",
-              description: "Focus on creating intuitive and visually appealing interfaces that prioritize user experience.",
-              icon: <Layout />,
-            },
-            {
-              title: "Innovative Development",
-              description: "Build websites and apps that are functionally robust and technologically advanced.",
-              icon: <Smartphone />,
-            },
-            {
-              title: "Scalable Solutions",
-              description: "Develop solutions that grow with your business, ensuring long-term success and adaptability.",
-              icon: <Zap />,
-            },
-          ],
+          title: service.features_title || "OUR APPROACH",
+          items: features_items.map(item => ({
+            ...item,
+            icon: ICON_MAP[item.icon_name] || <Check />
+          })),
         }}
         gridCols={3}
+        relatedServices={related_services.map(s => ({
+          ...s,
+          icon: ICON_MAP[s.icon_name] || <ArrowRight />
+        }))}
       />
 
       <div className="bg-zinc-50 py-20">

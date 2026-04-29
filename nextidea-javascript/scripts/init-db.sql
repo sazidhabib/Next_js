@@ -156,3 +156,27 @@ CREATE TABLE IF NOT EXISTS password_reset_tokens (
   INDEX idx_password_reset_user (user_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- Services table
+CREATE TABLE IF NOT EXISTS services (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  title VARCHAR(255) NOT NULL,
+  slug VARCHAR(255) UNIQUE NOT NULL,
+  tagline VARCHAR(255) NULL,
+  hero_image VARCHAR(500) NULL,
+  hero_icon VARCHAR(50) NULL,
+  about_title VARCHAR(255) NULL,
+  about_description TEXT NULL,
+  about_image VARCHAR(500) NULL,
+  features_title VARCHAR(255) NULL,
+  features_items JSON NULL,
+  process_title VARCHAR(255) NULL,
+  process_steps JSON NULL,
+  related_services JSON NULL,
+  meta_title VARCHAR(255) NULL,
+  meta_description TEXT NULL,
+  is_active BOOLEAN DEFAULT TRUE,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX idx_services_slug (slug)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+

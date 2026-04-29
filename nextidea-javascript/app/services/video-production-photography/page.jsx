@@ -1,96 +1,115 @@
-import { Sparkles, Code2, Megaphone, Headphones } from "lucide-react";
+import { Sparkles, Code2, Megaphone, Headphones, Video, Camera, Clapperboard, Users, Share2, Scissors, Zap, Plane, Check, ArrowRight } from "lucide-react";
 import ServiceHero from "../../components/ServiceHero";
 import ServiceContent from "../../components/ServiceContent";
 import ClientsSection from "../../components/ClientsSection";
 import FAQSection from "../../components/FAQSection";
 import CTASection from "../../components/CTASection";
+import { query } from "@/app/lib/db";
+import { notFound } from "next/navigation";
 
-export const metadata = {
-  title: "Video Production & Photography | Next Idea Solutions",
-  description: "We provide engaging and high-end video and photography services for your business. Professional content that tells your story.",
+// Icon mapping for rendering
+const ICON_MAP = {
+  Sparkles: <Sparkles />,
+  Video: <Video />,
+  Camera: <Camera />,
+  Clapperboard: <Clapperboard />,
+  Users: <Users />,
+  Share2: <Share2 />,
+  Scissors: <Scissors />,
+  Zap: <Zap />,
+  Plane: <Plane />,
+  Code2: <Code2 />,
+  Megaphone: <Megaphone />,
+  Headphones: <Headphones />,
+  Check: <Check />,
 };
 
-export default function VideoProductionPhotographyPage() {
+async function getService() {
+  const services = await query("SELECT * FROM services WHERE slug = 'video-production-photography' AND is_active = 1");
+  return services[0];
+}
+
+export async function generateMetadata() {
+  const service = await getService();
+  if (!service) return { title: "Video Production & Photography | Next Idea Solutions" };
+
+  return {
+    title: service.meta_title || "Video Production & Photography | Next Idea Solutions",
+    description: service.meta_description || service.tagline,
+  };
+}
+
+export default async function VideoProductionPhotographyPage() {
+  const service = await getService();
+  if (!service) return notFound();
+
+  // Parse JSON fields
+  const features_items = typeof service.features_items === 'string' ? JSON.parse(service.features_items || '[]') : service.features_items;
+  const process_steps = typeof service.process_steps === 'string' ? JSON.parse(service.process_steps || '[]') : service.process_steps;
+  const related_services = typeof service.related_services === 'string' ? JSON.parse(service.related_services || '[]') : service.related_services;
+
   return (
     <>
       <ServiceHero
-        icon={<Sparkles />}
-        title="Video Production & Photography"
-        tagline="Professional Content That Tells Your Story"
+        icon={ICON_MAP[service.hero_icon] || <Sparkles />}
+        title={service.title}
+        tagline={service.tagline}
         buttonText="Explore Our Service"
-        image="/Video-Production.png"
+        image={service.hero_image}
       />
-      <section className="py-20 bg-white overflow-hidden">
-        <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row items-center gap-12">
-            <div className="md:w-1/2">
-              <h2 className="text-4xl md:text-5xl font-bold text-zinc-900 mb-6 leading-tight">
-                About Video Production & <span className="text-primary">Photography</span>
-              </h2>
-              <p className="text-lg font-bold text-zinc-600 mb-8 leading-relaxed">
-                We provide engaging, high-end video and photography services that capture your brand's essence and communicate your message effectively.
-              </p>
-              <p className="text-lg text-zinc-600 mb-8 leading-relaxed">
-                Our Video Production & Photography service delivers professional visual content that elevates your brand and engages your audience. Whether you need compelling video campaigns, stunning product photography, corporate videos, or social media content, our team of creative professionals uses state-of-the-art equipment and techniques to produce content that exceeds expectations and achieves your marketing objectives.
-              </p>
-              <button className="bg-primary text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20">
-                GET A FREE QUOTE
-              </button>
-            </div>
-            <div className="md:w-1/2">
-              <img
-                src="/video_photography.jpeg"
-                alt="Local SEO Illustration"
-                className="w-full h-auto drop-shadow-2xl"
-              />
+      
+      {service.about_title && (
+        <section className="py-20 bg-white overflow-hidden">
+          <div className="container mx-auto px-4">
+            <div className="flex flex-col md:flex-row items-center gap-12">
+              <div className="md:w-1/2">
+                <h2 className="text-4xl md:text-5xl font-bold text-zinc-900 mb-6 leading-tight">
+                  {service.about_title.split(' ').map((word, i, arr) => 
+                    i === arr.length - 1 ? <span key={i} className="text-primary">{word}</span> : word + ' '
+                  )}
+                </h2>
+                <div 
+                  className="text-lg text-zinc-600 mb-8 leading-relaxed whitespace-pre-line"
+                  dangerouslySetInnerHTML={{ __html: service.about_description }}
+                />
+                <button className="bg-primary text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20">
+                  GET A FREE QUOTE
+                </button>
+              </div>
+              <div className="md:w-1/2">
+                {service.about_image && (
+                  <img
+                    src={service.about_image}
+                    alt={service.about_title}
+                    className="w-full h-auto drop-shadow-2xl rounded-2xl"
+                  />
+                )}
+              </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
+
       <ServiceContent
         overview={{
           title: "",
           description: "",
         }}
         features={{
-          title: "What&apos;s Included",
-          items: [
-            "Video Production (Commercials, Campaigns)",
-            "Corporate Video Production",
-            "Product Photography",
-            "Event Coverage",
-            "Social Media Content Creation",
-            "Post-production & Editing",
-            "Motion Graphics & Animation",
-            "Drone Aerial Photography/Videography",
-          ],
+          title: service.features_title || "What's Included",
+          items: features_items.map(item => ({
+            ...item,
+            icon: ICON_MAP[item.icon_name] || <Check />
+          })),
         }}
         process={{
-          title: "Our Process",
-          steps: [
-            {
-              title: "Pre-production",
-              description: "We develop concepts, scripts, storyboards, and plan all logistics before the shoot.",
-            },
-            {
-              title: "Production",
-              description: "Our professional crew captures high-quality footage and photographs using industry-standard equipment.",
-            },
-            {
-              title: "Post-production",
-              description: "We edit, color grade, add motion graphics, and polish the content to perfection.",
-            },
-            {
-              title: "Delivery",
-              description: "We deliver final assets in all required formats optimized for your intended platforms.",
-            },
-          ],
+          title: service.process_title || "Our Process",
+          steps: process_steps,
         }}
-        relatedServices={[
-          { title: "Creative Concept", link: "/services/creative-concept-execution", icon: <Headphones /> },
-          { title: "Event & Activation", link: "/services/event-and-activation", icon: <Megaphone /> },
-          { title: "Web Development", link: "/services/web-design-development", icon: <Code2 /> },
-        ]}
+        relatedServices={related_services.map(s => ({
+          ...s,
+          icon: ICON_MAP[s.icon_name] || <ArrowRight />
+        }))}
       />
       <ClientsSection />
       <FAQSection />

@@ -428,7 +428,7 @@ const NewsDetails = ({ id, initialData, initialAds }) => {
                                                                 })()}
                                                                 alt={ad.name || 'Advertisement'}
                                                                 fill
-                                                                className="rounded shadow-sm"
+                                                                className="rounded"
                                                                 style={{ objectFit: 'contain' }}
                                                                 sizes="(max-width: 992px) 0vw, 350px"
                                                             />

@@ -24,7 +24,11 @@ const NewsWidget = ({ cell, isPriority }) => {
     useEffect(() => {
         // Skip fetching if content is already resolved by the server
         if (cell.resolvedContent) {
-            setNews(cell.resolvedContent);
+            if (cell.resolvedContent.status === 'published') {
+                setNews(cell.resolvedContent);
+            } else {
+                setNews(null);
+            }
             setLoading(false);
             return;
         }
@@ -39,12 +43,18 @@ const NewsWidget = ({ cell, isPriority }) => {
                 if (cell.contentId) {
                     const response = await api.get(`/news/${cell.contentId}`);
                     const data = response.data.data || response.data.news || response.data;
-                    setNews(data);
+                    if (data && data.status === 'published') {
+                        setNews(data);
+                    } else {
+                        setNews(null);
+                    }
                 } else if (cell.tag) {
                     const response = await api.get('/news', { params: { tag: cell.tag, limit: 1 } });
                     const newsItems = response.data.news || response.data.rows || [];
-                    if (newsItems.length > 0) {
+                    if (newsItems.length > 0 && newsItems[0].status === 'published') {
                         setNews(newsItems[0]);
+                    } else {
+                        setNews(null);
                     }
                 }
             } catch (err) {

@@ -1,6 +1,7 @@
-"use client";
-
-import { Search, BarChart2, Code, MapPin, ShoppingCart, Smartphone, Youtube, Mic, MessageSquare, FileText, TrendingUp, Award, Zap, Target, CheckCircle, Star } from "lucide-react";
+import { 
+  Search, BarChart2, Code, MapPin, ShoppingCart, Smartphone, Youtube, Mic, MessageSquare, 
+  FileText, TrendingUp, Award, Zap, Target, CheckCircle, Star, Check, ArrowRight 
+} from "lucide-react";
 import ServiceHero from "../../components/ServiceHero";
 import ServiceContent from "../../components/ServiceContent";
 import PackagesSection from "../../components/PackagesSection";
@@ -10,17 +11,53 @@ import BlogsSection from "../../components/BlogsSection";
 import SEOProcess from "../../components/SEOProcess";
 import SEOTabbedServices from "../../components/SEOTabbedServices";
 import ClientsSection from "../../components/ClientsSection";
+import { query } from "@/app/lib/db";
+import { notFound } from "next/navigation";
 
+// Icon mapping for rendering
+const ICON_MAP = {
+  Search: <Search />,
+  BarChart2: <BarChart2 />,
+  Code: <Code />,
+  MapPin: <MapPin />,
+  ShoppingCart: <ShoppingCart />,
+  Smartphone: <Smartphone />,
+  Zap: <Zap />,
+  Check: <Check />,
+};
 
-export default function SEOPage() {
+async function getService() {
+  const services = await query("SELECT * FROM services WHERE slug = 'seo' AND is_active = 1");
+  return services[0];
+}
+
+export async function generateMetadata() {
+  const service = await getService();
+  if (!service) return { title: "SEO Services | Next Idea Solutions" };
+
+  return {
+    title: service.meta_title || "SEO Services | Next Idea Solutions",
+    description: service.meta_description || service.tagline,
+  };
+}
+
+export default async function SEOPage() {
+  const service = await getService();
+  if (!service) return notFound();
+
+  // Parse JSON fields
+  const features_items = typeof service.features_items === 'string' ? JSON.parse(service.features_items || '[]') : service.features_items;
+  const process_steps = typeof service.process_steps === 'string' ? JSON.parse(service.process_steps || '[]') : service.process_steps;
+  const related_services = typeof service.related_services === 'string' ? JSON.parse(service.related_services || '[]') : service.related_services;
+
   return (
     <>
       <ServiceHero
-        icon={<Search />}
-        title="SEO Services"
-        tagline="Future-Proof Your Visibility With The Best SEO Agency in Bangladesh"
-        description="At Next Idea solution, we specialize in turning concepts into remarkable SEO strategies that leave a lasting impression on your visibility ensuring your brand stands out in search results."
-        image="/SEO-Services.jpg"
+        icon={ICON_MAP[service.hero_icon] || <Search />}
+        title={service.title}
+        tagline={service.tagline}
+        buttonText="Explore Our Service"
+        image={service.hero_image}
       />
 
       {/* Marquee Services Section */}
@@ -58,59 +95,69 @@ export default function SEOPage() {
             </div>
           </div>
         </div>
-        <style jsx>{`
+        <style dangerouslySetInnerHTML={{ __html: `
           @keyframes scroll {
-            0% {
-              transform: translateX(0);
-            }
-            100% {
-              transform: translateX(-50%);
-            }
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
           }
           .animate-scroll {
             animation: scroll 40s linear infinite;
           }
-        `}</style>
+        `}} />
       </section>
 
-      <section className="py-20 bg-white overflow-hidden">
-        <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row items-center gap-12">
-            <div className="md:w-1/2">
-              <h2 className="text-4xl md:text-5xl font-bold text-zinc-900 mb-6 leading-tight">
-                About SEO <span className="text-primary">Services</span>
-              </h2>
-              <p className="text-lg font-bold text-zinc-600 mb-8 leading-relaxed">
-                Your Customers Are Searching For You On Google, But You Don't Know
-              </p>
-              <p className="text-lg text-zinc-600 mb-8 leading-relaxed">
-                In this age where customers search online to gather information and then make a purchase decision, you're losing sales if you're not present in front of their eyes when they're searching. Our SEO strategies are built to align with search engine priorities: helpfulness, authority, and relevance.
-              </p>
-              <button className="bg-primary text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20">
-                GET A FREE QUOTE
-              </button>
-            </div>
-            <div className="md:w-1/2">
-              <img
-                src="/seo.jpeg"
-                alt="Local SEO Illustration"
-                className="w-full h-auto drop-shadow-2xl"
-              />
+      {service.about_title && (
+        <section className="py-20 bg-white overflow-hidden">
+          <div className="container mx-auto px-4">
+            <div className="flex flex-col md:flex-row items-center gap-12">
+              <div className="md:w-1/2">
+                <h2 className="text-4xl md:text-5xl font-bold text-zinc-900 mb-6 leading-tight">
+                  {service.about_title.split(' ').map((word, i, arr) => 
+                    i === arr.length - 1 ? <span key={i} className="text-primary">{word}</span> : word + ' '
+                  )}
+                </h2>
+                <div 
+                  className="text-lg text-zinc-600 mb-8 leading-relaxed whitespace-pre-line"
+                  dangerouslySetInnerHTML={{ __html: service.about_description }}
+                />
+                <button className="bg-primary text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20">
+                  GET A FREE QUOTE
+                </button>
+              </div>
+              <div className="md:w-1/2">
+                {service.about_image && (
+                  <img
+                    src={service.about_image}
+                    alt={service.about_title}
+                    className="w-full h-auto drop-shadow-2xl rounded-2xl"
+                  />
+                )}
+              </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       <ServiceContent
         overview={{
           title: "",
           description: "",
         }}
-        relatedServices={[
-          { title: "SEO Audit", link: "/services/seo/seo-audit", icon: <FileText /> },
-          { title: "Local SEO", link: "/services/seo/local-seo", icon: <MapPin /> },
-          { title: "E-commerce SEO", link: "/services/seo/e-commerce-seo", icon: <ShoppingCart /> },
-        ]}
+        features={{
+          title: service.features_title || "What's Included",
+          items: features_items.map(item => ({
+            ...item,
+            icon: ICON_MAP[item.icon_name] || <Check />
+          })),
+        }}
+        process={{
+          title: service.process_title || "Our Process",
+          steps: process_steps,
+        }}
+        relatedServices={related_services.map(s => ({
+          ...s,
+          icon: ICON_MAP[s.icon_name] || <ArrowRight />
+        }))}
       />
 
       <SEOProcess />

@@ -57,9 +57,9 @@ const GridSection = ({ section }) => {
         });
     });
 
-    // Calculate column template: use the width values from first row if available
+    // Calculate column template: enforce equal width for all columns (1fr)
     const firstRowCols = (firstRow.Columns || firstRow.columns || []).sort((a, b) => a.colOrder - b.colOrder);
-    const gridTemplateColumns = firstRowCols.map(col => `${col.width || 1}fr`).join(' ');
+    const gridTemplateColumns = firstRowCols.map(() => `minmax(0, 1fr)`).join(' ');
 
     // ─── Mobile layout: merged cells first, then strict grid order ───
     const mergedCells = [];
@@ -191,6 +191,7 @@ const GridSection = ({ section }) => {
                                     gridRow,
                                     gridColumn,
                                     minHeight: '0',
+                                    minWidth: '0',
                                     height: '100%',
                                     position: 'relative'
                                 }}

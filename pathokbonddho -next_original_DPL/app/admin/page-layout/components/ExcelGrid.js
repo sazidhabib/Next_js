@@ -349,7 +349,7 @@ const GridCell = ({
 };
 
 // Merge Controls
-const MergeControls = ({ selectedCells, selectedRange, onMerge, onClearSelection }) => {
+const MergeControls = ({ selectedCells, selectedRange, onMerge, onClearSelection, disabled }) => {
     if (selectedCells.size === 0) return null;
     const cellCount = selectedCells.size;
     return (
@@ -364,8 +364,8 @@ const MergeControls = ({ selectedCells, selectedRange, onMerge, onClearSelection
                     )}
                 </div>
                 <div>
-                    {cellCount > 1 && <Button variant="success" size="sm" className="me-2" onClick={() => onMerge('merge')}>🔗 Merge {cellCount} Cells</Button>}
-                    <Button variant="warning" size="sm" className="me-2" onClick={() => onMerge('split')}>🔓 Split</Button>
+                    {cellCount > 1 && <Button variant="success" size="sm" className="me-2" onClick={() => onMerge('merge')} disabled={disabled}>🔗 Merge {cellCount} Cells</Button>}
+                    <Button variant="warning" size="sm" className="me-2" onClick={() => onMerge('split')} disabled={disabled}>🔓 Split</Button>
                     <Button variant="outline-secondary" size="sm" onClick={onClearSelection}>Clear</Button>
                 </div>
             </Card.Body>
@@ -502,8 +502,8 @@ export const ExcelGridSection = ({
                     />
                 </div>
                 <div className="d-flex gap-2">
-                    <Button variant="outline-primary" size="sm" onClick={() => onAddRow(sectionIndex)}>+ Row</Button>
-                    <Button variant="outline-primary" size="sm" onClick={() => onAddColumn(sectionIndex)}>+ Col</Button>
+                    <Button variant="outline-primary" size="sm" onClick={() => onAddRow(sectionIndex)} disabled={isAutoNewsMode}>+ Row</Button>
+                    <Button variant="outline-primary" size="sm" onClick={() => onAddColumn(sectionIndex)} disabled={isAutoNewsMode}>+ Col</Button>
                     <Button 
                         variant="outline-danger" 
                         size="sm" 
@@ -540,7 +540,7 @@ export const ExcelGridSection = ({
                     </Form.Select>
                 </Form.Group>
 
-                <MergeControls selectedCells={selectedCells} selectedRange={getSelectedRange()} onMerge={handleMerge} onClearSelection={() => setSelectedCells(new Set())} />
+                <MergeControls selectedCells={selectedCells} selectedRange={getSelectedRange()} onMerge={handleMerge} onClearSelection={() => setSelectedCells(new Set())} disabled={isAutoNewsMode} />
                 <div className="table-responsive">
                     <Table bordered className="mb-0" style={{ borderCollapse: 'separate' }}>
                         <thead>
@@ -549,7 +549,7 @@ export const ExcelGridSection = ({
                                 {columns.map((_, ci) => (
                                     <th key={ci} className="text-center bg-light position-relative">
                                         {String.fromCharCode(65 + ci)}
-                                        <Button variant="link" size="sm" className="p-0 position-absolute end-0 text-danger" onClick={() => onDeleteColumn(sectionIndex, ci)}>×</Button>
+                                        <Button variant="link" size="sm" className="p-0 position-absolute end-0 text-danger" onClick={() => onDeleteColumn(sectionIndex, ci)} disabled={isAutoNewsMode}>×</Button>
                                     </th>
                                 ))}
                             </tr>
@@ -559,7 +559,7 @@ export const ExcelGridSection = ({
                                 <tr key={ri}>
                                     <td className="bg-light text-center fw-bold position-relative">
                                         {ri + 1}
-                                        <Button variant="link" size="sm" className="p-0 position-absolute bottom-0 text-danger" onClick={() => onDeleteRow(sectionIndex, ri)}>×</Button>
+                                        <Button variant="link" size="sm" className="p-0 position-absolute bottom-0 text-danger" onClick={() => onDeleteRow(sectionIndex, ri)} disabled={isAutoNewsMode}>×</Button>
                                     </td>
                                     {row.columns.map((cell, ci) => {
                                         const autoNewsKey = `${sectionIndex}-${ri}-${ci}`;

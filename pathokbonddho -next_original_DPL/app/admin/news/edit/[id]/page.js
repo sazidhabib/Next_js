@@ -238,11 +238,20 @@ const NewsEdit = () => {
     const handleFormatConfirm = ({ format, altText, caption }) => {
         const imageUrl = photoToFormat.imageUrl ? (photoToFormat.imageUrl.startsWith('http') ? photoToFormat.imageUrl : `${IMG_BASE}/${photoToFormat.imageUrl.replace(/^\/+/, '')}`) : '';
         let html = '';
-        if (format === 'full-width') html = `<img src="${imageUrl}" alt="${altText}" style="width: 100%; height: auto; display: block; margin: 1em 0; border-radius: 0.375rem;" />`;
-        else if (format === 'left-aligned') html = `<img src="${imageUrl}" alt="${altText}" style="float: left; margin: 0 1.5em 1em 0; max-width: 50%; height: auto; border-radius: 0.375rem;" />`;
-        else if (format === 'right-aligned') html = `<img src="${imageUrl}" alt="${altText}" style="float: right; margin: 0 0 1em 1.5em; max-width: 50%; height: auto; border-radius: 0.375rem;" />`;
-        else if (format === 'full-width-captioned') {
-            html = `<figure style="width: 100%; margin: 1em 0; text-align: center; display: inline-block;"><img src="${imageUrl}" alt="${altText}" style="width: 100%; height: auto; border-radius: 0.375rem;" /><figcaption style="font-size: 0.9em; color: #666; margin-top: 0.5em; font-style: italic;">${caption}</figcaption></figure><p></p>`;
+        const altAttr = altText ? ` alt="${altText}"` : '';
+        const baseImgStyle = 'width: 100%; height: auto; border-radius: 0.375rem;';
+
+        let outerStyle = '';
+        if (format === 'full-width') outerStyle = 'width: 100%; margin: 1em 0; display: block;';
+        else if (format === 'left-aligned') outerStyle = 'float: left; margin: 0 1.5em 1em 0; max-width: 50%;';
+        else if (format === 'right-aligned') outerStyle = 'float: right; margin: 0 0 1em 1.5em; max-width: 50%;';
+
+        if (caption) {
+            html = `<figure style="${outerStyle} text-align: center;"><img src="${imageUrl}"${altAttr} style="${baseImgStyle}" /><figcaption style="font-size: 0.9em; color: #666; margin-top: 0.5em; font-style: italic;">${caption}</figcaption></figure><p></p>`;
+        } else {
+            if (format === 'full-width') html = `<img src="${imageUrl}"${altAttr} style="${baseImgStyle} ${outerStyle}" /><p></p>`;
+            else if (format === 'left-aligned') html = `<img src="${imageUrl}"${altAttr} style="${baseImgStyle} ${outerStyle}" />`;
+            else if (format === 'right-aligned') html = `<img src="${imageUrl}"${altAttr} style="${baseImgStyle} ${outerStyle}" />`;
         }
 
         if (editingElement) {

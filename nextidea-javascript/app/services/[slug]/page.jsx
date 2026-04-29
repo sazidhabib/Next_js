@@ -1,52 +1,76 @@
-import { Palette, Box, Layers, Package, BookOpen, Sparkles, Check, ArrowRight } from "lucide-react";
+import { 
+  Sparkles, Video, Camera, Clapperboard, Users, Share2, 
+  Scissors, Zap, Plane, Code2, Megaphone, Headphones, 
+  Target, Cpu, Trophy, FileText, Star, Palette, TrendingUp, Check
+} from "lucide-react";
 import ServiceHero from "../../components/ServiceHero";
 import ServiceContent from "../../components/ServiceContent";
-import PortfolioSection from "../../components/PortfolioSection";
 import ClientsSection from "../../components/ClientsSection";
 import FAQSection from "../../components/FAQSection";
-import BlogsSection from "../../components/BlogsSection";
 import CTASection from "../../components/CTASection";
 import { query } from "@/app/lib/db";
 import { notFound } from "next/navigation";
 
 // Icon mapping for rendering
 const ICON_MAP = {
-  Palette: <Palette />,
-  Box: <Box />,
-  Layers: <Layers />,
-  Package: <Package />,
-  BookOpen: <BookOpen />,
   Sparkles: <Sparkles />,
+  Video: <Video />,
+  Camera: <Camera />,
+  Clapperboard: <Clapperboard />,
+  Users: <Users />,
+  Share2: <Share2 />,
+  Scissors: <Scissors />,
+  Zap: <Zap />,
+  Plane: <Plane />,
+  Code2: <Code2 />,
+  Megaphone: <Megaphone />,
+  Headphones: <Headphones />,
+  Target: <Target />,
+  Cpu: <Cpu />,
+  Trophy: <Trophy />,
+  FileText: <FileText />,
+  Star: <Star />,
+  Palette: <Palette />,
+  TrendingUp: <TrendingUp />,
   Check: <Check />,
 };
 
-async function getService() {
-  const services = await query("SELECT * FROM services WHERE slug = 'brand-identity' AND is_active = 1");
+async function getService(slug) {
+  const services = await query("SELECT * FROM services WHERE slug = ? AND is_active = 1", [slug]);
   return services[0];
 }
 
-export async function generateMetadata() {
-  const service = await getService();
-  if (!service) return { title: "Brand Identity | Next Idea Solutions" };
+export async function generateMetadata({ params }) {
+  const { slug } = await params;
+  const service = await getService(slug);
+  if (!service) return {};
 
   return {
-    title: service.meta_title || "Brand Identity | Next Idea Solutions",
+    title: service.meta_title || `${service.title} | Next Idea Solutions`,
     description: service.meta_description || service.tagline,
   };
 }
 
-export default async function BrandIdentityPage() {
-  const service = await getService();
-  if (!service) return notFound();
+export default async function DynamicServicePage({ params }) {
+  const { slug } = await params;
+  const service = await getService(slug);
+
+  if (!service) {
+    // If not in DB, it might still be a static page in the filesystem.
+    // However, since we are moving to dynamic, we can handle it here.
+    // For now, let's return null or trigger notFound if we want to force DB.
+    notFound();
+  }
 
   // Parse JSON fields
   const features_items = typeof service.features_items === 'string' ? JSON.parse(service.features_items || '[]') : service.features_items;
+  const process_steps = typeof service.process_steps === 'string' ? JSON.parse(service.process_steps || '[]') : service.process_steps;
   const related_services = typeof service.related_services === 'string' ? JSON.parse(service.related_services || '[]') : service.related_services;
 
   return (
     <>
       <ServiceHero
-        icon={ICON_MAP[service.hero_icon] || <Palette />}
+        icon={ICON_MAP[service.hero_icon] || <Sparkles />}
         title={service.title}
         tagline={service.tagline}
         buttonText="Explore Our Service"
@@ -59,9 +83,7 @@ export default async function BrandIdentityPage() {
             <div className="flex flex-col md:flex-row items-center gap-12">
               <div className="md:w-1/2">
                 <h2 className="text-4xl md:text-5xl font-bold text-zinc-900 mb-6 leading-tight">
-                  {service.about_title.split(' ').map((word, i, arr) => 
-                    i === arr.length - 1 ? <span key={i} className="text-primary">{word}</span> : word + ' '
-                  )}
+                  {service.about_title}
                 </h2>
                 <div 
                   className="text-lg text-zinc-600 mb-8 leading-relaxed whitespace-pre-line"
@@ -87,31 +109,29 @@ export default async function BrandIdentityPage() {
 
       <ServiceContent
         overview={{
-          title: "",
+          title: "", // We use the About section above instead
           description: "",
         }}
         features={{
-          title: service.features_title || "WHAT WE OFFER",
+          title: service.features_title || "What's Included",
           items: features_items.map(item => ({
             ...item,
             icon: ICON_MAP[item.icon_name] || <Check />
           })),
         }}
-        gridCols={3}
+        process={{
+          title: service.process_title || "Our Process",
+          steps: process_steps,
+        }}
         relatedServices={related_services.map(s => ({
           ...s,
           icon: ICON_MAP[s.icon_name] || <ArrowRight />
         }))}
       />
-      <PortfolioSection />
-      <CTASection
-        title="Embark on a creative journey with Next Idea Solution."
-        description="Let's craft a narrative that captivates and converts."
-        buttonText="Ask for A Proposal"
-      />
+      
       <ClientsSection />
       <FAQSection />
-      <BlogsSection />
+      <CTASection />
     </>
   );
 }

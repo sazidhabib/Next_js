@@ -5,7 +5,7 @@ import NewsListClient from './NewsListClient';
 async function getInitialNews(token) {
     const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
     try {
-        const res = await fetch(`${API_URL}/news?page=1&limit=20`, {
+        const res = await fetch(`${API_URL}/news?page=1&limit=20&status=all`, {
             headers: {
                 'Authorization': `Bearer ${token}`
             },
