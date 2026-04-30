@@ -405,12 +405,31 @@ const PhotoNewsEdit = () => {
                             <Form.Group className="mb-3"><Form.Label>Author *</Form.Label>
                                 <InputGroup><Form.Control value={formData.authorName} readOnly placeholder="Select author" /><Button variant="outline-secondary" onClick={() => setDropdowns({...dropdowns, author: true})}>Find</Button></InputGroup>
                             </Form.Group>
-                            <Form.Group className="mb-3"><Form.Label>Thumbnail Image *</Form.Label>
-                                <div className="border p-2 text-center mb-2" style={{minHeight: '100px'}}>
-                                    {selectedImages.thumbImage ? <img src={getImageUrl(selectedImages.thumbImage.imageUrl)} alt="Preview" style={{maxWidth: '100%'}} /> : 
-                                     currentImages.thumbImage ? <img src={getImageUrl(currentImages.thumbImage)} alt="Current" style={{maxWidth: '100%'}} /> : 'No image'}
+                            <Form.Group className="mb-3">
+                                <div className="d-flex align-items-center gap-2 mb-2">
+                                    <Form.Label className="mb-0">Thumbnail Image *</Form.Label>
+                                    <Button
+                                        variant={(selectedImages.thumbImage || currentImages.thumbImage) && !modals._showThumb ? 'outline-success' : modals._showThumb ? 'outline-danger' : 'outline-primary'}
+                                        size="sm"
+                                        onClick={() => setModals(prev => ({...prev, _showThumb: !prev._showThumb}))}
+                                        style={{ width: '28px', height: '28px', padding: 0, lineHeight: '1', fontSize: '1rem', fontWeight: 'bold' }}
+                                        title={modals._showThumb ? 'Close thumbnail section' : 'Add thumbnail image'}
+                                    >
+                                        {modals._showThumb ? '−' : '+'}
+                                    </Button>
+                                    {(selectedImages.thumbImage || currentImages.thumbImage) && !modals._showThumb && (
+                                        <Badge bg="success" className="ms-1">✓ Added</Badge>
+                                    )}
                                 </div>
-                                <Button size="sm" className="w-100" onClick={() => { setSelectedImageType('thumbImage'); setModals({...modals, thumbImage: true}); }}>Choose from Gallery</Button>
+                                {modals._showThumb && (
+                                    <>
+                                        <div className="border p-2 text-center mb-2" style={{minHeight: '100px'}}>
+                                            {selectedImages.thumbImage ? <img src={getImageUrl(selectedImages.thumbImage.imageUrl)} alt="Preview" style={{maxWidth: '100%'}} /> : 
+                                             currentImages.thumbImage ? <img src={getImageUrl(currentImages.thumbImage)} alt="Current" style={{maxWidth: '100%'}} /> : 'No image'}
+                                        </div>
+                                        <Button size="sm" className="w-100" onClick={() => { setSelectedImageType('thumbImage'); setModals({...modals, thumbImage: true}); }}>Choose from Gallery</Button>
+                                    </>
+                                )}
                             </Form.Group>
                             <Form.Group className="mb-3"><Form.Label>Status</Form.Label><Form.Select value={formData.status} onChange={e => setFormData({...formData, status: e.target.value})}><option value="draft">Draft</option><option value="published">Published</option></Form.Select></Form.Group>
                             <Form.Group className="mb-3"><Form.Label>Categories</Form.Label><Form.Select multiple value={formData.categoryIds} onChange={e => setFormData({...formData, categoryIds: Array.from(e.target.selectedOptions, o => o.value)})} style={{height: '150px'}}>{categories.map(c => <option key={c.id} value={c.id}>-- {c.name}</option>)}</Form.Select></Form.Group>

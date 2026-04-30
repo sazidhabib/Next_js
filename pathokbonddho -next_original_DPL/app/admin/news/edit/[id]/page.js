@@ -29,6 +29,7 @@ const NewsEdit = () => {
     const [uploadFile, setUploadFile] = useState(null);
     const [uploadAlbumId, setUploadAlbumId] = useState('');
     const [showUploadSection, setShowUploadSection] = useState(false);
+    const [showThumbSection, setShowThumbSection] = useState(false);
 
     const [authorSearch, setAuthorSearch] = useState('');
     const [tagSearch, setTagSearch] = useState('');
@@ -99,6 +100,7 @@ const NewsEdit = () => {
                 });
                 setAuthorSearch(n.Author?.name || n.author?.name || '');
                 setCurrentImages({ leadImage: n.leadImage, thumbImage: n.thumbImage, metaImage: n.metaImage });
+                if (n.thumbImage) setShowThumbSection(true);
 
                 setAuthors(authRes.data.authors || authRes.data || []);
                 setTags(tagRes.data.tags || tagRes.data || []);
@@ -526,12 +528,30 @@ const NewsEdit = () => {
                                     <ImagePreview imageType="leadImage" />
                                 </Form.Group>
                                 <Form.Group className="mb-3">
-                                    <Form.Label>Thumbnail Image</Form.Label>
-                                    <div className="d-flex gap-2 mb-2">
-                                        <Form.Control type="file" name="thumbImage" accept="image/*" onChange={handleFileChange} />
-                                        <Button variant="outline-secondary" onClick={() => openImageModal('thumbImage')}>Choose</Button>
+                                    <div className="d-flex align-items-center gap-2 mb-2">
+                                        <Form.Label className="mb-0">Thumbnail Image</Form.Label>
+                                        <Button
+                                            variant={showThumbSection ? 'outline-danger' : 'outline-primary'}
+                                            size="sm"
+                                            onClick={() => setShowThumbSection(!showThumbSection)}
+                                            style={{ width: '28px', height: '28px', padding: 0, lineHeight: '1', fontSize: '1rem', fontWeight: 'bold' }}
+                                            title={showThumbSection ? 'Close thumbnail section' : 'Add thumbnail image'}
+                                        >
+                                            {showThumbSection ? '−' : '+'}
+                                        </Button>
+                                        {(files.thumbImage || selectedImages.thumbImage || currentImages.thumbImage) && !showThumbSection && (
+                                            <Badge bg="success" className="ms-1">✓ Added</Badge>
+                                        )}
                                     </div>
-                                    <ImagePreview imageType="thumbImage" />
+                                    {showThumbSection && (
+                                        <>
+                                            <div className="d-flex gap-2 mb-2">
+                                                <Form.Control type="file" name="thumbImage" accept="image/*" onChange={handleFileChange} />
+                                                <Button variant="outline-secondary" onClick={() => openImageModal('thumbImage')}>Choose</Button>
+                                            </div>
+                                            <ImagePreview imageType="thumbImage" />
+                                        </>
+                                    )}
                                 </Form.Group>
                                 <Form.Group className="mb-3">
                                     <Form.Label>Image Caption</Form.Label>

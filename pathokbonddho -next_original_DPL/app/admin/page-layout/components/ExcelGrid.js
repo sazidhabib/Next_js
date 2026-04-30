@@ -270,7 +270,7 @@ const GridCell = ({
                     </div>
                 ) : (
                     <div className="text-center p-1" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', height: '100%', overflow: 'hidden', opacity: isAutoNewsMode && !cell.tag ? 0.5 : 1 }}>
-                        {isAutoNewsMode ? (
+                        {isAutoNewsMode && (!cell.contentType || cell.contentType === 'text' || cell.contentType === 'news') ? (
                             /* Auto News Mode Display */
                             <>
                                 <div className="small fw-bold border-bottom mb-1 pb-1">

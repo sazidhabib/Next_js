@@ -113,9 +113,12 @@ const GridSection = ({ section }) => {
     };
 
     orderedRemainingCells.forEach(({ col, key }) => {
-        if (col.contentType === 'ad' || col.contentType === 'ads') {
+        if (col.contentType === 'ad' || col.contentType === 'ads' || col.design === 'text-inside-image') {
             flushContentBuffer();
-            mobileRows.push({ type: 'ad', cells: [{ col, key }] });
+            mobileRows.push({ 
+                type: col.design === 'text-inside-image' ? 'text-inside-image' : 'ad', 
+                cells: [{ col, key }] 
+            });
         } else {
             contentBuffer.push({ col, key });
         }
@@ -239,13 +242,16 @@ const GridSection = ({ section }) => {
                     {/* 1. Merged cells always at the top */}
                     {mergedCells.map(({ col, key }) => (
                         <div key={`mobile-merged-${key}`} className="mb-3">
-                            <GridCell cell={{ ...col, design: 'image-top' }} isPriority={false} />
+                            <GridCell 
+                                cell={{ ...col, design: col.design === 'text-inside-image' ? 'text-inside-image' : 'image-top' }} 
+                                isPriority={false} 
+                            />
                         </div>
                     ))}
 
                     {/* 2. Remaining cells in strict grid position order (1,1)→(1,2)→(1,3)→(2,1)→... */}
                     {mobileRows.map((row, rowIdx) => {
-                        if (row.type === 'ad') {
+                        if (row.type === 'ad' || row.type === 'text-inside-image') {
                             return (
                                 <div key={`mobile-row-${rowIdx}`} className="mb-3">
                                     {row.cells.map(({ col, key }) => (
@@ -258,7 +264,11 @@ const GridSection = ({ section }) => {
                             return (
                                 <div key={`mobile-row-${rowIdx}`} className="mb-3 mobile-row-title-image-left">
                                     {row.cells.map(({ col, key }) => (
-                                        <GridCell key={`mobile-til-${key}`} cell={{ ...col, design: 'title-image-left' }} isPriority={false} />
+                                        <GridCell 
+                                            key={`mobile-til-${key}`} 
+                                            cell={{ ...col, design: col.design === 'text-inside-image' ? 'text-inside-image' : 'title-image-left' }} 
+                                            isPriority={false} 
+                                        />
                                     ))}
                                 </div>
                             );
@@ -268,7 +278,10 @@ const GridSection = ({ section }) => {
                             <div key={`mobile-row-${rowIdx}`} className="row g-2 mb-3 mobile-row-image-top">
                                 {row.cells.map(({ col, key }) => (
                                     <div key={`mobile-it-${key}`} className="col-6">
-                                        <GridCell cell={{ ...col, design: 'image-top' }} isPriority={false} />
+                                        <GridCell 
+                                            cell={{ ...col, design: col.design === 'text-inside-image' ? 'text-inside-image' : 'image-top' }} 
+                                            isPriority={false} 
+                                        />
                                     </div>
                                 ))}
                             </div>

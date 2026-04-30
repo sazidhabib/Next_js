@@ -383,6 +383,7 @@ const NewsCreate = () => {
     };
 
     const [showUploadSection, setShowUploadSection] = useState(false);
+    const [showThumbSection, setShowThumbSection] = useState(false);
 
     return (
         <Container fluid className="py-4">
@@ -501,12 +502,30 @@ const NewsCreate = () => {
                                     <ImagePreview imageType="leadImage" />
                                 </Form.Group>
                                 <Form.Group className="mb-3">
-                                    <Form.Label>Thumbnail Image</Form.Label>
-                                    <div className="d-flex gap-2 mb-2">
-                                        <Form.Control type="file" name="thumbImage" accept="image/*" onChange={handleFileChange} />
-                                        <Button variant="outline-secondary" onClick={() => openImageModal('thumbImage')}>Choose</Button>
+                                    <div className="d-flex align-items-center gap-2 mb-2">
+                                        <Form.Label className="mb-0">Thumbnail Image</Form.Label>
+                                        <Button
+                                            variant={showThumbSection ? 'outline-danger' : 'outline-primary'}
+                                            size="sm"
+                                            onClick={() => setShowThumbSection(!showThumbSection)}
+                                            style={{ width: '28px', height: '28px', padding: 0, lineHeight: '1', fontSize: '1rem', fontWeight: 'bold' }}
+                                            title={showThumbSection ? 'Close thumbnail section' : 'Add thumbnail image'}
+                                        >
+                                            {showThumbSection ? '−' : '+'}
+                                        </Button>
+                                        {(files.thumbImage || selectedImages.thumbImage) && !showThumbSection && (
+                                            <Badge bg="success" className="ms-1">✓ Added</Badge>
+                                        )}
                                     </div>
-                                    <ImagePreview imageType="thumbImage" />
+                                    {showThumbSection && (
+                                        <>
+                                            <div className="d-flex gap-2 mb-2">
+                                                <Form.Control type="file" name="thumbImage" accept="image/*" onChange={handleFileChange} />
+                                                <Button variant="outline-secondary" onClick={() => openImageModal('thumbImage')}>Choose</Button>
+                                            </div>
+                                            <ImagePreview imageType="thumbImage" />
+                                        </>
+                                    )}
                                 </Form.Group>
                                 <Form.Group className="mb-3">
                                     <Form.Label>Image Caption</Form.Label>

@@ -126,6 +126,7 @@ const NewsWidget = ({ cell, isPriority }) => {
     const imageUrl = getImageUrl(news, design === 'text-inside-image' || cell.rowSpan > 1 || cell.colSpan > 1);
     const newsLink = `/news/${news._id || news.id}`;
     const imageHeight = getImageHeight();
+    const isMerged = (cell.rowSpan || 1) > 1 || (cell.colSpan || 1) > 1;
 
     const NewsImage = ({ className, currentDesign }) => {
         if (!imageUrl) {
@@ -141,8 +142,10 @@ const NewsWidget = ({ cell, isPriority }) => {
             ? '90px'
             : '120px';
 
+        const wrapperMinHeight = currentDesign === 'text-inside-image' ? '100%' : minHeight;
+
         return (
-            <div className="news-image-container" style={{ position: 'relative', width: '100%', height: '100%', minHeight }}>
+            <div className="news-image-container" style={{ position: 'relative', width: '100%', height: '100%', minHeight: wrapperMinHeight }}>
                 <Image
                     src={imageUrl}
                     alt={news.newsHeadline}
@@ -158,9 +161,9 @@ const NewsWidget = ({ cell, isPriority }) => {
 
     if (design === 'text-inside-image') {
         return (
-            <div className="custom-font news-design-text-inside-image h-100 overflow-hidden position-relative" style={{ minHeight: '350px' }}>
-                <Link href={newsLink} className="text-decoration-none h-100 d-block">
-                    <NewsImage className="text-inside-image-img h-100" currentDesign={design} />
+            <div className="custom-font news-design-text-inside-image d-flex flex-column overflow-hidden position-relative" style={{ minHeight: '400px', height: isMerged ? `${imageHeight + 100}px` : '400px' }}>
+                <Link href={newsLink} className="text-decoration-none d-flex flex-column flex-grow-1 h-100">
+                    <NewsImage className="text-inside-image-img flex-grow-1" currentDesign={design} />
                     <div className="text-inside-image-overlay position-absolute bottom-0 start-0 end-0 p-3">
                         <h4 className="text-white mb-2 fw-bold font-bangla text-inside-image-title ">
                             {news.alternativeHeadline || news.newsHeadline}
@@ -309,7 +312,6 @@ const NewsWidget = ({ cell, isPriority }) => {
         );
     }
 
-    const isMerged = (cell.rowSpan || 1) > 1 || (cell.colSpan || 1) > 1;
 
     return (
         <Card className="h-100 custom-font border-0 news-widget-card group shadow-sm-hover transition-all" style={{ display: 'flex', flexDirection: 'column' }}>
