@@ -3,38 +3,40 @@ import ServiceHero from "../../components/ServiceHero";
 import ServiceContent from "../../components/ServiceContent";
 import CTASection from "../../components/CTASection";
 import CaseStudySection from "../../components/CaseStudySection";
+import { getSettings } from "../../lib/getSettings";
 
 export const metadata = {
   title: "Creative Concept & Execution | Next Idea Solutions",
   description: "Elevate your brand with Next Idea Solutions' creative service that blends strategy, design, and technology to bring your concept to life.",
 };
 
-export default function CreativeConceptExecutionPage() {
+export default async function CreativeConceptExecutionPage() {
+  const settings = await getSettings();
+
   return (
     <>
       <ServiceHero
         icon={<Sparkles />}
-        title="Creative Concept & Execution"
-        tagline="Elevate your brand with Next Idea Solutions' creative service that blends strategy, design, and technology to bring your concept to life."
+        title={settings.service_creative_concept_execution_hero_title}
+        tagline={settings.service_creative_concept_execution_hero_tagline}
         buttonText="Explore More"
-
       />
       <section className="py-20 bg-white overflow-hidden">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row items-center gap-12">
             <div className="md:w-1/2">
               <h2 className="text-4xl md:text-5xl font-bold text-zinc-900 mb-6 leading-tight">
-                About This <span className="text-primary">Service</span>
+                {settings.service_creative_concept_execution_about_title}
               </h2>
               <p className="text-lg text-zinc-600 mb-8 leading-relaxed">
-                At Next Idea Solutions, we believe in the power of creativity to transform brands. Our Creative Concept & Execution service is tailored to craft innovative, impactful, and memorable campaigns that resonate with your audience. We merge creativity with strategic insights to develop concepts that align with your brand's goals and values.
+                {settings.service_creative_concept_execution_about_desc}
               </p>
 
             </div>
             <div className="md:w-1/2">
               <img
-                src="/creative_concept.jpeg"
-                alt="Local SEO Illustration"
+                src={settings.service_creative_concept_execution_about_image}
+                alt="Creative Concept"
                 className="w-full h-auto drop-shadow-2xl"
               />
             </div>

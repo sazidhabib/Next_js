@@ -1,0 +1,68 @@
+
+  // brand-identity Page
+  { key: 'service_brand_identity_hero_title', value: 'Brand Identity', type: 'string', description: 'Hero title' },
+  { key: 'service_brand_identity_hero_tagline', value: 'We help creating strong brand identity that will separate you from the noise.', type: 'text', description: 'Hero tagline' },
+  { key: 'service_brand_identity_hero_description', value: 'Let\'s craft a narrative that captivates and converts.', type: 'text', description: 'Hero description' },
+  { key: 'service_brand_identity_about_title', value: 'About this Service', type: 'string', description: 'About section title' },
+  { key: 'service_brand_identity_about_text', value: 'About text goes here.', type: 'text', description: 'About section paragraph' },
+
+  // creative-concept-execution Page
+  { key: 'service_creative_concept_execution_hero_title', value: 'Creative Concept & Execution', type: 'string', description: 'Hero title' },
+  { key: 'service_creative_concept_execution_hero_tagline', value: 'Elevate your brand with Next Idea Solutions\' creative service that blends strategy, design, and technology to bring your concept to life.', type: 'text', description: 'Hero tagline' },
+  { key: 'service_creative_concept_execution_hero_description', value: 'Let\'s craft a narrative that captivates and converts.', type: 'text', description: 'Hero description' },
+  { key: 'service_creative_concept_execution_about_title', value: 'About This Service', type: 'string', description: 'About section title' },
+  { key: 'service_creative_concept_execution_about_text', value: 'About text goes here.', type: 'text', description: 'About section paragraph' },
+
+  // design-printing Page
+  { key: 'service_design_printing_hero_title', value: 'Get started today!', type: 'string', description: 'Hero title' },
+  { key: 'service_design_printing_hero_tagline', value: 'Default Tagline', type: 'text', description: 'Hero tagline' },
+  { key: 'service_design_printing_hero_description', value: 'Connect with our design and printing experts to elevate your corporate image with premium, custom-made solutions.', type: 'text', description: 'Hero description' },
+  { key: 'service_design_printing_about_text', value: 'About text goes here.', type: 'text', description: 'About section paragraph' },
+
+  // digital-media-buying Page
+  { key: 'service_digital_media_buying_hero_title', value: 'Digital Media Buying', type: 'string', description: 'Hero title' },
+  { key: 'service_digital_media_buying_hero_tagline', value: 'Funnel-driven media buying solutions that generate higher ROI.', type: 'text', description: 'Hero tagline' },
+  { key: 'service_digital_media_buying_hero_image', value: '/Digital-Media.png', type: 'string', description: 'Hero image' },
+  { key: 'service_digital_media_buying_about_title', value: 'About Digital Media Buying', type: 'string', description: 'About section title' },
+  { key: 'service_digital_media_buying_about_text', value: 'About text goes here.', type: 'text', description: 'About section paragraph' },
+
+  // digital-pr Page
+  { key: 'service_digital_pr_hero_title', value: 'Work with One of The Best Digital PR Agencies in Bangladesh', type: 'string', description: 'Hero title' },
+  { key: 'service_digital_pr_hero_tagline', value: 'Default Tagline', type: 'text', description: 'Hero tagline' },
+  { key: 'service_digital_pr_hero_description', value: 'Partner with our digital PR agency and let us create a storytelling PR campaign that grabs the attention of your target audience, builds your brand reputation, and boosts your online visibility.', type: 'text', description: 'Hero description' },
+  { key: 'service_digital_pr_about_text', value: 'About text goes here.', type: 'text', description: 'About section paragraph' },
+
+  // event-and-activation Page
+  { key: 'service_event_and_activation_hero_title', value: 'Event & Activation', type: 'string', description: 'Hero title' },
+  { key: 'service_event_and_activation_hero_tagline', value: 'Next Idea Solution is the power to create happening events to guarantee you the maximum footfall', type: 'text', description: 'Hero tagline' },
+  { key: 'service_event_and_activation_hero_image', value: '/Event-Activation.png', type: 'string', description: 'Hero image' },
+  { key: 'service_event_and_activation_about_title', value: 'About Event & Activation', type: 'string', description: 'About section title' },
+  { key: 'service_event_and_activation_about_text', value: 'About text goes here.', type: 'text', description: 'About section paragraph' },
+
+  // seo Page
+  { key: 'service_seo_hero_title', value: 'SEO Services', type: 'string', description: 'Hero title' },
+  { key: 'service_seo_hero_tagline', value: 'Future-Proof Your Visibility With The Best SEO Agency in Bangladesh', type: 'text', description: 'Hero tagline' },
+  { key: 'service_seo_hero_description', value: 'At Next Idea solution, we specialize in turning concepts into remarkable SEO strategies that leave a lasting impression on your visibility ensuring your brand stands out in search results.', type: 'text', description: 'Hero description' },
+  { key: 'service_seo_hero_image', value: '/SEO-Services.jpg', type: 'string', description: 'Hero image' },
+  { key: 'service_seo_about_title', value: 'OUR SEO SERVICES', type: 'string', description: 'About section title' },
+  { key: 'service_seo_about_text', value: 'About text goes here.', type: 'text', description: 'About section paragraph' },
+
+  // social-media-marketing Page
+  { key: 'service_social_media_marketing_hero_title', value: 'Social Media Marketing', type: 'string', description: 'Hero title' },
+  { key: 'service_social_media_marketing_hero_tagline', value: 'Every 6 people out of 11 use social media to research products before making any purchase decision.', type: 'text', description: 'Hero tagline' },
+  { key: 'service_social_media_marketing_hero_image', value: '/Social-Media.png', type: 'string', description: 'Hero image' },
+  { key: 'service_social_media_marketing_about_title', value: 'About This Service', type: 'string', description: 'About section title' },
+  { key: 'service_social_media_marketing_about_text', value: 'About text goes here.', type: 'text', description: 'About section paragraph' },
+
+  // video-production-photography Page
+  { key: 'service_video_production_photography_hero_title', value: 'Video Production & Photography', type: 'string', description: 'Hero title' },
+  { key: 'service_video_production_photography_hero_tagline', value: 'Professional Content That Tells Your Story', type: 'text', description: 'Hero tagline' },
+  { key: 'service_video_production_photography_hero_image', value: '/Video-Production.png', type: 'string', description: 'Hero image' },
+  { key: 'service_video_production_photography_about_title', value: 'About Video Production & Photography', type: 'string', description: 'About section title' },
+  { key: 'service_video_production_photography_about_text', value: 'About text goes here.', type: 'text', description: 'About section paragraph' },
+
+  // web-design-development Page
+  { key: 'service_web_design_development_hero_title', value: 'Web Design & Development', type: 'string', description: 'Hero title' },
+  { key: 'service_web_design_development_hero_tagline', value: 'Strong marketing your brand with high-converting landing page, website or app.', type: 'text', description: 'Hero tagline' },
+  { key: 'service_web_design_development_about_title', value: 'About Web Design & Development', type: 'string', description: 'About section title' },
+  { key: 'service_web_design_development_about_text', value: 'About text goes here.', type: 'text', description: 'About section paragraph' },

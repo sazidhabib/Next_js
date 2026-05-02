@@ -5,31 +5,33 @@ import PackagesSection from "../../components/PackagesSection";
 import ClientsSection from "../../components/ClientsSection";
 import FAQSection from "../../components/FAQSection";
 import CTASection from "../../components/CTASection";
+import { getSettings } from "../../lib/getSettings";
 
 export const metadata = {
   title: "Social Media Marketing | Next Idea Solutions",
   description: "Strategic social media marketing that builds brand awareness, drives engagement, and generates results. Connect with your audience through compelling content.",
 };
 
-export default function SocialMediaMarketingPage() {
+export default async function SocialMediaMarketingPage() {
+  const settings = await getSettings();
+
   return (
     <>
       <ServiceHero
         icon={<Share2 />}
-        title="Social Media Marketing"
-        tagline="Every 6 people out of 11 use social media to research products before making any purchase decision."
-
-        image="/Social-Media.png"
+        title={settings.service_social_media_marketing_hero_title}
+        tagline={settings.service_social_media_marketing_hero_tagline}
+        image={settings.service_social_media_marketing_hero_image || "/Social-Media.png"}
       />
       <section className="py-20 bg-white overflow-hidden">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row items-center gap-12">
             <div className="md:w-1/2">
               <h2 className="text-4xl md:text-5xl font-bold text-zinc-900 mb-6 leading-tight">
-                About This <span className="text-primary">Service</span>
+                {settings.service_social_media_marketing_about_title}
               </h2>
               <p className="text-lg text-zinc-600 mb-8 leading-relaxed">
-                Social media marketing is the new word-of-mouth. Staying on top of social media is an effective way to build people's trust and can help you establish as a prominent brand over time. We take a results-oriented approach to generate more engagement, increase your reach, drive more website traffic, and support your broader business objectives through social media. Connect with your audience with strategic social media marketing. Develop a social media marketing strategy that will build your brand, boost your exposure, amplify your SEO, and help you grow your business.
+                {settings.service_social_media_marketing_about_desc}
               </p>
               <button className="bg-primary text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20">
                 GET A FREE QUOTE
@@ -37,8 +39,8 @@ export default function SocialMediaMarketingPage() {
             </div>
             <div className="md:w-1/2">
               <img
-                src="/digitalmedia.jpeg"
-                alt="Local SEO Illustration"
+                src={settings.service_social_media_marketing_about_image || "/digitalmedia.jpeg"}
+                alt="Social Media Marketing"
                 className="w-full h-auto drop-shadow-2xl"
               />
             </div>

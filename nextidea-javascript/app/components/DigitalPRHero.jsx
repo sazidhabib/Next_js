@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
 
-export default function DigitalPRHero() {
+export default function DigitalPRHero({ title, tagline, description }) {
   return (
     <section className="relative min-h-[80vh] flex items-center pt-32 pb-20 overflow-hidden bg-white">
       <div className="container mx-auto px-4 relative z-10">
@@ -17,15 +17,15 @@ export default function DigitalPRHero() {
             className="flex-1 text-left"
           >
             <h1 className="text-4xl md:text-6xl font-bold text-black mb-6 leading-tight">
-              Elevate Your Brand's Online Visibility With Strategic{" "}
-              <span className="text-primary">Digital PR Campaigns</span>
+              {title ? title.split(' ').map((word, i) => i === title.split(' ').length - 1 ? <span key={i} className="text-primary">{word}</span> : word + ' ') : <>Elevate Your Brand's Online Visibility With Strategic{" "}
+              <span className="text-primary">Digital PR Campaigns</span></>}
             </h1>
 
             <p className="text-lg text-zinc-600 mb-8 max-w-2xl">
-              <strong>Looking to get your brand featured in top news and media sites?</strong>
+              {description ? description : <><strong>Looking to get your brand featured in top news and media sites?</strong>
               <br className="mb-2" />
               Our Digital PR Services help you earn media coverage, build backlinks, trust
-              and establish authority to improve your SEO and online authority.
+              and establish authority to improve your SEO and online authority.</>}
             </p>
 
             <motion.div

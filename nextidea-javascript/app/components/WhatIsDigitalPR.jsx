@@ -26,7 +26,7 @@ const perfectFor = [
   },
 ];
 
-export default function WhatIsDigitalPR() {
+export default function WhatIsDigitalPR({ title, description }) {
   return (
     <section className="py-20 bg-white text-center">
       <div className="container mx-auto px-4">
@@ -38,10 +38,10 @@ export default function WhatIsDigitalPR() {
           className="max-w-4xl mx-auto mb-16"
         >
           <h2 className="text-3xl md:text-5xl font-bold text-black mb-6">
-            What is Digital PR?
+            {title || "What is Digital PR?"}
           </h2>
           <p className="text-lg text-zinc-600 leading-relaxed">
-            Digital PR is a modern form of public relations that focuses on increasing your online presence through strategic content, media outreach, and high-authority link placements. Unlike traditional PR, online PR in digital marketing focuses on digital outcomes like search rankings, referral traffic, and brand mentions on Google that bring measurable results.
+            {description || "Digital PR is a modern form of public relations that focuses on increasing your online presence through strategic content, media outreach, and high-authority link placements. Unlike traditional PR, online PR in digital marketing focuses on digital outcomes like search rankings, referral traffic, and brand mentions on Google that bring measurable results."}
           </p>
         </motion.div>
 

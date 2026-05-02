@@ -7,34 +7,40 @@ import BlogsSection from "../../components/BlogsSection";
 import ClientsSection from "../../components/ClientsSection";
 import FAQSection from "../../components/FAQSection";
 import CTASection from "../../components/CTASection";
+import { getSettings } from "../../lib/getSettings";
 
 export const metadata = {
   title: "Web Design & Development | Next Idea Solutions",
   description: "We excel in creating user-friendly, high-converting landing pages, websites, and apps. Modern design meets powerful functionality.",
 };
 
-export default function WebDesignDevelopmentPage() {
+export default async function WebDesignDevelopmentPage() {
+  const settings = await getSettings();
+  
+  let offerFeatures = [];
+  try {
+    offerFeatures = JSON.parse(settings.service_web_design_development_offer_features || "[]");
+  } catch(e) {}
+
   return (
     <>
       <ServiceHero
         icon={<Code2 />}
-        title="Web Design & Development"
-        tagline="Strong marketing your brand with high-converting landing page, website or app."
-
-
+        title={settings.service_web_design_development_hero_title}
+        tagline={settings.service_web_design_development_hero_tagline}
       />
       <section className="py-20 bg-white overflow-hidden">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row items-center gap-12">
             <div className="md:w-1/2">
               <h2 className="text-4xl md:text-5xl font-bold text-zinc-900 mb-6 leading-tight">
-                About Web Design & <span className="text-primary">Development</span>
+                {settings.service_web_design_development_about_title}
               </h2>
               <p className="text-lg font-bold text-zinc-600 mb-8 leading-relaxed">
-                Our Web Design & Development service combines creativity, functionality, and cutting-edge technology to create digital experiences that resonate with your audience.
+                {settings.service_web_design_development_about_subtitle}
               </p>
               <p className="text-lg text-zinc-600 mb-8 leading-relaxed">
-                If the stage of your website is small, we decide to customize it with our amazing custom web app development, the resulting development will make your business look like the next leading business.
+                {settings.service_web_design_development_about_desc}
               </p>
               <button className="bg-primary text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20">
                 GET A FREE QUOTE
@@ -42,8 +48,8 @@ export default function WebDesignDevelopmentPage() {
             </div>
             <div className="md:w-1/2">
               <img
-                src="/webdev.jpeg"
-                alt="Local SEO Illustration"
+                src={settings.service_web_design_development_about_image}
+                alt="Web Development"
                 className="w-full h-auto drop-shadow-2xl"
               />
             </div>
@@ -80,29 +86,17 @@ export default function WebDesignDevelopmentPage() {
 
       <div className="bg-zinc-50 py-20">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-16 uppercase tracking-widest">WHAT WE OFFER</h2>
+          <h2 className="text-3xl font-bold text-center mb-16 uppercase tracking-widest">{settings.service_web_design_development_offer_title}</h2>
           <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            <div className="bg-white p-8 rounded-2xl shadow-sm text-center">
-              <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-6 text-primary">
-                <ShoppingCart className="w-8 h-8" />
+            {offerFeatures.map((feature, idx) => (
+              <div key={idx} className="bg-white p-8 rounded-2xl shadow-sm text-center">
+                <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-6 text-primary">
+                  {idx === 0 ? <ShoppingCart className="w-8 h-8" /> : idx === 1 ? <Building2 className="w-8 h-8" /> : <Target className="w-8 h-8" />}
+                </div>
+                <h3 className="text-xl font-bold mb-4">{feature.title}</h3>
+                <p className="text-zinc-600 text-sm">{feature.description}</p>
               </div>
-              <h3 className="text-xl font-bold mb-4">Ecommerce Solutions</h3>
-              <p className="text-zinc-600 text-sm">Empower your business with robust and scalable online stores that drive sales and provide a seamless shopping experience.</p>
-            </div>
-            <div className="bg-white p-8 rounded-2xl shadow-sm text-center">
-              <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-6 text-primary">
-                <Building2 className="w-8 h-8" />
-              </div>
-              <h3 className="text-xl font-bold mb-4">Corporate Website Development</h3>
-              <p className="text-zinc-600 text-sm">Establish a professional and impactful online presence for your corporation with a custom-designed website.</p>
-            </div>
-            <div className="bg-white p-8 rounded-2xl shadow-sm text-center">
-              <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-6 text-primary">
-                <Target className="w-8 h-8" />
-              </div>
-              <h3 className="text-xl font-bold mb-4">Landing page creation</h3>
-              <p className="text-zinc-600 text-sm">Drive higher conversions for your marketing campaigns with high-impact and optimized landing pages.</p>
-            </div>
+            ))}
           </div>
         </div>
       </div>
