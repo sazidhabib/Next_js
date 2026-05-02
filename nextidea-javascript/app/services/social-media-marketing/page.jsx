@@ -1,4 +1,16 @@
-import { Share2, Users, TrendingUp, Target, Megaphone, Globe, Sparkles, Calendar, Palette } from "lucide-react";
+import {
+  Share2,
+  Users,
+  TrendingUp,
+  Target,
+  Megaphone,
+  Globe,
+  Sparkles,
+  Calendar,
+  Palette,
+  Check,
+  ArrowRight,
+} from "lucide-react";
 import ServiceHero from "../../components/ServiceHero";
 import ServiceContent from "../../components/ServiceContent";
 import PackagesSection from "../../components/PackagesSection";
@@ -7,9 +19,18 @@ import FAQSection from "../../components/FAQSection";
 import CTASection from "../../components/CTASection";
 import { getSettings } from "../../lib/getSettings";
 
-export const metadata = {
-  title: "Social Media Marketing | Next Idea Solutions",
-  description: "Strategic social media marketing that builds brand awareness, drives engagement, and generates results. Connect with your audience through compelling content.",
+// Icon mapping for rendering
+const ICON_MAP = {
+  Share2: <Share2 />,
+  Users: <Users />,
+  TrendingUp: <TrendingUp />,
+  Target: <Target />,
+  Megaphone: <Megaphone />,
+  Globe: <Globe />,
+  Sparkles: <Sparkles />,
+  Calendar: <Calendar />,
+  Palette: <Palette />,
+  Check: <Check />,
 };
 
 export default async function SocialMediaMarketingPage() {
@@ -21,7 +42,10 @@ export default async function SocialMediaMarketingPage() {
         icon={<Share2 />}
         title={settings.service_social_media_marketing_hero_title}
         tagline={settings.service_social_media_marketing_hero_tagline}
-        image={settings.service_social_media_marketing_hero_image || "/Social-Media.png"}
+        image={
+          settings.service_social_media_marketing_hero_image ||
+          "/Social-Media.png"
+        }
       />
       <section className="py-20 bg-white overflow-hidden">
         <div className="container mx-auto px-4">
@@ -39,7 +63,10 @@ export default async function SocialMediaMarketingPage() {
             </div>
             <div className="md:w-1/2">
               <img
-                src={settings.service_social_media_marketing_about_image || "/digitalmedia.jpeg"}
+                src={
+                  settings.service_social_media_marketing_about_image ||
+                  "/digitalmedia.jpeg"
+                }
                 alt="Social Media Marketing"
                 className="w-full h-auto drop-shadow-2xl"
               />
@@ -47,50 +74,20 @@ export default async function SocialMediaMarketingPage() {
           </div>
         </div>
       </section>
-      <ServiceContent
-        overview={{
 
-        }}
+      <ServiceContent
+        overview={{}}
         features={{
-          title: "What's Included",
-          items: [
-            {
-              icon: <Target className="w-6 h-6" />,
-              title: "Strategy Development",
-              description: "Comprehensive social media strategy tailored to your business goals."
-            },
-            {
-              icon: <Calendar className="w-6 h-6" />,
-              title: "Content Calendar",
-              description: "Planned out content for consistent posting and engagement."
-            },
-            {
-              icon: <Megaphone className="w-6 h-6" />,
-              title: "Media Buying & Ads",
-              description: "Running and optimizing paid campaigns for maximum ROI."
-            },
-            {
-              icon: <TrendingUp className="w-6 h-6" />,
-              title: "Sales Funnel Monitoring",
-              description: "Continuous tracking and optimizing to drive more conversions."
-            },
-            {
-              icon: <Palette className="w-6 h-6" />,
-              title: "Design & Video",
-              description: "Engaging visuals, animations, and video content strategies."
-            },
-            {
-              icon: <Users className="w-6 h-6" />,
-              title: "Community Management",
-              description: "Active engagement with your followers to build brand loyalty."
-            },
-          ],
+          title: service.features_title || "What's Included",
+          items: features_items.map((item) => ({
+            ...item,
+            icon: ICON_MAP[item.icon_name] || <Check />,
+          })),
         }}
-        relatedServices={[
-          { title: "Digital Media Buying", link: "/services/digital-media-buying", icon: <TrendingUp /> },
-          { title: "Creative Concept", link: "/services/creative-concept-execution", icon: <Target /> },
-          { title: "Brand Identity", link: "/services/brand-identity", icon: <Users /> },
-        ]}
+        relatedServices={related_services.map((s) => ({
+          ...s,
+          icon: ICON_MAP[s.icon_name] || <ArrowRight />,
+        }))}
       />
       <PackagesSection
         title="Let's Engage and Grow Together"

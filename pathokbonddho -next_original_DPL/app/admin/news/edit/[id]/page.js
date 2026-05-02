@@ -29,6 +29,7 @@ const NewsEdit = () => {
     const [uploadFile, setUploadFile] = useState(null);
     const [uploadAlbumId, setUploadAlbumId] = useState('');
     const [showUploadSection, setShowUploadSection] = useState(false);
+    const [showThumbSection, setShowThumbSection] = useState(false);
 
     const [authorSearch, setAuthorSearch] = useState('');
     const [tagSearch, setTagSearch] = useState('');
@@ -99,6 +100,7 @@ const NewsEdit = () => {
                 });
                 setAuthorSearch(n.Author?.name || n.author?.name || '');
                 setCurrentImages({ leadImage: n.leadImage, thumbImage: n.thumbImage, metaImage: n.metaImage });
+                if (n.thumbImage) setShowThumbSection(true);
 
                 setAuthors(authRes.data.authors || authRes.data || []);
                 setTags(tagRes.data.tags || tagRes.data || []);
@@ -238,11 +240,20 @@ const NewsEdit = () => {
     const handleFormatConfirm = ({ format, altText, caption }) => {
         const imageUrl = photoToFormat.imageUrl ? (photoToFormat.imageUrl.startsWith('http') ? photoToFormat.imageUrl : `${IMG_BASE}/${photoToFormat.imageUrl.replace(/^\/+/, '')}`) : '';
         let html = '';
-        if (format === 'full-width') html = `<img src="${imageUrl}" alt="${altText}" style="width: 100%; height: auto; display: block; margin: 1em 0; border-radius: 0.375rem;" />`;
-        else if (format === 'left-aligned') html = `<img src="${imageUrl}" alt="${altText}" style="float: left; margin: 0 1.5em 1em 0; max-width: 50%; height: auto; border-radius: 0.375rem;" />`;
-        else if (format === 'right-aligned') html = `<img src="${imageUrl}" alt="${altText}" style="float: right; margin: 0 0 1em 1.5em; max-width: 50%; height: auto; border-radius: 0.375rem;" />`;
-        else if (format === 'full-width-captioned') {
-            html = `<figure style="width: 100%; margin: 1em 0; text-align: center; display: inline-block;"><img src="${imageUrl}" alt="${altText}" style="width: 100%; height: auto; border-radius: 0.375rem;" /><figcaption style="font-size: 0.9em; color: #666; margin-top: 0.5em; font-style: italic;">${caption}</figcaption></figure><p></p>`;
+        const altAttr = altText ? ` alt="${altText}"` : '';
+        const baseImgStyle = 'width: 100%; height: auto; border-radius: 0.375rem;';
+
+        let outerStyle = '';
+        if (format === 'full-width') outerStyle = 'width: 100%; margin: 1em 0; display: block;';
+        else if (format === 'left-aligned') outerStyle = 'float: left; margin: 0 1.5em 1em 0; max-width: 50%;';
+        else if (format === 'right-aligned') outerStyle = 'float: right; margin: 0 0 1em 1.5em; max-width: 50%;';
+
+        if (caption) {
+            html = `<figure style="${outerStyle} text-align: center;"><img src="${imageUrl}"${altAttr} style="${baseImgStyle}" /><figcaption style="font-size: 0.9em; color: #666; margin-top: 0.5em; font-style: italic;">${caption}</figcaption></figure><p></p>`;
+        } else {
+            if (format === 'full-width') html = `<img src="${imageUrl}"${altAttr} style="${baseImgStyle} ${outerStyle}" /><p></p>`;
+            else if (format === 'left-aligned') html = `<img src="${imageUrl}"${altAttr} style="${baseImgStyle} ${outerStyle}" />`;
+            else if (format === 'right-aligned') html = `<img src="${imageUrl}"${altAttr} style="${baseImgStyle} ${outerStyle}" />`;
         }
 
         if (editingElement) {
@@ -517,12 +528,30 @@ const NewsEdit = () => {
                                     <ImagePreview imageType="leadImage" />
                                 </Form.Group>
                                 <Form.Group className="mb-3">
-                                    <Form.Label>Thumbnail Image</Form.Label>
-                                    <div className="d-flex gap-2 mb-2">
-                                        <Form.Control type="file" name="thumbImage" accept="image/*" onChange={handleFileChange} />
-                                        <Button variant="outline-secondary" onClick={() => openImageModal('thumbImage')}>Choose</Button>
+                                    <div className="d-flex align-items-center gap-2 mb-2">
+                                        <Form.Label className="mb-0">Thumbnail Image</Form.Label>
+                                        <Button
+                                            variant={showThumbSection ? 'outline-danger' : 'outline-primary'}
+                                            size="sm"
+                                            onClick={() => setShowThumbSection(!showThumbSection)}
+                                            style={{ width: '28px', height: '28px', padding: 0, lineHeight: '1', fontSize: '1rem', fontWeight: 'bold' }}
+                                            title={showThumbSection ? 'Close thumbnail section' : 'Add thumbnail image'}
+                                        >
+                                            {showThumbSection ? '−' : '+'}
+                                        </Button>
+                                        {(files.thumbImage || selectedImages.thumbImage || currentImages.thumbImage) && !showThumbSection && (
+                                            <Badge bg="success" className="ms-1">✓ Added</Badge>
+                                        )}
                                     </div>
-                                    <ImagePreview imageType="thumbImage" />
+                                    {showThumbSection && (
+                                        <>
+                                            <div className="d-flex gap-2 mb-2">
+                                                <Form.Control type="file" name="thumbImage" accept="image/*" onChange={handleFileChange} />
+                                                <Button variant="outline-secondary" onClick={() => openImageModal('thumbImage')}>Choose</Button>
+                                            </div>
+                                            <ImagePreview imageType="thumbImage" />
+                                        </>
+                                    )}
                                 </Form.Group>
                                 <Form.Group className="mb-3">
                                     <Form.Label>Image Caption</Form.Label>

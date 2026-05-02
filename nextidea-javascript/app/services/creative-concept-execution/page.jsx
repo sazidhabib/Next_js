@@ -1,13 +1,36 @@
-import { Target, Cpu, Settings, Trophy, FileText, Star, Palette, TrendingUp, Headphones, Sparkles } from "lucide-react";
+import {
+  Target,
+  Cpu,
+  Settings,
+  Trophy,
+  FileText,
+  Star,
+  Palette,
+  TrendingUp,
+  Headphones,
+  Sparkles,
+  Check,
+  ArrowRight,
+} from "lucide-react";
 import ServiceHero from "../../components/ServiceHero";
 import ServiceContent from "../../components/ServiceContent";
 import CTASection from "../../components/CTASection";
 import CaseStudySection from "../../components/CaseStudySection";
 import { getSettings } from "../../lib/getSettings";
 
-export const metadata = {
-  title: "Creative Concept & Execution | Next Idea Solutions",
-  description: "Elevate your brand with Next Idea Solutions' creative service that blends strategy, design, and technology to bring your concept to life.",
+// Icon mapping for rendering
+const ICON_MAP = {
+  Target: <Target />,
+  Cpu: <Cpu />,
+  Settings: <Settings />,
+  Trophy: <Trophy />,
+  FileText: <FileText />,
+  Star: <Star />,
+  Palette: <Palette />,
+  TrendingUp: <TrendingUp />,
+  Headphones: <Headphones />,
+  Sparkles: <Sparkles />,
+  Check: <Check />,
 };
 
 export default async function CreativeConceptExecutionPage() {
@@ -31,7 +54,6 @@ export default async function CreativeConceptExecutionPage() {
               <p className="text-lg text-zinc-600 mb-8 leading-relaxed">
                 {settings.service_creative_concept_execution_about_desc}
               </p>
-
             </div>
             <div className="md:w-1/2">
               <img
@@ -43,55 +65,24 @@ export default async function CreativeConceptExecutionPage() {
           </div>
         </div>
       </section>
-      <ServiceContent
-        overview={{
 
-        }}
+      <ServiceContent
+        overview={{}}
         features={{
-          title: "WHAT SETS US APART",
-          items: [
-            {
-              icon: <Target className="w-6 h-6" />,
-              title: "Strategic Creativity",
-              description: "We merge creativity with strategic insights to develop concepts that align with your brand's goals and values."
-            },
-            {
-              icon: <Cpu className="w-6 h-6" />,
-              title: "Holistic Approach",
-              description: "From ideation to execution, our team ensures a seamless creative process, encompassing diverse media channels and platforms."
-            },
-            {
-              icon: <Settings className="w-6 h-6" />,
-              title: "Tailored Solutions",
-              description: "Every brand is unique, and we customize our creative strategies to meet your specific needs and capture your audience's attention."
-            },
-          ],
+          title: service.features_title || "WHAT SETS US APART",
+          items: features_items.map((item) => ({
+            ...item,
+            icon: ICON_MAP[item.icon_name] || <Check />,
+          })),
         }}
         process={{
-          title: "WHAT WE OFFER",
-          steps: [
-            {
-              title: "Creative Campaigns",
-              description: "Our team designs captivating campaigns that engage your audience across digital and traditional platforms.",
-              icon: <Trophy className="w-6 h-6" />,
-            },
-            {
-              title: "Content Creation",
-              description: "We craft compelling content, including visuals, copy, and multimedia, to convey your brand's story effectively.",
-              icon: <FileText className="w-6 h-6" />,
-            },
-            {
-              title: "Brand Messaging",
-              description: "We refine your brand's messaging to deliver a clear, consistent, and impactful narrative.",
-              icon: <Star className="w-6 h-6" />,
-            },
-          ],
+          title: service.process_title || "WHAT WE OFFER",
+          steps: process_steps,
         }}
-        relatedServices={[
-          { title: "Brand Identity", link: "/services/brand-identity", icon: <Palette /> },
-          { title: "Digital Media Buying", link: "/services/digital-media-buying", icon: <TrendingUp /> },
-          { title: "Video Production", link: "/services/video-production-photography", icon: <Headphones /> },
-        ]}
+        relatedServices={related_services.map((s) => ({
+          ...s,
+          icon: ICON_MAP[s.icon_name] || <ArrowRight />,
+        }))}
       />
       <CaseStudySection />
       <CTASection

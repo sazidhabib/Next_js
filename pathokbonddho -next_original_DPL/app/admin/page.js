@@ -6,7 +6,7 @@ async function getDashboardStats(token) {
     const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
     try {
         const [newsRes, usersRes, menusRes, tagsRes] = await Promise.all([
-            fetch(`${API_URL}/news?limit=1`, {
+            fetch(`${API_URL}/news?limit=1&status=all`, {
                 headers: { 'Authorization': `Bearer ${token}` },
                 next: { revalidate: 0 }
             }),

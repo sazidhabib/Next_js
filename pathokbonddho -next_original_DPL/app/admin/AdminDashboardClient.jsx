@@ -16,7 +16,7 @@ export default function AdminDashboardClient({ initialStats, user }) {
     const fetchStats = async () => {
         try {
             const [newsRes, usersRes, menusRes, tagsRes] = await Promise.all([
-                api.get('/news?limit=1'),
+                api.get('/news?limit=1&status=all'),
                 api.get('/users'),
                 api.get('/menus'),
                 api.get('/tags')

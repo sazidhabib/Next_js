@@ -40,7 +40,7 @@ const ImageFormatModal = ({ show, onHide, onConfirm, photo }) => {
                 <div className="text-start">
                     <label className="form-label fw-bold small text-muted text-uppercase mb-3">Format *</label>
                     <div className="d-flex flex-column gap-2 mb-4">
-                        {['full-width', 'left-aligned', 'right-aligned', 'full-width-captioned'].map(f => (
+                        {['full-width', 'left-aligned', 'right-aligned'].map(f => (
                             <label key={f} className="d-flex align-items-center gap-2 p-2 rounded cursor-pointer" style={{ cursor: 'pointer' }}>
                                 <input 
                                     type="radio" 
@@ -66,18 +66,16 @@ const ImageFormatModal = ({ show, onHide, onConfirm, photo }) => {
                         />
                     </div>
 
-                    {format === 'full-width-captioned' && (
-                        <div className="mb-3">
-                            <label className="form-label fw-bold small text-muted text-uppercase">Caption</label>
-                            <input 
-                                type="text" 
-                                className="form-control" 
-                                value={caption} 
-                                onChange={(e) => setCaption(e.target.value)}
-                                placeholder="Enter image caption"
-                            />
-                        </div>
-                    )}
+                    <div className="mb-3">
+                        <label className="form-label fw-bold small text-muted text-uppercase">Caption (Optional)</label>
+                        <input 
+                            type="text" 
+                            className="form-control" 
+                            value={caption} 
+                            onChange={(e) => setCaption(e.target.value)}
+                            placeholder="Enter image caption"
+                        />
+                    </div>
                 </div>
             </Modal.Body>
             <Modal.Footer className="border-0 p-4">

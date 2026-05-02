@@ -1,4 +1,13 @@
-import { Palette, Box, Layers, Package, BookOpen, Sparkles } from "lucide-react";
+import {
+  Palette,
+  Box,
+  Layers,
+  Package,
+  BookOpen,
+  Sparkles,
+  Check,
+  ArrowRight,
+} from "lucide-react";
 import ServiceHero from "../../components/ServiceHero";
 import ServiceContent from "../../components/ServiceContent";
 import PortfolioSection from "../../components/PortfolioSection";
@@ -8,9 +17,15 @@ import BlogsSection from "../../components/BlogsSection";
 import CTASection from "../../components/CTASection";
 import { getSettings } from "../../lib/getSettings";
 
-export const metadata = {
-  title: "Brand Identity | Next Idea Solutions",
-  description: "We help create strong brand identity that separates you from the noise. Build a memorable brand that resonates with your audience.",
+// Icon mapping for rendering
+const ICON_MAP = {
+  Palette: <Palette />,
+  Box: <Box />,
+  Layers: <Layers />,
+  Package: <Package />,
+  BookOpen: <BookOpen />,
+  Sparkles: <Sparkles />,
+  Check: <Check />,
 };
 
 export default async function BrandIdentityPage() {
@@ -51,6 +66,7 @@ export default async function BrandIdentityPage() {
           </div>
         </div>
       </section>
+
       <ServiceContent
         overview={{
           title: "",
@@ -60,16 +76,22 @@ export default async function BrandIdentityPage() {
           title: "WHAT WE OFFER",
           items: (() => {
             try {
-              return JSON.parse(settings.service_brand_identity_features || "[]").map((item, idx) => {
+              return JSON.parse(
+                settings.service_brand_identity_features || "[]",
+              ).map((item, idx) => {
                 const icons = [<Palette />, <Package />, <BookOpen />];
                 return { ...item, icon: icons[idx % icons.length] };
               });
-            } catch(e) {
+            } catch (e) {
               return [];
             }
           })(),
         }}
         gridCols={3}
+        relatedServices={related_services.map((s) => ({
+          ...s,
+          icon: ICON_MAP[s.icon_name] || <ArrowRight />,
+        }))}
       />
       <PortfolioSection />
       <CTASection

@@ -27,6 +27,7 @@ export const NewsSelectionModal = ({ show, onClose, onSelect }) => {
             const params = {
                 page: currentPage,
                 limit: 12,
+                status: 'all',
                 ...(searchTerm && { search: searchTerm })
             };
             const res = await api.get('/news', { params });
@@ -174,7 +175,7 @@ export const VideoSelectionModal = ({ show, onClose, onSelect }) => {
     const fetchVideos = async () => {
         try {
             setLoading(true);
-            const res = await api.get('/news', { params: { categories: 'video,ভিডিও', limit: 20 } });
+            const res = await api.get('/news', { params: { categories: 'video,ভিডিও', limit: 20, status: 'all' } });
             const data = res.data.news || res.data.rows || [];
             setVideos(data);
         } catch (error) {

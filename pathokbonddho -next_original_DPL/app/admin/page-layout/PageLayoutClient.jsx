@@ -59,9 +59,9 @@ const PageLayoutClient = ({ initialPages, initialTags, initialMenus, initialDesi
                         ...r,
                         columns: (r.Columns || r.columns || []).map(c => ({
                             ...c,
-                            contentType: c.contentType || 'text',
-                            contentId: c.contentId || null,
-                            contentTitle: c.contentTitle || null,
+                            contentType: c.contentType || c.ContentType || 'text',
+                            contentId: c.contentId || c.ContentId || null,
+                            contentTitle: c.contentTitle || c.ContentTitle || null,
                             merged: !!(c.merged || c.Merged),
                             masterCell: !!(c.masterCell || c.MasterCell),
                             rowSpan: c.rowSpan || c.RowSpan || 1,
@@ -296,18 +296,22 @@ const PageLayoutClient = ({ initialPages, initialTags, initialMenus, initialDesi
     };
 
     const updateGridCell = (sIdx, rIdx, cIdx, field, value) => {
-        const newData = JSON.parse(JSON.stringify(editPage));
-        newData.PageSections[sIdx].rows[rIdx].columns[cIdx][field] = value;
-        setEditPage(newData);
+        setEditPage(prev => {
+            const newData = JSON.parse(JSON.stringify(prev));
+            newData.PageSections[sIdx].rows[rIdx].columns[cIdx][field] = value;
+            return newData;
+        });
     };
 
     const updateCellContent = (sIdx, rIdx, cIdx, type, id, title) => {
-        const newData = JSON.parse(JSON.stringify(editPage));
-        const cell = newData.PageSections[sIdx].rows[rIdx].columns[cIdx];
-        cell.contentType = type;
-        cell.contentId = id;
-        cell.contentTitle = title;
-        setEditPage(newData);
+        setEditPage(prev => {
+            const newData = JSON.parse(JSON.stringify(prev));
+            const cell = newData.PageSections[sIdx].rows[rIdx].columns[cIdx];
+            cell.contentType = type;
+            cell.contentId = id;
+            cell.contentTitle = title;
+            return newData;
+        });
     };
 
     const mergeGridCells = (sIdx, mergeData) => {

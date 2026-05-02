@@ -1,4 +1,18 @@
-import { Code2, Smartphone, Shield, Zap, Layout, ShoppingCart, Building2, Target, Sparkles, Palette, TrendingUp } from "lucide-react";
+import {
+  Code2,
+  Smartphone,
+  Shield,
+  Zap,
+  Layout,
+  ShoppingCart,
+  Building2,
+  Target,
+  Sparkles,
+  Palette,
+  TrendingUp,
+  Check,
+  ArrowRight,
+} from "lucide-react";
 import ServiceHero from "../../components/ServiceHero";
 import ServiceContent from "../../components/ServiceContent";
 import PackagesSection from "../../components/PackagesSection";
@@ -9,18 +23,31 @@ import FAQSection from "../../components/FAQSection";
 import CTASection from "../../components/CTASection";
 import { getSettings } from "../../lib/getSettings";
 
-export const metadata = {
-  title: "Web Design & Development | Next Idea Solutions",
-  description: "We excel in creating user-friendly, high-converting landing pages, websites, and apps. Modern design meets powerful functionality.",
+// Icon mapping for rendering
+const ICON_MAP = {
+  Code2: <Code2 />,
+  Smartphone: <Smartphone />,
+  Shield: <Shield />,
+  Zap: <Zap />,
+  Layout: <Layout />,
+  ShoppingCart: <ShoppingCart />,
+  Building2: <Building2 />,
+  Target: <Target />,
+  Sparkles: <Sparkles />,
+  Palette: <Palette />,
+  TrendingUp: <TrendingUp />,
+  Check: <Check />,
 };
 
 export default async function WebDesignDevelopmentPage() {
   const settings = await getSettings();
-  
+
   let offerFeatures = [];
   try {
-    offerFeatures = JSON.parse(settings.service_web_design_development_offer_features || "[]");
-  } catch(e) {}
+    offerFeatures = JSON.parse(
+      settings.service_web_design_development_offer_features || "[]",
+    );
+  } catch (e) {}
 
   return (
     <>
@@ -56,42 +83,42 @@ export default async function WebDesignDevelopmentPage() {
           </div>
         </div>
       </section>
+
       <ServiceContent
-        overview={{
-          title: "",
-          description: "",
-        }}
+        overview={{}}
         features={{
-          title: "OUR APPROACH",
-          items: [
-            {
-              title: "User-Centric Design",
-              description: "Focus on creating intuitive and visually appealing interfaces that prioritize user experience.",
-              icon: <Layout />,
-            },
-            {
-              title: "Innovative Development",
-              description: "Build websites and apps that are functionally robust and technologically advanced.",
-              icon: <Smartphone />,
-            },
-            {
-              title: "Scalable Solutions",
-              description: "Develop solutions that grow with your business, ensuring long-term success and adaptability.",
-              icon: <Zap />,
-            },
-          ],
+          title: service.features_title || "OUR APPROACH",
+          items: features_items.map((item) => ({
+            ...item,
+            icon: ICON_MAP[item.icon_name] || <Check />,
+          })),
         }}
         gridCols={3}
+        relatedServices={related_services.map((s) => ({
+          ...s,
+          icon: ICON_MAP[s.icon_name] || <ArrowRight />,
+        }))}
       />
 
       <div className="bg-zinc-50 py-20">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-16 uppercase tracking-widest">{settings.service_web_design_development_offer_title}</h2>
+          <h2 className="text-3xl font-bold text-center mb-16 uppercase tracking-widest">
+            {settings.service_web_design_development_offer_title}
+          </h2>
           <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
             {offerFeatures.map((feature, idx) => (
-              <div key={idx} className="bg-white p-8 rounded-2xl shadow-sm text-center">
+              <div
+                key={idx}
+                className="bg-white p-8 rounded-2xl shadow-sm text-center"
+              >
                 <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-6 text-primary">
-                  {idx === 0 ? <ShoppingCart className="w-8 h-8" /> : idx === 1 ? <Building2 className="w-8 h-8" /> : <Target className="w-8 h-8" />}
+                  {idx === 0 ? (
+                    <ShoppingCart className="w-8 h-8" />
+                  ) : idx === 1 ? (
+                    <Building2 className="w-8 h-8" />
+                  ) : (
+                    <Target className="w-8 h-8" />
+                  )}
                 </div>
                 <h3 className="text-xl font-bold mb-4">{feature.title}</h3>
                 <p className="text-zinc-600 text-sm">{feature.description}</p>

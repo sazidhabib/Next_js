@@ -1,4 +1,17 @@
-import { TrendingUp, Code2, Megaphone, Sparkles, Target, Layers, Zap, Filter, BarChart, Wallet } from "lucide-react";
+import {
+  TrendingUp,
+  Code2,
+  Megaphone,
+  Sparkles,
+  Target,
+  Layers,
+  Zap,
+  Filter,
+  BarChart,
+  Wallet,
+  Check,
+  ArrowRight,
+} from "lucide-react";
 import ServiceHero from "../../components/ServiceHero";
 import ServiceContent from "../../components/ServiceContent";
 import PackagesSection from "../../components/PackagesSection";
@@ -11,7 +24,8 @@ import { getSettings } from "../../lib/getSettings";
 
 export const metadata = {
   title: "Digital Media Buying | Next Idea Solutions",
-  description: "Funnel-driven media buying solutions that generate higher ROI. We optimize your ad spend across all digital platforms.",
+  description:
+    "Funnel-driven media buying solutions that generate higher ROI. We optimize your ad spend across all digital platforms.",
 };
 
 export default async function DigitalMediaBuyingPage() {
@@ -23,7 +37,10 @@ export default async function DigitalMediaBuyingPage() {
         icon={<TrendingUp />}
         title={settings.service_digital_media_buying_hero_title}
         tagline={settings.service_digital_media_buying_hero_tagline}
-        image={settings.service_digital_media_buying_hero_image || "/Digital-Media.png"}
+        image={
+          settings.service_digital_media_buying_hero_image ||
+          "/Digital-Media.png"
+        }
       />
       <section className="py-20 bg-white overflow-hidden">
         <div className="container mx-auto px-4">
@@ -41,7 +58,10 @@ export default async function DigitalMediaBuyingPage() {
             </div>
             <div className="md:w-1/2">
               <img
-                src={settings.service_digital_media_buying_about_image || "/digitalmedia.jpeg"}
+                src={
+                  settings.service_digital_media_buying_about_image ||
+                  "/digitalmedia.jpeg"
+                }
                 alt="Digital Media Buying"
                 className="w-full h-auto drop-shadow-2xl"
               />
@@ -50,26 +70,45 @@ export default async function DigitalMediaBuyingPage() {
         </div>
       </section>
       <ServiceContent
-        overview={{
-
-        }}
+        overview={{}}
         features={{
           title: "Why Choose Us",
           items: (() => {
             try {
-              return JSON.parse(settings.service_digital_media_buying_features || "[]").map((item, idx) => {
-                const icons = [<Target className="w-6 h-6" />, <Layers className="w-6 h-6" />, <Zap className="w-6 h-6" />, <Filter className="w-6 h-6" />, <BarChart className="w-6 h-6" />, <Wallet className="w-6 h-6" />];
+              return JSON.parse(
+                settings.service_digital_media_buying_features || "[]",
+              ).map((item, idx) => {
+                const icons = [
+                  <Target className="w-6 h-6" />,
+                  <Layers className="w-6 h-6" />,
+                  <Zap className="w-6 h-6" />,
+                  <Filter className="w-6 h-6" />,
+                  <BarChart className="w-6 h-6" />,
+                  <Wallet className="w-6 h-6" />,
+                ];
                 return { ...item, icon: icons[idx % icons.length] };
               });
-            } catch(e) {
+            } catch (e) {
               return [];
             }
           })(),
         }}
         relatedServices={[
-          { title: "Creative Concept", link: "/services/creative-concept-execution", icon: <TrendingUp /> },
-          { title: "Web Development", link: "/services/web-design-development", icon: <Code2 /> },
-          { title: "Event & Activation", link: "/services/event-and-activation", icon: <Megaphone /> },
+          {
+            title: "Creative Concept",
+            link: "/services/creative-concept-execution",
+            icon: <TrendingUp />,
+          },
+          {
+            title: "Web Development",
+            link: "/services/web-design-development",
+            icon: <Code2 />,
+          },
+          {
+            title: "Event & Activation",
+            link: "/services/event-and-activation",
+            icon: <Megaphone />,
+          },
         ]}
       />
       <PackagesSection />

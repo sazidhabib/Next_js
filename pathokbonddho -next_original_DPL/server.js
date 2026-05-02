@@ -7,13 +7,20 @@ require("dotenv").config({ path: ".env.local" });
 require("dotenv").config();
 
 const dev = process.env.NODE_ENV !== "production";
-const nextApp = next({ dev });
-const handle = nextApp.getRequestHandler();
+const useNext = process.env.DISABLE_NEXT !== "true";
+
+let nextApp;
+let handle;
+
+if (useNext) {
+    nextApp = next({ dev });
+    handle = nextApp.getRequestHandler();
+}
 
 const sequelize = require("./db/database");
 const errorMiddleware = require("./middlewares/error-middleware");
 
-nextApp.prepare().then(() => {
+const setupExpress = () => {
     const app = express();
 
     // Ensure "uploads" folder exists
@@ -79,9 +86,11 @@ nextApp.prepare().then(() => {
     app.use(errorMiddleware);
 
     // Next.js Request Handler (Catch-all)
-    app.all(/(.*)/, (req, res) => {
-        return handle(req, res);
-    });
+    if (useNext) {
+        app.all(/(.*)/, (req, res) => {
+            return handle(req, res);
+        });
+    }
 
     // Start server
     const startServer = async () => {
@@ -108,7 +117,7 @@ nextApp.prepare().then(() => {
             }
 
             const PORT = process.env.PORT || 5000;
-            app.listen(PORT, () => console.log(`🚀 Unified Server running on port ${PORT}`));
+            app.listen(PORT, () => console.log(`🚀 ${useNext ? 'Unified' : 'API'} Server running on port ${PORT}`));
         } catch (error) {
             console.error("❌ Server startup failed:", error);
             process.exit(1);
@@ -116,4 +125,12 @@ nextApp.prepare().then(() => {
     };
 
     startServer();
-});
+};
+
+if (useNext) {
+    nextApp.prepare().then(() => {
+        setupExpress();
+    });
+} else {
+    setupExpress();
+}

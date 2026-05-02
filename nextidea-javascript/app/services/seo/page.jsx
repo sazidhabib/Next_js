@@ -11,8 +11,45 @@ import BlogsSection from "../../components/BlogsSection";
 import SEOProcess from "../../components/SEOProcess";
 import SEOTabbedServices from "../../components/SEOTabbedServices";
 import ClientsSection from "../../components/ClientsSection";
+import { query } from "@/app/lib/db";
+import { notFound } from "next/navigation";
 
+// Icon mapping for rendering
+const ICON_MAP = {
+  Search: <Search />,
+  BarChart2: <BarChart2 />,
+  Code: <Code />,
+  MapPin: <MapPin />,
+  ShoppingCart: <ShoppingCart />,
+  Smartphone: <Smartphone />,
+  Zap: <Zap />,
+  Check: <Check />,
+};
 
+async function getService() {
+  const services = await query("SELECT * FROM services WHERE slug = 'seo' AND is_active = 1");
+  return services[0];
+}
+
+export async function generateMetadata() {
+  const service = await getService();
+  if (!service) return { title: "SEO Services | Next Idea Solutions" };
+
+  return {
+    title: service.meta_title || "SEO Services | Next Idea Solutions",
+    description: service.meta_description || service.tagline,
+  };
+}
+
+export default async function SEOPage() {
+  const service = await getService();
+  if (!service) return notFound();
+
+  // Parse JSON fields
+  const features_items = typeof service.features_items === 'string' ? JSON.parse(service.features_items || '[]') : service.features_items;
+  const process_steps = typeof service.process_steps === 'string' ? JSON.parse(service.process_steps || '[]') : service.process_steps;
+  const related_services = typeof service.related_services === 'string' ? JSON.parse(service.related_services || '[]') : service.related_services;
+}
 export default function SEOPage() {
   const [settings, setSettings] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -82,19 +119,15 @@ export default function SEOPage() {
             </div>
           </div>
         </div>
-        <style jsx>{`
+        <style dangerouslySetInnerHTML={{ __html: `
           @keyframes scroll {
-            0% {
-              transform: translateX(0);
-            }
-            100% {
-              transform: translateX(-50%);
-            }
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
           }
           .animate-scroll {
             animation: scroll 40s linear infinite;
           }
-        `}</style>
+        `}} />
       </section>
 
       <section className="py-20 bg-white overflow-hidden">
@@ -122,19 +155,30 @@ export default function SEOPage() {
               />
             </div>
           </div>
-        </div>
-      </section>
+          </div>
+        </section>
+    
 
       <ServiceContent
         overview={{
           title: "",
           description: "",
         }}
-        relatedServices={[
-          { title: "SEO Audit", link: "/services/seo/seo-audit", icon: <FileText /> },
-          { title: "Local SEO", link: "/services/seo/local-seo", icon: <MapPin /> },
-          { title: "E-commerce SEO", link: "/services/seo/e-commerce-seo", icon: <ShoppingCart /> },
-        ]}
+        features={{
+          title: service.features_title || "What's Included",
+          items: features_items.map(item => ({
+            ...item,
+            icon: ICON_MAP[item.icon_name] || <Check />
+          })),
+        }}
+        process={{
+          title: service.process_title || "Our Process",
+          steps: process_steps,
+        }}
+        relatedServices={related_services.map(s => ({
+          ...s,
+          icon: ICON_MAP[s.icon_name] || <ArrowRight />
+        }))}
       />
 
       <SEOProcess 

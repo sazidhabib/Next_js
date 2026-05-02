@@ -88,11 +88,11 @@ export default function AdminLayoutClient({ children, user }) {
                 >
                     <span className="navbar-toggler-icon"></span>
                 </button>
-                
+
                 <div className="navbar-nav ms-auto me-3">
                     <div className="nav-item text-nowrap">
-                        <button 
-                            className="btn btn-link nav-link px-3 text-danger border-0" 
+                        <button
+                            className="btn btn-link nav-link px-3 text-danger border-0"
                             onClick={handleLogout}
                         >
                             Logout
@@ -104,9 +104,9 @@ export default function AdminLayoutClient({ children, user }) {
             <div className="d-flex flex-grow-1">
                 <aside
                     className={`bg-dark text-white p-0 ${isSidebarOpen ? '' : 'd-none d-md-block'}`}
-                    style={{ 
-                        width: '260px', 
-                        minHeight: 'calc(100vh - 48px)', 
+                    style={{
+                        width: '260px',
+                        minHeight: 'calc(100vh - 48px)',
                         overflowY: 'auto',
                         flexShrink: 0,
                         zIndex: 1030
@@ -180,17 +180,9 @@ export default function AdminLayoutClient({ children, user }) {
                                             All News
                                         </Link>
                                     </li>
-                                    <li className={`nav-item py-1 ${isActiveRoute('/admin/news?type=photo') || pathname?.includes('/admin/photo-news') ? 'bg-secondary rounded' : ''}`}>
-                                        <Link href="/admin/news?type=photo" className="nav-link text-white px-3">
-                                            Photo News
-                                        </Link>
-                                    </li>
-                                    <li className={`nav-item py-1 ${isActiveRoute('/admin/news?type=video') || pathname?.includes('/admin/video-news') ? 'bg-secondary rounded' : ''}`}>
-                                        <Link href="/admin/news?type=video" className="nav-link text-white px-3">
-                                            Video News
-                                        </Link>
-                                    </li>
-                                    <hr className="bg-secondary my-1 border-0" style={{height: '1px'}} />
+
+
+                                    <hr className="bg-secondary my-1 border-0" style={{ height: '1px' }} />
                                     <li className={`nav-item py-1 ${isActiveRoute('/admin/photo-news/create') ? 'bg-secondary rounded' : ''}`}>
                                         <Link href="/admin/photo-news/create" className="nav-link text-white px-3">
                                             Photo News Create

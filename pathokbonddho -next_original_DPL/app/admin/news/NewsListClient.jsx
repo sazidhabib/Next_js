@@ -13,7 +13,7 @@ const NewsListClient = ({ initialNews, initialTotalPages, isAdmin }) => {
     const [totalPages, setTotalPages] = useState(initialTotalPages || 1);
     const [search, setSearch] = useState('');
     const [type, setType] = useState('');
-    const [status, setStatus] = useState('');
+    const [status, setStatus] = useState('all');
     const [bulkAction, setBulkAction] = useState('');
     const [selected, setSelected] = useState([]);
 
@@ -83,8 +83,12 @@ const NewsListClient = ({ initialNews, initialTotalPages, isAdmin }) => {
         } catch (err) { toast.error("Delete failed"); }
     };
 
-    const getStatusBadge = (s) => {
+    const getStatusBadge = (n) => {
+        const s = n.status;
         const map = { published: 'success', draft: 'warning', scheduled: 'info' };
+        if (s === 'scheduled' && n.newsSchedule) {
+            return <Badge bg="info" title={`Scheduled for: ${new Date(n.newsSchedule).toLocaleString()}`}>scheduled</Badge>;
+        }
         return <Badge bg={map[s] || 'secondary'}>{s}</Badge>;
     };
 
@@ -101,7 +105,7 @@ const NewsListClient = ({ initialNews, initialTotalPages, isAdmin }) => {
                 <Col md={4}><Form.Control placeholder="Search news..." value={search} onChange={e => { setSearch(e.target.value); setPage(1); }} /></Col>
                 <Col md={2}>
                     <Form.Select value={status} onChange={e => { setStatus(e.target.value); setPage(1); }}>
-                        <option value="">All Status</option>
+                        <option value="all">All Status</option>
                         <option value="published">Published</option>
                         <option value="draft">Draft</option>
                         <option value="scheduled">Scheduled</option>
@@ -135,7 +139,7 @@ const NewsListClient = ({ initialNews, initialTotalPages, isAdmin }) => {
                                         <td><div className="fw-bold">{n.newsHeadline}</div><small className="text-muted">{n.newsHeadlineBangla}</small></td>
                                         <td><Badge bg={n.newsType === 'photo' ? 'primary' : n.newsType === 'video' ? 'danger' : 'secondary'}>{n.newsType || 'standard'}</Badge></td>
                                         <td>{n.Author?.name || n.author?.name || 'N/A'}</td>
-                                        <td>{getStatusBadge(n.status)}</td>
+                                        <td>{getStatusBadge(n)}</td>
                                         <td>{new Date(n.createdAt).toLocaleDateString()}</td>
                                         <td className="text-center">
                                             <div className="btn-group">
