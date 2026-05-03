@@ -207,6 +207,7 @@ const Header = () => {
               alt="Pathokbonddho Logo"
               width={100}
               height={35}
+              className="h-10 w-auto md:h-10 lg:h-12"
               style={{ objectFit: 'contain' }}
               priority
             />
@@ -233,6 +234,7 @@ const Header = () => {
               alt="Pathokbonddho Logo"
               width={100}
               height={35}
+              className="h-10 w-auto md:h-10 lg:h-12"
               style={{ objectFit: 'contain' }}
             />
           </Link>
