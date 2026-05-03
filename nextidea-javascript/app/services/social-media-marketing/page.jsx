@@ -10,14 +10,20 @@ import {
   Palette,
   Check,
   ArrowRight,
+  Video,
+  Filter,
+  BarChart2,
 } from "lucide-react";
 import ServiceHero from "../../components/ServiceHero";
 import ServiceContent from "../../components/ServiceContent";
 import PackagesSection from "../../components/PackagesSection";
+import PortfolioSection from "../../components/PortfolioSection";
+import CaseStudySection from "../../components/CaseStudySection";
 import ClientsSection from "../../components/ClientsSection";
 import FAQSection from "../../components/FAQSection";
 import CTASection from "../../components/CTASection";
 import { getSettings } from "../../lib/getSettings";
+import { notFound } from "next/navigation";
 
 // Icon mapping for rendering
 const ICON_MAP = {
@@ -31,10 +37,37 @@ const ICON_MAP = {
   Calendar: <Calendar />,
   Palette: <Palette />,
   Check: <Check />,
+  Video: <Video />,
+  Filter: <Filter />,
+  BarChart2: <BarChart2 />,
 };
+
+export async function generateMetadata() {
+  const settings = await getSettings();
+  return {
+    title: settings.service_social_media_marketing_hero_title || "Social Media Marketing | Next Idea Solutions",
+    description: settings.service_social_media_marketing_hero_tagline || "Engage with your audience and grow your brand presence across all social platforms.",
+  };
+}
 
 export default async function SocialMediaMarketingPage() {
   const settings = await getSettings();
+
+  if (!settings) return notFound();
+
+  // Helper for parsing JSON safely
+  const parseJson = (val, fallback = []) => {
+    if (!val) return fallback;
+    try {
+      return typeof val === 'string' ? JSON.parse(val) : val;
+    } catch (e) {
+      console.error("Error parsing JSON setting:", e);
+      return fallback;
+    }
+  };
+
+  const features_items = parseJson(settings.service_social_media_marketing_features);
+  const related_services = parseJson(settings.service_social_media_marketing_related_services);
 
   return (
     <>
@@ -78,15 +111,15 @@ export default async function SocialMediaMarketingPage() {
       <ServiceContent
         overview={{}}
         features={{
-          title: service.features_title || "What's Included",
+          title: settings.service_social_media_marketing_features_title || "What's Included",
           items: features_items.map((item) => ({
             ...item,
-            icon: ICON_MAP[item.icon_name] || <Check />,
+            icon: ICON_MAP[item.icon] || ICON_MAP[item.icon_name] || <Check />,
           })),
         }}
         relatedServices={related_services.map((s) => ({
           ...s,
-          icon: ICON_MAP[s.icon_name] || <ArrowRight />,
+          icon: ICON_MAP[s.icon] || ICON_MAP[s.icon_name] || <ArrowRight />,
         }))}
       />
       <PackagesSection
@@ -126,6 +159,8 @@ export default async function SocialMediaMarketingPage() {
           },
         ]}
       />
+      <PortfolioSection />
+      <CaseStudySection />
       <ClientsSection />
       <FAQSection />
       <CTASection />

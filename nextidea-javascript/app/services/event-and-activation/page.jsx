@@ -8,13 +8,18 @@ import {
   CheckCircle,
   Check,
   ArrowRight,
+  Video,
+  Globe,
 } from "lucide-react";
 import ServiceHero from "../../components/ServiceHero";
 import ServiceContent from "../../components/ServiceContent";
 import ClientsSection from "../../components/ClientsSection";
+import PortfolioSection from "../../components/PortfolioSection";
+import CaseStudySection from "../../components/CaseStudySection";
 import FAQSection from "../../components/FAQSection";
 import CTASection from "../../components/CTASection";
 import { getSettings } from "../../lib/getSettings";
+import { notFound } from "next/navigation";
 
 // Icon mapping for rendering
 const ICON_MAP = {
@@ -26,10 +31,37 @@ const ICON_MAP = {
   Target: <Target />,
   CheckCircle: <CheckCircle />,
   Check: <Check />,
+  Video: <Video />,
+  Globe: <Globe />,
 };
+
+export async function generateMetadata() {
+  const settings = await getSettings();
+  return {
+    title: settings.service_event_and_activation_hero_title || "Event and Activation | Next Idea Solutions",
+    description: settings.service_event_and_activation_hero_tagline || "We help you connect with your audience through creative events and brand activations.",
+  };
+}
 
 export default async function EventAndActivationPage() {
   const settings = await getSettings();
+
+  if (!settings) return notFound();
+
+  // Helper for parsing JSON safely
+  const parseJson = (val, fallback = []) => {
+    if (!val) return fallback;
+    try {
+      return typeof val === 'string' ? JSON.parse(val) : val;
+    } catch (e) {
+      console.error("Error parsing JSON setting:", e);
+      return fallback;
+    }
+  };
+
+  const features_items = parseJson(settings.service_event_and_activation_features);
+  const process_steps = parseJson(settings.service_event_and_activation_process);
+  const related_services = parseJson(settings.service_event_and_activation_related_services);
 
   return (
     <>
@@ -73,21 +105,26 @@ export default async function EventAndActivationPage() {
       <ServiceContent
         overview={{}}
         features={{
-          title: service.features_title || "Why Choose Us",
+          title: settings.service_event_and_activation_features_title || "Why Choose Us",
           items: features_items.map((item) => ({
             ...item,
-            icon: ICON_MAP[item.icon_name] || <Check />,
+            icon: ICON_MAP[item.icon] || ICON_MAP[item.icon_name] || <Check />,
           })),
         }}
         process={{
-          title: service.process_title || "What We Bring to the Table",
-          steps: process_steps,
+          title: settings.service_event_and_activation_process_title || "What We Bring to the Table",
+          steps: process_steps.map(step => ({
+            ...step,
+            icon: ICON_MAP[step.icon] || ICON_MAP[step.icon_name] || <Sparkles />
+          })),
         }}
         relatedServices={related_services.map((s) => ({
           ...s,
-          icon: ICON_MAP[s.icon_name] || <ArrowRight />,
+          icon: ICON_MAP[s.icon] || ICON_MAP[s.icon_name] || <ArrowRight />,
         }))}
       />
+      <PortfolioSection />
+      <CaseStudySection />
       <ClientsSection />
       <FAQSection />
       <CTASection />

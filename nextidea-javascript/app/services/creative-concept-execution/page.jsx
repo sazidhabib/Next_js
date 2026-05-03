@@ -17,6 +17,7 @@ import ServiceContent from "../../components/ServiceContent";
 import CTASection from "../../components/CTASection";
 import CaseStudySection from "../../components/CaseStudySection";
 import { getSettings } from "../../lib/getSettings";
+import { notFound } from "next/navigation";
 
 // Icon mapping for rendering
 const ICON_MAP = {
@@ -33,8 +34,33 @@ const ICON_MAP = {
   Check: <Check />,
 };
 
+export async function generateMetadata() {
+  const settings = await getSettings();
+  return {
+    title: settings.service_creative_concept_execution_hero_title || "Creative Concept & Execution | Next Idea Solutions",
+    description: settings.service_creative_concept_execution_hero_tagline || "Elevate your brand with Next Idea Solutions' creative service that blends strategy, design, and technology to bring your concept to life.",
+  };
+}
+
 export default async function CreativeConceptExecutionPage() {
   const settings = await getSettings();
+
+  if (!settings) return notFound();
+
+  // Helper for parsing JSON safely
+  const parseJson = (val, fallback = []) => {
+    if (!val) return fallback;
+    try {
+      return typeof val === 'string' ? JSON.parse(val) : val;
+    } catch (e) {
+      console.error("Error parsing JSON setting:", e);
+      return fallback;
+    }
+  };
+
+  const features_items = parseJson(settings.service_creative_concept_execution_features);
+  const process_steps = parseJson(settings.service_creative_concept_execution_process);
+  const related_services = parseJson(settings.service_creative_concept_execution_related_services);
 
   return (
     <>
@@ -69,19 +95,22 @@ export default async function CreativeConceptExecutionPage() {
       <ServiceContent
         overview={{}}
         features={{
-          title: service.features_title || "WHAT SETS US APART",
+          title: settings.service_creative_concept_execution_features_title || "WHAT SETS US APART",
           items: features_items.map((item) => ({
             ...item,
-            icon: ICON_MAP[item.icon_name] || <Check />,
+            icon: ICON_MAP[item.icon] || ICON_MAP[item.icon_name] || <Check />,
           })),
         }}
         process={{
-          title: service.process_title || "WHAT WE OFFER",
-          steps: process_steps,
+          title: settings.service_creative_concept_execution_process_title || "WHAT WE OFFER",
+          steps: process_steps.map(step => ({
+            ...step,
+            icon: ICON_MAP[step.icon] || ICON_MAP[step.icon_name] || <Sparkles />
+          })),
         }}
         relatedServices={related_services.map((s) => ({
           ...s,
-          icon: ICON_MAP[s.icon_name] || <ArrowRight />,
+          icon: ICON_MAP[s.icon] || ICON_MAP[s.icon_name] || <ArrowRight />,
         }))}
       />
       <CaseStudySection />

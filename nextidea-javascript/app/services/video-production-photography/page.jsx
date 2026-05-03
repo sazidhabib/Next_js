@@ -13,13 +13,17 @@ import {
   Plane,
   Check,
   ArrowRight,
+  Palette,
 } from "lucide-react";
 import ServiceHero from "../../components/ServiceHero";
 import ServiceContent from "../../components/ServiceContent";
 import ClientsSection from "../../components/ClientsSection";
+import PortfolioSection from "../../components/PortfolioSection";
+import CaseStudySection from "../../components/CaseStudySection";
 import FAQSection from "../../components/FAQSection";
 import CTASection from "../../components/CTASection";
 import { getSettings } from "../../lib/getSettings";
+import { notFound } from "next/navigation";
 
 // Icon mapping for rendering
 const ICON_MAP = {
@@ -36,10 +40,36 @@ const ICON_MAP = {
   Megaphone: <Megaphone />,
   Headphones: <Headphones />,
   Check: <Check />,
+  Palette: <Palette />,
 };
+
+export async function generateMetadata() {
+  const settings = await getSettings();
+  return {
+    title: settings.service_video_production_photography_hero_title || "Video Production & Photography | Next Idea Solutions",
+    description: settings.service_video_production_photography_hero_tagline || "We provide engaging and high-end video & photography services for your business.",
+  };
+}
 
 export default async function VideoProductionPhotographyPage() {
   const settings = await getSettings();
+
+  if (!settings) return notFound();
+
+  // Helper for parsing JSON safely
+  const parseJson = (val, fallback = []) => {
+    if (!val) return fallback;
+    try {
+      return typeof val === 'string' ? JSON.parse(val) : val;
+    } catch (e) {
+      console.error("Error parsing JSON setting:", e);
+      return fallback;
+    }
+  };
+
+  const features_items = parseJson(settings.service_video_production_photography_features);
+  const process_steps = parseJson(settings.service_video_production_photography_process);
+  const related_services = parseJson(settings.service_video_production_photography_related_services);
 
   return (
     <>
@@ -82,26 +112,31 @@ export default async function VideoProductionPhotographyPage() {
       </section>
 
       <ServiceContent
-        overview={{
-          title: "",
-          description: "",
-        }}
+        overview={{}}
         features={{
-          title: service.features_title || "What's Included",
-          items: features_items.map((item) => ({
-            ...item,
-            icon: ICON_MAP[item.icon_name] || <Check />,
-          })),
+          title: settings.service_video_production_photography_features_title || "What's Included",
+          items: features_items.map((item) => {
+            if (typeof item === 'string') return { title: item, icon: <Check /> };
+            return {
+              ...item,
+              icon: ICON_MAP[item.icon] || ICON_MAP[item.icon_name] || <Check />,
+            };
+          }),
         }}
         process={{
-          title: service.process_title || "Our Process",
-          steps: process_steps,
+          title: settings.service_video_production_photography_process_title || "Our Process",
+          steps: process_steps.map(step => ({
+            ...step,
+            icon: ICON_MAP[step.icon] || ICON_MAP[step.icon_name] || <Sparkles />
+          })),
         }}
         relatedServices={related_services.map((s) => ({
           ...s,
-          icon: ICON_MAP[s.icon_name] || <ArrowRight />,
+          icon: ICON_MAP[s.icon] || ICON_MAP[s.icon_name] || <ArrowRight />,
         }))}
       />
+      <PortfolioSection />
+      <CaseStudySection />
       <ClientsSection />
       <FAQSection />
       <CTASection />

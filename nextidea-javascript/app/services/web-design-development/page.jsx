@@ -12,16 +12,19 @@ import {
   TrendingUp,
   Check,
   ArrowRight,
+  Search,
 } from "lucide-react";
 import ServiceHero from "../../components/ServiceHero";
 import ServiceContent from "../../components/ServiceContent";
 import PackagesSection from "../../components/PackagesSection";
-import ProjectGrid from "../../components/ProjectGrid";
+import PortfolioSection from "../../components/PortfolioSection";
+import CaseStudySection from "../../components/CaseStudySection";
 import BlogsSection from "../../components/BlogsSection";
 import ClientsSection from "../../components/ClientsSection";
 import FAQSection from "../../components/FAQSection";
 import CTASection from "../../components/CTASection";
 import { getSettings } from "../../lib/getSettings";
+import { notFound } from "next/navigation";
 
 // Icon mapping for rendering
 const ICON_MAP = {
@@ -37,17 +40,36 @@ const ICON_MAP = {
   Palette: <Palette />,
   TrendingUp: <TrendingUp />,
   Check: <Check />,
+  Search: <Search />,
 };
+
+export async function generateMetadata() {
+  const settings = await getSettings();
+  return {
+    title: settings.service_web_design_development_hero_title || "Web Design & Development | Next Idea Solutions",
+    description: settings.service_web_design_development_hero_tagline || "Strong marketing your brand with high-converting landing page, website or app.",
+  };
+}
 
 export default async function WebDesignDevelopmentPage() {
   const settings = await getSettings();
 
-  let offerFeatures = [];
-  try {
-    offerFeatures = JSON.parse(
-      settings.service_web_design_development_offer_features || "[]",
-    );
-  } catch (e) {}
+  if (!settings) return notFound();
+
+  // Helper for parsing JSON safely
+  const parseJson = (val, fallback = []) => {
+    if (!val) return fallback;
+    try {
+      return typeof val === 'string' ? JSON.parse(val) : val;
+    } catch (e) {
+      console.error("Error parsing JSON setting:", e);
+      return fallback;
+    }
+  };
+
+  const features_items = parseJson(settings.service_web_design_development_features);
+  const related_services = parseJson(settings.service_web_design_development_related_services);
+  const offerFeatures = parseJson(settings.service_web_design_development_offer_features);
 
   return (
     <>
@@ -87,16 +109,16 @@ export default async function WebDesignDevelopmentPage() {
       <ServiceContent
         overview={{}}
         features={{
-          title: service.features_title || "OUR APPROACH",
+          title: settings.service_web_design_development_features_title || "OUR APPROACH",
           items: features_items.map((item) => ({
             ...item,
-            icon: ICON_MAP[item.icon_name] || <Check />,
+            icon: ICON_MAP[item.icon] || ICON_MAP[item.icon_name] || <Check />,
           })),
         }}
         gridCols={3}
         relatedServices={related_services.map((s) => ({
           ...s,
-          icon: ICON_MAP[s.icon_name] || <ArrowRight />,
+          icon: ICON_MAP[s.icon] || ICON_MAP[s.icon_name] || <ArrowRight />,
         }))}
       />
 
@@ -128,7 +150,8 @@ export default async function WebDesignDevelopmentPage() {
         </div>
       </div>
 
-      <ProjectGrid categoryId={12} title="OUR DESIGNED WEBSITES" />
+      <PortfolioSection />
+      <CaseStudySection />
 
       <PackagesSection
         title="OUR WEBSITE PACKAGES"

@@ -15,6 +15,7 @@ import {
 import ServiceHero from "../../components/ServiceHero";
 import ServiceContent from "../../components/ServiceContent";
 import PackagesSection from "../../components/PackagesSection";
+import PortfolioSection from "../../components/PortfolioSection";
 import CaseStudySection from "../../components/CaseStudySection";
 import ClientsSection from "../../components/ClientsSection";
 import PartnerSection from "../../components/PartnerSection";
@@ -37,10 +38,7 @@ export default async function DigitalMediaBuyingPage() {
         icon={<TrendingUp />}
         title={settings.service_digital_media_buying_hero_title}
         tagline={settings.service_digital_media_buying_hero_tagline}
-        image={
-          settings.service_digital_media_buying_hero_image ||
-          "/Digital-Media.png"
-        }
+
       />
       <section className="py-20 bg-white overflow-hidden">
         <div className="container mx-auto px-4">
@@ -112,6 +110,7 @@ export default async function DigitalMediaBuyingPage() {
         ]}
       />
       <PackagesSection />
+      <PortfolioSection />
       <CaseStudySection />
       <ClientsSection />
       <PartnerSection />

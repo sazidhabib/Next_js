@@ -7,6 +7,7 @@ import FAQSection from "../../components/FAQSection";
 import BlogsSection from "../../components/BlogsSection";
 import SEOProcess from "../../components/SEOProcess";
 import SEOTabbedServices from "../../components/SEOTabbedServices";
+import CaseStudySection from "../../components/CaseStudySection";
 import ClientsSection from "../../components/ClientsSection";
 import { getSettings } from "../../lib/getSettings";
 import { notFound } from "next/navigation";
@@ -217,34 +218,7 @@ export default async function SEOPage() {
         </div>
       </section>
 
-      {/* Case Studies Section */}
-      <section className="py-20 bg-white">
-        <div className="container mx-auto px-4">
-          <div className="max-w-3xl mx-auto text-center mb-16">
-            <h2 className="text-4xl font-bold text-zinc-900 mb-4">{settings.service_seo_case_title || "See Next Idea Has Helped Clients"}</h2>
-            <p className="text-lg text-zinc-600">{settings.service_seo_case_desc || "Our portfolio showcases successful SEO projects across various industries with measurable results."}</p>
-          </div>
-          <div className="grid md:grid-cols-3 gap-8">
-            {parseJson(settings.service_seo_case_studies).map((project, index) => (
-              <div key={index} className="rounded-xl overflow-hidden border border-zinc-200 hover:shadow-xl transition-all group">
-                <div className="h-64 bg-gradient-to-br from-primary/10 to-primary/5 overflow-hidden flex items-center justify-center">
-                  {project.image && (
-                    <img src={project.image} alt={project.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" />
-                  )}
-                </div>
-                <div className="p-6 bg-white">
-                  <h3 className="text-xl font-bold text-zinc-900 mb-2">{project.title}</h3>
-                  <p className="text-zinc-600 mb-4">{project.description}</p>
-                  <div className="flex items-center gap-2 text-primary font-semibold">
-                    <TrendingUp className="w-4 h-4" />
-                    {project.stats}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      <CaseStudySection />
 
       {/* Why Choose Us Section */}
       <section className="py-20 bg-zinc-50">
