@@ -61,31 +61,41 @@ const GridSection = ({ section }) => {
     const firstRowCols = (firstRow.Columns || firstRow.columns || []).sort((a, b) => a.colOrder - b.colOrder);
     const gridTemplateColumns = firstRowCols.map(() => `minmax(0, 1fr)`).join(' ');
 
-    // ─── Mobile layout: merged cells first, then strict grid order ───
+    // ─── Mobile layout: lead item, then ads, then remaining cells ───
     const mergedCells = [];
-    const orderedRemainingCells = [];
+    const ads = [];
+    const newsCells = [];
 
-    gridCells.forEach(({ col, gridRow, gridColumn, key, rowIndex, colIndex }) => {
-        // Only treat cells that span MULTIPLE COLUMNS as merged (shown at top)
-        // Cells that span rows but not columns look like regular cells, keep them in grid order
-        const colSpan = col.colSpan || 1;
-        const isMerged = col.masterCell === true && colSpan > 1;
-
+    gridCells.forEach(({ col, key, rowIndex, colIndex }) => {
         // Skip empty/text-only cells
         if (!col.contentType || col.contentType === 'text') return;
+
+        if (col.contentType === 'ad' || col.contentType === 'ads') {
+            ads.push({ col, key });
+            return;
+        }
+
+        const colSpan = col.colSpan || 1;
+        const isMerged = col.masterCell === true && colSpan > 1;
 
         if (isMerged) {
             mergedCells.push({ col, key, rowIndex, colIndex });
         } else {
-            orderedRemainingCells.push({ col, key, rowIndex, colIndex });
+            newsCells.push({ col, key, rowIndex, colIndex });
         }
     });
 
-    // Sort remaining cells by strict grid position: (0,0) → (0,1) → (0,2) → (1,0) → (1,1) → ...
-    orderedRemainingCells.sort((a, b) => a.rowIndex - b.rowIndex || a.colIndex - b.colIndex);
+    // Sort by grid position
+    newsCells.sort((a, b) => a.rowIndex - b.rowIndex || a.colIndex - b.colIndex);
+    mergedCells.sort((a, b) => a.rowIndex - b.rowIndex || a.colIndex - b.colIndex);
 
+    // If no merged cells, the first news item is the "lead"
+    let leadNews = null;
+    if (mergedCells.length === 0 && newsCells.length > 0) {
+        leadNews = newsCells.shift();
+    }
 
-    // Build mobile rows from remaining cells (merged cells rendered separately at the top)
+    // Build mobile rows from remaining news cells
     const mobileRows = [];
     let contentBuffer = [];
     let alternatingType = 'title-image-left';
@@ -112,11 +122,11 @@ const GridSection = ({ section }) => {
         }
     };
 
-    orderedRemainingCells.forEach(({ col, key }) => {
-        if (col.contentType === 'ad' || col.contentType === 'ads' || col.design === 'text-inside-image') {
+    newsCells.forEach(({ col, key }) => {
+        if (col.design === 'text-inside-image') {
             flushContentBuffer();
             mobileRows.push({ 
-                type: col.design === 'text-inside-image' ? 'text-inside-image' : 'ad', 
+                type: 'text-inside-image', 
                 cells: [{ col, key }] 
             });
         } else {
@@ -239,7 +249,7 @@ const GridSection = ({ section }) => {
 
                 {/* ═══ MOBILE LAYOUT (below md) ═══ */}
                 <div className="d-md-none mobile-section-layout">
-                    {/* 1. Merged cells always at the top */}
+                    {/* 1. Lead content: Merged cells OR first news item */}
                     {mergedCells.map(({ col, key }) => (
                         <div key={`mobile-merged-${key}`} className="mb-3">
                             <GridCell 
@@ -249,9 +259,25 @@ const GridSection = ({ section }) => {
                         </div>
                     ))}
 
-                    {/* 2. Remaining cells in strict grid position order (1,1)→(1,2)→(1,3)→(2,1)→... */}
+                    {leadNews && (
+                        <div key={`mobile-lead-${leadNews.key}`} className="mb-3">
+                            <GridCell 
+                                cell={{ ...leadNews.col, design: leadNews.col.design === 'text-inside-image' ? 'text-inside-image' : 'image-top' }} 
+                                isPriority={false} 
+                            />
+                        </div>
+                    )}
+
+                    {/* 2. All Ads for this section */}
+                    {ads.map(({ col, key }) => (
+                        <div key={`mobile-ad-${key}`} className="mb-3">
+                            <GridCell cell={col} isPriority={false} />
+                        </div>
+                    ))}
+
+                    {/* 3. Remaining cells in alternating style */}
                     {mobileRows.map((row, rowIdx) => {
-                        if (row.type === 'ad' || row.type === 'text-inside-image') {
+                        if (row.type === 'text-inside-image') {
                             return (
                                 <div key={`mobile-row-${rowIdx}`} className="mb-3">
                                     {row.cells.map(({ col, key }) => (

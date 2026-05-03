@@ -11,7 +11,7 @@ const Footer = () => {
     const { settings } = useSettings();
 
     return (
-        <footer className="bg-dark text-white pt-5 pb-3 mt-auto custom-font" style={{ borderTop: '4px solid #006a60' }}>
+        <footer className="bg-dark text-white pt-5 pb-3 mt-auto custom-font" style={{ borderTop: '4px solid #ffffffff' }}>
             <div className="container">
                 <div className="row mb-4">
                     {/* Brand Column */}
@@ -26,13 +26,11 @@ const Footer = () => {
                                 style={{ objectFit: 'contain' }}
                             />
                         </Link>
-                        <p className="text-light opacity-75 medium lh-lg">
-                            {settings?.footerDescription || ''}
-                        </p>
-                        <div className="d-flex justify-content-center gap-3 mt-4">
+
+                        <div className="d-flex justify-content-center gap-3 mt-4 social-icons">
                             {settings?.social?.facebook && (
                                 <a href={settings.social.facebook} target="_blank" rel="noopener noreferrer" className="text-white hover-opacity transition" style={{ transition: 'opacity 0.2s', opacity: 0.8 }} onMouseOver={e => e.currentTarget.style.opacity = 1} onMouseOut={e => e.currentTarget.style.opacity = 0.8}>
-                                    <i className="fab fa-facebook-f fs-5"></i>
+                                    <i className="fa-brands fa-facebook-f fs-5"></i>
                                 </a>
                             )}
                             {settings?.social?.twitter && (
@@ -42,17 +40,17 @@ const Footer = () => {
                             )}
                             {settings?.social?.instagram && (
                                 <a href={settings.social.instagram} target="_blank" rel="noopener noreferrer" className="text-white hover-opacity transition" style={{ transition: 'opacity 0.2s', opacity: 0.8 }} onMouseOver={e => e.currentTarget.style.opacity = 1} onMouseOut={e => e.currentTarget.style.opacity = 0.8}>
-                                    <i className="fab fa-instagram fs-5"></i>
+                                    <i className="fa-brands fa-instagram fs-5"></i>
                                 </a>
                             )}
                             {settings?.social?.linkedin && (
                                 <a href={settings.social.linkedin} target="_blank" rel="noopener noreferrer" className="text-white hover-opacity transition" style={{ transition: 'opacity 0.2s', opacity: 0.8 }} onMouseOver={e => e.currentTarget.style.opacity = 1} onMouseOut={e => e.currentTarget.style.opacity = 0.8}>
-                                    <i className="fab fa-linkedin-in fs-5"></i>
+                                    <i className="fa-brands fa-linkedin-in fs-5"></i>
                                 </a>
                             )}
                             {settings?.social?.youtube && (
                                 <a href={settings.social.youtube} target="_blank" rel="noopener noreferrer" className="text-white hover-opacity transition" style={{ transition: 'opacity 0.2s', opacity: 0.8 }} onMouseOver={e => e.currentTarget.style.opacity = 1} onMouseOut={e => e.currentTarget.style.opacity = 0.8}>
-                                    <i className="fab fa-youtube fs-5"></i>
+                                    <i className="fa-brands fa-youtube fs-5"></i>
                                 </a>
                             )}
                         </div>
