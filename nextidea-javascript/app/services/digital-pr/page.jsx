@@ -4,6 +4,7 @@ import DigitalPRProcess from "../../components/DigitalPRProcess";
 import WhyTrustDigitalPR from "../../components/WhyTrustDigitalPR";
 import PartnerSection from "../../components/PartnerSection";
 import ServiceContactForm from "../../components/ServiceContactForm";
+import { getSettings } from "../../lib/getSettings";
 
 export const metadata = {
   title: "Digital PR Services | Next Idea Solutions",
@@ -17,11 +18,20 @@ const mediaPartners = [
   { name: "Jugantor", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Jugantor_Logo.svg/1024px-Jugantor_Logo.svg.png" },
 ];
 
-export default function DigitalPRPage() {
+export default async function DigitalPRPage() {
+  const settings = await getSettings();
+
   return (
     <main className="min-h-screen bg-white">
-      <DigitalPRHero />
-      <WhatIsDigitalPR />
+      <DigitalPRHero 
+        title={settings.service_digital_pr_hero_title}
+        tagline={settings.service_digital_pr_hero_tagline}
+        description={settings.service_digital_pr_hero_description}
+      />
+      <WhatIsDigitalPR 
+        title={settings.service_digital_pr_about_title}
+        description={settings.service_digital_pr_about_desc}
+      />
       <DigitalPRProcess />
       <WhyTrustDigitalPR />
       <PartnerSection 

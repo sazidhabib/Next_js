@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
 
-export default function DesignPrintingHero() {
+export default function DesignPrintingHero({ title, tagline, description, image }) {
   return (
     <section className="relative min-h-[80vh] flex items-center pt-32 pb-20 overflow-hidden bg-white">
       {/* Wavy Background Elements */}
@@ -38,13 +38,11 @@ export default function DesignPrintingHero() {
             className="flex-1 text-left"
           >
             <h1 className="text-4xl md:text-6xl font-bold text-black mb-6 leading-tight">
-              <span className="text-primary">Redefine</span> Your Corporate Image with Premium Designs and Customized Printing Solutions
+              {title ? title.split(' ').map((word, i) => i === 0 ? <span key={i} className="text-primary">{word} </span> : word + ' ') : <><span className="text-primary">Redefine</span> Your Corporate Image with Premium Designs and Customized Printing Solutions</>}
             </h1>
 
             <p className="text-lg text-zinc-600 mb-8 max-w-2xl">
-              Elevate your brand presence with custom-designed diaries,
-              calendars, notebooks, annual reports, and corporate gifts—perfect tools
-              to keep your brand top-of-mind and make a lasting impression.
+              {description || "Elevate your brand presence with custom-designed diaries, calendars, notebooks, annual reports, and corporate gifts—perfect tools to keep your brand top-of-mind and make a lasting impression."}
             </p>
 
             <motion.div
@@ -71,7 +69,7 @@ export default function DesignPrintingHero() {
             <div className="relative w-full aspect-square md:aspect-[4/3] rounded-3xl overflow-hidden shadow-2xl border-4 border-white">
               <div className="absolute inset-0 bg-primary opacity-10"></div>
               <Image
-                src="/dp1.jpeg"
+                src={image || "/dp1.jpeg"}
                 alt="Premium Brochure Design"
                 fill
                 className="object-cover"

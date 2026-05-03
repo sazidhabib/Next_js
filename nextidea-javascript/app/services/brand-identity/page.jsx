@@ -1,12 +1,24 @@
-import { Palette, Box, Layers, Package, BookOpen, Sparkles, Check, ArrowRight } from "lucide-react";
+import {
+  Palette,
+  Box,
+  Layers,
+  Package,
+  BookOpen,
+  Sparkles,
+  Check,
+  ArrowRight,
+  Code2,
+  Megaphone,
+} from "lucide-react";
 import ServiceHero from "../../components/ServiceHero";
 import ServiceContent from "../../components/ServiceContent";
 import PortfolioSection from "../../components/PortfolioSection";
+import CaseStudySection from "../../components/CaseStudySection";
 import ClientsSection from "../../components/ClientsSection";
 import FAQSection from "../../components/FAQSection";
 import BlogsSection from "../../components/BlogsSection";
 import CTASection from "../../components/CTASection";
-import { query } from "@/app/lib/db";
+import { getSettings } from "../../lib/getSettings";
 import { notFound } from "next/navigation";
 
 // Icon mapping for rendering
@@ -18,92 +30,93 @@ const ICON_MAP = {
   BookOpen: <BookOpen />,
   Sparkles: <Sparkles />,
   Check: <Check />,
+  Code2: <Code2 />,
+  Megaphone: <Megaphone />,
 };
 
-async function getService() {
-  const services = await query("SELECT * FROM services WHERE slug = 'brand-identity' AND is_active = 1");
-  return services[0];
-}
-
 export async function generateMetadata() {
-  const service = await getService();
-  if (!service) return { title: "Brand Identity | Next Idea Solutions" };
-
+  const settings = await getSettings();
   return {
-    title: service.meta_title || "Brand Identity | Next Idea Solutions",
-    description: service.meta_description || service.tagline,
+    title: settings.service_brand_identity_hero_title || "Brand Identity | Next Idea Solutions",
+    description: settings.service_brand_identity_hero_tagline || "We help creating strong brand identity that will separate you from the noise.",
   };
 }
 
 export default async function BrandIdentityPage() {
-  const service = await getService();
-  if (!service) return notFound();
+  const settings = await getSettings();
 
-  // Parse JSON fields
-  const features_items = typeof service.features_items === 'string' ? JSON.parse(service.features_items || '[]') : service.features_items;
-  const related_services = typeof service.related_services === 'string' ? JSON.parse(service.related_services || '[]') : service.related_services;
+  if (!settings) return notFound();
+
+  // Helper for parsing JSON safely
+  const parseJson = (val, fallback = []) => {
+    if (!val) return fallback;
+    try {
+      return typeof val === 'string' ? JSON.parse(val) : val;
+    } catch (e) {
+      console.error("Error parsing JSON setting:", e);
+      return fallback;
+    }
+  };
+
+  const features_items = parseJson(settings.service_brand_identity_features);
+  const related_services = parseJson(settings.service_brand_identity_related_services);
 
   return (
     <>
       <ServiceHero
-        icon={ICON_MAP[service.hero_icon] || <Palette />}
-        title={service.title}
-        tagline={service.tagline}
+        icon={<Palette />}
+        title={settings.service_brand_identity_hero_title}
+        tagline={settings.service_brand_identity_hero_tagline}
         buttonText="Explore Our Service"
-        image={service.hero_image}
       />
-      
-      {service.about_title && (
-        <section className="py-20 bg-white overflow-hidden">
-          <div className="container mx-auto px-4">
-            <div className="flex flex-col md:flex-row items-center gap-12">
-              <div className="md:w-1/2">
-                <h2 className="text-4xl md:text-5xl font-bold text-zinc-900 mb-6 leading-tight">
-                  {service.about_title.split(' ').map((word, i, arr) => 
-                    i === arr.length - 1 ? <span key={i} className="text-primary">{word}</span> : word + ' '
-                  )}
-                </h2>
-                <div 
-                  className="text-lg text-zinc-600 mb-8 leading-relaxed whitespace-pre-line"
-                  dangerouslySetInnerHTML={{ __html: service.about_description }}
-                />
-                <button className="bg-primary text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20">
-                  GET A FREE QUOTE
-                </button>
-              </div>
-              <div className="md:w-1/2">
-                {service.about_image && (
-                  <img
-                    src={service.about_image}
-                    alt={service.about_title}
-                    className="w-full h-auto drop-shadow-2xl rounded-2xl"
-                  />
-                )}
-              </div>
+      <section className="py-20 bg-white overflow-hidden">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col md:flex-row items-center gap-12">
+            <div className="md:w-1/2">
+              <h2 className="text-4xl md:text-5xl font-bold text-zinc-900 mb-6 leading-tight">
+                {settings.service_brand_identity_about_title}
+              </h2>
+              <p className="text-lg font-bold text-zinc-600 mb-8 leading-relaxed">
+                {settings.service_brand_identity_about_subtitle}
+              </p>
+              <p className="text-lg text-zinc-600 mb-8 leading-relaxed">
+                {settings.service_brand_identity_about_desc}
+              </p>
+              <button className="bg-primary text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20">
+                GET A FREE QUOTE
+              </button>
+            </div>
+            <div className="md:w-1/2">
+              <img
+                src={settings.service_brand_identity_about_image}
+                alt="Brand Identity"
+                className="w-full h-auto drop-shadow-2xl"
+              />
             </div>
           </div>
-        </section>
-      )}
+        </div>
+      </section>
 
       <ServiceContent
-        overview={{
-          title: "",
-          description: "",
-        }}
+        overview={{}}
         features={{
-          title: service.features_title || "WHAT WE OFFER",
-          items: features_items.map(item => ({
-            ...item,
-            icon: ICON_MAP[item.icon_name] || <Check />
-          })),
+          title: settings.service_brand_identity_features_title || "WHAT WE OFFER",
+          items: features_items.map((item, idx) => {
+            const icons = [<Palette />, <Package />, <BookOpen />];
+            return { 
+              ...item, 
+              icon: ICON_MAP[item.icon] || ICON_MAP[item.icon_name] || icons[idx % icons.length] 
+            };
+          }),
         }}
         gridCols={3}
-        relatedServices={related_services.map(s => ({
+        relatedServices={related_services.map((s) => ({
           ...s,
-          icon: ICON_MAP[s.icon_name] || <ArrowRight />
+          icon: ICON_MAP[s.icon] || ICON_MAP[s.icon_name] || <ArrowRight />,
         }))}
       />
       <PortfolioSection />
+      <CaseStudySection />
       <CTASection
         title="Embark on a creative journey with Next Idea Solution."
         description="Let's craft a narrative that captivates and converts."

@@ -13,7 +13,21 @@ export default function PageContentManager() {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState({ type: "", text: "" });
   const [activeTab, setActiveTab] = useState("home");
+  const [activeServiceTab, setActiveServiceTab] = useState("seo");
   const [editJsonAsCode, setEditJsonAsCode] = useState({});
+
+  const servicePagesList = [
+    { id: "seo", label: "SEO Services", prefix: "service_seo_" },
+    { id: "web_design_development", label: "Web Design", prefix: "service_web_design_development_" },
+    { id: "brand_identity", label: "Brand Identity", prefix: "service_brand_identity_" },
+    { id: "creative_concept_execution", label: "Creative Concept", prefix: "service_creative_concept_execution_" },
+    { id: "digital_media_buying", label: "Digital Media", prefix: "service_digital_media_buying_" },
+    { id: "design_printing", label: "Design & Printing", prefix: "service_design_printing_" },
+    { id: "digital_pr", label: "Digital PR", prefix: "service_digital_pr_" },
+    { id: "event_and_activation", label: "Event & Activation", prefix: "service_event_and_activation_" },
+    { id: "social_media_marketing", label: "Social Media", prefix: "service_social_media_marketing_" },
+    { id: "video_production_photography", label: "Video Production", prefix: "service_video_production_photography_" },
+  ];
 
   useEffect(() => {
     fetchSettings();
@@ -169,6 +183,15 @@ export default function PageContentManager() {
 
   const homeSettings = settings.filter(s => s.setting_key.startsWith("home_"));
   const aboutSettings = settings.filter(s => s.setting_key.startsWith("about_"));
+  const currentServicePrefix = servicePagesList.find(s => s.id === activeServiceTab)?.prefix || "service_seo_";
+  const serviceSettings = settings.filter(s => s.setting_key.startsWith(currentServicePrefix));
+
+  const getCurrentTabSettings = () => {
+    if (activeTab === "home") return homeSettings;
+    if (activeTab === "about") return aboutSettings;
+    if (activeTab === "services") return serviceSettings;
+    return [];
+  };
 
   if (loading) {
     return (
@@ -217,7 +240,34 @@ export default function PageContentManager() {
         >
           About Us Page
         </button>
+        <button
+          onClick={() => setActiveTab("services")}
+          className={`px-6 py-3 text-sm font-bold transition-all border-b-2 ${
+            activeTab === "services"
+              ? "border-primary text-primary"
+              : "border-transparent text-zinc-500 hover:text-zinc-300"
+          }`}
+        >
+          Service Pages
+        </button>
       </div>
+
+      {activeTab === "services" && (
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 bg-zinc-900/50 p-4 rounded-xl border border-zinc-800">
+          <label className="text-sm font-medium text-zinc-400">Select Service Page:</label>
+          <div className="flex flex-wrap gap-2">
+            <select 
+              value={activeServiceTab}
+              onChange={(e) => setActiveServiceTab(e.target.value)}
+              className="bg-zinc-800 border border-zinc-700 text-white text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+            >
+              {servicePagesList.map((service) => (
+                <option key={service.id} value={service.id}>{service.label}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+      )}
 
       {message.text && (
         <motion.div
@@ -241,7 +291,7 @@ export default function PageContentManager() {
       {/* Page Sections */}
       <div className="grid gap-8">
         <div className="grid lg:grid-cols-2 gap-6">
-          {(activeTab === "home" ? homeSettings : aboutSettings).map((setting) => {
+          {getCurrentTabSettings().map((setting) => {
             const isImage = setting.setting_key.includes("image");
             const isJson = setting.setting_type === "json";
             const showAsCode = editJsonAsCode[setting.setting_key];
@@ -301,7 +351,7 @@ export default function PageContentManager() {
                                           className="w-full px-4 py-2 bg-zinc-900 border border-zinc-800 rounded-xl text-white text-sm focus:outline-none focus:border-primary transition-all"
                                           rows={2}
                                         />
-                                      ) : field === 'imageUrl' ? (
+                                      ) : field.toLowerCase().includes('image') ? (
                                         <div className="space-y-3">
                                           {item[field] && (
                                             <div className="relative aspect-video rounded-lg overflow-hidden border border-zinc-800 bg-zinc-900">

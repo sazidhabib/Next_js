@@ -32,10 +32,14 @@ export default function FAQSection({
           if (faqData) {
             setItems(JSON.parse(faqData));
           } else if (derivedId !== 'home') {
-            // Fallback to global FAQs if service-specific ones don't exist
-            if (data.data.global_faqs) {
+            // Fallback to home then global FAQs if service-specific ones don't exist
+            if (data.data.home_faqs) {
+              setItems(JSON.parse(data.data.home_faqs));
+            } else if (data.data.global_faqs) {
               setItems(JSON.parse(data.data.global_faqs));
             }
+          } else if (data.data.global_faqs) {
+            setItems(JSON.parse(data.data.global_faqs));
           }
         }
       })

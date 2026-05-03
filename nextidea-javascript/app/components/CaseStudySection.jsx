@@ -1,34 +1,55 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
+import { usePathname } from "next/navigation";
 
-const caseStudies = [
-  {
-    id: 1,
-    title: "Turning Conversations into Conversions: The Lead Generation Success Story of Western Consulting Firm",
-    category: "Lead Generation",
-    image: "/Case-study.jpg",
-    link: "/case-study/western-consulting",
-  },
-  {
-    id: 2,
-    title: "From Zero to High-Intent Traffic: How Mostofa Pipe Built SEO Visibility in Just 5 Months",
-    category: "SEO",
-    image: "/CaseStudy2.jpg",
-    link: "/case-study/mostofa-pipe",
-  },
-  {
-    id: 3,
-    title: "How Next Idea Solution Drove 300X ROAS for Urban's Premium Real Estate Project in Dhaka",
-    category: "Real Estate",
-    image: "/case-study3.jpg",
-    link: "/case-study/urban-imperials",
-  },
-];
+export default function CaseStudySection({ pageId, title: initialTitle, description: initialDescription }) {
+  const [studies, setStudies] = useState([]);
+  const [title, setTitle] = useState(initialTitle || "");
+  const [description, setDescription] = useState(initialDescription || "");
+  const [loading, setLoading] = useState(true);
+  const pathname = usePathname();
 
-export default function CaseStudySection() {
+  useEffect(() => {
+    const pathSegments = pathname.split('/').filter(Boolean);
+    const lastSegment = pathSegments[pathSegments.length - 1] || 'home';
+    const derivedId = pageId || (pathname === '/' ? 'home' : lastSegment);
+    const settingKey = `${derivedId}_case_studies`;
+
+    fetch("/api/settings")
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          const caseData = data.data[settingKey];
+          if (caseData) {
+            setStudies(JSON.parse(caseData));
+          } else if (derivedId !== 'home') {
+            // Fallback to home case studies if service-specific one doesn't exist
+            if (data.data.home_case_studies) {
+              setStudies(JSON.parse(data.data.home_case_studies));
+            } else if (data.data.global_case_studies) {
+              setStudies(JSON.parse(data.data.global_case_studies));
+            }
+          } else if (data.data.global_case_studies) {
+            setStudies(JSON.parse(data.data.global_case_studies));
+          }
+
+          // Handle titles
+          const titleKey = `${derivedId}_case_title`;
+          const descKey = `${derivedId}_case_desc`;
+          if (data.data[titleKey]) setTitle(data.data[titleKey]);
+          if (data.data[descKey]) setDescription(data.data[descKey]);
+        }
+      })
+      .catch(err => console.error("Case studies fetch error:", err))
+      .finally(() => setLoading(false));
+  }, [pageId, pathname]);
+
+  if (loading || studies.length === 0) return null;
+
   return (
     <section className="py-24 bg-white">
       <div className="container mx-auto px-4">
@@ -40,39 +61,46 @@ export default function CaseStudySection() {
           className="text-center mb-16"
         >
           <h2 className="text-4xl md:text-5xl font-bold text-zinc-900 mb-4">
-            Case Studies
+            {title || "Case Studies"}
           </h2>
           <p className="text-lg text-zinc-600">
-            Results that speak for themselves
+            {description || "Results that speak for themselves"}
           </p>
         </motion.div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {caseStudies.map((study, index) => (
+          {studies.map((study, index) => (
             <motion.div
-              key={study.id}
+              key={study.id || index}
               initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: index * 0.15, ease: "easeOut" }}
             >
               <Link
-                href={study.link}
+                href={study.link || "#"}
                 className="group block"
               >
-                <div className="relative aspect-[4/3] rounded-2xl overflow-hidden mb-4">
+                <div className="relative aspect-[4/3] rounded-2xl overflow-hidden mb-4 border border-zinc-100">
                   <div
                     className="absolute inset-0 bg-cover bg-center group-hover:scale-105 transition-transform duration-500"
                     style={{ backgroundImage: `url(${study.image})` }}
                   />
                   <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors" />
-                  <div className="absolute top-4 left-4 px-3 py-1 bg-white/90 rounded-full text-sm font-medium text-zinc-900">
-                    {study.category}
-                  </div>
+                  {study.category && (
+                    <div className="absolute top-4 left-4 px-3 py-1 bg-white/90 rounded-full text-sm font-medium text-zinc-900">
+                      {study.category}
+                    </div>
+                  )}
                 </div>
                 <h3 className="text-lg font-semibold text-zinc-900 group-hover:text-primary transition-colors line-clamp-2">
                   {study.title}
                 </h3>
+                {study.stats && (
+                  <div className="mt-2 text-primary font-bold text-sm">
+                    {study.stats}
+                  </div>
+                )}
               </Link>
             </motion.div>
           ))}

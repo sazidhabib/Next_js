@@ -51,10 +51,14 @@ export default function ClientsSection({ pageId }) {
                     if (clientData) {
                         setClients(JSON.parse(clientData));
                     } else if (derivedId !== 'home') {
-                        // Fallback to home clients if service-specific ones don't exist
+                        // Fallback to home then global clients if service-specific ones don't exist
                         if (data.data.home_clients) {
                             setClients(JSON.parse(data.data.home_clients));
+                        } else if (data.data.global_clients) {
+                            setClients(JSON.parse(data.data.global_clients));
                         }
+                    } else if (data.data.global_clients) {
+                        setClients(JSON.parse(data.data.global_clients));
                     }
                 }
             })

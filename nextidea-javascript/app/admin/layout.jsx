@@ -49,6 +49,8 @@ export default function AdminLayout({ children }) {
   const navItems = [
     { href: '/admin', icon: LayoutDashboard, label: 'Dashboard' },
     { href: '/admin/pages', icon: FileText, label: 'Page Content' },
+    { href: '/admin/work', icon: FolderOpen, label: 'Our Work' },
+    { href: '/admin/case-studies', icon: BarChart3, label: 'Case Studies' },
     { href: '/admin/services', icon: LayoutDashboard, label: 'Services' },
     { href: '/admin/clients', icon: Users, label: 'Clients' },
     { href: '/admin/faqs', icon: HelpCircle, label: 'FAQs' },
