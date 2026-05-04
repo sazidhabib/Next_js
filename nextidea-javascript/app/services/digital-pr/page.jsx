@@ -3,6 +3,8 @@ import WhatIsDigitalPR from "../../components/WhatIsDigitalPR";
 import DigitalPRProcess from "../../components/DigitalPRProcess";
 import WhyTrustDigitalPR from "../../components/WhyTrustDigitalPR";
 import PartnerSection from "../../components/PartnerSection";
+import PortfolioSection from "../../components/PortfolioSection";
+import CaseStudySection from "../../components/CaseStudySection";
 import ServiceContactForm from "../../components/ServiceContactForm";
 import { getSettings } from "../../lib/getSettings";
 
@@ -38,6 +40,8 @@ export default async function DigitalPRPage() {
         title="Work with One of The Best Digital PR Agencies in Bangladesh" 
         partnersList={mediaPartners} 
       />
+      <PortfolioSection />
+      <CaseStudySection />
       <ServiceContactForm 
         title="Ready To Launch Your Digital PR Campaign?"
         description="Partner with our digital PR agency and let us create a storytelling PR campaign that grabs the attention of your target audience, builds your brand reputation, and boosts your online visibility."

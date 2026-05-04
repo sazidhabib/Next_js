@@ -7,6 +7,7 @@ import FAQSection from "../../components/FAQSection";
 import BlogsSection from "../../components/BlogsSection";
 import SEOProcess from "../../components/SEOProcess";
 import SEOTabbedServices from "../../components/SEOTabbedServices";
+import PortfolioSection from "../../components/PortfolioSection";
 import CaseStudySection from "../../components/CaseStudySection";
 import ClientsSection from "../../components/ClientsSection";
 import { getSettings } from "../../lib/getSettings";
@@ -218,6 +219,7 @@ export default async function SEOPage() {
         </div>
       </section>
 
+      <PortfolioSection />
       <CaseStudySection />
 
       {/* Why Choose Us Section */}

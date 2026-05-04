@@ -15,6 +15,7 @@ import {
 import ServiceHero from "../../components/ServiceHero";
 import ServiceContent from "../../components/ServiceContent";
 import CTASection from "../../components/CTASection";
+import PortfolioSection from "../../components/PortfolioSection";
 import CaseStudySection from "../../components/CaseStudySection";
 import { getSettings } from "../../lib/getSettings";
 import { notFound } from "next/navigation";
@@ -113,6 +114,7 @@ export default async function CreativeConceptExecutionPage() {
           icon: ICON_MAP[s.icon] || ICON_MAP[s.icon_name] || <ArrowRight />,
         }))}
       />
+      <PortfolioSection />
       <CaseStudySection />
       <CTASection
         title="Embark on a creative journey with Next Idea Solutions."

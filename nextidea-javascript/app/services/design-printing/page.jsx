@@ -1,6 +1,8 @@
 import DesignPrintingHero from "../../components/DesignPrintingHero";
 import DesignPrintingShowcase from "../../components/DesignPrintingShowcase";
 import DesignPrintingFeatures from "../../components/DesignPrintingFeatures";
+import PortfolioSection from "../../components/PortfolioSection";
+import CaseStudySection from "../../components/CaseStudySection";
 import ServiceContactForm from "../../components/ServiceContactForm";
 import { getSettings } from "../../lib/getSettings";
 
@@ -21,6 +23,8 @@ export default async function DesignPrintingPage() {
       />
       <DesignPrintingShowcase />
       <DesignPrintingFeatures />
+      <PortfolioSection />
+      <CaseStudySection />
       <ServiceContactForm 
         title="Get started today!"
         description="Connect with our design and printing experts to elevate your corporate image with premium, custom-made solutions."
