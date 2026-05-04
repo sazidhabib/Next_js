@@ -9,7 +9,7 @@ const NewsWidget = ({ cell, isPriority }) => {
     const [news, setNews] = useState(cell.resolvedContent || null);
     const [loading, setLoading] = useState(!cell.resolvedContent);
     const STATIC_BASE = STATIC_URL || 'http://localhost:5000';
-    
+
     const stripHtml = (html) => {
         if (!html) return '';
         return html.replace(/<[^>]*>?/gm, '');
@@ -161,7 +161,7 @@ const NewsWidget = ({ cell, isPriority }) => {
 
     if (design === 'text-inside-image') {
         return (
-            <div className="custom-font news-design-text-inside-image d-flex flex-column overflow-hidden position-relative" style={{ minHeight: '400px', height: isMerged ? `${imageHeight + 100}px` : '400px' }}>
+            <div className="custom-font news-design-text-inside-image d-flex flex-column overflow-hidden position-relative" style={{ minHeight: '250px', height: isMerged ? `${imageHeight - 100}px` : '250px' }}>
                 <Link href={newsLink} className="text-decoration-none d-flex flex-column flex-grow-1 h-100">
                     <NewsImage className="text-inside-image-img flex-grow-1" currentDesign={design} />
                     <div className="text-inside-image-overlay position-absolute bottom-0 start-0 end-0 p-3">
