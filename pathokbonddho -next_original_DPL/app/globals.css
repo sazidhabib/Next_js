@@ -2329,6 +2329,11 @@ footer {
         padding-bottom: 12px;
     }
 
+    /* Main lead news images get 250px min-height */
+    .mobile-section-layout .mobile-lead-news .news-image-container {
+        min-height: 250px !important;
+    }
+
     .mobile-section-layout .mobile-row-image-top {
         padding-bottom: 8px;
     }
@@ -2345,6 +2350,10 @@ footer {
         -webkit-line-clamp: 3;
         -webkit-box-orient: vertical;
         overflow: hidden;
+    }
+
+    .mobile-section-layout .mobile-row-image-top .card-body p {
+        display: none !important;
     }
 
     .mobile-section-layout .mobile-row-image-top .card-body .small {

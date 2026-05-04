@@ -66,6 +66,10 @@ const GridSection = ({ section }) => {
     const ads = [];
     const newsCells = [];
 
+    // Check if this is a "ছবি" (photo) section – exempt from the new mobile layout
+    const sectionName = (section.name || '').trim();
+    const isPhotoSection = sectionName === 'ছবি' || sectionName.toLowerCase() === 'photo';
+
     gridCells.forEach(({ col, key, rowIndex, colIndex }) => {
         // Skip empty/text-only cells
         if (!col.contentType || col.contentType === 'text') return;
@@ -95,45 +99,111 @@ const GridSection = ({ section }) => {
         leadNews = newsCells.shift();
     }
 
-    // Build mobile rows from remaining news cells
-    const mobileRows = [];
-    let contentBuffer = [];
-    let alternatingType = 'title-image-left';
+    // ─── Build mobile rows from remaining news cells ───
+    // New layout (for non-photo sections):
+    //   • First 4 news → "image-top", 2 per row
+    //   • Remaining news → "title-image-left", 1 per row
+    // Photo section keeps original grid behavior.
 
-    const flushContentBuffer = () => {
-        while (contentBuffer.length > 0) {
-            if (alternatingType === 'title-image-left') {
-                mobileRows.push({
-                    type: 'title-image-left',
-                    cells: [contentBuffer.shift()]
-                });
-                alternatingType = 'image-top';
-            } else {
-                const cells = [contentBuffer.shift()];
-                if (contentBuffer.length > 0) {
-                    cells.push(contentBuffer.shift());
+    const mobileRows = [];
+
+    if (isPhotoSection) {
+        // Photo section: keep original alternating layout but start with 2-column row
+        // ALL cells forced to text-inside-image design.
+        let contentBuffer = [];
+        let alternatingType = 'photo-double';
+
+        const flushContentBuffer = () => {
+            while (contentBuffer.length > 0) {
+                if (alternatingType === 'photo-single') {
+                    mobileRows.push({
+                        type: 'photo-single',
+                        cells: [contentBuffer.shift()]
+                    });
+                    alternatingType = 'photo-double';
+                } else {
+                    const cells = [contentBuffer.shift()];
+                    if (contentBuffer.length > 0) {
+                        cells.push(contentBuffer.shift());
+                    }
+                    mobileRows.push({
+                        type: 'photo-double',
+                        cells
+                    });
+                    alternatingType = 'photo-single';
+                }
+            }
+        };
+
+        newsCells.forEach(({ col, key }) => {
+            contentBuffer.push({ col, key });
+        });
+        flushContentBuffer();
+    } else {
+        // New layout for all non-photo sections
+        // First/unnamed section ("Section 1") gets 4 image-top items (2 rows of 2)
+        // Other named sections get 2 image-top items (1 row of 2)
+        const isFirstSection = sectionName.startsWith('Section') || !sectionName;
+        const IMAGE_TOP_LIMIT = isFirstSection ? 4 : 2;
+        let imageTopCount = 0;
+        let imageTopBuffer = [];
+
+        newsCells.forEach(({ col, key }) => {
+            // Always preserve text-inside-image design
+            if (col.design === 'text-inside-image') {
+                // Flush any pending image-top buffer first
+                if (imageTopBuffer.length > 0) {
+                    mobileRows.push({
+                        type: 'image-top',
+                        cells: [...imageTopBuffer]
+                    });
+                    imageTopBuffer = [];
                 }
                 mobileRows.push({
-                    type: 'image-top',
-                    cells
+                    type: 'text-inside-image',
+                    cells: [{ col, key }]
                 });
-                alternatingType = 'title-image-left';
+                return;
             }
-        }
-    };
 
-    newsCells.forEach(({ col, key }) => {
-        if (col.design === 'text-inside-image') {
-            flushContentBuffer();
-            mobileRows.push({ 
-                type: 'text-inside-image', 
-                cells: [{ col, key }] 
+            if (imageTopCount < IMAGE_TOP_LIMIT) {
+                // First 4 news: image-top design, buffer 2 per row
+                imageTopBuffer.push({ col, key });
+                imageTopCount++;
+
+                if (imageTopBuffer.length === 2) {
+                    mobileRows.push({
+                        type: 'image-top',
+                        cells: [...imageTopBuffer]
+                    });
+                    imageTopBuffer = [];
+                }
+            } else {
+                // Remaining news: title-image-left design, 1 per row
+                // Flush any leftover image-top buffer first
+                if (imageTopBuffer.length > 0) {
+                    mobileRows.push({
+                        type: 'image-top',
+                        cells: [...imageTopBuffer]
+                    });
+                    imageTopBuffer = [];
+                }
+                mobileRows.push({
+                    type: 'title-image-left',
+                    cells: [{ col, key }]
+                });
+            }
+        });
+
+        // Flush any remaining image-top buffer
+        if (imageTopBuffer.length > 0) {
+            mobileRows.push({
+                type: 'image-top',
+                cells: [...imageTopBuffer]
             });
-        } else {
-            contentBuffer.push({ col, key });
         }
-    });
-    flushContentBuffer();
+    }
+
 
     // Section header (shared between desktop and mobile)
     const sectionHeader = section.name && !section.name.startsWith('Section') && (
@@ -251,18 +321,18 @@ const GridSection = ({ section }) => {
                 <div className="d-md-none mobile-section-layout">
                     {/* 1. Lead content: Merged cells OR first news item */}
                     {mergedCells.map(({ col, key }) => (
-                        <div key={`mobile-merged-${key}`} className="mb-3">
+                        <div key={`mobile-merged-${key}`} className="mb-3 mobile-lead-news">
                             <GridCell 
-                                cell={{ ...col, design: col.design === 'text-inside-image' ? 'text-inside-image' : 'image-top' }} 
+                                cell={{ ...col, design: isPhotoSection ? 'text-inside-image' : (col.design === 'text-inside-image' ? 'text-inside-image' : 'image-top') }} 
                                 isPriority={false} 
                             />
                         </div>
                     ))}
 
                     {leadNews && (
-                        <div key={`mobile-lead-${leadNews.key}`} className="mb-3">
+                        <div key={`mobile-lead-${leadNews.key}`} className="mb-3 mobile-lead-news">
                             <GridCell 
-                                cell={{ ...leadNews.col, design: leadNews.col.design === 'text-inside-image' ? 'text-inside-image' : 'image-top' }} 
+                                cell={{ ...leadNews.col, design: isPhotoSection ? 'text-inside-image' : (leadNews.col.design === 'text-inside-image' ? 'text-inside-image' : 'image-top') }} 
                                 isPriority={false} 
                             />
                         </div>
@@ -275,13 +345,36 @@ const GridSection = ({ section }) => {
                         </div>
                     ))}
 
-                    {/* 3. Remaining cells in alternating style */}
+                    {/* 3. Remaining cells: first 4 as image-top (2 per row), rest as title-image-left */}
                     {mobileRows.map((row, rowIdx) => {
+                        if (row.type === 'photo-single') {
+                            return (
+                                <div key={`mobile-row-${rowIdx}`} className="mb-3">
+                                    {row.cells.map(({ col, key }) => (
+                                        <GridCell key={`mobile-ps-${key}`} cell={{ ...col, design: 'text-inside-image', rowSpan: 1, colSpan: 1 }} isPriority={false} />
+                                    ))}
+                                </div>
+                            );
+                        }
+                        if (row.type === 'photo-double') {
+                            return (
+                                <div key={`mobile-row-${rowIdx}`} className="row g-2 mb-3">
+                                    {row.cells.map(({ col, key }) => (
+                                        <div key={`mobile-pd-${key}`} className="col-6">
+                                            <GridCell 
+                                                cell={{ ...col, design: 'text-inside-image', rowSpan: 1, colSpan: 1 }} 
+                                                isPriority={false} 
+                                            />
+                                        </div>
+                                    ))}
+                                </div>
+                            );
+                        }
                         if (row.type === 'text-inside-image') {
                             return (
                                 <div key={`mobile-row-${rowIdx}`} className="mb-3">
                                     {row.cells.map(({ col, key }) => (
-                                        <GridCell key={`mobile-ad-${key}`} cell={col} isPriority={false} />
+                                        <GridCell key={`mobile-tii-${key}`} cell={{ ...col, rowSpan: 1, colSpan: 1 }} isPriority={false} />
                                     ))}
                                 </div>
                             );
@@ -292,7 +385,7 @@ const GridSection = ({ section }) => {
                                     {row.cells.map(({ col, key }) => (
                                         <GridCell 
                                             key={`mobile-til-${key}`} 
-                                            cell={{ ...col, design: col.design === 'text-inside-image' ? 'text-inside-image' : 'title-image-left' }} 
+                                            cell={{ ...col, design: col.design === 'text-inside-image' ? 'text-inside-image' : 'title-image-left', rowSpan: 1, colSpan: 1 }} 
                                             isPriority={false} 
                                         />
                                     ))}
@@ -305,7 +398,7 @@ const GridSection = ({ section }) => {
                                 {row.cells.map(({ col, key }) => (
                                     <div key={`mobile-it-${key}`} className="col-6">
                                         <GridCell 
-                                            cell={{ ...col, design: col.design === 'text-inside-image' ? 'text-inside-image' : 'image-top' }} 
+                                            cell={{ ...col, design: col.design === 'text-inside-image' ? 'text-inside-image' : 'image-top', rowSpan: 1, colSpan: 1 }} 
                                             isPriority={false} 
                                         />
                                     </div>

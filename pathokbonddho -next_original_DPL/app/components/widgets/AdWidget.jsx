@@ -154,7 +154,7 @@ const AdWidget = ({ cell, isPriority }) => {
             className="ad-widget w-100 overflow-hidden position-relative"
             style={{
                 // backgroundColor: '#f8f9fa', 
-                minHeight: '120px',
+                minHeight: '250px',
                 height: '100%',
                 display: 'block'
             }}
