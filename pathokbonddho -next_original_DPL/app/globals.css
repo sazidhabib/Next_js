@@ -224,6 +224,11 @@ body {
 
 /* Sidebar styles end */
 
+/* Mobile Menu Active State */
+.modal-body .nav-link.active {
+    color: #E67E22 !important;
+}
+
 @media (max-width: 768px) {
     .onlyphone {
         background-color: #26272e;
@@ -1531,7 +1536,7 @@ footer {
 /* ─── Responsive adjustments for news designs ─── */
 @media (max-width: 768px) {
     .text-inside-image-title {
-        font-size: 0.9rem;
+        font-size: 1rem;
     }
 
     .text-inside-image-overlay {
@@ -2344,7 +2349,7 @@ footer {
     }
 
     .mobile-section-layout .mobile-row-image-top .card-body h5 {
-        font-size: 0.85rem;
+        font-size: 1rem;
         line-height: 1.4;
         display: -webkit-box;
         -webkit-line-clamp: 3;
@@ -2530,6 +2535,12 @@ footer {
     transition: color 0.3s ease !important;
 }
 
+@media (max-width: 767.98px) {
+    .news-design-side-layout h5 {
+        font-size: 1rem;
+    }
+}
+
 .news-widget-card:hover .news-card-title,
 .hover-shadow:hover .hover-danger,
 .hover-shadow:hover .hover-primary,
@@ -2557,10 +2568,10 @@ footer {
 
 /* Specific Sidebar News List Hover */
 .related-news-list .hover-bg-light:hover {
-    background-color: #f8f9fa !important;
-    transform: translateX(4px);
-    box-shadow: -2px 0 0 #da251d;
-    transition: all 0.3s ease;
+    background-color: #f0f7f6 !important;
+    transform: translateX(5px);
+    box-shadow: -3px 0 0 #006a60;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .related-news-list .hover-bg-light img {
@@ -2572,5 +2583,71 @@ footer {
 }
 
 .related-news-list .hover-bg-light:hover .hover-danger {
-    color: #da251d !important;
+    color: #E67E22 !important;
 }
+
+/* ════════════ NEWS DETAILS PAGE FIXES ════════════ */
+
+/* 1. Remove Horizontal Scroll */
+.news-details-page {
+    overflow-x: hidden;
+    width: 100%;
+}
+
+/* 2. Desktop Image Height Limiter */
+@media (min-width: 992px) {
+    .hero-image-wrapper {
+        max-height: 650px !important;
+        min-height: 350px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #f8f9fa;
+    }
+
+    .hero-image-wrapper img {
+        max-height: 650px !important;
+        width: 100% !important;
+        height: auto !important;
+        object-fit: cover !important;
+        object-position: center;
+    }
+    
+    /* Also limit gallery images height on desktop */
+    .gallery-item .w-100.h-auto {
+        max-height: 700px;
+        object-fit: contain;
+        background-color: #f8f9fa;
+    }
+}
+
+/* Fix for action tools to stay on a single line */
+@media (max-width: 768px) {
+    .action-tools {
+        flex-wrap: nowrap !important;
+        overflow-x: auto;
+        padding-bottom: 5px;
+        -webkit-overflow-scrolling: touch;
+        gap: 8px !important;
+        justify-content: flex-start !important;
+        scrollbar-width: none; /* Hide scrollbar for cleaner look */
+    }
+    .action-tools::-webkit-scrollbar {
+        display: none;
+    }
+    .social-share-group {
+        margin-top: 0 !important;
+        width: auto !important;
+        white-space: nowrap;
+    }
+    .social-share-group span {
+        display: none; /* Hide "শেয়ার:" text on very small screens to save space if needed */
+    }
+}
+
+@media (max-width: 400px) {
+    .font-size-controls {
+        display: none !important; /* Hide font controls on very small screens to make room for share buttons */
+    }
+}
+
