@@ -9,6 +9,12 @@ const NewsDetails = ({ id, initialData, initialAds }) => {
     const [loading, setLoading] = useState(!initialData);
     const [fontSize, setFontSize] = useState(19);
 
+    useEffect(() => {
+        if (typeof window !== 'undefined' && window.innerWidth < 768) {
+            setFontSize(17);
+        }
+    }, []);
+
     const [error, setError] = useState(null);
     const [relatedNews, setRelatedNews] = useState([]);
     const [sidebarAds, setSidebarAds] = useState(initialAds?.sidebar || []);
@@ -110,6 +116,50 @@ const NewsDetails = ({ id, initialData, initialAds }) => {
     const decreaseFontSize = () => setFontSize(prev => Math.max(prev - 1, 14));
     const handlePrint = () => window.print();
 
+    const handleSocialShare = (platform) => {
+        if (typeof window === 'undefined') return;
+        const url = encodeURIComponent(window.location.href);
+        const title = encodeURIComponent(news.newsHeadline);
+        let shareUrl = '';
+
+        switch (platform) {
+            case 'facebook':
+                shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${url}`;
+                break;
+            case 'twitter':
+                shareUrl = `https://twitter.com/intent/tweet?url=${url}&text=${title}`;
+                break;
+            case 'whatsapp':
+                shareUrl = `https://api.whatsapp.com/send?text=${title}%20${url}`;
+                break;
+            default:
+                return;
+        }
+        window.open(shareUrl, '_blank', 'width=600,height=400');
+    };
+
+    const handleWebShare = async () => {
+        if (typeof window === 'undefined') return;
+        if (navigator.share) {
+            try {
+                await navigator.share({
+                    title: news.newsHeadline,
+                    text: news.highlight ? news.highlight.replace(/<[^>]*>/g, '') : '',
+                    url: window.location.href,
+                });
+            } catch (err) {
+                if (err.name !== 'AbortError') console.error('Error sharing:', err);
+            }
+        } else {
+            try {
+                await navigator.clipboard.writeText(window.location.href);
+                alert('লিঙ্কটি কপি করা হয়েছে!');
+            } catch (err) {
+                console.error('Clipboard error:', err);
+            }
+        }
+    };
+
     const getYouTubeId = (url) => {
         if (!url) return null;
         const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
@@ -210,64 +260,96 @@ const NewsDetails = ({ id, initialData, initialAds }) => {
                             ))}
                         </div>
 
-                        <h1 className="fw-bold mb-3 font-bangla" style={{ fontSize: '2.5rem', lineHeight: '1.4', color: '#1a1a1a' }}>
+                        <h1 className="fw-bold mb-3 font-bangla news-main-headline">
                             {news.newsHeadline}
                         </h1>
 
                         {news.highlight && (
                             <div
                                 className="text-secondary custom-font mb-4 fst-italic news-highlight-content"
-                                style={{ fontSize: '1.2rem', lineHeight: '1.6', fontWeight: '500' }}
                                 dangerouslySetInnerHTML={{ __html: news.highlight }}
                             />
                         )}
 
-                        <div className="d-flex flex-wrap justify-content-between align-items-center mb-4 py-3 border-top border-bottom">
-                            <div className="d-flex align-items-center text-muted small font-bangla">
-                                {news.Author && (
-                                    <div className="me-4 text-dark fw-bold">
-                                        <i className="bi bi-person-circle me-2 text-secondary"></i>
-                                        {news.Author.name}
+                        <div className="meta-info-container mb-4 py-2 border-top border-bottom no-print">
+                            <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
+                                {/* Left Side: Author and Date */}
+                                <div className="d-flex flex-wrap align-items-center text-muted font-bangla gap-3">
+                                    {news.Author && (
+                                        <div className="author-info d-flex align-items-center text-dark fw-bold">
+                                            <i className="bi bi-person-circle me-2 fs-5 text-secondary"></i>
+                                            <span>{news.Author.name}</span>
+                                        </div>
+                                    )}
+                                    <div className="date-info d-flex align-items-center small">
+                                        <i className="bi bi-calendar3 me-2 text-secondary"></i>
+                                        {formatDate(news.createdAt)}
                                     </div>
-                                )}
-                                <div>
-                                    <i className="bi bi-calendar3 me-2 text-secondary"></i>
-                                    {formatDate(news.createdAt)}
-                                </div>
-                            </div>
-
-                            <div className="d-flex align-items-center gap-2 mt-2 mt-md-0 flex-wrap">
-                                <div className="d-flex align-items-center border rounded-pill px-2 py-1 no-print">
-                                    <button
-                                        className="btn btn-sm p-0 px-2 border-0"
-                                        onClick={decreaseFontSize}
-                                        disabled={fontSize <= 14}
-                                        title="ফন্ট ছোট করুন"
-                                    >
-                                        <i className="fas fa-minus"></i>
-                                    </button>
-                                    <button
-                                        className="btn btn-sm p-0 px-2 border-0"
-                                        onClick={increaseFontSize}
-                                        disabled={fontSize >= 22}
-                                        title="ফন্ট বড় করুন"
-                                    >
-                                        <i className="fas fa-plus"></i>
-                                    </button>
                                 </div>
 
-                                <button
-                                    className="btn btn-sm btn-light rounded-circle shadow-sm border no-print"
-                                    onClick={handlePrint}
-                                    title="প্রিন্ট করুন"
-                                >
-                                    <i className="fas fa-print"></i>
-                                </button>
+                                {/* Right Side: Tools and Sharing */}
+                                <div className="d-flex align-items-center gap-2 action-tools">
+                                    <div className="font-size-controls d-flex align-items-center no-print">
+                                        <button
+                                            className="btn btn-sm border-0"
+                                            onClick={decreaseFontSize}
+                                            disabled={fontSize <= 14}
+                                            title="ফন্ট ছোট করুন"
+                                        >
+                                            <i className="fas fa-minus"></i>
+                                        </button>
+                                        <div className="border-start mx-1" style={{ height: '15px' }}></div>
+                                        <button
+                                            className="btn btn-sm border-0"
+                                            onClick={increaseFontSize}
+                                            disabled={fontSize >= 22}
+                                            title="ফন্ট বড় করুন"
+                                        >
+                                            <i className="fas fa-plus"></i>
+                                        </button>
+                                    </div>
 
-                                <span className="me-1 text-muted small no-print">শেয়ার:</span>
-                                <button className="btn btn-sm btn-light rounded-circle me-1 shadow-sm border no-print"><i className="fab fa-facebook-f text-primary"></i></button>
-                                <button className="btn btn-sm btn-light rounded-circle me-1 shadow-sm border no-print"><i className="fab fa-twitter text-info"></i></button>
-                                <button className="btn btn-sm btn-light rounded-circle shadow-sm border no-print"><i className="fab fa-whatsapp text-success"></i></button>
+                                    <button
+                                        className="btn-tool no-print"
+                                        onClick={handlePrint}
+                                        title="প্রিন্ট করুন"
+                                    >
+                                        <i className="fas fa-print"></i>
+                                    </button>
+
+                                    <button
+                                        className="btn-tool no-print"
+                                        onClick={handleWebShare}
+                                        title="শেয়ার করুন"
+                                    >
+                                        <i className="fas fa-share-alt"></i>
+                                    </button>
+
+                                    <div className="social-share-group d-flex align-items-center gap-2">
+                                        <span className="me-1 text-muted small no-print">শেয়ার:</span>
+                                        <button
+                                            className="share-btn btn-light no-print"
+                                            onClick={() => handleSocialShare('facebook')}
+                                            title="ফেসবুকে শেয়ার করুন"
+                                        >
+                                            <i className="fab fa-facebook-f text-primary"></i>
+                                        </button>
+                                        <button
+                                            className="share-btn btn-light no-print"
+                                            onClick={() => handleSocialShare('twitter')}
+                                            title="টুইটারে শেয়ার করুন"
+                                        >
+                                            <i className="fab fa-x-twitter text-info"></i>
+                                        </button>
+                                        <button
+                                            className="share-btn btn-light no-print"
+                                            onClick={() => handleSocialShare('whatsapp')}
+                                            title="হোয়াটসঅ্যাপে শেয়ার করুন"
+                                        >
+                                            <i className="fab fa-whatsapp text-success"></i>
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
@@ -296,7 +378,7 @@ const NewsDetails = ({ id, initialData, initialAds }) => {
 
                             return leadImageUrl && (
                                 <div className="mb-4">
-                                    <div className="hero-image-wrapper rounded shadow-sm overflow-hidden bg-light" style={{ position: 'relative', width: '100%', height: 'auto', minHeight: '300px', maxHeight: '500px' }}>
+                                    <div className="hero-image-wrapper rounded shadow-sm overflow-hidden bg-light" style={{ position: 'relative', width: '100%' }}>
                                         <Image
                                             src={leadImageUrl}
                                             alt={news.imageCaption || news.newsHeadline}
@@ -308,7 +390,7 @@ const NewsDetails = ({ id, initialData, initialAds }) => {
                                         />
                                     </div>
                                     {news.imageCaption && (
-                                        <p className="text-muted small text-center mt-2 font-bangla px-3 fst-italic">
+                                        <p className="text-muted text-center mt-2 font-bangla px-3 fst-italic image-caption">
                                             {news.imageCaption}
                                         </p>
                                     )}
@@ -318,9 +400,18 @@ const NewsDetails = ({ id, initialData, initialAds }) => {
 
                         <style>
                             {`
+                                .news-main-headline { font-size: 2.5rem; line-height: 1.4; color: #1a1a1a; }
+                                .news-highlight-content { font-size: 1.2rem; line-height: 1.6; font-weight: 500; }
+                                .image-caption { font-size: 1rem !important; }
+
                                 .article-body { color: #333; word-wrap: break-word; line-height: 1.9; font-size: ${fontSize}px !important; }
-                                .article-body p, .article-body div, .article-body span, .article-body li, .article-body blockquote, .article-body figcaption, .article-body section, .article-body article {
+                                .article-body p, .article-body div, .article-body span, .article-body li, .article-body blockquote, .article-body section, .article-body article {
                                     font-family: 'custom_font' !important; font-size: ${fontSize}px !important; line-height: inherit !important;
+                                }
+                                .article-body figcaption {
+                                    font-size: 1rem !important;
+                                    font-family: 'custom_font' !important;
+                                    line-height: 1.6 !important;
                                 }
                                 .article-body h1, .article-body h2, .article-body h3, .article-body h4, .article-body h5, .article-body h6 {
                                     font-family: 'custom_font' !important; font-size: ${fontSize + 4}px !important; line-height: 1.4 !important;
@@ -328,6 +419,26 @@ const NewsDetails = ({ id, initialData, initialAds }) => {
                                 .article-body ul, .news-highlight-content ul { list-style-type: disc !important; padding-left: 2.5rem !important; margin-bottom: 1rem !important; }
                                 .article-body ol, .news-highlight-content ol { list-style-type: decimal !important; padding-left: 2.5rem !important; margin-bottom: 1rem !important; }
                                 .article-body li, .news-highlight-content li { margin-bottom: 0.5rem !important; display: list-item !important; }
+                                
+                                @media (max-width: 768px) {
+                                    .news-main-headline { font-size: 1.8rem !important; }
+                                    .news-highlight-content { font-size: 1.1rem !important; }
+                                    .action-tools { width: 100%; justify-content: flex-start; border-top: 1px solid #eee; padding-top: 10px; flex-wrap: nowrap !important; }
+                                    .social-share-group { margin-left: 10px; }
+                                }
+
+                                .meta-info-container { border-color: #eee !important; }
+                                .author-info i { color: #dc3545; }
+                                .font-size-controls { background: #fff; border: 1px solid #ddd; border-radius: 20px; padding: 2px 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+                                .font-size-controls button:hover { background: #f8f9fa; color: #dc3545; }
+                                .btn-tool { width: 35px; height: 35px; border-radius: 50%; border: 1px solid #ddd; background: #fff; display: flex; align-items: center; justify-content: center; transition: all 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+                                .btn-tool:hover { background: #f8f9fa; color: #dc3545; transform: translateY(-2px); }
+                                .share-btn { width: 32px; height: 32px; border-radius: 50%; border: none; display: flex; align-items: center; justify-content: center; color: #fff; transition: all 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+                                .share-btn:hover { transform: scale(1.1); filter: brightness(1.1); }
+                                .share-btn.fb { background: #3b5998; }
+                                .share-btn.tw { background: #1da1f2; }
+                                .share-btn.wa { background: #25d366; }
+
                                 @media print {
                                     body * { visibility: hidden; }
                                     .news-details-page, .news-details-page .main-article-column, .news-details-page .main-article-column * { visibility: visible; }
@@ -347,7 +458,7 @@ const NewsDetails = ({ id, initialData, initialAds }) => {
                                     <div key={item.id || idx} className="gallery-item mb-5">
                                         {item.imageUrl && (
                                             <div className=" shadow-sm border mb-3 overflow-hidden">
-                                                <div style={{ position: 'relative', width: '100%', height: 'auto' }}>
+                                                <div style={{ position: 'relative', width: '100%' }}>
                                                     <Image
                                                         src={getImageUrl(item.imageUrl)}
                                                         alt={item.caption || `Gallery image ${idx + 1}`}
@@ -360,7 +471,7 @@ const NewsDetails = ({ id, initialData, initialAds }) => {
                                                 </div>
                                                 {item.caption && (
                                                     <div className="py-2 bg-light border-top">
-                                                        <p className="text-muted small text-center mb-0 font-bangla px-3 fst-italic">
+                                                        <p className="text-muted text-center mb-0 font-bangla px-3 fst-italic image-caption">
                                                             {item.caption}
                                                         </p>
                                                     </div>

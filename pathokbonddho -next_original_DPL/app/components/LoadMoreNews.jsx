@@ -75,14 +75,14 @@ const LoadMoreNews = ({ slug, excludeIds }) => {
 
     const getImageUrl = (newsItem, preferHighRes = false) => {
         if (!newsItem) return null;
-        
+
         let imagePath;
         if (preferHighRes) {
             imagePath = newsItem.leadImage || newsItem.thumbImage || newsItem.metaImage;
         } else {
             imagePath = newsItem.thumbImage || newsItem.leadImage || newsItem.metaImage;
         }
-        
+
         if (!imagePath && newsItem.newsType === 'video' && newsItem.videoLink) {
             const videoId = getYoutubeId(newsItem.videoLink);
             if (videoId) return `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
@@ -132,7 +132,7 @@ const LoadMoreNews = ({ slug, excludeIds }) => {
                         return (
                             <div key={item.id || index} className="col-lg-6 col-6 mb-3">
                                 {/* Desktop Layout */}
-                                <div className="d-none d-md-block news-design-title-image-side h-100 p-3 border shadow-sm bg-white hover-shadow transition" style={{ transition: 'all 0.3s ease' }}>
+                                <div className="d-none d-md-block news-design-title-image-side h-100 p-3 border bg-white hover-shadow transition" style={{ transition: 'all 0.3s ease' }}>
                                     <Link href={newsLink} className="text-decoration-none text-dark">
                                         <h5 className="fw-bold mb-3 code-font-bangla hover-danger" style={{ lineHeight: '1.5' }}>
                                             {item.alternativeHeadline || item.newsHeadline}
@@ -174,7 +174,7 @@ const LoadMoreNews = ({ slug, excludeIds }) => {
                                 </div>
 
                                 {/* Mobile Layout: Image Top */}
-                                <div className="d-flex d-md-none flex-column h-100 p-2 border shadow-sm bg-white hover-shadow transition" style={{ transition: 'all 0.3s ease' }}>
+                                <div className="d-flex d-md-none flex-column h-100 p-2 border bg-white hover-shadow transition" style={{ transition: 'all 0.3s ease' }}>
                                     {getImageUrl(item, true) && (
                                         <div className="mb-2 w-100 position-relative" style={{ aspectRatio: '16/9' }}>
                                             <Link href={newsLink} className="d-block w-100 h-100 position-relative">

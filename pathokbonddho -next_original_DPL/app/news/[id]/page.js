@@ -45,6 +45,7 @@ async function getNewsData(id) {
 export async function generateMetadata({ params }) {
   const { id } = await params;
   const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+  const STATIC_BASE = API_URL.replace(/\/api$/, '');
   const settings = await getSettings();
 
   try {
@@ -56,8 +57,14 @@ export async function generateMetadata({ params }) {
     const news = rawData.data || rawData.news || rawData;
 
     const siteName = settings?.siteNameBn || 'পাঠকবন্ধু';
-    const headline = news?.newsHeadline || news?.title || 'News';
+    const headline = news?.metaTitle || news?.newsHeadline || news?.title || 'News';
     const description = news?.metaDescription || news?.shortDescription || news?.description?.slice(0, 160) || `Latest news from ${siteName}`;
+    
+    // Construct absolute image URL for OG
+    let shareImage = news?.metaImage || news?.leadImage || news?.thumbImage;
+    if (shareImage && !shareImage.startsWith('http')) {
+        shareImage = `${STATIC_BASE}/${shareImage.replace(/^\//, '')}`;
+    }
 
     return {
       title: `${headline} | ${siteName}`,
@@ -66,12 +73,13 @@ export async function generateMetadata({ params }) {
         title: headline,
         description: description,
         type: 'article',
-        images: news?.leadImage || news?.metaImage || news?.thumbImage ? [{ url: news.leadImage || news.metaImage || news.thumbImage }] : [],
+        images: shareImage ? [{ url: shareImage }] : [],
       },
       twitter: {
         card: 'summary_large_image',
         title: headline,
         description: description,
+        images: shareImage ? [shareImage] : [],
       }
     };
   } catch (err) {

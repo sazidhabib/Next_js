@@ -207,7 +207,7 @@ const Header = () => {
               alt="Pathokbonddho Logo"
               width={100}
               height={35}
-              className="h-10 w-auto md:h-10 lg:h-12"
+              className="h-14 w-auto md:h-12 lg:h-14"
               style={{ objectFit: 'contain' }}
               priority
             />
@@ -282,23 +282,6 @@ const Header = () => {
                   {renderMenuLinks(() => setShowSidebar(false))}
                 </ul>
 
-                <div className="social-icons mt-3">
-                  {settings?.social?.linkedin && (
-                    <a key="linkedin" href={settings.social.linkedin} target="_blank" rel="noopener noreferrer" className="text-white me-2"><i className="fa-brands fa-linkedin-in"></i></a>
-                  )}
-                  {settings?.social?.twitter && (
-                    <a key="twitter" href={settings.social.twitter} target="_blank" rel="noopener noreferrer" className="text-white me-2"><i className="fa-brands fa-x-twitter"></i></a>
-                  )}
-                  {settings?.social?.facebook && (
-                    <a key="facebook" href={settings.social.facebook} target="_blank" rel="noopener noreferrer" className="text-white me-2"><i className="fa-brands fa-facebook-f"></i></a>
-                  )}
-                  {settings?.social?.instagram && (
-                    <a key="instagram" href={settings.social.instagram} target="_blank" rel="noopener noreferrer" className="text-white me-2"><i className="fa-brands fa-instagram"></i></a>
-                  )}
-                  {settings?.social?.youtube && (
-                    <a key="youtube" href={settings.social.youtube} target="_blank" rel="noopener noreferrer" className="text-white me-2"><i className="fa-brands fa-youtube"></i></a>
-                  )}
-                </div>
               </div>
             </div>
           </div>
