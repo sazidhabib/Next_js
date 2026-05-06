@@ -55,7 +55,6 @@ export default function DigitalPRHero({ title, tagline, description }) {
                 alt="Digital PR Campaigns" 
                 fill
                 className="object-contain"
-                priority
               />
             </div>
           </motion.div>

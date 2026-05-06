@@ -73,7 +73,6 @@ export default function DesignPrintingHero({ title, tagline, description, image 
                 alt="Premium Brochure Design"
                 fill
                 className="object-cover"
-                priority
               />
             </div>
           </motion.div>
