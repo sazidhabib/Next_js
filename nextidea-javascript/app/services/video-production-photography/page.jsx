@@ -14,6 +14,7 @@ import {
   Check,
   ArrowRight,
   Palette,
+  Film,
 } from "lucide-react";
 import ServiceHero from "../../components/ServiceHero";
 import ServiceContent from "../../components/ServiceContent";
@@ -41,6 +42,7 @@ const ICON_MAP = {
   Headphones: <Headphones />,
   Check: <Check />,
   Palette: <Palette />,
+  Film: <Film />,
 };
 
 export async function generateMetadata() {
@@ -116,10 +118,23 @@ export default async function VideoProductionPhotographyPage() {
         features={{
           title: settings.service_video_production_photography_features_title || "What's Included",
           items: features_items.map((item) => {
-            if (typeof item === 'string') return { title: item, icon: <Check /> };
+            const getIcon = (text) => {
+              const lowerText = text.toLowerCase();
+              if (lowerText.includes("commercial") || lowerText.includes("video production")) return <Film />;
+              if (lowerText.includes("corporate")) return <Clapperboard />;
+              if (lowerText.includes("photography") || lowerText.includes("camera")) return <Camera />;
+              if (lowerText.includes("event") || lowerText.includes("coverage")) return <Users />;
+              if (lowerText.includes("social media") || lowerText.includes("content creation")) return <Share2 />;
+              if (lowerText.includes("post-production") || lowerText.includes("editing")) return <Scissors />;
+              if (lowerText.includes("motion") || lowerText.includes("animation")) return <Zap />;
+              if (lowerText.includes("drone") || lowerText.includes("aerial")) return <Plane />;
+              return <Check />;
+            };
+
+            if (typeof item === 'string') return { title: item, icon: getIcon(item) };
             return {
               ...item,
-              icon: ICON_MAP[item.icon] || ICON_MAP[item.icon_name] || <Check />,
+              icon: ICON_MAP[item.icon] || ICON_MAP[item.icon_name] || getIcon(item.title || ""),
             };
           }),
         }}
