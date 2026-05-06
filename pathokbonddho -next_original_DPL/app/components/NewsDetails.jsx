@@ -233,7 +233,8 @@ const NewsDetails = ({ id, initialData, initialAds }) => {
                                             fill
                                             className="rounded shadow-sm"
                                             style={{ objectFit: 'contain' }}
-                                            sizes="(max-width: 768px) 100vw, 728px"
+                                            sizes="(max-width: 992px) 100vw, 728px"
+                                            priority={idx === 0}
                                         />
                                     </div>
                                 </a>
@@ -541,7 +542,7 @@ const NewsDetails = ({ id, initialData, initialAds }) => {
                                                                 fill
                                                                 className="rounded"
                                                                 style={{ objectFit: 'contain' }}
-                                                                sizes="(max-width: 992px) 0vw, 350px"
+                                                                sizes="(max-width: 992px) 100vw, 350px"
                                                             />
                                                         </div>
                                                     </a>
@@ -633,7 +634,7 @@ const NewsDetails = ({ id, initialData, initialAds }) => {
                                             fill
                                             className="rounded shadow-sm"
                                             style={{ objectFit: 'contain' }}
-                                            sizes="(max-width: 768px) 100vw, 728px"
+                                            sizes="(max-width: 992px) 100vw, 728px"
                                         />
                                     </div>
                                 </a>

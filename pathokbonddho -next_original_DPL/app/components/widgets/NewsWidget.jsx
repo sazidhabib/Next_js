@@ -67,15 +67,12 @@ const NewsWidget = ({ cell, isPriority }) => {
         fetchNews();
     }, [cell.contentId, cell.tag, cell.resolvedContent, STATIC_BASE]);
 
-    const getImageUrl = (newsItem, preferHighRes = false) => {
+    const getImageUrl = (newsItem) => {
         if (!newsItem) return null;
 
-        let imagePath;
-        if (preferHighRes) {
-            imagePath = newsItem.leadImage || newsItem.thumbImage || newsItem.metaImage;
-        } else {
-            imagePath = newsItem.thumbImage || newsItem.leadImage || newsItem.metaImage;
-        }
+        // In widgets (frontend), we prioritize thumbImage if present.
+        // Lead image is used in the news details page.
+        const imagePath = newsItem.thumbImage || newsItem.leadImage || newsItem.metaImage;
 
         if (!imagePath && newsItem.newsType === 'video' && newsItem.videoLink) {
             const videoId = getYoutubeId(newsItem.videoLink);
@@ -123,7 +120,7 @@ const NewsWidget = ({ cell, isPriority }) => {
     if (!news) return null;
 
     const design = cell.design || 'title-image-top';
-    const imageUrl = getImageUrl(news, design === 'text-inside-image' || cell.rowSpan > 1 || cell.colSpan > 1);
+    const imageUrl = getImageUrl(news);
     const newsLink = `/news/${news._id || news.id}`;
     const imageHeight = getImageHeight();
     const isMerged = (cell.rowSpan || 1) > 1 || (cell.colSpan || 1) > 1;
@@ -217,7 +214,7 @@ const NewsWidget = ({ cell, isPriority }) => {
                     )}
                     <div className="flex-grow-1">
                         {news.shortDescription && (
-                            <p className="small text-muted mb-2 font-bangla">{stripHtml(news.shortDescription)}</p>
+                            <p className="small text-muted mb-2 font-bangla d-md-none">{stripHtml(news.shortDescription)}</p>
                         )}
                         <small className="text-muted">{formatDate(news.createdAt)}</small>
                     </div>
@@ -247,6 +244,9 @@ const NewsWidget = ({ cell, isPriority }) => {
                             {news.alternativeHeadline || news.newsHeadline}
                         </h5>
                     </Link>
+                    {news.shortDescription && (
+                        <p className="small text-muted mb-2 font-bangla d-md-none">{stripHtml(news.shortDescription)}</p>
+                    )}
                     <small className="text-muted">{formatDate(news.createdAt)}</small>
                 </div>
             </div>
@@ -264,7 +264,7 @@ const NewsWidget = ({ cell, isPriority }) => {
                 <div className="d-flex gap-3">
                     <div className="flex-grow-1">
                         {news.shortDescription && (
-                            <p className="small text-muted mb-2 line-clamp-2 d-none d-sm-block font-bangla">{stripHtml(news.shortDescription)}</p>
+                            <p className="small text-muted mb-2 line-clamp-2 d-md-none font-bangla">{stripHtml(news.shortDescription)}</p>
                         )}
                         <small className="text-muted">{formatDate(news.createdAt)}</small>
                     </div>
@@ -294,6 +294,9 @@ const NewsWidget = ({ cell, isPriority }) => {
                             {news.alternativeHeadline || news.newsHeadline}
                         </h5>
                     </Link>
+                    {news.shortDescription && (
+                        <p className="small text-muted mb-2 font-bangla d-md-none">{stripHtml(news.shortDescription)}</p>
+                    )}
                     <small className="text-muted">{formatDate(news.createdAt)}</small>
                 </div>
                 {imageUrl && (
@@ -338,7 +341,7 @@ const NewsWidget = ({ cell, isPriority }) => {
                     </h5>
                 </Link>
                 {news.shortDescription && (
-                    <p className="small text-muted line-clamp-3 mb-2 font-bangla">{stripHtml(news.shortDescription)}</p>
+                    <p className="small text-muted line-clamp-3 mb-2 font-bangla d-md-none">{stripHtml(news.shortDescription)}</p>
                 )}
                 <div className="text-muted small mt-auto">
                     {formatDate(news.createdAt)}

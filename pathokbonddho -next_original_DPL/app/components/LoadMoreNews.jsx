@@ -73,15 +73,11 @@ const LoadMoreNews = ({ slug, excludeIds }) => {
         fetchNews(nextPage);
     };
 
-    const getImageUrl = (newsItem, preferHighRes = false) => {
+    const getImageUrl = (newsItem) => {
         if (!newsItem) return null;
 
-        let imagePath;
-        if (preferHighRes) {
-            imagePath = newsItem.leadImage || newsItem.thumbImage || newsItem.metaImage;
-        } else {
-            imagePath = newsItem.thumbImage || newsItem.leadImage || newsItem.metaImage;
-        }
+        // In listings (frontend), we prioritize thumbImage if present.
+        const imagePath = newsItem.thumbImage || newsItem.leadImage || newsItem.metaImage;
 
         if (!imagePath && newsItem.newsType === 'video' && newsItem.videoLink) {
             const videoId = getYoutubeId(newsItem.videoLink);
@@ -139,12 +135,12 @@ const LoadMoreNews = ({ slug, excludeIds }) => {
                                         </h5>
                                     </Link>
                                     <div className="d-flex gap-3">
-                                        {getImageUrl(item, false) && (
+                                        {getImageUrl(item) && (
                                             <div className="news-side-image-wrapper flex-shrink-0 position-relative" style={{ width: '140px', height: '95px' }}>
 
                                                 <Link href={newsLink} className="d-block w-100 h-100 position-relative">
                                                     <Image
-                                                        src={getImageUrl(item, false)}
+                                                        src={getImageUrl(item)}
                                                         alt={item.newsHeadline}
                                                         fill
                                                         className="object-fit-cover news-side-image"
@@ -161,7 +157,7 @@ const LoadMoreNews = ({ slug, excludeIds }) => {
                                         )}
                                         <div className="flex-grow-1 d-flex flex-column justify-content-between">
                                             {item.shortDescription && (
-                                                <p className="small custom-font text-muted mb-2 code-font-bangla" style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                                                <p className="small custom-font text-muted mb-2 code-font-bangla d-md-none" style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                                                     {stripHtml(item.shortDescription)}
                                                 </p>
                                             )}
@@ -175,11 +171,11 @@ const LoadMoreNews = ({ slug, excludeIds }) => {
 
                                 {/* Mobile Layout: Image Top */}
                                 <div className="d-flex d-md-none flex-column h-100 p-2 border bg-white hover-shadow transition" style={{ transition: 'all 0.3s ease' }}>
-                                    {getImageUrl(item, true) && (
+                                    {getImageUrl(item) && (
                                         <div className="mb-2 w-100 position-relative" style={{ aspectRatio: '16/9' }}>
                                             <Link href={newsLink} className="d-block w-100 h-100 position-relative">
                                                 <Image
-                                                    src={getImageUrl(item, true)}
+                                                    src={getImageUrl(item)}
                                                     alt={item.newsHeadline}
                                                     fill
                                                     className="object-fit-cover"
@@ -199,6 +195,9 @@ const LoadMoreNews = ({ slug, excludeIds }) => {
                                             {item.alternativeHeadline || item.newsHeadline}
                                         </h6>
                                     </Link>
+                                    {item.shortDescription && (
+                                        <p className="small text-muted mb-2 font-bangla line-clamp-2">{stripHtml(item.shortDescription)}</p>
+                                    )}
                                     <div className="small text-muted mt-2" style={{ fontSize: '0.75rem' }}>
                                         <i className="bi bi-clock me-1"></i>
                                         {formatDate(item.createdAt)}
