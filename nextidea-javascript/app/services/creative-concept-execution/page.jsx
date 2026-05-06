@@ -11,6 +11,8 @@ import {
   Sparkles,
   Check,
   ArrowRight,
+  Lightbulb,
+  Layers,
 } from "lucide-react";
 import ServiceHero from "../../components/ServiceHero";
 import ServiceContent from "../../components/ServiceContent";
@@ -33,6 +35,8 @@ const ICON_MAP = {
   Headphones: <Headphones />,
   Sparkles: <Sparkles />,
   Check: <Check />,
+  Lightbulb: <Lightbulb />,
+  Layers: <Layers />,
 };
 
 export async function generateMetadata() {
@@ -97,10 +101,20 @@ export default async function CreativeConceptExecutionPage() {
         overview={{}}
         features={{
           title: settings.service_creative_concept_execution_features_title || "WHAT SETS US APART",
-          items: features_items.map((item) => ({
-            ...item,
-            icon: ICON_MAP[item.icon] || ICON_MAP[item.icon_name] || <Check />,
-          })),
+          items: features_items.map((item) => {
+            const getIcon = () => {
+              if (ICON_MAP[item.icon] || ICON_MAP[item.icon_name]) return ICON_MAP[item.icon] || ICON_MAP[item.icon_name];
+              const title = (item.title || "").toLowerCase();
+              if (title.includes("creative")) return <Lightbulb />;
+              if (title.includes("strategic") || title.includes("planning")) return <Target />;
+              if (title.includes("diverse") || title.includes("offering")) return <Layers />;
+              return <Check />;
+            };
+            return {
+              ...item,
+              icon: getIcon(),
+            };
+          }),
         }}
         process={{
           title: settings.service_creative_concept_execution_process_title || "WHAT WE OFFER",

@@ -10,6 +10,8 @@ import {
   ArrowRight,
   Video,
   Globe,
+  Lightbulb,
+  Layers,
 } from "lucide-react";
 import ServiceHero from "../../components/ServiceHero";
 import ServiceContent from "../../components/ServiceContent";
@@ -33,6 +35,8 @@ const ICON_MAP = {
   Check: <Check />,
   Video: <Video />,
   Globe: <Globe />,
+  Lightbulb: <Lightbulb />,
+  Layers: <Layers />,
 };
 
 export async function generateMetadata() {
@@ -106,10 +110,20 @@ export default async function EventAndActivationPage() {
         overview={{}}
         features={{
           title: settings.service_event_and_activation_features_title || "Why Choose Us",
-          items: features_items.map((item) => ({
-            ...item,
-            icon: ICON_MAP[item.icon] || ICON_MAP[item.icon_name] || <Check />,
-          })),
+          items: features_items.map((item) => {
+            const getIcon = () => {
+              if (ICON_MAP[item.icon] || ICON_MAP[item.icon_name]) return ICON_MAP[item.icon] || ICON_MAP[item.icon_name];
+              const title = (item.title || "").toLowerCase();
+              if (title.includes("creative")) return <Lightbulb />;
+              if (title.includes("strategic") || title.includes("planning")) return <Target />;
+              if (title.includes("diverse") || title.includes("offering")) return <Layers />;
+              return <Check />;
+            };
+            return {
+              ...item,
+              icon: getIcon(),
+            };
+          }),
         }}
         process={{
           title: settings.service_event_and_activation_process_title || "What We Bring to the Table",
