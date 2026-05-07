@@ -14,7 +14,7 @@ export function getPool() {
     password: process.env.DATABASE_PASSWORD || '',
     database: process.env.DATABASE_NAME || 'nextidea',
     waitForConnections: true,
-    connectionLimit: parseInt(process.env.DATABASE_CONNECTION_LIMIT, 10) || 10,
+    connectionLimit: parseInt(process.env.DATABASE_CONNECTION_LIMIT, 10) || 5,
     queueLimit: 0,
     enableKeepAlive: true,
     keepAliveInitialDelay: 0,
@@ -35,8 +35,8 @@ export async function query(sql, params = []) {
   } catch (error) {
     if (error.code === 'ER_BAD_DB_ERROR' || error.code === 'ER_NO_SUCH_TABLE') {
       const dbName = process.env.DATABASE_NAME || 'nextidea';
-      console.error(`DATABASE ERROR: The database or table is missing. Please visit http://localhost:3000/api/db-init to set up your database.`);
-      throw new Error(`Database setup required. Please visit /api/db-init to initialize your database '${dbName}'.`);
+      console.error(`DATABASE ERROR: The database or table is missing. Please run the database initialization.`);
+      throw new Error(`Database setup required. Please initialize your database '${dbName}' using the init-db.sql script.`);
     }
     console.error('Database query error:', error.message);
     throw error;

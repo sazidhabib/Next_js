@@ -27,7 +27,7 @@ const showcaseItems = [
     title: "Annual Reports",
     description: "Present your company's achievements in a comprehensive and visually appealing annual report. We ensure your data is communicated clearly and elegantly.",
     icon: <FileText className="w-6 h-6" />,
-    image: "/annual report.jpeg", // Fallback image
+    image: "/annual-report.jpeg", // Fallback image
   },
   {
     title: "Customized Corporate Gifts",

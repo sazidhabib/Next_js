@@ -3,7 +3,20 @@ import mysql from 'mysql2/promise';
 import fs from 'fs';
 import path from 'path';
 
-export async function GET() {
+export async function GET(request) {
+  // Block in production to prevent accidental database resets
+  if (process.env.NODE_ENV === 'production') {
+    // Allow only if a secret init key is provided
+    const { searchParams } = new URL(request.url);
+    const initKey = searchParams.get('key');
+    if (!initKey || initKey !== process.env.DB_INIT_SECRET) {
+      return NextResponse.json(
+        { success: false, error: 'Database initialization is disabled in production. Provide ?key=YOUR_DB_INIT_SECRET to proceed.' },
+        { status: 403 }
+      );
+    }
+  }
+
   const dbConfig = {
     host: process.env.DATABASE_HOST || 'localhost',
     port: parseInt(process.env.DATABASE_PORT, 10) || 3306,
@@ -49,11 +62,7 @@ ON DUPLICATE KEY UPDATE setting_key=setting_key;
 
     return NextResponse.json({ 
       success: true, 
-      message: 'Database initialized and seeded successfully!',
-      admin: {
-        email: 'admin@nextideasolution.com',
-        password: 'Admin@12345'
-      }
+      message: 'Database initialized and seeded successfully! Please change the default admin password immediately.',
     });
   } catch (error) {
     console.error('Setup error:', error);

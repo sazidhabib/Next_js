@@ -2,7 +2,6 @@
 // This file runs the Next.js standalone server with low memory settings
 
 const { createServer } = require("http");
-const { parse } = require("url");
 const path = require("path");
 const next = require("next");
 
@@ -23,7 +22,8 @@ const handle = app.getRequestHandler();
 app.prepare().then(() => {
   createServer(async (req, res) => {
     try {
-      const parsedUrl = parse(req.url, true);
+      // Use the WHATWG URL API instead of deprecated url.parse()
+      const parsedUrl = new URL(req.url, `http://${hostname}:${port}`);
       await handle(req, res, parsedUrl);
     } catch (err) {
       console.error("Error occurred handling", req.url, err);

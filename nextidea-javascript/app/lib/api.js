@@ -1,5 +1,5 @@
-const BASE_URL = 'https://demo.nextideasolution.com/api';
-export const IMAGE_BASE_URL = "https://demo.nextideasolution.com/uploads/demos/";
+const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://demo.nextideasolution.com/api';
+export const IMAGE_BASE_URL = process.env.NEXT_PUBLIC_IMAGE_BASE_URL || "https://demo.nextideasolution.com/uploads/demos/";
 
 /**
  * Fetches demos from the external PHP API with optional filters.

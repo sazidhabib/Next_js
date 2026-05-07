@@ -30,8 +30,10 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
-.env*
+# env files
+.env
+.env.local
+.env.production
 
 # vercel
 .vercel
@@ -40,15 +42,10 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# Environment variables
-.env
-.env.local
-.env.production
-
-# Uploads
+# Uploads (user-generated content)
 public/uploads/
 
-# Database
+# Database exports
 *.sql
 !scripts/init-db.sql
 !scripts/seed-data.sql
@@ -56,48 +53,20 @@ public/uploads/
 # IDE
 .vscode/
 .idea/
+.jetro/
 
 # OS
-.DS_Store
 Thumbs.db
 
-# Next.js
-.next/
-out/
-
 # Logs
+logs/
 *.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
 
-# Environment variables
-.env
-.env.local
-.env.production
-
-# Uploads
-public/uploads/
-
-# Database
-*.sql
-!scripts/init-db.sql
-!scripts/seed-data.sql
-
-# IDE
-.vscode/
-.idea/
-
-# OS
-.DS_Store
-Thumbs.db
-
-# Next.js
-.next/
-out/
-
-# Logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
+# Development artifacts
+scratch/
+appDataDir/
+eslint_out*.json
+lint_output.txt
+hash.txt
+fix-*.js
+IMPLEMENTATION_COMPLETE.md
