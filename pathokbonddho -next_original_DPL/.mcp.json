@@ -1,0 +1,17 @@
+{
+  "mcpServers": {
+    "jetro": {
+      "type": "stdio",
+      "command": "C:\\Users\\80509\\.jetro\\runtime\\node-win32-x64.exe",
+      "args": [
+        "C:\\Users\\80509\\.jetro\\mcp-server\\index.js"
+      ],
+      "env": {
+        "JET_WORKSPACE": "d:\\Github\\pathokbonddho -next_original_DPL",
+        "JET_API_URL": "https://api.jetro.ai",
+        "JET_JWT": "eyJhbGciOiJSUzI1NiIsImtpZCI6Ijg2OGU0YWNlMGI2NTE2ZDM2YjlmNTZkZThjZTQ5Nzg4ZmNjZGFjNDMiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL3NlY3VyZXRva2VuLmdvb2dsZS5jb20vamV0cm8tY2RhZWYiLCJhdWQiOiJqZXRyby1jZGFlZiIsImF1dGhfdGltZSI6MTc3ODEzNTQ1OSwidXNlcl9pZCI6IlpPQTlrQVNCU1BVMzdYZ2lVcWR6QVBUSDNEcjEiLCJzdWIiOiJaT0E5a0FTQlNQVTM3WGdpVXFkekFQVEgzRHIxIiwiaWF0IjoxNzc4MTM1NDU5LCJleHAiOjE3NzgxMzkwNTksImVtYWlsIjoicm90YWxpdDQzMUBreW5uaW5jLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJmaXJlYmFzZSI6eyJpZGVudGl0aWVzIjp7ImVtYWlsIjpbInJvdGFsaXQ0MzFAa3lubmluYy5jb20iXX0sInNpZ25faW5fcHJvdmlkZXIiOiJwYXNzd29yZCJ9fQ.MZFb-YHLRDwhfgeEeZhgj2ixTqJ7mMhVZqJl7nOZIjAQu2TMDtm8DZahafNRBKceft6I_ZlaPpdCl43v-KvfyxukioJ7Ijr7h-AVFkV5rTauhiSWjiVlBl81q_hzOJStQ8-az9ao4IUNum4P__s1ijpSu9Lxk3TQQ_s5qUNqx7H_vrW9Ov1aVaaxksoK8quIr3t5sclPEo_icodMwul43vGivHhMh0Gj2anm5FFHArLRNqX5dU6odVHX7a5GM9m0-Lv-dqI1EZNZvtQ4WQGo5gEyALVLTRk3YUKhGlmRs1HO7rx2rqF4KYTGhgrNppJieDdboNiSCwjZQkjtXA_iEg",
+        "PATH": "C:\\Users\\80509\\.jetro\\runtime;C:\\WINDOWS\\system32;C:\\WINDOWS;C:\\WINDOWS\\System32\\Wbem;C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\;C:\\WINDOWS\\System32\\OpenSSH\\;C:\\Program Files\\nodejs\\;C:\\Program Files\\nodejs;C:\\Program Files\\MongoDB\\Tools\\100\\bin;C:\\Program Files\\cursor\\resources\\app\\bin;C:\\Program Files\\PowerShell\\7\\;C:\\Users\\80509\\AppData\\Local\\Microsoft\\WindowsApps;C:\\Users\\80509\\AppData\\Local\\Programs\\Microsoft VS Code\\bin;C:\\Users\\80509\\AppData\\Roaming\\npm;C:\\Users\\80509\\AppData\\Local\\GitHubDesktop\\bin;C:\\Users\\80509\\AppData\\Local\\Programs\\Antigravity\\bin"
+      }
+    }
+  }
+}

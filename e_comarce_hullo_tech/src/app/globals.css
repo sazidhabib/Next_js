@@ -1,0 +1,25 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-white text-star-text font-sans;
+    scroll-behavior: smooth;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-sans font-semibold;
+  }
+}
+
+@layer components {
+  .product-card {
+    @apply border border-star-gray rounded-lg bg-white hover:shadow-lg transition-shadow duration-300;
+  }
+  .btn-primary {
+    @apply bg-star-blue text-white px-6 py-2 rounded hover:bg-star-dark-blue transition-colors;
+  }
+  .btn-cart {
+    @apply bg-star-red text-white px-4 py-2 rounded hover:bg-red-700 transition-colors;
+  }
+}
