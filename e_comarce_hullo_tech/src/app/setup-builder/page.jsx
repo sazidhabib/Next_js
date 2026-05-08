@@ -9,7 +9,7 @@ const parts = [
 ];
 
 export default function SetupBuilderPage() {
-  const [selectedParts, setSelectedParts] = useState<Record<string, string>>({});
+  const [selectedParts, setSelectedParts] = useState({});
   const totalPrice = Object.keys(selectedParts).length * 500;
 
   return (

@@ -1,12 +1,15 @@
 "use client";
 
-import { products, categories } from "@/data/mockData";
+import { products, categories } from "../../../data/mockData";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 
-export default function CategoryPage({ params }: { params: { slug: string } }) {
-  const category = categories.find((c) => c.slug === params.slug);
-  const categoryProducts = products.filter((p) => p.category === params.slug);
+import { use } from "react";
+
+export default function CategoryPage({ params }) {
+  const { slug } = use(params);
+  const category = categories.find((c) => c.slug === slug);
+  const categoryProducts = products.filter((p) => p.category === slug);
 
   if (!category) notFound();
 
@@ -21,7 +24,7 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
 
       <div className="grid md:grid-cols-3 lg:grid-cols-4 gap-4">
         {categoryProducts.map((product) => (
-          <Link key={product.id} href={`/products/${product.id}`}>
+          <Link key={product.id} href={`/${product.category}/${product.slug}`}>
             <div className="product-card p-4">
               <div className="aspect-square bg-star-light-gray rounded mb-3 flex items-center justify-center text-gray-400">
                 Product Image

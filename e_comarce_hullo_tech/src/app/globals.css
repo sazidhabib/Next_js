@@ -14,12 +14,30 @@
 
 @layer components {
   .product-card {
-    @apply border border-star-gray rounded-lg bg-white hover:shadow-lg transition-shadow duration-300;
+    @apply border border-star-gray rounded-lg bg-white hover:shadow-lg transition-all duration-300 overflow-hidden;
+  }
+  .product-card:hover {
+    @apply border-star-blue;
   }
   .btn-primary {
     @apply bg-star-blue text-white px-6 py-2 rounded hover:bg-star-dark-blue transition-colors;
   }
   .btn-cart {
     @apply bg-star-red text-white px-4 py-2 rounded hover:bg-red-700 transition-colors;
+  }
+  .btn-orange {
+    @apply bg-star-orange text-white px-4 py-2 rounded hover:bg-orange-700 transition-colors;
+  }
+  .mega-menu {
+    @apply absolute top-full left-0 w-full bg-white shadow-lg border-t border-star-gray z-50;
+  }
+  .category-link {
+    @apply block py-1.5 text-sm text-star-text hover:text-star-blue transition-colors;
+  }
+  .badge-new {
+    @apply absolute top-2 left-2 bg-star-green text-white text-xs px-2 py-1 rounded;
+  }
+  .badge-sale {
+    @apply absolute top-2 left-2 bg-star-red text-white text-xs px-2 py-1 rounded;
   }
 }
