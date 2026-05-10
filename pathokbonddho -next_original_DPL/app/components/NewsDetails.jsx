@@ -4,6 +4,7 @@ import Link from 'next/link';
 import api, { STATIC_URL } from '@/app/lib/api';
 import { Container, Row, Col, Spinner, Alert, Badge } from 'react-bootstrap';
 import Image from 'next/image';
+import { formatBengaliDate } from '@/app/lib/dateUtils';
 const NewsDetails = ({ id, initialData, initialAds }) => {
     const [news, setNews] = useState(initialData || null);
     const [loading, setLoading] = useState(!initialData);
@@ -105,11 +106,7 @@ const NewsDetails = ({ id, initialData, initialAds }) => {
     };
 
     const formatDate = (dateStr) => {
-        if (!dateStr) return '';
-        return new Date(dateStr).toLocaleDateString('bn-BD', {
-            year: 'numeric', month: 'long', day: 'numeric',
-            hour: '2-digit', minute: '2-digit', hour12: false
-        });
+        return formatBengaliDate(dateStr, true);
     };
 
     const increaseFontSize = () => setFontSize(prev => Math.min(prev + 1, 22));

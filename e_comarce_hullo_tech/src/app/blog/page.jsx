@@ -1,4 +1,4 @@
-import { blogPosts } from "@/data/mockData";
+import { blogPosts } from "../../data/mockData";
 import Image from "next/image";
 
 export default function BlogPage() {

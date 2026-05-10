@@ -14,7 +14,7 @@
     --ht-card-bg: rgba(255, 255, 255, 0.8);
     --ht-card-bg-dark: rgba(20, 25, 35, 0.8);
     --ht-glass-border: rgba(255, 255, 255, 0.1);
-    
+
     /* Gradients */
     --ht-gradient: linear-gradient(135deg, var(--ht-primary), var(--ht-secondary));
     --ht-gradient-dark: linear-gradient(135deg, var(--ht-bg-dark), #1A1F2B);
@@ -304,7 +304,7 @@ body {
     background: var(--ht-gradient-dark);
     position: relative;
     z-index: 10;
-    border-bottom: 2px solid var(--ht-primary);
+
 }
 
 .text-container {
@@ -554,8 +554,7 @@ body {
 }
 
 .top-bar-custom {
-    background-color: var(--ht-bg-dark);
-    border-bottom: 1px solid var(--ht-primary);
+
     color: white;
     padding: 10px 30px;
     font-size: 14px;
@@ -2552,7 +2551,7 @@ footer {
 .news-design-side-layout:hover {
     transform: translateX(4px);
     background-color: #f8f9fa;
-    box-shadow: -2px 0 0 #E67E22;
+    box-shadow: -2px 0 0 #006a60;
     z-index: 2;
 }
 
@@ -2679,7 +2678,7 @@ footer {
         object-fit: cover !important;
         object-position: center;
     }
-    
+
     /* Also limit gallery images height on desktop */
     .gallery-item .w-100.h-auto {
         max-height: 700px;
@@ -2697,24 +2696,29 @@ footer {
         -webkit-overflow-scrolling: touch;
         gap: 8px !important;
         justify-content: flex-start !important;
-        scrollbar-width: none; /* Hide scrollbar for cleaner look */
+        scrollbar-width: none;
+        /* Hide scrollbar for cleaner look */
     }
+
     .action-tools::-webkit-scrollbar {
         display: none;
     }
+
     .social-share-group {
         margin-top: 0 !important;
         width: auto !important;
         white-space: nowrap;
     }
+
     .social-share-group span {
-        display: none; /* Hide "শেয়ার:" text on very small screens to save space if needed */
+        display: none;
+        /* Hide "শেয়ার:" text on very small screens to save space if needed */
     }
 }
 
 @media (max-width: 400px) {
     .font-size-controls {
-        display: none !important; /* Hide font controls on very small screens to make room for share buttons */
+        display: none !important;
+        /* Hide font controls on very small screens to make room for share buttons */
     }
 }
-

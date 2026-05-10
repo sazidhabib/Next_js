@@ -4,6 +4,7 @@ import api, { STATIC_URL } from '@/app/lib/api';
 import { Container, Button, Spinner, Badge } from 'react-bootstrap';
 import Link from 'next/link';
 import Image from 'next/image';
+import { formatBengaliDate } from '@/app/lib/dateUtils';
 
 const LoadMoreNews = ({ slug, excludeIds }) => {
     const [news, setNews] = useState([]);
@@ -95,10 +96,7 @@ const LoadMoreNews = ({ slug, excludeIds }) => {
     };
 
     const formatDate = (dateStr) => {
-        if (!dateStr) return '';
-        return new Date(dateStr).toLocaleDateString('bn-BD', {
-            year: 'numeric', month: 'long', day: 'numeric'
-        });
+        return formatBengaliDate(dateStr);
     };
 
     const renderCategoryBadgeContent = (category) => {
@@ -128,8 +126,8 @@ const LoadMoreNews = ({ slug, excludeIds }) => {
                         return (
                             <div key={item.id || index} className="col-lg-6 col-6 mb-3">
                                 {/* Desktop Layout */}
-                                <div className="d-none d-md-block news-design-title-image-side h-100 p-3 border bg-white hover-shadow transition" style={{ transition: 'all 0.3s ease' }}>
-                                    <Link href={newsLink} className="text-decoration-none text-dark">
+                                <div className="d-none d-md-block news-design-title-image-side h-100 p-3 border bg-white hover-shadow transition position-relative group" style={{ transition: 'all 0.3s ease' }}>
+                                    <Link href={newsLink} className="text-decoration-none text-dark stretched-link">
                                         <h5 className="fw-bold mb-3 code-font-bangla hover-danger" style={{ lineHeight: '1.5' }}>
                                             {item.alternativeHeadline || item.newsHeadline}
                                         </h5>
@@ -138,16 +136,16 @@ const LoadMoreNews = ({ slug, excludeIds }) => {
                                         {getImageUrl(item) && (
                                             <div className="news-side-image-wrapper flex-shrink-0 position-relative" style={{ width: '140px', height: '95px' }}>
 
-                                                <Link href={newsLink} className="d-block w-100 h-100 position-relative">
+                                                <div className="d-block w-100 h-100 overflow-hidden">
                                                     <Image
                                                         src={getImageUrl(item)}
                                                         alt={item.newsHeadline}
                                                         fill
-                                                        className="object-fit-cover news-side-image"
+                                                        className="object-fit-cover news-side-image hover-zoom transition"
                                                         sizes="140px"
                                                         quality={90}
                                                     />
-                                                </Link>
+                                                </div>
                                                 {item.Categories && item.Categories[0] && (
                                                     <Badge bg="danger" className="position-absolute top-0 start-0 m-1" style={{ zIndex: 2, fontSize: '0.65rem' }}>
                                                         {renderCategoryBadgeContent(item.Categories[0])}
@@ -155,9 +153,9 @@ const LoadMoreNews = ({ slug, excludeIds }) => {
                                                 )}
                                             </div>
                                         )}
-                                        <div className="flex-grow-1 d-flex flex-column justify-content-between">
+                                        <div className="flex-grow-1 d-flex flex-column justify-content-between position-relative" style={{ zIndex: 2, pointerEvents: 'none' }}>
                                             {item.shortDescription && (
-                                                <p className="small custom-font text-muted mb-2 code-font-bangla d-md-none" style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                                                <p className="small custom-font text-muted mb-2 code-font-bangla" style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                                                     {stripHtml(item.shortDescription)}
                                                 </p>
                                             )}
@@ -170,19 +168,19 @@ const LoadMoreNews = ({ slug, excludeIds }) => {
                                 </div>
 
                                 {/* Mobile Layout: Image Top */}
-                                <div className="d-flex d-md-none flex-column h-100 p-2 border bg-white hover-shadow transition" style={{ transition: 'all 0.3s ease' }}>
+                                <div className="d-flex d-md-none flex-column h-100 p-2 border bg-white hover-shadow transition position-relative group" style={{ transition: 'all 0.3s ease' }}>
                                     {getImageUrl(item) && (
                                         <div className="mb-2 w-100 position-relative" style={{ aspectRatio: '16/9' }}>
-                                            <Link href={newsLink} className="d-block w-100 h-100 position-relative">
+                                            <div className="d-block w-100 h-100 overflow-hidden">
                                                 <Image
                                                     src={getImageUrl(item)}
                                                     alt={item.newsHeadline}
                                                     fill
-                                                    className="object-fit-cover"
+                                                    className="object-fit-cover hover-zoom transition"
                                                     sizes="(max-width: 768px) 50vw, 33vw"
                                                     quality={90}
                                                 />
-                                            </Link>
+                                            </div>
                                             {item.Categories && item.Categories[0] && (
                                                 <Badge bg="danger" className="position-absolute top-0 start-0 m-2" style={{ zIndex: 2 }}>
                                                     {renderCategoryBadgeContent(item.Categories[0])}
@@ -190,15 +188,15 @@ const LoadMoreNews = ({ slug, excludeIds }) => {
                                             )}
                                         </div>
                                     )}
-                                    <Link href={newsLink} className="text-decoration-none text-dark flex-grow-1">
+                                    <Link href={newsLink} className="text-decoration-none text-dark flex-grow-1 stretched-link">
                                         <h6 className="fw-bold mb-2 code-font-bangla hover-danger" style={{ lineHeight: '1.4', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                                             {item.alternativeHeadline || item.newsHeadline}
                                         </h6>
                                     </Link>
                                     {item.shortDescription && (
-                                        <p className="small text-muted mb-2 font-bangla line-clamp-2">{stripHtml(item.shortDescription)}</p>
+                                        <p className="small text-muted mb-2 font-bangla line-clamp-2 position-relative" style={{ zIndex: 2, pointerEvents: 'none' }}>{stripHtml(item.shortDescription)}</p>
                                     )}
-                                    <div className="small text-muted mt-2" style={{ fontSize: '0.75rem' }}>
+                                    <div className="small text-muted mt-2 position-relative" style={{ fontSize: '0.75rem', zIndex: 2, pointerEvents: 'none' }}>
                                         <i className="bi bi-clock me-1"></i>
                                         {formatDate(item.createdAt)}
                                     </div>

@@ -1,0 +1,59 @@
+Technical Analysis Report: Pathokbonddho CMS
+This document provides a comprehensive breakdown of the Pathokbonddho project. It is designed to give you a deep understanding of the architecture, technology stack, and design decisions so you can confidently answer interview questions about the project.
+
+1. Project Overview
+Pathokbonddho is a full-stack, dynamic News Portal / Content Management System (CMS). Instead of a simple static site, it features a complete backend for managing articles, authors, categories, advertisements, image galleries, and a dynamic layout builder (pages, sections, rows, columns) that allows administrators to control the frontend appearance directly from the admin dashboard.
+
+2. High-Level Architecture
+The project utilizes a Monolithic Architecture with a Custom Next.js Server. Instead of separating the backend and frontend into completely different repositories/ports, the application uses a single server.js entry point.
+
+Express Server Initialization: Express starts up, connects to the MySQL database, and registers all RESTful API routes under /api/*.
+Static File Handling: Express handles file uploads natively by exposing an /uploads directory.
+Next.js Integration: For any request that does not match an /api route, Express forwards the request to the Next.js request handler. Next.js then serves the React App Router pages.
+3. Technology Stack & "Why" We Used It
+Frontend (Client & UI)
+Next.js (v15) & React (v19):
+Why: Next.js App Router provides Server-Side Rendering (SSR) and Static Site Generation (SSG). For a news portal, SEO (Search Engine Optimization) is critical. SSR ensures that Google crawlers see the full HTML of a news article immediately, while keeping the user experience extremely fast.
+Tailwind CSS & Bootstrap:
+Why: Tailwind provides utility-first CSS for highly customized, responsive designs without writing raw CSS. Bootstrap might be used for legacy components or quick admin-panel scaffolding where pre-built UI components speed up development.
+SWR (Stale-While-Revalidate):
+Why: Used for client-side data fetching. In a news app, data changes often. SWR shows the user cached data instantly while silently fetching the updated news in the background, providing a snappy experience.
+React Hook Form & Zod:
+Why: React Hook Form manages complex forms (like creating a news article) efficiently using uncontrolled components to prevent lag. Zod validates the form data schema on the client side before sending it to the server.
+Tiptap / Jodit / Syncfusion (Rich Text Editors):
+Why: A CMS requires a robust text editor so journalists can format text, add bolding, headings, and inline images.
+Backend (Server & API)
+Node.js & Express.js:
+Why: Express is a lightweight, flexible routing framework. It handles complex API routing, middleware (like authentication checks), and file serving far better than default Next.js API routes, especially when doing heavy file uploads.
+Multer & Sharp:
+Why: Multer is used to handle multipart/form-data for image uploads. Sharp is an image processing library used to compress, resize, and convert images to efficient formats (like WebP). This ensures the news portal loads fast, even with large hero images.
+JWT (JSON Web Tokens) & Bcryptjs:
+Why: Bcryptjs safely hashes admin passwords before saving them to the database. JWT provides stateless authentication, meaning the server doesn't need to track sessions in memory; the token itself validates the user.
+Database
+MySQL:
+Why: A news portal is highly relational. A News article belongs to a Category, is written by an Author, and has many Tags. Relational Databases (SQL) handle these complex joins much better than NoSQL databases (like MongoDB).
+Sequelize ORM:
+Why: Object-Relational Mapping (ORM) abstracts raw SQL queries into JavaScript functions. It provides database migrations (sequelize-cli), ensuring database schemas are version-controlled and consistent across development and production.
+4. How the Full Project is Built (The Workflow)
+Database & Models: The foundation is built in the /models directory (e.g., news-model.js, user-model.js, ad-model.js, row.js, column.js). These define the structure of the data.
+API & Controllers: The /controllers handle business logic (e.g., fetching news, processing an image upload, checking passwords). They are connected to /router files which are imported into server.js.
+Dynamic Layout Engine: The presence of page, pageSection, row, column, and design models indicates that the homepage isn't hardcoded. The admin panel saves the layout structure to the DB, and the frontend fetches this layout to dynamically render grid widgets (e.g., "Top News", "Sports Category Grid").
+Frontend Consumption: The Next.js pages in /app (like /app/news/[slug]) fetch data from the Express APIs (or directly via Server Components) and render the final UI to the user.
+5. Potential Interview Questions & How to Answer Them
+Q1: "Why did you use a Custom Express Server instead of just Next.js API routes?"
+Answer: "Next.js API routes are great for serverless environments, but a News CMS requires heavy file management (handling image uploads, storing them on the disk, and processing them with Sharp). Furthermore, we wanted to ensure long-running database connections via Sequelize and use standard Express middlewares for complex routing. A custom server combining Express and Next.js gave us the best of both worlds: robust backend control and Next.js frontend optimization."
+
+Q2: "Why use MySQL over MongoDB for this project?"
+Answer: "A news portal's data is inherently relational. Articles have foreign keys to authors, categories, and multiple tags. We also have a complex layout builder where Rows belong to Sections, and Columns belong to Rows. MySQL, paired with Sequelize ORM, allowed us to strictly enforce these relationships, maintain data integrity, and perform efficient SQL JOIN queries which would be complex and slow in a document database like MongoDB."
+
+Q3: "How do you handle image optimization so the site loads fast?"
+Answer: "When an admin uploads a news thumbnail, it's captured by Multer. Before saving, we pass the buffer to Sharp, which resizes it to appropriate dimensions and compresses it (e.g., converting to WebP). This drastically reduces the payload size. On the frontend, we use the Next.js <Image> component or custom Lazy Loading components to ensure images only load when they enter the viewport."
+
+Q4: "How does the Dynamic Layout work?"
+Answer: "Instead of hardcoding the homepage grid, we built a layout engine. The database holds tables for Pages, PageSections, Rows, and Columns. Each column references a specific Design widget (like a 2-grid news layout or a sidebar). The Next.js frontend fetches this JSON structure and maps over it, rendering the appropriate React Components dynamically. This allows site admins to redesign the homepage without deploying new code."
+
+Q5: "What is the purpose of SWR in your application?"
+Answer: "We use SWR (Stale-While-Revalidate) for client-side data fetching. When a user navigates the site, SWR instantly loads the news from the local cache, making the app feel instantaneous. Behind the scenes, it silently fetches the server to see if there are updates. If a breaking news article was just published, SWR updates the UI seamlessly without a hard refresh."
+
+Q6: "How did you handle authentication?"
+Answer: "We implemented JWT (JSON Web Tokens) with Bcrypt for password hashing. When an admin logs in, the Express backend verifies the credentials and signs a JWT. This token is sent back and stored securely on the client. For subsequent requests to protected API routes (like creating an article), the token is passed in the Authorization header. We used express-validator to ensure all incoming data to auth routes is sanitized and valid."

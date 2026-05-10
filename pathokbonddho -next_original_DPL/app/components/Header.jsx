@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { useMenu } from '../providers/MenuProvider';
 import { useSettings } from '../providers/SettingsProvider';
-import { Spinner } from 'react-bootstrap';
+import { formatBengaliDate } from '@/app/lib/dateUtils';
 
 const normalizePath = (path, includeQuery = false) => {
   if (!path) return '/';
@@ -32,9 +32,7 @@ const Header = () => {
   const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
-    const date = new Date();
-    const options = { day: 'numeric', month: 'long', year: 'numeric' };
-    setCurrentDate(date.toLocaleDateString('bn-BD', options));
+    setCurrentDate(formatBengaliDate(new Date()));
   }, []);
 
   const handleSearch = (e) => {

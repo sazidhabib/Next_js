@@ -4,6 +4,7 @@ import api, { STATIC_URL } from '@/app/lib/api';
 import { Card, Badge, Spinner } from 'react-bootstrap';
 import Link from 'next/link';
 import Image from 'next/image';
+import { formatBengaliDate } from '@/app/lib/dateUtils';
 
 const NewsWidget = ({ cell, isPriority }) => {
     const [news, setNews] = useState(cell.resolvedContent || null);
@@ -90,10 +91,7 @@ const NewsWidget = ({ cell, isPriority }) => {
     };
 
     const formatDate = (dateStr) => {
-        if (!dateStr) return '';
-        return new Date(dateStr).toLocaleDateString('bn-BD', {
-            year: 'numeric', month: 'long', day: 'numeric'
-        });
+        return formatBengaliDate(dateStr);
     };
 
     const getImageHeight = () => {
@@ -180,12 +178,15 @@ const NewsWidget = ({ cell, isPriority }) => {
 
     if (design === 'title-only') {
         return (
-            <div className="custom-font news-design-title-only h-100 pb-2">
-                <Link href={newsLink} className="text-decoration-none text-dark">
-                    <h5 className="fw-bold mb-1 font-bangla hover-primary">
+            <div className="custom-font news-design-title-only h-100 pb-2 position-relative group hover-bg-light transition p-2">
+                <Link href={newsLink} className="text-decoration-none text-dark stretched-link">
+                    <h5 className="fw-bold mb-1 font-bangla hover-danger">
                         {news.alternativeHeadline || news.newsHeadline}
                     </h5>
                 </Link>
+                {news.shortDescription && (
+                    <p className="small text-muted mb-2 font-bangla d-md-none">{stripHtml(news.shortDescription)}</p>
+                )}
                 <small className="text-muted">{formatDate(news.createdAt)}</small>
             </div>
         );
@@ -193,18 +194,18 @@ const NewsWidget = ({ cell, isPriority }) => {
 
     if (design === 'title-image-left') {
         return (
-            <div className="custom-font news-design-side-layout pb-3">
-                <Link href={newsLink} className="text-decoration-none text-dark d-block mb-2">
-                    <h5 className="fw-bold font-bangla mb-1">
+            <div className="custom-font news-design-side-layout pb-3 position-relative group hover-bg-light transition p-2">
+                <Link href={newsLink} className="text-decoration-none text-dark d-block mb-2 stretched-link">
+                    <h5 className="fw-bold font-bangla mb-1 hover-danger">
                         {news.alternativeHeadline || news.newsHeadline}
                     </h5>
                 </Link>
                 <div className="d-flex gap-3">
                     {imageUrl && (
                         <div className="side-image-container flex-shrink-0 position-relative" style={{ width: '120px', height: '90px' }}>
-                            <Link href={newsLink} className="d-block h-100">
-                                <NewsImage className="" currentDesign={design} />
-                            </Link>
+                            <div className="d-block h-100 overflow-hidden ">
+                                <NewsImage className="hover-zoom" currentDesign={design} />
+                            </div>
                             {news.Categories && news.Categories[0] && (
                                 <Badge bg="danger" className="position-absolute top-0 start-0 m-1" style={{ zIndex: 2 }}>
                                     {renderCategoryBadgeContent(news.Categories[0])}
@@ -214,7 +215,7 @@ const NewsWidget = ({ cell, isPriority }) => {
                     )}
                     <div className="flex-grow-1">
                         {news.shortDescription && (
-                            <p className="small text-muted mb-2 font-bangla d-md-none">{stripHtml(news.shortDescription)}</p>
+                            <p className="small text-muted mb-2 font-bangla">{stripHtml(news.shortDescription)}</p>
                         )}
                         <small className="text-muted">{formatDate(news.createdAt)}</small>
                     </div>
@@ -225,12 +226,12 @@ const NewsWidget = ({ cell, isPriority }) => {
 
     if (design === 'image-left') {
         return (
-            <div className="custom-font news-design-side-layout d-flex gap-3 pb-3">
+            <div className="custom-font news-design-side-layout d-flex gap-3 pb-3 position-relative group hover-bg-light transition p-2">
                 {imageUrl && (
                     <div className="side-image-container flex-shrink-0 position-relative" style={{ width: '120px', height: '90px' }}>
-                        <Link href={newsLink} className="d-block h-100">
-                            <NewsImage className="" currentDesign={design} />
-                        </Link>
+                        <div className="d-block h-100 overflow-hidden">
+                            <NewsImage className="hover-zoom" currentDesign={design} />
+                        </div>
                         {news.Categories && news.Categories[0] && (
                             <Badge bg="danger" className="position-absolute top-0 start-0 m-2" style={{ zIndex: 2 }}>
                                 {renderCategoryBadgeContent(news.Categories[0])}
@@ -239,8 +240,8 @@ const NewsWidget = ({ cell, isPriority }) => {
                     </div>
                 )}
                 <div className="flex-grow-1">
-                    <Link href={newsLink} className="text-decoration-none text-dark">
-                        <h5 className="fw-bold mb-2 font-bangla">
+                    <Link href={newsLink} className="text-decoration-none text-dark stretched-link">
+                        <h5 className="fw-bold mb-2 font-bangla hover-danger">
                             {news.alternativeHeadline || news.newsHeadline}
                         </h5>
                     </Link>
@@ -255,24 +256,24 @@ const NewsWidget = ({ cell, isPriority }) => {
 
     if (design === 'title-image-right') {
         return (
-            <div className="custom-font news-design-side-layout pb-3">
-                <Link href={newsLink} className="text-decoration-none text-dark d-block mb-2">
-                    <h5 className="fw-bold font-bangla mb-1">
+            <div className="custom-font news-design-side-layout pb-3 position-relative group hover-bg-light transition p-2">
+                <Link href={newsLink} className="text-decoration-none text-dark d-block mb-2 stretched-link">
+                    <h5 className="fw-bold font-bangla mb-1 hover-danger">
                         {news.alternativeHeadline || news.newsHeadline}
                     </h5>
                 </Link>
                 <div className="d-flex gap-3">
                     <div className="flex-grow-1">
                         {news.shortDescription && (
-                            <p className="small text-muted mb-2 line-clamp-2 d-md-none font-bangla">{stripHtml(news.shortDescription)}</p>
+                            <p className="small text-muted mb-2 font-bangla">{stripHtml(news.shortDescription)}</p>
                         )}
                         <small className="text-muted">{formatDate(news.createdAt)}</small>
                     </div>
                     {imageUrl && (
                         <div className="side-image-container flex-shrink-0 position-relative" style={{ width: '120px', height: '90px' }}>
-                            <Link href={newsLink} className="d-block h-100">
-                                <NewsImage className="" currentDesign={design} />
-                            </Link>
+                            <div className="d-block h-100 overflow-hidden">
+                                <NewsImage className="hover-zoom" currentDesign={design} />
+                            </div>
                             {news.Categories && news.Categories[0] && (
                                 <Badge bg="danger" className="position-absolute top-0 end-0 m-1" style={{ zIndex: 2 }}>
                                     {renderCategoryBadgeContent(news.Categories[0])}
@@ -287,10 +288,10 @@ const NewsWidget = ({ cell, isPriority }) => {
 
     if (design === 'image-right') {
         return (
-            <div className="custom-font news-design-side-layout d-flex gap-3 pb-3">
+            <div className="custom-font news-design-side-layout d-flex gap-3 pb-3 position-relative group hover-bg-light transition p-2">
                 <div className="flex-grow-1">
-                    <Link href={newsLink} className="text-decoration-none text-dark">
-                        <h5 className="fw-bold mb-2 font-bangla ">
+                    <Link href={newsLink} className="text-decoration-none text-dark stretched-link">
+                        <h5 className="fw-bold mb-2 font-bangla hover-danger">
                             {news.alternativeHeadline || news.newsHeadline}
                         </h5>
                     </Link>
@@ -301,9 +302,9 @@ const NewsWidget = ({ cell, isPriority }) => {
                 </div>
                 {imageUrl && (
                     <div className="side-image-container flex-shrink-0 position-relative" style={{ width: '120px', height: '90px' }}>
-                        <Link href={newsLink} className="d-block h-100">
-                            <NewsImage className="" currentDesign={design} />
-                        </Link>
+                        <div className="d-block h-100 overflow-hidden">
+                            <NewsImage className="hover-zoom" currentDesign={design} />
+                        </div>
                         {news.Categories && news.Categories[0] && (
                             <Badge bg="danger" className="position-absolute top-0 end-0 m-2" style={{ zIndex: 2 }}>
                                 {renderCategoryBadgeContent(news.Categories[0])}
@@ -317,7 +318,7 @@ const NewsWidget = ({ cell, isPriority }) => {
 
 
     return (
-        <Card className="h-100 custom-font border-0 news-widget-card group shadow-sm-hover transition-all" style={{ display: 'flex', flexDirection: 'column' }}>
+        <Card className="h-100 custom-font border-0 news-widget-card group shadow-sm-hover transition-all p-1 position-relative" style={{ display: 'flex', flexDirection: 'column' }}>
             <div
                 className={`card-img-wrapper position-relative overflow-hidden mb-2 ${design === 'image-top' || !design ? 'news-design-image-top' : ''}`}
                 style={isMerged
@@ -325,25 +326,25 @@ const NewsWidget = ({ cell, isPriority }) => {
                     : { minHeight: `${imageHeight}px`, display: 'flex', flexDirection: 'column' }
                 }
             >
-                <Link href={newsLink} className="d-block h-100">
+                <div className="d-block h-100">
                     <NewsImage className="transition-transform group-hover-scale" currentDesign={design} />
-                </Link>
+                </div>
                 {news.Categories && news.Categories[0] && (
-                    <Badge bg="danger" className="position-absolute top-0 start-0 m-2 shadow-sm">
+                    <Badge bg="danger" className="position-absolute top-0 start-0 m-2 shadow-sm" style={{ zIndex: 2 }}>
                         {renderCategoryBadgeContent(news.Categories[0])}
                     </Badge>
                 )}
             </div>
             <Card.Body className="p-0" style={isMerged ? { flex: '0 0 auto' } : {}}>
-                <Link href={newsLink} className="text-decoration-none text-dark">
-                    <h5 className="fw-bold mb-2 font-bangla news-card-title">
+                <Link href={newsLink} className="text-decoration-none text-dark stretched-link">
+                    <h5 className="fw-bold mb-2 font-bangla news-card-title hover-danger">
                         {news.alternativeHeadline || news.newsHeadline}
                     </h5>
                 </Link>
-                {news.shortDescription && (
-                    <p className="small text-muted line-clamp-3 mb-2 font-bangla d-md-none">{stripHtml(news.shortDescription)}</p>
+                {news.shortDescription && !cell.design && (
+                    <p className="small text-muted line-clamp-3 mb-2 font-bangla d-none d-md-block position-relative" style={{ zIndex: 2, pointerEvents: 'none' }}>{stripHtml(news.shortDescription)}</p>
                 )}
-                <div className="text-muted small mt-auto">
+                <div className="text-muted small mt-auto position-relative" style={{ zIndex: 2, pointerEvents: 'none' }}>
                     {formatDate(news.createdAt)}
                 </div>
             </Card.Body>
