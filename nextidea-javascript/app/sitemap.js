@@ -1,5 +1,5 @@
 export default function sitemap() {
-  const baseUrl = "https://nextideasolution.com";
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://nextideasolution.com";
 
   const staticPages = [
     { url: baseUrl, lastModified: new Date(), changeFrequency: "weekly", priority: 1.0 },

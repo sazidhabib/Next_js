@@ -23,6 +23,14 @@ const nextConfig = {
         protocol: "https",
         hostname: "www.nextideasolution.com",
       },
+      {
+        protocol: "https",
+        hostname: "activephysiotherapycenter.com",
+      },
+      {
+        protocol: "https",
+        hostname: "www.activephysiotherapycenter.com",
+      },
     ],
   },
   serverExternalPackages: ['mysql2'],

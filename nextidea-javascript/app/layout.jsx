@@ -1,7 +1,7 @@
 import "./globals.css";
 
 export const metadata = {
-  metadataBase: new URL("https://nextideasolution.com"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://nextideasolution.com"),
   title: {
     default: "Next Idea Solution - Your Ideas Our Solution",
     template: "%s | Next Idea Solution",
@@ -18,7 +18,7 @@ export const metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://nextideasolution.com",
+    url: process.env.NEXT_PUBLIC_SITE_URL || "https://nextideasolution.com",
     siteName: "Next Idea Solution",
     title: "Next Idea Solution - Your Ideas Our Solution",
     description: "Award-winning 360-degree digital-first advertising agency in Bangladesh.",
@@ -29,7 +29,7 @@ export const metadata = {
     description: "Award-winning 360-degree digital-first advertising agency in Bangladesh.",
   },
   alternates: {
-    canonical: "https://nextideasolution.com",
+    canonical: process.env.NEXT_PUBLIC_SITE_URL || "https://nextideasolution.com",
   },
 };
 
