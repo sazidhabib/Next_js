@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { addSecurityHeaders } from './app/lib/middleware';
+import { addSecurityHeaders } from './app/lib/security';
 
 export function middleware(request) {
   const response = NextResponse.next();

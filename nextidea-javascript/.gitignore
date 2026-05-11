@@ -70,3 +70,6 @@ lint_output.txt
 hash.txt
 fix-*.js
 IMPLEMENTATION_COMPLETE.md
+
+# Zip files
+*.zip

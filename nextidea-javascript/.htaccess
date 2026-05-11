@@ -1,15 +1,15 @@
-# Next.js Reverse Proxy Configuration for cPanel
-# Place this file in your public_html directory
+# cPanel Node.js Selector Configuration
+# The Selector usually adds these lines automatically. 
+# If your app doesn't start, ensure 'server.js' is set as the startup file in cPanel.
 
 RewriteEngine On
 
-# Proxy all requests to the Node.js server
-RewriteRule ^(.*)$ http://127.0.0.1:3000/$1 [P,L]
+# Optional: Redirect HTTP to HTTPS
+RewriteCond %{HTTPS} off
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
-# If mod_proxy is not available, use this redirect-based approach instead:
-# Comment out the RewriteRule above and uncomment below:
-# RewriteCond %{REQUEST_URI} !^/\.well-known/
-# RewriteRule ^(.*)$ http://127.0.0.1:3000/$1 [P,L,QSA]
+# Manual Proxy (ONLY uncomment if NOT using cPanel Node.js Selector)
+# RewriteRule ^(.*)$ http://127.0.0.1:3000/$1 [P,L]
 
 # Security Headers
 <IfModule mod_headers.c>

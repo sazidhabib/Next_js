@@ -3,9 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "nodemon server.js",
+    "dev:next": "next dev",
+    "dev:server": "nodemon server.js",
     "build": "next build",
-    "start": "next start",
+    "start": "cross-env NODE_ENV=production node server.js",
     "lint": "eslint",
     "db:init": "node scripts/migrate.js init",
     "db:seed": "node scripts/migrate.js seed",
@@ -14,8 +16,13 @@
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",
+    "concurrently": "^8.2.2",
     "cookie": "^1.1.1",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "cross-env": "^7.0.3",
     "dotenv": "^17.4.0",
+    "express": "^4.21.2",
     "framer-motion": "^12.38.0",
     "joi": "^18.1.2",
     "jsonwebtoken": "^9.0.3",
@@ -33,6 +40,7 @@
     "@tailwindcss/postcss": "^4",
     "eslint": "^9",
     "eslint-config-next": "16.0.10",
+    "nodemon": "^3.1.9",
     "tailwindcss": "^4"
   }
 }
