@@ -5,34 +5,69 @@ import Image from "next/image";
 import { ChevronLeft, ChevronRight, Zap, Tag, Clock } from "lucide-react";
 import CategoryGrid from "../components/CategoryGrid";
 import FeaturedProducts from "../components/FeaturedProducts";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
 const banners = [
   {
     id: 1,
     title: "Gaming Laptop Festival",
     subtitle: "Up to 30% Off on Selected Gaming Laptops",
-    image: "/laptop.webp",
+    image: "/1st-post.jpeg",
     bgColor: "bg-gray-900",
   },
   {
     id: 2,
     title: "PC Builder Season",
     subtitle: "Build Your Dream PC with Best Prices",
-    image: "/desktop.webp",
+    image: "/2nd_post.jpeg",
     bgColor: "bg-gray-900",
   },
   {
     id: 3,
     title: "Smartphone Bonanza",
     subtitle: "Latest Phones at Unbeatable Prices",
-    image: "/phone.webp",
+    image: "/3rd_post.png",
     bgColor: "bg-gray-900",
   },
+];
+const topSideBanners = [
+  { id: 1, image: "/1st-post.jpeg", link: "/new-arrivals" },
+  { id: 2, image: "/4th_post.png", link: "/new-arrivals" },
+  { id: 3, image: "/3rd_post.png", link: "/new-arrivals" },
+];
+
+const bottomSideBanners = [
+  { id: 1, image: "/2nd_post.jpeg", link: "/gaming" },
+  { id: 2, image: "/cover.jpeg", link: "/gaming" },
+  { id: 3, image: "/1st-post.jpeg", link: "/gaming" },
 ];
 
 export default function Home() {
   const [currentBanner, setCurrentBanner] = useState(0);
+  const [currentTopSide, setCurrentTopSide] = useState(0);
+  const [currentBottomSide, setCurrentBottomSide] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentBanner((prev) => (prev + 1) % banners.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTopSide((prev) => (prev + 1) % topSideBanners.length);
+    }, 4000);
+    return () => clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentBottomSide((prev) => (prev + 1) % bottomSideBanners.length);
+    }, 4500);
+    return () => clearInterval(timer);
+  }, []);
 
   const nextBanner = () => {
     setCurrentBanner((prev) => (prev + 1) % banners.length);
@@ -42,65 +77,166 @@ export default function Home() {
     setCurrentBanner((prev) => (prev - 1 + banners.length) % banners.length);
   };
 
+  const nextTopSide = () => {
+    setCurrentTopSide((prev) => (prev + 1) % topSideBanners.length);
+  };
+
+  const prevTopSide = () => {
+    setCurrentTopSide((prev) => (prev - 1 + topSideBanners.length) % topSideBanners.length);
+  };
+
+  const nextBottomSide = () => {
+    setCurrentBottomSide((prev) => (prev + 1) % bottomSideBanners.length);
+  };
+
+  const prevBottomSide = () => {
+    setCurrentBottomSide((prev) => (prev - 1 + bottomSideBanners.length) % bottomSideBanners.length);
+  };
+
   return (
     <main className="bg-star-light-gray">
-      {/* Hero Banner Carousel */}
-      <section className="relative bg-white overflow-hidden">
-        <div className="relative h-[300px] md:h-[400px]">
-          {banners.map((banner, index) => (
-            <div
-              key={banner.id}
-              className={`absolute inset-0 transition-opacity duration-500 ${index === currentBanner ? "opacity-100" : "opacity-0"
-                }`}
-            >
-              <div className={`${banner.bgColor} h-full`}>
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center">
-                  <div className="grid md:grid-cols-2 gap-8 items-center w-full">
-                    <div className="text-white">
-                      <h1 className="text-3xl md:text-5xl font-bold mb-4">
-                        {banner.title}
+      {/* Hero Section with Grid Layout */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-6">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+
+          {/* Main Slider (Left Side - 3/4 Width) */}
+          <div className="lg:col-span-3 relative bg-white rounded-xl overflow-hidden shadow-sm h-[300px] md:h-[420px]">
+            <AnimatePresence>
+              <motion.div
+                key={currentBanner}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.7, ease: "easeInOut" }}
+                className="absolute inset-0"
+              >
+                <div className="relative h-full w-full">
+                  <Image
+                    src={banners[currentBanner].image}
+                    alt={banners[currentBanner].title}
+                    fill
+                    className="object-cover"
+                    priority
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent"></div>
+
+                  <div className="relative h-full flex flex-col items-start justify-center px-8 md:px-12">
+                    <div className="max-w-md text-white">
+                      <h1 className="text-3xl md:text-5xl font-extrabold mb-4 leading-tight tracking-tight">
+                        {banners[currentBanner].title}
                       </h1>
-                      <p className="text-lg md:text-xl mb-6 opacity-90">
-                        {banner.subtitle}
+                      <p className="text-lg md:text-xl mb-8 opacity-90 font-medium">
+                        {banners[currentBanner].subtitle}
                       </p>
                       <Link
                         href="/offers"
-                        className="inline-block bg-white text-star-blue px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
+                        className="inline-block bg-star-blue text-white px-8 py-3 rounded-lg font-bold hover:bg-star-dark-blue transition-all transform hover:scale-105 shadow-lg"
                       >
                         Shop Now
                       </Link>
                     </div>
-                    <div className="hidden md:flex justify-center">
-                      <div className="w-64 h-64 bg-white/20 rounded-lg flex items-center justify-center">
-                        <span className="text-white text-lg">Banner Image</span>
-                      </div>
-                    </div>
                   </div>
                 </div>
+              </motion.div>
+            </AnimatePresence>
+
+            {/* Navigation Buttons */}
+            <button
+              onClick={prevBanner}
+              className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/20 backdrop-blur-md p-2.5 rounded-full text-white hover:bg-white/40 transition-colors z-20 border border-white/30"
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </button>
+            <button
+              onClick={nextBanner}
+              className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/20 backdrop-blur-md p-2.5 rounded-full text-white hover:bg-white/40 transition-colors z-20 border border-white/30"
+            >
+              <ChevronRight className="w-5 h-5" />
+            </button>
+
+            {/* Dot Indicators */}
+            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2 z-20">
+              {banners.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => setCurrentBanner(index)}
+                  className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${index === currentBanner ? "bg-white w-8" : "bg-white/40 hover:bg-white/60"
+                    }`}
+                />
+              ))}
+            </div>
+          </div>
+
+          <div className="lg:col-span-1 flex flex-col gap-4">
+            {/* Top Side Banner Slider */}
+            <div className="flex-1 relative rounded-xl overflow-hidden h-[150px] lg:h-auto min-h-[200px] shadow-sm">
+              <AnimatePresence>
+                <motion.div
+                  key={currentTopSide}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.7 }}
+                  className="absolute inset-0"
+                >
+                  <Link href={topSideBanners[currentTopSide].link} className="block relative w-full h-full group">
+                    <Image
+                      src={topSideBanners[currentTopSide].image}
+                      alt="Side Banner Top"
+                      fill
+                      className="object-cover transition-transform duration-700 group-hover:scale-110"
+                    />
+                  </Link>
+                </motion.div>
+              </AnimatePresence>
+
+              {/* Dot Indicators for Top Side Slider (Top Right) */}
+              <div className="absolute top-4 right-4 flex gap-1.5 z-20">
+                {topSideBanners.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setCurrentTopSide(index)}
+                    className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${index === currentTopSide ? "bg-white w-4" : "bg-white/40 hover:bg-white/60"
+                      }`}
+                  />
+                ))}
               </div>
             </div>
-          ))}
-          <button
-            onClick={prevBanner}
-            className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/80 p-2 rounded-full shadow hover:bg-white transition-colors"
-          >
-            <ChevronLeft className="w-5 h-5" />
-          </button>
-          <button
-            onClick={nextBanner}
-            className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/80 p-2 rounded-full shadow hover:bg-white transition-colors"
-          >
-            <ChevronRight className="w-5 h-5" />
-          </button>
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
-            {banners.map((_, index) => (
-              <button
-                key={index}
-                onClick={() => setCurrentBanner(index)}
-                className={`w-2.5 h-2.5 rounded-full transition-colors ${index === currentBanner ? "bg-white" : "bg-white/50"
-                  }`}
-              />
-            ))}
+
+            {/* Bottom Side Banner Slider */}
+            <div className="flex-1 relative rounded-xl overflow-hidden h-[150px] lg:h-auto min-h-[200px] shadow-sm">
+              <AnimatePresence>
+                <motion.div
+                  key={currentBottomSide}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.7 }}
+                  className="absolute inset-0"
+                >
+                  <Link href={bottomSideBanners[currentBottomSide].link} className="block relative w-full h-full group">
+                    <Image
+                      src={bottomSideBanners[currentBottomSide].image}
+                      alt="Side Banner Bottom"
+                      fill
+                      className="object-cover transition-transform duration-700 group-hover:scale-110"
+                    />
+                  </Link>
+                </motion.div>
+              </AnimatePresence>
+
+              {/* Dot Indicators for Bottom Side Slider (Top Right) */}
+              <div className="absolute top-4 right-4 flex gap-1.5 z-20">
+                {bottomSideBanners.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setCurrentBottomSide(index)}
+                    className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${index === currentBottomSide ? "bg-white w-4" : "bg-white/40 hover:bg-white/60"
+                      }`}
+                  />
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </section>

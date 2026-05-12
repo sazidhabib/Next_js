@@ -3,7 +3,7 @@ import { categories } from "../data/mockData";
 import { Laptop, Monitor, Cpu, Smartphone, Tablet, Camera, Shield, PcCase } from "lucide-react";
 
 const iconMap = {
-  Desktop: PcCase,
+  PcCase: PcCase,
   Laptop: Laptop,
   Cpu: Cpu,
   Monitor: Monitor,

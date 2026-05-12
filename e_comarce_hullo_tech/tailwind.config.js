@@ -7,11 +7,16 @@ const config = {
   theme: {
     extend: {
       colors: {
-        "star-blue": "#1979d2",
-        "star-dark-blue": "#0d5ea6",
-        "star-light-gray": "#f8f9fa",
+        "primary": "#0077e5",
+        "primary-dark": "#010d21",
+        "hullo-blue": "#0077e5",
+        "hullo-navy": "#010d21",
+        "hullo-gray": "#f8fafc",
+        "star-blue": "#0077e5",
+        "star-dark-blue": "#010d21",
+        "star-light-gray": "var(--hullo-gray)",
         "star-gray": "#e5e7eb",
-        "star-text": "#333333",
+        "star-text": "var(--hullo-text)",
         "star-red": "#e53935",
         "star-orange": "#ff6d00",
         "star-green": "#43a047",

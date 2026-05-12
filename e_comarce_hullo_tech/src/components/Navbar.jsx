@@ -133,7 +133,7 @@ export default function Navbar() {
   return (
     <>
       {/* Top Bar */}
-      <div className="bg-star-blue text-white py-1.5 px-4 text-sm">
+      <div className="bg-[#010d21] text-white py-1.5 px-4 text-sm">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <div className="hidden md:flex gap-6">
             <Link href="/information/offer" className="hover:underline flex items-center gap-1">
@@ -233,11 +233,10 @@ export default function Navbar() {
                 >
                   <Link
                     href={cat.href}
-                    className={`inline-block py-3 px-3 text-sm font-medium transition-colors ${
-                      activeMegaMenu === cat.name
-                        ? "text-star-blue"
-                        : "text-star-text hover:text-star-blue"
-                    }`}
+                    className={`inline-block py-3 px-3 text-sm font-medium transition-colors ${activeMegaMenu === cat.name
+                      ? "text-star-blue"
+                      : "text-star-text hover:text-star-blue"
+                      }`}
                   >
                     {cat.name}
                   </Link>

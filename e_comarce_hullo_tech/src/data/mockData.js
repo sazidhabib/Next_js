@@ -1,5 +1,5 @@
 export const categories = [
-  { id: 1, name: "Desktops", icon: "Monitor", slug: "desktops", image: "/desktop.webp" },
+  { id: 1, name: "Desktops", icon: "HardDrive", slug: "desktops", image: "/desktop.webp" },
   { id: 2, name: "Laptops", icon: "Laptop", slug: "laptop-notebook", image: "/laptop.webp" },
   { id: 3, name: "Components", icon: "Cpu", slug: "component", image: "/components.jpg" },
   { id: 4, name: "Monitors", icon: "Monitor", slug: "monitor", image: "/monitor.webp" },

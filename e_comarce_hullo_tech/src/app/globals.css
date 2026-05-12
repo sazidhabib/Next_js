@@ -7,36 +7,86 @@
     @apply bg-white text-star-text font-sans;
     scroll-behavior: smooth;
   }
-  h1, h2, h3, h4, h5, h6 {
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     @apply font-sans font-semibold;
   }
 }
+
+:root {
+  --color-primary: #0077e5; /* Hullo Blue */
+  --color-primary-dark: #010d21; /* Hullo Navy */
+  --color-primary-light: #f0f7ff;
+
+  --color-accent: #0077e5;
+  --color-accent-hover: #010d21;
+
+  --color-text: #1e293b;
+  --color-text-muted: #64748b;
+
+  --color-background: #ffffff;
+  --color-background-soft: #f8fafc;
+  --color-card: #ffffff;
+
+  --color-border: #e2e8f0;
+
+  --color-success: #10b981;
+  --color-success-light: #d1fae5;
+
+  --color-warning: #f59e0b;
+  --color-warning-light: #fef3c7;
+
+  --color-danger: #ef4444;
+  --color-danger-light: #fee2e2;
+
+  /* Aliases for compatibility */
+  --primary: var(--color-primary);
+  --primary-dark: var(--color-primary-dark);
+  --hullo-blue: var(--color-primary);
+  --hullo-navy: var(--color-primary-dark);
+  --hullo-text: var(--color-text);
+  --hullo-gray: var(--color-background-soft);
+}
+
 
 @layer components {
   .product-card {
     @apply border border-star-gray rounded-lg bg-white hover:shadow-lg transition-all duration-300 overflow-hidden;
   }
+
   .product-card:hover {
     @apply border-star-blue;
   }
+
   .btn-primary {
     @apply bg-star-blue text-white px-6 py-2 rounded hover:bg-star-dark-blue transition-colors;
   }
+
   .btn-cart {
     @apply bg-star-red text-white px-4 py-2 rounded hover:bg-red-700 transition-colors;
   }
+
   .btn-orange {
     @apply bg-star-orange text-white px-4 py-2 rounded hover:bg-orange-700 transition-colors;
   }
+
   .mega-menu {
     @apply absolute top-full left-0 w-full bg-white shadow-lg border-t border-star-gray z-50;
   }
+
   .category-link {
     @apply block py-1.5 text-sm text-star-text hover:text-star-blue transition-colors;
   }
+
   .badge-new {
     @apply absolute top-2 left-2 bg-star-green text-white text-xs px-2 py-1 rounded;
   }
+
   .badge-sale {
     @apply absolute top-2 left-2 bg-star-red text-white text-xs px-2 py-1 rounded;
   }
