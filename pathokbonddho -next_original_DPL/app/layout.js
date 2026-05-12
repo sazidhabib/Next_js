@@ -7,6 +7,7 @@ import { AuthProvider } from './providers/AuthProvider';
 import { MenuProvider } from './providers/MenuProvider';
 import { SettingsProvider } from './providers/SettingsProvider';
 import { ToastContainer } from 'react-toastify';
+import PopupAd from './components/PopupAd';
 
 async function fetchWithTimeout(url, options = {}, timeoutMs = 5000) {
   const controller = new AbortController();
@@ -66,6 +67,7 @@ export default function RootLayout({ children }) {
           <MenuProvider>
             <SettingsProvider>
               {children}
+              <PopupAd />
               <ToastContainer position="top-right" autoClose={3000} />
             </SettingsProvider>
           </MenuProvider>

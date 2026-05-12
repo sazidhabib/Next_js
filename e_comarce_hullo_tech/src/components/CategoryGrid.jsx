@@ -1,9 +1,9 @@
 import Link from "next/link";
 import { categories } from "../data/mockData";
-import { Laptop, Monitor, Cpu, Smartphone, Tablet, Camera, Shield, PcCase } from "lucide-react";
+import { Laptop, Monitor, Cpu, Smartphone, Tablet, Camera, Shield, HardDrive } from "lucide-react";
 
 const iconMap = {
-  PcCase: PcCase,
+  HardDrive: HardDrive,
   Laptop: Laptop,
   Cpu: Cpu,
   Monitor: Monitor,
