@@ -98,6 +98,22 @@ const setupExpress = () => {
             await sequelize.authenticate();
             console.log("✅ MySQL connection established successfully.");
 
+            // Auto-migration: add popup ad columns if missing
+            try {
+                const [cols] = await sequelize.query("SHOW COLUMNS FROM ads LIKE 'popupAutoCloseSeconds'");
+                if (cols.length === 0) {
+                    await sequelize.query("ALTER TABLE ads ADD COLUMN popupAutoCloseSeconds INT NULL DEFAULT NULL");
+                    console.log("✅ Added column: popupAutoCloseSeconds");
+                }
+            } catch (e) { /* table might not exist yet, ignore */ }
+            try {
+                const [cols] = await sequelize.query("SHOW COLUMNS FROM ads LIKE 'popupMaxShowCount'");
+                if (cols.length === 0) {
+                    await sequelize.query("ALTER TABLE ads ADD COLUMN popupMaxShowCount INT NULL DEFAULT NULL");
+                    console.log("✅ Added column: popupMaxShowCount");
+                }
+            } catch (e) { /* table might not exist yet, ignore */ }
+
             const { Page, PageSection, Row, Column } = require("./models");
 
             // Safe sync logic

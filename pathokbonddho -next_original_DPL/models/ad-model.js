@@ -67,6 +67,17 @@ const Ad = sequelize.define("Ad", {
         type: DataTypes.INTEGER,
         defaultValue: 0,
     },
+    // Popup-specific controls
+    popupAutoCloseSeconds: {
+        type: DataTypes.INTEGER,   // auto-close after N seconds (null = no auto-close)
+        allowNull: true,
+        defaultValue: null,
+    },
+    popupMaxShowCount: {
+        type: DataTypes.INTEGER,   // max times to show per user (null = show once per session)
+        allowNull: true,
+        defaultValue: null,
+    },
 }, {
     tableName: 'ads',
     timestamps: true,

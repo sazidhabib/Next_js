@@ -6,6 +6,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useMenu } from '../providers/MenuProvider';
 import { useSettings } from '../providers/SettingsProvider';
 import { formatBengaliDate } from '@/app/lib/dateUtils';
+import HeaderAd from './HeaderAd';
 
 const normalizePath = (path, includeQuery = false) => {
   if (!path) return '/';
@@ -191,6 +192,8 @@ const Header = () => {
         </div>
       </div>
 
+
+
       {/* Mobile Top Bar */}
       {isMediumOrSmaller && (
         <div
@@ -303,8 +306,10 @@ const Header = () => {
         </div>
       )}
 
+
+
       {!isMediumOrSmaller && (
-        <div className="site-header">
+        <div className="site-header position-relative" style={{ zIndex: 1020 }}>
           {/* White Sticky Navbar */}
           <div className={`main-navbar-custom ${showScrollingNavbar ? 'sticky' : ''}`}>
             <div className="inside_main container">
@@ -340,6 +345,9 @@ const Header = () => {
           </div>
         </div>
       )}
+
+      {/* Header Ad */}
+      <HeaderAd />
 
     </header>
   );

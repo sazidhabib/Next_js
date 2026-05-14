@@ -62,7 +62,8 @@ const AdForm = ({ ad, onClose, onSuccess, categories = [] }) => {
     const [formData, setFormData] = useState({
         name: '', slug: '', type: 'image', position: 'sidebar',
         imageUrl: '', headCode: '', bodyCode: '', displayPages: [],
-        startDate: '', endDate: '', isActive: true, maxImpressions: ''
+        startDate: '', endDate: '', isActive: true, maxImpressions: '',
+        popupAutoCloseSeconds: '', popupMaxShowCount: ''
     });
     const [imageFile, setImageFile] = useState(null);
     const [imagePreview, setImagePreview] = useState(null);
@@ -86,7 +87,9 @@ const AdForm = ({ ad, onClose, onSuccess, categories = [] }) => {
                 startDate: ad.startDate ? ad.startDate.split('T')[0] : '',
                 endDate: ad.endDate ? ad.endDate.split('T')[0] : '',
                 isActive: ad.isActive !== undefined ? ad.isActive : true,
-                maxImpressions: ad.maxImpressions || ''
+                maxImpressions: ad.maxImpressions || '',
+                popupAutoCloseSeconds: ad.popupAutoCloseSeconds || '',
+                popupMaxShowCount: ad.popupMaxShowCount || ''
             });
             if (ad.image) setImagePreview(`${IMG_URL}/${ad.image}`);
         }
@@ -116,7 +119,8 @@ const AdForm = ({ ad, onClose, onSuccess, categories = [] }) => {
                 let value = formData[key];
                 if (key === 'displayPages') {
                     submitData.append(key, JSON.stringify(formData.displayPages || []));
-                } else if (key === 'maxImpressions' || key === 'startDate' || key === 'endDate') {
+                } else if (key === 'maxImpressions' || key === 'startDate' || key === 'endDate'
+                    || key === 'popupAutoCloseSeconds' || key === 'popupMaxShowCount') {
                     submitData.append(key, value || '');
                 } else if (value !== '' && value !== null) {
                     submitData.append(key, value);
@@ -265,6 +269,45 @@ const AdForm = ({ ad, onClose, onSuccess, categories = [] }) => {
                             </Form.Group>
                         </Col>
                     </Row>
+                    {formData.position === 'popup' && (
+                        <Row className="mb-3">
+                            <Col md={12}>
+                                <div className="border rounded p-3 bg-light">
+                                    <h6 className="mb-3 text-primary">⏱ Popup Controls</h6>
+                                    <Row>
+                                        <Col md={6}>
+                                            <Form.Group className="mb-2">
+                                                <Form.Label>Auto-Close After (seconds)</Form.Label>
+                                                <Form.Control
+                                                    type="number"
+                                                    min="1"
+                                                    placeholder="e.g. 10 (empty = manual close only)"
+                                                    name="popupAutoCloseSeconds"
+                                                    value={formData.popupAutoCloseSeconds}
+                                                    onChange={handleInputChange}
+                                                />
+                                                <Form.Text className="text-muted">Leave empty if you want users to close it manually.</Form.Text>
+                                            </Form.Group>
+                                        </Col>
+                                        <Col md={6}>
+                                            <Form.Group className="mb-2">
+                                                <Form.Label>Max Show Count (per user)</Form.Label>
+                                                <Form.Control
+                                                    type="number"
+                                                    min="1"
+                                                    placeholder="e.g. 3 (empty = show once per session)"
+                                                    name="popupMaxShowCount"
+                                                    value={formData.popupMaxShowCount}
+                                                    onChange={handleInputChange}
+                                                />
+                                                <Form.Text className="text-muted">How many times this popup appears per user session. Leave empty = show once.</Form.Text>
+                                            </Form.Group>
+                                        </Col>
+                                    </Row>
+                                </div>
+                            </Col>
+                        </Row>
+                    )}
                     <Row>
                         <Col md={12} className="d-flex align-items-center mb-3">
                             <Form.Check type="checkbox" label="Active" name="isActive" checked={formData.isActive} onChange={handleInputChange} />

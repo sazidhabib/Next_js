@@ -24,7 +24,9 @@ const createAd = async (req, res) => {
             startDate,
             endDate,
             isActive,
-            maxImpressions
+            maxImpressions,
+            popupAutoCloseSeconds,
+            popupMaxShowCount
         } = req.body;
 
         if (!name || !slug || !type || !position) {
@@ -81,6 +83,8 @@ const createAd = async (req, res) => {
             endDate: endDate || null,
             isActive: isActive === "true" || isActive === true,
             maxImpressions: parsedMaxImpressions || null,
+            popupAutoCloseSeconds: popupAutoCloseSeconds ? parseInt(popupAutoCloseSeconds) || null : null,
+            popupMaxShowCount: popupMaxShowCount ? parseInt(popupMaxShowCount) || null : null,
         });
 
         res.status(201).json({
@@ -311,7 +315,9 @@ const updateAd = async (req, res) => {
             startDate,
             endDate,
             isActive,
-            maxImpressions
+            maxImpressions,
+            popupAutoCloseSeconds,
+            popupMaxShowCount
         } = req.body;
 
         // Find the existing ad
@@ -396,6 +402,12 @@ const updateAd = async (req, res) => {
             endDate: endDate !== undefined ? (endDate === '' ? null : endDate) : existingAd.endDate,
             isActive: parsedIsActive,
             maxImpressions: parsedMaxImpressions,
+            popupAutoCloseSeconds: popupAutoCloseSeconds !== undefined
+                ? (popupAutoCloseSeconds === '' || popupAutoCloseSeconds === null ? null : parseInt(popupAutoCloseSeconds) || null)
+                : existingAd.popupAutoCloseSeconds,
+            popupMaxShowCount: popupMaxShowCount !== undefined
+                ? (popupMaxShowCount === '' || popupMaxShowCount === null ? null : parseInt(popupMaxShowCount) || null)
+                : existingAd.popupMaxShowCount,
         };
 
         // Only update image if a new one is uploaded
