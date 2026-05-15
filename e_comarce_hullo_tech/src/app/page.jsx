@@ -27,14 +27,14 @@ const banners = [
     id: 3,
     title: "Smartphone Bonanza",
     subtitle: "Latest Phones at Unbeatable Prices",
-    image: "/3rd_post.png",
+    image: "/cover.jpeg",
     bgColor: "bg-gray-900",
   },
 ];
 const topSideBanners = [
   { id: 1, image: "/1st-post.jpeg", link: "/new-arrivals" },
-  { id: 2, image: "/4th_post.png", link: "/new-arrivals" },
-  { id: 3, image: "/3rd_post.png", link: "/new-arrivals" },
+  { id: 2, image: "/cover.jpeg", link: "/new-arrivals" },
+  { id: 3, image: "/2nd_post.jpeg", link: "/new-arrivals" },
 ];
 
 const bottomSideBanners = [
