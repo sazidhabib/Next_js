@@ -13,18 +13,18 @@ const sanitizeFilename = (filename) => {
 const storage = multer.memoryStorage();
 
 const fileFilter = (req, file, cb) => {
-    const allowedTypes = ["image/jpeg", "image/png", "image/jpg", "image/webp"];
+    const allowedTypes = ["image/jpeg", "image/png", "image/jpg", "image/webp", "image/gif"];
     if (allowedTypes.includes(file.mimetype)) {
         cb(null, true);
     } else {
-        cb(new Error("Only .jpg, .jpeg, and .png formats allowed!"), false);
+        cb(new Error("Only .jpg, .jpeg, .png, .webp and .gif formats allowed!"), false);
     }
 };
 
 const upload = multer({
     storage: storage,
     fileFilter: fileFilter,
-    limits: { fileSize: 2 * 1024 * 1024 }, //2MB limit
+    limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit (increased for GIFs)
 });
 
 
@@ -42,18 +42,29 @@ const convertToWebp = (subdir = "") => async (req, res, next) => {
         if (req.file) {
             const originalName = path.parse(req.file.originalname).name;
             const sanitizedOriginalName = sanitizeFilename(originalName);
-            const filename = `${sanitizedOriginalName}-${Date.now()}.webp`;
-            const outputPath = path.join(uploadDir, filename);
 
-            // Convert buffer to webp using sharp
-            await sharp(req.file.buffer)
-                .webp({ quality: 80 })
-                .toFile(outputPath);
+            // Skip WebP conversion for GIF files to preserve animation
+            if (req.file.mimetype === 'image/gif') {
+                const filename = `${sanitizedOriginalName}-${Date.now()}.gif`;
+                const outputPath = path.join(uploadDir, filename);
+                fs.writeFileSync(outputPath, req.file.buffer);
+                req.file.filename = filename;
+                req.file.path = outputPath;
+                req.file.originalname = filename;
+            } else {
+                const filename = `${sanitizedOriginalName}-${Date.now()}.webp`;
+                const outputPath = path.join(uploadDir, filename);
 
-            // Attach file info for controller use
-            req.file.filename = filename;
-            req.file.path = outputPath;
-            req.file.originalname = filename;
+                // Convert buffer to webp using sharp
+                await sharp(req.file.buffer)
+                    .webp({ quality: 80 })
+                    .toFile(outputPath);
+
+                // Attach file info for controller use
+                req.file.filename = filename;
+                req.file.path = outputPath;
+                req.file.originalname = filename;
+            }
         }
 
         // Handle multiple file uploads
@@ -65,20 +76,31 @@ const convertToWebp = (subdir = "") => async (req, res, next) => {
             for (const file of filesToProcess) {
                 const originalName = path.parse(file.originalname).name;
                 const sanitizedOriginalName = sanitizeFilename(originalName);
-                const filename = `${sanitizedOriginalName}-${Date.now()}-${Math.random().toString(36).substr(2, 4)}.webp`;
-                const outputPath = path.join(uploadDir, filename);
 
-                // Convert buffer to webp using sharp
-                await sharp(file.buffer)
-                    .webp({ quality: 80 })
-                    .toFile(outputPath);
+                if (file.mimetype === 'image/gif') {
+                    const filename = `${sanitizedOriginalName}-${Date.now()}-${Math.random().toString(36).substr(2, 4)}.gif`;
+                    const outputPath = path.join(uploadDir, filename);
+                    fs.writeFileSync(outputPath, file.buffer);
+                    file.filename = filename;
+                    file.path = outputPath;
+                    file.originalname = filename;
+                    processedFiles.push(file);
+                } else {
+                    const filename = `${sanitizedOriginalName}-${Date.now()}-${Math.random().toString(36).substr(2, 4)}.webp`;
+                    const outputPath = path.join(uploadDir, filename);
 
-                // Attach file info for controller use
-                file.filename = filename;
-                file.path = outputPath;
-                file.originalname = filename;
+                    // Convert buffer to webp using sharp
+                    await sharp(file.buffer)
+                        .webp({ quality: 80 })
+                        .toFile(outputPath);
 
-                processedFiles.push(file);
+                    // Attach file info for controller use
+                    file.filename = filename;
+                    file.path = outputPath;
+                    file.originalname = filename;
+
+                    processedFiles.push(file);
+                }
             }
 
             // Restore structure for upload.fields() if applicable

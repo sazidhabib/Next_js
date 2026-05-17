@@ -22,7 +22,8 @@ const DEFAULT_SETTINGS = {
         instagram: 'https://instagram.com/pathokbonddho',
         linkedin: 'https://linkedin.com/company/pathokbonddho',
         youtube: 'https://youtube.com/pathokbonddho'
-    }
+    },
+    enableConfetti: true
 };
 
 export const SettingsProvider = ({ children }) => {

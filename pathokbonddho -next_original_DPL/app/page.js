@@ -2,8 +2,6 @@ import Header from './components/Header';
 import Footer from './components/Footer';
 import ScrollToSection from './components/ScrollToSection';
 import PageRenderer from './components/PageRenderer';
-import ConfettiFireworks from './components/ConfettiFireworks';
-import ConfettiSideCannons from './components/ConfettiSideCannons';
 
 // Helper to prevent fetch from hanging when backend isn't ready
 async function fetchWithTimeout(url, options = {}, timeoutMs = 5000) {
@@ -203,8 +201,6 @@ export default async function HomePage() {
     <>
       <ScrollToSection />
       <Header />
-      <ConfettiFireworks triggerOnLoad={true} />
-      <ConfettiSideCannons triggerOnLoad={true} />
       <main className="main-content custom-font">
         <PageRenderer slug="home" initialLayout={initialData} />
       </main>

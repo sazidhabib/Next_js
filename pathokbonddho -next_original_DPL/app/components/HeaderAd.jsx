@@ -105,14 +105,14 @@ const HeaderAd = () => {
                     </div>
                 ) : (
                     imgSrc && (
-                        <a href={adLink} target="_blank" rel="noopener noreferrer" onClick={handleAdClick} className="d-inline-block">
+                        <a href={adLink} target="_blank" rel="noopener noreferrer" onClick={handleAdClick} className="d-block w-100">
                             <Image
                                 src={imgSrc}
                                 alt={adTitle}
                                 width={1280}
-                                height={50}
-                                className="img-fluid"
-                                style={{ objectFit: 'contain', maxHeight: '90px', width: 'auto' }}
+                                height={150}
+                                className="img-fluid w-100"
+                                style={{ objectFit: 'fill', maxHeight: '130px', height: 'auto', borderRadius: '4px' }}
                                 priority
                             />
                         </a>

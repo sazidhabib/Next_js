@@ -4,13 +4,19 @@ import { Modal } from 'react-bootstrap';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import api from '@/app/lib/api';
+import ConfettiSideCannons from './ConfettiSideCannons';
+import ConfettiFireworks from './ConfettiFireworks';
+import { useSettings } from '@/app/providers/SettingsProvider';
 
 const PopupAd = () => {
+    const { settings } = useSettings();
     const pathname = usePathname();
     const [ad, setAd] = useState(null);
     const [show, setShow] = useState(false);
     const [loading, setLoading] = useState(true);
     const [countdown, setCountdown] = useState(null); // visible countdown in seconds
+    const [showCannons, setShowCannons] = useState(false);
+    const [showFireworks, setShowFireworks] = useState(false);
     const autoCloseTimer = useRef(null);
     const countdownInterval = useRef(null);
 
@@ -131,6 +137,10 @@ const PopupAd = () => {
                             // Small delay before showing the popup
                             setTimeout(() => {
                                 setShow(true);
+                                setShowCannons(true);
+                                setTimeout(() => {
+                                    setShowFireworks(true);
+                                }, 6000);
                                 // Increment the show count
                                 sessionStorage.setItem(sessionKey, String(currentShowCount + 1));
                                 // Record impression
@@ -141,7 +151,7 @@ const PopupAd = () => {
                                 if (autoCloseSeconds && autoCloseSeconds > 0) {
                                     startAutoClose(autoCloseSeconds);
                                 }
-                            }, 5000);
+                            }, 3000);
                         }
                     }
                 }
@@ -171,7 +181,7 @@ const PopupAd = () => {
         }
     };
 
-    if (!ad || !show) return null;
+    if (!ad) return null;
 
     const adImage = ad.image;
     const adTitle = ad.title || ad.name || 'Advertisement';
@@ -197,6 +207,12 @@ const PopupAd = () => {
 
     return (
         <>
+            {settings?.enableConfetti !== false && showCannons && (
+                <ConfettiSideCannons triggerOnLoad={true} duration={3000} />
+            )}
+            {settings?.enableConfetti !== false && showFireworks && (
+                <ConfettiFireworks triggerOnLoad={true} duration={10000} />
+            )}
             <style jsx global>{`
                 .popup-ad-modal .modal-dialog {
                     max-width: fit-content;

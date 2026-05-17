@@ -39,7 +39,8 @@ const SettingsClient = ({ isAdmin }) => {
         seo: {
             description: 'Latest news and updates from Pathokbonddho.',
             keywords: 'news, bangladesh, pathokbonddho'
-        }
+        },
+        enableConfetti: true
     });
 
     const handleFileUpload = async (file, fileType) => {
@@ -283,6 +284,22 @@ const SettingsClient = ({ isAdmin }) => {
                                                 </div>
                                             )}
                                         </div>
+                                    </Form.Group>
+                                </Col>
+                                <Col md={12}>
+                                    <Form.Group className="mb-3">
+                                        <div className="d-flex align-items-center">
+                                            <Form.Check 
+                                                type="switch"
+                                                id="confetti-switch"
+                                                label={<span className="fw-bold ms-2">🎉 Enable Confetti & Fireworks Effects</span>}
+                                                checked={settings.enableConfetti !== false}
+                                                onChange={e => handleChange(null, 'enableConfetti', e.target.checked)}
+                                            />
+                                        </div>
+                                        <Form.Text className="text-muted ms-5">
+                                            Turn on or off the popup ad confetti & fireworks animations across the site.
+                                        </Form.Text>
                                     </Form.Group>
                                 </Col>
                             </Row>
