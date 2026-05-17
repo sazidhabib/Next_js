@@ -1,7 +1,5 @@
 "use client";
 import { useEffect } from 'react';
-import confetti from 'canvas-confetti';
-
 export default function ConfettiSideCannons({ triggerOnLoad = true, duration = 3000 }) {
     useEffect(() => {
         if (triggerOnLoad) {
@@ -9,7 +7,8 @@ export default function ConfettiSideCannons({ triggerOnLoad = true, duration = 3
         }
     }, [triggerOnLoad]);
 
-    const triggerSideCannons = () => {
+    const triggerSideCannons = async () => {
+        const confetti = (await import('canvas-confetti')).default;
         const end = Date.now() + duration;
 
         const frame = () => {

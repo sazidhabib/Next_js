@@ -1,7 +1,5 @@
 "use client";
 import { useEffect } from 'react';
-import confetti from 'canvas-confetti';
-
 export default function ConfettiFireworks({ triggerOnLoad = true, duration = 5000 }) {
     useEffect(() => {
         if (triggerOnLoad) {
@@ -9,7 +7,8 @@ export default function ConfettiFireworks({ triggerOnLoad = true, duration = 500
         }
     }, [triggerOnLoad]);
 
-    const triggerFireworks = () => {
+    const triggerFireworks = async () => {
+        const confetti = (await import('canvas-confetti')).default;
         const animationEnd = Date.now() + duration;
         const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 9999 };
 

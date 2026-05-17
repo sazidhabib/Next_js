@@ -4,9 +4,11 @@ import { Modal } from 'react-bootstrap';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import api from '@/app/lib/api';
-import ConfettiSideCannons from './ConfettiSideCannons';
-import ConfettiFireworks from './ConfettiFireworks';
+import dynamic from 'next/dynamic';
 import { useSettings } from '@/app/providers/SettingsProvider';
+
+const ConfettiSideCannons = dynamic(() => import('./ConfettiSideCannons'), { ssr: false });
+const ConfettiFireworks = dynamic(() => import('./ConfettiFireworks'), { ssr: false });
 
 const PopupAd = () => {
     const { settings } = useSettings();
