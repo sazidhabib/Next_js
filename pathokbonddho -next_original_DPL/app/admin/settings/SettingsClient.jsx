@@ -300,6 +300,61 @@ const SettingsClient = ({ isAdmin }) => {
                                         <Form.Text className="text-muted ms-5">
                                             Turn on or off the popup ad confetti & fireworks animations across the site.
                                         </Form.Text>
+                                        
+                                        {settings.enableConfetti !== false && (
+                                            <div className="ms-5 mt-3 ps-3 border-start border-primary border-3">
+                                                <Row>
+                                                    <Col md={6}>
+                                                        <Form.Group className="mb-3">
+                                                            <Form.Label className="fw-bold fs-7">Side Cannon Delay (ms)</Form.Label>
+                                                            <Form.Control
+                                                                type="number"
+                                                                value={settings.confettiSideCannonDelay || 0}
+                                                                onChange={e => handleChange(null, 'confettiSideCannonDelay', parseInt(e.target.value) || 0)}
+                                                                placeholder="e.g. 0"
+                                                            />
+                                                            <Form.Text className="text-muted" style={{fontSize: '0.75rem'}}>Time before cannons fire (0 = instant)</Form.Text>
+                                                        </Form.Group>
+                                                    </Col>
+                                                    <Col md={6}>
+                                                        <Form.Group className="mb-3">
+                                                            <Form.Label className="fw-bold fs-7">Side Cannon Duration (ms)</Form.Label>
+                                                            <Form.Control
+                                                                type="number"
+                                                                value={settings.confettiSideCannonDuration || 3000}
+                                                                onChange={e => handleChange(null, 'confettiSideCannonDuration', parseInt(e.target.value) || 3000)}
+                                                                placeholder="e.g. 3000"
+                                                            />
+                                                            <Form.Text className="text-muted" style={{fontSize: '0.75rem'}}>How long cannons last (3000 = 3s)</Form.Text>
+                                                        </Form.Group>
+                                                    </Col>
+                                                    <Col md={6}>
+                                                        <Form.Group className="mb-3">
+                                                            <Form.Label className="fw-bold fs-7">Fireworks Delay (ms)</Form.Label>
+                                                            <Form.Control
+                                                                type="number"
+                                                                value={settings.confettiFireworksDelay || 6000}
+                                                                onChange={e => handleChange(null, 'confettiFireworksDelay', parseInt(e.target.value) || 0)}
+                                                                placeholder="e.g. 6000"
+                                                            />
+                                                            <Form.Text className="text-muted" style={{fontSize: '0.75rem'}}>Time before fireworks start (6000 = 6s)</Form.Text>
+                                                        </Form.Group>
+                                                    </Col>
+                                                    <Col md={6}>
+                                                        <Form.Group className="mb-3">
+                                                            <Form.Label className="fw-bold fs-7">Fireworks Duration (ms)</Form.Label>
+                                                            <Form.Control
+                                                                type="number"
+                                                                value={settings.confettiFireworksDuration || 10000}
+                                                                onChange={e => handleChange(null, 'confettiFireworksDuration', parseInt(e.target.value) || 10000)}
+                                                                placeholder="e.g. 10000"
+                                                            />
+                                                            <Form.Text className="text-muted" style={{fontSize: '0.75rem'}}>How long fireworks last (10000 = 10s)</Form.Text>
+                                                        </Form.Group>
+                                                    </Col>
+                                                </Row>
+                                            </div>
+                                        )}
                                     </Form.Group>
                                 </Col>
                             </Row>

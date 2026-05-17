@@ -12,6 +12,12 @@ const ConfettiFireworks = dynamic(() => import('./ConfettiFireworks'), { ssr: fa
 
 const PopupAd = () => {
     const { settings } = useSettings();
+    const settingsRef = useRef(settings);
+    
+    useEffect(() => {
+        settingsRef.current = settings;
+    }, [settings]);
+    
     const pathname = usePathname();
     const [ad, setAd] = useState(null);
     const [show, setShow] = useState(false);
@@ -131,20 +137,22 @@ const PopupAd = () => {
                         const maxShowCount = activeAd.popupMaxShowCount || 1; // default: show once per session
                         const sessionKey = `popup_ad_show_count_${adId}`;
 
-                        // Get current show count from sessionStorage
-                        const currentShowCount = parseInt(sessionStorage.getItem(sessionKey) || '0', 10);
+                        // Get current show count from localStorage
+                        const currentShowCount = parseInt(localStorage.getItem(sessionKey) || '0', 10);
 
                         if (currentShowCount < maxShowCount) {
                             setAd(activeAd);
                             // Small delay before showing the popup
                             setTimeout(() => {
                                 setShow(true);
-                                setShowCannons(true);
+                                setTimeout(() => {
+                                    setShowCannons(true);
+                                }, settingsRef.current?.confettiSideCannonDelay || 0);
                                 setTimeout(() => {
                                     setShowFireworks(true);
-                                }, 6000);
+                                }, settingsRef.current?.confettiFireworksDelay || 6000);
                                 // Increment the show count
-                                sessionStorage.setItem(sessionKey, String(currentShowCount + 1));
+                                localStorage.setItem(sessionKey, String(currentShowCount + 1));
                                 // Record impression
                                 api.post(`/ads/${adId}/impression`).catch(() => { });
 
@@ -153,7 +161,7 @@ const PopupAd = () => {
                                 if (autoCloseSeconds && autoCloseSeconds > 0) {
                                     startAutoClose(autoCloseSeconds);
                                 }
-                            }, 3000);
+                            }, 0);
                         }
                     }
                 }
@@ -203,6 +211,7 @@ const PopupAd = () => {
 
     // Calculate countdown progress for the visual bar
     const autoCloseTotal = ad.popupAutoCloseSeconds;
+    <ConfettiSideCannons triggerOnLoad={true} duration={3000} />
     const progressPercent = autoCloseTotal && countdown !== null
         ? (countdown / autoCloseTotal) * 100
         : null;
@@ -210,10 +219,10 @@ const PopupAd = () => {
     return (
         <>
             {settings?.enableConfetti !== false && showCannons && (
-                <ConfettiSideCannons triggerOnLoad={true} duration={3000} />
+                <ConfettiSideCannons triggerOnLoad={true} duration={settings?.confettiSideCannonDuration || 3000} />
             )}
             {settings?.enableConfetti !== false && showFireworks && (
-                <ConfettiFireworks triggerOnLoad={true} duration={10000} />
+                <ConfettiFireworks triggerOnLoad={true} duration={settings?.confettiFireworksDuration || 10000} />
             )}
             <style jsx global>{`
                 .popup-ad-modal .modal-dialog {
@@ -281,6 +290,10 @@ const PopupAd = () => {
                     border-radius: 12px 0 12px 0;
                     z-index: 20;
                 }
+                .opaque-backdrop {
+                    opacity: 1 !important;
+                    background-color: #000000 !important;
+                }
             `}</style>
             <Modal
                 show={show}
@@ -288,6 +301,7 @@ const PopupAd = () => {
                 centered
                 className="popup-ad-modal"
                 backdrop="static"
+                backdropClassName="opaque-backdrop"
             >
                 {countdown !== null && countdown > 0 && (
                     <span className="popup-countdown-badge">

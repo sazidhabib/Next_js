@@ -23,7 +23,11 @@ const DEFAULT_SETTINGS = {
         linkedin: 'https://linkedin.com/company/pathokbonddho',
         youtube: 'https://youtube.com/pathokbonddho'
     },
-    enableConfetti: true
+    enableConfetti: true,
+    confettiSideCannonDelay: 0,
+    confettiSideCannonDuration: 3000,
+    confettiFireworksDelay: 6000,
+    confettiFireworksDuration: 10000
 };
 
 export const SettingsProvider = ({ children }) => {
