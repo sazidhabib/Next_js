@@ -211,7 +211,6 @@ const PopupAd = () => {
 
     // Calculate countdown progress for the visual bar
     const autoCloseTotal = ad.popupAutoCloseSeconds;
-    <ConfettiSideCannons triggerOnLoad={true} duration={3000} />
     const progressPercent = autoCloseTotal && countdown !== null
         ? (countdown / autoCloseTotal) * 100
         : null;
