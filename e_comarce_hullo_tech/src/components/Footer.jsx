@@ -1,8 +1,38 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Mail, Phone, MapPin } from "lucide-react";
 
 export default function Footer() {
+  const [settings, setSettings] = useState({
+    contactAddress: "123 Tech Street, Dhaka, Bangladesh",
+    contactPhone: "+880 123-456-7890",
+    contactEmail: "support@hullotech.com",
+    footerText: "© 2026 HulloTech. All rights reserved.",
+  });
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const res = await fetch("/api/settings");
+        const data = await res.json();
+        if (data.success && data.data) {
+          setSettings({
+            contactAddress: data.data.contactAddress || "123 Tech Street, Dhaka, Bangladesh",
+            contactPhone: data.data.contactPhone || "+880 123-456-7890",
+            contactEmail: data.data.contactEmail || "support@hullotech.com",
+            footerText: data.data.footerText || "© 2026 HulloTech. All rights reserved.",
+          });
+        }
+      } catch (error) {
+        console.error("Failed to load footer settings:", error);
+      }
+    };
+    fetchSettings();
+  }, []);
+
   const shopLinks = [
     { name: "Desktop", href: "/desktops" },
     { name: "Laptop", href: "/laptop-notebook" },
@@ -63,15 +93,15 @@ export default function Footer() {
             <div className="space-y-2 text-sm">
               <div className="flex items-center gap-2">
                 <MapPin className="w-4 h-4 text-star-blue" />
-                <span>123 Tech Street, Dhaka, Bangladesh</span>
+                <span>{settings.contactAddress}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Phone className="w-4 h-4 text-star-blue" />
-                <span>+880 123-456-7890</span>
+                <span>{settings.contactPhone}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Mail className="w-4 h-4 text-star-blue" />
-                <span>support@hullotech.com</span>
+                <span>{settings.contactEmail}</span>
               </div>
             </div>
           </div>
@@ -148,7 +178,7 @@ export default function Footer() {
       <div className="border-t border-gray-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-sm">
-            <p>© 2026 HulloTech. All rights reserved.</p>
+            <p>{settings.footerText}</p>
             <div className="flex gap-4">
               {legalLinks.map((link) => (
                 <Link key={link.name} href={link.href} className="hover:text-white transition-colors">

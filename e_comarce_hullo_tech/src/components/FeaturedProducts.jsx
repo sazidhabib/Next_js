@@ -1,16 +1,49 @@
 "use client";
 
-import { products } from "../data/mockData";
+import { useState, useEffect } from "react";
 import { ShoppingCart, Star } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { products as mockProducts } from "../data/mockData";
 
 export default function FeaturedProducts() {
-  const featured = products.filter((p) => p.featured);
+  const [featuredList, setFeaturedList] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchFeatured = async () => {
+      try {
+        const res = await fetch("/api/products?featured=true");
+        const data = await res.json();
+        if (data.success && data.data.length > 0) {
+          setFeaturedList(data.data);
+        } else {
+          // Fallback if DB returns no featured products
+          setFeaturedList(mockProducts.filter((p) => p.featured));
+        }
+      } catch (error) {
+        console.error("Failed to load featured products:", error);
+        setFeaturedList(mockProducts.filter((p) => p.featured));
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchFeatured();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        {[1, 2, 3, 4].map((i) => (
+          <div key={i} className="aspect-square bg-slate-100 rounded-lg animate-pulse"></div>
+        ))}
+      </div>
+    );
+  }
 
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-      {featured.map((product) => (
+      {featuredList.map((product) => (
         <Link
           key={product.id}
           href={`/${product.category}/${product.slug}`}

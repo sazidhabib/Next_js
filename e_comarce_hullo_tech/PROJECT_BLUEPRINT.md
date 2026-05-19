@@ -17,11 +17,12 @@
 | **Animations** | Framer Motion 11 |
 | **Icons** | Lucide React 0.395 |
 | **Font** | Inter (loaded via `next/font/google`) |
-| **Database** | None — all data lives in `src/data/mockData.js` |
-| **Auth** | None — login/register links are placeholder |
+| **Backend** | Express.js custom server alongside Next.js |
+| **Database** | MySQL via Sequelize (in progress, previously none) |
+| **Auth** | JWT-based custom backend authentication (`/api/auth`) |
 | **State Mgmt** | React `useState` only (no global store) |
 | **Package Manager** | npm |
-| **Entry Point** | `src/app/layout.jsx` (root layout) → `src/app/page.jsx` (home) |
+| **Entry Point** | `server.js` (Unified server) → `src/app/layout.jsx` (root layout) |
 
 ---
 
@@ -29,12 +30,42 @@
 
 ```
 📁 / (project root)
+├── 📄 server.js                 — Unified Express + Next.js custom server entry point
 ├── 📄 package.json              — Dependencies, scripts (dev/build/start/lint)
 ├── 📄 next.config.mjs           — Next.js config (currently empty/default)
 ├── 📄 tailwind.config.js        — Tailwind theme: custom colors (hullo-blue, star-*), Inter font
 ├── 📄 postcss.config.mjs        — PostCSS plugins: tailwindcss + autoprefixer
 ├── 📄 .gitignore                — Standard Next.js ignores + .jetro/
+├── 📄 .env.example              — Environment variables template
 ├── 📄 next-env.d.ts             — Auto-generated TypeScript env declarations
+│
+├── 📁 controllers/
+│   ├── 📄 auth-controller.js    — Handles user login and profile fetching
+│   ├── 📄 category-controller.js — Handles category CRUD operations
+│   ├── 📄 product-controller.js  — Handles product CRUD operations
+│   └── 📄 setting-controller.js — Handles site settings CRUD operations
+│
+├── 📁 db/
+│   ├── 📄 database.js           — Sequelize MySQL connection configuration
+│   └── 📄 seedData.js           — CJS Seeding data for categories and products
+│
+├── 📁 models/
+│   ├── 📄 index.js              — Model initialization and associations
+│   ├── 📄 Category.js           — Sequelize model for categories
+│   ├── 📄 Product.js            — Sequelize model for products
+│   ├── 📄 User.js               — Sequelize model for users (auth)
+│   └── 📄 SiteSetting.js        — Sequelize model for site global settings
+│
+├── 📁 middlewares/
+│   ├── 📄 auth-middleware.js    — JWT protection and admin verification
+│   └── 📄 error-middleware.js   — Express global error handling middleware
+│
+├── 📁 router/
+│   ├── 📄 index.js              — Main Express API router entry point
+│   ├── 📄 auth-router.js        — Routes for login/profile
+│   ├── 📄 category-router.js    — Routes for category CRUD
+│   ├── 📄 product-router.js     — Routes for product CRUD
+│   └── 📄 setting-router.js     — Routes for site settings
 │
 ├── 📁 public/                   — Static assets served at root URL
 │   ├── 📄 logo.jpg              — HulloTech brand logo (Navbar + Footer)
@@ -96,9 +127,23 @@
 │   │   ├── 📁 blog/
 │   │   │   └── 📄 page.jsx      — Blog listing: renders blogPosts from mockData with images
 │   │   │
-│   │   └── 📁 setup-builder/
-│   │       └── 📄 page.jsx      — PC BUILDER ("use client"): select CPU/GPU/RAM, shows summary
-│   │                              with total price, "Save Setup" button
+│   │   ├── 📁 contact/
+│   │   │   └── 📄 page.jsx      — CONTACT PAGE ("use client"): fetches settings, contact form
+│   │   │
+│   │   ├── 📁 setup-builder/
+│   │   │   └── 📄 page.jsx      — PC BUILDER ("use client"): select CPU/GPU/RAM, shows summary
+│   │   │                              with total price, "Save Setup" button
+│   │   │
+│   │   ├── 📁 admin/
+│   │   │   ├── 📁 login/
+│   │   │   │   └── 📄 page.jsx  — ADMIN LOGIN ("use client"): login interface with API check
+│   │   │   └── 📁 dashboard/
+│   │   │       └── 📄 page.jsx  — ADMIN DASHBOARD ("use client"): site settings, category & product CRUD
+│   │   │
+│   │   ├── 📄 layout.jsx        — ROOT LAYOUT ("use server"): HTML wrapper, fonts, loads Header & Footer
+│   │   ├── 📄 loading.jsx       — Global next/loading state skeleton
+│   │   └── 📄 page.jsx          — HOMEPAGE ("use server"): loads BannerSlider, CategoryGrid,
+│   │                              ProductSection (Featured + Hot deals)
 │   │
 │   ├── 📁 components/           — Reusable UI components
 │   │   ├── 📄 Navbar.jsx        — "use client": top bar (offers/PC builder/compare/login),
@@ -114,13 +159,13 @@
 │   │   └── 📄 ProductGrid.jsx   — Server component: generic product grid, receives {products, title}
 │   │                              as props, renders cards with image, specs, price
 │   │
-│   └── 📁 data/
-│       └── 📄 mockData.js       — ALL APPLICATION DATA (no API/DB):
-│                                  • categories[] — 8 items (id, name, icon, slug, image)
-│                                  • products[] — 21 items (id, name, slug, price, category,
-│                                    image, images[], specs[], description, featured, brand,
-│                                    model, stock)
-│                                  • blogPosts[] — 3 items (id, title, date, category, image)
+│   ├── 📁 data/
+│   │   └── 📄 mockData.js       — ALL APPLICATION DATA (no API/DB):
+│   │
+│   └── 📁 utils/
+│       └── 📄 jwt.js            — Native JWT encoder/decoder using Node's crypto
+│
+└── 📁 public/
 ```
 
 ---
@@ -281,7 +326,7 @@ src/app/setup-builder/page.jsx
 
 ## 6. Configuration & Environment Variables
 
-### No `.env` file exists — the project has no environment-dependent configuration.
+### `.env.local` handles sensitive configuration (ignored in git). Use `.env.example` as a template.
 
 | Config File | Key Settings |
 |-------------|-------------|
@@ -332,10 +377,11 @@ src/app/setup-builder/page.jsx
 3. Modify component classes in `globals.css` → `@layer components`
 
 ### TO ADD A BACKEND/API:
-1. Create `src/app/api/{endpoint}/route.js` (Next.js API Routes)
-2. Replace `mockData.js` imports with `fetch()` calls
-3. Add database connection (e.g. Prisma, Drizzle)
-4. Add `.env.local` for database URL, API keys
+1. Create a new router in `router/` (e.g., `product-router.js`)
+2. Mount it in `router/index.js` (`router.use('/products', productRouter)`)
+3. Create Sequelize models in a `models/` directory
+4. Sync database via `server.js` or migrations
+5. Replace `mockData.js` imports with `fetch()` calls to `/api/...` endpoints
 
 ### TO ADD CART FUNCTIONALITY:
 1. Create a React Context or Zustand store in `src/context/` or `src/store/`
@@ -408,7 +454,8 @@ There are no `__tests__/`, `test/`, or `*.test.*` files. No testing framework is
 | `/categories/:slug` | `src/app/categories/[slug]/page.jsx` | Client | Generic category page (simpler) |
 | `/products/:id` | `src/app/products/[id]/page.jsx` | Server | Redirects to /:category/:slug |
 | `/blog` | `src/app/blog/page.jsx` | Server | Blog listing |
+| `/contact` | `src/app/contact/page.jsx` | Client | Contact page with dynamic info |
 | `/setup-builder` | `src/app/setup-builder/page.jsx` | Client | PC Builder tool |
 
 ### Referenced but NOT implemented routes (dead links):
-`/offers`, `/new-arrivals`, `/happy-hour`, `/tool/pc_builder`, `/compare`, `/track-order`, `/help`, `/account`, `/account/login`, `/account/register`, `/cart`, `/contact`, `/shipping`, `/returns`, `/faq`, `/about`, `/careers`, `/press`, `/stores`, `/privacy`, `/terms`, `/cookies`, `/sitemap`, `/gaming`, and all Navbar subcategory links (e.g., `/desktops/gaming-pc`, `/component/processor`, `/apple-iphone`, etc.)
+`/offers`, `/new-arrivals`, `/happy-hour`, `/tool/pc_builder`, `/compare`, `/track-order`, `/help`, `/account`, `/account/login`, `/account/register`, `/cart`, `/shipping`, `/returns`, `/faq`, `/about`, `/careers`, `/press`, `/stores`, `/privacy`, `/terms`, `/cookies`, `/sitemap`, `/gaming`, and all Navbar subcategory links (e.g., `/desktops/gaming-pc`, `/component/processor`, `/apple-iphone`, etc.)
