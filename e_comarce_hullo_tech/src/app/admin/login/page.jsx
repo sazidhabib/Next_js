@@ -31,14 +31,27 @@ export default function AdminLogin() {
       if (data.success) {
         // Save token and user details to localStorage
         localStorage.setItem('adminToken', data.data.token);
-        localStorage.setItem('adminUser', JSON.stringify({ email: data.data.email, role: data.data.role }));
-        
+        localStorage.setItem('adminUser', JSON.stringify({
+          id: data.data.id,
+          email: data.data.email,
+          role: data.data.role
+        }));
+
+        // Also save to cookies for middleware access
+        document.cookie = `adminToken=${data.data.token}; path=/; max-age=${7 * 24 * 60 * 60}; SameSite=Strict`;
+        document.cookie = `adminUser=${JSON.stringify({
+          id: data.data.id,
+          email: data.data.email,
+          role: data.data.role
+        })}; path=/; max-age=${7 * 24 * 60 * 60}; SameSite=Strict`;
+
         // Redirect to dashboard
         router.push('/admin/dashboard');
       } else {
         setError(data.message || 'Invalid credentials');
       }
     } catch (err) {
+      console.error('Login error:', err);
       setError('Something went wrong. Please check your connection.');
     } finally {
       setLoading(false);
@@ -60,6 +73,9 @@ export default function AdminLogin() {
             </div>
             <h1 className="text-2xl font-bold text-slate-100 tracking-tight">HulloTech Admin</h1>
             <p className="text-sm text-slate-400 mt-1">Sign in to manage your e-commerce platform</p>
+            <p className="text-xs text-slate-500 mt-3 bg-slate-950/50 rounded-lg p-2 border border-slate-800">
+              Demo: <strong>admin@hullotech.com</strong> / <strong>admin123</strong>
+            </p>
           </div>
 
           {error && (

@@ -17,8 +17,16 @@ if (useNext) {
     handle = nextApp.getRequestHandler();
 }
 
-const sequelize = require("./db/database");
-const models = require("./models"); // Import models so they are registered before sync
+let sequelize;
+let models;
+
+try {
+    sequelize = require("./db/database");
+    models = require("./models"); // Import models so they are registered before sync
+} catch (error) {
+    console.error("❌ Failed to load database/models:", error.message);
+}
+
 const errorMiddleware = require("./middlewares/error-middleware");
 
 const setupExpress = () => {
@@ -71,48 +79,61 @@ const setupExpress = () => {
 
     // Start server
     const startServer = async () => {
+        let dbConnected = false;
         try {
-            await sequelize.authenticate();
-            console.log("✅ MySQL connection established successfully.");
-            
-            // Sync database to create tables if they don't exist
-            if (process.env.NODE_ENV !== 'production') {
-                 await sequelize.sync();
-                 console.log("✅ Database synchronized.");
-                 
-                 // Create default admin user if not exists
-                 const { User, Category, Product } = require('./models');
-                 const adminExists = await User.findOne({ where: { email: 'admin@hullotech.com' } });
-                 if (!adminExists) {
-                     await User.create({
-                         email: 'admin@hullotech.com',
-                         password: 'admin123',
-                         role: 'admin'
-                     });
-                     console.log("✅ Default admin user created (admin@hullotech.com / admin123)");
-                 }
+            if (sequelize) {
+                await sequelize.authenticate();
+                console.log("✅ MySQL connection established successfully.");
+                dbConnected = true;
 
-                 // Seed default categories
-                 const categoryCount = await Category.count();
-                 if (categoryCount === 0) {
-                     const { categories: seedCategories } = require('./db/seedData');
-                     await Category.bulkCreate(seedCategories);
-                     console.log("✅ Database seeded with default categories.");
-                 }
+                // Sync database to create tables if they don't exist
+                if (process.env.NODE_ENV !== 'production') {
+                    await sequelize.sync();
+                    console.log("✅ Database synchronized.");
 
-                 // Seed default products
-                 const productCount = await Product.count();
-                 if (productCount === 0) {
-                     const { products: seedProducts } = require('./db/seedData');
-                     await Product.bulkCreate(seedProducts);
-                     console.log("✅ Database seeded with default products.");
-                 }
+                    // Create default admin user if not exists
+                    const { User, Category, Product } = require('./models');
+                    const adminExists = await User.findOne({ where: { email: 'admin@hullotech.com' } });
+                    if (!adminExists) {
+                        await User.create({
+                            email: 'admin@hullotech.com',
+                            password: 'admin123',
+                            role: 'admin'
+                        });
+                        console.log("✅ Default admin user created (admin@hullotech.com / admin123)");
+                    }
+
+                    // Seed default categories
+                    const categoryCount = await Category.count();
+                    if (categoryCount === 0) {
+                        const { categories: seedCategories } = require('./db/seedData');
+                        await Category.bulkCreate(seedCategories);
+                        console.log("✅ Database seeded with default categories.");
+                    }
+
+                    // Seed default products
+                    const productCount = await Product.count();
+                    if (productCount === 0) {
+                        const { products: seedProducts } = require('./db/seedData');
+                        await Product.bulkCreate(seedProducts);
+                        console.log("✅ Database seeded with default products.");
+                    }
+                }
+            } else {
+                console.warn("⚠️  Sequelize not initialized - running in fallback mock mode.");
             }
-
-            const PORT = process.env.PORT || 3000; // Next.js default port
-            app.listen(PORT, () => console.log(`🚀 ${useNext ? 'Unified' : 'API'} Server running on port ${PORT}`));
         } catch (error) {
-            console.error("❌ Server startup failed:", error);
+            console.error("❌ Database connection failed. Running in fallback mock mode. Error:", error.message);
+            // Do NOT call process.exit(1) so the server can run with mock fallback data.
+        }
+
+        // Use port 5000 if running in standalone (DISABLE_NEXT=true) to avoid conflict with Next.js on port 3000
+        const PORT = process.env.DISABLE_NEXT === "true" ? 5000 : (process.env.PORT || 3000);
+
+        try {
+            app.listen(PORT, () => console.log(`🚀 ${useNext ? 'Unified' : 'API'} Server running on port ${PORT}`));
+        } catch (serverError) {
+            console.error("❌ Express server failed to start:", serverError.message);
             process.exit(1);
         }
     };

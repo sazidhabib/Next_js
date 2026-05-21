@@ -1,6 +1,6 @@
 # PROJECT BLUEPRINT — HulloTech E-Commerce
 
-> **Last Updated:** 2026-05-15
+> **Last Updated:** 2026-05-21
 > **Read this file BEFORE any task** (new feature, bug fix, refactor).
 > It describes the full project structure so you never need to re-scan the codebase.
 
@@ -38,6 +38,7 @@
 ├── 📄 .gitignore                — Standard Next.js ignores + .jetro/
 ├── 📄 .env.example              — Environment variables template
 ├── 📄 next-env.d.ts             — Auto-generated TypeScript env declarations
+├── 📄 jsconfig.json             — Path mapping configuration for alias resolution (`@/*` -> `./src/*`)
 │
 ├── 📁 controllers/
 │   ├── 📄 auth-controller.js    — Handles user login and profile fetching
@@ -137,8 +138,14 @@
 │   │   ├── 📁 admin/
 │   │   │   ├── 📁 login/
 │   │   │   │   └── 📄 page.jsx  — ADMIN LOGIN ("use client"): login interface with API check
-│   │   │   └── 📁 dashboard/
-│   │   │       └── 📄 page.jsx  — ADMIN DASHBOARD ("use client"): site settings, category & product CRUD
+│   │   │   ├── 📁 dashboard/
+│   │   │   │   └── 📄 page.jsx  — ADMIN DASHBOARD ("use client"): overview with stats and quick links
+│   │   │   ├── 📁 settings/
+│   │   │   │   └── 📄 page.jsx  — SITE CONFIGURATION ("use client"): manage site settings
+│   │   │   ├── 📁 products/
+│   │   │   │   └── 📄 page.jsx  — PRODUCT INVENTORY ("use client"): product CRUD interface
+│   │   │   └── 📁 categories/
+│   │   │       └── 📄 page.jsx  — CATEGORY MANAGER ("use client"): category CRUD interface
 │   │   │
 │   │   ├── 📄 layout.jsx        — ROOT LAYOUT ("use server"): HTML wrapper, fonts, loads Header & Footer
 │   │   ├── 📄 loading.jsx       — Global next/loading state skeleton
@@ -456,6 +463,11 @@ There are no `__tests__/`, `test/`, or `*.test.*` files. No testing framework is
 | `/blog` | `src/app/blog/page.jsx` | Server | Blog listing |
 | `/contact` | `src/app/contact/page.jsx` | Client | Contact page with dynamic info |
 | `/setup-builder` | `src/app/setup-builder/page.jsx` | Client | PC Builder tool |
+| `/admin/login` | `src/app/admin/login/page.jsx` | Client | Admin login interface |
+| `/admin/dashboard` | `src/app/admin/dashboard/page.jsx` | Client | Admin dashboard overview |
+| `/admin/settings` | `src/app/admin/settings/page.jsx` | Client | Site Configuration |
+| `/admin/products` | `src/app/admin/products/page.jsx` | Client | Product Inventory |
+| `/admin/categories` | `src/app/admin/categories/page.jsx` | Client | Category Manager |
 
 ### Referenced but NOT implemented routes (dead links):
 `/offers`, `/new-arrivals`, `/happy-hour`, `/tool/pc_builder`, `/compare`, `/track-order`, `/help`, `/account`, `/account/login`, `/account/register`, `/cart`, `/shipping`, `/returns`, `/faq`, `/about`, `/careers`, `/press`, `/stores`, `/privacy`, `/terms`, `/cookies`, `/sitemap`, `/gaming`, and all Navbar subcategory links (e.g., `/desktops/gaming-pc`, `/component/processor`, `/apple-iphone`, etc.)

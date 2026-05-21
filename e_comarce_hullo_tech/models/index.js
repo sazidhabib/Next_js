@@ -1,12 +1,23 @@
 const sequelize = require('../db/database');
-const Category = require('./Category');
-const Product = require('./Product');
-const User = require('./User');
-const SiteSetting = require('./SiteSetting');
 
-// Associations (if any)
-// E.g. Category.hasMany(Product, { foreignKey: 'categoryId' })
-// Product.belongsTo(Category, { foreignKey: 'categoryId' })
+let Category;
+let Product;
+let User;
+let SiteSetting;
+
+// Only load models if sequelize is available
+if (sequelize) {
+  Category = require('./Category');
+  Product = require('./Product');
+  User = require('./User');
+  SiteSetting = require('./SiteSetting');
+
+  // Associations (if any)
+  // E.g. Category.hasMany(Product, { foreignKey: 'categoryId' })
+  // Product.belongsTo(Category, { foreignKey: 'categoryId' })
+} else {
+  console.warn('⚠️  Database not initialized - models will be unavailable');
+}
 
 module.exports = {
   sequelize,
