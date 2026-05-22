@@ -82,42 +82,56 @@ const setupExpress = () => {
         let dbConnected = false;
         try {
             if (sequelize) {
+                // Ensure the database exists before connecting
+                try {
+                    const mysql2 = require('mysql2/promise');
+                    const connection = await mysql2.createConnection({
+                        host: process.env.DB_HOST || 'localhost',
+                        port: process.env.Db_port || 3306,
+                        user: process.env.DB_USER,
+                        password: process.env.DB_PASSWORD || '',
+                    });
+                    await connection.query(`CREATE DATABASE IF NOT EXISTS \`${process.env.DB_NAME || 'hullotech'}\`;`);
+                    await connection.end();
+                    console.log(`✅ Database "${process.env.DB_NAME || 'hullotech'}" ensured.`);
+                } catch (dbCreateError) {
+                    console.warn("⚠️  Could not auto-create database:", dbCreateError.message);
+                }
+
                 await sequelize.authenticate();
                 console.log("✅ MySQL connection established successfully.");
                 dbConnected = true;
 
                 // Sync database to create tables if they don't exist
-                if (process.env.NODE_ENV !== 'production') {
-                    await sequelize.sync();
-                    console.log("✅ Database synchronized.");
+                await sequelize.sync();
+                console.log("✅ Database synchronized (tables created if not existing).");
 
-                    // Create default admin user if not exists
-                    const { User, Category, Product } = require('./models');
-                    const adminExists = await User.findOne({ where: { email: 'admin@hullotech.com' } });
-                    if (!adminExists) {
-                        await User.create({
-                            email: 'admin@hullotech.com',
-                            password: 'admin123',
-                            role: 'admin'
-                        });
-                        console.log("✅ Default admin user created (admin@hullotech.com / admin123)");
-                    }
+                // Create default admin user if not exists
+                const { User, Category, Product } = require('./models');
+                const adminExists = await User.findOne({ where: { email: 'admin@hullotech.com' } });
+                if (!adminExists) {
+                    await User.create({
+                        email: 'admin@hullotech.com',
+                        password: 'admin123',
+                        role: 'admin'
+                    });
+                    console.log("✅ Default admin user created (admin@hullotech.com / admin123)");
+                }
 
-                    // Seed default categories
-                    const categoryCount = await Category.count();
-                    if (categoryCount === 0) {
-                        const { categories: seedCategories } = require('./db/seedData');
-                        await Category.bulkCreate(seedCategories);
-                        console.log("✅ Database seeded with default categories.");
-                    }
+                // Seed default categories
+                const categoryCount = await Category.count();
+                if (categoryCount === 0) {
+                    const { categories: seedCategories } = require('./db/seedData');
+                    await Category.bulkCreate(seedCategories);
+                    console.log("✅ Database seeded with default categories.");
+                }
 
-                    // Seed default products
-                    const productCount = await Product.count();
-                    if (productCount === 0) {
-                        const { products: seedProducts } = require('./db/seedData');
-                        await Product.bulkCreate(seedProducts);
-                        console.log("✅ Database seeded with default products.");
-                    }
+                // Seed default products
+                const productCount = await Product.count();
+                if (productCount === 0) {
+                    const { products: seedProducts } = require('./db/seedData');
+                    await Product.bulkCreate(seedProducts);
+                    console.log("✅ Database seeded with default products.");
                 }
             } else {
                 console.warn("⚠️  Sequelize not initialized - running in fallback mock mode.");

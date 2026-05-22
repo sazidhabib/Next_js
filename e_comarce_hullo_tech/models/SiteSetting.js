@@ -43,4 +43,6 @@ if (sequelize) {
     tableName: 'site_settings'
   });
 
-  module.exports = SiteSetting;
+}
+
+module.exports = SiteSetting;
