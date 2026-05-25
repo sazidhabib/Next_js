@@ -43,6 +43,14 @@ if (sequelize) {
       type: DataTypes.TEXT,
       allowNull: true,
     },
+    warranty: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    specifications: {
+      type: DataTypes.JSON, // Structured section->key->value
+      allowNull: true,
+    },
     featured: {
       type: DataTypes.BOOLEAN,
       defaultValue: false,

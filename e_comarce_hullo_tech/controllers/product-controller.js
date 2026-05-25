@@ -4,6 +4,18 @@ const { products: seedProducts } = require('../db/seedData');
 // Fallback in-memory products list in case DB is not available
 let fallbackProducts = [...seedProducts];
 
+const slugify = (text) => {
+  if (!text) return '';
+  return text
+    .toString()
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, '') // remove non-alphanumeric, spaces, hyphens
+    .replace(/\s+/g, '-') // replace spaces with hyphen
+    .replace(/-+/g, '-') // replace multiple hyphens with single
+    .replace(/^-+|-+$/g, ''); // trim hyphens from ends
+};
+
 const getProducts = async (req, res) => {
   try {
     if (!Product) {
@@ -78,19 +90,23 @@ const getProductBySlug = async (req, res) => {
 
 const createProduct = async (req, res) => {
   try {
-    const { name, slug, price, category, image, images, specs, description, featured, brand, model, stock } = req.body;
+    const { name, slug, price, category, image, images, specs, specifications, description, featured, brand, model, stock, warranty } = req.body;
+
+    const finalSlug = slug && slug.trim() !== '' ? slug : slugify(name || '');
 
     if (!Product) {
       const newProduct = {
         id: fallbackProducts.length > 0 ? Math.max(...fallbackProducts.map(p => p.id)) + 1 : 1,
         name,
-        slug,
+        slug: finalSlug,
         price: parseFloat(price),
         category,
         image,
         images: Array.isArray(images) ? images : [image],
         specs: Array.isArray(specs) ? specs : (specs ? specs.split(',').map(s => s.trim()) : []),
         description,
+        specifications: typeof specifications === 'string' ? JSON.parse(specifications) : (specifications || {}),
+        warranty,
         featured: featured === true || featured === 'true',
         brand,
         model,
@@ -102,7 +118,7 @@ const createProduct = async (req, res) => {
 
     try {
       const product = await Product.create({
-        name, slug, price, category, image, images, specs, description, featured, brand, model, stock
+        name, slug: finalSlug, price, category, image, images, specs, specifications, description, featured, brand, model, stock, warranty
       });
       return res.status(201).json({ success: true, data: product });
     } catch (dbError) {
@@ -110,13 +126,15 @@ const createProduct = async (req, res) => {
       const newProduct = {
         id: fallbackProducts.length > 0 ? Math.max(...fallbackProducts.map(p => p.id)) + 1 : 1,
         name,
-        slug,
+        slug: finalSlug,
         price: parseFloat(price),
         category,
         image,
         images: Array.isArray(images) ? images : [image],
         specs: Array.isArray(specs) ? specs : (specs ? specs.split(',').map(s => s.trim()) : []),
         description,
+        specifications: typeof specifications === 'string' ? JSON.parse(specifications) : (specifications || {}),
+        warranty,
         featured: featured === true || featured === 'true',
         brand,
         model,
@@ -133,7 +151,15 @@ const createProduct = async (req, res) => {
 const updateProduct = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, slug, price, category, image, images, specs, description, featured, brand, model, stock } = req.body;
+    const { name, slug, price, category, image, images, specs, specifications, description, featured, brand, model, stock, warranty } = req.body;
+
+    // Determine slug: if slug is provided and not empty, use it; else if name is provided, generate from name; else keep existing
+    let finalSlug;
+    if (slug !== undefined && slug !== null && slug.trim() !== '') {
+      finalSlug = slug.trim();
+    } else if (name !== undefined && name !== null && name.trim() !== '') {
+      finalSlug = slugify(name.trim());
+    } // else finalSlug remains undefined, we'll keep existing later
 
     if (!Product) {
       const productIdx = fallbackProducts.findIndex(p => p.id === parseInt(id));
@@ -144,13 +170,15 @@ const updateProduct = async (req, res) => {
       fallbackProducts[productIdx] = {
         ...fallbackProducts[productIdx],
         name: name !== undefined ? name : fallbackProducts[productIdx].name,
-        slug: slug !== undefined ? slug : fallbackProducts[productIdx].slug,
+        slug: finalSlug !== undefined ? finalSlug : fallbackProducts[productIdx].slug,
         price: price !== undefined ? parseFloat(price) : fallbackProducts[productIdx].price,
         category: category !== undefined ? category : fallbackProducts[productIdx].category,
         image: image !== undefined ? image : fallbackProducts[productIdx].image,
         images: images !== undefined ? (Array.isArray(images) ? images : [images]) : fallbackProducts[productIdx].images,
         specs: specs !== undefined ? (Array.isArray(specs) ? specs : specs.split(',').map(s => s.trim())) : fallbackProducts[productIdx].specs,
+        specifications: specifications !== undefined ? (typeof specifications === 'string' ? JSON.parse(specifications) : specifications) : fallbackProducts[productIdx].specifications,
         description: description !== undefined ? description : fallbackProducts[productIdx].description,
+        warranty: warranty !== undefined ? warranty : fallbackProducts[productIdx].warranty,
         featured: featured !== undefined ? (featured === true || featured === 'true') : fallbackProducts[productIdx].featured,
         brand: brand !== undefined ? brand : fallbackProducts[productIdx].brand,
         model: model !== undefined ? model : fallbackProducts[productIdx].model,
@@ -166,13 +194,15 @@ const updateProduct = async (req, res) => {
       }
 
       product.name = name !== undefined ? name : product.name;
-      product.slug = slug !== undefined ? slug : product.slug;
+      product.slug = finalSlug !== undefined ? finalSlug : product.slug;
       product.price = price !== undefined ? price : product.price;
       product.category = category !== undefined ? category : product.category;
       product.image = image !== undefined ? image : product.image;
       product.images = images !== undefined ? images : product.images;
       product.specs = specs !== undefined ? specs : product.specs;
+      product.specifications = specifications !== undefined ? specifications : product.specifications;
       product.description = description !== undefined ? description : product.description;
+      product.warranty = warranty !== undefined ? warranty : product.warranty;
       product.featured = featured !== undefined ? featured : product.featured;
       product.brand = brand !== undefined ? brand : product.brand;
       product.model = model !== undefined ? model : product.model;
@@ -190,13 +220,15 @@ const updateProduct = async (req, res) => {
       fallbackProducts[productIdx] = {
         ...fallbackProducts[productIdx],
         name: name !== undefined ? name : fallbackProducts[productIdx].name,
-        slug: slug !== undefined ? slug : fallbackProducts[productIdx].slug,
+        slug: finalSlug !== undefined ? finalSlug : fallbackProducts[productIdx].slug,
         price: price !== undefined ? parseFloat(price) : fallbackProducts[productIdx].price,
         category: category !== undefined ? category : fallbackProducts[productIdx].category,
         image: image !== undefined ? image : fallbackProducts[productIdx].image,
         images: images !== undefined ? (Array.isArray(images) ? images : [images]) : fallbackProducts[productIdx].images,
         specs: specs !== undefined ? (Array.isArray(specs) ? specs : specs.split(',').map(s => s.trim())) : fallbackProducts[productIdx].specs,
+        specifications: specifications !== undefined ? (typeof specifications === 'string' ? JSON.parse(specifications) : specifications) : fallbackProducts[productIdx].specifications,
         description: description !== undefined ? description : fallbackProducts[productIdx].description,
+        warranty: warranty !== undefined ? warranty : fallbackProducts[productIdx].warranty,
         featured: featured !== undefined ? (featured === true || featured === 'true') : fallbackProducts[productIdx].featured,
         brand: brand !== undefined ? brand : fallbackProducts[productIdx].brand,
         model: model !== undefined ? model : fallbackProducts[productIdx].model,

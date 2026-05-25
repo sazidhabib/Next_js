@@ -36,7 +36,7 @@ export default function ProductDetailContent({ product, category, relatedProduct
         {/* Left: Product Image */}
         <div className="lg:w-[42%]">
           <div className="images">
-            <div className="bg-[#f8f9fa] rounded-lg p-6 relative aspect-square flex items-center justify-center border border-gray-100">
+            <div className="bg-[#ffffff] rounded-lg p-6 relative aspect-square flex items-center justify-center border border-gray-100">
               <Image
                 src={images[selectedImage]}
                 alt={product.name}
@@ -52,9 +52,8 @@ export default function ProductDetailContent({ product, category, relatedProduct
                   <button
                     key={i}
                     onClick={() => setSelectedImage(i)}
-                    className={`w-16 h-16 rounded border p-1 flex items-center justify-center bg-white ${
-                      i === selectedImage ? "border-star-blue" : "border-gray-200"
-                    }`}
+                    className={`w-16 h-16 rounded border p-1 flex items-center justify-center bg-white ${i === selectedImage ? "border-star-blue" : "border-gray-200"
+                      }`}
                   >
                     <Image
                       src={img}
@@ -93,56 +92,47 @@ export default function ProductDetailContent({ product, category, relatedProduct
             {product.name}
           </h1>
 
-          {/* Product Info Table */}
-          <table className="w-full text-sm mb-5 product-info-table">
-            <tbody>
-              <tr className="border-b border-gray-100">
-                <td className="py-2.5 text-gray-500 w-[140px]">Price</td>
-                <td className="py-2.5">
-                  {hasDiscount ? (
-                    <>
-                      <span className="text-xl font-bold text-star-blue">${product.price}</span>
-                      <span className="text-sm text-gray-400 line-through ml-2">${regularPrice}</span>
-                    </>
-                  ) : (
-                    <span className="text-xl font-bold text-star-blue">${product.price}</span>
-                  )}
-                </td>
-              </tr>
-              {hasDiscount && (
-                <tr className="border-b border-gray-100">
-                  <td className="py-2.5 text-gray-500">Regular Price</td>
-                  <td className="py-2.5 text-gray-600">${regularPrice}</td>
-                </tr>
-              )}
-              <tr className="border-b border-gray-100">
-                <td className="py-2.5 text-gray-500">Status</td>
-                <td className="py-2.5">
-                  {product.stock ? (
-                    <span className="text-green-600 font-medium">In Stock</span>
-                  ) : (
-                    <span className="text-red-600 font-medium">Out of Stock</span>
-                  )}
-                </td>
-              </tr>
-              <tr className="border-b border-gray-100">
-                <td className="py-2.5 text-gray-500">Product Code</td>
-                <td className="py-2.5 text-gray-700 font-medium">{product.id}</td>
-              </tr>
-              {product.brand && (
-                <tr className="border-b border-gray-100">
-                  <td className="py-2.5 text-gray-500">Brand</td>
-                  <td className="py-2.5 text-gray-700 font-medium">{product.brand}</td>
-                </tr>
-              )}
-              {product.model && (
-                <tr className="border-b border-gray-100">
-                  <td className="py-2.5 text-gray-500">Model</td>
-                  <td className="py-2.5 text-gray-700 font-medium">{product.model}</td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+          {/* Product Info Card */}
+          <div className="flex flex-wrap gap-4 mb-6">
+            <div className="flex items-center gap-2 bg-[#f8f9fa] rounded-lg px-3 py-2">
+              <span className="text-xs font-medium text-gray-500">Price :</span>
+              <span className="text-lg font-bold text-star-blue">৳{product.price}</span>
+            </div>
+            {hasDiscount && (
+              <div className="flex items-center gap-2 bg-[#f8f9fa] rounded-lg px-3 py-2">
+                <span className="text-xs font-medium text-gray-500">Regular Price :</span>
+                <span className="text-lg font-bold text-gray-600 line-through">৳{regularPrice}</span>
+              </div>
+            )}
+            <div className="flex items-center gap-2 bg-[#f8f9fa] rounded-lg px-3 py-2">
+              <span className="text-xs font-medium text-gray-500">Status :</span>
+              <span className={product.stock ? 'text-green-600 font-medium' : 'text-red-600 font-medium'}>
+                {product.stock ? 'In Stock' : 'Out of Stock'}
+              </span>
+            </div>
+            <div className="flex items-center gap-2 bg-[#f8f9fa] rounded-lg px-3 py-2">
+              <span className="text-xs font-medium text-gray-500">Product Code :</span>
+              <span className="text-lg font-medium text-gray-700">{product.id}</span>
+            </div>
+            {product.brand && (
+              <div className="flex items-center gap-2 bg-[#f8f9fa] rounded-lg px-3 py-2">
+                <span className="text-xs font-medium text-gray-500">Brand :</span>
+                <span className="text-lg font-medium text-gray-700">{product.brand}</span>
+              </div>
+            )}
+            {product.model && (
+              <div className="flex items-center gap-2 bg-[#f8f9fa] rounded-lg px-3 py-2">
+                <span className="text-xs font-medium text-gray-500">Model :</span>
+                <span className="text-lg font-medium text-gray-700">{product.model}</span>
+              </div>
+            )}
+            {product.warranty && (
+              <div className="flex items-center gap-2 bg-[#f8f9fa] rounded-lg px-3 py-2">
+                <span className="text-xs font-medium text-gray-500">Warranty :</span>
+                <span className="text-lg font-medium text-gray-700">{product.warranty}</span>
+              </div>
+            )}
+          </div>
 
           {/* Key Features */}
           <div className="mb-6">
@@ -163,25 +153,24 @@ export default function ProductDetailContent({ product, category, relatedProduct
             <div className="flex gap-3">
               <label
                 onClick={() => setPaymentMode("cash")}
-                className={`flex-1 border-2 rounded-lg p-4 cursor-pointer transition-all ${
-                  paymentMode === "cash"
-                    ? "border-star-blue bg-blue-50"
-                    : "border-gray-200 hover:border-gray-300"
-                }`}
+                className={`flex-1 border-2 rounded-lg p-4 cursor-pointer transition-all ${paymentMode === "cash"
+                  ? "border-star-blue bg-blue-50"
+                  : "border-gray-200 hover:border-gray-300"
+                  }`}
               >
                 <input
                   type="radio"
                   name="payment"
                   value="cash"
                   checked={paymentMode === "cash"}
-                  onChange={() => {}}
+                  onChange={() => { }}
                   className="sr-only"
                 />
                 <div className="text-center">
                   <div className="mb-1">
-                    <span className="text-lg font-bold text-gray-900">${product.price}</span>
+                    <span className="text-lg font-bold text-gray-900">৳{product.price}</span>
                     {hasDiscount && (
-                      <span className="text-sm text-gray-400 line-through ml-2">${regularPrice}</span>
+                      <span className="text-sm text-gray-400 line-through ml-2">৳{regularPrice}</span>
                     )}
                   </div>
                   <div className="text-xs font-medium text-star-blue">Cash Discount Price</div>
@@ -190,25 +179,24 @@ export default function ProductDetailContent({ product, category, relatedProduct
               </label>
               <label
                 onClick={() => setPaymentMode("emi")}
-                className={`flex-1 border-2 rounded-lg p-4 cursor-pointer transition-all ${
-                  paymentMode === "emi"
-                    ? "border-star-blue bg-blue-50"
-                    : "border-gray-200 hover:border-gray-300"
-                }`}
+                className={`flex-1 border-2 rounded-lg p-4 cursor-pointer transition-all ${paymentMode === "emi"
+                  ? "border-star-blue bg-blue-50"
+                  : "border-gray-200 hover:border-gray-300"
+                  }`}
               >
                 <input
                   type="radio"
                   name="payment"
                   value="emi"
                   checked={paymentMode === "emi"}
-                  onChange={() => {}}
+                  onChange={() => { }}
                   className="sr-only"
                 />
                 <div className="text-center">
                   <div className="text-lg font-bold text-gray-900 mb-1">
-                    ${Math.round(product.price / 12)}/month
+                    ৳{Math.round(product.price / 12)}/month
                   </div>
-                  <div className="text-xs font-medium text-gray-600">Regular Price: ${regularPrice}</div>
+                  <div className="text-xs font-medium text-gray-600">Regular Price: ৳{regularPrice}</div>
                   <div className="text-xs text-gray-400 mt-0.5">0% EMI for up to 12 Months</div>
                 </div>
               </label>
@@ -257,11 +245,10 @@ export default function ProductDetailContent({ product, category, relatedProduct
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
-                  className={`pb-3 text-sm font-medium transition-colors relative ${
-                    activeTab === tab
-                      ? "text-star-blue after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-star-blue"
-                      : "text-gray-500 hover:text-gray-700"
-                  }`}
+                  className={`pb-3 text-sm font-medium transition-colors relative ${activeTab === tab
+                    ? "text-star-blue after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-star-blue"
+                    : "text-gray-500 hover:text-gray-700"
+                    }`}
                 >
                   {tab}
                 </button>
@@ -276,39 +263,63 @@ export default function ProductDetailContent({ product, category, relatedProduct
                 <div className="mb-4">
                   <h2 className="text-lg font-bold text-gray-900">Specification</h2>
                 </div>
-                <table className="w-full data-table text-sm">
-                  <thead>
-                    <tr>
-                      <td className="bg-[#f8f9fa] font-bold text-gray-900 px-4 py-3 rounded-tl-lg rounded-tr-lg" colSpan={2}>
-                        Basic Information
-                      </td>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr className="border-b border-gray-100 even:bg-[#fafbfc]">
-                      <td className="px-4 py-3 text-gray-500 w-48">Name</td>
-                      <td className="px-4 py-3 text-gray-800">{product.name}</td>
-                    </tr>
-                    {product.brand && (
-                      <tr className="border-b border-gray-100 even:bg-[#fafbfc]">
-                        <td className="px-4 py-3 text-gray-500">Brand</td>
-                        <td className="px-4 py-3 text-gray-800">{product.brand}</td>
-                      </tr>
-                    )}
-                    {product.model && (
-                      <tr className="border-b border-gray-100 even:bg-[#fafbfc]">
-                        <td className="px-4 py-3 text-gray-500">Model</td>
-                        <td className="px-4 py-3 text-gray-800">{product.model}</td>
-                      </tr>
-                    )}
-                    {product.specs.map((spec, i) => (
-                      <tr key={i} className="border-b border-gray-100 even:bg-[#fafbfc]">
-                        <td className="px-4 py-3 text-gray-500">Specification {i + 1}</td>
-                        <td className="px-4 py-3 text-gray-800">{spec}</td>
-                      </tr>
+                {product.specifications && Object.keys(product.specifications).length > 0 ? (
+                  <div className="space-y-6">
+                    {Object.entries(product.specifications).map(([section, fields], idx) => (
+                      <table key={idx} className="w-full data-table text-sm border-collapse">
+                        <thead>
+                          <tr>
+                            <td className="bg-[#f8f9fa] font-bold text-gray-900 px-4 py-3 rounded-tl-lg rounded-tr-lg" colSpan={2}>
+                              {section}
+                            </td>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {Object.entries(fields).map(([key, value], i) => (
+                            <tr key={i} className="border-b border-gray-100 even:bg-[#fafbfc]">
+                              <td className="px-4 py-3 text-gray-500 w-48 align-top">{key}</td>
+                              <td className="px-4 py-3 text-gray-800">{value}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
                     ))}
-                  </tbody>
-                </table>
+                  </div>
+                ) : (
+                  <table className="w-full data-table text-sm border-collapse">
+                    <thead>
+                      <tr>
+                        <td className="bg-[#f8f9fa] font-bold text-gray-900 px-4 py-3 rounded-tl-lg rounded-tr-lg" colSpan={2}>
+                          Basic Information
+                        </td>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr className="border-b border-gray-100 even:bg-[#fafbfc]">
+                        <td className="px-4 py-3 text-gray-500 w-48">Name</td>
+                        <td className="px-4 py-3 text-gray-800">{product.name}</td>
+                      </tr>
+                      {product.brand && (
+                        <tr className="border-b border-gray-100 even:bg-[#fafbfc]">
+                          <td className="px-4 py-3 text-gray-500">Brand</td>
+                          <td className="px-4 py-3 text-gray-800">{product.brand}</td>
+                        </tr>
+                      )}
+                      {product.model && (
+                        <tr className="border-b border-gray-100 even:bg-[#fafbfc]">
+                          <td className="px-4 py-3 text-gray-500">Model</td>
+                          <td className="px-4 py-3 text-gray-800">{product.model}</td>
+                        </tr>
+                      )}
+                      {product.specs && product.specs.map((spec, i) => (
+                        <tr key={i} className="border-b border-gray-100 even:bg-[#fafbfc]">
+                          <td className="px-4 py-3 text-gray-500">Specification {i + 1}</td>
+                          <td className="px-4 py-3 text-gray-800">{spec}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
               </section>
             )}
 
@@ -370,7 +381,7 @@ export default function ProductDetailContent({ product, category, relatedProduct
             </h2>
             <p className="text-sm text-gray-600 leading-relaxed">
               The latest price of {product.name} is{" "}
-              <span className="font-bold text-star-blue">${product.price}</span> in Bangladesh.
+              <span className="font-bold text-star-blue">৳{product.price}</span> in Bangladesh.
               You can buy the {product.name} at best price from our website or visit our nearest showroom.
             </p>
           </section>
@@ -402,7 +413,7 @@ export default function ProductDetailContent({ product, category, relatedProduct
                         {rp.name}
                       </h4>
                       <div className="mt-1">
-                        <span className="text-sm font-bold text-star-blue">${rp.price}</span>
+                        <span className="text-sm font-bold text-star-blue">৳{rp.price}</span>
                       </div>
                     </div>
                   </Link>

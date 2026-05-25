@@ -23,6 +23,18 @@ export default function AdminProducts() {
   const { isAuthorized, user, token, isLoading: authLoading } = useAdminAuth();
   const router = useRouter();
 
+  const generateSlug = (text) => {
+    if (!text) return '';
+    return text
+      .toString()
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9\s-]/g, '') // remove non-alphanumeric, spaces, hyphens
+      .replace(/\s+/g, '-') // replace spaces with hyphen
+      .replace(/-+/g, '-') // replace multiple hyphens with single
+      .replace(/^-+|-+$/g, ''); // trim hyphens from ends
+  };
+
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -40,6 +52,8 @@ export default function AdminProducts() {
     category: '',
     image: '',
     specs: '',
+    specifications: {},
+    warranty: '',
     description: '',
     featured: false,
     brand: '',
@@ -103,6 +117,7 @@ export default function AdminProducts() {
       ...productForm,
       price: parseFloat(productForm.price),
       specs: specsArray,
+      specifications: productForm.specifications,
       images: [productForm.image] // Use single image as array
     };
 
@@ -158,6 +173,8 @@ export default function AdminProducts() {
       category: product.category,
       image: product.image,
       specs: Array.isArray(product.specs) ? product.specs.join(', ') : '',
+      specifications: product.specifications || {},
+      warranty: product.warranty || '',
       description: product.description || '',
       featured: product.featured || false,
       brand: product.brand || '',
@@ -177,6 +194,10 @@ export default function AdminProducts() {
       category: categories[0]?.slug || '',
       image: '',
       specs: '',
+      specifications: {
+        "Basic Information": { "Product Name": "", "Model": "", "Warranty": "" }
+      },
+      warranty: '',
       description: '',
       featured: false,
       brand: '',
@@ -343,7 +364,7 @@ export default function AdminProducts() {
                             </div>
                           </td>
                           <td className="p-4 font-medium text-blue-400">{product.category}</td>
-                          <td className="p-4 font-semibold text-slate-100">${product.price}</td>
+                          <td className="p-4 font-semibold text-slate-100">৳{product.price}</td>
                           <td className="p-4">{product.brand}</td>
                           <td className="p-4 text-center">
                             {product.featured ? (
@@ -397,7 +418,14 @@ export default function AdminProducts() {
                     <input
                       type="text" required
                       value={productForm.name}
-                      onChange={(e) => setProductForm({ ...productForm, name: e.target.value })}
+                      onChange={(e) => {
+                        const name = e.target.value;
+                        setProductForm(prev => ({
+                          ...prev,
+                          name,
+                          slug: generateSlug(name)
+                        }));
+                      }}
                       className="w-full px-4 py-2 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 focus:outline-none focus:border-blue-500"
                     />
                   </div>
@@ -406,12 +434,11 @@ export default function AdminProducts() {
                     <input
                       type="text" required
                       value={productForm.slug}
-                      onChange={(e) => setProductForm({ ...productForm, slug: e.target.value })}
                       className="w-full px-4 py-2 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 focus:outline-none focus:border-blue-500"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-slate-300 mb-1">Price ($)</label>
+                    <label className="block text-sm font-semibold text-slate-300 mb-1">Price (৳)</label>
                     <input
                       type="number" required step="0.01"
                       value={productForm.price}
@@ -450,6 +477,16 @@ export default function AdminProducts() {
                     />
                   </div>
                   <div className="md:col-span-2">
+                    <label className="block text-sm font-semibold text-slate-300 mb-1">Warranty</label>
+                    <input
+                      type="text"
+                      value={productForm.warranty}
+                      onChange={(e) => setProductForm({ ...productForm, warranty: e.target.value })}
+                      placeholder="e.g. 1 Year, 3 Years"
+                      className="w-full px-4 py-2 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 focus:outline-none focus:border-blue-500"
+                    />
+                  </div>
+                  <div className="md:col-span-2">
                     <label className="block text-sm font-semibold text-slate-300 mb-1">Image URL</label>
                     <input
                       type="text" required
@@ -459,7 +496,7 @@ export default function AdminProducts() {
                     />
                   </div>
                   <div className="md:col-span-2">
-                    <label className="block text-sm font-semibold text-slate-300 mb-1">Key Specs (Comma-separated)</label>
+                    <label className="block text-sm font-semibold text-slate-300 mb-1">Key Features (Comma-separated)</label>
                     <input
                       type="text"
                       value={productForm.specs}
@@ -467,6 +504,110 @@ export default function AdminProducts() {
                       placeholder="Intel i7, RTX 4070, 16GB RAM"
                       className="w-full px-4 py-2 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 focus:outline-none focus:border-blue-500"
                     />
+                  </div>
+
+                  {/* Detailed Specifications Editor */}
+                  <div className="md:col-span-2 mt-4 p-5 border border-slate-800 rounded-xl bg-slate-900/50">
+                    <div className="flex items-center justify-between mb-4">
+                      <h4 className="text-lg font-bold text-slate-200">Structured Specifications</h4>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const sectionName = window.prompt("Enter new section name (e.g., Processor):");
+                          if (sectionName && !productForm.specifications[sectionName]) {
+                            setProductForm(prev => ({
+                              ...prev,
+                              specifications: { ...prev.specifications, [sectionName]: {} }
+                            }));
+                          }
+                        }}
+                        className="text-sm px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg flex items-center gap-1"
+                      >
+                        <Plus className="w-3.5 h-3.5" /> Add Section
+                      </button>
+                    </div>
+
+                    <div className="space-y-6">
+                      {Object.entries(productForm.specifications || {}).map(([section, fields]) => (
+                        <div key={section} className="border border-slate-700/50 rounded-lg overflow-hidden bg-slate-950/30">
+                          <div className="bg-slate-800/80 px-4 py-2.5 flex items-center justify-between border-b border-slate-700/50">
+                            <span className="font-semibold text-slate-300">{section}</span>
+                            <div className="flex gap-2">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const fieldName = window.prompt(`Enter new field name for "${section}" (e.g., RAM):`);
+                                  if (fieldName) {
+                                    setProductForm(prev => ({
+                                      ...prev,
+                                      specifications: {
+                                        ...prev.specifications,
+                                        [section]: { ...prev.specifications[section], [fieldName]: "" }
+                                      }
+                                    }));
+                                  }
+                                }}
+                                className="text-xs px-2 py-1 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded"
+                              >
+                                + Field
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  if (window.confirm(`Remove section "${section}"?`)) {
+                                    const newSpecs = { ...productForm.specifications };
+                                    delete newSpecs[section];
+                                    setProductForm(prev => ({ ...prev, specifications: newSpecs }));
+                                  }
+                                }}
+                                className="text-xs px-2 py-1 bg-red-500/20 hover:bg-red-500/40 text-red-400 rounded"
+                              >
+                                Remove
+                              </button>
+                            </div>
+                          </div>
+                          <div className="p-4 space-y-3">
+                            {Object.entries(fields).length === 0 && <div className="text-sm text-slate-500 italic">No fields yet. Click "+ Field" to add.</div>}
+                            {Object.entries(fields).map(([key, value]) => (
+                              <div key={key} className="flex items-start gap-3">
+                                <div className="w-1/3 pt-2 text-sm text-slate-400 font-medium truncate" title={key}>
+                                  {key}
+                                </div>
+                                <div className="w-2/3 flex gap-2">
+                                  <input
+                                    type="text"
+                                    value={value}
+                                    onChange={(e) => {
+                                      setProductForm(prev => ({
+                                        ...prev,
+                                        specifications: {
+                                          ...prev.specifications,
+                                          [section]: { ...prev.specifications[section], [key]: e.target.value }
+                                        }
+                                      }));
+                                    }}
+                                    className="w-full px-3 py-1.5 bg-slate-900 border border-slate-700 rounded-lg text-slate-200 text-sm focus:outline-none focus:border-blue-500"
+                                    placeholder={`Value for ${key}`}
+                                  />
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      const newSpecs = { ...productForm.specifications };
+                                      delete newSpecs[section][key];
+                                      setProductForm(prev => ({ ...prev, specifications: newSpecs }));
+                                    }}
+                                    className="p-1.5 text-slate-500 hover:text-red-400 transition"
+                                    title="Remove field"
+                                  >
+                                    <X className="w-4 h-4" />
+                                  </button>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                   <div className="md:col-span-2">
                     <label className="block text-sm font-semibold text-slate-300 mb-1">Description</label>
