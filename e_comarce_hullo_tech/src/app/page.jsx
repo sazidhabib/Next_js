@@ -5,6 +5,8 @@ import Image from "next/image";
 import { ChevronLeft, ChevronRight, Zap, Tag, Clock } from "lucide-react";
 import CategoryGrid from "../components/CategoryGrid";
 import FeaturedProducts from "../components/FeaturedProducts";
+import FeatureCards from "../components/FeatureCards";
+import FeaturedCategories from "../components/FeaturedCategories";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -82,7 +84,9 @@ export default function Home() {
   };
 
   const prevTopSide = () => {
-    setCurrentTopSide((prev) => (prev - 1 + topSideBanners.length) % topSideBanners.length);
+    setCurrentTopSide(
+      (prev) => (prev - 1 + topSideBanners.length) % topSideBanners.length,
+    );
   };
 
   const nextBottomSide = () => {
@@ -90,7 +94,10 @@ export default function Home() {
   };
 
   const prevBottomSide = () => {
-    setCurrentBottomSide((prev) => (prev - 1 + bottomSideBanners.length) % bottomSideBanners.length);
+    setCurrentBottomSide(
+      (prev) =>
+        (prev - 1 + bottomSideBanners.length) % bottomSideBanners.length,
+    );
   };
 
   return (
@@ -98,7 +105,6 @@ export default function Home() {
       {/* Hero Section with Grid Layout */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-6">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
-
           {/* Main Slider (Left Side - 3/4 Width) */}
           <div className="lg:col-span-3 relative bg-white rounded-xl overflow-hidden shadow-sm h-[300px] md:h-[420px]">
             <AnimatePresence>
@@ -160,8 +166,11 @@ export default function Home() {
                 <button
                   key={index}
                   onClick={() => setCurrentBanner(index)}
-                  className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${index === currentBanner ? "bg-white w-8" : "bg-white/40 hover:bg-white/60"
-                    }`}
+                  className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${
+                    index === currentBanner
+                      ? "bg-white w-8"
+                      : "bg-white/40 hover:bg-white/60"
+                  }`}
                 />
               ))}
             </div>
@@ -179,7 +188,10 @@ export default function Home() {
                   transition={{ duration: 0.7 }}
                   className="absolute inset-0"
                 >
-                  <Link href={topSideBanners[currentTopSide].link} className="block relative w-full h-full group">
+                  <Link
+                    href={topSideBanners[currentTopSide].link}
+                    className="block relative w-full h-full group"
+                  >
                     <Image
                       src={topSideBanners[currentTopSide].image}
                       alt="Side Banner Top"
@@ -196,8 +208,11 @@ export default function Home() {
                   <button
                     key={index}
                     onClick={() => setCurrentTopSide(index)}
-                    className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${index === currentTopSide ? "bg-white w-4" : "bg-white/40 hover:bg-white/60"
-                      }`}
+                    className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
+                      index === currentTopSide
+                        ? "bg-white w-4"
+                        : "bg-white/40 hover:bg-white/60"
+                    }`}
                   />
                 ))}
               </div>
@@ -214,7 +229,10 @@ export default function Home() {
                   transition={{ duration: 0.7 }}
                   className="absolute inset-0"
                 >
-                  <Link href={bottomSideBanners[currentBottomSide].link} className="block relative w-full h-full group">
+                  <Link
+                    href={bottomSideBanners[currentBottomSide].link}
+                    className="block relative w-full h-full group"
+                  >
                     <Image
                       src={bottomSideBanners[currentBottomSide].image}
                       alt="Side Banner Bottom"
@@ -231,8 +249,11 @@ export default function Home() {
                   <button
                     key={index}
                     onClick={() => setCurrentBottomSide(index)}
-                    className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${index === currentBottomSide ? "bg-white w-4" : "bg-white/40 hover:bg-white/60"
-                      }`}
+                    className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
+                      index === currentBottomSide
+                        ? "bg-white w-4"
+                        : "bg-white/40 hover:bg-white/60"
+                    }`}
                   />
                 ))}
               </div>
@@ -245,19 +266,31 @@ export default function Home() {
       <section className="bg-white border-y border-star-gray">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
           <div className="flex justify-center gap-6 md:gap-12 text-sm">
-            <Link href="/happy-hour" className="flex items-center gap-2 text-star-orange hover:text-orange-700 font-medium">
+            <Link
+              href="/happy-hour"
+              className="flex items-center gap-2 text-star-orange hover:text-orange-700 font-medium"
+            >
               <Zap className="w-4 h-4" />
               <span>Happy Hour Deals</span>
             </Link>
-            <Link href="/information/offer" className="flex items-center gap-2 text-star-red hover:text-red-700 font-medium">
+            <Link
+              href="/information/offer"
+              className="flex items-center gap-2 text-star-red hover:text-red-700 font-medium"
+            >
               <Tag className="w-4 h-4" />
               <span>Offers</span>
             </Link>
-            <Link href="/tool/pc_builder" className="flex items-center gap-2 text-star-blue hover:text-star-dark-blue font-medium">
+            <Link
+              href="/tool/pc_builder"
+              className="flex items-center gap-2 text-star-blue hover:text-star-dark-blue font-medium"
+            >
               <span>🛠️</span>
               <span>PC Builder</span>
             </Link>
-            <Link href="/new-arrivals" className="flex items-center gap-2 text-star-green hover:text-green-700 font-medium">
+            <Link
+              href="/new-arrivals"
+              className="flex items-center gap-2 text-star-green hover:text-green-700 font-medium"
+            >
               <Clock className="w-4 h-4" />
               <span>New Arrivals</span>
             </Link>
@@ -265,10 +298,11 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Category Grid */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <CategoryGrid />
-      </section>
+      {/* Feature Cards */}
+      <FeatureCards />
+
+      {/* Featured Categories */}
+      <FeaturedCategories />
 
       {/* Happy Hour Section */}
       <section className="bg-gradient-to-r from-blue-500 to-orange-50 border-y border-orange-200">
@@ -277,9 +311,14 @@ export default function Home() {
             <div className="flex items-center gap-2">
               <Zap className="w-6 h-6 text-star-orange" />
               <h2 className="text-2xl font-bold text-gray-800">Happy Hour</h2>
-              <span className="bg-star-orange text-white text-xs px-2 py-1 rounded">Limited Time</span>
+              <span className="bg-star-orange text-white text-xs px-2 py-1 rounded">
+                Limited Time
+              </span>
             </div>
-            <Link href="/happy-hour" className="text-star-blue hover:underline text-sm font-medium">
+            <Link
+              href="/happy-hour"
+              className="text-star-blue hover:underline text-sm font-medium"
+            >
               View All →
             </Link>
           </div>
@@ -293,10 +332,14 @@ export default function Home() {
                   <div className="badge-sale">SALE</div>
                 </div>
                 <div className="p-3">
-                  <h3 className="text-sm font-medium mb-2 line-clamp-2">Happy Hour Deal Product {item}</h3>
+                  <h3 className="text-sm font-medium mb-2 line-clamp-2">
+                    Happy Hour Deal Product {item}
+                  </h3>
                   <div className="flex items-center gap-2">
                     <span className="text-star-blue font-bold">$499</span>
-                    <span className="text-gray-400 line-through text-sm">$699</span>
+                    <span className="text-gray-400 line-through text-sm">
+                      $699
+                    </span>
                   </div>
                   <div className="mt-2 bg-orange-100 text-orange-700 text-xs px-2 py-1 rounded">
                     Save $200
@@ -311,8 +354,13 @@ export default function Home() {
       {/* Featured Products */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold text-gray-800">Featured Products</h2>
-          <Link href="/featured" className="text-star-blue hover:underline text-sm font-medium">
+          <h2 className="text-2xl font-bold text-gray-800">
+            Featured Products
+          </h2>
+          <Link
+            href="/featured"
+            className="text-star-blue hover:underline text-sm font-medium"
+          >
             View All →
           </Link>
         </div>
@@ -324,7 +372,10 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold text-gray-800">New Arrivals</h2>
-            <Link href="/new-arrivals" className="text-star-blue hover:underline text-sm font-medium">
+            <Link
+              href="/new-arrivals"
+              className="text-star-blue hover:underline text-sm font-medium"
+            >
               View All →
             </Link>
           </div>
@@ -338,7 +389,9 @@ export default function Home() {
                   <div className="badge-new">NEW</div>
                 </div>
                 <div className="p-3">
-                  <h3 className="text-sm font-medium mb-2 line-clamp-2">New Arrival Product {item}</h3>
+                  <h3 className="text-sm font-medium mb-2 line-clamp-2">
+                    New Arrival Product {item}
+                  </h3>
                   <p className="text-star-blue font-bold">$999</p>
                 </div>
               </div>
@@ -349,7 +402,9 @@ export default function Home() {
 
       {/* AI Recommendations */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <h2 className="text-2xl font-bold text-gray-800 mb-6">Recommended for You</h2>
+        <h2 className="text-2xl font-bold text-gray-800 mb-6">
+          Recommended for You
+        </h2>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {[1, 2, 3, 4].map((item) => (
             <div key={item} className="product-card bg-white">
@@ -357,7 +412,9 @@ export default function Home() {
                 <span className="text-gray-400">Recommended {item}</span>
               </div>
               <div className="p-3">
-                <h3 className="text-sm font-medium mb-2">Recommended Product {item}</h3>
+                <h3 className="text-sm font-medium mb-2">
+                  Recommended Product {item}
+                </h3>
                 <p className="text-star-blue font-bold text-lg">$999</p>
               </div>
             </div>
@@ -369,8 +426,13 @@ export default function Home() {
       <section className="bg-white border-t border-star-gray">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-gray-800">Latest Tech News</h2>
-            <Link href="/blog" className="text-star-blue hover:underline text-sm font-medium">
+            <h2 className="text-2xl font-bold text-gray-800">
+              Latest Tech News
+            </h2>
+            <Link
+              href="/blog"
+              className="text-star-blue hover:underline text-sm font-medium"
+            >
               View All →
             </Link>
           </div>
