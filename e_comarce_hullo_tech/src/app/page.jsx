@@ -101,7 +101,7 @@ export default function Home() {
   };
 
   return (
-    <main className="bg-star-light-gray">
+    <main className="bg-white">
       {/* Hero Section with Grid Layout */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-6">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
@@ -166,11 +166,10 @@ export default function Home() {
                 <button
                   key={index}
                   onClick={() => setCurrentBanner(index)}
-                  className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${
-                    index === currentBanner
-                      ? "bg-white w-8"
-                      : "bg-white/40 hover:bg-white/60"
-                  }`}
+                  className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${index === currentBanner
+                    ? "bg-white w-8"
+                    : "bg-white/40 hover:bg-white/60"
+                    }`}
                 />
               ))}
             </div>
@@ -208,11 +207,10 @@ export default function Home() {
                   <button
                     key={index}
                     onClick={() => setCurrentTopSide(index)}
-                    className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
-                      index === currentTopSide
-                        ? "bg-white w-4"
-                        : "bg-white/40 hover:bg-white/60"
-                    }`}
+                    className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${index === currentTopSide
+                      ? "bg-white w-4"
+                      : "bg-white/40 hover:bg-white/60"
+                      }`}
                   />
                 ))}
               </div>
@@ -249,11 +247,10 @@ export default function Home() {
                   <button
                     key={index}
                     onClick={() => setCurrentBottomSide(index)}
-                    className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
-                      index === currentBottomSide
-                        ? "bg-white w-4"
-                        : "bg-white/40 hover:bg-white/60"
-                    }`}
+                    className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${index === currentBottomSide
+                      ? "bg-white w-4"
+                      : "bg-white/40 hover:bg-white/60"
+                      }`}
                   />
                 ))}
               </div>
@@ -263,7 +260,7 @@ export default function Home() {
       </section>
 
       {/* Quick Links */}
-      <section className="bg-white border-y border-star-gray">
+      <section className="bg-white ">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
           <div className="flex justify-center gap-6 md:gap-12 text-sm">
             <Link
@@ -305,7 +302,7 @@ export default function Home() {
       <FeaturedCategories />
 
       {/* Happy Hour Section */}
-      <section className="bg-gradient-to-r from-blue-500 to-orange-50 border-y border-orange-200">
+      <section className="bg-white ">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-2">
@@ -368,7 +365,7 @@ export default function Home() {
       </section>
 
       {/* New Arrivals */}
-      <section className="bg-white border-y border-star-gray">
+      <section className="bg-white ">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold text-gray-800">New Arrivals</h2>
@@ -423,7 +420,7 @@ export default function Home() {
       </section>
 
       {/* Blog Section */}
-      <section className="bg-white border-t border-star-gray">
+      <section className="bg-white ">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold text-gray-800">

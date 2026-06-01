@@ -1,5 +1,6 @@
 "use client";
 
+import { motion } from "framer-motion";
 import { Laptop, AlertCircle, Home, Wrench } from "lucide-react";
 
 const features = [
@@ -29,30 +30,70 @@ const features = [
   },
 ];
 
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+      delayChildren: 0.2,
+    },
+  },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.5,
+      ease: "easeOut",
+    },
+  },
+};
+
 export default function FeatureCards() {
   return (
-    <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+    <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
+      <motion.div
+        className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6"
+        variants={containerVariants}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.2 }}
+      >
         {features.map((feature) => {
           const IconComponent = feature.icon;
           return (
-            <div
+            <motion.div
               key={feature.id}
-              className="bg-white border border-star-gray rounded-lg p-6 flex flex-col items-center gap-3 hover:shadow-lg hover:border-star-blue transition-all duration-300 cursor-pointer group"
+              variants={itemVariants}
+              whileHover={{ y: -8 }}
+              transition={{ duration: 0.3 }}
             >
-              <div className="w-12 h-12 bg-star-light-gray rounded-full flex items-center justify-center group-hover:bg-blue-50 transition-colors">
-                <IconComponent className="w-6 h-6 text-star-blue" />
+              <div className="bg-white border border-star-gray rounded-lg p-6 md:p-8 flex flex-col items-center gap-4 hover:shadow-xl hover:border-star-blue transition-all duration-300 cursor-pointer group h-full">
+                <motion.div
+                  className="w-14 h-14 bg-gradient-to-br from-star-light-gray to-blue-50 rounded-full flex items-center justify-center group-hover:from-blue-50 group-hover:to-blue-100 transition-colors duration-300"
+                  whileHover={{ scale: 1.15, rotate: 360 }}
+                  transition={{ duration: 0.6 }}
+                >
+                  <IconComponent className="w-7 h-7 text-star-blue" />
+                </motion.div>
+                <motion.h3
+                  className="text-center font-bold text-gray-900 group-hover:text-star-blue transition-colors duration-300 text-sm md:text-base"
+                  whileHover={{ scale: 1.05 }}
+                >
+                  {feature.title}
+                </motion.h3>
+                <p className="text-center text-xs md:text-sm text-gray-600 leading-relaxed">
+                  {feature.description}
+                </p>
               </div>
-              <h3 className="text-center font-semibold text-gray-800 group-hover:text-star-blue transition-colors">
-                {feature.title}
-              </h3>
-              <p className="text-center text-sm text-gray-600">
-                {feature.description}
-              </p>
-            </div>
+            </motion.div>
           );
         })}
-      </div>
+      </motion.div>
     </section>
   );
 }
