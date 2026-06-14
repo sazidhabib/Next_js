@@ -12,21 +12,20 @@ const containerVariants = {
   visible: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.1,
-      delayChildren: 0.2,
+      staggerChildren: 0.08,
+      delayChildren: 0.15,
     },
   },
 };
 
 const itemVariants = {
-  hidden: { opacity: 0, scale: 0.9, y: 20 },
+  hidden: { opacity: 0, y: 20 },
   visible: {
     opacity: 1,
-    scale: 1,
     y: 0,
     transition: {
       duration: 0.5,
-      ease: "easeOut",
+      ease: [0.16, 1, 0.3, 1],
     },
   },
 };
@@ -45,8 +44,7 @@ export default function FeaturedProducts() {
         } else {
           setFeaturedList(mockProducts.filter((p) => p.featured));
         }
-      } catch (error) {
-        console.error("Failed to load featured products:", error);
+      } catch {
         setFeaturedList(mockProducts.filter((p) => p.featured));
       } finally {
         setLoading(false);
@@ -66,7 +64,7 @@ export default function FeaturedProducts() {
         {[1, 2, 3, 4].map((i) => (
           <motion.div
             key={i}
-            className="aspect-square bg-gradient-to-br from-slate-100 to-slate-200 rounded-lg"
+            className="aspect-square bg-gradient-to-br from-slate-100 to-slate-200 rounded-xl"
             variants={itemVariants}
             animate={{ opacity: [0.5, 1, 0.5] }}
             transition={{ duration: 2, repeat: Infinity }}
@@ -88,55 +86,42 @@ export default function FeaturedProducts() {
         <motion.div key={product.id} variants={itemVariants}>
           <Link
             href={`/${product.category}/${product.slug}`}
-            className="group product-card bg-white rounded-lg overflow-hidden block h-full shadow-sm hover:shadow-lg transition-shadow duration-300"
+            className="group block bg-white rounded-xl border border-gray-100 overflow-hidden hover:shadow-xl hover:border-gray-200 transition-all duration-500"
           >
-            {/* Product Image */}
-            <motion.div
-              className="relative aspect-square bg-star-light-gray overflow-hidden"
-              whileHover={{ y: -4 }}
-              transition={{ duration: 0.3 }}
-            >
+            <div className="relative aspect-square bg-[#f8fafc] overflow-hidden">
               <Image
                 src={product.image}
                 alt={product.name}
                 fill
-                className="object-cover group-hover:scale-110 transition-transform duration-500"
+                className="object-cover group-hover:scale-105 transition-transform duration-700"
                 sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
               />
-              <motion.button
-                className="absolute bottom-3 right-3 bg-white p-2.5 rounded-full shadow-md hover:bg-star-blue hover:text-white transition-all"
-                initial={{ opacity: 0, scale: 0.5 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.95 }}
-                transition={{ duration: 0.2 }}
-                onClick={(e) => e.preventDefault()}
-              >
-                <ShoppingCart className="w-4 h-4" />
-              </motion.button>
-            </motion.div>
-
-            {/* Product Info */}
-            <div className="p-4 flex flex-col h-full">
-              <div className="flex items-center gap-1 mb-2">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <Star key={star} className="w-3.5 h-3.5 fill-yellow-400 text-yellow-400" />
-                ))}
-                <span className="text-xs text-gray-500 ml-1.5 font-medium">(5)</span>
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/[0.02] transition-colors duration-500" />
+              <div className="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0">
+                <span className="flex items-center gap-1.5 bg-white/90 backdrop-blur-sm text-gray-900 text-xs font-semibold px-3 py-2 rounded-full shadow-lg hover:bg-blue-600 hover:text-white transition-all cursor-pointer active:scale-95">
+                  <ShoppingCart className="w-3.5 h-3.5" />
+                  Add to Cart
+                </span>
               </div>
-              <motion.h3
-                className="text-sm font-semibold mb-3 line-clamp-2 text-gray-900 group-hover:text-star-blue transition-colors duration-300"
-                whileHover={{ x: 2 }}
-              >
+            </div>
+            <div className="p-4">
+              <div className="flex items-center gap-0.5 mb-2">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <Star
+                    key={star}
+                    className="w-3 h-3 fill-amber-400 text-amber-400"
+                  />
+                ))}
+                <span className="text-[11px] text-gray-400 ml-1.5 font-medium">
+                  (5)
+                </span>
+              </div>
+              <h3 className="text-sm font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors leading-snug">
                 {product.name}
-              </motion.h3>
-              <motion.p
-                className="text-star-blue font-bold text-lg mt-auto"
-                whileHover={{ scale: 1.05 }}
-                transition={{ duration: 0.2 }}
-              >
+              </h3>
+              <p className="text-lg font-bold text-gray-900">
                 ${product.price}
-              </motion.p>
+              </p>
             </div>
           </Link>
         </motion.div>

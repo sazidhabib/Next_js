@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { motion } from "framer-motion";
 import {
   Laptop,
   Monitor,
@@ -25,6 +26,25 @@ const iconMap = {
   Shield: Shield,
 };
 
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.05,
+    },
+  },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 16 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] },
+  },
+};
+
 export default function FeaturedCategories() {
   const [categoriesList, setCategoriesList] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -39,11 +59,7 @@ export default function FeaturedCategories() {
         } else {
           setCategoriesList(mockCategories);
         }
-      } catch (error) {
-        console.error(
-          "DB Fetch failed for categories, falling back to mockData:",
-          error,
-        );
+      } catch {
         setCategoriesList(mockCategories);
       } finally {
         setLoading(false);
@@ -54,19 +70,21 @@ export default function FeaturedCategories() {
 
   if (loading) {
     return (
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <h2 className="text-2xl text-center font-bold text-gray-800 mb-6">
-          Featured Category
-        </h2>
-        <p className="text-sm text-gray-600 mb-6">
-          Get Your Desired Product from Featured Category!
-        </p>
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="text-center mb-10">
+          <p className="text-blue-600 text-xs font-medium tracking-[0.15em] uppercase mb-2">
+            Categories
+          </p>
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 tracking-tight">
+            Shop by Category
+          </h2>
+        </div>
         <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3">
           {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
             <div
               key={i}
-              className="h-24 bg-slate-100 rounded-lg animate-pulse"
-            ></div>
+              className="h-24 bg-slate-100 rounded-xl animate-pulse"
+            />
           ))}
         </div>
       </section>
@@ -74,34 +92,43 @@ export default function FeaturedCategories() {
   }
 
   return (
-    <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <h2 className="text-2xl text-center font-bold text-gray-800 mb-2">
-        Featured Category
-      </h2>
-      <p className="text-sm text-center text-gray-600 mb-6">
-        Get Your Desired Product from Featured Category!
-      </p>
-      <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3">
-        {categoriesList.map((category) => {
+    <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-20">
+      <div className="text-center mb-10">
+        <p className="text-blue-600 text-xs font-medium tracking-[0.15em] uppercase mb-2">
+          Categories
+        </p>
+        <h2 className="text-3xl md:text-4xl font-bold text-gray-900 tracking-tight">
+          Shop by Category
+        </h2>
+      </div>
+      <motion.div
+        className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3"
+        variants={containerVariants}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.1 }}
+      >
+        {categoriesList.map((category, i) => {
           const IconComponent = iconMap[category.icon];
           return (
-            <Link
-              key={category.id}
-              href={`/${category.slug}`}
-              className="group bg-white border border-star-gray rounded-lg p-3 flex flex-col items-center gap-2 hover:border-star-blue hover:shadow-md transition-all duration-300"
-            >
-              <div className="w-12 h-12 bg-star-light-gray rounded-lg flex items-center justify-center group-hover:bg-blue-50 transition-colors">
-                {IconComponent && (
-                  <IconComponent className="w-6 h-6 text-star-blue" />
-                )}
-              </div>
-              <h3 className="text-xs font-medium text-center text-star-text group-hover:text-star-blue transition-colors">
-                {category.name}
-              </h3>
-            </Link>
+            <motion.div key={category.id} variants={itemVariants}>
+              <Link
+                href={`/${category.slug}`}
+                className="group flex flex-col items-center gap-3 bg-white border border-gray-100 rounded-xl p-4 hover:border-blue-100 hover:bg-blue-50/30 hover:shadow-md transition-all duration-300"
+              >
+                <div className="w-12 h-12 bg-gradient-to-br from-gray-50 to-blue-50 rounded-xl flex items-center justify-center group-hover:from-blue-50 group-hover:to-blue-100 transition-all duration-300">
+                  {IconComponent && (
+                    <IconComponent className="w-6 h-6 text-blue-600 group-hover:scale-110 transition-transform duration-300" />
+                  )}
+                </div>
+                <h3 className="text-xs font-semibold text-center text-gray-900 group-hover:text-blue-600 transition-colors">
+                  {category.name}
+                </h3>
+              </Link>
+            </motion.div>
           );
         })}
-      </div>
+      </motion.div>
     </section>
   );
 }

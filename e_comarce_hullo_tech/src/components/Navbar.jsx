@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Search, ShoppingCart, User, Menu, X } from "lucide-react";
+import { Search, ShoppingCart, User, Menu, X, Gift, Zap, Wrench, BarChart3 } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -142,26 +142,26 @@ export default function Navbar() {
       >
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <div className="hidden md:flex gap-6">
-            <motion.div whileHover={{ x: 4 }} transition={{ duration: 0.2 }}>
-              <Link href="/information/offer" className="hover:text-blue-300 flex items-center gap-1 transition-colors font-medium">
-                <span>🎁</span> Offers
-              </Link>
-            </motion.div>
-            <motion.div whileHover={{ x: 4 }} transition={{ duration: 0.2 }}>
-              <Link href="/happy-hour" className="hover:text-blue-300 flex items-center gap-1 transition-colors font-medium">
-                <span>⚡</span> Happy Hour
-              </Link>
-            </motion.div>
-            <motion.div whileHover={{ x: 4 }} transition={{ duration: 0.2 }}>
-              <Link href="/tool/pc_builder" className="hover:text-blue-300 flex items-center gap-1 transition-colors font-medium">
-                <span>🛠️</span> PC Builder
-              </Link>
-            </motion.div>
-            <motion.div whileHover={{ x: 4 }} transition={{ duration: 0.2 }}>
-              <Link href="/compare" className="hover:text-blue-300 flex items-center gap-1 transition-colors font-medium">
-                <span>📊</span> Compare (0)
-              </Link>
-            </motion.div>
+              <motion.div whileHover={{ x: 4 }} transition={{ duration: 0.2 }}>
+                <Link href="/information/offer" className="hover:text-blue-300 flex items-center gap-1.5 transition-colors font-medium">
+                  <Gift className="w-3.5 h-3.5" /> Offers
+                </Link>
+              </motion.div>
+              <motion.div whileHover={{ x: 4 }} transition={{ duration: 0.2 }}>
+                <Link href="/happy-hour" className="hover:text-blue-300 flex items-center gap-1.5 transition-colors font-medium">
+                  <Zap className="w-3.5 h-3.5" /> Happy Hour
+                </Link>
+              </motion.div>
+              <motion.div whileHover={{ x: 4 }} transition={{ duration: 0.2 }}>
+                <Link href="/tool/pc_builder" className="hover:text-blue-300 flex items-center gap-1.5 transition-colors font-medium">
+                  <Wrench className="w-3.5 h-3.5" /> PC Builder
+                </Link>
+              </motion.div>
+              <motion.div whileHover={{ x: 4 }} transition={{ duration: 0.2 }}>
+                <Link href="/compare" className="hover:text-blue-300 flex items-center gap-1.5 transition-colors font-medium">
+                  <BarChart3 className="w-3.5 h-3.5" /> Compare (0)
+                </Link>
+              </motion.div>
           </div>
           <div className="flex gap-4">
             <Link href="/track-order" className="hover:text-blue-300 hidden md:block transition-colors font-medium">Track Order</Link>
@@ -194,7 +194,7 @@ export default function Navbar() {
                     className="h-8 w-auto"
                   />
                 </div>
-                <span className="text-2xl font-extrabold bg-gradient-to-r from-star-blue to-blue-600 bg-clip-text text-transparent tracking-tight\">
+                <span className="text-2xl font-extrabold bg-gradient-to-r from-star-blue to-blue-600 bg-clip-text text-transparent tracking-tight">
                   HulloTech
                 </span>
               </Link>
