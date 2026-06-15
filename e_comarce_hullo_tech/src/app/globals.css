@@ -1,0 +1,91 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-white text-gray-900 font-sans antialiased;
+    scroll-behavior: smooth;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-sans font-semibold;
+  }
+
+  ::selection {
+    @apply bg-blue-600/10 text-blue-900;
+  }
+}
+
+:root {
+  --color-primary: #0077e5;
+  --color-primary-dark: #010d21;
+  --color-primary-light: #f0f7ff;
+
+  --color-accent: #0077e5;
+
+  --color-text: #1e293b;
+  --color-text-muted: #64748b;
+
+  --color-background: #ffffff;
+  --color-background-soft: #f8fafc;
+  --color-card: #ffffff;
+
+  --color-border: #e2e8f0;
+  --color-border-light: #f1f5f9;
+
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-danger: #ef4444;
+
+  --primary: var(--color-primary);
+  --primary-dark: var(--color-primary-dark);
+  --hullo-blue: var(--color-primary);
+  --hullo-navy: var(--color-primary-dark);
+  --hullo-text: var(--color-text);
+  --hullo-gray: var(--color-background-soft);
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+@layer components {
+  .product-card {
+    @apply border border-gray-100 rounded-xl bg-white hover:shadow-xl transition-all duration-500 overflow-hidden;
+  }
+
+  .product-card:hover {
+    @apply border-gray-200;
+  }
+
+  .btn-primary {
+    @apply bg-blue-600 text-white px-6 py-2.5 rounded-lg font-semibold hover:bg-blue-700 transition-all active:scale-[0.98] font-sans;
+  }
+
+  .btn-cart {
+    @apply bg-red-500 text-white px-4 py-2 rounded-lg font-medium hover:bg-red-600 transition-all active:scale-[0.98];
+  }
+
+  .btn-orange {
+    @apply bg-amber-500 text-white px-4 py-2 rounded-lg font-medium hover:bg-amber-600 transition-all;
+  }
+
+  .mega-menu {
+    @apply absolute top-full left-0 w-full bg-white shadow-xl border-t border-gray-100 z-50;
+  }
+
+  .category-link {
+    @apply block py-1.5 text-sm text-gray-700 hover:text-blue-600 transition-colors;
+  }
+
+  .badge-new {
+    @apply absolute top-3 left-3 bg-blue-600 text-white text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider;
+  }
+
+  .badge-sale {
+    @apply absolute top-3 left-3 bg-red-500 text-white text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider;
+  }
+}
