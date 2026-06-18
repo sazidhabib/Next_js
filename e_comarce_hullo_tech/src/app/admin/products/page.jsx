@@ -113,11 +113,36 @@ export default function AdminProducts() {
       .map(s => s.trim())
       .filter(s => s !== '');
 
+    const convertToDbStructure = (editorSpecs) => {
+      if (!Array.isArray(editorSpecs)) return {};
+      const dbSpecs = {};
+      editorSpecs.forEach(sec => {
+        if (sec.name && sec.name.trim() !== "") {
+          const sectionName = sec.name.trim();
+          dbSpecs[sectionName] = {};
+          if (Array.isArray(sec.fields)) {
+            let emptyCount = 0;
+            sec.fields.forEach(f => {
+              let k = (f.key || "");
+              if (k.trim() === "") {
+                k = " ".repeat(emptyCount);
+                emptyCount++;
+              } else {
+                k = k.trim();
+              }
+              dbSpecs[sectionName][k] = f.value || "";
+            });
+          }
+        }
+      });
+      return dbSpecs;
+    };
+
     const payload = {
       ...productForm,
       price: parseFloat(productForm.price),
       specs: specsArray,
-      specifications: productForm.specifications,
+      specifications: convertToDbStructure(productForm.specifications),
       images: [productForm.image] // Use single image as array
     };
 
@@ -165,6 +190,34 @@ export default function AdminProducts() {
   };
 
   const openProductEdit = (product) => {
+    const safeParse = (val, fallback) => {
+      if (!val) return fallback;
+      if (typeof val === 'string') {
+        try {
+          return JSON.parse(val);
+        } catch (e) {
+          return fallback;
+        }
+      }
+      return val;
+    };
+
+    const convertToEditorStructure = (specsObj) => {
+      if (!specsObj || typeof specsObj !== 'object') return [];
+      return Object.entries(specsObj).map(([sectionName, fields], sIdx) => ({
+        id: `section_${sIdx}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        name: sectionName,
+        fields: Object.entries(fields || {}).map(([key, val], fIdx) => ({
+          id: `field_${sIdx}_${fIdx}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+          key: key.trim(),
+          value: val
+        }))
+      }));
+    };
+
+    const parsedSpecs = safeParse(product.specifications, {});
+    const parsedSpecsArray = safeParse(product.specs, []);
+
     setProductForm({
       id: product.id,
       name: product.name,
@@ -172,8 +225,8 @@ export default function AdminProducts() {
       price: product.price,
       category: product.category,
       image: product.image,
-      specs: Array.isArray(product.specs) ? product.specs.join(', ') : '',
-      specifications: product.specifications || {},
+      specs: Array.isArray(parsedSpecsArray) ? parsedSpecsArray.join(', ') : '',
+      specifications: convertToEditorStructure(parsedSpecs),
       warranty: product.warranty || '',
       description: product.description || '',
       featured: product.featured || false,
@@ -194,9 +247,17 @@ export default function AdminProducts() {
       category: categories[0]?.slug || '',
       image: '',
       specs: '',
-      specifications: {
-        "Basic Information": { "Product Name": "", "Model": "", "Warranty": "" }
-      },
+      specifications: [
+        {
+          id: `section_0_${Date.now()}`,
+          name: "Basic Information",
+          fields: [
+            { id: `field_0_0_${Date.now()}`, key: "Product Name", value: "" },
+            { id: `field_0_1_${Date.now()}`, key: "Model", value: "" },
+            { id: `field_0_2_${Date.now()}`, key: "Warranty", value: "" }
+          ]
+        }
+      ],
       warranty: '',
       description: '',
       featured: false,
@@ -206,6 +267,97 @@ export default function AdminProducts() {
     });
     setIsEditMode(false);
     setIsModalOpen(true);
+  };
+
+  const handleRenameSection = (sectionId, newName) => {
+    setProductForm(prev => ({
+      ...prev,
+      specifications: (prev.specifications || []).map(sec => 
+        sec.id === sectionId ? { ...sec, name: newName } : sec
+      )
+    }));
+  };
+
+  const handleAddField = (sectionId) => {
+    setProductForm(prev => ({
+      ...prev,
+      specifications: (prev.specifications || []).map(sec => 
+        sec.id === sectionId 
+          ? { 
+              ...sec, 
+              fields: [
+                ...(sec.fields || []), 
+                { id: `field_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`, key: "New Field", value: "" }
+              ] 
+            } 
+          : sec
+      )
+    }));
+  };
+
+  const handleRemoveSection = (sectionId) => {
+    if (window.confirm("Remove this section and all its fields?")) {
+      setProductForm(prev => ({
+        ...prev,
+        specifications: (prev.specifications || []).filter(sec => sec.id !== sectionId)
+      }));
+    }
+  };
+
+  const handleRenameKey = (sectionId, fieldId, newKey) => {
+    setProductForm(prev => ({
+      ...prev,
+      specifications: (prev.specifications || []).map(sec => 
+        sec.id === sectionId 
+          ? {
+              ...sec,
+              fields: (sec.fields || []).map(f => f.id === fieldId ? { ...f, key: newKey } : f)
+            }
+          : sec
+      )
+    }));
+  };
+
+  const handleChangeValue = (sectionId, fieldId, newValue) => {
+    setProductForm(prev => ({
+      ...prev,
+      specifications: (prev.specifications || []).map(sec => 
+        sec.id === sectionId 
+          ? {
+              ...sec,
+              fields: (sec.fields || []).map(f => f.id === fieldId ? { ...f, value: newValue } : f)
+            }
+          : sec
+      )
+    }));
+  };
+
+  const handleRemoveKey = (sectionId, fieldId) => {
+    setProductForm(prev => ({
+      ...prev,
+      specifications: (prev.specifications || []).map(sec => 
+        sec.id === sectionId 
+          ? {
+              ...sec,
+              fields: (sec.fields || []).filter(f => f.id !== fieldId)
+            }
+          : sec
+      )
+    }));
+  };
+
+  const handleAddSection = () => {
+    setProductForm(prev => ({
+      ...prev,
+      specifications: [
+        ...(prev.specifications || []),
+        {
+          id: `section_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+          name: "New Section",
+          fields: []
+        }
+      ]
+    }));
   };
 
   // Show loading screen while checking auth
@@ -512,15 +664,7 @@ export default function AdminProducts() {
                       <h4 className="text-lg font-bold text-slate-200">Structured Specifications</h4>
                       <button
                         type="button"
-                        onClick={() => {
-                          const sectionName = window.prompt("Enter new section name (e.g., Processor):");
-                          if (sectionName && !productForm.specifications[sectionName]) {
-                            setProductForm(prev => ({
-                              ...prev,
-                              specifications: { ...prev.specifications, [sectionName]: {} }
-                            }));
-                          }
-                        }}
+                        onClick={handleAddSection}
                         className="text-sm px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg flex items-center gap-1"
                       >
                         <Plus className="w-3.5 h-3.5" /> Add Section
@@ -528,81 +672,28 @@ export default function AdminProducts() {
                     </div>
 
                     <div className="space-y-6">
-                      {Object.entries(productForm.specifications || {}).map(([section, fields]) => (
-                        <div key={section} className="border border-slate-700/50 rounded-lg overflow-hidden bg-slate-950/30">
-                          <div className="bg-slate-800/80 px-4 py-2.5 flex items-center justify-between border-b border-slate-700/50">
-                            <span className="font-semibold text-slate-300">{section}</span>
-                            <div className="flex gap-2">
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  const fieldName = window.prompt(`Enter new field name for "${section}" (e.g., RAM):`);
-                                  if (fieldName) {
-                                    setProductForm(prev => ({
-                                      ...prev,
-                                      specifications: {
-                                        ...prev.specifications,
-                                        [section]: { ...prev.specifications[section], [fieldName]: "" }
-                                      }
-                                    }));
-                                  }
-                                }}
-                                className="text-xs px-2 py-1 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded"
-                              >
-                                + Field
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  if (window.confirm(`Remove section "${section}"?`)) {
-                                    const newSpecs = { ...productForm.specifications };
-                                    delete newSpecs[section];
-                                    setProductForm(prev => ({ ...prev, specifications: newSpecs }));
-                                  }
-                                }}
-                                className="text-xs px-2 py-1 bg-red-500/20 hover:bg-red-500/40 text-red-400 rounded"
-                              >
-                                Remove
-                              </button>
-                            </div>
-                          </div>
+                      {(productForm.specifications || []).map((section) => (
+                        <div key={section.id} className="border border-slate-700/50 rounded-lg overflow-hidden bg-slate-950/30">
+                          <SpecSectionHeader
+                            sectionId={section.id}
+                            sectionName={section.name}
+                            onRenameSection={handleRenameSection}
+                            onAddField={() => handleAddField(section.id)}
+                            onRemoveSection={() => handleRemoveSection(section.id)}
+                          />
                           <div className="p-4 space-y-3">
-                            {Object.entries(fields).length === 0 && <div className="text-sm text-slate-500 italic">No fields yet. Click "+ Field" to add.</div>}
-                            {Object.entries(fields).map(([key, value]) => (
-                              <div key={key} className="flex items-start gap-3">
-                                <div className="w-1/3 pt-2 text-sm text-slate-400 font-medium truncate" title={key}>
-                                  {key}
-                                </div>
-                                <div className="w-2/3 flex gap-2">
-                                  <input
-                                    type="text"
-                                    value={value}
-                                    onChange={(e) => {
-                                      setProductForm(prev => ({
-                                        ...prev,
-                                        specifications: {
-                                          ...prev.specifications,
-                                          [section]: { ...prev.specifications[section], [key]: e.target.value }
-                                        }
-                                      }));
-                                    }}
-                                    className="w-full px-3 py-1.5 bg-slate-900 border border-slate-700 rounded-lg text-slate-200 text-sm focus:outline-none focus:border-blue-500"
-                                    placeholder={`Value for ${key}`}
-                                  />
-                                  <button
-                                    type="button"
-                                    onClick={() => {
-                                      const newSpecs = { ...productForm.specifications };
-                                      delete newSpecs[section][key];
-                                      setProductForm(prev => ({ ...prev, specifications: newSpecs }));
-                                    }}
-                                    className="p-1.5 text-slate-500 hover:text-red-400 transition"
-                                    title="Remove field"
-                                  >
-                                    <X className="w-4 h-4" />
-                                  </button>
-                                </div>
-                              </div>
+                            {(!section.fields || section.fields.length === 0) && <div className="text-sm text-slate-500 italic">No fields yet. Click "+ Field" to add.</div>}
+                            {(section.fields || []).map((field) => (
+                              <SpecRow
+                                key={field.id}
+                                sectionId={section.id}
+                                fieldId={field.id}
+                                fieldKey={field.key}
+                                fieldValue={field.value}
+                                onRenameKey={(oldK, newK) => handleRenameKey(section.id, field.id, newK)}
+                                onChangeValue={(k, val) => handleChangeValue(section.id, field.id, val)}
+                                onRemove={() => handleRemoveKey(section.id, field.id)}
+                              />
                             ))}
                           </div>
                         </div>
@@ -661,6 +752,74 @@ export default function AdminProducts() {
           </div>
         )}
       </main>
+    </div>
+  );
+}
+
+function SpecSectionHeader({ sectionId, sectionName, onRenameSection, onAddField, onRemoveSection }) {
+  return (
+    <div className="bg-slate-800/80 px-4 py-2.5 flex items-center justify-between border-b border-slate-700/50">
+      <div className="flex items-center gap-2 min-w-0">
+        <input
+          type="text"
+          value={sectionName || ""}
+          onChange={(e) => onRenameSection(sectionId, e.target.value)}
+          placeholder="Section Name (e.g. Processor)"
+          className="px-2.5 py-1 bg-slate-950 border border-slate-800 hover:border-slate-700 focus:border-blue-500 rounded text-slate-100 text-sm font-semibold focus:outline-none transition-all w-60"
+        />
+      </div>
+      <div className="flex gap-2">
+        <button
+          type="button"
+          onClick={onAddField}
+          className="text-xs px-2.5 py-1.5 bg-blue-600/10 hover:bg-blue-600 text-blue-400 hover:text-white border border-blue-500/20 hover:border-blue-500 rounded-lg transition font-semibold"
+        >
+          + Field
+        </button>
+        <button
+          type="button"
+          onClick={onRemoveSection}
+          className="text-xs px-2.5 py-1.5 bg-red-500/10 hover:bg-red-500 text-red-400 hover:text-white border border-red-500/20 hover:border-red-500 rounded-lg transition font-semibold"
+        >
+          Remove
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function SpecRow({ sectionId, fieldId, fieldKey, fieldValue, onRenameKey, onChangeValue, onRemove }) {
+  return (
+    <div className="flex items-start gap-4">
+      {/* Left side: Key Name Input */}
+      <div className="w-1/3 min-w-0">
+        <input
+          type="text"
+          value={fieldKey || ""}
+          onChange={(e) => onRenameKey(fieldKey, e.target.value)}
+          placeholder="Field Key (e.g. Speed)"
+          className="w-full px-3 py-2 bg-slate-950 border border-slate-800 hover:border-slate-700 focus:border-blue-500 rounded-lg text-slate-350 text-xs font-semibold focus:outline-none transition-all"
+        />
+      </div>
+
+      {/* Right side: Textarea Value + Delete Button */}
+      <div className="w-2/3 flex gap-2">
+        <textarea
+          value={fieldValue || ""}
+          onChange={(e) => onChangeValue(fieldKey, e.target.value)}
+          className="w-full px-3 py-1.5 bg-slate-950 border border-slate-800 hover:border-slate-700 focus:border-blue-500 rounded-lg text-slate-200 text-xs focus:outline-none resize-y transition-all min-h-[38px]"
+          placeholder={`Value for ${fieldKey || "this field"}`}
+          rows={2}
+        />
+        <button
+          type="button"
+          onClick={onRemove}
+          className="p-2 bg-slate-950 border border-slate-800 hover:border-red-500/35 hover:bg-red-500/10 text-slate-500 hover:text-red-400 rounded-lg transition self-stretch flex items-center justify-center"
+          title="Remove field"
+        >
+          <X className="w-4 h-4" />
+        </button>
+      </div>
     </div>
   );
 }

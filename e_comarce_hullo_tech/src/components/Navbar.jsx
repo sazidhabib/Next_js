@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Search, ShoppingCart, User, Menu, X, Gift, Zap, Wrench, BarChart3 } from "lucide-react";
+import { Search, ShoppingCart, User, Menu, X, Gift, Zap, Wrench, BarChart3, ChevronRight, ChevronDown } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -12,8 +12,24 @@ const categories = [
     name: "Desktop",
     href: "/desktops",
     subCategories: [
-      { name: "Gaming PC", href: "/desktops/gaming-pc" },
-      { name: "Brand PC", href: "/desktops/brand-pc" },
+      {
+        name: "Gaming PC",
+        href: "/desktops/gaming-pc",
+        subCategories: [
+          { name: "Intel Gaming PC", href: "/desktops/gaming-pc/intel" },
+          { name: "AMD Gaming PC", href: "/desktops/gaming-pc/amd" },
+          { name: "Custom Gaming Build", href: "/desktops/gaming-pc/custom" },
+        ]
+      },
+      {
+        name: "Brand PC",
+        href: "/desktops/brand-pc",
+        subCategories: [
+          { name: "HP Brand PC", href: "/desktops/brand-pc/hp" },
+          { name: "Dell Brand PC", href: "/desktops/brand-pc/dell" },
+          { name: "Lenovo Brand PC", href: "/desktops/brand-pc/lenovo" },
+        ]
+      },
       { name: "All-in-One PC", href: "/desktops/all-in-one-pc" },
       { name: "Portable Mini PC", href: "/desktops/portable-mini-pc" },
     ],
@@ -22,8 +38,25 @@ const categories = [
     name: "Laptop",
     href: "/laptop-notebook",
     subCategories: [
-      { name: "All Laptop", href: "/laptop-notebook/laptop" },
-      { name: "Gaming Laptop", href: "/laptop-notebook/Gaming-Laptop" },
+      {
+        name: "All Laptop",
+        href: "/laptop-notebook/laptop",
+        subCategories: [
+          { name: "HP Laptops", href: "/laptop-notebook/laptop/hp" },
+          { name: "Dell Laptops", href: "/laptop-notebook/laptop/dell" },
+          { name: "Lenovo Laptops", href: "/laptop-notebook/laptop/lenovo" },
+          { name: "Asus Laptops", href: "/laptop-notebook/laptop/asus" },
+        ]
+      },
+      {
+        name: "Gaming Laptop",
+        href: "/laptop-notebook/Gaming-Laptop",
+        subCategories: [
+          { name: "ASUS ROG/TUF", href: "/laptop-notebook/Gaming-Laptop/asus" },
+          { name: "MSI Gaming", href: "/laptop-notebook/Gaming-Laptop/msi" },
+          { name: "Lenovo Legion", href: "/laptop-notebook/Gaming-Laptop/lenovo" },
+        ]
+      },
       { name: "Premium Ultrabook", href: "/laptop-notebook/ultrabook" },
       { name: "Laptop Bag", href: "/laptop-bag-backpack" },
     ],
@@ -32,9 +65,31 @@ const categories = [
     name: "Component",
     href: "/component",
     subCategories: [
-      { name: "Processor", href: "/component/processor" },
-      { name: "Motherboard", href: "/component/motherboard" },
-      { name: "Graphics Card", href: "/component/graphics-card" },
+      {
+        name: "Processor",
+        href: "/component/processor",
+        subCategories: [
+          { name: "Intel Processor", href: "/component/processor/intel" },
+          { name: "AMD Processor", href: "/component/processor/amd" },
+        ]
+      },
+      {
+        name: "Motherboard",
+        href: "/component/motherboard",
+        subCategories: [
+          { name: "ASUS Motherboard", href: "/component/motherboard/asus" },
+          { name: "MSI Motherboard", href: "/component/motherboard/msi" },
+          { name: "Gigabyte Motherboard", href: "/component/motherboard/gigabyte" },
+        ]
+      },
+      {
+        name: "Graphics Card",
+        href: "/component/graphics-card",
+        subCategories: [
+          { name: "NVIDIA GeForce", href: "/component/graphics-card/nvidia" },
+          { name: "AMD Radeon", href: "/component/graphics-card/amd" },
+        ]
+      },
       { name: "RAM (Desktop)", href: "/component/ram" },
       { name: "RAM (Laptop)", href: "/component/laptop-ram" },
       { name: "SSD", href: "/ssd" },
@@ -47,7 +102,15 @@ const categories = [
     name: "Monitor",
     href: "/monitor",
     subCategories: [
-      { name: "Gaming Monitor", href: "/gaming-monitor" },
+      {
+        name: "Gaming Monitor",
+        href: "/gaming-monitor",
+        subCategories: [
+          { name: "144Hz Monitor", href: "/gaming-monitor/144hz" },
+          { name: "240Hz Monitor", href: "/gaming-monitor/240hz" },
+          { name: "Ultrawide Gaming", href: "/gaming-monitor/ultrawide" },
+        ]
+      },
       { name: "Curved Monitor", href: "/curved-monitor" },
       { name: "4K Monitor", href: "/4k-monitor" },
       { name: "Portable Monitor", href: "/portable-monitor" },
@@ -67,8 +130,27 @@ const categories = [
     name: "Phone",
     href: "/mobile-phone",
     subCategories: [
-      { name: "iPhone", href: "/apple-iphone" },
-      { name: "Samsung", href: "/samsung-mobile-phone" },
+      {
+        name: "iPhone",
+        href: "/apple-iphone",
+        subCategories: [
+          { name: "iPhone 15 Pro Max", href: "/apple-iphone/iphone-15-pro-max" },
+          { name: "iPhone 15 Pro", href: "/apple-iphone/iphone-15-pro" },
+          { name: "iPhone 15", href: "/apple-iphone/iphone-15" },
+          { name: "iPhone 14 Series", href: "/apple-iphone/iphone-14" },
+          { name: "iPhone 13 Series", href: "/apple-iphone/iphone-13" },
+        ]
+      },
+      {
+        name: "Samsung",
+        href: "/samsung-mobile-phone",
+        subCategories: [
+          { name: "Galaxy S24 Ultra", href: "/samsung-mobile-phone/s24-ultra" },
+          { name: "Galaxy S24 Series", href: "/samsung-mobile-phone/s24" },
+          { name: "Galaxy Fold/Flip", href: "/samsung-mobile-phone/fold-flip" },
+          { name: "Galaxy A Series", href: "/samsung-mobile-phone/a-series" },
+        ]
+      },
       { name: "Redmi", href: "/xiaomi-mobile-phone" },
       { name: "Realme", href: "/realme-mobile-phone" },
     ],
@@ -77,7 +159,16 @@ const categories = [
     name: "Tablet",
     href: "/tablet-pc",
     subCategories: [
-      { name: "iPad", href: "/apple-ipad" },
+      {
+        name: "iPad",
+        href: "/apple-ipad",
+        subCategories: [
+          { name: "iPad Pro", href: "/apple-ipad/ipad-pro" },
+          { name: "iPad Air", href: "/apple-ipad/ipad-air" },
+          { name: "iPad Mini", href: "/apple-ipad/ipad-mini" },
+          { name: "iPad 10.2", href: "/apple-ipad/ipad-10-2" },
+        ]
+      },
       { name: "Samsung", href: "/samsung-tablet" },
       { name: "Lenovo", href: "/tablet-pc/lenovo-tablet-pc" },
       { name: "Graphics Tablet", href: "/graphics-tablet" },
@@ -118,18 +209,26 @@ const categories = [
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeMegaMenu, setActiveMegaMenu] = useState(null);
+  const [activeSubCategory, setActiveSubCategory] = useState(null);
+  const [mobileExpandedCat, setMobileExpandedCat] = useState(null);
+  const [mobileExpandedSub, setMobileExpandedSub] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const pathname = usePathname();
 
   const handleMouseEnter = (categoryName) => {
     setActiveMegaMenu(categoryName);
+    const cat = categories.find(c => c.name === categoryName);
+    if (cat && cat.subCategories && cat.subCategories.length > 0) {
+      setActiveSubCategory(cat.subCategories[0].name);
+    } else {
+      setActiveSubCategory(null);
+    }
   };
 
   const handleMouseLeave = () => {
     setActiveMegaMenu(null);
+    setActiveSubCategory(null);
   };
-
-  const activeCategory = categories.find(cat => cat.name === activeMegaMenu);
 
   return (
     <>
@@ -142,26 +241,26 @@ export default function Navbar() {
       >
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <div className="hidden md:flex gap-6">
-              <motion.div whileHover={{ x: 4 }} transition={{ duration: 0.2 }}>
-                <Link href="/information/offer" className="hover:text-blue-300 flex items-center gap-1.5 transition-colors font-medium">
-                  <Gift className="w-3.5 h-3.5" /> Offers
-                </Link>
-              </motion.div>
-              <motion.div whileHover={{ x: 4 }} transition={{ duration: 0.2 }}>
-                <Link href="/happy-hour" className="hover:text-blue-300 flex items-center gap-1.5 transition-colors font-medium">
-                  <Zap className="w-3.5 h-3.5" /> Happy Hour
-                </Link>
-              </motion.div>
-              <motion.div whileHover={{ x: 4 }} transition={{ duration: 0.2 }}>
-                <Link href="/tool/pc_builder" className="hover:text-blue-300 flex items-center gap-1.5 transition-colors font-medium">
-                  <Wrench className="w-3.5 h-3.5" /> PC Builder
-                </Link>
-              </motion.div>
-              <motion.div whileHover={{ x: 4 }} transition={{ duration: 0.2 }}>
-                <Link href="/compare" className="hover:text-blue-300 flex items-center gap-1.5 transition-colors font-medium">
-                  <BarChart3 className="w-3.5 h-3.5" /> Compare (0)
-                </Link>
-              </motion.div>
+            <motion.div whileHover={{ x: 4 }} transition={{ duration: 0.2 }}>
+              <Link href="/information/offer" className="hover:text-blue-300 flex items-center gap-1.5 transition-colors font-medium">
+                <Gift className="w-3.5 h-3.5" /> Offers
+              </Link>
+            </motion.div>
+            <motion.div whileHover={{ x: 4 }} transition={{ duration: 0.2 }}>
+              <Link href="/happy-hour" className="hover:text-blue-300 flex items-center gap-1.5 transition-colors font-medium">
+                <Zap className="w-3.5 h-3.5" /> Happy Hour
+              </Link>
+            </motion.div>
+            <motion.div whileHover={{ x: 4 }} transition={{ duration: 0.2 }}>
+              <Link href="/tool/pc_builder" className="hover:text-blue-300 flex items-center gap-1.5 transition-colors font-medium">
+                <Wrench className="w-3.5 h-3.5" /> PC Builder
+              </Link>
+            </motion.div>
+            <motion.div whileHover={{ x: 4 }} transition={{ duration: 0.2 }}>
+              <Link href="/compare" className="hover:text-blue-300 flex items-center gap-1.5 transition-colors font-medium">
+                <BarChart3 className="w-3.5 h-3.5" /> Compare (0)
+              </Link>
+            </motion.div>
           </div>
           <div className="flex gap-4">
             <Link href="/track-order" className="hover:text-blue-300 hidden md:block transition-colors font-medium">Track Order</Link>
@@ -270,7 +369,7 @@ export default function Navbar() {
           </div>
         </div>
 
-        {/* Category Navigation with Mega Menu */}
+        {/* Category Navigation */}
         <motion.div
           className="bg-white border-t border-star-gray hidden md:block relative"
           onMouseLeave={handleMouseLeave}
@@ -279,90 +378,99 @@ export default function Navbar() {
           transition={{ duration: 0.5, delay: 0.3 }}
         >
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center gap-1 overflow-x-auto">
-              {categories.map((cat, idx) => (
-                <motion.div
-                  key={cat.name}
-                  className="relative"
-                  onMouseEnter={() => handleMouseEnter(cat.name)}
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, delay: idx * 0.02 }}
-                >
-                  <Link
-                    href={cat.href}
-                    className={`inline-block py-3 px-3 text-sm font-semibold transition-all duration-300 whitespace-nowrap ${activeMegaMenu === cat.name
+            <div className="flex items-center justify-between gap-1">
+              {categories.map((cat, idx) => {
+                const isActive = activeMegaMenu === cat.name;
+                return (
+                  <div
+                    key={cat.name}
+                    className="relative"
+                    onMouseEnter={() => handleMouseEnter(cat.name)}
+                  >
+                    <Link
+                      href={cat.href}
+                      className={`inline-block py-3 px-3 text-sm font-semibold transition-all duration-300 whitespace-nowrap ${isActive
                         ? "text-star-blue border-b-2 border-star-blue"
                         : "text-gray-700 hover:text-star-blue border-b-2 border-transparent"
-                      }`}
-                  >
-                    {cat.name}
-                  </Link>
-                </motion.div>
-              ))}
+                        }`}
+                    >
+                      {cat.name}
+                    </Link>
+
+                    {/* Cascading Dropdown */}
+                    <AnimatePresence>
+                      {isActive && cat.subCategories && cat.subCategories.length > 0 && (
+                        <motion.div
+                          className={`absolute top-full ${idx > categories.length - 4 ? "right-0" : "left-0"
+                            } mt-0 bg-white border border-gray-200 rounded-b-lg shadow-xl z-50 flex overflow-hidden min-h-[280px] max-h-[480px]`}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: 10 }}
+                          transition={{ duration: 0.2 }}
+                        >
+                          {/* Panel 1: Subcategories */}
+                          <div className="w-60 py-2 bg-white flex flex-col border-r border-gray-100 overflow-y-auto">
+                            {cat.subCategories.map((sub) => {
+                              const hasSubSubs = sub.subCategories && sub.subCategories.length > 0;
+                              const isSubActive = activeSubCategory === sub.name;
+                              return (
+                                <Link
+                                  key={sub.name}
+                                  href={sub.href}
+                                  onMouseEnter={() => {
+                                    if (hasSubSubs) {
+                                      setActiveSubCategory(sub.name);
+                                    } else {
+                                      setActiveSubCategory(null);
+                                    }
+                                  }}
+                                  className={`flex items-center justify-between px-4 py-2.5 text-xs font-semibold transition-colors ${isSubActive
+                                    ? "bg-star-blue text-white"
+                                    : "text-gray-700 hover:bg-gray-50 hover:text-star-blue"
+                                    }`}
+                                >
+                                  <span>{sub.name}</span>
+                                  {hasSubSubs && (
+                                    <ChevronRight className={`w-3.5 h-3.5 ${isSubActive ? "text-white" : "text-gray-400"}`} />
+                                  )}
+                                </Link>
+                              );
+                            })}
+                          </div>
+
+                          {/* Panel 2: Sub-subcategories */}
+                          {(() => {
+                            const activeSubData = cat.subCategories.find(sub => sub.name === activeSubCategory);
+                            if (activeSubData && activeSubData.subCategories && activeSubData.subCategories.length > 0) {
+                              return (
+                                <motion.div
+                                  className="w-60 py-2 bg-gray-50/80 flex flex-col border-l border-gray-100 overflow-y-auto"
+                                  initial={{ opacity: 0, x: -10 }}
+                                  animate={{ opacity: 1, x: 0 }}
+                                  transition={{ duration: 0.15 }}
+                                >
+                                  {activeSubData.subCategories.map((subSub) => (
+                                    <Link
+                                      key={subSub.name}
+                                      href={subSub.href}
+                                      className="px-4 py-2 text-xs font-medium text-gray-600 hover:text-star-blue hover:bg-gray-100/75 transition-colors"
+                                    >
+                                      {subSub.name}
+                                    </Link>
+                                  ))}
+                                </motion.div>
+                              );
+                            }
+                            return null;
+                          })()}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                );
+              })}
             </div>
           </div>
-
-          {/* Mega Menu - Full Width */}
-          <AnimatePresence>
-            {activeMegaMenu && activeCategory && activeCategory.subCategories && (
-              <motion.div
-                className="absolute top-full left-0 right-0 bg-white border-b border-star-gray/50 shadow-xl z-50"
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.3 }}
-              >
-                <div className="max-w-7xl mx-auto px-6 py-8">
-                  <div className="grid grid-cols-4 gap-8">
-                    <motion.div
-                      className="col-span-1"
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ duration: 0.3 }}
-                    >
-                      <h3 className="font-bold text-star-blue mb-4 text-base tracking-tight">Popular {activeCategory.name}</h3>
-                      <motion.div
-                        whileHover={{ scale: 1.05 }}
-                        transition={{ duration: 0.2 }}
-                      >
-                        <Link
-                          href={activeCategory.href}
-                          className="inline-block bg-gradient-to-r from-star-blue to-blue-600 text-white px-5 py-2.5 rounded-lg text-sm font-semibold hover:shadow-lg transition-all duration-300"
-                        >
-                          View All {activeCategory.name}
-                        </Link>
-                      </motion.div>
-                    </motion.div>
-                    <motion.div
-                      className="col-span-3"
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ duration: 0.3, delay: 0.1 }}
-                    >
-                      <div className="grid grid-cols-3 gap-3">
-                        {activeCategory.subCategories.map((sub, idx) => (
-                          <motion.div
-                            key={sub.name}
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.2, delay: idx * 0.05 }}
-                          >
-                            <Link
-                              href={sub.href}
-                              className="block py-2 px-3 text-sm text-gray-700 hover:text-star-blue hover:bg-star-light-gray rounded transition-all duration-300 font-medium"
-                            >
-                              {sub.name}
-                            </Link>
-                          </motion.div>
-                        ))}
-                      </div>
-                    </motion.div>
-                  </div>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
         </motion.div>
       </motion.div>
 
@@ -370,59 +478,103 @@ export default function Navbar() {
       <AnimatePresence>
         {mobileMenuOpen && (
           <motion.div
-            className="md:hidden bg-white border-b border-star-gray shadow-xl"
+            className="md:hidden bg-white border-b border-star-gray shadow-xl fixed top-16 left-0 right-0 z-40"
             initial={{ opacity: 0, y: -20, height: 0 }}
             animate={{ opacity: 1, y: 0, height: "auto" }}
             exit={{ opacity: 0, y: -20, height: 0 }}
             transition={{ duration: 0.3 }}
           >
             <motion.div
-              className="px-4 py-4 space-y-2 max-h-96 overflow-y-auto"
+              className="px-4 py-4 space-y-2 max-h-[calc(100vh-5rem)] overflow-y-auto"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.1 }}
             >
-              {categories.map((cat, idx) => (
-                <motion.div
-                  key={cat.name}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.2, delay: idx * 0.03 }}
-                >
-                  <Link
-                    href={cat.href}
-                    className="block py-2.5 text-sm font-semibold text-gray-900 hover:text-star-blue transition-colors border-l-2 border-transparent hover:border-star-blue pl-3"
-                    onClick={() => setMobileMenuOpen(false)}
+              {categories.map((cat, idx) => {
+                const isCatExpanded = mobileExpandedCat === cat.name;
+                const hasSubs = cat.subCategories && cat.subCategories.length > 0;
+                return (
+                  <motion.div
+                    key={cat.name}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.2, delay: idx * 0.03 }}
+                    className="border-b border-gray-100 pb-1"
                   >
-                    {cat.name}
-                  </Link>
-                  {cat.subCategories && (
-                    <motion.div
-                      className="pl-4 space-y-1"
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: "auto" }}
-                      transition={{ duration: 0.2, delay: 0.05 }}
-                    >
-                      {cat.subCategories.map((sub, sidx) => (
-                        <motion.div
-                          key={sub.name}
-                          initial={{ opacity: 0, x: -10 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ duration: 0.15, delay: sidx * 0.02 }}
+                    <div className="flex items-center justify-between py-2">
+                      <Link
+                        href={cat.href}
+                        className="text-sm font-bold text-gray-900 hover:text-star-blue transition-colors pl-2"
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        {cat.name}
+                      </Link>
+                      {hasSubs && (
+                        <button
+                          onClick={() => setMobileExpandedCat(isCatExpanded ? null : cat.name)}
+                          className="p-1 text-gray-500 hover:text-star-blue"
                         >
-                          <Link
-                            href={sub.href}
-                            className="block py-1.5 text-xs text-gray-600 hover:text-star-blue transition-colors font-medium"
-                            onClick={() => setMobileMenuOpen(false)}
-                          >
-                            {sub.name}
-                          </Link>
-                        </motion.div>
-                      ))}
-                    </motion.div>
-                  )}
-                </motion.div>
-              ))}
+                          <ChevronDown className={`w-4 h-4 transition-transform ${isCatExpanded ? "rotate-180" : ""}`} />
+                        </button>
+                      )}
+                    </div>
+
+                    {hasSubs && isCatExpanded && (
+                      <motion.div
+                        className="pl-4 pb-2 space-y-2"
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        {cat.subCategories.map((sub) => {
+                          const isSubExpanded = mobileExpandedSub === sub.name;
+                          const hasSubSubs = sub.subCategories && sub.subCategories.length > 0;
+                          return (
+                            <div key={sub.name} className="space-y-1">
+                              <div className="flex items-center justify-between py-1">
+                                <Link
+                                  href={sub.href}
+                                  className="text-xs font-semibold text-gray-700 hover:text-star-blue transition-colors"
+                                  onClick={() => setMobileMenuOpen(false)}
+                                >
+                                  {sub.name}
+                                </Link>
+                                {hasSubSubs && (
+                                  <button
+                                    onClick={() => setMobileExpandedSub(isSubExpanded ? null : sub.name)}
+                                    className="p-1 text-gray-400 hover:text-star-blue"
+                                  >
+                                    <ChevronDown className={`w-3.5 h-3.5 transition-transform ${isSubExpanded ? "rotate-180" : ""}`} />
+                                  </button>
+                                )}
+                              </div>
+                              {hasSubSubs && isSubExpanded && (
+                                <motion.div
+                                  className="pl-3 space-y-1 border-l border-gray-200 ml-1"
+                                  initial={{ opacity: 0, height: 0 }}
+                                  animate={{ opacity: 1, height: "auto" }}
+                                  transition={{ duration: 0.15 }}
+                                >
+                                  {sub.subCategories.map((subSub) => (
+                                    <Link
+                                      key={subSub.name}
+                                      href={subSub.href}
+                                      className="block py-1 text-[11px] text-gray-500 hover:text-star-blue transition-colors"
+                                      onClick={() => setMobileMenuOpen(false)}
+                                    >
+                                      {subSub.name}
+                                    </Link>
+                                  ))}
+                                </motion.div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </motion.div>
+                    )}
+                  </motion.div>
+                );
+              })}
             </motion.div>
           </motion.div>
         )}

@@ -360,28 +360,43 @@ export default function ProductDetailContent({ product, category, relatedProduct
               exit={{ opacity: 0, y: -8 }}
               transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
             >
-              {activeTab === "Specification" && (
-                <section>
-                  {product.specifications && typeof product.specifications === 'object' && !Array.isArray(product.specifications) && Object.keys(product.specifications).length > 0 ? (
-                    <div className="space-y-8">
-                      {Object.entries(product.specifications).map(([section, fields], idx) => (
-                        <div key={idx}>
-                          <h3 className="text-sm font-bold text-gray-900 mb-4 pb-2 border-b border-gray-100">
-                            {section}
-                          </h3>
-                          <div className="space-y-0">
-                            {Object.entries(fields).map(([key, value], i) => (
-                              <div
-                                key={i}
-                                className={`flex items-start gap-4 py-3 ${i % 2 === 0 ? "bg-[#fafbfc] -mx-4 px-4 rounded-lg" : ""
-                                }`}
-                              >
-                                <span className="text-sm text-gray-500 w-48 shrink-0 font-medium">
-                                  {key}
-                                </span>
-                                <span className="text-sm text-gray-900">
-                                  {value}
-                                </span>
+              {activeTab === "Specification" && (() => {
+                const getSpecsObject = () => {
+                  if (!product.specifications) return {};
+                  if (typeof product.specifications === 'string') {
+                    try {
+                      return JSON.parse(product.specifications);
+                    } catch (e) {
+                      return {};
+                    }
+                  }
+                  return product.specifications;
+                };
+                const specsObject = getSpecsObject();
+                return (
+                  <section>
+                    {specsObject && typeof specsObject === 'object' && !Array.isArray(specsObject) && Object.keys(specsObject).length > 0 ? (
+                      <div className="space-y-8">
+                        {Object.entries(specsObject).map(([section, fields], idx) => (
+                          <div key={idx}>
+                            <h3 className="text-sm font-bold text-gray-900 mb-4 pb-2 border-b border-gray-100">
+                              {section}
+                            </h3>
+                            <div className="space-y-0">
+                              {Object.entries(fields).map(([key, value], i) => (
+                                <div
+                                  key={i}
+                                  className={`flex items-start gap-4 py-3 ${i % 2 === 0 ? "bg-[#fafbfc] -mx-4 px-4 rounded-lg" : ""
+                                  }`}
+                                >
+                                  {key && key.trim() !== "" && (
+                                    <span className="text-sm text-gray-500 w-48 shrink-0 font-medium">
+                                      {key}
+                                    </span>
+                                  )}
+                                  <span className="text-sm text-gray-900 whitespace-pre-line flex-1">
+                                    {value}
+                                  </span>
                               </div>
                             ))}
                           </div>
@@ -420,7 +435,7 @@ export default function ProductDetailContent({ product, category, relatedProduct
                     </div>
                   )}
                 </section>
-              )}
+              )})()}
 
               {activeTab === "Description" && (
                 <section>
