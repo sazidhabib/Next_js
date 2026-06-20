@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>CineFlow Pro | Professional Video Editor</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-tertiary-fixed": "#2a1700",
+                        "on-secondary": "#003824",
+                        "on-primary-fixed-variant": "#004395",
+                        "on-error-container": "#ffdad6",
+                        "tertiary-fixed-dim": "#ffb95f",
+                        "primary-fixed-dim": "#adc6ff",
+                        "on-secondary-fixed-variant": "#005236",
+                        "surface": "#131313",
+                        "on-tertiary": "#472a00",
+                        "surface-container": "#201f1f",
+                        "on-surface-variant": "#c2c6d6",
+                        "secondary": "#4edea3",
+                        "on-tertiary-container": "#3e2400",
+                        "inverse-on-surface": "#313030",
+                        "primary": "#adc6ff",
+                        "on-secondary-container": "#00311f",
+                        "on-primary": "#002e6a",
+                        "secondary-fixed": "#6ffbbe",
+                        "tertiary-fixed": "#ffddb8",
+                        "surface-tint": "#adc6ff",
+                        "surface-container-high": "#2a2a2a",
+                        "surface-variant": "#353534",
+                        "error": "#ffb4ab",
+                        "surface-container-lowest": "#0e0e0e",
+                        "inverse-primary": "#005ac2",
+                        "primary-container": "#4d8eff",
+                        "on-error": "#690005",
+                        "tertiary": "#ffb95f",
+                        "on-secondary-fixed": "#002113",
+                        "on-surface": "#e5e2e1",
+                        "surface-container-highest": "#353534",
+                        "outline-variant": "#424754",
+                        "on-tertiary-fixed-variant": "#653e00",
+                        "surface-dim": "#131313",
+                        "outline": "#8c909f",
+                        "on-background": "#e5e2e1",
+                        "surface-container-low": "#1c1b1b",
+                        "surface-bright": "#393939",
+                        "inverse-surface": "#e5e2e1",
+                        "error-container": "#93000a",
+                        "primary-fixed": "#d8e2ff",
+                        "tertiary-container": "#ca8100",
+                        "on-primary-fixed": "#001a42",
+                        "on-primary-container": "#00285d",
+                        "secondary-fixed-dim": "#4edea3",
+                        "secondary-container": "#00a572",
+                        "background": "#131313"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "unit": "4px",
+                        "toolbar-height": "48px",
+                        "gutter": "1px",
+                        "timeline-track-height": "32px",
+                        "panel-padding": "12px"
+                    },
+                    "fontFamily": {
+                        "label-caps": ["Inter"],
+                        "mono-data": ["JetBrains Mono"],
+                        "headline-lg": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "body-md": ["Inter"],
+                        "headline-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "label-caps": ["11px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700" }],
+                        "mono-data": ["12px", { "lineHeight": "16px", "fontWeight": "400" }],
+                        "headline-lg": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "body-sm": ["12px", { "lineHeight": "16px", "fontWeight": "400" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "headline-md": ["18px", { "lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "600" }]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            background-color: #121212;
+            color: #e5e2e1;
+            overflow: hidden;
+            font-family: 'Inter', sans-serif;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #424754;
+            border-radius: 10px;
+        }
+        .panel-border {
+            border: 1px solid #333333;
+        }
+        .scrubbable:hover {
+            color: #adc6ff;
+            cursor: ew-resize;
+        }
+        .timeline-clip {
+            transition: transform 0.1s ease;
+        }
+        .timeline-clip:hover {
+            filter: brightness(1.1);
+        }
+    </style>
+</head>
+<body class="flex flex-col h-screen select-none">
+<!-- TopNavBar -->
+<header class="flex justify-between items-center w-full px-panel-padding h-toolbar-height z-50 bg-surface border-b border-outline-variant fixed top-0">
+<div class="flex items-center gap-6">
+<span class="font-headline-md text-headline-md font-bold text-primary">CineFlow Pro</span>
+<nav class="hidden md:flex gap-4">
+<a class="text-primary font-bold border-b-2 border-primary pb-1 font-label-caps text-label-caps" href="#">File</a>
+<a class="text-on-surface-variant font-medium hover:bg-surface-container-high transition-colors duration-150 px-2 rounded font-label-caps text-label-caps" href="#">Edit</a>
+<a class="text-on-surface-variant font-medium hover:bg-surface-container-high transition-colors duration-150 px-2 rounded font-label-caps text-label-caps" href="#">Sequence</a>
+<a class="text-on-surface-variant font-medium hover:bg-surface-container-high transition-colors duration-150 px-2 rounded font-label-caps text-label-caps" href="#">Clip</a>
+<a class="text-on-surface-variant font-medium hover:bg-surface-container-high transition-colors duration-150 px-2 rounded font-label-caps text-label-caps" href="#">Graphics</a>
+<a class="text-on-surface-variant font-medium hover:bg-surface-container-high transition-colors duration-150 px-2 rounded font-label-caps text-label-caps" href="#">View</a>
+</nav>
+</div>
+<div class="flex items-center gap-3">
+<button class="material-symbols-outlined text-on-surface-variant hover:bg-surface-container-high p-1 rounded transition-all">notifications</button>
+<button class="material-symbols-outlined text-on-surface-variant hover:bg-surface-container-high p-1 rounded transition-all">settings</button>
+<button class="px-4 py-1.5 bg-surface-container-highest border border-outline-variant text-on-surface rounded font-label-caps text-label-caps hover:bg-surface-bright transition-all">Share</button>
+<button class="px-4 py-1.5 bg-primary text-on-primary rounded font-label-caps text-label-caps font-bold hover:opacity-90 active:scale-95 transition-all">Export</button>
+<div class="w-8 h-8 rounded-full overflow-hidden ml-2 border border-outline-variant">
+<img class="w-full h-full object-cover" data-alt="A professional headshot of a creative editor in their 30s, looking confidently at the camera, soft studio lighting, high-end production environment in the background, sharp focus, cinematic color grading with cool tones and subtle blue rim light." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAH0pVIY_MOg3rrLUk7mhO6Pge3q7hln_2dTNfaDhmiIW0nilOspZUHXyKSb4-BCMVzMx1_edVgBBlJrXMfDf4fG_p2tA-F8MhpzlZTUvw14uTs4LXmMbXtrAEIHLVX1bah4ziOaJMupqOCgzbKz30kmqncdG17qfB8Ke-VzadqEutusgqa55F-BofK_rNWZPB4wI7PgxbbSr7_slwIRqYJzHvsv8jT1VSJJCF5sjF8MMou5dtf0PWDFaN814mSf3WPtEF7g0oDqwmc"/>
+</div>
+</div>
+</header>
+<!-- SideNavBar -->
+<aside class="fixed left-0 top-toolbar-height bottom-0 flex flex-col items-center py-panel-padding z-40 bg-surface-container border-r border-outline-variant w-16">
+<div class="mb-4 flex flex-col items-center gap-1 opacity-60">
+<div class="w-8 h-8 bg-primary-container rounded flex items-center justify-center text-on-primary-container">
+<span class="material-symbols-outlined text-sm">movie</span>
+</div>
+</div>
+<div class="flex-1 flex flex-col gap-2 w-full">
+<button class="bg-primary text-on-primary rounded-lg mx-2 p-2 flex items-center justify-center transition-transform active:scale-90" title="Selection">
+<span class="material-symbols-outlined">near_me</span>
+</button>
+<button class="text-on-surface-variant mx-2 p-2 rounded-lg flex items-center justify-center hover:bg-surface-container-highest transition-all duration-200" title="Blade">
+<span class="material-symbols-outlined">content_cut</span>
+</button>
+<button class="text-on-surface-variant mx-2 p-2 rounded-lg flex items-center justify-center hover:bg-surface-container-highest transition-all duration-200" title="Text">
+<span class="material-symbols-outlined">title</span>
+</button>
+<button class="text-on-surface-variant mx-2 p-2 rounded-lg flex items-center justify-center hover:bg-surface-container-highest transition-all duration-200" title="Transitions">
+<span class="material-symbols-outlined">animation</span>
+</button>
+<button class="text-on-surface-variant mx-2 p-2 rounded-lg flex items-center justify-center hover:bg-surface-container-highest transition-all duration-200" title="Effects">
+<span class="material-symbols-outlined">auto_fix_high</span>
+</button>
+<button class="text-on-surface-variant mx-2 p-2 rounded-lg flex items-center justify-center hover:bg-surface-container-highest transition-all duration-200" title="Audio">
+<span class="material-symbols-outlined">volume_up</span>
+</button>
+</div>
+<div class="flex flex-col gap-2 w-full mt-auto">
+<button class="text-on-surface-variant mx-2 p-2 rounded-lg flex items-center justify-center hover:bg-surface-container-highest" title="Help">
+<span class="material-symbols-outlined">help</span>
+</button>
+<button class="text-on-surface-variant mx-2 p-2 rounded-lg flex items-center justify-center hover:bg-surface-container-highest" title="Trash">
+<span class="material-symbols-outlined">delete</span>
+</button>
+</div>
+</aside>
+<!-- Main Workspace Area -->
+<main class="ml-16 mt-toolbar-height flex flex-col h-[calc(100vh-48px)] overflow-hidden">
+<!-- Upper Workspace: 3 Columns -->
+<div class="flex flex-1 overflow-hidden border-b border-outline-variant">
+<!-- Left Panel: Media Library -->
+<section class="w-80 flex flex-col bg-surface border-r border-outline-variant">
+<div class="flex border-b border-outline-variant overflow-x-auto custom-scrollbar">
+<button class="px-4 py-2 text-primary font-bold border-b border-primary font-label-caps text-label-caps whitespace-nowrap">My Media</button>
+<button class="px-4 py-2 text-on-surface-variant hover:bg-surface-container-high font-label-caps text-label-caps whitespace-nowrap">Templates</button>
+<button class="px-4 py-2 text-on-surface-variant hover:bg-surface-container-high font-label-caps text-label-caps whitespace-nowrap">Elements</button>
+<button class="px-4 py-2 text-on-surface-variant hover:bg-surface-container-high font-label-caps text-label-caps whitespace-nowrap">Audio</button>
+<button class="px-4 py-2 text-on-surface-variant hover:bg-surface-container-high font-label-caps text-label-caps whitespace-nowrap">Text</button>
+</div>
+<div class="p-3 flex items-center gap-2">
+<div class="flex-1 bg-surface-container-low border border-outline-variant rounded px-2 py-1 flex items-center gap-2">
+<span class="material-symbols-outlined text-sm opacity-50">search</span>
+<input class="bg-transparent border-none text-xs w-full focus:ring-0 text-on-surface" placeholder="Search media..." type="text"/>
+</div>
+<button class="material-symbols-outlined text-on-surface-variant hover:bg-surface-container-high p-1 rounded">filter_list</button>
+</div>
+<div class="flex-1 overflow-y-auto p-3 grid grid-cols-2 gap-3 custom-scrollbar">
+<!-- Media Asset Cards -->
+<div class="flex flex-col group cursor-pointer">
+<div class="aspect-video bg-surface-container-highest rounded border border-outline-variant overflow-hidden relative">
+<img class="w-full h-full object-cover" data-alt="A cinematic wide shot of a futuristic neon city at night during rainfall, reflecting vibrant cyan and magenta lights on wet pavement, shot with a high-end cinema camera, shallow depth of field, realistic textures, 8k resolution, professional color grade." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB06H5N0CvZyuOUjYbm7dbfHjbvZnhNhZMDoNgB2vWi6f-b2aiOHss75sgZgtnbva6IC7MRN-h4-UYoM-BflURw5IWZNDCGw2I56avKb50Qmp7SG0l9y2mkWVfG0raIq84aIGqnsQLGxHeviwC0GGhgOc0hHt4_OKzH__ZvEH2NMFKTq9d0yCSUnGnHev4T1pHADwKyZaPQsOKm9KW7ppMAHX6yF_crv6bOXer4NIBPeWDojNSUstzhzNOZRslKVJJruxXZ5Le2Hhim"/>
+<div class="absolute bottom-1 right-1 px-1 bg-black/70 text-[10px] rounded font-mono-data">00:15</div>
+<div class="absolute inset-0 bg-primary/20 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+</div>
+<span class="text-[11px] mt-1 truncate text-on-surface-variant font-medium">Urban_Night_01.mp4</span>
+</div>
+<div class="flex flex-col group cursor-pointer">
+<div class="aspect-video bg-surface-container-highest rounded border border-outline-variant overflow-hidden relative">
+<img class="w-full h-full object-cover" data-alt="Close up high-speed footage of water splashing in slow motion against a dark obsidian background, studio lighting, sharp droplets, dramatic shadows, professional macro cinematography, 1000fps look, deep blue and black color palette." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCVs0tJ7Kg2ysSR9K83pwqmH8Tggg7PqfL5-mu4H2gqg26ivfFqGxLR6z16zhSNu3wMaG_vIW32SlZSGs9yhZMsN9fcfSxOzx1EyvsOsHUSiKekOnphTrqdCjTZNpxvOeuUJmqvIDmGSePEmuZ-gaImkvQXX6HIlrHk9ahR4Hufj9HeflCUplWBz3wMSvD36LcoMOXMYocQT5dd1jHFdSD1Ph8Rh0RgY4Dh7dTf5tGK1-T3g76pgadjxtsnVn1mODIHXldHOzQhdnLm"/>
+<div class="absolute bottom-1 right-1 px-1 bg-black/70 text-[10px] rounded font-mono-data">00:08</div>
+<div class="absolute inset-0 bg-primary/20 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+</div>
+<span class="text-[11px] mt-1 truncate text-on-surface-variant font-medium">Splash_Macro.mov</span>
+</div>
+<div class="flex flex-col group cursor-pointer">
+<div class="aspect-video bg-surface-container-highest rounded border border-outline-variant overflow-hidden relative">
+<img class="w-full h-full object-cover" data-alt="A serene aerial drone shot of a pine forest covered in morning fog, soft diffused sunlight breaking through the clouds, muted natural green and grey tones, cinematic landscape photography, professional 4k drone footage aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAargbmRJLaKeP1BX7DnT4an4xfZHBID2ei1kmsKBp997VzJZ57pxUDvXaUPdBsqIOOXXopHGs2sMB2E1H7EJC9k_Ech5UGuIJgrwJVuETzo6e4zWa6eQOMkb0qXlBb21gAZchRZg28CNhP5lQgL0E0jYrQYTBRUEKnVH3P_xWpkxpVl__fGZsWwIq53XWI3WPteYTKvRAguTa-B5AbJ13L-e0QNKOZtLfr2QzYGtxFK68IRosTPHw3803aSJeHaASXvZ0RVJ3juWov"/>
+<div class="absolute bottom-1 right-1 px-1 bg-black/70 text-[10px] rounded font-mono-data">00:24</div>
+<div class="absolute inset-0 bg-primary/20 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+</div>
+<span class="text-[11px] mt-1 truncate text-on-surface-variant font-medium">Forest_Aerial.mp4</span>
+</div>
+<div class="flex flex-col group cursor-pointer">
+<div class="aspect-video bg-surface-container-highest rounded border border-outline-variant overflow-hidden relative">
+<img class="w-full h-full object-cover" data-alt="Handheld shot of a person walking through a modern art gallery with abstract paintings on white walls, bright natural lighting, soft shadows, clean minimalist aesthetic, high-end professional production value." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAso8_7A9sXu5ij1dMT9Flnno1hQy_x6wVzB1bWgoyP5tep4DGvBiOtT88RqscG8ViLtdnfphn6VTzopI8NvOUJZ8zf9KztN0zYZVGZ9IeM6N2r6-GvJqfk3j7z5s8IaJsPnyyGLmov9k6EPL4Qz7zvKk2fkhNR7SU7RGjw9j9AYeM2WW5lY_yH8IGjhe4s1a5WCNWsYB_A4p5EZsvhAq6xGyUiYcE-sLWMKbF0oT4JojE5eT4Cvx0lHdvpMMKLN4EX-rXKc1H_CA21"/>
+<div class="absolute bottom-1 right-1 px-1 bg-black/70 text-[10px] rounded font-mono-data">00:12</div>
+<div class="absolute inset-0 bg-primary/20 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+</div>
+<span class="text-[11px] mt-1 truncate text-on-surface-variant font-medium">Gallery_Walk.mp4</span>
+</div>
+<!-- Empty/Skeleton placeholders for more content -->
+<div class="flex flex-col opacity-40">
+<div class="aspect-video bg-surface-container-high rounded border border-dashed border-outline-variant flex items-center justify-center">
+<span class="material-symbols-outlined">add</span>
+</div>
+<span class="text-[11px] mt-1 text-center text-on-surface-variant font-medium">Import</span>
+</div>
+</div>
+</section>
+<!-- Center Panel: Video Preview -->
+<section class="flex-1 flex flex-col bg-surface-container-lowest relative">
+<!-- Preview Toolbar -->
+<div class="flex justify-between items-center p-2 border-b border-outline-variant bg-surface">
+<div class="flex items-center gap-4">
+<span class="font-mono-data text-label-caps text-on-surface-variant">00:04:12:15</span>
+<div class="h-4 w-px bg-outline-variant"></div>
+<span class="font-mono-data text-label-caps text-primary">FIT</span>
+</div>
+<div class="flex items-center gap-2">
+<button class="material-symbols-outlined text-on-surface-variant text-sm p-1 hover:bg-surface-container-high rounded">high_quality</button>
+<button class="material-symbols-outlined text-on-surface-variant text-sm p-1 hover:bg-surface-container-high rounded">grid_view</button>
+</div>
+</div>
+<!-- Monitor Area -->
+<div class="flex-1 flex items-center justify-center p-4">
+<div class="relative w-full h-full max-w-4xl shadow-2xl overflow-hidden rounded bg-black flex items-center justify-center">
+<img class="max-w-full max-h-full object-contain" data-alt="A frame from a professional film: a cinematic shot of a futuristic neon city street at night, heavy rain, glowing blue and pink neon signs, a sleek hover-vehicle passing by, high contrast, cinematic depth of field, professional color grading, anamorphic lens flare." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDnDbAu1rNa4qiyKUaQlvQnzS0gtrIvT0SkayiDADGv5094qlEjZ4qWPMDWZkQ03Rllq0JPi6OFSEFVH94S6AT56DQzaD7E7AC6y3MB8Lq5VXE2xAgfnYVGlta-OUMHu4ghPcdLwMqn9JKd9bbPpfi3-LUclJBjrtJundNP0yiZIyydb3hLdvVjWrgEroGBoDdDxuPK1XhNdgEmiR2n4FcRSrwlYPmXwTOEUI5AGmg1woM2B-cysjuFc49vPkUn_iuHqWdGioADGDDu"/>
+<!-- Playback Overlay (invisible until hover) -->
+<div class="absolute inset-0 bg-black/20 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center">
+<button class="w-16 h-16 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center text-white border border-white/20">
+<span class="material-symbols-outlined text-4xl" style="font-variation-settings: 'FILL' 1;">play_arrow</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Playback Controls -->
+<div class="p-3 bg-surface border-t border-outline-variant flex flex-col gap-2">
+<div class="flex items-center justify-center gap-6">
+<button class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors">skip_previous</button>
+<button class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors">fast_rewind</button>
+<button class="w-10 h-10 rounded-full bg-primary text-on-primary flex items-center justify-center shadow-lg hover:scale-105 active:scale-95 transition-all">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">play_arrow</span>
+</button>
+<button class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors">fast_forward</button>
+<button class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors">skip_next</button>
+</div>
+<div class="h-1 w-full bg-surface-container-highest rounded-full relative cursor-pointer">
+<div class="absolute h-full w-1/3 bg-primary rounded-full"></div>
+<div class="absolute h-3 w-3 bg-white rounded-full -top-1 left-1/3 shadow-md border-2 border-primary"></div>
+</div>
+</div>
+</section>
+<!-- Right Panel: Inspector -->
+<section class="w-72 flex flex-col bg-surface border-l border-outline-variant">
+<div class="flex items-center justify-between p-3 border-b border-outline-variant">
+<span class="font-label-caps text-label-caps text-primary uppercase">Inspector</span>
+<button class="material-symbols-outlined text-on-surface-variant text-sm">more_vert</button>
+</div>
+<div class="flex-1 overflow-y-auto custom-scrollbar p-3 space-y-6">
+<!-- Transform Section -->
+<div>
+<div class="flex items-center justify-between mb-3">
+<span class="font-label-caps text-[10px] text-on-surface-variant uppercase">Transform</span>
+<button class="material-symbols-outlined text-[10px] text-on-surface-variant">replay</button>
+</div>
+<div class="space-y-3">
+<div class="flex items-center justify-between text-xs">
+<span class="text-on-surface-variant">Position X</span>
+<span class="text-primary scrubbable font-mono-data">0.0 px</span>
+</div>
+<div class="flex items-center justify-between text-xs">
+<span class="text-on-surface-variant">Position Y</span>
+<span class="text-primary scrubbable font-mono-data">0.0 px</span>
+</div>
+<div class="flex items-center justify-between text-xs">
+<span class="text-on-surface-variant">Scale</span>
+<div class="flex items-center gap-2">
+<span class="text-primary scrubbable font-mono-data">100.0%</span>
+<span class="material-symbols-outlined text-[10px] text-on-surface-variant opacity-50">link</span>
+</div>
+</div>
+<div class="flex items-center justify-between text-xs">
+<span class="text-on-surface-variant">Rotation</span>
+<span class="text-primary scrubbable font-mono-data">0.0°</span>
+</div>
+</div>
+</div>
+<!-- Opacity Section -->
+<div class="pt-4 border-t border-outline-variant">
+<div class="flex items-center justify-between mb-3">
+<span class="font-label-caps text-[10px] text-on-surface-variant uppercase">Compositing</span>
+</div>
+<div class="space-y-3">
+<div class="flex items-center justify-between text-xs">
+<span class="text-on-surface-variant">Opacity</span>
+<span class="text-primary scrubbable font-mono-data">100%</span>
+</div>
+<div class="h-1 w-full bg-surface-container-high rounded-full">
+<div class="h-full w-full bg-primary rounded-full"></div>
+</div>
+<div class="flex items-center justify-between text-xs pt-1">
+<span class="text-on-surface-variant">Blend Mode</span>
+<div class="bg-surface-container-high border border-outline-variant px-2 py-0.5 rounded text-[10px] flex items-center gap-1">
+<span>Normal</span>
+<span class="material-symbols-outlined text-[10px]">expand_more</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Audio Section -->
+<div class="pt-4 border-t border-outline-variant">
+<div class="flex items-center justify-between mb-3">
+<span class="font-label-caps text-[10px] text-on-surface-variant uppercase">Audio</span>
+</div>
+<div class="space-y-3">
+<div class="flex items-center justify-between text-xs">
+<span class="text-on-surface-variant">Volume</span>
+<span class="text-secondary scrubbable font-mono-data">0.0 dB</span>
+</div>
+<div class="h-1 w-full bg-surface-container-high rounded-full overflow-hidden">
+<div class="h-full w-2/3 bg-secondary rounded-full"></div>
+</div>
+</div>
+</div>
+<!-- Filter Chips -->
+<div class="pt-4 border-t border-outline-variant">
+<span class="font-label-caps text-[10px] text-on-surface-variant uppercase block mb-3">Applied Filters</span>
+<div class="flex flex-wrap gap-2">
+<div class="bg-primary-container/20 border border-primary/30 px-2 py-1 rounded flex items-center gap-2 text-[10px]">
+<span class="text-primary">Color Balance</span>
+<span class="material-symbols-outlined text-[10px] cursor-pointer">close</span>
+</div>
+<button class="bg-surface-container-high border border-outline-variant border-dashed px-2 py-1 rounded text-[10px] text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[10px]">add</span>
+                                Add Effect
+                            </button>
+</div>
+</div>
+</div>
+</section>
+</div>
+<!-- Lower Workspace: Timeline -->
+<section class="h-80 flex flex-col bg-surface overflow-hidden relative">
+<!-- Timeline Toolbar -->
+<div class="flex items-center justify-between px-3 h-8 border-b border-outline-variant bg-surface-container-low">
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-1 bg-surface-container-high rounded px-2 py-0.5 border border-outline-variant">
+<span class="material-symbols-outlined text-xs text-primary">alarm</span>
+<span class="font-mono-data text-[10px]">00:04:12:15</span>
+</div>
+<div class="flex items-center gap-1">
+<button class="material-symbols-outlined text-sm text-on-surface-variant p-1 hover:bg-surface-container-high rounded">zoom_out</button>
+<div class="w-24 h-1 bg-surface-container-high rounded-full">
+<div class="w-1/2 h-full bg-primary rounded-full"></div>
+</div>
+<button class="material-symbols-outlined text-sm text-on-surface-variant p-1 hover:bg-surface-container-high rounded">zoom_in</button>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<button class="material-symbols-outlined text-sm text-on-surface-variant p-1 hover:bg-surface-container-high rounded">magnet</button>
+<button class="material-symbols-outlined text-sm text-on-surface-variant p-1 hover:bg-surface-container-high rounded">link</button>
+<button class="material-symbols-outlined text-sm text-on-surface-variant p-1 hover:bg-surface-container-high rounded">layers</button>
+</div>
+</div>
+<!-- Tracks Area -->
+<div class="flex-1 overflow-auto custom-scrollbar relative flex">
+<!-- Track Headers -->
+<div class="w-16 border-r border-outline-variant bg-surface sticky left-0 z-10 flex flex-col">
+<!-- Video Tracks -->
+<div class="h-timeline-track-height flex items-center justify-center border-b border-outline-variant bg-surface-container-low text-[9px] font-bold text-on-surface-variant">V3</div>
+<div class="h-timeline-track-height flex items-center justify-center border-b border-outline-variant bg-surface-container-low text-[9px] font-bold text-on-surface-variant">V2</div>
+<div class="h-timeline-track-height flex items-center justify-center border-b border-outline-variant bg-surface-container-low text-[9px] font-bold text-on-surface-variant">V1</div>
+<!-- Spacer -->
+<div class="h-2 bg-surface-container-highest"></div>
+<!-- Audio Tracks -->
+<div class="h-timeline-track-height flex items-center justify-center border-b border-outline-variant bg-surface-container-low text-[9px] font-bold text-on-surface-variant">A1</div>
+<div class="h-timeline-track-height flex items-center justify-center border-b border-outline-variant bg-surface-container-low text-[9px] font-bold text-on-surface-variant">A2</div>
+</div>
+<!-- Main Timeline Canvas -->
+<div class="flex-1 relative bg-[#121212] min-w-[2000px]">
+<!-- Time Markers Ruler -->
+<div class="h-6 border-b border-outline-variant flex items-end">
+<div class="w-full h-full relative" style="background-image: radial-gradient(circle, #333 1px, transparent 1px); background-size: 20px 100%;">
+<span class="absolute left-[100px] text-[8px] font-mono-data opacity-40">00:00:05</span>
+<span class="absolute left-[200px] text-[8px] font-mono-data opacity-40">00:00:10</span>
+<span class="absolute left-[300px] text-[8px] font-mono-data opacity-40">00:00:15</span>
+<span class="absolute left-[400px] text-[8px] font-mono-data opacity-40">00:00:20</span>
+</div>
+</div>
+<!-- Track Rows -->
+<div class="flex flex-col">
+<!-- V3 -->
+<div class="h-timeline-track-height border-b border-outline-variant flex items-center relative"></div>
+<!-- V2 -->
+<div class="h-timeline-track-height border-b border-outline-variant flex items-center relative">
+<div class="absolute left-[240px] w-48 h-6 bg-primary-container/40 border border-primary/50 rounded flex items-center px-2 timeline-clip overflow-hidden">
+<span class="text-[9px] font-bold text-on-primary-container truncate uppercase">Overlay_LightLeak</span>
+</div>
+</div>
+<!-- V1 -->
+<div class="h-timeline-track-height border-b border-outline-variant flex items-center relative">
+<div class="absolute left-0 w-60 h-6 bg-surface-container-highest border border-outline rounded flex items-center timeline-clip overflow-hidden">
+<img class="w-12 h-full object-cover opacity-50" data-alt="Microscopic texture of paper, extreme detail, monochromatic gray, cinematic lighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCBQxK69lNY4rFlqnmoE1-JtN5RZ5feVlA0utKStNAb1SNwznnvpFEWnYwSD9I6tewYvqFx548jn4BurVYW8-Jjvo9qvlSqpc9egL5leDF1ymrnxKDAZGdVtFFkTE6hdHy_9WK2H2UQLqCpAxCmtpyJDxkxTsDDKd8UfwraI2SCeMWmBcc94JXt4gSy4YcGJ0EojrlEXwW0F1TqnkYAroztW1mvYl5dMC9RqcLbZuhT1bFDtMQ-lypDQ6rnym5edvzeous64zFJ7rK8"/>
+<span class="text-[9px] font-bold px-2 truncate">Urban_Night_01</span>
+<div class="ml-auto flex gap-1 pr-1">
+<span class="material-symbols-outlined text-[8px] text-secondary">closed_caption</span>
+<span class="material-symbols-outlined text-[8px] text-primary">description</span>
+</div>
+</div>
+<div class="absolute left-[240px] w-80 h-6 bg-surface-container-highest border border-outline rounded flex items-center timeline-clip overflow-hidden">
+<img class="w-12 h-full object-cover opacity-50" data-alt="Textural background of dark ocean waves at night, deep blue tones, subtle light." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDI5gG33QvYwGIwsaJwfFTsbahv2I1yXOSWncpC69MKZh3P43ui9Meqg2hx4gd2ExfT1wzp9WUbgjiv08NLhtGiN12TzLdW5P3K1yfbsKnZTtBAdyfPTZkkCvrNGKMr_npsI6dlbRLWV7tAEbwFziNFPd1eMQY8XHMmKU_jmr9rWjxBx1HUtR4zgEvgIBhHy5aOW3ZAtplWfXx27hc03z0Yk063KPlqeePeZUMNTjVjz-PnF0mUz0nqEfad999AjK3grpkMvWC-0stW"/>
+<span class="text-[9px] font-bold px-2 truncate">Splash_Macro.mov</span>
+</div>
+</div>
+<!-- Spacer -->
+<div class="h-2 bg-surface-container-highest"></div>
+<!-- A1 -->
+<div class="h-timeline-track-height border-b border-outline-variant flex items-center relative">
+<div class="absolute left-0 w-60 h-6 bg-secondary-container/30 border border-secondary/40 rounded flex flex-col justify-center px-1 timeline-clip overflow-hidden">
+<div class="h-2 w-full" style="background: repeating-linear-gradient(90deg, #4edea3 0px, #4edea3 1px, transparent 1px, transparent 4px); opacity: 0.5;"></div>
+<span class="text-[8px] font-bold truncate">Background_Atmosphere.wav</span>
+</div>
+<div class="absolute left-[240px] w-80 h-6 bg-secondary-container/30 border border-secondary/40 rounded flex flex-col justify-center px-1 timeline-clip overflow-hidden">
+<div class="h-2 w-full" style="background: repeating-linear-gradient(90deg, #4edea3 0px, #4edea3 1px, transparent 1px, transparent 3px); opacity: 0.5;"></div>
+<span class="text-[8px] font-bold truncate">Splash_Sound_Design.wav</span>
+</div>
+</div>
+<!-- A2 -->
+<div class="h-timeline-track-height border-b border-outline-variant flex items-center relative">
+<div class="absolute left-[50px] w-[500px] h-6 bg-secondary-container/10 border border-secondary/20 rounded flex flex-col justify-center px-1 timeline-clip overflow-hidden">
+<div class="h-2 w-full" style="background: repeating-linear-gradient(90deg, #4edea3 0px, #4edea3 2px, transparent 2px, transparent 8px); opacity: 0.3;"></div>
+<span class="text-[8px] font-bold truncate">Cinematic_Soundtrack_v1.mp3</span>
+</div>
+</div>
+</div>
+<!-- Playhead -->
+<div class="absolute top-0 bottom-0 left-[350px] w-px bg-primary z-20 pointer-events-none">
+<div class="absolute -top-1 -left-[5px] w-[11px] h-[15px] bg-primary flex flex-col items-center clip-path-polygon">
+<div class="w-full h-[10px] bg-primary"></div>
+<div class="w-0 h-0 border-l-[5px] border-l-transparent border-r-[5px] border-r-transparent border-t-[5px] border-t-primary"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Footer Stats -->
+<div class="flex items-center justify-between px-3 h-6 border-t border-outline-variant bg-surface text-[10px] text-on-surface-variant font-mono-data">
+<div class="flex gap-4">
+<span>FPS: 23.976</span>
+<span>RES: 3840 x 2160</span>
+<span>BITRATE: 120 Mbps</span>
+</div>
+<div class="flex gap-4 items-center">
+<span class="text-secondary">Rendering: 100% Complete</span>
+<div class="w-24 h-1 bg-surface-container-high rounded-full overflow-hidden">
+<div class="h-full w-full bg-secondary"></div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Context Floating Interaction Script (Optional) -->
+<script>
+        // Simple micro-interaction for scrubbable values
+        document.querySelectorAll('.scrubbable').forEach(el => {
+            el.addEventListener('mousedown', (e) => {
+                let startX = e.clientX;
+                let originalValue = parseFloat(el.innerText);
+                
+                const onMouseMove = (moveEvent) => {
+                    let diff = moveEvent.clientX - startX;
+                    let newValue = (originalValue + diff * 0.1).toFixed(1);
+                    if (el.innerText.includes('%')) el.innerText = newValue + '%';
+                    else if (el.innerText.includes('px')) el.innerText = newValue + ' px';
+                    else if (el.innerText.includes('°')) el.innerText = newValue + '°';
+                    else if (el.innerText.includes('dB')) el.innerText = newValue + ' dB';
+                    else el.innerText = newValue;
+                };
+                
+                const onMouseUp = () => {
+                    document.removeEventListener('mousemove', onMouseMove);
+                    document.removeEventListener('mouseup', onMouseUp);
+                };
+                
+                document.addEventListener('mousemove', onMouseMove);
+                document.addEventListener('mouseup', onMouseUp);
+            });
+        });
+    </script>
+</body></html>

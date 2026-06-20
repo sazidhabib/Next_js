@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>CineFlow Pro - Export &amp; Render</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-tertiary-fixed": "#2a1700",
+                        "on-secondary": "#003824",
+                        "on-primary-fixed-variant": "#004395",
+                        "on-error-container": "#ffdad6",
+                        "tertiary-fixed-dim": "#ffb95f",
+                        "primary-fixed-dim": "#adc6ff",
+                        "on-secondary-fixed-variant": "#005236",
+                        "surface": "#131313",
+                        "on-tertiary": "#472a00",
+                        "surface-container": "#201f1f",
+                        "on-surface-variant": "#c2c6d6",
+                        "secondary": "#4edea3",
+                        "on-tertiary-container": "#3e2400",
+                        "inverse-on-surface": "#313030",
+                        "primary": "#adc6ff",
+                        "on-secondary-container": "#00311f",
+                        "on-primary": "#002e6a",
+                        "secondary-fixed": "#6ffbbe",
+                        "tertiary-fixed": "#ffddb8",
+                        "surface-tint": "#adc6ff",
+                        "surface-container-high": "#2a2a2a",
+                        "surface-variant": "#353534",
+                        "error": "#ffb4ab",
+                        "surface-container-lowest": "#0e0e0e",
+                        "inverse-primary": "#005ac2",
+                        "primary-container": "#4d8eff",
+                        "on-error": "#690005",
+                        "tertiary": "#ffb95f",
+                        "on-secondary-fixed": "#002113",
+                        "on-surface": "#e5e2e1",
+                        "surface-container-highest": "#353534",
+                        "outline-variant": "#424754",
+                        "on-tertiary-fixed-variant": "#653e00",
+                        "surface-dim": "#131313",
+                        "outline": "#8c909f",
+                        "on-background": "#e5e2e1",
+                        "surface-container-low": "#1c1b1b",
+                        "surface-bright": "#393939",
+                        "inverse-surface": "#e5e2e1",
+                        "error-container": "#93000a",
+                        "primary-fixed": "#d8e2ff",
+                        "tertiary-container": "#ca8100",
+                        "on-primary-fixed": "#001a42",
+                        "on-primary-container": "#00285d",
+                        "secondary-fixed-dim": "#4edea3",
+                        "secondary-container": "#00a572",
+                        "background": "#131313"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "unit": "4px",
+                        "toolbar-height": "48px",
+                        "gutter": "1px",
+                        "timeline-track-height": "32px",
+                        "panel-padding": "12px"
+                    },
+                    "fontFamily": {
+                        "label-caps": ["Inter"],
+                        "mono-data": ["JetBrains Mono"],
+                        "headline-lg": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "body-md": ["Inter"],
+                        "headline-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "label-caps": ["11px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700" }],
+                        "mono-data": ["12px", { "lineHeight": "16px", "fontWeight": "400" }],
+                        "headline-lg": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "body-sm": ["12px", { "lineHeight": "16px", "fontWeight": "400" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "headline-md": ["18px", { "lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "600" }]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            background-color: #121212;
+            color: #e5e2e1;
+            font-family: 'Inter', sans-serif;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        input[type="range"] {
+            -webkit-appearance: none;
+            background: transparent;
+        }
+        input[type="range"]::-webkit-slider-runnable-track {
+            background: #333333;
+            height: 4px;
+            border-radius: 2px;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 16px;
+            width: 16px;
+            border-radius: 50%;
+            background: #adc6ff;
+            cursor: pointer;
+            margin-top: -6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #333333;
+            border-radius: 2px;
+        }
+        .bento-card {
+            background: #1E1E1E;
+            border: 1px solid #333333;
+        }
+    </style>
+</head>
+<body class="flex flex-col h-screen overflow-hidden selection:bg-primary/30">
+<!-- TopNavBar -->
+<header class="flex justify-between items-center w-full px-panel-padding h-toolbar-height z-50 bg-surface border-b border-outline-variant docked full-width top-0">
+<div class="flex items-center gap-8">
+<span class="font-headline-md text-headline-md font-bold text-primary">CineFlow Pro</span>
+<nav class="hidden md:flex gap-6">
+<a class="font-label-caps text-label-caps text-on-surface-variant font-medium hover:bg-surface-container-high transition-colors duration-150 px-2 py-1" href="#">File</a>
+<a class="font-label-caps text-label-caps text-on-surface-variant font-medium hover:bg-surface-container-high transition-colors duration-150 px-2 py-1" href="#">Edit</a>
+<a class="font-label-caps text-label-caps text-on-surface-variant font-medium hover:bg-surface-container-high transition-colors duration-150 px-2 py-1" href="#">Sequence</a>
+<a class="font-label-caps text-label-caps text-on-surface-variant font-medium hover:bg-surface-container-high transition-colors duration-150 px-2 py-1" href="#">Clip</a>
+<a class="font-label-caps text-label-caps text-on-surface-variant font-medium hover:bg-surface-container-high transition-colors duration-150 px-2 py-1" href="#">Graphics</a>
+<a class="font-label-caps text-label-caps text-primary font-bold border-b-2 border-primary pb-1 px-2 py-1" href="#">Export</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<button class="material-symbols-outlined text-on-surface-variant hover:bg-surface-container-high p-2 transition-all">notifications</button>
+<button class="material-symbols-outlined text-on-surface-variant hover:bg-surface-container-high p-2 transition-all">settings</button>
+<div class="flex gap-2">
+<button class="px-4 py-1.5 font-label-caps text-label-caps bg-surface-container-high text-on-surface hover:bg-surface-container-highest rounded-lg transition-all">Share</button>
+<button class="px-4 py-1.5 font-label-caps text-label-caps bg-primary text-on-primary font-bold hover:opacity-80 active:scale-95 transition-all rounded-lg">Export</button>
+</div>
+<div class="w-8 h-8 rounded-full bg-surface-container-highest overflow-hidden border border-outline-variant">
+<img class="w-full h-full object-cover" data-alt="A professional headshot of a creative director in their 30s with a focused expression, set against a blurred cinematic studio background with warm key lighting and cool rim light accents. The aesthetic is clean, professional, and sophisticated, mirroring the CineFlow Pro design language." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBQJ60-oluQMVSya9p4Ny6OoXkVl4h3WOnVd1b8WZYNWFgm4wMay5xL4Y7NK1t7yV0qKv9KE7fwtsAn8KlQUsmJYzGyu6MSbbu0OX9PGz6XTjFBvZsrhzHA-5jhcPuFsmEjKTs6eRZa3RUj0YTN_xLLmg0MD8zihDLFXArgvZ6vHHLREMLS8NTLvaiYZW6fwoExFlzgj9Xl4sTfkdvkNVw8T7VzaqhcTpmofBYq3imnrhkdXXeo4KlC02YpoE2UPJTiSrlnBKuEB4f5"/>
+</div>
+</div>
+</header>
+<div class="flex flex-1 overflow-hidden relative">
+<!-- SideNavBar -->
+<aside class="fixed left-0 top-toolbar-height bottom-0 flex flex-col items-center py-panel-padding z-40 bg-surface-container w-16 border-r border-outline-variant">
+<div class="flex flex-col gap-4 flex-1">
+<button class="w-10 h-10 flex items-center justify-center text-on-surface-variant mx-2 my-1 hover:bg-surface-container-highest transition-all duration-200"><span class="material-symbols-outlined">near_me</span></button>
+<button class="w-10 h-10 flex items-center justify-center text-on-surface-variant mx-2 my-1 hover:bg-surface-container-highest transition-all duration-200"><span class="material-symbols-outlined">content_cut</span></button>
+<button class="w-10 h-10 flex items-center justify-center text-on-surface-variant mx-2 my-1 hover:bg-surface-container-highest transition-all duration-200"><span class="material-symbols-outlined">title</span></button>
+<button class="w-10 h-10 flex items-center justify-center text-on-surface-variant mx-2 my-1 hover:bg-surface-container-highest transition-all duration-200"><span class="material-symbols-outlined">animation</span></button>
+<button class="w-10 h-10 flex items-center justify-center text-on-surface-variant mx-2 my-1 hover:bg-surface-container-highest transition-all duration-200"><span class="material-symbols-outlined">auto_fix_high</span></button>
+<button class="w-10 h-10 flex items-center justify-center bg-primary text-on-primary rounded-lg mx-2 my-1 active:scale-90 transition-transform"><span class="material-symbols-outlined">file_download</span></button>
+</div>
+<div class="flex flex-col gap-4">
+<button class="w-10 h-10 flex items-center justify-center text-on-surface-variant mx-2 my-1 hover:bg-surface-container-highest transition-all duration-200"><span class="material-symbols-outlined">help</span></button>
+<button class="w-10 h-10 flex items-center justify-center text-on-surface-variant mx-2 my-1 hover:bg-surface-container-highest transition-all duration-200"><span class="material-symbols-outlined">delete</span></button>
+</div>
+</aside>
+<!-- Main Canvas -->
+<main class="flex-1 ml-16 p-panel-padding flex items-center justify-center bg-surface-dim">
+<!-- Modal Container -->
+<div class="w-full max-w-5xl h-[680px] bento-card rounded-xl overflow-hidden flex flex-col shadow-2xl animate-in fade-in zoom-in duration-300">
+<!-- Modal Header -->
+<div class="h-12 border-b border-outline-variant px-6 flex items-center justify-between bg-surface-container-high">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[20px]">movie_edit</span>
+<h2 class="font-headline-md text-headline-md">Export Media</h2>
+</div>
+<button class="material-symbols-outlined text-on-surface-variant hover:text-on-surface transition-colors">close</button>
+</div>
+<div class="flex flex-1 overflow-hidden">
+<!-- Left Column: Settings -->
+<div class="flex-[1.2] p-8 border-r border-outline-variant overflow-y-auto custom-scrollbar bg-surface-container-low">
+<section class="space-y-8">
+<!-- File Identity -->
+<div>
+<label class="font-label-caps text-label-caps text-on-surface-variant block mb-3 uppercase tracking-widest">General</label>
+<div class="space-y-4">
+<div class="flex flex-col gap-1">
+<span class="font-body-sm text-body-sm text-outline">File Name</span>
+<input class="bg-surface-container-lowest border border-outline-variant rounded-lg px-3 py-2 font-body-md text-body-md focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all" type="text" value="Project_Alpha_V1_Final"/>
+</div>
+<div class="flex flex-col gap-1">
+<span class="font-body-sm text-body-sm text-outline">Output Location</span>
+<div class="flex items-center gap-2">
+<input class="flex-1 bg-surface-container-lowest border border-outline-variant rounded-lg px-3 py-2 font-mono-data text-mono-data text-outline-variant outline-none" readonly="" type="text" value="/Volumes/External_SSD/Projects/Render/"/>
+<button class="p-2 border border-outline-variant rounded-lg bg-surface hover:bg-surface-container-highest transition-colors">
+<span class="material-symbols-outlined text-[18px]">folder_open</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Video Settings -->
+<div>
+<label class="font-label-caps text-label-caps text-on-surface-variant block mb-3 uppercase tracking-widest">Video Configuration</label>
+<div class="grid grid-cols-2 gap-4">
+<div class="flex flex-col gap-1">
+<span class="font-body-sm text-body-sm text-outline">Format</span>
+<select class="bg-surface-container-lowest border border-outline-variant rounded-lg px-3 py-2 font-body-md text-body-md focus:ring-1 focus:ring-primary outline-none appearance-none">
+<option>MP4 (H.264)</option>
+<option selected="">MOV (ProRes 422)</option>
+<option>GIF (Animated)</option>
+<option>WebM (VP9)</option>
+</select>
+</div>
+<div class="flex flex-col gap-1">
+<span class="font-body-sm text-body-sm text-outline">Resolution</span>
+<select class="bg-surface-container-lowest border border-outline-variant rounded-lg px-3 py-2 font-body-md text-body-md focus:ring-1 focus:ring-primary outline-none appearance-none">
+<option selected="">4K (3840 x 2160)</option>
+<option>1080p (1920 x 1080)</option>
+<option>720p (1280 x 720)</option>
+<option>Custom...</option>
+</select>
+</div>
+<div class="flex flex-col gap-1">
+<span class="font-body-sm text-body-sm text-outline">Frame Rate</span>
+<select class="bg-surface-container-lowest border border-outline-variant rounded-lg px-3 py-2 font-body-md text-body-md focus:ring-1 focus:ring-primary outline-none appearance-none">
+<option selected="">23.976 fps</option>
+<option>24.00 fps</option>
+<option>29.97 fps</option>
+<option>30.00 fps</option>
+<option>60.00 fps</option>
+</select>
+</div>
+<div class="flex flex-col gap-1">
+<span class="font-body-sm text-body-sm text-outline">Aspect Ratio</span>
+<div class="flex items-center gap-2 px-3 py-2 bg-surface-container-lowest border border-outline-variant rounded-lg text-outline">
+<span class="material-symbols-outlined text-[16px]">aspect_ratio</span>
+<span class="font-body-md text-body-md">16:9 Wide</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Quality Control -->
+<div class="space-y-4">
+<div class="flex justify-between items-center">
+<label class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-widest">Encoding Quality</label>
+<span class="font-mono-data text-mono-data text-primary text-[14px]" id="quality-value">85%</span>
+</div>
+<div class="relative group">
+<input class="w-full h-1 cursor-pointer" id="quality-slider" max="100" min="0" type="range" value="85"/>
+<div class="flex justify-between mt-2">
+<span class="font-label-caps text-[9px] text-outline uppercase">Low Bitrate</span>
+<span class="font-label-caps text-[9px] text-outline uppercase">Lossless</span>
+</div>
+</div>
+</div>
+</section>
+</div>
+<!-- Right Column: Preview & Metadata -->
+<div class="flex-1 p-8 bg-surface flex flex-col gap-6">
+<div>
+<label class="font-label-caps text-label-caps text-on-surface-variant block mb-3 uppercase tracking-widest">Preview Frame</label>
+<div class="aspect-video w-full rounded-lg bg-surface-container-lowest border border-outline-variant overflow-hidden relative group cursor-crosshair">
+<img class="w-full h-full object-cover" data-alt="A high-contrast cinematic frame showing a futuristic neon city street at dusk, with shallow depth of field focusing on a single light-streaked vehicle. The color palette is dominated by deep blues and vibrant electric teals, with sharp highlights that demonstrate the dynamic range and visual fidelity of CineFlow Pro's rendering engine." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAv8Rm8riaVej7FueS8XzM6nRHGD6WXlcIgXp5sEmj70GoCzkvuh7GY1qc6owC2a6-1XdoM41rmvo8S0VvztrJpRBgPG5hhxXYnXeG_TRWFsy30_M9aDX34NYMMrZlmYjQHTIKUaIWA2p2JFpN033TCanlUmyag1GAc-IoWBT10VJdIOqP4sFhSjJibp1tYccqG_oA-3g_dU6MdI4qCtvc6pUpWFDVl9uCt7Nxesg_9iBH8d_wh7fCoHWkwp94fqzXUTo_aBVqmtceI"/>
+<div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+<span class="material-symbols-outlined text-[48px] text-white">play_circle</span>
+</div>
+<div class="absolute bottom-3 right-3 bg-black/60 px-2 py-1 rounded text-white font-mono-data text-[10px] backdrop-blur-md">
+                                    00:04:12:15
+                                </div>
+</div>
+</div>
+<div class="space-y-4 bg-surface-container-high p-5 rounded-xl border border-outline-variant">
+<h4 class="font-label-caps text-label-caps text-primary uppercase">Estimated Output</h4>
+<div class="grid grid-cols-2 gap-4">
+<div class="flex flex-col">
+<span class="text-outline font-body-sm text-body-sm">File Size</span>
+<span class="font-headline-md text-headline-md text-on-surface">1.24 GB</span>
+</div>
+<div class="flex flex-col">
+<span class="text-outline font-body-sm text-body-sm">Duration</span>
+<span class="font-headline-md text-headline-md text-on-surface">03:45</span>
+</div>
+<div class="flex flex-col">
+<span class="text-outline font-body-sm text-body-sm">Peak Bitrate</span>
+<span class="font-headline-md text-headline-md text-on-surface">45 Mbps</span>
+</div>
+<div class="flex flex-col">
+<span class="text-outline font-body-sm text-body-sm">Render Est.</span>
+<span class="font-headline-md text-headline-md text-on-surface">~4m 20s</span>
+</div>
+</div>
+</div>
+<!-- Render Process Indicator -->
+<div class="space-y-2">
+<div class="flex justify-between items-center text-[11px] font-label-caps text-outline">
+<span>READY TO RENDER</span>
+<span class="text-secondary">SYSTEM IDLE</span>
+</div>
+<div class="w-full h-1 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full w-0 bg-secondary transition-all duration-1000" id="render-bar"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Bottom Footer Actions -->
+<div class="p-6 bg-surface-container border-t border-outline-variant flex items-center justify-between">
+<div class="flex items-center gap-6">
+<label class="flex items-center gap-3 cursor-pointer group">
+<div class="relative">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-10 h-5 bg-surface-container-highest border border-outline-variant rounded-full peer-checked:bg-secondary transition-colors"></div>
+<div class="absolute left-1 top-1 w-3 h-3 bg-on-surface rounded-full peer-checked:translate-x-5 transition-transform"></div>
+</div>
+<span class="font-body-md text-body-md text-on-surface-variant group-hover:text-on-surface transition-colors">Upload to YouTube</span>
+</label>
+<label class="flex items-center gap-3 cursor-pointer group">
+<div class="relative">
+<input class="sr-only peer" type="checkbox"/>
+<div class="w-10 h-5 bg-surface-container-highest border border-outline-variant rounded-full peer-checked:bg-secondary transition-colors"></div>
+<div class="absolute left-1 top-1 w-3 h-3 bg-on-surface rounded-full peer-checked:translate-x-5 transition-transform"></div>
+</div>
+<span class="font-body-md text-body-md text-on-surface-variant group-hover:text-on-surface transition-colors">Post to Instagram</span>
+</label>
+</div>
+<div class="flex items-center gap-4">
+<button class="px-6 py-2.5 font-label-caps text-label-caps text-outline hover:text-on-surface transition-colors border border-outline-variant rounded-lg">Cancel</button>
+<button class="flex items-center gap-2 px-10 py-3 font-label-caps text-label-caps bg-primary text-on-primary font-bold rounded-lg hover:brightness-110 active:scale-95 transition-all shadow-lg shadow-primary/20" id="start-export">
+<span class="material-symbols-outlined text-[20px]">bolt</span>
+                            START EXPORT
+                        </button>
+</div>
+</div>
+</div>
+</main>
+</div>
+<!-- Background Decoration -->
+<div class="fixed inset-0 -z-10 overflow-hidden pointer-events-none opacity-20">
+
+</div>
+<script>
+        // Micro-interactions
+        const slider = document.getElementById('quality-slider');
+        const qualityVal = document.getElementById('quality-value');
+        const exportBtn = document.getElementById('start-export');
+        const renderBar = document.getElementById('render-bar');
+
+        slider.addEventListener('input', (e) => {
+            qualityVal.textContent = `${e.target.value}%`;
+        });
+
+        exportBtn.addEventListener('click', () => {
+            let progress = 0;
+            exportBtn.disabled = true;
+            exportBtn.innerHTML = `
+                <span class="material-symbols-outlined animate-spin text-[20px]">sync</span>
+                EXPORTING...
+            `;
+            exportBtn.classList.replace('bg-primary', 'bg-surface-container-highest');
+            exportBtn.classList.add('text-outline');
+
+            const interval = setInterval(() => {
+                progress += 1;
+                renderBar.style.width = `${progress}%`;
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    exportBtn.innerHTML = `
+                        <span class="material-symbols-outlined text-[20px]">check_circle</span>
+                        COMPLETED
+                    `;
+                    exportBtn.classList.replace('bg-surface-container-highest', 'bg-secondary');
+                    exportBtn.classList.replace('text-outline', 'text-on-secondary');
+                }
+            }, 30);
+        });
+
+        // Toggle hover states for nav
+        document.querySelectorAll('nav a').forEach(link => {
+            link.addEventListener('mouseenter', () => {
+                if(!link.classList.contains('text-primary')) {
+                    link.classList.add('text-on-surface');
+                }
+            });
+            link.addEventListener('mouseleave', () => {
+                if(!link.classList.contains('text-primary')) {
+                    link.classList.remove('text-on-surface');
+                }
+            });
+        });
+    </script>
+</body></html>

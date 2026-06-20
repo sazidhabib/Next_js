@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>CineFlow Pro | Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        :root {
+            --toolbar-height: 48px;
+            --panel-padding: 12px;
+        }
+        body {
+            background-color: #131313;
+            color: #e5e2e1;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .glass-panel {
+            background: rgba(30, 30, 30, 0.7);
+            backdrop-filter: blur(8px);
+            border: 1px solid #333333;
+        }
+        .bento-card {
+            background: #1E1E1E;
+            border: 1px solid #333333;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .bento-card:hover {
+            border-color: #3B82F6;
+            background: #2A2A2A;
+        }
+        .scrub-text:hover {
+            color: #adc6ff;
+            cursor: ew-resize;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "surface": "#131313",
+                        "surface-container": "#201f1f",
+                        "surface-container-high": "#2a2a2a",
+                        "surface-container-highest": "#353534",
+                        "on-surface": "#e5e2e1",
+                        "on-surface-variant": "#c2c6d6",
+                        "primary": "#adc6ff",
+                        "on-primary": "#002e6a",
+                        "primary-container": "#4d8eff",
+                        "on-primary-container": "#00285d",
+                        "secondary": "#4edea3",
+                        "outline": "#8c909f",
+                        "outline-variant": "#424754",
+                        "background": "#131313"
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    spacing: {
+                        "unit": "4px",
+                        "toolbar-height": "48px",
+                        "panel-padding": "12px"
+                    },
+                    fontFamily: {
+                        "label-caps": ["Inter"],
+                        "mono-data": ["JetBrains Mono"],
+                        "headline-lg": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "body-md": ["Inter"],
+                        "headline-md": ["Inter"]
+                    },
+                    fontSize: {
+                        "label-caps": ["11px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                        "mono-data": ["12px", {"lineHeight": "16px", "fontWeight": "400"}],
+                        "headline-lg": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                        "body-sm": ["12px", {"lineHeight": "16px", "fontWeight": "400"}],
+                        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "headline-md": ["18px", {"lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "600"}]
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="dark bg-background text-on-surface">
+<!-- TopNavBar -->
+<header class="fixed top-0 left-0 right-0 z-50 flex justify-between items-center w-full px-panel-padding h-toolbar-height border-b border-outline-variant bg-surface">
+<div class="flex items-center gap-6">
+<span class="font-headline-md text-headline-md font-bold text-primary">CineFlow Pro</span>
+<nav class="hidden md:flex gap-4">
+<a class="text-primary font-bold border-b-2 border-primary pb-1 font-label-caps text-label-caps" href="#">File</a>
+<a class="text-on-surface-variant font-medium hover:bg-surface-container-high transition-colors duration-150 px-2 rounded font-label-caps text-label-caps" href="#">Edit</a>
+<a class="text-on-surface-variant font-medium hover:bg-surface-container-high transition-colors duration-150 px-2 rounded font-label-caps text-label-caps" href="#">Sequence</a>
+<a class="text-on-surface-variant font-medium hover:bg-surface-container-high transition-colors duration-150 px-2 rounded font-label-caps text-label-caps" href="#">Clip</a>
+<a class="text-on-surface-variant font-medium hover:bg-surface-container-high transition-colors duration-150 px-2 rounded font-label-caps text-label-caps" href="#">Graphics</a>
+<a class="text-on-surface-variant font-medium hover:bg-surface-container-high transition-colors duration-150 px-2 rounded font-label-caps text-label-caps" href="#">View</a>
+</nav>
+</div>
+<div class="flex items-center gap-3">
+<div class="flex gap-1 mr-2">
+<button class="p-2 hover:bg-surface-container-high rounded transition-colors active:scale-95">
+<span class="material-symbols-outlined text-on-surface-variant">settings</span>
+</button>
+<button class="p-2 hover:bg-surface-container-high rounded transition-colors active:scale-95">
+<span class="material-symbols-outlined text-on-surface-variant">notifications</span>
+</button>
+</div>
+<button class="px-4 py-1.5 text-on-surface font-medium border border-outline-variant hover:bg-surface-container-high rounded transition-all active:scale-95 text-body-md font-body-md">Share</button>
+<button class="px-4 py-1.5 bg-primary-container text-on-primary-container font-bold rounded hover:opacity-90 transition-all active:scale-95 text-body-md font-body-md">Export</button>
+<div class="w-8 h-8 rounded-full overflow-hidden ml-2 border border-outline-variant">
+<img class="w-full h-full object-cover" data-alt="A professional headshot of a creative director in a high-tech studio environment. The lighting is moody and cinematic with soft blue rim light. The individual has a focused expression, representing the professional user base of CineFlow Pro. Dark charcoal background with subtle bokeh." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBAjGADBhkt1XxXgXw-xgCpjoSuvP0VtS0KRyOf1lvJuPR8fuJonAuy4tGOpLgyY6bUcAMYxYkuvZam6Tb_rZ7PFnCH0m890BGcf0cC9by8nTlOYIw_JvsqAnLw6umPcholkJN0qrgvdkweg8x1HLFnnYslPXmnTrKbWVc0ziRBULVITknfQk2t8SdNwKS2p_lQzXsP7Rj2MOxl48qL_4nXNSb4VliJcrM-i5KEIZ4nVnq-J5myz62BOaFBcaCqOtUZQdl42TNoP7Zu"/>
+</div>
+</div>
+</header>
+<!-- SideNavBar -->
+<aside class="fixed left-0 top-toolbar-height bottom-0 w-16 flex flex-col items-center py-panel-padding z-40 border-r border-outline-variant bg-surface-container">
+<div class="flex flex-col gap-2 w-full items-center">
+<button class="w-10 h-10 flex items-center justify-center bg-primary text-on-primary rounded-lg mx-2 my-1 active:scale-90 transition-transform">
+<span class="material-symbols-outlined">home</span>
+</button>
+<button class="w-10 h-10 flex items-center justify-center text-on-surface-variant mx-2 my-1 hover:bg-surface-container-highest rounded-lg transition-all">
+<span class="material-symbols-outlined">auto_fix_high</span>
+</button>
+<button class="w-10 h-10 flex items-center justify-center text-on-surface-variant mx-2 my-1 hover:bg-surface-container-highest rounded-lg transition-all">
+<span class="material-symbols-outlined">perm_media</span>
+</button>
+<button class="w-10 h-10 flex items-center justify-center text-on-surface-variant mx-2 my-1 hover:bg-surface-container-highest rounded-lg transition-all">
+<span class="material-symbols-outlined">group</span>
+</button>
+</div>
+<div class="mt-auto flex flex-col gap-2 w-full items-center">
+<button class="w-10 h-10 flex items-center justify-center text-on-surface-variant mx-2 my-1 hover:bg-surface-container-highest rounded-lg transition-all">
+<span class="material-symbols-outlined">help</span>
+</button>
+<button class="w-10 h-10 flex items-center justify-center text-on-surface-variant mx-2 my-1 hover:bg-surface-container-highest rounded-lg transition-all">
+<span class="material-symbols-outlined">delete</span>
+</button>
+</div>
+</aside>
+<!-- Main Canvas -->
+<main class="ml-16 mt-toolbar-height p-panel-padding min-h-screen">
+<!-- Hero Section: Create New -->
+<section class="mb-10">
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8 mt-4">
+<div>
+<h1 class="font-headline-lg text-headline-lg mb-1">Welcome back, Editor</h1>
+<p class="text-on-surface-variant font-body-md text-body-md">Ready to start your next masterpiece?</p>
+</div>
+<button class="flex items-center gap-2 bg-[#3B82F6] text-white px-6 py-3 rounded-lg font-bold hover:brightness-110 transition-all active:scale-95 shadow-lg">
+<span class="material-symbols-outlined">add</span>
+<span>Create New Project</span>
+</button>
+</div>
+<!-- Templates Horizontal Scroll -->
+<div class="mb-4 flex items-center justify-between">
+<h3 class="font-label-caps text-label-caps uppercase tracking-widest text-on-surface-variant">Start from Template</h3>
+<div class="flex gap-2">
+<button class="p-1 border border-outline-variant rounded hover:bg-surface-container-high"><span class="material-symbols-outlined text-sm">chevron_left</span></button>
+<button class="p-1 border border-outline-variant rounded hover:bg-surface-container-high"><span class="material-symbols-outlined text-sm">chevron_right</span></button>
+</div>
+</div>
+<div class="flex gap-4 overflow-x-auto no-scrollbar pb-4 -mx-1 px-1">
+<!-- Template Card 1 -->
+<div class="min-w-[280px] group cursor-pointer">
+<div class="relative h-40 rounded-xl overflow-hidden bento-card mb-3">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="A vibrant and energetic YouTube intro template thumbnail featuring bold 3D typography and bright neon light trails. The background shows a high-end gaming setup with RGB lighting. The visual style is fast-paced and modern, with a professional motion graphics aesthetic in shades of electric blue and hot pink." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDVvbQ8ulunx2o9yhRzmeeJuNdkHsQuyfsNauirUgidbhO7wgTLKuUeiFVSy3MhAnpd29KwsyI685p68lSYbe-ewIo0Qrp3worQ-MzMcqGC5zb3FPAVZ7ykpeTSOGqGEQhTqF14vtXK53iMR6UNZi0HUh8pT8ZlibmJJT-b-QB_GyNWaOZM8Q4ui2vxhJxSFzr3Oit21KbmQSjnVFuigselbNLRJ8GBNpzB6ZH9R__C9ASWG9WUkPtfUuK4MQEeVFG2PntqxuSTPvpW"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3">
+<span class="text-white text-xs font-bold bg-[#3B82F6] px-2 py-1 rounded">16:9</span>
+</div>
+</div>
+<span class="font-body-md text-body-md font-semibold">YouTube Intro</span>
+<p class="text-xs text-on-surface-variant">4K • 60fps • 15s</p>
+</div>
+<!-- Template Card 2 -->
+<div class="min-w-[200px] group cursor-pointer">
+<div class="relative h-40 rounded-xl overflow-hidden bento-card mb-3">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="A vertical video template for TikTok featuring a split-screen aesthetic with fashion lifestyle footage. The colors are warm and desaturated, with soft grain and vintage film textures. A central text overlay shows a minimalist font, capturing the trendy, cinematic social media vibe. Dark professional UI context with high-contrast elements." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDiNR_Hjvu-yepqXdzSMU-jX9-C6N6mXxW0BkBKgKLzv-LFDd4TkkZl6evTuUTj_dO0fnZmkl04qf8Cv41aG1VOa13rktyE4t21X_V_P02NX3OPBFf8KhSkIko-0WUmnrG_YCaSbjkPflvFT4HkZ_r-qkfnX73W9N-0_rOPCVxQgSIQHdo0NUtfLEedeLkIVhyjIHbuo-10w4QiNbZloAfnM2usreCWG58y7j5MUrAE0QyiGbQUGtvCB3uRTjkVpERFQRw3u_0nxa7z"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3">
+<span class="text-white text-xs font-bold bg-[#3B82F6] px-2 py-1 rounded">9:16</span>
+</div>
+</div>
+<span class="font-body-md text-body-md font-semibold">TikTok Vertical</span>
+<p class="text-xs text-on-surface-variant">1080p • 30fps • 60s</p>
+</div>
+<!-- Template Card 3 -->
+<div class="min-w-[280px] group cursor-pointer">
+<div class="relative h-40 rounded-xl overflow-hidden bento-card mb-3">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="A cinematic wedding video template thumbnail showing a romantic slow-motion shot of a couple in a sun-drenched field. The lighting is golden-hour warm, with soft flares and a shallow depth of field. High-end color grading with deep blacks and rich, natural tones. The overall mood is emotional, elegant, and timelessly professional." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDcWjwm6GIQcM6aw2px7zqJawnfWKsVroLl5Fdp1HG_EA9HyvjU9RnX2Fi73zTPXVJNjgD8wdOSQ2MjsKaLN9P5RJGc5LHUubMbxJQYEyhXS5hAwHcWUVOlfmHQSEofGrEaDPzwecTImL_gdZKbqmtiH6LKRFsIRkgw5QtA5SowZUn-B5lNYIHelI1ooFXR64NHtGh8qQnOQhmJ1Jt0zUbK2JbuRsrPrrJ2Gl1uitTXF_mGje5FOiMToDNB26G8Pfi4cvOrTJHS9mp9"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3">
+<span class="text-white text-xs font-bold bg-[#3B82F6] px-2 py-1 rounded">2.35:1</span>
+</div>
+</div>
+<span class="font-body-md text-body-md font-semibold">Cinematic Wedding</span>
+<p class="text-xs text-on-surface-variant">4K • 24fps • Multi-scene</p>
+</div>
+<!-- Template Card 4 -->
+<div class="min-w-[280px] group cursor-pointer">
+<div class="relative h-40 rounded-xl overflow-hidden bento-card mb-3">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="A high-end product advertisement template featuring a sleek metallic watch on a dark, reflective surface. Sharp macro lighting highlights the textures of the metal and glass. Sophisticated dark mode aesthetic with surgical blue highlights. The background is a deep charcoal with subtle particles, suggesting a premium, tech-focused brand identity." src="https://lh3.googleusercontent.com/aida-public/AB6AXuACuCliCA4HeNc-Wti44zV5_1Ht2o73rpO3kiJXysCldKjtcsAEFr0FijEd0C-mqmnvcwhblSImSTsHmbiEFGyfFUUV67FzT7QC4-Y0skS5l5YhMLYWz3LAIHpK-ZkVW9bqQu4mOHT-6kMx61efgvAEJLGduQAxWGuBnPR1dB3y2zyCSEDY-Zy9GFDHFgplnNLEdZiXdaTP8wmHDpqVvJhQoKNSYSKL6aDuDO167il_dYEK4tW0QenwP86BBlqg7nuL4gNtqbWsIQB0"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3">
+<span class="text-white text-xs font-bold bg-[#3B82F6] px-2 py-1 rounded">1:1</span>
+</div>
+</div>
+<span class="font-body-md text-body-md font-semibold">Product Ad</span>
+<p class="text-xs text-on-surface-variant">4K • 120fps • 30s</p>
+</div>
+</div>
+</section>
+<!-- Recent Projects Section -->
+<section>
+<div class="flex items-center justify-between mb-6">
+<h2 class="font-headline-md text-headline-md">Recent Projects</h2>
+<div class="flex items-center gap-4">
+<div class="flex border border-outline-variant rounded overflow-hidden">
+<button class="px-3 py-1 bg-surface-container-highest text-primary"><span class="material-symbols-outlined text-[20px]">grid_view</span></button>
+<button class="px-3 py-1 hover:bg-surface-container-high"><span class="material-symbols-outlined text-[20px]">list</span></button>
+</div>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-2 top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px]">search</span>
+<input class="bg-surface-container-low border border-outline-variant rounded-lg pl-8 pr-4 py-1.5 text-sm focus:ring-1 focus:ring-primary focus:border-primary outline-none w-64" placeholder="Search projects..." type="text"/>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+<!-- Project Card 1 -->
+<div class="bento-card rounded-xl overflow-hidden flex flex-col">
+<div class="relative h-48 group">
+<img class="w-full h-full object-cover" data-alt="A vibrant video editing project thumbnail titled 'Summer Vibe Edit'. The image shows a montage of beach scenes, surfing, and outdoor festivals with high-saturation colors and dynamic motion blurs. The UI reflects a professional editing workspace with a primary blue timeline visible at the bottom of the frame." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBOVIOoOljT4cEIBTBhIcO3kEIGEPL1N_ZHXB0AYEh0chbcmIa1yfLVWRCdNkBwRNeQ-OSYt9M--2s1JB2m98BCgEA8hf_1yxpvHbY2WrrT4nh4lNM-K5I9JItGkpZgIj_m0oI4jFnLFSjinnf8fX-_X4i6IXDpnCm_L6qkHCpMJ2ze4p8rcvytz5UKuM17R9FGu2FgYplFAq7_jhDd4B4ZqkfN1kS_0BBfAcTMxSFZCgwAjCygkbLBhMemKmi0W2unvDYwa0Vz_Syf"/>
+<div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4">
+<button class="bg-primary text-on-primary w-10 h-10 rounded-full flex items-center justify-center shadow-xl transform scale-75 group-hover:scale-100 transition-transform"><span class="material-symbols-outlined">edit</span></button>
+<button class="bg-surface text-on-surface w-10 h-10 rounded-full flex items-center justify-center shadow-xl transform scale-75 group-hover:scale-100 transition-transform"><span class="material-symbols-outlined">more_horiz</span></button>
+</div>
+<div class="absolute bottom-2 left-2 px-2 py-0.5 bg-black/60 rounded text-[10px] font-mono-data uppercase tracking-tighter">04:22</div>
+</div>
+<div class="p-4">
+<h4 class="font-body-md text-body-md font-bold mb-1 truncate">Summer Vibe Edit</h4>
+<div class="flex items-center justify-between">
+<span class="text-xs text-on-surface-variant">Modified 2h ago</span>
+<div class="flex -space-x-2">
+<div class="w-5 h-5 rounded-full border border-surface bg-[#4edea3]"></div>
+<div class="w-5 h-5 rounded-full border border-surface bg-[#adc6ff]"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Project Card 2 -->
+<div class="bento-card rounded-xl overflow-hidden flex flex-col border-primary/30 bg-primary/5">
+<div class="relative h-48 group">
+<img class="w-full h-full object-cover" data-alt="A professional video project thumbnail titled 'Client Feedback Rev 2'. The scene shows a corporate interview with high-end three-point lighting. A sidebar shows various comments and markers in a surgical blue color, indicating an active review session. The color palette is professional charcoal and deep blues." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAyAgZin02ugijhGZxSQNZya-9aHnOmuQFv81uCFcm59aP2SqqJpbNj-dssQ-sVKG7JfSsZUvUCWrsAvq_0D5oqxjP2-LOg6H4iqGHREMVvTbH0M-Lo-VGqwabD-YRjbMgS0GWE9f08BjXUFpYcD0jEnusu0CFPkqroHOuLcI3XJuWGn_tdkqpbe7Nb7BrLOBTNZ7hozKz_dcV6dVzsHEZocitsAg8qL9V62uk5TnxJhEYmdphQld1fDMgJWu5E_AMwblqhm1ltLUwS"/>
+<div class="absolute top-2 right-2 px-2 py-1 bg-[#3B82F6] text-[10px] font-bold rounded uppercase">In Review</div>
+<div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4">
+<button class="bg-primary text-on-primary w-10 h-10 rounded-full flex items-center justify-center shadow-xl"><span class="material-symbols-outlined">edit</span></button>
+</div>
+</div>
+<div class="p-4">
+<h4 class="font-body-md text-body-md font-bold mb-1 truncate">Client Feedback Rev 2</h4>
+<div class="flex items-center justify-between">
+<span class="text-xs text-on-surface-variant">Modified 5h ago</span>
+<span class="material-symbols-outlined text-xs text-secondary" style="font-variation-settings: 'FILL' 1;">cloud_done</span>
+</div>
+</div>
+</div>
+<!-- Project Card 3 -->
+<div class="bento-card rounded-xl overflow-hidden flex flex-col">
+<div class="relative h-48 group">
+<img class="w-full h-full object-cover" data-alt="A music video project thumbnail featuring a performer in a dark urban alley lit by red and blue neon signs. The image is gritty and high-contrast with artistic lens flare. The editing style suggested is rhythmic and high-energy. Dark charcoal environment with precise professional UI elements." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDO2zn9cREUgk3NMzw-51xH8CnLnUpLbuRnNZvQYIjujnuqxTiyaX6OWLOaPsyqn9rDDlMHqvIjooyxS8NutVnDM_TiIyuH7KeMdtTArjA-mGtui8yBLtpAvP4tbyCVJddDca5n93OpDb4HAhUIIEFdPUTl1Rd3qfgJsypwv2YBuG-z86JyJbw1AHt6SiRQcu6r05fE8aOkU5toWc8BNsl-D7S2dSa940obRwUDJ2PVrD9bSNwidemY6tdZn8VVbDD2sxgIstA9evC8"/>
+<div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4">
+<button class="bg-primary text-on-primary w-10 h-10 rounded-full flex items-center justify-center shadow-xl"><span class="material-symbols-outlined">edit</span></button>
+</div>
+</div>
+<div class="p-4">
+<h4 class="font-body-md text-body-md font-bold mb-1 truncate">Music Video Raw Cuts</h4>
+<div class="flex items-center justify-between">
+<span class="text-xs text-on-surface-variant">Modified Yesterday</span>
+<span class="text-xs text-on-surface-variant">12.4 GB</span>
+</div>
+</div>
+</div>
+<!-- Project Card 4 -->
+<div class="bento-card rounded-xl overflow-hidden flex flex-col">
+<div class="relative h-48 group">
+<img class="w-full h-full object-cover" data-alt="A documentary style video project thumbnail showing a landscape of snow-capped mountains at dawn. The colors are cool and desaturated, with a professional cinematic look. High-end post-production quality is evident in the sharpness and tonal balance. The UI frame is a deep black with a thin hairline border." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBAVlm8MXm_wyNiRPJ4W5Nu8AhGkU4xxCThPEA9qCDP3Xt21bdDAyYz7Z_igyxkpxbpDINNBvXsui80Pqly4ie8OLBWWionQ22ezg9DOsJ8SQKhHVU0HpXG2B0gc_OW3wEjBSup3kEcBejo1NnAxnQfAi_2UYiE-hm-OIsdi4BiX8tVB135lHW1jjLYdEOAMQOo7BuAk4oS-6cDi0lLNhI2YntijGpeWi3PfXEKjugU4iqvqhjz2lKBUC9CAqtI_eWSewSXsP8zjcT2"/>
+<div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4">
+<button class="bg-primary text-on-primary w-10 h-10 rounded-full flex items-center justify-center shadow-xl"><span class="material-symbols-outlined">edit</span></button>
+</div>
+</div>
+<div class="p-4">
+<h4 class="font-body-md text-body-md font-bold mb-1 truncate">Mountain B-Roll Prep</h4>
+<div class="flex items-center justify-between">
+<span class="text-xs text-on-surface-variant">Modified 3 days ago</span>
+<span class="material-symbols-outlined text-xs text-on-surface-variant">lock</span>
+</div>
+</div>
+</div>
+<!-- Add Project Card (Placeholder) -->
+<div class="border-2 border-dashed border-outline-variant rounded-xl flex flex-col items-center justify-center p-8 hover:border-primary group transition-colors cursor-pointer min-h-[260px]">
+<div class="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center mb-4 group-hover:bg-primary-container group-hover:text-on-primary-container transition-colors">
+<span class="material-symbols-outlined text-2xl">add</span>
+</div>
+<span class="font-label-caps text-label-caps text-on-surface-variant group-hover:text-primary">Start New Session</span>
+</div>
+</div>
+</section>
+<!-- Storage & Activity (Bento Grid Style) -->
+<section class="mt-12 grid grid-cols-1 lg:grid-cols-3 gap-6">
+<div class="lg:col-span-2 bento-card rounded-xl p-6">
+<div class="flex items-center justify-between mb-4">
+<h3 class="font-headline-md text-headline-md">Cloud Sync Status</h3>
+<span class="text-xs font-mono-data text-secondary flex items-center gap-1">
+<span class="w-2 h-2 rounded-full bg-secondary animate-pulse"></span>
+                        Live
+                    </span>
+</div>
+<div class="space-y-4">
+<div class="flex items-center justify-between text-sm">
+<span class="text-on-surface-variant">Primary Workspace (S3-Region-1)</span>
+<span class="font-mono-data">428 GB / 1 TB</span>
+</div>
+<div class="w-full bg-surface-container-highest h-1 rounded-full overflow-hidden">
+<div class="bg-primary h-full w-[42%]"></div>
+</div>
+<div class="grid grid-cols-3 gap-4 pt-4">
+<div class="flex flex-col">
+<span class="text-[10px] uppercase text-on-surface-variant tracking-wider">Video Assets</span>
+<span class="text-lg font-bold">312.4 GB</span>
+</div>
+<div class="flex flex-col">
+<span class="text-[10px] uppercase text-on-surface-variant tracking-wider">Audio Files</span>
+<span class="text-lg font-bold">84.2 GB</span>
+</div>
+<div class="flex flex-col">
+<span class="text-[10px] uppercase text-on-surface-variant tracking-wider">Proxies</span>
+<span class="text-lg font-bold">31.4 GB</span>
+</div>
+</div>
+</div>
+</div>
+<div class="bento-card rounded-xl p-6 flex flex-col justify-between">
+<div>
+<h3 class="font-headline-md text-headline-md mb-4">Quick Shortcuts</h3>
+<div class="space-y-3">
+<div class="flex items-center justify-between p-2 hover:bg-surface-container-highest rounded transition-colors cursor-pointer group">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary">auto_fix_high</span>
+<span class="text-sm">Auto-generate Proxies</span>
+</div>
+<span class="material-symbols-outlined text-xs opacity-0 group-hover:opacity-100">arrow_forward</span>
+</div>
+<div class="flex items-center justify-between p-2 hover:bg-surface-container-highest rounded transition-colors cursor-pointer group">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-secondary">movie_edit</span>
+<span class="text-sm">Consolidate Project</span>
+</div>
+<span class="material-symbols-outlined text-xs opacity-0 group-hover:opacity-100">arrow_forward</span>
+</div>
+<div class="flex items-center justify-between p-2 hover:bg-surface-container-highest rounded transition-colors cursor-pointer group">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[#ffb95f]">folder_zip</span>
+<span class="text-sm">Archive to Cold Storage</span>
+</div>
+<span class="material-symbols-outlined text-xs opacity-0 group-hover:opacity-100">arrow_forward</span>
+</div>
+</div>
+</div>
+<div class="pt-6 mt-6 border-t border-outline-variant flex items-center gap-3">
+<span class="material-symbols-outlined text-on-surface-variant">speed</span>
+<span class="text-xs text-on-surface-variant">System performance: <span class="text-secondary">Optimal</span></span>
+</div>
+</div>
+</section>
+</main>
+<!-- Floating Action for Context (FAB Suppression check: Only on Dashboard) -->
+<button class="fixed bottom-6 right-6 w-14 h-14 bg-primary text-on-primary rounded-full shadow-2xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all z-50">
+<span class="material-symbols-outlined text-3xl">add</span>
+</button>
+<!-- Bottom Nav for Mobile -->
+<nav class="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-surface-container border-t border-outline-variant flex items-center justify-around px-4 z-50">
+<button class="flex flex-col items-center text-primary">
+<span class="material-symbols-outlined">home</span>
+<span class="text-[10px] font-label-caps">Home</span>
+</button>
+<button class="flex flex-col items-center text-on-surface-variant">
+<span class="material-symbols-outlined">auto_fix_high</span>
+<span class="text-[10px] font-label-caps">Templates</span>
+</button>
+<button class="flex flex-col items-center text-on-surface-variant">
+<span class="material-symbols-outlined">perm_media</span>
+<span class="text-[10px] font-label-caps">Media</span>
+</button>
+<button class="flex flex-col items-center text-on-surface-variant">
+<span class="material-symbols-outlined">group</span>
+<span class="text-[10px] font-label-caps">Team</span>
+</button>
+</nav>
+<script>
+        // Simple Micro-interactions
+        document.querySelectorAll('.bento-card').forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                // Potential for subtle sound or haptic feedback triggers here
+            });
+        });
+
+        // Search bar focus effect
+        const searchInput = document.querySelector('input[type="text"]');
+        searchInput.addEventListener('focus', () => {
+            searchInput.parentElement.classList.add('ring-1', 'ring-primary');
+        });
+        searchInput.addEventListener('blur', () => {
+            searchInput.parentElement.classList.remove('ring-1', 'ring-primary');
+        });
+    </script>
+</body></html>
