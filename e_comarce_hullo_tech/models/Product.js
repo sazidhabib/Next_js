@@ -23,6 +23,10 @@ if (sequelize) {
       type: DataTypes.DECIMAL(10, 2),
       allowNull: false,
     },
+    regularPrice: {
+      type: DataTypes.DECIMAL(10, 2),
+      allowNull: true,
+    },
     category: {
       type: DataTypes.STRING,
       allowNull: false,

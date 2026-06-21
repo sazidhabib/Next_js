@@ -29,7 +29,7 @@ export default function ProductDetailContent({ product, category, relatedProduct
   const [paymentMode, setPaymentMode] = useState("cash");
 
   const images = Array.isArray(product.images) ? product.images : [product.image].filter(Boolean);
-  const regularPrice = Math.round(product.price * 1.12);
+  const regularPrice = product.regularPrice ? Math.round(parseFloat(product.regularPrice)) : Math.round(product.price * 1.12);
   const hasDiscount = regularPrice > product.price;
 
   return (
@@ -377,70 +377,79 @@ export default function ProductDetailContent({ product, category, relatedProduct
                   <section>
                     {specsObject && typeof specsObject === 'object' && !Array.isArray(specsObject) && Object.keys(specsObject).length > 0 ? (
                       <div className="space-y-8">
-                        {Object.entries(specsObject).map(([section, fields], idx) => (
-                          <div key={idx}>
-                            <h3 className="text-sm font-bold text-gray-900 mb-4 pb-2 border-b border-gray-100">
-                              {section}
-                            </h3>
-                            <div className="space-y-0">
-                              {Object.entries(fields).map(([key, value], i) => (
-                                <div
-                                  key={i}
-                                  className={`flex items-start gap-4 py-3 ${i % 2 === 0 ? "bg-[#fafbfc] -mx-4 px-4 rounded-lg" : ""
-                                  }`}
-                                >
-                                  {key && key.trim() !== "" && (
-                                    <span className="text-sm text-gray-500 w-48 shrink-0 font-medium">
-                                      {key}
-                                    </span>
-                                  )}
-                                  <span className="text-sm text-gray-900 whitespace-pre-line flex-1">
-                                    {value}
-                                  </span>
+                        {Object.entries(specsObject).map(([section, fields], idx) => {
+                          const fieldsEntries = Object.entries(fields || {});
+                          const allKeysEmpty = fieldsEntries.every(([key]) => !key || key.trim() === "");
+                          return (
+                            <div key={idx}>
+                              {!allKeysEmpty && (
+                                <h3 className="text-sm font-bold text-gray-900 mb-4 pb-2 border-b border-gray-100">
+                                  {section}
+                                </h3>
+                              )}
+                              <div className="space-y-0">
+                                {fieldsEntries.map(([key, value], i) => {
+                                  const isKeyEmpty = !key || key.trim() === "";
+                                  const displayKey = isKeyEmpty ? section : key;
+                                  return (
+                                    <div
+                                      key={i}
+                                      className={`flex items-start gap-4 py-3 ${i % 2 === 0 ? "bg-[#fafbfc] -mx-4 px-4 rounded-lg" : ""
+                                      }`}
+                                    >
+                                      <span className="text-sm text-gray-500 w-48 shrink-0 font-medium">
+                                        {displayKey}
+                                      </span>
+                                      <span className="text-sm text-gray-900 whitespace-pre-line flex-1">
+                                        {value}
+                                      </span>
+                                    </div>
+                                  );
+                                })}
                               </div>
-                            ))}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div>
-                      <h3 className="text-sm font-bold text-gray-900 mb-4 pb-2 border-b border-gray-100">
-                        Basic Information
-                      </h3>
-                      <div className="space-y-0">
-                        {[
-                          { label: "Name", value: product.name },
-                          { label: "Brand", value: product.brand },
-                          { label: "Model", value: product.model },
-                          ...(Array.isArray(product.specs) ? product.specs.map((spec, i) => ({
-                            label: `Specification ${i + 1}`,
-                            value: spec,
-                          })) : []),
-                        ].filter((item) => item.value).map((item, i) => (
-                          <div
-                            key={i}
-                            className={`flex items-start gap-4 py-3 ${i % 2 === 0 ? "bg-[#fafbfc] -mx-4 px-4 rounded-lg" : ""
-                            }`}
-                          >
-                            <span className="text-sm text-gray-500 w-48 shrink-0 font-medium">
-                              {item.label}
-                            </span>
-                            <span className="text-sm text-gray-900">
-                              {item.value}
-                            </span>
-                          </div>
-                        ))}
+                            </div>
+                          );
+                        })}
                       </div>
-                    </div>
-                  )}
-                </section>
-              )})()}
+                    ) : (
+                      <div>
+                        <h3 className="text-sm font-bold text-gray-900 mb-4 pb-2 border-b border-gray-100">
+                          Basic Information
+                        </h3>
+                        <div className="space-y-0">
+                          {[
+                            { label: "Name", value: product.name },
+                            { label: "Brand", value: product.brand },
+                            { label: "Model", value: product.model },
+                            ...(Array.isArray(product.specs) ? product.specs.map((spec, i) => ({
+                              label: `Specification ${i + 1}`,
+                              value: spec,
+                            })) : []),
+                          ].filter((item) => item.value).map((item, i) => (
+                            <div
+                              key={i}
+                              className={`flex items-start gap-4 py-3 ${i % 2 === 0 ? "bg-[#fafbfc] -mx-4 px-4 rounded-lg" : ""
+                              }`}
+                            >
+                              <span className="text-sm text-gray-500 w-48 shrink-0 font-medium">
+                                {item.label}
+                              </span>
+                              <span className="text-sm text-gray-900">
+                                {item.value}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </section>
+                );
+              })()}
 
               {activeTab === "Description" && (
                 <section>
                   <div className="prose prose-sm max-w-none text-gray-600 leading-relaxed">
-                    <p className="text-sm">{product.description}</p>
+                    <div className="text-sm rich-editor-content text-gray-600 leading-relaxed" dangerouslySetInnerHTML={{ __html: product.description }} />
                     {Array.isArray(product.specs) && product.specs.length > 0 && (
                       <div className="mt-6">
                         <h3 className="text-sm font-bold text-gray-900 mb-3">Key Highlights</h3>

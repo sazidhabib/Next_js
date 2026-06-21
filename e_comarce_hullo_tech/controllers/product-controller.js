@@ -90,7 +90,7 @@ const getProductBySlug = async (req, res) => {
 
 const createProduct = async (req, res) => {
   try {
-    const { name, slug, price, category, image, images, specs, specifications, description, featured, brand, model, stock, warranty } = req.body;
+    const { name, slug, price, regularPrice, category, image, images, specs, specifications, description, featured, brand, model, stock, warranty } = req.body;
 
     const finalSlug = slug && slug.trim() !== '' ? slug : slugify(name || '');
 
@@ -100,6 +100,7 @@ const createProduct = async (req, res) => {
         name,
         slug: finalSlug,
         price: parseFloat(price),
+        regularPrice: regularPrice ? parseFloat(regularPrice) : null,
         category,
         image,
         images: Array.isArray(images) ? images : [image],
@@ -118,7 +119,7 @@ const createProduct = async (req, res) => {
 
     try {
       const product = await Product.create({
-        name, slug: finalSlug, price, category, image, images, specs, specifications, description, featured, brand, model, stock, warranty
+        name, slug: finalSlug, price, regularPrice, category, image, images, specs, specifications, description, featured, brand, model, stock, warranty
       });
       return res.status(201).json({ success: true, data: product });
     } catch (dbError) {
@@ -128,6 +129,7 @@ const createProduct = async (req, res) => {
         name,
         slug: finalSlug,
         price: parseFloat(price),
+        regularPrice: regularPrice ? parseFloat(regularPrice) : null,
         category,
         image,
         images: Array.isArray(images) ? images : [image],
@@ -151,7 +153,7 @@ const createProduct = async (req, res) => {
 const updateProduct = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, slug, price, category, image, images, specs, specifications, description, featured, brand, model, stock, warranty } = req.body;
+    const { name, slug, price, regularPrice, category, image, images, specs, specifications, description, featured, brand, model, stock, warranty } = req.body;
 
     // Determine slug: if slug is provided and not empty, use it; else if name is provided, generate from name; else keep existing
     let finalSlug;
@@ -172,6 +174,7 @@ const updateProduct = async (req, res) => {
         name: name !== undefined ? name : fallbackProducts[productIdx].name,
         slug: finalSlug !== undefined ? finalSlug : fallbackProducts[productIdx].slug,
         price: price !== undefined ? parseFloat(price) : fallbackProducts[productIdx].price,
+        regularPrice: regularPrice !== undefined ? (regularPrice ? parseFloat(regularPrice) : null) : fallbackProducts[productIdx].regularPrice,
         category: category !== undefined ? category : fallbackProducts[productIdx].category,
         image: image !== undefined ? image : fallbackProducts[productIdx].image,
         images: images !== undefined ? (Array.isArray(images) ? images : [images]) : fallbackProducts[productIdx].images,
@@ -196,6 +199,7 @@ const updateProduct = async (req, res) => {
       product.name = name !== undefined ? name : product.name;
       product.slug = finalSlug !== undefined ? finalSlug : product.slug;
       product.price = price !== undefined ? price : product.price;
+      product.regularPrice = regularPrice !== undefined ? (regularPrice ? parseFloat(regularPrice) : null) : product.regularPrice;
       product.category = category !== undefined ? category : product.category;
       product.image = image !== undefined ? image : product.image;
       product.images = images !== undefined ? images : product.images;
@@ -222,6 +226,7 @@ const updateProduct = async (req, res) => {
         name: name !== undefined ? name : fallbackProducts[productIdx].name,
         slug: finalSlug !== undefined ? finalSlug : fallbackProducts[productIdx].slug,
         price: price !== undefined ? parseFloat(price) : fallbackProducts[productIdx].price,
+        regularPrice: regularPrice !== undefined ? (regularPrice ? parseFloat(regularPrice) : null) : fallbackProducts[productIdx].regularPrice,
         category: category !== undefined ? category : fallbackProducts[productIdx].category,
         image: image !== undefined ? image : fallbackProducts[productIdx].image,
         images: images !== undefined ? (Array.isArray(images) ? images : [images]) : fallbackProducts[productIdx].images,

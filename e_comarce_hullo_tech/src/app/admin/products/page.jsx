@@ -15,9 +15,12 @@ import {
   Settings,
   Grid,
   LogOut,
-  X
+  X,
+  FileImage
 } from 'lucide-react';
 import Link from 'next/link';
+import RichTextEditor from '../../../components/RichTextEditor';
+import MediaLibraryModal from '../../../components/MediaLibraryModal';
 
 export default function AdminProducts() {
   const { isAuthorized, user, token, isLoading: authLoading } = useAdminAuth();
@@ -44,13 +47,18 @@ export default function AdminProducts() {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
+  const [isMediaOpen, setIsMediaOpen] = useState(false);
+  const [mediaMode, setMediaMode] = useState('single'); // 'single' or 'multi'
+  
   const [productForm, setProductForm] = useState({
     id: null,
     name: '',
     slug: '',
     price: '',
+    regularPrice: '',
     category: '',
     image: '',
+    images: [],
     specs: '',
     specifications: {},
     warranty: '',
@@ -141,9 +149,12 @@ export default function AdminProducts() {
     const payload = {
       ...productForm,
       price: parseFloat(productForm.price),
+      regularPrice: productForm.regularPrice ? parseFloat(productForm.regularPrice) : null,
       specs: specsArray,
       specifications: convertToDbStructure(productForm.specifications),
-      images: [productForm.image] // Use single image as array
+      images: Array.isArray(productForm.images) && productForm.images.length > 0 
+        ? productForm.images 
+        : [productForm.image].filter(Boolean)
     };
 
     try {
@@ -217,14 +228,17 @@ export default function AdminProducts() {
 
     const parsedSpecs = safeParse(product.specifications, {});
     const parsedSpecsArray = safeParse(product.specs, []);
+    const parsedImagesArray = safeParse(product.images, []);
 
     setProductForm({
       id: product.id,
       name: product.name,
       slug: product.slug,
       price: product.price,
+      regularPrice: product.regularPrice || '',
       category: product.category,
       image: product.image,
+      images: Array.isArray(parsedImagesArray) ? parsedImagesArray : (product.image ? [product.image] : []),
       specs: Array.isArray(parsedSpecsArray) ? parsedSpecsArray.join(', ') : '',
       specifications: convertToEditorStructure(parsedSpecs),
       warranty: product.warranty || '',
@@ -244,8 +258,10 @@ export default function AdminProducts() {
       name: '',
       slug: '',
       price: '',
+      regularPrice: '',
       category: categories[0]?.slug || '',
       image: '',
+      images: [],
       specs: '',
       specifications: [
         {
@@ -360,6 +376,23 @@ export default function AdminProducts() {
     }));
   };
 
+  const handleMediaSelect = (urls) => {
+    if (mediaMode === 'single') {
+      setProductForm(prev => ({
+        ...prev,
+        image: urls // In single mode, urls is a single string URL
+      }));
+    } else {
+      // In multi mode, urls is an array of string URLs
+      const existingImages = productForm.images || [];
+      const uniqueNewUrls = urls.filter(url => !existingImages.includes(url));
+      setProductForm(prev => ({
+        ...prev,
+        images: [...existingImages, ...uniqueNewUrls]
+      }));
+    }
+  };
+
   // Show loading screen while checking auth
   if (authLoading) {
     return (
@@ -424,6 +457,14 @@ export default function AdminProducts() {
           >
             <Grid className="w-5 h-5" />
             <span>Category Manager</span>
+          </Link>
+
+          <Link
+            href="/admin/media"
+            className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition text-left hover:bg-slate-800 hover:text-slate-200"
+          >
+            <FileImage className="w-5 h-5" />
+            <span>Media Gallery</span>
           </Link>
         </nav>
 
@@ -586,15 +627,26 @@ export default function AdminProducts() {
                     <input
                       type="text" required
                       value={productForm.slug}
+                      onChange={(e) => setProductForm({ ...productForm, slug: e.target.value })}
                       className="w-full px-4 py-2 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 focus:outline-none focus:border-blue-500"
                     />
                   </div>
-                  <div>
+                   <div>
                     <label className="block text-sm font-semibold text-slate-300 mb-1">Price (৳)</label>
                     <input
                       type="number" required step="0.01"
                       value={productForm.price}
                       onChange={(e) => setProductForm({ ...productForm, price: e.target.value })}
+                      className="w-full px-4 py-2 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 focus:outline-none focus:border-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-300 mb-1">Regular Price (৳) (Strikethrough)</label>
+                    <input
+                      type="number" step="0.01"
+                      value={productForm.regularPrice}
+                      onChange={(e) => setProductForm({ ...productForm, regularPrice: e.target.value })}
+                      placeholder="e.g. 1500 (Optional)"
                       className="w-full px-4 py-2 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 focus:outline-none focus:border-blue-500"
                     />
                   </div>
@@ -628,7 +680,7 @@ export default function AdminProducts() {
                       className="w-full px-4 py-2 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 focus:outline-none focus:border-blue-500"
                     />
                   </div>
-                  <div className="md:col-span-2">
+                  <div>
                     <label className="block text-sm font-semibold text-slate-300 mb-1">Warranty</label>
                     <input
                       type="text"
@@ -638,14 +690,81 @@ export default function AdminProducts() {
                       className="w-full px-4 py-2 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 focus:outline-none focus:border-blue-500"
                     />
                   </div>
-                  <div className="md:col-span-2">
-                    <label className="block text-sm font-semibold text-slate-300 mb-1">Image URL</label>
-                    <input
-                      type="text" required
-                      value={productForm.image}
-                      onChange={(e) => setProductForm({ ...productForm, image: e.target.value })}
-                      className="w-full px-4 py-2 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 focus:outline-none focus:border-blue-500"
-                    />
+                  {/* Main Product Image */}
+                  <div className="md:col-span-2 border border-slate-800/80 rounded-xl p-4 bg-slate-900/30">
+                    <label className="block text-sm font-semibold text-slate-300 mb-2">Main Product Image</label>
+                    <div className="flex flex-col sm:flex-row gap-4 items-center">
+                      <div className="w-20 h-20 bg-slate-950 border border-slate-800 rounded-xl overflow-hidden flex items-center justify-center shrink-0">
+                        {productForm.image ? (
+                          <img src={productForm.image} alt="Preview" className="object-contain w-full h-full p-1" />
+                        ) : (
+                          <ImageIcon className="w-6 h-6 text-slate-650" />
+                        )}
+                      </div>
+                      <div className="flex-1 w-full space-y-2">
+                        <div className="flex gap-2">
+                          <button
+                            type="button"
+                            onClick={() => { setMediaMode('single'); setIsMediaOpen(true); }}
+                            className="bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs px-3.5 py-2 rounded-lg transition"
+                          >
+                            Choose Main Image
+                          </button>
+                          {productForm.image && (
+                            <button
+                              type="button"
+                              onClick={() => setProductForm({ ...productForm, image: '' })}
+                              className="bg-slate-800 hover:bg-slate-750 text-slate-350 hover:text-red-400 font-semibold text-xs px-3.5 py-2 rounded-lg transition border border-slate-700/40"
+                            >
+                              Remove
+                            </button>
+                          )}
+                        </div>
+                        <input
+                          type="text"
+                          value={productForm.image}
+                          onChange={(e) => setProductForm({ ...productForm, image: e.target.value })}
+                          placeholder="Or paste an image URL here..."
+                          className="w-full px-3 py-1.5 bg-slate-950 border border-slate-800 rounded-lg text-slate-100 text-xs focus:outline-none focus:border-blue-500 transition"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Product Gallery (Multiple Images) */}
+                  <div className="md:col-span-2 border border-slate-800/80 rounded-xl p-4 bg-slate-900/30">
+                    <div className="flex justify-between items-center mb-3">
+                      <label className="block text-sm font-semibold text-slate-300">Product Gallery (Additional Images)</label>
+                      <button
+                        type="button"
+                        onClick={() => { setMediaMode('multi'); setIsMediaOpen(true); }}
+                        className="bg-slate-800 hover:bg-slate-750 text-slate-350 hover:text-blue-400 font-semibold text-xs px-3 py-1.5 rounded-lg transition border border-slate-700/40"
+                      >
+                        Add Gallery Image(s)
+                      </button>
+                    </div>
+                    {productForm.images && productForm.images.length > 0 ? (
+                      <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
+                        {productForm.images.map((imgUrl, i) => (
+                          <div key={i} className="group relative aspect-square bg-slate-950 border border-slate-800 rounded-lg overflow-hidden">
+                            <img src={imgUrl} alt={`Gallery ${i}`} className="object-contain w-full h-full p-1" />
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const newImages = productForm.images.filter((_, idx) => idx !== i);
+                                setProductForm({ ...productForm, images: newImages });
+                              }}
+                              className="absolute inset-0 bg-slate-950/75 opacity-0 group-hover:opacity-100 flex items-center justify-center transition duration-200 text-red-500 hover:text-red-450"
+                              title="Remove image from gallery"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-xs text-slate-500 italic py-2">No additional images added yet. Click "Add Gallery Image(s)" to upload/select.</p>
+                    )}
                   </div>
                   <div className="md:col-span-2">
                     <label className="block text-sm font-semibold text-slate-300 mb-1">Key Features (Comma-separated)</label>
@@ -702,11 +821,10 @@ export default function AdminProducts() {
                   </div>
                   <div className="md:col-span-2">
                     <label className="block text-sm font-semibold text-slate-300 mb-1">Description</label>
-                    <textarea
-                      rows="3"
+                    <RichTextEditor
                       value={productForm.description}
-                      onChange={(e) => setProductForm({ ...productForm, description: e.target.value })}
-                      className="w-full px-4 py-2 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 focus:outline-none focus:border-blue-500 resize-none"
+                      onChange={(val) => setProductForm({ ...productForm, description: val })}
+                      placeholder="Enter product description (supports formatting, lists, links, images, and videos)..."
                     />
                   </div>
                   <div className="flex items-center space-x-6 pt-2">
@@ -751,6 +869,14 @@ export default function AdminProducts() {
             </div>
           </div>
         )}
+
+        <MediaLibraryModal
+          isOpen={isMediaOpen}
+          onClose={() => setIsMediaOpen(false)}
+          onSelect={handleMediaSelect}
+          multiSelect={mediaMode === 'multi'}
+          title={mediaMode === 'multi' ? "Add Gallery Images" : "Select Main Product Image"}
+        />
       </main>
     </div>
   );

@@ -14,7 +14,8 @@ import {
   Settings,
   Package,
   LogOut,
-  X
+  X,
+  FileImage
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -211,6 +212,14 @@ export default function AdminCategories() {
           >
             <Grid className="w-5 h-5" />
             <span>Category Manager</span>
+          </Link>
+
+          <Link
+            href="/admin/media"
+            className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition text-left hover:bg-slate-800 hover:text-slate-200"
+          >
+            <FileImage className="w-5 h-5" />
+            <span>Media Gallery</span>
           </Link>
         </nav>
 

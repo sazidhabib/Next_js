@@ -21,6 +21,22 @@ const nextConfig = {
         source: '/api/products/:path*',
         destination: 'http://localhost:5000/api/products/:path*',
       },
+      {
+        source: '/api/upload',
+        destination: 'http://localhost:5000/api/upload',
+      },
+      {
+        source: '/api/images',
+        destination: 'http://localhost:5000/api/images',
+      },
+      {
+        source: '/api/images/:path*',
+        destination: 'http://localhost:5000/api/images/:path*',
+      },
+      {
+        source: '/uploads/:path*',
+        destination: 'http://localhost:5000/uploads/:path*',
+      },
     ];
   },
   webpack: (config, { isServer }) => {
