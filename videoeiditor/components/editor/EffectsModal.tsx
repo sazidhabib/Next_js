@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { useEditorStore, editorStore, getClipById } from '../../store/editorStore';
+import { useEditorStore, editorStore, getClipFromState } from '../../store/editorStore';
 
 interface EffectsModalProps {
   isOpen: boolean;
@@ -9,8 +9,8 @@ interface EffectsModalProps {
 }
 
 export default function EffectsModal({ isOpen, onClose }: EffectsModalProps) {
-  const selectedClipId = useEditorStore((state) => state.selectedClipId);
-  const selectedClip = getClipById(selectedClipId);
+  const selectedClip = useEditorStore((state) => getClipFromState(state, state.selectedClipId));
+  const selectedClipId = selectedClip?.id || null;
 
   const handleApplyEffect = (effectName: string) => {
     if (!selectedClipId || !selectedClip) return;

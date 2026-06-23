@@ -1,11 +1,11 @@
 'use client';
 
 import React, { useRef } from 'react';
-import { useEditorStore, editorStore, getClipById } from '../../store/editorStore';
+import { useEditorStore, editorStore, getClipFromState } from '../../store/editorStore';
 
 export default function InspectorPanel() {
-  const selectedClipId = useEditorStore((state) => state.selectedClipId);
-  const selectedClip = getClipById(selectedClipId);
+  const selectedClip = useEditorStore((state) => getClipFromState(state, state.selectedClipId));
+  const selectedClipId = selectedClip?.id || null;
 
   const startXRef = useRef(0);
   const startValRef = useRef(0);
