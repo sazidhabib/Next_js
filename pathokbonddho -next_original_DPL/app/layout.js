@@ -8,6 +8,7 @@ import { MenuProvider } from './providers/MenuProvider';
 import { SettingsProvider } from './providers/SettingsProvider';
 import { ToastContainer } from 'react-toastify';
 import PopupAd from './components/PopupAd';
+import Script from 'next/script';
 
 async function fetchWithTimeout(url, options = {}, timeoutMs = 5000) {
   const controller = new AbortController();
@@ -44,7 +45,7 @@ export async function generateMetadata() {
   // Ensure favicon is a valid file path, not a data URL
   const isValidPath = faviconPath && !faviconPath.startsWith('data:');
   const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';
-  
+
   let faviconUrl = undefined;
   if (isValidPath) {
     faviconUrl = faviconPath.startsWith('http') ? faviconPath : `${baseUrl}${faviconPath}`;
@@ -61,6 +62,19 @@ export default function RootLayout({ children }) {
   return (
     <html lang="bn">
       <head>
+        {/* Google tag (gtag.js) */}
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-0TFVFXRWKF"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-0TFVFXRWKF');
+          `}
+        </Script>
       </head>
       <body suppressHydrationWarning>
         <AuthProvider>
