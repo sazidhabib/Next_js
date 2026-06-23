@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
+import api from '@/app/lib/api';
 
 const PhotocardGenerator = () => {
     const [imageSrc, setImageSrc] = useState(null);
@@ -9,6 +10,8 @@ const PhotocardGenerator = () => {
     const [position, setPosition] = useState({ x: 0, y: 0 });
     const [isDragging, setIsDragging] = useState(false);
     const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+    const [imageRatio, setImageRatio] = useState(1);
+    const [isSharing, setIsSharing] = useState(false);
     const containerRef = useRef(null);
 
     // Default placeholder frame (a simple border with a transparent center)
@@ -22,6 +25,14 @@ const PhotocardGenerator = () => {
             setImageSrc(imageUrl);
             setScale(1);
             setPosition({ x: 0, y: 0 });
+            setImageRatio(1);
+        }
+    };
+
+    const handleImageLoad = (e) => {
+        const { naturalWidth, naturalHeight } = e.target;
+        if (naturalWidth && naturalHeight) {
+            setImageRatio(naturalWidth / naturalHeight);
         }
     };
 
@@ -173,6 +184,125 @@ const PhotocardGenerator = () => {
         }
     };
 
+    const handleFacebookShare = () => {
+        if (isSharing) return;
+        setIsSharing(true);
+
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+
+        const canvasWidth = 1080;
+        const canvasHeight = 1080;
+        canvas.width = canvasWidth;
+        canvas.height = canvasHeight;
+
+        // Draw background (white)
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        const uploadAndShare = () => {
+            const frameImg = new window.Image();
+            frameImg.crossOrigin = 'anonymous';
+
+            const proceedWithUpload = async () => {
+                try {
+                    // Export canvas as base64 data URL
+                    const dataUrl = canvas.toDataURL('image/png');
+                    
+                    // Upload to server
+                    const response = await api.post('/public/photocard', { image: dataUrl });
+                    const imageUrl = response.data.url;
+
+                    // Construct share page URL
+                    const sharePageUrl = `${window.location.origin}/photocard/share?img=${imageUrl}&name=${encodeURIComponent(name || 'ফটোকার্ড')}`;
+                    
+                    // Open Facebook sharer
+                    window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(sharePageUrl)}`, '_blank');
+                } catch (error) {
+                    console.error('Error sharing photocard:', error);
+                    alert('ফেসবুকে শেয়ার করতে সমস্যা হয়েছে। দয়া করে আবার চেষ্টা করুন।');
+                } finally {
+                    setIsSharing(false);
+                }
+            };
+
+            frameImg.onload = () => {
+                // Draw frame
+                ctx.drawImage(frameImg, 0, 0, canvasWidth, canvasHeight);
+
+                // Draw Name inside the card area
+                ctx.fillStyle = '#ffffff'; // White text
+                ctx.font = 'bold 52px "Hind Siliguri", sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'bottom';
+                ctx.fillText(name || 'আপনার নাম', canvasWidth / 2, canvasHeight * 0.87);
+
+                proceedWithUpload();
+            };
+
+            frameImg.onerror = () => {
+                console.warn('Frame image not found. Sharing without frame.');
+                ctx.fillStyle = '#006a60';
+                ctx.font = 'bold 52px "Hind Siliguri", sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'bottom';
+                ctx.fillText(name || 'আপনার নাম', canvasWidth / 2, canvasHeight * 0.86);
+
+                proceedWithUpload();
+            };
+
+            frameImg.src = frameSrc;
+        };
+
+        if (imageSrc) {
+            const userImg = new window.Image();
+            userImg.crossOrigin = 'anonymous';
+            userImg.onload = () => {
+                const container = containerRef.current;
+                if (!container) {
+                    setIsSharing(false);
+                    return;
+                }
+
+                // Ratio relative to the 1080x1080 canvas
+                const ratio = canvasWidth / container.clientWidth;
+                const imgWidth = userImg.width;
+                const imgHeight = userImg.height;
+
+                const containerRatio = container.clientWidth / container.clientHeight;
+                const imgRatio = imgWidth / imgHeight;
+
+                let baseDrawWidth, baseDrawHeight;
+                if (imgRatio > containerRatio) {
+                    baseDrawHeight = canvasHeight;
+                    baseDrawWidth = canvasHeight * imgRatio;
+                } else {
+                    baseDrawWidth = canvasWidth;
+                    baseDrawHeight = canvasWidth / imgRatio;
+                }
+
+                const finalDrawWidth = baseDrawWidth * scale;
+                const finalDrawHeight = baseDrawHeight * scale;
+
+                const centerX = (canvasWidth - finalDrawWidth) / 2;
+                const centerY = (canvasHeight - finalDrawHeight) / 2;
+
+                const finalX = centerX + (position.x * ratio);
+                const finalY = centerY + (position.y * ratio);
+
+                ctx.drawImage(userImg, finalX, finalY, finalDrawWidth, finalDrawHeight);
+                uploadAndShare();
+            };
+            userImg.onerror = () => {
+                console.error('Failed to load user image.');
+                setIsSharing(false);
+            };
+            userImg.src = imageSrc;
+        } else {
+            uploadAndShare();
+        }
+    };
+
     return (
         <div className="photocard-container p-4 max-w-6xl mx-auto my-8 grid grid-cols-1 md:grid-cols-2 gap-8">
             <style jsx>{`
@@ -194,11 +324,8 @@ const PhotocardGenerator = () => {
                 }
                 .user-image {
                     position: absolute;
-                    top: 0;
-                    left: 0;
-                    width: 100%;
-                    height: 100%;
-                    object-fit: cover;
+                    max-width: none !important;
+                    max-height: none !important;
                     transform-origin: center center;
                 }
                 .frame-overlay {
@@ -288,8 +415,14 @@ const PhotocardGenerator = () => {
                             src={imageSrc}
                             alt="User upload"
                             className="user-image"
+                            onLoad={handleImageLoad}
                             style={{
-                                transform: `translate(${position.x}px, ${position.y}px) scale(${scale})`
+                                width: imageRatio > 1 ? `${imageRatio * 100}%` : '100%',
+                                height: imageRatio <= 1 ? `${(1 / imageRatio) * 100}%` : '100%',
+                                top: '50%',
+                                left: '50%',
+                                transform: `translate(calc(-50% + ${position.x}px), calc(-50% + ${position.y}px)) scale(${scale})`,
+                                transformOrigin: 'center center'
                             }}
                             draggable="false"
                         />
@@ -359,12 +492,40 @@ const PhotocardGenerator = () => {
                     />
                 </div>
 
-                <div className="mt-4">
+                <div className="mt-4 d-flex flex-column gap-2">
                     <button
                         onClick={handleDownload}
                         className="btn btn-download w-100 shadow"
                     >
                         <i className="bi bi-download me-2"></i> ফটোকার্ড ডাউনলোড করুন
+                    </button>
+                    <button
+                        onClick={handleFacebookShare}
+                        className="btn btn-share w-100 shadow d-flex align-items-center justify-content-center gap-2"
+                        disabled={isSharing}
+                        style={{
+                            background: '#1877f2',
+                            color: 'white',
+                            border: 'none',
+                            padding: '12px 24px',
+                            borderRadius: '8px',
+                            fontSize: '1.1rem',
+                            fontWeight: 'bold',
+                            cursor: 'pointer',
+                            transition: 'transform 0.2s, box-shadow 0.2s',
+                            opacity: isSharing ? 0.7 : 1
+                        }}
+                    >
+                        {isSharing ? (
+                            <>
+                                <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                লিঙ্ক তৈরি হচ্ছে...
+                            </>
+                        ) : (
+                            <>
+                                <i className="fab fa-facebook-f me-2"></i> ফেসবুকে শেয়ার করুন
+                            </>
+                        )}
                     </button>
                 </div>
             </div>

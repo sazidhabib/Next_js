@@ -1,0 +1,355 @@
+"use client";
+import React, { useState, useEffect } from 'react';
+import api, { STATIC_URL } from '@/app/lib/api';
+import { Card, Badge, Spinner } from 'react-bootstrap';
+import Link from 'next/link';
+import Image from 'next/image';
+import { formatBengaliDate } from '@/app/lib/dateUtils';
+
+const NewsWidget = ({ cell, isPriority }) => {
+    const [news, setNews] = useState(cell.resolvedContent || null);
+    const [loading, setLoading] = useState(!cell.resolvedContent);
+    const STATIC_BASE = STATIC_URL || 'http://localhost:5000';
+
+    const stripHtml = (html) => {
+        if (!html) return '';
+        return html.replace(/<[^>]*>?/gm, '');
+    };
+
+    const getYoutubeId = (url) => {
+        if (!url) return null;
+        const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([^&\n?#]+)/);
+        return match ? match[1] : null;
+    };
+
+    useEffect(() => {
+        // Skip fetching if content is already resolved by the server
+        if (cell.resolvedContent) {
+            if (cell.resolvedContent.status === 'published') {
+                setNews(cell.resolvedContent);
+            } else {
+                setNews(null);
+            }
+            setLoading(false);
+            return;
+        }
+
+        const fetchNews = async () => {
+            try {
+                if (!cell.contentId && !cell.tag) {
+                    setLoading(false);
+                    return;
+                }
+
+                if (cell.contentId) {
+                    const response = await api.get(`/news/${cell.contentId}`);
+                    const data = response.data.data || response.data.news || response.data;
+                    if (data && data.status === 'published') {
+                        setNews(data);
+                    } else {
+                        setNews(null);
+                    }
+                } else if (cell.tag) {
+                    const response = await api.get('/news', { params: { tag: cell.tag, limit: 1 } });
+                    const newsItems = response.data.news || response.data.rows || [];
+                    if (newsItems.length > 0 && newsItems[0].status === 'published') {
+                        setNews(newsItems[0]);
+                    } else {
+                        setNews(null);
+                    }
+                }
+            } catch (err) {
+                console.error('Error fetching news widget data:', err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchNews();
+    }, [cell.contentId, cell.tag, cell.resolvedContent, STATIC_BASE]);
+
+    const getImageUrl = (newsItem) => {
+        if (!newsItem) return null;
+
+        // In widgets (frontend), we prioritize thumbImage if present.
+        // Lead image is used in the news details page.
+        const imagePath = newsItem.thumbImage || newsItem.leadImage || newsItem.metaImage;
+
+        if (!imagePath && newsItem.newsType === 'video' && newsItem.videoLink) {
+            const videoId = getYoutubeId(newsItem.videoLink);
+            if (videoId) return `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+        }
+
+        if (!imagePath) return null;
+        if (imagePath.startsWith('http')) {
+            // Only force https if not on a local environment
+            const isLocal = imagePath.includes('127.0.0.1') || imagePath.includes('localhost');
+            if (isLocal) return imagePath;
+            return imagePath.replace(/^http:\/\//, 'https://');
+        }
+        return `${STATIC_BASE}/${imagePath.replace(/^\//, '')}`;
+    };
+
+    const formatDate = (dateStr) => {
+        return formatBengaliDate(dateStr);
+    };
+
+    const getImageHeight = () => {
+        const rowSpan = cell.rowSpan || 1;
+        const colSpan = cell.colSpan || 1;
+        const baseHeight = 160;
+        return rowSpan > 1 || colSpan > 1
+            ? baseHeight * rowSpan + (rowSpan - 1) * 20
+            : baseHeight;
+    };
+
+    const renderCategoryBadgeContent = (category) => {
+        if (!category) return null;
+        const name = category.name?.trim();
+        if (name === 'ছবি') return <i className="fas fa-camera" title="ছবি"></i>;
+        if (name === 'ভিডিও') return <i className="fas fa-video" title="ভিডিও"></i>;
+        return name;
+    };
+
+    if (loading && !news) {
+        return <div className="text-center p-2"><Spinner animation="border" size="sm" /></div>;
+    }
+
+    if (!news) return null;
+
+    const design = cell.design || 'title-image-top';
+    const imageUrl = getImageUrl(news);
+    const newsLink = `/news/${news._id || news.id}`;
+    const imageHeight = getImageHeight();
+    const isMerged = (cell.rowSpan || 1) > 1 || (cell.colSpan || 1) > 1;
+
+    const NewsImage = ({ className, currentDesign }) => {
+        if (!imageUrl) {
+            return (
+                <div className={`${className} bg-light d-flex align-items-center justify-content-center text-muted`}>
+                    📰
+                </div>
+            );
+        }
+
+        // Side layout images are smaller (90px), top layout images are taller (180px)
+        const minHeight = (currentDesign === 'title-image-left' || currentDesign === 'image-left' || currentDesign === 'title-image-right' || currentDesign === 'image-right')
+            ? '90px'
+            : '120px';
+
+        const wrapperMinHeight = currentDesign === 'text-inside-image' ? '100%' : minHeight;
+
+        return (
+            <div className="news-image-container" style={{ position: 'relative', width: '100%', height: '100%', minHeight: wrapperMinHeight }}>
+                <Image
+                    src={imageUrl}
+                    alt={news.newsHeadline}
+                    fill
+                    className={`${className} object-fit-cover`}
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    priority={isPriority !== undefined ? isPriority : (cell.rowSpan > 1 || cell.colSpan > 1)} // Strictly use isPriority if provided, otherwise fallback to span logic
+                    quality={90}
+                />
+            </div>
+        );
+    };
+
+    if (design === 'text-inside-image') {
+        return (
+            <div className="custom-font news-design-text-inside-image d-flex flex-column overflow-hidden position-relative" style={{ minHeight: '250px', height: isMerged ? `${imageHeight - 100}px` : '250px' }}>
+                <Link href={newsLink} className="text-decoration-none d-flex flex-column flex-grow-1 h-100">
+                    <NewsImage className="text-inside-image-img flex-grow-1" currentDesign={design} />
+                    <div className="text-inside-image-overlay position-absolute bottom-0 start-0 end-0 p-3">
+                        <h4 className="text-white mb-2 fw-bold font-bangla text-inside-image-title ">
+                            {news.alternativeHeadline || news.newsHeadline}
+                        </h4>
+                        <small className="text-light opacity-75">{formatDate(news.createdAt)}</small>
+                    </div>
+                </Link>
+                {news.Categories && news.Categories[0] && (
+                    <Badge bg="danger" className="position-absolute top-0 start-0 m-2" style={{ zIndex: 2 }}>
+                        {renderCategoryBadgeContent(news.Categories[0])}
+                    </Badge>
+                )}
+            </div>
+        );
+    }
+
+
+    if (design === 'title-only') {
+        return (
+            <div className="custom-font news-design-title-only h-100 pb-2 position-relative group hover-bg-light transition p-2">
+                <Link href={newsLink} className="text-decoration-none text-dark stretched-link">
+                    <h5 className="fw-bold mb-1 font-bangla hover-danger">
+                        {news.alternativeHeadline || news.newsHeadline}
+                    </h5>
+                </Link>
+                {news.shortDescription && (
+                    <p className="small text-muted mb-2 font-bangla d-md-none">{stripHtml(news.shortDescription)}</p>
+                )}
+                <small className="text-muted">{formatDate(news.createdAt)}</small>
+            </div>
+        );
+    }
+
+    if (design === 'title-image-left') {
+        return (
+            <div className="custom-font news-design-side-layout pb-3 position-relative group hover-bg-light transition p-2">
+                <Link href={newsLink} className="text-decoration-none text-dark d-block mb-2 stretched-link">
+                    <h5 className="fw-bold font-bangla mb-1 hover-danger">
+                        {news.alternativeHeadline || news.newsHeadline}
+                    </h5>
+                </Link>
+                <div className="d-flex gap-3">
+                    {imageUrl && (
+                        <div className="side-image-container flex-shrink-0 position-relative" style={{ width: '120px', height: '90px' }}>
+                            <div className="d-block h-100 overflow-hidden ">
+                                <NewsImage className="hover-zoom" currentDesign={design} />
+                            </div>
+                            {news.Categories && news.Categories[0] && (
+                                <Badge bg="danger" className="position-absolute top-0 start-0 m-1" style={{ zIndex: 2 }}>
+                                    {renderCategoryBadgeContent(news.Categories[0])}
+                                </Badge>
+                            )}
+                        </div>
+                    )}
+                    <div className="flex-grow-1">
+                        {news.shortDescription && (
+                            <p className="small text-muted mb-2 font-bangla">{stripHtml(news.shortDescription)}</p>
+                        )}
+                        <small className="text-muted">{formatDate(news.createdAt)}</small>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    if (design === 'image-left') {
+        return (
+            <div className="custom-font news-design-side-layout d-flex gap-3 pb-3 position-relative group hover-bg-light transition p-2">
+                {imageUrl && (
+                    <div className="side-image-container flex-shrink-0 position-relative" style={{ width: '120px', height: '90px' }}>
+                        <div className="d-block h-100 overflow-hidden">
+                            <NewsImage className="hover-zoom" currentDesign={design} />
+                        </div>
+                        {news.Categories && news.Categories[0] && (
+                            <Badge bg="danger" className="position-absolute top-0 start-0 m-2" style={{ zIndex: 2 }}>
+                                {renderCategoryBadgeContent(news.Categories[0])}
+                            </Badge>
+                        )}
+                    </div>
+                )}
+                <div className="flex-grow-1">
+                    <Link href={newsLink} className="text-decoration-none text-dark stretched-link">
+                        <h5 className="fw-bold mb-2 font-bangla hover-danger">
+                            {news.alternativeHeadline || news.newsHeadline}
+                        </h5>
+                    </Link>
+                    {news.shortDescription && (
+                        <p className="small text-muted mb-2 font-bangla d-md-none">{stripHtml(news.shortDescription)}</p>
+                    )}
+                    <small className="text-muted">{formatDate(news.createdAt)}</small>
+                </div>
+            </div>
+        );
+    }
+
+    if (design === 'title-image-right') {
+        return (
+            <div className="custom-font news-design-side-layout pb-3 position-relative group hover-bg-light transition p-2">
+                <Link href={newsLink} className="text-decoration-none text-dark d-block mb-2 stretched-link">
+                    <h5 className="fw-bold font-bangla mb-1 hover-danger">
+                        {news.alternativeHeadline || news.newsHeadline}
+                    </h5>
+                </Link>
+                <div className="d-flex gap-3">
+                    <div className="flex-grow-1">
+                        {news.shortDescription && (
+                            <p className="small text-muted mb-2 font-bangla">{stripHtml(news.shortDescription)}</p>
+                        )}
+                        <small className="text-muted">{formatDate(news.createdAt)}</small>
+                    </div>
+                    {imageUrl && (
+                        <div className="side-image-container flex-shrink-0 position-relative" style={{ width: '120px', height: '90px' }}>
+                            <div className="d-block h-100 overflow-hidden">
+                                <NewsImage className="hover-zoom" currentDesign={design} />
+                            </div>
+                            {news.Categories && news.Categories[0] && (
+                                <Badge bg="danger" className="position-absolute top-0 end-0 m-1" style={{ zIndex: 2 }}>
+                                    {renderCategoryBadgeContent(news.Categories[0])}
+                                </Badge>
+                            )}
+                        </div>
+                    )}
+                </div>
+            </div>
+        );
+    }
+
+    if (design === 'image-right') {
+        return (
+            <div className="custom-font news-design-side-layout d-flex gap-3 pb-3 position-relative group hover-bg-light transition p-2">
+                <div className="flex-grow-1">
+                    <Link href={newsLink} className="text-decoration-none text-dark stretched-link">
+                        <h5 className="fw-bold mb-2 font-bangla hover-danger">
+                            {news.alternativeHeadline || news.newsHeadline}
+                        </h5>
+                    </Link>
+                    {news.shortDescription && (
+                        <p className="small text-muted mb-2 font-bangla d-md-none">{stripHtml(news.shortDescription)}</p>
+                    )}
+                    <small className="text-muted">{formatDate(news.createdAt)}</small>
+                </div>
+                {imageUrl && (
+                    <div className="side-image-container flex-shrink-0 position-relative" style={{ width: '120px', height: '90px' }}>
+                        <div className="d-block h-100 overflow-hidden">
+                            <NewsImage className="hover-zoom" currentDesign={design} />
+                        </div>
+                        {news.Categories && news.Categories[0] && (
+                            <Badge bg="danger" className="position-absolute top-0 end-0 m-2" style={{ zIndex: 2 }}>
+                                {renderCategoryBadgeContent(news.Categories[0])}
+                            </Badge>
+                        )}
+                    </div>
+                )}
+            </div>
+        );
+    }
+
+
+    return (
+        <Card className="h-100 custom-font border-0 news-widget-card group shadow-sm-hover transition-all p-1 position-relative" style={{ display: 'flex', flexDirection: 'column' }}>
+            <div
+                className={`card-img-wrapper position-relative overflow-hidden mb-2 ${design === 'image-top' || !design ? 'news-design-image-top' : ''}`}
+                style={isMerged
+                    ? { flex: '1 1 auto', minHeight: '200px', display: 'flex', flexDirection: 'column' }
+                    : { minHeight: `${imageHeight}px`, display: 'flex', flexDirection: 'column' }
+                }
+            >
+                <div className="d-block h-100">
+                    <NewsImage className="transition-transform group-hover-scale" currentDesign={design} />
+                </div>
+                {news.Categories && news.Categories[0] && (
+                    <Badge bg="danger" className="position-absolute top-0 start-0 m-2 shadow-sm" style={{ zIndex: 2 }}>
+                        {renderCategoryBadgeContent(news.Categories[0])}
+                    </Badge>
+                )}
+            </div>
+            <Card.Body className="p-0" style={isMerged ? { flex: '0 0 auto' } : {}}>
+                <Link href={newsLink} className="text-decoration-none text-dark stretched-link">
+                    <h5 className="fw-bold mb-2 font-bangla news-card-title hover-danger">
+                        {news.alternativeHeadline || news.newsHeadline}
+                    </h5>
+                </Link>
+                {news.shortDescription && !cell.design && (
+                    <p className="small text-muted line-clamp-3 mb-2 font-bangla d-none d-md-block position-relative" style={{ zIndex: 2, pointerEvents: 'none' }}>{stripHtml(news.shortDescription)}</p>
+                )}
+                <div className="text-muted small mt-auto position-relative" style={{ zIndex: 2, pointerEvents: 'none' }}>
+                    {formatDate(news.createdAt)}
+                </div>
+            </Card.Body>
+        </Card>
+    );
+};
+
+export default NewsWidget;

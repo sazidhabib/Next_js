@@ -2,6 +2,7 @@ import { headers } from 'next/headers';
 import { jwtDecode } from 'jwt-decode';
 import { redirect } from 'next/navigation';
 import AdminLayoutClient from './components/AdminLayoutClient';
+import './admin.css';
 
 export default async function AdminLayout({ children }) {
     const headersList = await headers();

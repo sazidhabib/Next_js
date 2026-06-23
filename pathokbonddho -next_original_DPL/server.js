@@ -47,7 +47,7 @@ const setupExpress = () => {
         optionsSuccessStatus: 200
     };
     app.use(cors(corsOptions));
-    app.use(express.json());
+    app.use(express.json({ limit: '10mb' }));
 
     // Security Headers (CSP) - Important for Custom Servers
     app.use((req, res, next) => {
@@ -81,6 +81,36 @@ const setupExpress = () => {
     app.use("/api", require("./router/photoRoutes"));
     app.use("/api/images", require("./router/imageRoutes"));
     app.use('/api/image-registry', imageRegistryRoutes);
+
+    // Ensure public photocards uploads directory exists
+    const photocardDir = path.join(__dirname, "uploads", "photocards");
+    if (!fs.existsSync(photocardDir)) {
+        fs.mkdirSync(photocardDir, { recursive: true });
+    }
+
+    // Public photocard upload endpoint
+    app.post("/api/public/photocard", (req, res) => {
+        try {
+            const { image } = req.body;
+            if (!image) {
+                return res.status(400).json({ message: "Image data is required" });
+            }
+
+            const base64Data = image.replace(/^data:image\/\w+;base64,/, "");
+            const buffer = Buffer.from(base64Data, "base64");
+
+            const filename = `photocard-${Date.now()}-${Math.random().toString(36).substring(2, 8)}.png`;
+            const filePath = path.join(photocardDir, filename);
+
+            fs.writeFileSync(filePath, buffer);
+
+            const fileUrl = `/uploads/photocards/${filename}`;
+            res.status(200).json({ url: fileUrl });
+        } catch (error) {
+            console.error("Public photocard upload error:", error);
+            res.status(500).json({ message: "Internal server error" });
+        }
+    });
 
     // Error Handling Middleware (Keep before Next.js handler)
     app.use(errorMiddleware);
