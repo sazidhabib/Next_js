@@ -3,7 +3,14 @@ import React, { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
 import api from '@/app/lib/api';
 
-const PhotocardGenerator = () => {
+const PhotocardGenerator = ({ 
+    hideName = false, 
+    frameImage = '/pathokcard.png',
+    nameBottom = '12%',
+    nameCanvasY = 0.87,
+    hideShare = false,
+    placeholderTop = '50%'
+}) => {
     const [imageSrc, setImageSrc] = useState(null);
     const [name, setName] = useState('');
     const [scale, setScale] = useState(1);
@@ -16,7 +23,7 @@ const PhotocardGenerator = () => {
 
     // Default placeholder frame (a simple border with a transparent center)
     // Replace this with your actual transparent PNG frame path, e.g., '/images/frame.png'
-    const frameSrc = '/pathokcard.png';
+    const frameSrc = frameImage;
 
     const handleImageUpload = (e) => {
         const file = e.target.files[0];
@@ -97,13 +104,15 @@ const PhotocardGenerator = () => {
                 ctx.drawImage(frameImg, 0, 0, canvasWidth, canvasHeight);
 
                 // Draw Text
-                ctx.fillStyle = '#ffffff'; // White text
-                ctx.font = 'bold 52px "Hind Siliguri", sans-serif'; // Matched to preview size (1.2rem)
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'bottom';
+                if (!hideName) {
+                    ctx.fillStyle = '#ffffff'; // White text
+                    ctx.font = 'bold 52px "Hind Siliguri", sans-serif'; // Matched to preview size (1.2rem)
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'bottom';
 
-                // Position text near the bottom (adjust Y coordinate as needed based on your frame)
-                ctx.fillText(name || 'আপনার নাম', canvasWidth / 2, canvasHeight * 0.87);
+                    // Position text near the bottom (adjust Y coordinate as needed based on your frame)
+                    ctx.fillText(name || 'আপনার নাম', canvasWidth / 2, canvasHeight * nameCanvasY);
+                }
 
                 // Export
                 const dataUrl = canvas.toDataURL('image/png');
@@ -116,11 +125,13 @@ const PhotocardGenerator = () => {
             // If the user hasn't added a frame yet, we just draw the text and user image
             frameImg.onerror = () => {
                 console.warn('Frame image not found. Drawing without frame.');
-                ctx.fillStyle = '#ffffff';
-                ctx.font = 'bold 52px "Hind Siliguri", sans-serif';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'bottom';
-                ctx.fillText(name || 'আপনার নাম', canvasWidth / 2, canvasHeight * 0.86);
+                if (!hideName) {
+                    ctx.fillStyle = '#ffffff';
+                    ctx.font = 'bold 52px "Hind Siliguri", sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'bottom';
+                    ctx.fillText(name || 'আপনার নাম', canvasWidth / 2, canvasHeight * (nameCanvasY - 0.01));
+                }
 
                 const dataUrl = canvas.toDataURL('image/png');
                 const link = document.createElement('a');
@@ -231,22 +242,26 @@ const PhotocardGenerator = () => {
                 ctx.drawImage(frameImg, 0, 0, canvasWidth, canvasHeight);
 
                 // Draw Name inside the card area
-                ctx.fillStyle = '#ffffff'; // White text
-                ctx.font = 'bold 52px "Hind Siliguri", sans-serif';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'bottom';
-                ctx.fillText(name || 'আপনার নাম', canvasWidth / 2, canvasHeight * 0.87);
+                if (!hideName) {
+                    ctx.fillStyle = '#ffffff'; // White text
+                    ctx.font = 'bold 52px "Hind Siliguri", sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'bottom';
+                    ctx.fillText(name || 'আপনার নাম', canvasWidth / 2, canvasHeight * nameCanvasY);
+                }
 
                 proceedWithUpload();
             };
 
             frameImg.onerror = () => {
                 console.warn('Frame image not found. Sharing without frame.');
-                ctx.fillStyle = '#006a60';
-                ctx.font = 'bold 52px "Hind Siliguri", sans-serif';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'bottom';
-                ctx.fillText(name || 'আপনার নাম', canvasWidth / 2, canvasHeight * 0.86);
+                if (!hideName) {
+                    ctx.fillStyle = '#006a60';
+                    ctx.font = 'bold 52px "Hind Siliguri", sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'bottom';
+                    ctx.fillText(name || 'আপনার নাম', canvasWidth / 2, canvasHeight * (nameCanvasY - 0.01));
+                }
 
                 proceedWithUpload();
             };
@@ -390,9 +405,28 @@ const PhotocardGenerator = () => {
                     cursor: pointer;
                     transition: transform 0.2s, box-shadow 0.2s;
                 }
-                .btn-download:hover {
-                    transform: translateY(-2px);
-                    box-shadow: 0 8px 20px rgba(0, 198, 255, 0.4);
+                .file-upload-label {
+                    cursor: pointer;
+                    padding: 12px 20px;
+                    border: 2px dashed #006a60;
+                    border-radius: 8px;
+                    background-color: #f8fafc;
+                    color: #006a60 !important;
+                    font-weight: 600;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 8px;
+                    transition: all 0.2s;
+                    text-align: center;
+                }
+                .file-upload-label:hover {
+                    background-color: #006a60 !important;
+                    color: #ffffff !important;
+                }
+                .file-upload-label:active {
+                    background-color: #004d46 !important;
+                    color: #ffffff !important;
                 }
             `}</style>
 
@@ -427,7 +461,16 @@ const PhotocardGenerator = () => {
                             draggable="false"
                         />
                     ) : (
-                        <div className="d-flex h-100 align-items-center justify-content-center text-muted text-center p-4">
+                        <div 
+                            className="text-muted text-center p-4 w-100"
+                            style={{
+                                position: 'absolute',
+                                top: placeholderTop,
+                                left: '50%',
+                                transform: 'translate(-50%, -50%)',
+                                pointerEvents: 'none'
+                            }}
+                        >
                             আপনার ছবি আপলোড করুন
                         </div>
                     )}
@@ -444,9 +487,11 @@ const PhotocardGenerator = () => {
                     </div>
 
                     {/* 3. User Name Overlay (Top Layer) */}
-                    <div className="name-overlay">
-                        {name || 'আপনার নাম'}
-                    </div>
+                    {!hideName && (
+                        <div className="name-overlay" style={{ bottom: nameBottom }}>
+                            {name || 'আপনার নাম'}
+                        </div>
+                    )}
                 </div>
                 <p className="text-muted mt-3 text-center small">
                     <i className="bi bi-arrows-move me-1"></i> ছবিটি টেনে সঠিক স্থানে বসান
@@ -460,26 +505,34 @@ const PhotocardGenerator = () => {
                 <div className="control-group">
                     <label>১. ছবি আপলোড করুন</label>
                     <input
+                        id="photocard-file-input"
                         type="file"
                         accept="image/*"
                         onChange={handleImageUpload}
                         className="form-control"
+                        style={{ display: 'none' }}
                     />
+                    <label htmlFor="photocard-file-input" className="file-upload-label">
+                        <i className="fas fa-image me-2"></i>
+                        {imageSrc ? 'অন্য ছবি নির্বাচন করুন' : 'ছবি নির্বাচন করুন'}
+                    </label>
                 </div>
 
-                <div className="control-group">
-                    <label>২. আপনার নাম লিখুন</label>
-                    <input
-                        type="text"
-                        placeholder="আপনার নাম"
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        className="form-control"
-                    />
-                </div>
+                {!hideName && (
+                    <div className="control-group">
+                        <label>২. আপনার নাম লিখুন</label>
+                        <input
+                            type="text"
+                            placeholder="আপনার নাম"
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                            className="form-control"
+                        />
+                    </div>
+                )}
 
                 <div className="control-group">
-                    <label>৩. ছবি ছোট/বড় করুন (Scale)</label>
+                    <label>{hideName ? '২.' : '৩.'} ছবি ছোট/বড় করুন (Scale)</label>
                     <input
                         type="range"
                         min="0.5"
@@ -499,34 +552,36 @@ const PhotocardGenerator = () => {
                     >
                         <i className="bi bi-download me-2"></i> ফটোকার্ড ডাউনলোড করুন
                     </button>
-                    <button
-                        onClick={handleFacebookShare}
-                        className="btn btn-share w-100 shadow d-flex align-items-center justify-content-center gap-2"
-                        disabled={isSharing}
-                        style={{
-                            background: '#1877f2',
-                            color: 'white',
-                            border: 'none',
-                            padding: '12px 24px',
-                            borderRadius: '8px',
-                            fontSize: '1.1rem',
-                            fontWeight: 'bold',
-                            cursor: 'pointer',
-                            transition: 'transform 0.2s, box-shadow 0.2s',
-                            opacity: isSharing ? 0.7 : 1
-                        }}
-                    >
-                        {isSharing ? (
-                            <>
-                                <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                                লিঙ্ক তৈরি হচ্ছে...
-                            </>
-                        ) : (
-                            <>
-                                <i className="fab fa-facebook-f me-2"></i> ফেসবুকে শেয়ার করুন
-                            </>
-                        )}
-                    </button>
+                    {!hideShare && (
+                        <button
+                            onClick={handleFacebookShare}
+                            className="btn btn-share w-100 shadow d-flex align-items-center justify-content-center gap-2"
+                            disabled={isSharing}
+                            style={{
+                                background: '#1877f2',
+                                color: 'white',
+                                border: 'none',
+                                padding: '12px 24px',
+                                borderRadius: '8px',
+                                fontSize: '1.1rem',
+                                fontWeight: 'bold',
+                                cursor: 'pointer',
+                                transition: 'transform 0.2s, box-shadow 0.2s',
+                                opacity: isSharing ? 0.7 : 1
+                            }}
+                        >
+                            {isSharing ? (
+                                <>
+                                    <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                    লিঙ্ক তৈরি হচ্ছে...
+                                </>
+                            ) : (
+                                <>
+                                    <i className="fab fa-facebook-f me-2"></i> ফেসবুকে শেয়ার করুন
+                                </>
+                            )}
+                        </button>
+                    )}
                 </div>
             </div>
         </div>
