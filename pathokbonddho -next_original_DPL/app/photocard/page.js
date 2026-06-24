@@ -18,8 +18,8 @@ export default function PhotocardPage() {
         <ConfettiFalling />
         <div className="container">
           <div className="text-center mb-5">
-            <h1 className="display-5 font-weight-bold" style={{ color: '#006a60' }}>পাঠকবন্ধু ফটোকার্ড</h1>
-            <p className="lead text-muted">আপনার ছবি ও নাম দিয়ে একটি সুন্দর ফটোকার্ড তৈরি করুন</p>
+            <h1 className="text-2xl md:text-4xl font-bold" style={{ color: '#006a60' }}>পাঠকবন্ধু ফটোকার্ড</h1>
+            <p className="hidden md:block text-sm md:text-lg text-muted">আপনার ছবি ও নাম দিয়ে একটি সুন্দর ফটোকার্ড তৈরি করুন</p>
           </div>
 
           <PhotocardGenerator />

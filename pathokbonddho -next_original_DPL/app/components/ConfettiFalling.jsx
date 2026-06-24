@@ -3,8 +3,8 @@ import { useEffect, useRef } from 'react';
 
 // Vibrant color palette for the papers
 const COLORS = [
-    '#ff2a6d', '#05d9e8', '#01f9c6', '#f3e5ab', '#ffa500', 
-    '#ff00ff', '#9d00ff', '#39ff14', '#ff5e7e', '#88ff5a', 
+    '#ff2a6d', '#05d9e8', '#01f9c6', '#f3e5ab', '#ffa500',
+    '#ff00ff', '#9d00ff', '#39ff14', '#ff5e7e', '#88ff5a',
     '#fcff42', '#ffa62d', '#ff36ff', '#1877f2', '#00d2fc'
 ];
 
@@ -81,8 +81,11 @@ export default function ConfettiFalling({ density = 75 }) {
         resize();
         window.addEventListener('resize', resize);
 
+        const isMobile = window.innerWidth < 768;
+        const actualDensity = isMobile ? Math.round(density * 0.2) : density;
+
         // Initialize particles scattered throughout viewport height
-        particlesRef.current = Array.from({ length: density }, () => 
+        particlesRef.current = Array.from({ length: actualDensity }, () =>
             createParticle(canvas.width, canvas.height, true)
         );
 

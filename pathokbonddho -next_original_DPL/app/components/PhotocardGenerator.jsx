@@ -3,8 +3,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
 import api from '@/app/lib/api';
 
-const PhotocardGenerator = ({ 
-    hideName = false, 
+const PhotocardGenerator = ({
+    hideName = false,
     frameImage = '/pathokcard.png',
     nameBottom = '12%',
     nameCanvasY = 0.87,
@@ -24,6 +24,7 @@ const PhotocardGenerator = ({
     const [imageRatio, setImageRatio] = useState(1);
     const [isSharing, setIsSharing] = useState(false);
     const [isDownloading, setIsDownloading] = useState(false);
+    const [showSuccessModal, setShowSuccessModal] = useState(false);
     const containerRef = useRef(null);
 
     // Default placeholder frame (a simple border with a transparent center)
@@ -123,12 +124,17 @@ const PhotocardGenerator = ({
             link.href = dataUrl;
             link.click();
 
+            setShowSuccessModal(true);
+
             if (redirectUrl) {
                 setTimeout(() => {
                     window.location.href = redirectUrl;
                 }, redirectDelayMs);
             } else {
                 setIsDownloading(false);
+                setTimeout(() => {
+                    setShowSuccessModal(false);
+                }, 3000);
             }
         };
 
@@ -255,14 +261,14 @@ const PhotocardGenerator = ({
                 try {
                     // Export canvas as base64 data URL
                     const dataUrl = canvas.toDataURL('image/png');
-                    
+
                     // Upload to server
                     const response = await api.post('/public/photocard', { image: dataUrl });
                     const imageUrl = response.data.url;
 
                     // Construct share page URL
                     const sharePageUrl = `${window.location.origin}/photocard/share?img=${imageUrl}&name=${encodeURIComponent(name || 'ফটোকার্ড')}`;
-                    
+
                     // Open Facebook sharer
                     window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(sharePageUrl)}`, '_blank');
                 } catch (error) {
@@ -355,7 +361,7 @@ const PhotocardGenerator = ({
     };
 
     return (
-        <div className="photocard-container p-4 max-w-6xl mx-auto my-8 grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="photocard-container p-4 max-w-6xl mx-auto my-8 grid grid-cols-1 md:grid-cols-2 gap-0 md:gap-8">
             <style jsx>{`
                 .preview-box {
                     width: 100%;
@@ -418,6 +424,11 @@ const PhotocardGenerator = ({
                     border-radius: 12px;
                     box-shadow: 0 5px 20px rgba(0,0,0,0.05);
                 }
+                @media (max-width: 768px) {
+                    .controls {
+                        padding: 10px;
+                    }
+                }
                 .control-group {
                     display: flex;
                     flex-direction: column;
@@ -464,6 +475,91 @@ const PhotocardGenerator = ({
                     background-color: #004d46 !important;
                     color: #ffffff !important;
                 }
+                .success-modal-backdrop {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100vw;
+                    height: 100vh;
+                    background-color: rgba(0, 0, 0, 0.5);
+                    backdrop-filter: blur(8px);
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    z-index: 9999;
+                    animation: fadeIn 0.3s ease-out forwards;
+                }
+                .success-modal-content {
+                    background: white;
+                    padding: 40px;
+                    border-radius: 16px;
+                    box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+                    text-align: center;
+                    max-width: 90%;
+                    width: 400px;
+                    animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+                }
+                .success-message {
+                    color: #006a60;
+                    font-size: 1.25rem;
+                    font-weight: bold;
+                    margin-top: 20px;
+                    font-family: 'Hind Siliguri', sans-serif;
+                }
+                .checkmark {
+                    width: 72px;
+                    height: 72px;
+                    border-radius: 50%;
+                    display: block;
+                    stroke-width: 4;
+                    stroke: #28a745;
+                    stroke-miterlimit: 10;
+                    box-shadow: inset 0px 0px 0px #28a745;
+                    animation: fill .4s ease-in-out .4s forwards, scale .3s ease-in-out 0s both;
+                    margin: 0 auto;
+                }
+                .checkmark__circle {
+                    stroke-dasharray: 166;
+                    stroke-dashoffset: 166;
+                    stroke-width: 4;
+                    stroke-miterlimit: 10;
+                    stroke: #28a745;
+                    fill: none;
+                    animation: stroke .6s cubic-bezier(0.650, 0.000, 0.450, 1.000) forwards;
+                }
+                .checkmark__check {
+                    transform-origin: 50% 50%;
+                    stroke-dasharray: 48;
+                    stroke-dashoffset: 48;
+                    stroke: #fff;
+                    animation: stroke .3s cubic-bezier(0.650, 0.000, 0.450, 1.000) .8s forwards;
+                }
+                @keyframes stroke {
+                    100% {
+                        stroke-dashoffset: 0;
+                    }
+                }
+                @keyframes scale {
+                    0%, 100% {
+                        transform: none;
+                    }
+                    50% {
+                        transform: scale3d(1.1, 1.1, 1);
+                    }
+                }
+                @keyframes fill {
+                    100% {
+                        box-shadow: inset 0px 0px 0px 40px #28a745;
+                    }
+                }
+                @keyframes fadeIn {
+                    from { opacity: 0; }
+                    to { opacity: 1; }
+                }
+                @keyframes slideUp {
+                    from { transform: translateY(20px); opacity: 0; }
+                    to { transform: translateY(0); opacity: 1; }
+                }
             `}</style>
 
             {/* Left Column: Preview Area */}
@@ -497,7 +593,7 @@ const PhotocardGenerator = ({
                             draggable="false"
                         />
                     ) : (
-                        <div 
+                        <div
                             className="text-muted text-center p-4 w-100"
                             style={{
                                 position: 'absolute',
@@ -536,7 +632,7 @@ const PhotocardGenerator = ({
 
             {/* Right Column: Controls */}
             <div className="controls">
-                <h3 className="mb-3 text-success font-weight-bold">{cardTypeText} তৈরি করুন</h3>
+                <h3 className="hidden md:block mb-3 text-success font-weight-bold">{cardTypeText} তৈরি করুন</h3>
 
                 <div className="control-group">
                     <label>১. ছবি আপলোড করুন</label>
@@ -630,6 +726,31 @@ const PhotocardGenerator = ({
                     )}
                 </div>
             </div>
+
+            {showSuccessModal && (
+                <div className="success-modal-backdrop">
+                    <div className="success-modal-content">
+                        <svg className="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+                            <circle className="checkmark__circle" cx="26" cy="26" r="25" fill="none" />
+                            <path className="checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8" />
+                        </svg>
+                        <h4 className="success-message">
+                            {cardTypeText === 'প্রোফাইল কার্ড'
+                                ? 'আপনার প্রোফাইল পিকচার ডাউনলোড হয়েছে ।'
+                                : 'আপনার ফটোকার্ড ডাউনলোড হয়েছে ।'}
+                        </h4>
+                        {!redirectUrl && (
+                            <button
+                                onClick={() => setShowSuccessModal(false)}
+                                className="btn btn-sm btn-success mt-3 px-4"
+                                style={{ borderRadius: '20px', backgroundColor: '#006a60', borderColor: '#006a60' }}
+                            >
+                                বন্ধ করুন
+                            </button>
+                        )}
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

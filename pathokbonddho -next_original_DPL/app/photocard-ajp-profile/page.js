@@ -15,15 +15,15 @@ export default function PhotocardAjpProfilePage() {
       <ConfettiFalling />
       <div className="container">
         <div className="text-center mb-5">
-          <h1 className="display-5 font-weight-bold" style={{ color: '#006a60', fontWeight: 'bold' }}>আজকের পত্রিকা প্রোফাইল কার্ড</h1>
-          <p className="lead text-muted">আপনার ছবি দিয়ে একটি সুন্দর প্রোফাইল কার্ড তৈরি করুন</p>
+          <h1 className="text-2xl md:text-4xl font-bold" style={{ color: '#006a60' }}>প্রোফাইল পিকচার</h1>
+          <p className="hidden md:block text-sm md:text-lg text-muted">আপনার ছবি দিয়ে একটি সুন্দর প্রোফাইল পিকচার তৈরি করুন</p>
         </div>
 
-        <PhotocardGenerator 
-          hideName={true} 
-          frameImage="/photocard_profile.png" 
-          hideShare={true} 
-          cardTypeText="প্রোফাইল কার্ড"
+        <PhotocardGenerator
+          hideName={true}
+          frameImage="/photocard_profile.png"
+          hideShare={true}
+          cardTypeText="প্রোফাইল পিকচার"
           requireValidation={true}
           redirectUrl="https://www.ajkerpatrika.com/"
           redirectDelayMs={3000}
