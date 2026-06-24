@@ -9,7 +9,11 @@ const PhotocardGenerator = ({
     nameBottom = '12%',
     nameCanvasY = 0.87,
     hideShare = false,
-    placeholderTop = '50%'
+    placeholderTop = '50%',
+    cardTypeText = 'ফটোকার্ড',
+    requireValidation = false,
+    redirectUrl = '',
+    redirectDelayMs = 3000
 }) => {
     const [imageSrc, setImageSrc] = useState(null);
     const [name, setName] = useState('');
@@ -19,6 +23,7 @@ const PhotocardGenerator = ({
     const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
     const [imageRatio, setImageRatio] = useState(1);
     const [isSharing, setIsSharing] = useState(false);
+    const [isDownloading, setIsDownloading] = useState(false);
     const containerRef = useRef(null);
 
     // Default placeholder frame (a simple border with a transparent center)
@@ -82,6 +87,22 @@ const PhotocardGenerator = ({
     };
 
     const handleDownload = () => {
+        if (isDownloading) return;
+
+        // Validation checks
+        if (requireValidation) {
+            if (!imageSrc) {
+                alert('দয়া করে আপনার একটি ছবি নির্বাচন করুন।');
+                return;
+            }
+            if (!hideName && !name.trim()) {
+                alert('দয়া করে আপনার নাম লিখুন।');
+                return;
+            }
+        }
+
+        setIsDownloading(true);
+
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
 
@@ -94,6 +115,22 @@ const PhotocardGenerator = ({
         // Draw background (white)
         ctx.fillStyle = '#ffffff';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        const executeDownload = (dataUrl) => {
+            const link = document.createElement('a');
+            const filenamePrefix = cardTypeText === 'প্রোফাইল কার্ড' ? 'profilecard' : 'photocard';
+            link.download = `${filenamePrefix}-${name || 'download'}.png`;
+            link.href = dataUrl;
+            link.click();
+
+            if (redirectUrl) {
+                setTimeout(() => {
+                    window.location.href = redirectUrl;
+                }, redirectDelayMs);
+            } else {
+                setIsDownloading(false);
+            }
+        };
 
         const drawFrameAndSave = () => {
             const frameImg = new window.Image();
@@ -114,12 +151,8 @@ const PhotocardGenerator = ({
                     ctx.fillText(name || 'আপনার নাম', canvasWidth / 2, canvasHeight * nameCanvasY);
                 }
 
-                // Export
-                const dataUrl = canvas.toDataURL('image/png');
-                const link = document.createElement('a');
-                link.download = `photocard-${name || 'download'}.png`;
-                link.href = dataUrl;
-                link.click();
+                // Export and save
+                executeDownload(canvas.toDataURL('image/png'));
             };
 
             // If the user hasn't added a frame yet, we just draw the text and user image
@@ -133,11 +166,7 @@ const PhotocardGenerator = ({
                     ctx.fillText(name || 'আপনার নাম', canvasWidth / 2, canvasHeight * (nameCanvasY - 0.01));
                 }
 
-                const dataUrl = canvas.toDataURL('image/png');
-                const link = document.createElement('a');
-                link.download = `photocard-${name || 'download'}.png`;
-                link.href = dataUrl;
-                link.click();
+                executeDownload(canvas.toDataURL('image/png'));
             };
 
             frameImg.src = frameSrc;
@@ -151,7 +180,10 @@ const PhotocardGenerator = ({
                 // We map the UI scale and position to the canvas size
                 // The preview box is typically smaller than the actual canvas
                 const container = containerRef.current;
-                if (!container) return;
+                if (!container) {
+                    setIsDownloading(false);
+                    return;
+                }
 
                 const ratio = canvasWidth / container.clientWidth;
 
@@ -188,6 +220,10 @@ const PhotocardGenerator = ({
 
                 // Proceed to draw frame on top
                 drawFrameAndSave();
+            };
+            userImg.onerror = () => {
+                console.error('Failed to load user image.');
+                setIsDownloading(false);
             };
             userImg.src = imageSrc;
         } else {
@@ -500,7 +536,7 @@ const PhotocardGenerator = ({
 
             {/* Right Column: Controls */}
             <div className="controls">
-                <h3 className="mb-3 text-success font-weight-bold">ফটোকার্ড তৈরি করুন</h3>
+                <h3 className="mb-3 text-success font-weight-bold">{cardTypeText} তৈরি করুন</h3>
 
                 <div className="control-group">
                     <label>১. ছবি আপলোড করুন</label>
@@ -548,9 +584,19 @@ const PhotocardGenerator = ({
                 <div className="mt-4 d-flex flex-column gap-2">
                     <button
                         onClick={handleDownload}
-                        className="btn btn-download w-100 shadow"
+                        className="btn btn-download w-100 shadow d-flex align-items-center justify-content-center gap-2"
+                        disabled={isDownloading}
                     >
-                        <i className="bi bi-download me-2"></i> ফটোকার্ড ডাউনলোড করুন
+                        {isDownloading ? (
+                            <>
+                                <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                {redirectUrl ? 'ডাউনলোড হচ্ছে, অনুগ্রহ করে অপেক্ষা করুন...' : 'ডাউনলোড হচ্ছে...'}
+                            </>
+                        ) : (
+                            <>
+                                <i className="bi bi-download me-2"></i> {cardTypeText} ডাউনলোড করুন
+                            </>
+                        )}
                     </button>
                     {!hideShare && (
                         <button

@@ -1,6 +1,7 @@
 "use client";
 import React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 
 export default function AjpHeader() {
@@ -12,12 +13,12 @@ export default function AjpHeader() {
     return (
         <header className="custom-font w-100 py-3 mb-4" style={{ backgroundColor: '#ffffff', boxShadow: '0 2px 10px rgba(0,0,0,0.05)' }}>
             <div className="container d-flex justify-content-between align-items-center flex-wrap gap-3">
-                <Link href="/" style={{ textDecoration: 'none', color: '#006a60', fontWeight: 'bold', fontSize: '1.4rem' }}>
-                    আজকের পত্রিকা
+                <Link href="https://www.ajkerpatrika.com/" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', color: '#006a60', fontWeight: 'bold', fontSize: '1.4rem' }}>
+                    <Image src="/Ajker_Patrika_Logo.png" alt="আজকের পত্রিকা" width={200} height={100} />
                 </Link>
                 <div className="d-flex gap-2">
-                    <Link 
-                        href="/photocard-ajp" 
+                    <Link
+                        href="/photocard-ajp"
                         className="btn px-4 py-2 font-weight-bold"
                         style={{
                             borderRadius: '25px',
@@ -32,8 +33,8 @@ export default function AjpHeader() {
                     >
                         ফটোকার্ড
                     </Link>
-                    <Link 
-                        href="/photocard-ajp-profile" 
+                    <Link
+                        href="/photocard-ajp-profile"
                         className="btn px-4 py-2 font-weight-bold"
                         style={{
                             borderRadius: '25px',

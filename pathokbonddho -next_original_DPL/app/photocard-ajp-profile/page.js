@@ -23,6 +23,10 @@ export default function PhotocardAjpProfilePage() {
           hideName={true} 
           frameImage="/photocard_profile.png" 
           hideShare={true} 
+          cardTypeText="প্রোফাইল কার্ড"
+          requireValidation={true}
+          redirectUrl="https://www.ajkerpatrika.com/"
+          redirectDelayMs={3000}
         />
       </div>
     </main>

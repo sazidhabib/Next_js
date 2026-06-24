@@ -25,6 +25,9 @@ export default function PhotocardAjpPage() {
           nameCanvasY={.93}
           hideShare={true}
           placeholderTop="35%"
+          requireValidation={true}
+          redirectUrl="https://www.ajkerpatrika.com/"
+          redirectDelayMs={3000}
         />
       </div>
     </main>
