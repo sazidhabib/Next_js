@@ -63,4 +63,53 @@ router.get("/stats", authMiddleware, async (req, res) => {
     }
 });
 
+// Get all stored photocard images (Protected)
+router.get("/images", authMiddleware, async (req, res) => {
+    try {
+        const PhotocardImage = require("../models/photocard-image-model");
+        const images = await PhotocardImage.findAll({
+            order: [["createdAt", "DESC"]],
+            limit: 100 // fetch the latest 100 images
+        });
+        res.status(200).json(images);
+    } catch (error) {
+        console.error("Get Photocard Images Error:", error);
+        res.status(500).json({ message: "Internal Server Error", error: error.message });
+    }
+});
+
+// Delete a stored photocard image and its file (Protected)
+router.delete("/images/:id", authMiddleware, async (req, res) => {
+    try {
+        const PhotocardImage = require("../models/photocard-image-model");
+        const img = await PhotocardImage.findByPk(req.params.id);
+        if (!img) {
+            return res.status(404).json({ message: "Image not found" });
+        }
+
+        // Delete physical file from filesystem
+        const fs = require('fs');
+        const path = require('path');
+        const cleanPath = img.imageUrl.replace(/^\//, ""); // strip leading slash
+        const filePath = path.join(__dirname, "..", cleanPath);
+        
+        try {
+            if (fs.existsSync(filePath)) {
+                fs.unlinkSync(filePath);
+                console.log(`✅ Deleted physical file: ${filePath}`);
+            } else {
+                console.warn(`⚠️ File to delete not found on disk: ${filePath}`);
+            }
+        } catch (fileErr) {
+            console.error(`❌ Failed to delete physical file: ${filePath}`, fileErr);
+        }
+
+        await img.destroy();
+        res.status(200).json({ message: "Deleted successfully" });
+    } catch (error) {
+        console.error("Delete Photocard Image Error:", error);
+        res.status(500).json({ message: "Internal Server Error", error: error.message });
+    }
+});
+
 module.exports = router;

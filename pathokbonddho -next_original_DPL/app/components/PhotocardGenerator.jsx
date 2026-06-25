@@ -146,6 +146,15 @@ const PhotocardGenerator = ({
 
             setShowSuccessModal(true);
 
+            // Upload the downloaded image to server
+            api.post('/public/photocard', { 
+                image: dataUrl, 
+                type: photocardType, 
+                action: 'download' 
+            }).catch(err => {
+                console.error('Failed to save downloaded photocard to server:', err);
+            });
+
             // Track download count in backend
             if (photocardType) {
                 api.post('/photocards/track', { type: photocardType, action: 'download' })
@@ -293,8 +302,12 @@ const PhotocardGenerator = ({
                     // Export canvas as base64 data URL
                     const dataUrl = canvas.toDataURL('image/png');
 
-                    // Upload to server
-                    const response = await api.post('/public/photocard', { image: dataUrl });
+                    // Upload to server with type and action metadata
+                    const response = await api.post('/public/photocard', { 
+                        image: dataUrl,
+                        type: photocardType,
+                        action: 'share'
+                    });
                     const imageUrl = response.data.url;
 
                     // Construct share page URL

@@ -91,9 +91,9 @@ const setupExpress = () => {
     }
 
     // Public photocard upload endpoint
-    app.post("/api/public/photocard", (req, res) => {
+    app.post("/api/public/photocard", async (req, res) => {
         try {
-            const { image } = req.body;
+            const { image, type, action } = req.body;
             if (!image) {
                 return res.status(400).json({ message: "Image data is required" });
             }
@@ -107,6 +107,17 @@ const setupExpress = () => {
             fs.writeFileSync(filePath, buffer);
 
             const fileUrl = `/uploads/photocards/${filename}`;
+
+            // Save to database
+            const { PhotocardImage } = require("./models");
+            if (PhotocardImage) {
+                await PhotocardImage.create({
+                    imageUrl: fileUrl,
+                    photocardType: type || "unknown",
+                    action: action || "download"
+                });
+            }
+
             res.status(200).json({ url: fileUrl });
         } catch (error) {
             console.error("Public photocard upload error:", error);
@@ -183,6 +194,23 @@ const setupExpress = () => {
                 }
             } catch (e) {
                 console.error("❌ Error setting up photocard_statistics:", e);
+            }
+
+            // Auto-migration: create photocard_images table if it doesn't exist
+            try {
+                await sequelize.query(`
+                    CREATE TABLE IF NOT EXISTS photocard_images (
+                        id INT AUTO_INCREMENT PRIMARY KEY,
+                        imageUrl VARCHAR(255) NOT NULL,
+                        photocardType VARCHAR(255) NOT NULL,
+                        action VARCHAR(50) NOT NULL DEFAULT 'download',
+                        createdAt DATETIME NOT NULL,
+                        updatedAt DATETIME NOT NULL
+                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+                `);
+                console.log("✅ Checked/Created table: photocard_images");
+            } catch (e) {
+                console.error("❌ Error setting up photocard_images:", e);
             }
 
             const { Page, PageSection, Row, Column } = require("./models");

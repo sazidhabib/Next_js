@@ -13,9 +13,9 @@ export default function AjpHeader() {
     return (
         <header className="custom-font w-100 py-3 mb-4" style={{ backgroundColor: '#ffffff', boxShadow: '0 2px 10px rgba(0,0,0,0.05)' }}>
             <style jsx>{`
-                .logo-img {
-                    max-width: 240px !important;
-                    width: 240px !important;
+                :global(.logo-img) {
+                    max-width: 300px !important;
+                    width: 300px !important;
                     height: auto !important;
                 }
                 .nav-btn {
@@ -29,7 +29,7 @@ export default function AjpHeader() {
                     width: 100% !important;
                 }
                 @media (min-width: 768px) {
-                    .logo-img {
+                    :global(.logo-img) {
                         max-width: 200px !important;
                         width: 200px !important;
                     }
@@ -46,19 +46,19 @@ export default function AjpHeader() {
                 }
             `}</style>
             <div className="container d-flex justify-content-center justify-content-md-between align-items-center flex-wrap gap-3">
-                <Link 
-                    href="https://www.ajkerpatrika.com/" 
-                    target="_blank" 
-                    rel="noopener noreferrer" 
+                <Link
+                    href="https://www.ajkerpatrika.com/"
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="logo-link text-center text-md-start d-block d-md-inline-block"
                     style={{ textDecoration: 'none', color: '#006a60', fontWeight: 'bold', fontSize: '1.4rem' }}
                 >
-                    <Image 
-                        src="/Ajker_Patrika_Logo.png" 
-                        alt="আজকের পত্রিকা" 
-                        width={200} 
-                        height={100} 
-                        className="mx-auto d-inline-block logo-img" 
+                    <Image
+                        src="/Ajker_Patrika_Logo.png"
+                        alt="আজকের পত্রিকা"
+                        width={200}
+                        height={100}
+                        className="mx-auto d-inline-block logo-img"
                     />
                 </Link>
                 <div className="buttons-wrapper d-flex gap-2 justify-content-center justify-content-md-start">

@@ -18,6 +18,8 @@ const NewsCategory = require('./news-category-model');
 const NewsGalleryItem = require('./news-gallery-item');
 const ImageRegistry = require('./imageRegistry');
 const PhotocardStatistic = require('./photocard-statistic-model');
+const PhotocardImage = require('./photocard-image-model');
+
 
 // Associations for Photo Gallery
 Album.hasMany(Photo, {
@@ -168,4 +170,5 @@ module.exports = {
     ImageRegistry,
     About,
     PhotocardStatistic,
-};
+    PhotocardImage,
+};
