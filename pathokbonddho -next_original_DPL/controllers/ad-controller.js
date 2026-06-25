@@ -10,7 +10,7 @@ const createAd = async (req, res) => {
     try {
         console.log('=== CREATE AD CONTROLLER ===');
         console.log('Request body:', req.body);
-        console.log('Request file:', req.file);
+        console.log('Request files:', req.files);
 
         const {
             name,
@@ -33,8 +33,10 @@ const createAd = async (req, res) => {
             return res.status(400).json({ message: "Name, Slug, Type, and Position are required" });
         }
 
+        const hasImage = req.files && req.files['image'] && req.files['image'][0];
+
         // Validate ad type specific fields
-        if (type === 'image' && !req.file) {
+        if (type === 'image' && !hasImage) {
             return res.status(400).json({ message: "Image is required for image ads" });
         }
 
@@ -48,7 +50,10 @@ const createAd = async (req, res) => {
             return res.status(409).json({ message: "An ad with this slug already exists." });
         }
 
-        const imagePath = req.file ? req.file.filename : null;
+        const imagePath = hasImage ? req.files['image'][0].filename : null;
+        const mobileImagePath = req.files && req.files['mobileImage'] && req.files['mobileImage'][0] 
+            ? req.files['mobileImage'][0].filename 
+            : null;
 
         // Parse displayPages if provided
         let displayPagesToSave = null;
@@ -74,6 +79,7 @@ const createAd = async (req, res) => {
             slug: slug.toLowerCase(),
             type,
             image: imagePath,
+            mobileImage: mobileImagePath,
             imageUrl: type === 'image' ? imageUrl : null,
             headCode: type === 'google_adsense' ? headCode : null,
             bodyCode: type === 'google_adsense' ? bodyCode : null,
@@ -298,10 +304,7 @@ const updateAd = async (req, res) => {
         console.log('=== UPDATE AD CONTROLLER ===');
         console.log('Request params:', req.params);
         console.log('Request body:', req.body);
-        console.log('Request file:', req.file ? {
-            filename: req.file.filename,
-            size: req.file.size
-        } : 'No file');
+        console.log('Request files:', req.files ? Object.keys(req.files) : 'No files');
 
         const {
             name,
@@ -364,14 +367,6 @@ const updateAd = async (req, res) => {
             }
         }
 
-        // Delete old image if new one is uploaded
-        if (req.file && existingAd.image) {
-            const oldImagePath = path.join(__dirname, "..", "uploads", "ads", existingAd.image);
-            if (fs.existsSync(oldImagePath)) {
-                fs.unlinkSync(oldImagePath);
-            }
-        }
-
         // Parse displayPages if provided
         let displayPagesToSave = existingAd.displayPages;
         if (displayPages !== undefined) {
@@ -410,9 +405,28 @@ const updateAd = async (req, res) => {
                 : existingAd.popupMaxShowCount,
         };
 
-        // Only update image if a new one is uploaded
-        if (req.file) {
-            updateData.image = req.file.filename;
+        // Delete old desktop image if new one is uploaded
+        const newImageFile = req.files && req.files['image'] && req.files['image'][0];
+        if (newImageFile) {
+            if (existingAd.image) {
+                const oldImagePath = path.join(__dirname, "..", "uploads", "ads", existingAd.image);
+                if (fs.existsSync(oldImagePath)) {
+                    fs.unlinkSync(oldImagePath);
+                }
+            }
+            updateData.image = newImageFile.filename;
+        }
+
+        // Delete old mobile image if new one is uploaded
+        const newMobileImageFile = req.files && req.files['mobileImage'] && req.files['mobileImage'][0];
+        if (newMobileImageFile) {
+            if (existingAd.mobileImage) {
+                const oldMobileImagePath = path.join(__dirname, "..", "uploads", "ads", existingAd.mobileImage);
+                if (fs.existsSync(oldMobileImagePath)) {
+                    fs.unlinkSync(oldMobileImagePath);
+                }
+            }
+            updateData.mobileImage = newMobileImageFile.filename;
         }
 
         console.log('Update data:', updateData);
@@ -496,6 +510,14 @@ const deleteAd = async (req, res) => {
             }
         }
 
+        // Delete associated mobile image
+        if (ad.mobileImage) {
+            const mobileImagePath = path.join(__dirname, "..", "uploads", "ads", ad.mobileImage);
+            if (fs.existsSync(mobileImagePath)) {
+                fs.unlinkSync(mobileImagePath);
+            }
+        }
+
         await ad.destroy();
         res.status(200).json({ message: "Ad Deleted Successfully" });
     } catch (error) {
@@ -526,6 +548,12 @@ const bulkDeleteAds = async (req, res) => {
                 const imagePath = path.join(__dirname, "..", "uploads", "ads", ad.image);
                 if (fs.existsSync(imagePath)) {
                     fs.unlinkSync(imagePath);
+                }
+            }
+            if (ad.mobileImage) {
+                const mobileImagePath = path.join(__dirname, "..", "uploads", "ads", ad.mobileImage);
+                if (fs.existsSync(mobileImagePath)) {
+                    fs.unlinkSync(mobileImagePath);
                 }
             }
         }

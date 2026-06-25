@@ -65,7 +65,8 @@ const setupExpress = () => {
     const designRoutes = require('./router/design-router');
     const imageRegistryRoutes = require('./router/imageRegistryRoutes');
     const menuRoutes = require('./router/menu-routes');
-    const newsRouter = require('./router/news-router');
+    const newsRouter = require("./router/news-router");
+    const photocardRouter = require("./router/photocard-router");
 
     // API Routes
     app.use("/api/menus", menuRoutes);
@@ -81,6 +82,7 @@ const setupExpress = () => {
     app.use("/api", require("./router/photoRoutes"));
     app.use("/api/images", require("./router/imageRoutes"));
     app.use('/api/image-registry', imageRegistryRoutes);
+    app.use("/api/photocards", photocardRouter);
 
     // Ensure public photocards uploads directory exists
     const photocardDir = path.join(__dirname, "uploads", "photocards");
@@ -143,6 +145,45 @@ const setupExpress = () => {
                     console.log("✅ Added column: popupMaxShowCount");
                 }
             } catch (e) { /* table might not exist yet, ignore */ }
+            try {
+                const [cols] = await sequelize.query("SHOW COLUMNS FROM ads LIKE 'mobileImage'");
+                if (cols.length === 0) {
+                    await sequelize.query("ALTER TABLE ads ADD COLUMN mobileImage VARCHAR(255) NULL DEFAULT NULL");
+                    console.log("✅ Added column: mobileImage");
+                }
+            } catch (e) { /* table might not exist yet, ignore */ }
+
+            // Auto-migration: create photocard_statistics table if it doesn't exist
+            try {
+                await sequelize.query(`
+                    CREATE TABLE IF NOT EXISTS photocard_statistics (
+                        id INT AUTO_INCREMENT PRIMARY KEY,
+                        type VARCHAR(255) NOT NULL UNIQUE,
+                        name VARCHAR(255) NOT NULL,
+                        downloadCount INT DEFAULT 0,
+                        shareCount INT DEFAULT 0,
+                        createdAt DATETIME NOT NULL,
+                        updatedAt DATETIME NOT NULL
+                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+                `);
+                console.log("✅ Checked/Created table: photocard_statistics");
+
+                // Initialize the 3 default photocard types if they don't exist
+                const [records] = await sequelize.query("SELECT COUNT(*) as count FROM photocard_statistics");
+                if (records[0].count === 0) {
+                    const now = new Date().toISOString().slice(0, 19).replace('T', ' ');
+                    await sequelize.query(`
+                        INSERT INTO photocard_statistics (type, name, downloadCount, shareCount, createdAt, updatedAt)
+                        VALUES 
+                        ('pathokbonddho-photocard', 'পাঠকবন্ধু ফটোকার্ড', 0, 0, '${now}', '${now}'),
+                        ('ajp-photocard', 'আজকের পত্রিকা ফটোকার্ড', 0, 0, '${now}', '${now}'),
+                        ('ajp-profile', 'প্রোফাইল পিকচার', 0, 0, '${now}', '${now}')
+                    `);
+                    console.log("✅ Seeded default photocard statistic records");
+                }
+            } catch (e) {
+                console.error("❌ Error setting up photocard_statistics:", e);
+            }
 
             const { Page, PageSection, Row, Column } = require("./models");
 

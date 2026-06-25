@@ -75,8 +75,8 @@ router.post("/:id/impression", recordImpression);
 router.post("/:id/click", recordClick);
 
 // Protected routes (require authentication)
-router.post("/", authMiddleware, upload.single("image"), convertToWebp('ads'), createAd);
-router.patch("/:id", authMiddleware, upload.single("image"), convertToWebp('ads'), updateAd);
+router.post("/", authMiddleware, upload.fields([{ name: "image", maxCount: 1 }, { name: "mobileImage", maxCount: 1 }]), convertToWebp('ads'), createAd);
+router.patch("/:id", authMiddleware, upload.fields([{ name: "image", maxCount: 1 }, { name: "mobileImage", maxCount: 1 }]), convertToWebp('ads'), updateAd);
 router.delete("/:id", authMiddleware, deleteAd);
 router.post("/bulk-delete", authMiddleware, bulkDeleteAds);
 

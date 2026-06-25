@@ -27,6 +27,7 @@ export default function PhotocardAjpProfilePage() {
           requireValidation={true}
           redirectUrl="https://www.ajkerpatrika.com/"
           redirectDelayMs={3000}
+          photocardType="ajp-profile"
         />
       </div>
     </main>

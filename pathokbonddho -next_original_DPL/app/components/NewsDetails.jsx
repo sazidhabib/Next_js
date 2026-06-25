@@ -215,25 +215,70 @@ const NewsDetails = ({ id, initialData, initialAds }) => {
                                         }
                                     }}
                                 >
-                                    <div style={{ position: 'relative', height: '120px', width: '100%', maxWidth: '728px', margin: '0 auto' }}>
-                                        <Image
-                                            src={(() => {
-                                                const rawUrl = ad.image.startsWith('http') ? ad.image : `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000'}/uploads/ads/${ad.image}`;
-                                                if (rawUrl.startsWith('http')) {
-                                                    const isLocal = rawUrl.includes('127.0.0.1') || rawUrl.includes('localhost');
-                                                    if (isLocal) return rawUrl;
-                                                    return rawUrl.replace(/^http:\/\//, 'https://');
-                                                }
-                                                return rawUrl;
-                                            })()}
-                                            alt={ad.name || 'Advertisement'}
-                                            fill
-                                            className="rounded shadow-sm"
-                                            style={{ objectFit: 'contain' }}
-                                            sizes="(max-width: 992px) 100vw, 728px"
-                                            priority={idx === 0}
-                                        />
-                                    </div>
+                                    {ad.mobileImage ? (
+                                        <>
+                                            {/* Desktop view */}
+                                            <div className="d-none d-md-block" style={{ position: 'relative', height: '120px', width: '100%', maxWidth: '728px', margin: '0 auto' }}>
+                                                <Image
+                                                    src={(() => {
+                                                        const rawUrl = ad.image.startsWith('http') ? ad.image : `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000'}/uploads/ads/${ad.image}`;
+                                                        if (rawUrl.startsWith('http')) {
+                                                            const isLocal = rawUrl.includes('127.0.0.1') || rawUrl.includes('localhost');
+                                                            if (isLocal) return rawUrl;
+                                                            return rawUrl.replace(/^http:\/\//, 'https://');
+                                                        }
+                                                        return rawUrl;
+                                                    })()}
+                                                    alt={ad.name || 'Advertisement'}
+                                                    fill
+                                                    className="rounded shadow-sm"
+                                                    style={{ objectFit: 'contain' }}
+                                                    sizes="(max-width: 992px) 100vw, 728px"
+                                                    priority={idx === 0}
+                                                />
+                                            </div>
+                                            {/* Mobile view */}
+                                            <div className="d-block d-md-none" style={{ position: 'relative', height: '100px', width: '100%', maxWidth: '480px', margin: '0 auto' }}>
+                                                <Image
+                                                    src={(() => {
+                                                        const rawUrl = ad.mobileImage.startsWith('http') ? ad.mobileImage : `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000'}/uploads/ads/${ad.mobileImage}`;
+                                                        if (rawUrl.startsWith('http')) {
+                                                            const isLocal = rawUrl.includes('127.0.0.1') || rawUrl.includes('localhost');
+                                                            if (isLocal) return rawUrl;
+                                                            return rawUrl.replace(/^http:\/\//, 'https://');
+                                                        }
+                                                        return rawUrl;
+                                                    })()}
+                                                    alt={ad.name || 'Advertisement'}
+                                                    fill
+                                                    className="rounded shadow-sm"
+                                                    style={{ objectFit: 'contain' }}
+                                                    sizes="(max-width: 992px) 100vw, 480px"
+                                                    priority={idx === 0}
+                                                />
+                                            </div>
+                                        </>
+                                    ) : (
+                                        <div style={{ position: 'relative', height: '120px', width: '100%', maxWidth: '728px', margin: '0 auto' }}>
+                                            <Image
+                                                src={(() => {
+                                                    const rawUrl = ad.image.startsWith('http') ? ad.image : `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000'}/uploads/ads/${ad.image}`;
+                                                    if (rawUrl.startsWith('http')) {
+                                                        const isLocal = rawUrl.includes('127.0.0.1') || rawUrl.includes('localhost');
+                                                        if (isLocal) return rawUrl;
+                                                        return rawUrl.replace(/^http:\/\//, 'https://');
+                                                    }
+                                                    return rawUrl;
+                                                })()}
+                                                alt={ad.name || 'Advertisement'}
+                                                fill
+                                                className="rounded shadow-sm"
+                                                style={{ objectFit: 'contain' }}
+                                                sizes="(max-width: 992px) 100vw, 728px"
+                                                priority={idx === 0}
+                                            />
+                                        </div>
+                                    )}
                                 </a>
                             )
                         )}
@@ -616,24 +661,67 @@ const NewsDetails = ({ id, initialData, initialAds }) => {
                                         }
                                     }}
                                 >
-                                    <div style={{ position: 'relative', height: '120px', width: '100%', maxWidth: '728px', margin: '0 auto' }}>
-                                        <Image
-                                            src={(() => {
-                                                const rawUrl = ad.image.startsWith('http') ? ad.image : `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000'}/uploads/ads/${ad.image}`;
-                                                if (rawUrl.startsWith('http')) {
-                                                    const isLocal = rawUrl.includes('127.0.0.1') || rawUrl.includes('localhost');
-                                                    if (isLocal) return rawUrl;
-                                                    return rawUrl.replace(/^http:\/\//, 'https://');
-                                                }
-                                                return rawUrl;
-                                            })()}
-                                            alt={ad.name || 'Advertisement'}
-                                            fill
-                                            className="rounded shadow-sm"
-                                            style={{ objectFit: 'contain' }}
-                                            sizes="(max-width: 992px) 100vw, 728px"
-                                        />
-                                    </div>
+                                    {ad.mobileImage ? (
+                                        <>
+                                            {/* Desktop view */}
+                                            <div className="d-none d-md-block" style={{ position: 'relative', height: '120px', width: '100%', maxWidth: '728px', margin: '0 auto' }}>
+                                                <Image
+                                                    src={(() => {
+                                                        const rawUrl = ad.image.startsWith('http') ? ad.image : `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000'}/uploads/ads/${ad.image}`;
+                                                        if (rawUrl.startsWith('http')) {
+                                                            const isLocal = rawUrl.includes('127.0.0.1') || rawUrl.includes('localhost');
+                                                            if (isLocal) return rawUrl;
+                                                            return rawUrl.replace(/^http:\/\//, 'https://');
+                                                        }
+                                                        return rawUrl;
+                                                    })()}
+                                                    alt={ad.name || 'Advertisement'}
+                                                    fill
+                                                    className="rounded shadow-sm"
+                                                    style={{ objectFit: 'contain' }}
+                                                    sizes="(max-width: 992px) 100vw, 728px"
+                                                />
+                                            </div>
+                                            {/* Mobile view */}
+                                            <div className="d-block d-md-none" style={{ position: 'relative', height: '100px', width: '100%', maxWidth: '480px', margin: '0 auto' }}>
+                                                <Image
+                                                    src={(() => {
+                                                        const rawUrl = ad.mobileImage.startsWith('http') ? ad.mobileImage : `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000'}/uploads/ads/${ad.mobileImage}`;
+                                                        if (rawUrl.startsWith('http')) {
+                                                            const isLocal = rawUrl.includes('127.0.0.1') || rawUrl.includes('localhost');
+                                                            if (isLocal) return rawUrl;
+                                                            return rawUrl.replace(/^http:\/\//, 'https://');
+                                                        }
+                                                        return rawUrl;
+                                                    })()}
+                                                    alt={ad.name || 'Advertisement'}
+                                                    fill
+                                                    className="rounded shadow-sm"
+                                                    style={{ objectFit: 'contain' }}
+                                                    sizes="(max-width: 992px) 100vw, 480px"
+                                                />
+                                            </div>
+                                        </>
+                                    ) : (
+                                        <div style={{ position: 'relative', height: '120px', width: '100%', maxWidth: '728px', margin: '0 auto' }}>
+                                            <Image
+                                                src={(() => {
+                                                    const rawUrl = ad.image.startsWith('http') ? ad.image : `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000'}/uploads/ads/${ad.image}`;
+                                                    if (rawUrl.startsWith('http')) {
+                                                        const isLocal = rawUrl.includes('127.0.0.1') || rawUrl.includes('localhost');
+                                                        if (isLocal) return rawUrl;
+                                                        return rawUrl.replace(/^http:\/\//, 'https://');
+                                                    }
+                                                    return rawUrl;
+                                                })()}
+                                                alt={ad.name || 'Advertisement'}
+                                                fill
+                                                className="rounded shadow-sm"
+                                                style={{ objectFit: 'contain' }}
+                                                sizes="(max-width: 992px) 100vw, 728px"
+                                            />
+                                        </div>
+                                    )}
                                 </a>
                             )
                         )}

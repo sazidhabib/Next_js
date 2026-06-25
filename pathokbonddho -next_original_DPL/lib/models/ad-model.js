@@ -21,6 +21,10 @@ const Ad = sequelize.define("Ad", {
         type: DataTypes.STRING,
         allowNull: true,
     },
+    mobileImage: {
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
     imageUrl: {
         type: DataTypes.STRING,
         allowNull: true,

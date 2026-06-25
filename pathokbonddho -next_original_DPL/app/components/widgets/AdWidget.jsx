@@ -128,17 +128,20 @@ const AdWidget = ({ cell, isPriority }) => {
     const adImage = ad.image;
     const adTitle = ad.title || ad.name || cell.contentTitle || 'Advertisement';
     const adLink = ad.imageUrl || ad.link || ad.url || '#';
-    const imgSrc = adImage
-        ? (() => {
-            const rawUrl = adImage.startsWith('http') ? adImage : `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000'}/uploads/ads/${adImage}`;
-            if (rawUrl.startsWith('http')) {
-                const isLocal = rawUrl.includes('127.0.0.1') || rawUrl.includes('localhost');
-                if (isLocal) return rawUrl;
-                return rawUrl.replace(/^http:\/\//, 'https://');
-            }
-            return rawUrl;
-        })()
-        : null;
+    
+    const getFullImgSrc = (imgName) => {
+        if (!imgName) return null;
+        const rawUrl = imgName.startsWith('http') ? imgName : `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000'}/uploads/ads/${imgName}`;
+        if (rawUrl.startsWith('http')) {
+            const isLocal = rawUrl.includes('127.0.0.1') || rawUrl.includes('localhost');
+            if (isLocal) return rawUrl;
+            return rawUrl.replace(/^http:\/\//, 'https://');
+        }
+        return rawUrl;
+    };
+
+    const imgSrc = getFullImgSrc(adImage);
+    const imgSrcMobile = getFullImgSrc(ad.mobileImage);
 
     if (ad.type === 'google_adsense') {
         return (
@@ -153,24 +156,50 @@ const AdWidget = ({ cell, isPriority }) => {
         <div
             className="ad-widget w-100 overflow-hidden position-relative"
             style={{
-                // backgroundColor: '#f8f9fa', 
-                minHeight: '250px',
                 height: '100%',
                 display: 'block'
             }}
         >
             {imgSrc ? (
-                <NextImage
-                    src={imgSrc}
-                    alt={adTitle}
-                    fill
-                    className="w-100 h-100"
-                    style={{ objectFit: 'contain' }}
-                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                    priority={isPriority !== undefined ? isPriority : (currentPage === 'home')}
-                />
+                imgSrcMobile ? (
+                    <>
+                        {/* Desktop view */}
+                        <div className="d-none d-md-block h-100 w-100 position-relative" style={{ minHeight: '250px', height: '100%' }}>
+                            <NextImage
+                                src={imgSrc}
+                                alt={adTitle}
+                                fill
+                                style={{ objectFit: 'contain' }}
+                                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                                priority={isPriority !== undefined ? isPriority : (currentPage === 'home')}
+                            />
+                        </div>
+                        {/* Mobile view */}
+                        <div className="d-block d-md-none h-100 w-100 position-relative" style={{ minHeight: '100px', height: '100%' }}>
+                            <NextImage
+                                src={imgSrcMobile}
+                                alt={adTitle}
+                                fill
+                                style={{ objectFit: 'contain' }}
+                                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                                priority={isPriority !== undefined ? isPriority : (currentPage === 'home')}
+                            />
+                        </div>
+                    </>
+                ) : (
+                    <div className="h-100 w-100 position-relative" style={{ minHeight: '250px', height: '100%' }}>
+                        <NextImage
+                            src={imgSrc}
+                            alt={adTitle}
+                            fill
+                            style={{ objectFit: 'contain' }}
+                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                            priority={isPriority !== undefined ? isPriority : (currentPage === 'home')}
+                        />
+                    </div>
+                )
             ) : (
-                <div className="d-flex align-items-center justify-content-center h-100 text-muted small">
+                <div className="d-flex align-items-center justify-content-center h-100 text-muted small" style={{ minHeight: '250px' }}>
                     Advertisement
                 </div>
             )}

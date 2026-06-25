@@ -292,6 +292,11 @@ export default function AdminLayoutClient({ children, user }) {
                                 <i className="fas fa-ad me-2"></i> Advertisement
                             </Link>
                         </li>
+                        <li className="nav-item">
+                            <Link href="/admin/photocard-stats" className={`sidebar-link ${isActiveRoute('/admin/photocard-stats') ? 'sidebar-link-active' : ''}`}>
+                                <i className="fas fa-image me-2"></i> Photocard Stats
+                            </Link>
+                        </li>
 
                         <div className="sidebar-category-header">System</div>
                         <li className="nav-item">

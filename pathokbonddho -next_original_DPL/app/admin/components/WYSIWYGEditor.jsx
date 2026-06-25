@@ -166,7 +166,7 @@ const WYSIWYGEditor = forwardRef(({
     const handleJustifyRight = (e) => { e.preventDefault(); execCommand('justifyRight'); };
 
     return (
-        <div className="border rounded" style={{ height: `${height}px`, display: 'flex', flexDirection: 'column', position: 'relative' }}>
+        <div className="border rounded" style={{ minHeight: `${height}px`, height: `${height}px`, display: 'flex', flexDirection: 'column', position: 'relative', resize: 'vertical', overflow: 'hidden' }}>
             <div className="d-flex flex-wrap gap-1 p-2 bg-light border-bottom">
                 <div className="btn-group">
                     <button type="button" className="btn btn-sm btn-outline-secondary" onMouseDown={e => e.preventDefault()} onClick={handleBold} title="Bold"><strong>B</strong></button>
@@ -175,12 +175,12 @@ const WYSIWYGEditor = forwardRef(({
                     <button type="button" className="btn btn-sm btn-outline-secondary" onMouseDown={e => e.preventDefault()} onClick={handleStrikethrough} title="Strikethrough"><s>S</s></button>
                 </div>
                 <div className="btn-group">
-                    <select className="form-select form-select-sm" style={{ width: 'auto' }} onChange={handleHeadingChange} title="Heading" defaultValue="p">
+                    <select className="form-select form-select-sm" style={{ width: 'auto', paddingRight: '2rem', minWidth: '120px' }} onChange={handleHeadingChange} title="Heading" defaultValue="p">
                         <option value="p">Paragraph</option><option value="h1">Heading 1</option><option value="h2">Heading 2</option><option value="h3">Heading 3</option><option value="h4">Heading 4</option>
                     </select>
                 </div>
                 <div className="btn-group">
-                    <select className="form-select form-select-sm" style={{ width: 'auto' }} onChange={handleFontSizeChange} title="Font Size" defaultValue="3">
+                    <select className="form-select form-select-sm" style={{ width: 'auto', paddingRight: '2rem', minWidth: '100px' }} onChange={handleFontSizeChange} title="Font Size" defaultValue="3">
                         <option value="1">Small</option><option value="2">Medium</option><option value="3">Normal</option><option value="4">Large</option><option value="5">X-Large</option><option value="6">XX-Large</option><option value="7">XXX-Large</option>
                     </select>
                 </div>

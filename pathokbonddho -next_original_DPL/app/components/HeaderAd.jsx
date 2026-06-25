@@ -80,20 +80,23 @@ const HeaderAd = () => {
     if (loading || !ad) return null;
 
     const adImage = ad.image;
+    const adMobileImage = ad.mobileImage;
     const adTitle = ad.title || ad.name || 'Advertisement';
     const adLink = ad.imageUrl || ad.link || ad.url || '#';
 
-    const imgSrc = adImage
-        ? (() => {
-            const rawUrl = adImage.startsWith('http') ? adImage : `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000'}/uploads/ads/${adImage}`;
-            if (rawUrl.startsWith('http')) {
-                const isLocal = rawUrl.includes('127.0.0.1') || rawUrl.includes('localhost');
-                if (isLocal) return rawUrl;
-                return rawUrl.replace(/^http:\/\//, 'https://');
-            }
-            return rawUrl;
-        })()
-        : null;
+    const getFullImgSrc = (imgName) => {
+        if (!imgName) return null;
+        const rawUrl = imgName.startsWith('http') ? imgName : `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000'}/uploads/ads/${imgName}`;
+        if (rawUrl.startsWith('http')) {
+            const isLocal = rawUrl.includes('127.0.0.1') || rawUrl.includes('localhost');
+            if (isLocal) return rawUrl;
+            return rawUrl.replace(/^http:\/\//, 'https://');
+        }
+        return rawUrl;
+    };
+
+    const imgSrc = getFullImgSrc(adImage);
+    const imgSrcMobile = getFullImgSrc(adMobileImage);
 
     return (
         <div className="header-ad-container  text-center pt-2" style={{ backgroundColor: '#ffffffff' }}>
@@ -106,15 +109,44 @@ const HeaderAd = () => {
                 ) : (
                     imgSrc && (
                         <a href={adLink} target="_blank" rel="noopener noreferrer" onClick={handleAdClick} className="d-block w-100">
-                            <Image
-                                src={imgSrc}
-                                alt={adTitle}
-                                width={1280}
-                                height={150}
-                                className="img-fluid w-100"
-                                style={{ objectFit: 'fill', maxHeight: '130px', height: 'auto', borderRadius: '4px' }}
-                                priority
-                            />
+                            {imgSrcMobile ? (
+                                <>
+                                    {/* Desktop view image */}
+                                    <div className="d-none d-md-block">
+                                        <Image
+                                            src={imgSrc}
+                                            alt={adTitle}
+                                            width={1280}
+                                            height={150}
+                                            className="img-fluid w-100"
+                                            style={{ objectFit: 'fill', maxHeight: '130px', height: 'auto', borderRadius: '4px' }}
+                                            priority
+                                        />
+                                    </div>
+                                    {/* Mobile view image */}
+                                    <div className="d-block d-md-none">
+                                        <Image
+                                            src={imgSrcMobile}
+                                            alt={adTitle}
+                                            width={480}
+                                            height={120}
+                                            className="img-fluid w-100"
+                                            style={{ objectFit: 'fill', maxHeight: '100px', height: 'auto', borderRadius: '4px' }}
+                                            priority
+                                        />
+                                    </div>
+                                </>
+                            ) : (
+                                <Image
+                                    src={imgSrc}
+                                    alt={adTitle}
+                                    width={1280}
+                                    height={150}
+                                    className="img-fluid w-100"
+                                    style={{ objectFit: 'fill', maxHeight: '130px', height: 'auto', borderRadius: '4px' }}
+                                    priority
+                                />
+                            )}
                         </a>
                     )
                 )}

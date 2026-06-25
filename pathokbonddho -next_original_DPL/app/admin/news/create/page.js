@@ -9,6 +9,8 @@ import { useAuth } from "@/app/providers/AuthProvider";
 import WYSIWYGEditor from '@/app/admin/components/WYSIWYGEditor';
 import ImageFormatModal from '@/app/admin/components/ImageFormatModal';
 
+
+
 const NewsCreate = () => {
     const router = useRouter();
     const { user } = useAuth();
@@ -81,9 +83,9 @@ const NewsCreate = () => {
             setAuthors(authorsRes.data.authors || authorsRes.data || []);
             setTags(tagRes.data.tags || tagRes.data || []);
             setCategories(processCategories(menuRes.data.data || menuRes.data || []));
-        } catch (err) { 
+        } catch (err) {
             console.error('Error fetching dropdown data:', err);
-            toast.error("Failed to load dropdown data"); 
+            toast.error("Failed to load dropdown data");
         }
     };
 
@@ -408,15 +410,18 @@ const NewsCreate = () => {
                                 </Form.Group>
                                 <Form.Group className="mb-3">
                                     <Form.Label>Highlight</Form.Label>
-                                    <WYSIWYGEditor ref={editorRefs.highlight} value={formData.highlight} onChange={v => setFormData({...formData, highlight: v})} height={200} onImageClick={() => openEditorImageModal('highlight')} onEditImage={(data) => handleEditImage(data, 'highlight')} />
+                                    <WYSIWYGEditor ref={editorRefs.highlight} value={formData.highlight} onChange={v => setFormData({ ...formData, highlight: v })} height={200} onImageClick={() => openEditorImageModal('highlight')} onEditImage={(data) => handleEditImage(data, 'highlight')} />
                                 </Form.Group>
                                 <Form.Group className="mb-3">
                                     <Form.Label>Short Description</Form.Label>
-                                    <Form.Control as="textarea" rows={3} value={formData.shortDescription} name="shortDescription" onChange={handleInputChange} placeholder="Brief summary of the news (plain text)..." />
+                                    <Form.Control as="textarea" rows={3} value={formData.shortDescription} name="shortDescription" onChange={handleInputChange} placeholder="Brief summary of the news (plain text)..." style={{ resize: 'vertical' }} maxLength={150} />
+                                    <div className="text-muted small mt-1">
+                                        Short description accepts a maximum of 150 characters. ({(formData.shortDescription || '').length}/150 characters)
+                                    </div>
                                 </Form.Group>
                                 <Form.Group className="mb-3">
                                     <Form.Label>Content *</Form.Label>
-                                    <WYSIWYGEditor ref={editorRefs.content} value={formData.content} onChange={v => setFormData({...formData, content: v})} height={400} onImageClick={() => openEditorImageModal('content')} onEditImage={(data) => handleEditImage(data, 'content')} />
+                                    <WYSIWYGEditor ref={editorRefs.content} value={formData.content} onChange={v => setFormData({ ...formData, content: v })} height={'400'} onImageClick={() => openEditorImageModal('content')} onEditImage={(data) => handleEditImage(data, 'content')} />
                                 </Form.Group>
                             </Card.Body>
                         </Card>
@@ -508,10 +513,11 @@ const NewsCreate = () => {
                                             variant={showThumbSection ? 'outline-danger' : 'outline-primary'}
                                             size="sm"
                                             onClick={() => setShowThumbSection(!showThumbSection)}
-                                            style={{ width: '28px', height: '28px', padding: 0, lineHeight: '1', fontSize: '1rem', fontWeight: 'bold' }}
+                                            className="d-inline-flex align-items-center justify-content-center p-0"
+                                            style={{ width: '28px', height: '28px', borderRadius: '50%' }}
                                             title={showThumbSection ? 'Close thumbnail section' : 'Add thumbnail image'}
                                         >
-                                            {showThumbSection ? '−' : '+'}
+                                            {showThumbSection ? <i className="fas fa-minus small" style={{ fontSize: '0.8rem' }}></i> : <i className="fas fa-plus small" style={{ fontSize: '0.8rem' }}></i>}
                                         </Button>
                                         {(files.thumbImage || selectedImages.thumbImage) && !showThumbSection && (
                                             <Badge bg="success" className="ms-1">✓ Added</Badge>

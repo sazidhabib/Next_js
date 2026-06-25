@@ -9,6 +9,8 @@ import api, { STATIC_URL } from "@/app/lib/api";
 import { useAuth } from "@/app/providers/AuthProvider";
 import WYSIWYGEditor from '../../../components/WYSIWYGEditor';
 
+
+
 const PhotoNewsEdit = () => {
     const router = useRouter();
     const { id } = useParams();
@@ -395,7 +397,13 @@ const PhotoNewsEdit = () => {
                             </Card>
 
                             <Form.Group className="mb-3 mt-4"><Form.Label>Highlight</Form.Label><WYSIWYGEditor ref={editorRefs.highlight} value={formData.highlight} onChange={v => setFormData({...formData, highlight: v})} height={150} onImageClick={() => { setActiveEditor('highlight'); setModals({...modals, editor: true}); }} /></Form.Group>
-                            <Form.Group className="mb-3"><Form.Label>Short Description</Form.Label><Form.Control as="textarea" rows={3} value={formData.shortDescription} onChange={e => setFormData({...formData, shortDescription: e.target.value})} placeholder="Brief summary of the photo news (plain text)..." /></Form.Group>
+                            <Form.Group className="mb-3">
+                                <Form.Label>Short Description</Form.Label>
+                                <Form.Control as="textarea" rows={3} value={formData.shortDescription} onChange={e => setFormData({...formData, shortDescription: e.target.value})} placeholder="Brief summary of the photo news (plain text)..." style={{ resize: 'vertical' }} maxLength={150} />
+                                <div className="text-muted small mt-1">
+                                    Short description accepts a maximum of 150 characters. ({(formData.shortDescription || '').length}/150 characters)
+                                </div>
+                            </Form.Group>
                             <Form.Group className="mb-3"><Form.Label>Main Content</Form.Label><WYSIWYGEditor ref={editorRefs.content} value={formData.content} onChange={v => setFormData({...formData, content: v})} height={300} onImageClick={() => { setActiveEditor('content'); setModals({...modals, editor: true}); }} /></Form.Group>
                         </Card.Body></Card>
                     </Col>
@@ -412,10 +420,11 @@ const PhotoNewsEdit = () => {
                                         variant={(selectedImages.thumbImage || currentImages.thumbImage) && !modals._showThumb ? 'outline-success' : modals._showThumb ? 'outline-danger' : 'outline-primary'}
                                         size="sm"
                                         onClick={() => setModals(prev => ({...prev, _showThumb: !prev._showThumb}))}
-                                        style={{ width: '28px', height: '28px', padding: 0, lineHeight: '1', fontSize: '1rem', fontWeight: 'bold' }}
+                                        className="d-inline-flex align-items-center justify-content-center p-0"
+                                        style={{ width: '28px', height: '28px', borderRadius: '50%' }}
                                         title={modals._showThumb ? 'Close thumbnail section' : 'Add thumbnail image'}
                                     >
-                                        {modals._showThumb ? '−' : '+'}
+                                        {modals._showThumb ? <i className="fas fa-minus small" style={{ fontSize: '0.8rem' }}></i> : <i className="fas fa-plus small" style={{ fontSize: '0.8rem' }}></i>}
                                     </Button>
                                     {(selectedImages.thumbImage || currentImages.thumbImage) && !modals._showThumb && (
                                         <Badge bg="success" className="ms-1">✓ Added</Badge>

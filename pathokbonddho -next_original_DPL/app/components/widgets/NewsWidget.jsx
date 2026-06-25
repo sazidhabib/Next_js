@@ -16,6 +16,12 @@ const NewsWidget = ({ cell, isPriority }) => {
         return html.replace(/<[^>]*>?/gm, '');
     };
 
+    const truncateChars = (text, maxChars) => {
+        if (!text) return '';
+        if (text.length <= maxChars) return text;
+        return text.substring(0, maxChars) + '...';
+    };
+
     const getYoutubeId = (url) => {
         if (!url) return null;
         const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([^&\n?#]+)/);
@@ -215,7 +221,7 @@ const NewsWidget = ({ cell, isPriority }) => {
                     )}
                     <div className="flex-grow-1">
                         {news.shortDescription && (
-                            <p className="small text-muted mb-2 font-bangla">{stripHtml(news.shortDescription)}</p>
+                            <p className="small text-muted mb-2 font-bangla">{truncateChars(stripHtml(news.shortDescription), 150)}</p>
                         )}
                         <small className="text-muted">{formatDate(news.createdAt)}</small>
                     </div>
@@ -265,7 +271,7 @@ const NewsWidget = ({ cell, isPriority }) => {
                 <div className="d-flex gap-3">
                     <div className="flex-grow-1">
                         {news.shortDescription && (
-                            <p className="small text-muted mb-2 font-bangla">{stripHtml(news.shortDescription)}</p>
+                            <p className="small text-muted mb-2 font-bangla">{truncateChars(stripHtml(news.shortDescription), 150)}</p>
                         )}
                         <small className="text-muted">{formatDate(news.createdAt)}</small>
                     </div>
@@ -341,8 +347,8 @@ const NewsWidget = ({ cell, isPriority }) => {
                         {news.alternativeHeadline || news.newsHeadline}
                     </h5>
                 </Link>
-                {news.shortDescription && !cell.design && (
-                    <p className="small text-muted line-clamp-3 mb-2 font-bangla d-none d-md-block position-relative" style={{ zIndex: 2, pointerEvents: 'none' }}>{stripHtml(news.shortDescription)}</p>
+                {news.shortDescription && (!cell.design || cell.design === 'title-image-top') && (
+                    <p className="small text-muted line-clamp-3 mb-2 font-bangla d-none d-md-block position-relative" style={{ zIndex: 2, pointerEvents: 'none' }}>{truncateChars(stripHtml(news.shortDescription), 150)}</p>
                 )}
                 <div className="text-muted small mt-auto position-relative" style={{ zIndex: 2, pointerEvents: 'none' }}>
                     {formatDate(news.createdAt)}

@@ -67,6 +67,8 @@ const AdForm = ({ ad, onClose, onSuccess, categories = [] }) => {
     });
     const [imageFile, setImageFile] = useState(null);
     const [imagePreview, setImagePreview] = useState(null);
+    const [mobileImageFile, setMobileImageFile] = useState(null);
+    const [mobileImagePreview, setMobileImagePreview] = useState(null);
     const [loading, setLoading] = useState(false);
 
     const [errors, setErrors] = useState({});
@@ -91,7 +93,23 @@ const AdForm = ({ ad, onClose, onSuccess, categories = [] }) => {
                 popupAutoCloseSeconds: ad.popupAutoCloseSeconds || '',
                 popupMaxShowCount: ad.popupMaxShowCount || ''
             });
-            if (ad.image) setImagePreview(`${IMG_URL}/${ad.image}`);
+            if (ad.image) {
+                setImagePreview(`${IMG_URL}/${ad.image}`);
+            } else {
+                setImagePreview(null);
+            }
+            if (ad.mobileImage) {
+                setMobileImagePreview(`${IMG_URL}/${ad.mobileImage}`);
+            } else {
+                setMobileImagePreview(null);
+            }
+            setImageFile(null);
+            setMobileImageFile(null);
+        } else {
+            setImageFile(null);
+            setImagePreview(null);
+            setMobileImageFile(null);
+            setMobileImagePreview(null);
         }
 
     }, [ad]);
@@ -107,6 +125,14 @@ const AdForm = ({ ad, onClose, onSuccess, categories = [] }) => {
         if (file) {
             setImageFile(file);
             setImagePreview(URL.createObjectURL(file));
+        }
+    };
+
+    const handleMobileImageChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setMobileImageFile(file);
+            setMobileImagePreview(URL.createObjectURL(file));
         }
     };
 
@@ -127,6 +153,7 @@ const AdForm = ({ ad, onClose, onSuccess, categories = [] }) => {
                 }
             });
             if (imageFile) submitData.append('image', imageFile);
+            if (mobileImageFile) submitData.append('mobileImage', mobileImageFile);
 
             if (ad) {
                 await api.patch(`/ads/${ad.id}`, submitData, { headers: { 'Content-Type': 'multipart/form-data' } });
@@ -155,16 +182,45 @@ const AdForm = ({ ad, onClose, onSuccess, categories = [] }) => {
                         <Col md={6}><Form.Group className="mb-3"><Form.Label>Position</Form.Label><Form.Select name="position" value={formData.position} onChange={handleInputChange}><option value="header">Header</option><option value="sidebar">Sidebar</option><option value="footer">Footer</option><option value="in_content">In Content</option><option value="popup">Popup</option></Form.Select></Form.Group></Col>
                     </Row>
                     {formData.type === 'image' ? (
-                        <Row>
-                            <Col md={6}><Form.Group className="mb-3"><Form.Label>Image</Form.Label><Form.Control type="file" accept="image/*" onChange={handleImageChange} /></Form.Group><Form.Group className="mb-3"><Form.Label>Click URL</Form.Label><Form.Control name="imageUrl" value={formData.imageUrl} onChange={handleInputChange} /></Form.Group></Col>
-                            <Col md={6}>
-                                {imagePreview && (
-                                    <div style={{ position: 'relative', height: '150px', width: '100%' }}>
-                                        <NextImage src={imagePreview} alt="Preview" fill className="img-thumbnail" style={{ objectFit: 'contain' }} />
-                                    </div>
-                                )}
-                            </Col>
-                        </Row>
+                        <>
+                            <Row>
+                                <Col md={6}>
+                                    <Form.Group className="mb-3">
+                                        <Form.Label>{(formData.position === 'header' || formData.position === 'footer') ? 'Desktop Image' : 'Image'}</Form.Label>
+                                        <Form.Control type="file" accept="image/*" onChange={handleImageChange} />
+                                    </Form.Group>
+                                    <Form.Group className="mb-3">
+                                        <Form.Label>Click URL</Form.Label>
+                                        <Form.Control name="imageUrl" value={formData.imageUrl} onChange={handleInputChange} />
+                                    </Form.Group>
+                                </Col>
+                                <Col md={6}>
+                                    {imagePreview && (
+                                        <div style={{ position: 'relative', height: '150px', width: '100%' }}>
+                                            <NextImage src={imagePreview} alt="Preview" fill className="img-thumbnail" style={{ objectFit: 'contain' }} />
+                                        </div>
+                                    )}
+                                </Col>
+                            </Row>
+                            {(formData.position === 'header' || formData.position === 'footer') && (
+                                <Row className="mt-3">
+                                    <Col md={6}>
+                                        <Form.Group className="mb-3">
+                                            <Form.Label>Mobile Image</Form.Label>
+                                            <Form.Control type="file" accept="image/*" onChange={handleMobileImageChange} />
+                                            <Form.Text className="text-muted">Will be shown on mobile screens for Header/Footer ads.</Form.Text>
+                                        </Form.Group>
+                                    </Col>
+                                    <Col md={6}>
+                                        {mobileImagePreview && (
+                                            <div style={{ position: 'relative', height: '150px', width: '100%' }}>
+                                                <NextImage src={mobileImagePreview} alt="Mobile Preview" fill className="img-thumbnail" style={{ objectFit: 'contain' }} />
+                                            </div>
+                                        )}
+                                    </Col>
+                                </Row>
+                            )}
+                        </>
                     ) : (
                         <Row>
                             <Col md={6}><Form.Group className="mb-3"><Form.Label>Head Code</Form.Label><Form.Control as="textarea" rows={4} name="headCode" value={formData.headCode} onChange={handleInputChange} /></Form.Group></Col>

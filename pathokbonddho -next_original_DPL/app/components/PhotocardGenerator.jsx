@@ -2,6 +2,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
 import api from '@/app/lib/api';
+import { convertToBengaliDigits } from '@/app/lib/dateUtils';
 
 const PhotocardGenerator = ({
     hideName = false,
@@ -13,7 +14,8 @@ const PhotocardGenerator = ({
     cardTypeText = 'ফটোকার্ড',
     requireValidation = false,
     redirectUrl = '',
-    redirectDelayMs = 3000
+    redirectDelayMs = 3000,
+    photocardType = 'pathokbonddho-photocard'
 }) => {
     const [imageSrc, setImageSrc] = useState(null);
     const [name, setName] = useState('');
@@ -25,7 +27,25 @@ const PhotocardGenerator = ({
     const [isSharing, setIsSharing] = useState(false);
     const [isDownloading, setIsDownloading] = useState(false);
     const [showSuccessModal, setShowSuccessModal] = useState(false);
+    const [downloadCount, setDownloadCount] = useState(null);
     const containerRef = useRef(null);
+
+    const fetchPublicStats = async () => {
+        try {
+            const response = await api.get(`/photocards/public/${photocardType}`);
+            if (response.data && response.data.downloadCount !== undefined) {
+                setDownloadCount(response.data.downloadCount);
+            }
+        } catch (err) {
+            console.error('Error fetching photocard download count:', err);
+        }
+    };
+
+    useEffect(() => {
+        if (photocardType) {
+            fetchPublicStats();
+        }
+    }, [photocardType]);
 
     // Default placeholder frame (a simple border with a transparent center)
     // Replace this with your actual transparent PNG frame path, e.g., '/images/frame.png'
@@ -125,6 +145,17 @@ const PhotocardGenerator = ({
             link.click();
 
             setShowSuccessModal(true);
+
+            // Track download count in backend
+            if (photocardType) {
+                api.post('/photocards/track', { type: photocardType, action: 'download' })
+                    .then(() => {
+                        fetchPublicStats();
+                    })
+                    .catch(err => {
+                        console.error('Failed to track photocard download:', err);
+                    });
+            }
 
             if (redirectUrl) {
                 setTimeout(() => {
@@ -271,6 +302,13 @@ const PhotocardGenerator = ({
 
                     // Open Facebook sharer
                     window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(sharePageUrl)}`, '_blank');
+
+                    // Track share count in backend
+                    if (photocardType) {
+                        api.post('/photocards/track', { type: photocardType, action: 'share' }).catch(err => {
+                            console.error('Failed to track photocard share:', err);
+                        });
+                    }
                 } catch (error) {
                     console.error('Error sharing photocard:', error);
                     alert('ফেসবুকে শেয়ার করতে সমস্যা হয়েছে। দয়া করে আবার চেষ্টা করুন।');
@@ -676,6 +714,13 @@ const PhotocardGenerator = ({
                         disabled={!imageSrc}
                     />
                 </div>
+
+                {downloadCount !== null && (
+                    <div className="text-center text-muted mb-3 p-2 bg-light rounded border border-light-subtle animate__animated animate__fadeIn" style={{ fontSize: '0.9rem' }}>
+                        <i className="fas fa-download me-1 text-success"></i>
+                        এই {cardTypeText}টি এ পর্যন্ত <strong className="text-success fs-5">{convertToBengaliDigits(downloadCount)}</strong> বার ডাউনলোড করা হয়েছে।
+                    </div>
+                )}
 
                 <div className="mt-4 d-flex flex-column gap-2">
                     <button

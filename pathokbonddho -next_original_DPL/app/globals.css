@@ -2722,3 +2722,15 @@ footer {
         /* Hide font controls on very small screens to make room for share buttons */
     }
 }
+
+/* ════════════ MOBILE NAVBAR SHADOW FIXES ════════════ */
+.mobile-topbardef {
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08) !important;
+    position: relative;
+    z-index: 1040;
+}
+
+.mobile-topbar {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12) !important;
+    z-index: 1050;
+}

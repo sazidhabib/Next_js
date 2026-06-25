@@ -144,7 +144,7 @@ const DesignListClient = ({ initialDesigns, isAdmin }) => {
                                     <td><Form.Check checked={selectedDesigns.includes(design.id)} onChange={(e) => setSelectedDesigns(prev => e.target.checked ? [...prev, design.id] : prev.filter(id => id !== design.id))} /></td>
                                     <td>
                                         <div className="fw-bold">{design.design_name}</div>
-                                        <div className="text-muted small text-truncate" style={{maxWidth: '300px'}}>{design.description || 'No description provided'}</div>
+                                        <div className="text-muted small text-truncate" style={{maxWidth: '300px'}} title={design.description || 'No description provided'}>{design.description || 'No description provided'}</div>
                                     </td>
                                     <td><code className="text-primary">{design.slug}</code></td>
                                     <td><Badge bg={design.design_status ? 'success' : 'secondary'}>{design.design_status ? 'Active' : 'Inactive'}</Badge></td>

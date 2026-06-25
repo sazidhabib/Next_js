@@ -17,6 +17,7 @@ import NewsCategory from './news-category-model.js';
 import NewsGalleryItem from './news-gallery-item.js';
 import ImageRegistry from './imageRegistry.js';
 import Ad from './ad-model.js';
+import PhotocardStatistic from './photocard-statistic-model.js';
 import Design from './design-model.js';
 import Song from './song.js';
 import Videos from './videos.js';
@@ -186,4 +187,5 @@ export {
     Videos,
     HeroSection,
     Section,
+    PhotocardStatistic,
 };
