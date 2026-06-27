@@ -22,7 +22,10 @@ export default function PhotocardPage() {
             <p className="hidden md:block text-sm md:text-lg text-muted">আপনার ছবি ও নাম দিয়ে একটি সুন্দর ফটোকার্ড তৈরি করুন</p>
           </div>
 
-          <PhotocardGenerator photocardType="pathokbonddho-photocard" />
+          <PhotocardGenerator 
+            photocardType="pathokbonddho-photocard" 
+            isNameOptional={true}
+          />
         </div>
       </main>
       <Footer />

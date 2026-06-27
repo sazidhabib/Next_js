@@ -63,15 +63,69 @@ router.get("/stats", authMiddleware, async (req, res) => {
     }
 });
 
-// Get all stored photocard images (Protected)
+// Get stored photocard images with pagination, filtering, and type-wise counts (Protected)
 router.get("/images", authMiddleware, async (req, res) => {
     try {
         const PhotocardImage = require("../models/photocard-image-model");
-        const images = await PhotocardImage.findAll({
+        
+        // Parse pagination query params
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 30;
+        const offset = (page - 1) * limit;
+
+        const type = req.query.type || 'all';
+        const action = req.query.action || 'all';
+
+        // Build search conditions
+        const whereClause = {};
+        if (type !== 'all') {
+            whereClause.photocardType = type;
+        }
+        if (action !== 'all') {
+            whereClause.action = action;
+        }
+
+        // 1. Fetch the paginated rows and the matching count
+        const { count, rows: images } = await PhotocardImage.findAndCountAll({
+            where: whereClause,
             order: [["createdAt", "DESC"]],
-            limit: 100 // fetch the latest 100 images
+            limit: limit,
+            offset: offset
         });
-        res.status(200).json(images);
+
+        // 2. Fetch the overall counts grouped by photocardType (ignoring current filter so option labels are stable)
+        const typeCounts = await PhotocardImage.findAll({
+            attributes: [
+                'photocardType',
+                [PhotocardImage.sequelize.fn('COUNT', PhotocardImage.sequelize.col('id')), 'count']
+            ],
+            group: ['photocardType']
+        });
+
+        const typeCountsObj = {
+            'all': 0,
+            'pathokbonddho-photocard': 0,
+            'ajp-photocard': 0,
+            'ajp-profile': 0
+        };
+
+        let totalOverallCount = 0;
+        typeCounts.forEach(item => {
+            const t = item.photocardType;
+            const c = parseInt(item.get('count')) || 0;
+            typeCountsObj[t] = c;
+            totalOverallCount += c;
+        });
+        typeCountsObj['all'] = totalOverallCount;
+
+        res.status(200).json({
+            images,
+            totalCount: count,
+            totalPages: Math.ceil(count / limit),
+            currentPage: page,
+            limit,
+            typeCounts: typeCountsObj
+        });
     } catch (error) {
         console.error("Get Photocard Images Error:", error);
         res.status(500).json({ message: "Internal Server Error", error: error.message });

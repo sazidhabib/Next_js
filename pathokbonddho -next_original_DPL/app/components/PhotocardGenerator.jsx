@@ -15,10 +15,13 @@ const PhotocardGenerator = ({
     requireValidation = false,
     redirectUrl = '',
     redirectDelayMs = 3000,
-    photocardType = 'pathokbonddho-photocard'
+    photocardType = 'pathokbonddho-photocard',
+    isNameOptional = false,
+    fontFamily = 'VarendraAP'
 }) => {
     const [imageSrc, setImageSrc] = useState(null);
     const [name, setName] = useState('');
+    const [addName, setAddName] = useState(!isNameOptional);
     const [scale, setScale] = useState(1);
     const [position, setPosition] = useState({ x: 0, y: 0 });
     const [isDragging, setIsDragging] = useState(false);
@@ -116,7 +119,7 @@ const PhotocardGenerator = ({
                 alert('দয়া করে আপনার একটি ছবি নির্বাচন করুন।');
                 return;
             }
-            if (!hideName && !name.trim()) {
+            if (shouldDrawName && !name.trim()) {
                 alert('দয়া করে আপনার নাম লিখুন।');
                 return;
             }
@@ -178,7 +181,15 @@ const PhotocardGenerator = ({
             }
         };
 
-        const drawFrameAndSave = () => {
+        const drawFrameAndSave = async () => {
+            if (document.fonts && fontFamily) {
+                try {
+                    await document.fonts.load(`bold 52px "${fontFamily}"`);
+                } catch (e) {
+                    console.warn(`Could not load font ${fontFamily} explicitly:`, e);
+                }
+            }
+
             const frameImg = new window.Image();
             frameImg.crossOrigin = 'anonymous';
 
@@ -187,9 +198,9 @@ const PhotocardGenerator = ({
                 ctx.drawImage(frameImg, 0, 0, canvasWidth, canvasHeight);
 
                 // Draw Text
-                if (!hideName) {
+                if (shouldDrawName) {
                     ctx.fillStyle = '#ffffff'; // White text
-                    ctx.font = 'bold 52px "Hind Siliguri", sans-serif'; // Matched to preview size (1.2rem)
+                    ctx.font = `bold 52px "${fontFamily}", sans-serif`; // Matched to preview size (1.2rem)
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'bottom';
 
@@ -204,9 +215,9 @@ const PhotocardGenerator = ({
             // If the user hasn't added a frame yet, we just draw the text and user image
             frameImg.onerror = () => {
                 console.warn('Frame image not found. Drawing without frame.');
-                if (!hideName) {
+                if (shouldDrawName) {
                     ctx.fillStyle = '#ffffff';
-                    ctx.font = 'bold 52px "Hind Siliguri", sans-serif';
+                    ctx.font = `bold 52px "${fontFamily}", sans-serif`;
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'bottom';
                     ctx.fillText(name || 'আপনার নাম', canvasWidth / 2, canvasHeight * (nameCanvasY - 0.01));
@@ -293,7 +304,15 @@ const PhotocardGenerator = ({
         ctx.fillStyle = '#ffffff';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        const uploadAndShare = () => {
+        const uploadAndShare = async () => {
+            if (document.fonts && fontFamily) {
+                try {
+                    await document.fonts.load(`bold 52px "${fontFamily}"`);
+                } catch (e) {
+                    console.warn(`Could not load font ${fontFamily} explicitly:`, e);
+                }
+            }
+
             const frameImg = new window.Image();
             frameImg.crossOrigin = 'anonymous';
 
@@ -335,9 +354,9 @@ const PhotocardGenerator = ({
                 ctx.drawImage(frameImg, 0, 0, canvasWidth, canvasHeight);
 
                 // Draw Name inside the card area
-                if (!hideName) {
+                if (shouldDrawName) {
                     ctx.fillStyle = '#ffffff'; // White text
-                    ctx.font = 'bold 52px "Hind Siliguri", sans-serif';
+                    ctx.font = `bold 52px "${fontFamily}", sans-serif`;
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'bottom';
                     ctx.fillText(name || 'আপনার নাম', canvasWidth / 2, canvasHeight * nameCanvasY);
@@ -348,9 +367,9 @@ const PhotocardGenerator = ({
 
             frameImg.onerror = () => {
                 console.warn('Frame image not found. Sharing without frame.');
-                if (!hideName) {
+                if (shouldDrawName) {
                     ctx.fillStyle = '#006a60';
-                    ctx.font = 'bold 52px "Hind Siliguri", sans-serif';
+                    ctx.font = `bold 52px "${fontFamily}", sans-serif`;
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'bottom';
                     ctx.fillText(name || 'আপনার নাম', canvasWidth / 2, canvasHeight * (nameCanvasY - 0.01));
@@ -411,6 +430,10 @@ const PhotocardGenerator = ({
         }
     };
 
+    const shouldDrawName = !hideName && (!isNameOptional || addName);
+    const showNameInputSection = !hideName && addName;
+    const scaleLabelNumber = showNameInputSection ? '৩.' : '২.';
+
     return (
         <div className="photocard-container p-4 max-w-6xl mx-auto my-8 grid grid-cols-1 md:grid-cols-2 gap-0 md:gap-8">
             <style jsx>{`
@@ -465,6 +488,7 @@ const PhotocardGenerator = ({
                     z-index: 20;
                     pointer-events: none;
                     text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+                    font-family: ${fontFamily}, sans-serif;
                 }
                 .controls {
                     display: flex;
@@ -670,7 +694,7 @@ const PhotocardGenerator = ({
                     </div>
 
                     {/* 3. User Name Overlay (Top Layer) */}
-                    {!hideName && (
+                    {shouldDrawName && (
                         <div className="name-overlay" style={{ bottom: nameBottom }}>
                             {name || 'আপনার নাম'}
                         </div>
@@ -702,20 +726,44 @@ const PhotocardGenerator = ({
                 </div>
 
                 {!hideName && (
-                    <div className="control-group">
-                        <label>২. আপনার নাম লিখুন</label>
-                        <input
-                            type="text"
-                            placeholder="আপনার নাম"
-                            value={name}
-                            onChange={(e) => setName(e.target.value)}
-                            className="form-control"
-                        />
-                    </div>
+                    <>
+                        {isNameOptional && (
+                            <div className="form-check mb-2">
+                                <input
+                                    className="form-check-input"
+                                    type="checkbox"
+                                    id="addNameCheckbox"
+                                    checked={addName}
+                                    onChange={(e) => {
+                                        setAddName(e.target.checked);
+                                        if (!e.target.checked) {
+                                            setName('');
+                                        }
+                                    }}
+                                    style={{ cursor: 'pointer' }}
+                                />
+                                <label className="form-check-label font-weight-bold" htmlFor="addNameCheckbox" style={{ cursor: 'pointer', color: '#333' }}>
+                                    আপনি কি নাম যোগ করতে চান?
+                                </label>
+                            </div>
+                        )}
+                        {showNameInputSection && (
+                            <div className="control-group animate__animated animate__fadeIn">
+                                <label>২. আপনার নাম লিখুন</label>
+                                <input
+                                    type="text"
+                                    placeholder="আপনার নাম"
+                                    value={name}
+                                    onChange={(e) => setName(e.target.value)}
+                                    className="form-control"
+                                />
+                            </div>
+                        )}
+                    </>
                 )}
 
                 <div className="control-group">
-                    <label>{hideName ? '২.' : '৩.'} ছবি ছোট/বড় করুন (Scale)</label>
+                    <label>{scaleLabelNumber} ছবি ছোট/বড় করুন (Scale)</label>
                     <input
                         type="range"
                         min="0.5"

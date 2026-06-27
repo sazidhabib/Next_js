@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, Table, Row, Col, Spinner, Button, Badge, Form, Modal } from 'react-bootstrap';
 import useSWR, { mutate } from 'swr';
 import { fetcher } from "@/app/lib/swr-config";
@@ -9,18 +9,25 @@ import api, { STATIC_URL } from '@/app/lib/api';
 
 export default function PhotocardStatsClient({ initialStats, isAdmin }) {
     const swrKey = isAdmin ? '/photocards/stats' : null;
-    const imagesSwrKey = isAdmin ? '/photocards/images' : null;
 
+    const [page, setPage] = useState(1);
+    const [inputPage, setInputPage] = useState('1');
     const [filterType, setFilterType] = useState('all');
     const [filterAction, setFilterAction] = useState('all');
     const [selectedImage, setSelectedImage] = useState(null);
+
+    const imagesSwrKey = isAdmin 
+        ? `/photocards/images?page=${page}&limit=30&type=${filterType}&action=${filterAction}`
+        : null;
     
     const { data: stats, isLoading } = useSWR(swrKey, fetcher, {
         fallbackData: initialStats,
         keepPreviousData: true
     });
 
-    const { data: images, isLoading: isImagesLoading } = useSWR(imagesSwrKey, fetcher);
+    const { data: images, isLoading: isImagesLoading } = useSWR(imagesSwrKey, fetcher, {
+        keepPreviousData: true
+    });
 
     if (!isAdmin) {
         return <div className="p-4 text-center"><h4>Access Denied</h4></div>;
@@ -59,12 +66,40 @@ export default function PhotocardStatsClient({ initialStats, isAdmin }) {
         }
     };
 
-    // Filter logic
-    const filteredImages = images?.filter(img => {
-        const typeMatch = filterType === 'all' || img.photocardType === filterType;
-        const actionMatch = filterAction === 'all' || img.action === filterAction;
-        return typeMatch && actionMatch;
-    }) || [];
+    // Extract paginated images data from the SWR response
+    const imagesList = images?.images || [];
+    const totalCount = images?.totalCount || 0;
+    const totalPages = images?.totalPages || 1;
+    const typeCounts = images?.typeCounts || {};
+
+    // Sync inputPage state when page changes
+    useEffect(() => {
+        setInputPage(page.toString());
+    }, [page]);
+
+    const handlePageInputChange = (e) => {
+        setInputPage(e.target.value);
+    };
+
+    const handlePageInputBlur = () => {
+        const val = parseInt(inputPage);
+        if (!isNaN(val) && val >= 1 && val <= totalPages) {
+            setPage(val);
+        } else {
+            setInputPage(page.toString());
+        }
+    };
+
+    const handlePageInputKeyDown = (e) => {
+        if (e.key === 'Enter') {
+            const val = parseInt(inputPage);
+            if (!isNaN(val) && val >= 1 && val <= totalPages) {
+                setPage(val);
+            } else {
+                setInputPage(page.toString());
+            }
+        }
+    };
 
     return (
         <div className="container mt-4">
@@ -153,7 +188,14 @@ export default function PhotocardStatsClient({ initialStats, isAdmin }) {
             {/* Grid Preview Section */}
             <Card className="shadow-sm mt-5 mb-5 border-0">
                 <Card.Header className="bg-white border-0 pt-4 pb-0 d-flex justify-content-between align-items-center flex-wrap">
-                    <h5 className="mb-3 text-dark fw-bold">Downloaded & Shared Photos Gallery</h5>
+                    <h5 className="mb-3 text-dark fw-bold">
+                        Downloaded & Shared Photos Gallery
+                        {totalCount > 0 && (
+                            <Badge bg="secondary" className="ms-2" style={{ fontSize: '0.85rem' }}>
+                                Total: {totalCount}
+                            </Badge>
+                        )}
+                    </h5>
                     
                     {/* Filters */}
                     <div className="d-flex gap-3 mb-3 flex-wrap">
@@ -162,13 +204,16 @@ export default function PhotocardStatsClient({ initialStats, isAdmin }) {
                             <Form.Select 
                                 size="sm" 
                                 value={filterType} 
-                                onChange={(e) => setFilterType(e.target.value)}
-                                style={{ borderRadius: '6px', minWidth: '150px' }}
+                                onChange={(e) => {
+                                    setFilterType(e.target.value);
+                                    setPage(1);
+                                }}
+                                style={{ borderRadius: '6px', minWidth: '240px' }}
                             >
-                                <option value="all">All Types</option>
-                                <option value="pathokbonddho-photocard">পাঠকবন্ধু ফটোকার্ড</option>
-                                <option value="ajp-photocard">আজকের পত্রিকা ফটোকার্ড</option>
-                                <option value="ajp-profile">প্রোফাইল পিকচার</option>
+                                <option value="all">All Types ({typeCounts['all'] || 0})</option>
+                                <option value="pathokbonddho-photocard">পাঠকবন্ধু ফটোকার্ড ({typeCounts['pathokbonddho-photocard'] || 0})</option>
+                                <option value="ajp-photocard">আজকের পত্রিকা ফটোকার্ড ({typeCounts['ajp-photocard'] || 0})</option>
+                                <option value="ajp-profile">প্রোফাইল পিকচার ({typeCounts['ajp-profile'] || 0})</option>
                             </Form.Select>
                         </Form.Group>
                         <Form.Group className="d-flex align-items-center">
@@ -176,7 +221,10 @@ export default function PhotocardStatsClient({ initialStats, isAdmin }) {
                             <Form.Select 
                                 size="sm" 
                                 value={filterAction} 
-                                onChange={(e) => setFilterAction(e.target.value)}
+                                onChange={(e) => {
+                                    setFilterAction(e.target.value);
+                                    setPage(1);
+                                }}
                                 style={{ borderRadius: '6px', minWidth: '120px' }}
                             >
                                 <option value="all">All Actions</option>
@@ -192,77 +240,120 @@ export default function PhotocardStatsClient({ initialStats, isAdmin }) {
                             <Spinner animation="border" variant="primary" />
                             <div className="mt-2 text-muted">Loading preview gallery...</div>
                         </div>
-                    ) : filteredImages && filteredImages.length > 0 ? (
-                        <Row className="g-2 g-sm-3">
-                            {filteredImages.map(img => {
-                                const imgBaseUrl = STATIC_URL || 'http://localhost:5000';
-                                const fullImgUrl = img.imageUrl.startsWith('http') 
-                                    ? img.imageUrl 
-                                    : `${imgBaseUrl}/${img.imageUrl.replace(/^\/+/, '')}`;
-                                
-                                // Determine display label and color
-                                let typeLabel = img.photocardType;
-                                let typeColor = 'secondary';
-                                if (img.photocardType === 'pathokbonddho-photocard') {
-                                    typeLabel = 'পাঠকবন্ধু ফটোকার্ড';
-                                    typeColor = 'success';
-                                } else if (img.photocardType === 'ajp-photocard') {
-                                    typeLabel = 'আজকের পত্রিকা ফটোকার্ড';
-                                    typeColor = 'primary';
-                                } else if (img.photocardType === 'ajp-profile') {
-                                    typeLabel = 'প্রোফাইল পিকচার';
-                                    typeColor = 'warning';
-                                }
+                    ) : imagesList && imagesList.length > 0 ? (
+                        <>
+                            <Row className="g-2 g-sm-3">
+                                {imagesList.map(img => {
+                                    const imgBaseUrl = STATIC_URL || 'http://localhost:5000';
+                                    const fullImgUrl = img.imageUrl.startsWith('http') 
+                                        ? img.imageUrl 
+                                        : `${imgBaseUrl}/${img.imageUrl.replace(/^\/+/, '')}`;
+                                    
+                                    // Determine display label and color
+                                    let typeLabel = img.photocardType;
+                                    let typeColor = 'secondary';
+                                    if (img.photocardType === 'pathokbonddho-photocard') {
+                                        typeLabel = 'পাঠকবন্ধু ফটোকার্ড';
+                                        typeColor = 'success';
+                                    } else if (img.photocardType === 'ajp-photocard') {
+                                        typeLabel = 'আজকের পত্রিকা ফটোকার্ড';
+                                        typeColor = 'primary';
+                                    } else if (img.photocardType === 'ajp-profile') {
+                                        typeLabel = 'প্রোফাইল পিকচার';
+                                        typeColor = 'warning';
+                                    }
 
-                                return (
-                                    <Col key={img.id} xs={6} sm={6} md={4} lg={3} className="mb-2 mb-sm-3">
-                                        <Card className="h-100 shadow-sm border-0 position-relative overflow-hidden photocard-preview-card" style={{ transition: 'all 0.3s ease', borderRadius: '12px' }}>
-                                            <div style={{ position: 'relative', width: '100%', aspectRatio: '1/1', backgroundColor: '#f8f9fa', overflow: 'hidden' }}>
-                                                {/* eslint-disable-next-line @next/next/no-img-element */}
-                                                <img 
-                                                    src={fullImgUrl} 
-                                                    alt="Generated Photocard" 
-                                                    style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover' }} 
-                                                    loading="lazy"
-                                                />
-                                                <div className="photocard-overlay">
-                                                    <Button 
-                                                        variant="light" 
-                                                        size="sm" 
-                                                        className="me-2 fw-semibold" 
-                                                        onClick={() => setSelectedImage(img)}
-                                                    >
-                                                        <i className="fas fa-eye me-1"></i> View
-                                                    </Button>
-                                                    <Button 
-                                                        variant="danger" 
-                                                        size="sm" 
-                                                        className="fw-semibold"
-                                                        onClick={() => handleDeleteImage(img.id)}
-                                                    >
-                                                        <i className="fas fa-trash-alt me-1"></i> Delete
-                                                    </Button>
+                                    return (
+                                        <Col key={img.id} xs={6} sm={6} md={4} lg={3} className="mb-2 mb-sm-3">
+                                            <Card className="h-100 shadow-sm border-0 position-relative overflow-hidden photocard-preview-card" style={{ transition: 'all 0.3s ease', borderRadius: '12px' }}>
+                                                <div style={{ position: 'relative', width: '100%', aspectRatio: '1/1', backgroundColor: '#f8f9fa', overflow: 'hidden' }}>
+                                                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                                                    <img 
+                                                        src={fullImgUrl} 
+                                                        alt="Generated Photocard" 
+                                                        style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover' }} 
+                                                        loading="lazy"
+                                                    />
+                                                    <div className="photocard-overlay">
+                                                        <Button 
+                                                            variant="light" 
+                                                            size="sm" 
+                                                            className="me-2 fw-semibold" 
+                                                            onClick={() => setSelectedImage(img)}
+                                                        >
+                                                            <i className="fas fa-eye me-1"></i> View
+                                                        </Button>
+                                                        <Button 
+                                                            variant="danger" 
+                                                            size="sm" 
+                                                            className="fw-semibold"
+                                                            onClick={() => handleDeleteImage(img.id)}
+                                                        >
+                                                            <i className="fas fa-trash-alt me-1"></i> Delete
+                                                        </Button>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            <Card.Body className="p-2 p-sm-3" style={{ fontSize: '0.85rem' }}>
-                                                <div className="d-flex flex-wrap gap-1 mb-2">
-                                                    <Badge bg={typeColor} className="text-white">
-                                                        {typeLabel}
-                                                    </Badge>
-                                                    <Badge bg={img.action === 'share' ? 'info' : 'primary'} className="text-white">
-                                                        {img.action === 'share' ? 'Share' : 'Download'}
-                                                    </Badge>
-                                                </div>
-                                                <div className="text-muted small">
-                                                    <i className="far fa-clock me-1"></i>
-                                                    {new Date(img.createdAt).toLocaleString('en-US')}
-                                                </div>
-                                            </Card.Body>
-                                        </Card>
-                                    </Col>
-                                );
-                            })}
-                        </Row>
+                                                <Card.Body className="p-2 p-sm-3" style={{ fontSize: '0.85rem' }}>
+                                                    <div className="d-flex flex-wrap gap-1 mb-2">
+                                                        <Badge bg={typeColor} className="text-white">
+                                                            {typeLabel}
+                                                        </Badge>
+                                                        <Badge bg={img.action === 'share' ? 'info' : 'primary'} className="text-white">
+                                                            {img.action === 'share' ? 'Share' : 'Download'}
+                                                        </Badge>
+                                                    </div>
+                                                    <div className="text-muted small">
+                                                        <i className="far fa-clock me-1"></i>
+                                                        {new Date(img.createdAt).toLocaleString('en-US')}
+                                                    </div>
+                                                </Card.Body>
+                                            </Card>
+                                        </Col>
+                                    );
+                                })}
+                            </Row>
+
+                            {/* Responsive Pagination Component */}
+                            {totalPages > 1 && (
+                                <div className="d-flex justify-content-center align-items-center gap-2 mt-4 pt-3 border-top flex-wrap">
+                                    <Button 
+                                        variant="light" 
+                                        disabled={page <= 1} 
+                                        onClick={() => setPage(page - 1)}
+                                        className="border shadow-sm px-3 d-flex align-items-center justify-content-center"
+                                        style={{ height: '38px', minWidth: '38px', borderRadius: '6px' }}
+                                    >
+                                        &lt;
+                                    </Button>
+                                    
+                                    <span className="mx-2 text-muted" style={{ fontSize: '0.95rem' }}>
+                                        Page <strong className="text-dark">{page}</strong> of <strong className="text-dark">{totalPages}</strong>
+                                    </span>
+                                    
+                                    <Form.Control
+                                        type="number"
+                                        value={inputPage}
+                                        onChange={handlePageInputChange}
+                                        onBlur={handlePageInputBlur}
+                                        onKeyDown={handlePageInputKeyDown}
+                                        className="text-center shadow-sm"
+                                        style={{ width: '70px', height: '38px', borderRadius: '6px' }}
+                                        min={1}
+                                        max={totalPages}
+                                    />
+                                    
+                                    <Button 
+                                        variant="light" 
+                                        disabled={page >= totalPages} 
+                                        onClick={() => setPage(page + 1)}
+                                        className="border shadow-sm px-3 d-flex align-items-center justify-content-center text-primary"
+                                        style={{ height: '38px', minWidth: '38px', borderRadius: '6px' }}
+                                    >
+                                        &gt;
+                                    </Button>
+                                </div>
+                            )}
+                        </>
                     ) : (
                         <div className="text-center py-5 text-muted border rounded-3 bg-light">
                             <i className="far fa-image mb-2" style={{ fontSize: '2rem' }}></i>
