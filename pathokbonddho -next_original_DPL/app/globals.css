@@ -1445,7 +1445,6 @@ footer {
     position: relative;
     overflow: hidden;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 @media (min-width: 992px) {
@@ -1455,21 +1454,11 @@ footer {
     }
 }
 
-.news-design-text-inside-image:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-}
-
 .text-inside-image-img {
     width: 100%;
     height: 100%;
     object-fit: cover;
     display: block;
-    transition: transform 0.5s ease;
-}
-
-.news-design-text-inside-image:hover .text-inside-image-img {
-    transform: scale(1.1);
 }
 
 .text-inside-image-overlay {
@@ -2522,73 +2511,28 @@ footer {
 }
 
 /* ════════════ FRONTEND NEWS HOVER EFFECTS ════════════ */
-/* 1. Card Zoom & Lift Effect */
+/* 1. Card Layout Base Transitions */
 .news-widget-card,
 .hover-shadow,
 .news-design-text-inside-image,
 .news-design-side-layout,
 .news-design-title-only {
-    transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease !important;
-
     background-color: transparent;
 }
 
-.news-widget-card:hover,
-.hover-shadow:hover,
-.news-design-text-inside-image:hover,
-.news-design-title-only:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12) !important;
-    z-index: 2;
-    background-color: #ffffff;
-}
-
-/* Side layouts look better with a subtle background and slight translate rather than large shadow */
+/* Side layouts base padding */
 .news-design-side-layout {
     padding: 8px;
 }
 
-.news-design-side-layout:hover {
-    transform: translateX(4px);
-    background-color: #f8f9fa;
-    box-shadow: -2px 0 0 #006a60;
-    z-index: 2;
-}
-
-.news-widget-card:hover,
-.hover-shadow:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12) !important;
-    z-index: 2;
-}
-
-/* 2. Image Inner Zoom on Hover */
+/* 2. Image Base Styles */
 .card-img-wrapper,
 .news-side-image-wrapper,
 .news-image-container,
 .side-image-container,
 .text-inside-image-img {
     overflow: hidden;
-
     background-color: #f8f9fa;
-}
-
-.card-img-wrapper img,
-.news-side-image-wrapper img,
-.news-image-container img,
-.side-image-container img,
-.text-inside-image-img img,
-.hover-zoom {
-    transition: transform 0.5s ease-out !important;
-}
-
-.news-widget-card:hover .card-img-wrapper img,
-.news-widget-card:hover .news-image-container img,
-.hover-shadow:hover .news-side-image-wrapper img,
-.news-design-text-inside-image:hover .text-inside-image-img img,
-.news-design-side-layout:hover .side-image-container img,
-.hover-shadow:hover .hover-zoom {
-    transform: scale(1.08) !important;
 }
 
 /* 3. Text/Title Color Change on Hover (matching site's green/red brand) */
@@ -2633,19 +2577,8 @@ footer {
 }
 
 /* Specific Sidebar News List Hover */
-.related-news-list .hover-bg-light:hover {
-    background-color: #f0f7f6 !important;
-    transform: translateX(5px);
-    box-shadow: -3px 0 0 #006a60;
+.related-news-list .hover-bg-light {
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.related-news-list .hover-bg-light img {
-    transition: transform 0.4s ease;
-}
-
-.related-news-list .hover-bg-light:hover img {
-    transform: scale(1.1);
 }
 
 .related-news-list .hover-bg-light:hover .hover-danger {
