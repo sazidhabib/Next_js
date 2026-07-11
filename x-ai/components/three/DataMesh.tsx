@@ -24,18 +24,22 @@ function DataMesh({ scrollProgress }: { scrollProgress: MotionValue<number> }) {
   }, [scrollProgress]);
 
   // Generate three geometry targets
-  const { icoPositions, torusPositions, spherePositions, edges } = useMemo(() => {
+  // Generate four geometry targets
+  const { icoPositions, torusPositions, spherePositions, knotPositions, edges } = useMemo(() => {
     const ico = new THREE.IcosahedronGeometry(2.5, 3);
     const torus = new THREE.TorusGeometry(2, 0.8, 16, 32);
     const sphere = new THREE.SphereGeometry(2.2, 16, 16);
+    const knot = new THREE.TorusKnotGeometry(1.6, 0.4, 64, 8);
 
     const icoArr = new Float32Array(VERTEX_COUNT * 3);
     const torusArr = new Float32Array(VERTEX_COUNT * 3);
     const sphereArr = new Float32Array(VERTEX_COUNT * 3);
+    const knotArr = new Float32Array(VERTEX_COUNT * 3);
 
     const icoPos = ico.attributes.position;
     const torusPos = torus.attributes.position;
     const spherePos = sphere.attributes.position;
+    const knotPos = knot.attributes.position;
 
     for (let i = 0; i < VERTEX_COUNT; i++) {
       const i3 = i * 3;
@@ -50,6 +54,10 @@ function DataMesh({ scrollProgress }: { scrollProgress: MotionValue<number> }) {
       sphereArr[i3] = spherePos.getX(i % spherePos.count);
       sphereArr[i3 + 1] = spherePos.getY(i % spherePos.count);
       sphereArr[i3 + 2] = spherePos.getZ(i % spherePos.count);
+
+      knotArr[i3] = knotPos.getX(i % knotPos.count);
+      knotArr[i3 + 1] = knotPos.getY(i % knotPos.count);
+      knotArr[i3 + 2] = knotPos.getZ(i % knotPos.count);
     }
 
     // Generate edge connections (connect nearby vertices)
@@ -69,11 +77,13 @@ function DataMesh({ scrollProgress }: { scrollProgress: MotionValue<number> }) {
     ico.dispose();
     torus.dispose();
     sphere.dispose();
+    knot.dispose();
 
     return {
       icoPositions: icoArr,
       torusPositions: torusArr,
       spherePositions: sphereArr,
+      knotPositions: knotArr,
       edges: edgePairs,
     };
   }, []);
@@ -91,19 +101,24 @@ function DataMesh({ scrollProgress }: { scrollProgress: MotionValue<number> }) {
     for (let i = 0; i < VERTEX_COUNT; i++) {
       const i3 = i * 3;
 
-      // Morph: ico → torus (0–0.5) → sphere (0.5–1.0)
+      // Morph: ico -> torus (0–0.33) -> sphere (0.33–0.66) -> knot (0.66-1.0)
       let targetX: number, targetY: number, targetZ: number;
 
-      if (t < 0.5) {
-        const localT = t * 2; // 0 to 1
+      if (t < 0.33) {
+        const localT = t / 0.33; // 0 to 1
         targetX = THREE.MathUtils.lerp(icoPositions[i3], torusPositions[i3], localT);
         targetY = THREE.MathUtils.lerp(icoPositions[i3 + 1], torusPositions[i3 + 1], localT);
         targetZ = THREE.MathUtils.lerp(icoPositions[i3 + 2], torusPositions[i3 + 2], localT);
-      } else {
-        const localT = (t - 0.5) * 2; // 0 to 1
+      } else if (t < 0.66) {
+        const localT = (t - 0.33) / 0.33; // 0 to 1
         targetX = THREE.MathUtils.lerp(torusPositions[i3], spherePositions[i3], localT);
         targetY = THREE.MathUtils.lerp(torusPositions[i3 + 1], spherePositions[i3 + 1], localT);
         targetZ = THREE.MathUtils.lerp(torusPositions[i3 + 2], spherePositions[i3 + 2], localT);
+      } else {
+        const localT = Math.min((t - 0.66) / 0.34, 1); // 0 to 1
+        targetX = THREE.MathUtils.lerp(spherePositions[i3], knotPositions[i3], localT);
+        targetY = THREE.MathUtils.lerp(spherePositions[i3 + 1], knotPositions[i3 + 1], localT);
+        targetZ = THREE.MathUtils.lerp(spherePositions[i3 + 2], knotPositions[i3 + 2], localT);
       }
 
       // Add subtle oscillation
@@ -182,6 +197,110 @@ function DataMesh({ scrollProgress }: { scrollProgress: MotionValue<number> }) {
   );
 }
 
+// ─── Depth-Based Parallax Background ──────────────────────────────────────────
+
+const BG_PARTICLE_COUNT = 300;
+
+function ParallaxBackground({ scrollProgress }: { scrollProgress: MotionValue<number> }) {
+  const pointsRef1 = useRef<THREE.Points>(null);
+  const pointsRef2 = useRef<THREE.Points>(null);
+  const { mouse } = useThree();
+  const progressRef = useRef(0);
+
+  useEffect(() => {
+    const unsubscribe = scrollProgress.on("change", (v) => {
+      progressRef.current = v;
+    });
+    return () => unsubscribe();
+  }, [scrollProgress]);
+
+  // Layer 1: Midground (closer, faster parallax)
+  const layer1Positions = useMemo(() => {
+    const arr = new Float32Array(BG_PARTICLE_COUNT * 3);
+    for (let i = 0; i < BG_PARTICLE_COUNT; i++) {
+      const i3 = i * 3;
+      arr[i3] = (Math.random() - 0.5) * 12;      // X
+      arr[i3 + 1] = (Math.random() - 0.5) * 12;  // Y
+      arr[i3 + 2] = -2 - Math.random() * 3;      // Z: -2 to -5
+    }
+    return arr;
+  }, []);
+
+  // Layer 2: Background (farther, slower parallax)
+  const layer2Positions = useMemo(() => {
+    const arr = new Float32Array(BG_PARTICLE_COUNT * 3);
+    for (let i = 0; i < BG_PARTICLE_COUNT; i++) {
+      const i3 = i * 3;
+      arr[i3] = (Math.random() - 0.5) * 20;      // X
+      arr[i3 + 1] = (Math.random() - 0.5) * 20;  // Y
+      arr[i3 + 2] = -5 - Math.random() * 5;      // Z: -5 to -10
+    }
+    return arr;
+  }, []);
+
+  useFrame(() => {
+    const t = progressRef.current;
+
+    // Midground (Layer 1) parallax translations
+    if (pointsRef1.current) {
+      const targetX = mouse.x * -0.8;
+      const targetY = mouse.y * -0.8 + (t - 0.5) * -1.5;
+      pointsRef1.current.position.x = THREE.MathUtils.lerp(pointsRef1.current.position.x, targetX, 0.05);
+      pointsRef1.current.position.y = THREE.MathUtils.lerp(pointsRef1.current.position.y, targetY, 0.05);
+    }
+
+    // Background (Layer 2) parallax translations (slower multipliers)
+    if (pointsRef2.current) {
+      const targetX = mouse.x * -0.3;
+      const targetY = mouse.y * -0.3 + (t - 0.5) * -0.5;
+      pointsRef2.current.position.x = THREE.MathUtils.lerp(pointsRef2.current.position.x, targetX, 0.05);
+      pointsRef2.current.position.y = THREE.MathUtils.lerp(pointsRef2.current.position.y, targetY, 0.05);
+    }
+  });
+
+  return (
+    <>
+      {/* Midground Layer */}
+      <points ref={pointsRef1}>
+        <bufferGeometry>
+          <bufferAttribute
+            attach="attributes-position"
+            args={[layer1Positions, 3]}
+          />
+        </bufferGeometry>
+        <pointsMaterial
+          size={0.04}
+          color="#3F3F46"
+          transparent
+          opacity={0.6}
+          sizeAttenuation
+          blending={THREE.AdditiveBlending}
+          depthWrite={false}
+        />
+      </points>
+
+      {/* Deep Background Layer */}
+      <points ref={pointsRef2}>
+        <bufferGeometry>
+          <bufferAttribute
+            attach="attributes-position"
+            args={[layer2Positions, 3]}
+          />
+        </bufferGeometry>
+        <pointsMaterial
+          size={0.02}
+          color="#27272A"
+          transparent
+          opacity={0.4}
+          sizeAttenuation
+          blending={THREE.AdditiveBlending}
+          depthWrite={false}
+        />
+      </points>
+    </>
+  );
+}
+
 // ─── Scene Wrapper for Signature Section ──────────────────────────────────────
 
 export default function SignatureScene({ scrollProgress }: { scrollProgress: MotionValue<number> }) {
@@ -195,6 +314,7 @@ export default function SignatureScene({ scrollProgress }: { scrollProgress: Mot
       <Suspense fallback={null}>
         <ambientLight intensity={0.4} />
         <pointLight position={[5, 5, 5]} intensity={0.3} color="#A1A1AA" />
+        <ParallaxBackground scrollProgress={scrollProgress} />
         <DataMesh scrollProgress={scrollProgress} />
       </Suspense>
     </Canvas>

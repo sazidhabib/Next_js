@@ -10,7 +10,7 @@ import Footer from "@/components/layout/Footer";
 export default function App() {
   return (
     <div
-      className="min-h-screen bg-[#09090B] text-white overflow-x-hidden"
+      className="min-h-screen bg-[#09090B] text-white overflow-x-clip"
       style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
     >
       <Navbar />
