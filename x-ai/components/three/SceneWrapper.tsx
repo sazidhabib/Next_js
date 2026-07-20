@@ -14,8 +14,8 @@ const GRID_SIZE = 18; // 18×18 = 324 positions, we cycle through for 4000
 
 function ParticleCloud({ morphProgress }: { morphProgress: MotionValue<number> }) {
   const pointsRef = useRef<THREE.Points>(null);
-  const { mouse, viewport } = useThree();
-  const progressRef = useRef(0);
+  const { mouse } = useThree();
+  const progressRef = useRef(morphProgress.get());
 
   // Subscribe to morph progress motion value
   useEffect(() => {
@@ -26,10 +26,9 @@ function ParticleCloud({ morphProgress }: { morphProgress: MotionValue<number> }
   }, [morphProgress]);
 
   // Generate random and grid positions
-  const { randomPositions, gridPositions, initialColors } = useMemo(() => {
+  const { randomPositions, gridPositions } = useMemo(() => {
     const random = new Float32Array(PARTICLE_COUNT * 3);
     const grid = new Float32Array(PARTICLE_COUNT * 3);
-    const colors = new Float32Array(PARTICLE_COUNT * 3);
 
     for (let i = 0; i < PARTICLE_COUNT; i++) {
       const i3 = i * 3;
@@ -51,14 +50,9 @@ function ParticleCloud({ morphProgress }: { morphProgress: MotionValue<number> }
       grid[i3] = col * spacing - offset;
       grid[i3 + 1] = row * spacing - offset;
       grid[i3 + 2] = layer * spacing * 0.5 - 1;
-
-      // Initial colors: zinc-500 (#71717A) → will transition to white
-      colors[i3] = 0.443;     // R
-      colors[i3 + 1] = 0.443; // G
-      colors[i3 + 2] = 0.478; // B
     }
 
-    return { randomPositions: random, gridPositions: grid, initialColors: colors };
+    return { randomPositions: random, gridPositions: grid };
   }, []);
 
   // Time offset for floating animation
@@ -66,12 +60,45 @@ function ParticleCloud({ morphProgress }: { morphProgress: MotionValue<number> }
     return Array.from({ length: PARTICLE_COUNT }, () => Math.random() * Math.PI * 2);
   }, []);
 
+  // Stable buffer arrays that survive React re-renders.
+  // Initialized with the correct morph state based on current scroll progress.
+  const positionBuffer = useMemo(() => {
+    const t = Math.min(Math.max(morphProgress.get(), 0), 1);
+    const arr = new Float32Array(PARTICLE_COUNT * 3);
+    for (let i = 0; i < PARTICLE_COUNT; i++) {
+      const i3 = i * 3;
+      arr[i3] = THREE.MathUtils.lerp(randomPositions[i3], gridPositions[i3], t);
+      arr[i3 + 1] = THREE.MathUtils.lerp(randomPositions[i3 + 1], gridPositions[i3 + 1], t);
+      arr[i3 + 2] = THREE.MathUtils.lerp(randomPositions[i3 + 2], gridPositions[i3 + 2], t);
+    }
+    return arr;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [randomPositions, gridPositions]);
+
+  const colorBuffer = useMemo(() => {
+    const t = Math.min(Math.max(morphProgress.get(), 0), 1);
+    const colorT = Math.min(t * 1.2, 1);
+    const arr = new Float32Array(PARTICLE_COUNT * 3);
+    for (let i = 0; i < PARTICLE_COUNT; i++) {
+      const i3 = i * 3;
+      arr[i3] = THREE.MathUtils.lerp(0.443, 0.95, colorT);
+      arr[i3 + 1] = THREE.MathUtils.lerp(0.443, 0.95, colorT);
+      arr[i3 + 2] = THREE.MathUtils.lerp(0.478, 0.95, colorT);
+    }
+    return arr;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Stable args tuples — same reference across re-renders prevents R3F from recreating the BufferAttribute
+  const positionArgs = useMemo<[Float32Array, number]>(() => [positionBuffer, 3], [positionBuffer]);
+  const colorArgs = useMemo<[Float32Array, number]>(() => [colorBuffer, 3], [colorBuffer]);
+
   useFrame((state) => {
     if (!pointsRef.current) return;
 
     const positions = pointsRef.current.geometry.attributes.position.array as Float32Array;
     const colors = pointsRef.current.geometry.attributes.color.array as Float32Array;
-    const t = progressRef.current;
+    const t = Math.min(Math.max(progressRef.current, 0), 1);
     const time = state.clock.elapsedTime;
 
     for (let i = 0; i < PARTICLE_COUNT; i++) {
@@ -122,11 +149,11 @@ function ParticleCloud({ morphProgress }: { morphProgress: MotionValue<number> }
       <bufferGeometry>
         <bufferAttribute
           attach="attributes-position"
-          args={[new Float32Array(randomPositions), 3]}
+          args={positionArgs}
         />
         <bufferAttribute
           attach="attributes-color"
-          args={[new Float32Array(initialColors), 3]}
+          args={colorArgs}
         />
       </bufferGeometry>
       <pointsMaterial

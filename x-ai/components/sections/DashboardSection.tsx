@@ -65,7 +65,25 @@ function CustomTooltip({ active, payload, label }: { active?: boolean; payload?:
   );
 }
 
+// ─── Inline Icons ────────────────────────────────────────────────────────────
+
+const MenuIcon = ({ className }: { className?: string }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <line x1="4" x2="20" y1="12" y2="12" />
+    <line x1="4" x2="20" y1="6" y2="6" />
+    <line x1="4" x2="20" y1="18" y2="18" />
+  </svg>
+);
+
+const CloseIcon = ({ className }: { className?: string }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <line x1="18" x2="6" y1="6" y2="18" />
+    <line x1="6" x2="18" y1="6" y2="18" />
+  </svg>
+);
+
 // ─── Animation Variants ───────────────────────────────────────────────────────
+// ... [rest remains unchanged, replacing up to exports]
 
 const frameVariants = {
   hidden: { opacity: 0, y: 40, scale: 0.98 },
@@ -116,6 +134,7 @@ const tableRowVariant = {
 export default function DashboardSection() {
   const [activeNav, setActiveNav] = useState("Ingestion");
   const [activeRange, setActiveRange] = useState("24H");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
     <section className="border-b border-[#27272A]">
@@ -151,12 +170,34 @@ export default function DashboardSection() {
         </div>
 
         {/* App shell */}
-        <div className="flex" style={{ height: "640px" }}>
+        <div className="flex relative" style={{ height: "640px" }}>
+          {/* Backdrop overlay for mobile sidebar */}
+          <AnimatePresence>
+            {sidebarOpen && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 0.5 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setSidebarOpen(false)}
+                className="absolute inset-0 bg-black z-40 lg:hidden"
+              />
+            )}
+          </AnimatePresence>
+
           {/* Sidebar */}
-          <aside className="w-[220px] border-r border-[#27272A] flex flex-col shrink-0">
+          <aside className={`w-[220px] border-r border-[#27272A] flex flex-col shrink-0 bg-[#09090B] transition-transform duration-300 absolute inset-y-0 left-0 z-50 lg:relative lg:translate-x-0 ${
+            sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+          }`}>
             {/* Brand */}
-            <div className="px-5 py-4 border-b border-[#27272A]">
+            <div className="px-5 py-4 border-b border-[#27272A] flex items-center justify-between">
               <XaiLogo />
+              <button
+                onClick={() => setSidebarOpen(false)}
+                className="lg:hidden p-1 text-[#71717A] hover:text-white transition-colors"
+                aria-label="Close sidebar"
+              >
+                <CloseIcon />
+              </button>
             </div>
 
             {/* Workspace selector */}
@@ -186,7 +227,10 @@ export default function DashboardSection() {
                 <motion.button
                   key={label}
                   variants={sidebarItemVariant}
-                  onClick={() => setActiveNav(label)}
+                  onClick={() => {
+                    setActiveNav(label);
+                    setSidebarOpen(false);
+                  }}
                   whileHover={{ x: 4 }}
                   transition={{ type: "spring", stiffness: 400, damping: 25 }}
                   className={`w-full flex items-center gap-3 px-3 py-2 text-left text-[12px] transition-colors duration-100 rounded-sm ${
@@ -222,14 +266,21 @@ export default function DashboardSection() {
           {/* Main content */}
           <div className="flex-1 flex flex-col min-w-0">
             {/* Top header */}
-            <header className="flex items-center justify-between px-6 py-3 border-b border-[#27272A] shrink-0">
+            <header className="flex items-center justify-between px-4 lg:px-6 py-3 border-b border-[#27272A] shrink-0 gap-2">
               <div className="flex items-center gap-2 font-mono text-[11px] text-[#52525B]">
+                <button
+                  onClick={() => setSidebarOpen(true)}
+                  className="lg:hidden p-1 text-[#71717A] hover:text-white transition-colors mr-1"
+                  aria-label="Open sidebar"
+                >
+                  <MenuIcon />
+                </button>
                 <span>Workspace</span>
-                <span className="text-[#3F3F46]">/</span>
+                <span className="text-[#3F3F46] inline">/</span>
                 <AnimatePresence mode="wait">
                   <motion.span
                     key={activeNav}
-                    className="text-[#A1A1AA]"
+                    className="text-[#A1A1AA] inline"
                     initial={{ opacity: 0, y: -8 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 8 }}
@@ -242,7 +293,7 @@ export default function DashboardSection() {
               <div className="flex items-center gap-3">
                 {/* Command palette */}
                 <motion.div
-                  className="flex items-center gap-2 border border-[#27272A] px-3 py-1.5 bg-[#18181B] min-w-[220px] cursor-pointer transition-colors"
+                  className="hidden md:flex items-center gap-2 border border-[#27272A] px-3 py-1.5 bg-[#18181B] min-w-[220px] cursor-pointer transition-colors"
                   whileHover={{ borderColor: "#3F3F46" }}
                 >
                   <SearchIcon />
@@ -256,10 +307,10 @@ export default function DashboardSection() {
             </header>
 
             {/* Dashboard grid */}
-            <div className="flex-1 overflow-auto p-6 space-y-4">
+            <div className="flex-1 overflow-auto p-4 lg:p-6 space-y-4">
               {/* Metrics row */}
               <motion.div
-                className="grid grid-cols-4 gap-3"
+                className="grid grid-cols-2 lg:grid-cols-4 gap-3"
                 variants={staggerContainer}
                 initial="hidden"
                 whileInView="visible"
@@ -271,12 +322,12 @@ export default function DashboardSection() {
                     variants={cardVariant}
                     whileHover={{ y: -2, borderColor: "#3F3F46" }}
                     transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                    className="border border-[#27272A] bg-[#18181B] px-4 py-3 cursor-default"
+                    className="border border-[#27272A] bg-[#18181B] px-3 lg:px-4 py-3 cursor-default"
                   >
                     <div className="font-mono text-[9px] text-[#52525B] uppercase tracking-widest mb-2">
                       {m.label}
                     </div>
-                    <div className="text-[20px] font-bold text-white tracking-tight">{m.value}</div>
+                    <div className="text-[18px] lg:text-[20px] font-bold text-white tracking-tight">{m.value}</div>
                     <div className={`font-mono text-[9px] mt-1 ${m.up ? "text-emerald-500" : "text-red-400"}`}>
                       {m.delta} vs yesterday
                     </div>
@@ -375,65 +426,67 @@ export default function DashboardSection() {
                   </motion.button>
                 </div>
 
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b border-[#27272A]">
-                      {["Source", "Type", "Records", "Status", "Confidence", "Updated"].map((h) => (
-                        <th
-                          key={h}
-                          className="px-5 py-2.5 text-left font-mono text-[9px] text-[#52525B] uppercase tracking-widest font-normal"
+                <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-[#27272A] scrollbar-track-transparent">
+                  <table className="w-full min-w-[600px]">
+                    <thead>
+                      <tr className="border-b border-[#27272A]">
+                        {["Source", "Type", "Records", "Status", "Confidence", "Updated"].map((h) => (
+                          <th
+                            key={h}
+                            className="px-5 py-2.5 text-left font-mono text-[9px] text-[#52525B] uppercase tracking-widest font-normal"
+                          >
+                            {h}
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <motion.tbody
+                      variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.04 } } }}
+                      initial="hidden"
+                      whileInView="visible"
+                      viewport={{ once: true }}
+                    >
+                      {ingestionRows.map((row, i) => (
+                        <motion.tr
+                          key={row.id}
+                          variants={tableRowVariant}
+                          className={`border-b border-[#1F1F23] hover:bg-[#1C1C1F] transition-colors cursor-pointer ${
+                            i === ingestionRows.length - 1 ? "border-b-0" : ""
+                          }`}
                         >
-                          {h}
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <motion.tbody
-                    variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.04 } } }}
-                    initial="hidden"
-                    whileInView="visible"
-                    viewport={{ once: true }}
-                  >
-                    {ingestionRows.map((row, i) => (
-                      <motion.tr
-                        key={row.id}
-                        variants={tableRowVariant}
-                        className={`border-b border-[#1F1F23] hover:bg-[#1C1C1F] transition-colors cursor-pointer ${
-                          i === ingestionRows.length - 1 ? "border-b-0" : ""
-                        }`}
-                      >
-                        <td className="px-5 py-2.5">
-                          <div className="text-[11px] font-medium text-white">{row.source}</div>
-                          <div className="font-mono text-[9px] text-[#3F3F46]">{row.id}</div>
-                        </td>
-                        <td className="px-5 py-2.5">
-                          <span className="font-mono text-[9px] text-[#52525B] border border-[#27272A] px-1.5 py-0.5">
-                            {row.type}
-                          </span>
-                        </td>
-                        <td className="px-5 py-2.5 font-mono text-[11px] text-[#A1A1AA]">{row.records}</td>
-                        <td className="px-5 py-2.5">
-                          <div className="flex items-center gap-1.5">
-                            <div
-                              className={`w-1 h-1 rounded-full ${
-                                row.status === "Structuring" ? "bg-amber-400" : "bg-emerald-500"
-                              }`}
-                            />
-                            <span
-                              className={`font-mono text-[9px] ${
-                                row.status === "Structuring" ? "text-amber-400" : "text-emerald-500"
-                              }`}
-                            >
-                              {row.status}
+                          <td className="px-5 py-2.5">
+                            <div className="text-[11px] font-medium text-white">{row.source}</div>
+                            <div className="font-mono text-[9px] text-[#3F3F46]">{row.id}</div>
+                          </td>
+                          <td className="px-5 py-2.5">
+                            <span className="font-mono text-[9px] text-[#52525B] border border-[#27272A] px-1.5 py-0.5">
+                              {row.type}
                             </span>
-                          </div>
-                        </td>
-                        <td className="px-5 py-2.5 font-mono text-[11px] text-white">{row.confidence}</td>
-                        <td className="px-5 py-2.5 font-mono text-[9px] text-[#52525B]">{row.updated}</td>
-                      </motion.tr>
-                    ))}
-                  </motion.tbody>
-                </table>
+                          </td>
+                          <td className="px-5 py-2.5 font-mono text-[11px] text-[#A1A1AA]">{row.records}</td>
+                          <td className="px-5 py-2.5">
+                            <div className="flex items-center gap-1.5">
+                              <div
+                                className={`w-1 h-1 rounded-full ${
+                                  row.status === "Structuring" ? "bg-amber-400" : "bg-emerald-500"
+                                }`}
+                              />
+                              <span
+                                className={`font-mono text-[9px] ${
+                                  row.status === "Structuring" ? "text-amber-400" : "text-emerald-500"
+                                }`}
+                              >
+                                {row.status}
+                              </span>
+                            </div>
+                          </td>
+                          <td className="px-5 py-2.5 font-mono text-[11px] text-white">{row.confidence}</td>
+                          <td className="px-5 py-2.5 font-mono text-[9px] text-[#52525B]">{row.updated}</td>
+                        </motion.tr>
+                      ))}
+                    </motion.tbody>
+                  </table>
+                </div>
               </motion.div>
             </div>
           </div>

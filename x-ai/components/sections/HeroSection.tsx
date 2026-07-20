@@ -58,17 +58,14 @@ const statVariants = {
 
 export default function HeroSection() {
   const sectionRef = useRef<HTMLElement>(null);
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ["start start", "end end"],
-  });
+  const { scrollY } = useScroll();
 
   // Pass scroll progress to 3D scene
-  // Maps 0 to 0.9 of scroll progress to 0 to 1 of morphing progress, allowing a buffer to see the completed shape
-  const morphProgress = useTransform(scrollYProgress, [0, 0.9], [0, 1]);
+  // Maps 0 to 800px of scroll progress to 0 to 1 of morphing progress, keeping the shape locked when scrolled past
+  const morphProgress = useTransform(scrollY, [0, 800], [0, 1]);
 
   return (
-    <section ref={sectionRef} className="h-[200vh] border-b border-[#27272A] relative">
+    <section ref={sectionRef} className="h-[300vh] border-b border-[#27272A] relative">
       <div className="sticky top-0 h-screen w-full flex flex-col justify-between overflow-hidden">
         {/* Hero body */}
         <div className="flex-1 grid grid-cols-1 lg:grid-cols-2">

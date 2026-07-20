@@ -66,9 +66,9 @@ export default function PipelineSection() {
         const tl = gsap.timeline({
           scrollTrigger: {
             trigger: card,
-            start: "top 85%",
-            end: "top 50%",
-            toggleActions: "play none none reverse",
+            start: "top 92%",
+            end: "top 55%",
+            scrub: 1,
           },
         });
 

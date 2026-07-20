@@ -46,8 +46,7 @@ components/
 │   └── SignatureSection.tsx    # WOW Moment: 3D interactive wireframe mesh
 │
 ├── three/
-│   ├── SceneWrapper.tsx        # Dynamic Canvas wrapper with SSR compatibility fallback
-│   ├── ParticleCloud.tsx       # R3F particle morphing cloud
+│   ├── SceneWrapper.tsx        # Canvas wrapper & ParticleCloud component (SSR compatible fallback)
 │   └── DataMesh.tsx            # R3F signature geometric wireframe mesh
 │
 ├── animation/
@@ -81,7 +80,7 @@ components/
 
 ### 4. Signature Interaction: R3F Geometry Morph (The WOW Moment)
 - **The Concept:** Demonstrate deep mathematical understanding and high interaction craft.
-- **Implementation:** A wireframe points mesh consisting of 200 vertices and edge lines that dynamically morphs between `Icosahedron` (raw ingestion states) → `Torus` (deep model processing) → `Sphere` (unified output data) depending on scroll progress.
+- **Implementation:** A wireframe points mesh consisting of 200 vertices and edge lines that dynamically morphs between `Icosahedron` (raw ingestion states) → `Torus` (deep model processing) → `Sphere` (unified output data) → `Torus Knot` (final refined state) depending on scroll progress.
 
 ---
 

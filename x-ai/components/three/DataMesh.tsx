@@ -13,7 +13,7 @@ function DataMesh({ scrollProgress }: { scrollProgress: MotionValue<number> }) {
   const meshRef = useRef<THREE.Points>(null);
   const linesRef = useRef<THREE.LineSegments>(null);
   const { mouse } = useThree();
-  const progressRef = useRef(0);
+  const progressRef = useRef(scrollProgress.get());
   const timeRef = useRef(0);
 
   useEffect(() => {
@@ -88,11 +88,44 @@ function DataMesh({ scrollProgress }: { scrollProgress: MotionValue<number> }) {
     };
   }, []);
 
+  // Stable position buffer — initialized with correct morph state, survives re-renders
+  const positionBuffer = useMemo(() => {
+    const t = Math.min(Math.max(scrollProgress.get(), 0), 1);
+    const arr = new Float32Array(VERTEX_COUNT * 3);
+    for (let i = 0; i < VERTEX_COUNT; i++) {
+      const i3 = i * 3;
+      let x: number, y: number, z: number;
+      if (t < 0.33) {
+        const lt = t / 0.33;
+        x = THREE.MathUtils.lerp(icoPositions[i3], torusPositions[i3], lt);
+        y = THREE.MathUtils.lerp(icoPositions[i3 + 1], torusPositions[i3 + 1], lt);
+        z = THREE.MathUtils.lerp(icoPositions[i3 + 2], torusPositions[i3 + 2], lt);
+      } else if (t < 0.66) {
+        const lt = (t - 0.33) / 0.33;
+        x = THREE.MathUtils.lerp(torusPositions[i3], spherePositions[i3], lt);
+        y = THREE.MathUtils.lerp(torusPositions[i3 + 1], spherePositions[i3 + 1], lt);
+        z = THREE.MathUtils.lerp(torusPositions[i3 + 2], spherePositions[i3 + 2], lt);
+      } else {
+        const lt = Math.min((t - 0.66) / 0.34, 1);
+        x = THREE.MathUtils.lerp(spherePositions[i3], knotPositions[i3], lt);
+        y = THREE.MathUtils.lerp(spherePositions[i3 + 1], knotPositions[i3 + 1], lt);
+        z = THREE.MathUtils.lerp(spherePositions[i3 + 2], knotPositions[i3 + 2], lt);
+      }
+      arr[i3] = x;
+      arr[i3 + 1] = y;
+      arr[i3 + 2] = z;
+    }
+    return arr;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [icoPositions, torusPositions, spherePositions, knotPositions]);
+
+  const positionArgs = useMemo<[Float32Array, number]>(() => [positionBuffer, 3], [positionBuffer]);
+
   useFrame((state, delta) => {
     if (!meshRef.current || !linesRef.current) return;
 
     timeRef.current += delta;
-    const t = progressRef.current;
+    const t = Math.min(Math.max(progressRef.current, 0), 1);
     const time = timeRef.current;
 
     const positions = meshRef.current.geometry.attributes.position.array as Float32Array;
@@ -105,17 +138,17 @@ function DataMesh({ scrollProgress }: { scrollProgress: MotionValue<number> }) {
       let targetX: number, targetY: number, targetZ: number;
 
       if (t < 0.33) {
-        const localT = t / 0.33; // 0 to 1
+        const localT = t / 0.33;
         targetX = THREE.MathUtils.lerp(icoPositions[i3], torusPositions[i3], localT);
         targetY = THREE.MathUtils.lerp(icoPositions[i3 + 1], torusPositions[i3 + 1], localT);
         targetZ = THREE.MathUtils.lerp(icoPositions[i3 + 2], torusPositions[i3 + 2], localT);
       } else if (t < 0.66) {
-        const localT = (t - 0.33) / 0.33; // 0 to 1
+        const localT = (t - 0.33) / 0.33;
         targetX = THREE.MathUtils.lerp(torusPositions[i3], spherePositions[i3], localT);
         targetY = THREE.MathUtils.lerp(torusPositions[i3 + 1], spherePositions[i3 + 1], localT);
         targetZ = THREE.MathUtils.lerp(torusPositions[i3 + 2], spherePositions[i3 + 2], localT);
       } else {
-        const localT = Math.min((t - 0.66) / 0.34, 1); // 0 to 1
+        const localT = Math.min((t - 0.66) / 0.34, 1);
         targetX = THREE.MathUtils.lerp(spherePositions[i3], knotPositions[i3], localT);
         targetY = THREE.MathUtils.lerp(spherePositions[i3 + 1], knotPositions[i3 + 1], localT);
         targetZ = THREE.MathUtils.lerp(spherePositions[i3 + 2], knotPositions[i3 + 2], localT);
@@ -159,13 +192,15 @@ function DataMesh({ scrollProgress }: { scrollProgress: MotionValue<number> }) {
     return new Float32Array(edges.length * 3);
   }, [edges]);
 
+  const lineArgs = useMemo<[Float32Array, number]>(() => [linePositionsArray, 3], [linePositionsArray]);
+
   return (
     <>
       <points ref={meshRef}>
         <bufferGeometry>
           <bufferAttribute
             attach="attributes-position"
-            args={[new Float32Array(icoPositions), 3]}
+            args={positionArgs}
           />
         </bufferGeometry>
         <pointsMaterial
@@ -183,7 +218,7 @@ function DataMesh({ scrollProgress }: { scrollProgress: MotionValue<number> }) {
         <bufferGeometry>
           <bufferAttribute
             attach="attributes-position"
-            args={[linePositionsArray, 3]}
+            args={lineArgs}
           />
         </bufferGeometry>
         <lineBasicMaterial
@@ -205,7 +240,7 @@ function ParallaxBackground({ scrollProgress }: { scrollProgress: MotionValue<nu
   const pointsRef1 = useRef<THREE.Points>(null);
   const pointsRef2 = useRef<THREE.Points>(null);
   const { mouse } = useThree();
-  const progressRef = useRef(0);
+  const progressRef = useRef(scrollProgress.get());
 
   useEffect(() => {
     const unsubscribe = scrollProgress.on("change", (v) => {

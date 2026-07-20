@@ -49,7 +49,7 @@ The prototype is implemented as a cohesive single-page app structure divided int
 
 ### Section 4: Signature Interaction
 - **UI Layout:** A 2/3 column 3D viewport on the right, paired with real-time telemetry updates and model mathematical equations (Transformer formulas, confidence entropy equations) on the left.
-- **Narrative Metaphor:** The centerpiece interactive 3D mesh morphs between distinct geometric shapes (Icosahedron → Torus → Sphere) on scroll, demonstrating deep mathematical structure and AI inference pipelines.
+- **Narrative Metaphor:** The centerpiece interactive 3D mesh morphs between distinct geometric shapes (Icosahedron → Torus → Sphere → Torus Knot) on scroll, demonstrating deep mathematical structure and AI inference pipelines.
 
 ---
 
