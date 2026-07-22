@@ -1,4 +1,4 @@
-const User = require("../models/user-model");
+const { User, Role } = require("../models");
 const bcrypt = require("bcryptjs");
 
 // GET /api/users — List all users
@@ -6,6 +6,7 @@ const getAllUsers = async (req, res) => {
     try {
         const users = await User.findAll({
             attributes: { exclude: ['password'] },
+            include: [{ model: Role, as: 'roleRelation' }],
             order: [['createdAt', 'DESC']]
         });
         res.status(200).json({ users });
@@ -19,7 +20,8 @@ const getAllUsers = async (req, res) => {
 const getUserById = async (req, res) => {
     try {
         const user = await User.findByPk(req.params.id, {
-            attributes: { exclude: ['password'] }
+            attributes: { exclude: ['password'] },
+            include: [{ model: Role, as: 'roleRelation' }]
         });
         if (!user) {
             return res.status(404).json({ message: "User not found" });
@@ -34,7 +36,7 @@ const getUserById = async (req, res) => {
 // POST /api/users — Create new user
 const createUser = async (req, res) => {
     try {
-        const { username, email, phone, password, role, permissions, isAdmin } = req.body;
+        const { username, email, phone, password, role, roleId, permissions, isAdmin } = req.body;
 
         // Check if user already exists
         const existingUser = await User.findOne({ where: { email } });
@@ -47,12 +49,18 @@ const createUser = async (req, res) => {
             return res.status(400).json({ message: "Username, email, phone, and password are required" });
         }
 
+        // Restrict role/permission setup to superadmin
+        if ((roleId !== undefined || permissions !== undefined || role === 'superadmin' || role === 'admin') && (!req.user || req.user.role !== 'superadmin')) {
+            return res.status(403).json({ message: "Only superadmins can assign roles or permissions on user creation" });
+        }
+
         const newUser = await User.create({
             username,
             email,
             phone,
             password,
             role: role || 'editor',
+            roleId: roleId || null,
             permissions: permissions || User.DEFAULT_PERMISSIONS,
             isAdmin: isAdmin !== undefined ? isAdmin : true,
             isActive: true
@@ -81,21 +89,34 @@ const updateUser = async (req, res) => {
             return res.status(403).json({ message: "Cannot modify a superadmin" });
         }
 
-        const { username, email, phone, role, permissions, isAdmin, isActive } = req.body;
+        const { username, email, phone, role, roleId, permissions, isAdmin, isActive } = req.body;
+
+        // Restrict role/permission modifications to superadmin
+        if ((role !== undefined || roleId !== undefined || permissions !== undefined) && req.user.role !== 'superadmin') {
+            return res.status(403).json({ message: "Only superadmins can modify roles and permissions" });
+        }
 
         const updateData = {};
         if (username !== undefined) updateData.username = username;
         if (email !== undefined) updateData.email = email;
         if (phone !== undefined) updateData.phone = phone;
         if (role !== undefined) updateData.role = role;
+        if (roleId !== undefined) updateData.roleId = roleId;
         if (permissions !== undefined) updateData.permissions = permissions;
         if (isAdmin !== undefined) updateData.isAdmin = isAdmin;
         if (isActive !== undefined) updateData.isActive = isActive;
 
         await user.update(updateData);
 
+        // Explicitly notify Sequelize that permissions JSON has changed to guarantee save
+        if (permissions !== undefined) {
+            user.changed('permissions', true);
+            await user.save();
+        }
+
         const updatedUser = await User.findByPk(req.params.id, {
-            attributes: { exclude: ['password'] }
+            attributes: { exclude: ['password'] },
+            include: [{ model: Role, as: 'roleRelation' }]
         });
 
         res.status(200).json({ message: "User updated successfully", user: updatedUser });

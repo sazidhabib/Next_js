@@ -68,6 +68,12 @@ export default function AdminLayoutClient({ children, user }) {
 
     const isAdminUser = user?.role === 'admin' || user?.role === 'superadmin' || user?.isAdmin;
 
+    const hasViewPermission = (section) => {
+        if (user?.role === 'superadmin') return true;
+        if (!user?.permissions) return false;
+        return !!user.permissions[section]?.view;
+    };
+
     useEffect(() => {
         if (!loading && (!user || !isAdminUser)) {
             router.push('/login');
@@ -165,150 +171,202 @@ export default function AdminLayoutClient({ children, user }) {
                     </div>
 
                     <ul className="nav flex-column p-3 gap-1" style={{ fontSize: '0.875rem' }}>
-                        <div className="sidebar-category-header">General</div>
-                        <li className="nav-item">
-                            <Link href="/admin" className={`sidebar-link ${isActiveRoute('/admin') ? 'sidebar-link-active' : ''}`}>
-                                <i className="fas fa-th-large me-2"></i> Dashboard
-                            </Link>
-                        </li>
+                        {hasViewPermission('dashboard') && (
+                            <>
+                                <div className="sidebar-category-header">General</div>
+                                <li className="nav-item">
+                                    <Link href="/admin" className={`sidebar-link ${isActiveRoute('/admin') ? 'sidebar-link-active' : ''}`}>
+                                        <i className="fas fa-th-large me-2"></i> Dashboard
+                                    </Link>
+                                </li>
+                            </>
+                        )}
 
-                        <div className="sidebar-category-header">Site Architecture</div>
-                        <li className="nav-item">
-                            <Link href="/admin/menu" className={`sidebar-link ${isActiveRoute('/admin/menu') ? 'sidebar-link-active' : ''}`}>
-                                <i className="fas fa-compass me-2"></i> Menu Settings
-                            </Link>
-                        </li>
-                        <li className="nav-item">
-                            <Link href="/admin/page-layout" className={`sidebar-link ${isActiveRoute('/admin/page-layout') ? 'sidebar-link-active' : ''}`}>
-                                <i className="fas fa-columns me-2"></i> Page Layout
-                            </Link>
-                        </li>
-                        <li className="nav-item">
-                            <Link href="/admin/design" className={`sidebar-link ${isActiveRoute('/admin/design') ? 'sidebar-link-active' : ''}`}>
-                                <i className="fas fa-paint-brush me-2"></i> Design & Theme
-                            </Link>
-                        </li>
+                        {(hasViewPermission('menu') || hasViewPermission('pageLayout') || hasViewPermission('design')) && (
+                            <>
+                                <div className="sidebar-category-header">Site Architecture</div>
+                                {hasViewPermission('menu') && (
+                                    <li className="nav-item">
+                                        <Link href="/admin/menu" className={`sidebar-link ${isActiveRoute('/admin/menu') ? 'sidebar-link-active' : ''}`}>
+                                            <i className="fas fa-compass me-2"></i> Menu Settings
+                                        </Link>
+                                    </li>
+                                )}
+                                {hasViewPermission('pageLayout') && (
+                                    <li className="nav-item">
+                                        <Link href="/admin/page-layout" className={`sidebar-link ${isActiveRoute('/admin/page-layout') ? 'sidebar-link-active' : ''}`}>
+                                            <i className="fas fa-columns me-2"></i> Page Layout
+                                        </Link>
+                                    </li>
+                                )}
+                                {hasViewPermission('design') && (
+                                    <li className="nav-item">
+                                        <Link href="/admin/design" className={`sidebar-link ${isActiveRoute('/admin/design') ? 'sidebar-link-active' : ''}`}>
+                                            <i className="fas fa-paint-brush me-2"></i> Design & Theme
+                                        </Link>
+                                    </li>
+                                )}
+                            </>
+                        )}
 
-                        <div className="sidebar-category-header">Content Management</div>
-                        {/* News Sections (collapsible) */}
-                        <li className="nav-item">
-                            <div
-                                className="sidebar-link d-flex justify-content-between align-items-center"
-                                style={{ cursor: 'pointer' }}
-                                onClick={() => setIsNewsOpen(!isNewsOpen)}
-                            >
-                                <span className="d-flex align-items-center">
-                                    <i className="fas fa-newspaper me-2"></i> News Articles
-                                </span>
-                                <i 
-                                    className="fas fa-chevron-right" 
-                                    style={{ 
-                                        fontSize: '0.75rem',
-                                        transition: 'transform 0.2s ease',
-                                        transform: isNewsOpen ? 'rotate(90deg)' : 'rotate(0deg)',
-                                        color: 'currentColor'
-                                    }}
-                                ></i>
-                            </div>
-                            <div style={{ display: isNewsOpen ? 'block' : 'none' }}>
-                                <ul className="nav flex-column ms-3 mt-1 gap-1">
+                        {(hasViewPermission('news') || hasViewPermission('gallery') || hasViewPermission('tags') || hasViewPermission('authors') || hasViewPermission('heroSection') || hasViewPermission('ads')) && (
+                            <>
+                                <div className="sidebar-category-header">Content Management</div>
+                                
+                                {/* News Sections (collapsible) */}
+                                {hasViewPermission('news') && (
                                     <li className="nav-item">
-                                        <Link href="/admin/news/create" className={`sidebar-link py-2 ${isActiveRoute('/admin/news/create') ? 'sidebar-link-active' : ''}`}>
-                                            <i className="fas fa-plus me-2" style={{ fontSize: '0.7rem' }}></i> Create Article
-                                        </Link>
+                                        <div
+                                            className="sidebar-link d-flex justify-content-between align-items-center"
+                                            style={{ cursor: 'pointer' }}
+                                            onClick={() => setIsNewsOpen(!isNewsOpen)}
+                                        >
+                                            <span className="d-flex align-items-center">
+                                                <i className="fas fa-newspaper me-2"></i> News Articles
+                                            </span>
+                                            <i 
+                                                className="fas fa-chevron-right" 
+                                                style={{ 
+                                                    fontSize: '0.75rem',
+                                                    transition: 'transform 0.2s ease',
+                                                    transform: isNewsOpen ? 'rotate(90deg)' : 'rotate(0deg)',
+                                                    color: 'currentColor'
+                                                }}
+                                            ></i>
+                                        </div>
+                                        <div style={{ display: isNewsOpen ? 'block' : 'none' }}>
+                                            <ul className="nav flex-column ms-3 mt-1 gap-1">
+                                                <li className="nav-item">
+                                                    <Link href="/admin/news/create" className={`sidebar-link py-2 ${isActiveRoute('/admin/news/create') ? 'sidebar-link-active' : ''}`}>
+                                                        <i className="fas fa-plus me-2" style={{ fontSize: '0.7rem' }}></i> Create Article
+                                                    </Link>
+                                                </li>
+                                                <li className="nav-item">
+                                                    <Link href="/admin/news" className={`sidebar-link py-2 ${isActiveRoute('/admin/news') ? 'sidebar-link-active' : ''}`}>
+                                                        <i className="fas fa-list me-2" style={{ fontSize: '0.7rem' }}></i> All Articles
+                                                    </Link>
+                                                </li>
+                                                {hasViewPermission('gallery') && (
+                                                    <li className="nav-item">
+                                                        <Link href="/admin/photo-news/create" className={`sidebar-link py-2 ${isActiveRoute('/admin/photo-news/create') ? 'sidebar-link-active' : ''}`}>
+                                                            <i className="fas fa-camera me-2" style={{ fontSize: '0.7rem' }}></i> Photo News
+                                                        </Link>
+                                                    </li>
+                                                )}
+                                                {hasViewPermission('videos') && (
+                                                    <li className="nav-item">
+                                                        <Link href="/admin/video-news/create" className={`sidebar-link py-2 ${isActiveRoute('/admin/video-news/create') ? 'sidebar-link-active' : ''}`}>
+                                                            <i className="fas fa-video me-2" style={{ fontSize: '0.7rem' }}></i> Video News
+                                                        </Link>
+                                                    </li>
+                                                )}
+                                            </ul>
+                                        </div>
                                     </li>
-                                    <li className="nav-item">
-                                        <Link href="/admin/news" className={`sidebar-link py-2 ${isActiveRoute('/admin/news') ? 'sidebar-link-active' : ''}`}>
-                                            <i className="fas fa-list me-2" style={{ fontSize: '0.7rem' }}></i> All Articles
-                                        </Link>
-                                    </li>
-                                    <li className="nav-item">
-                                        <Link href="/admin/photo-news/create" className={`sidebar-link py-2 ${isActiveRoute('/admin/photo-news/create') ? 'sidebar-link-active' : ''}`}>
-                                            <i className="fas fa-camera me-2" style={{ fontSize: '0.7rem' }}></i> Photo News
-                                        </Link>
-                                    </li>
-                                    <li className="nav-item">
-                                        <Link href="/admin/video-news/create" className={`sidebar-link py-2 ${isActiveRoute('/admin/video-news/create') ? 'sidebar-link-active' : ''}`}>
-                                            <i className="fas fa-video me-2" style={{ fontSize: '0.7rem' }}></i> Video News
-                                        </Link>
-                                    </li>
-                                </ul>
-                            </div>
-                        </li>
+                                )}
 
-                        {/* Photo Gallery (collapsible) */}
-                        <li className="nav-item">
-                            <div
-                                className="sidebar-link d-flex justify-content-between align-items-center"
-                                style={{ cursor: 'pointer' }}
-                                onClick={() => setIsGalleryOpen(!isGalleryOpen)}
-                            >
-                                <span className="d-flex align-items-center">
-                                    <i className="fas fa-images me-2"></i> Galleries
-                                </span>
-                                <i 
-                                    className="fas fa-chevron-right" 
-                                    style={{ 
-                                        fontSize: '0.75rem',
-                                        transition: 'transform 0.2s ease',
-                                        transform: isGalleryOpen ? 'rotate(90deg)' : 'rotate(0deg)',
-                                        color: 'currentColor'
-                                    }}
-                                ></i>
-                            </div>
-                            <div style={{ display: isGalleryOpen ? 'block' : 'none' }}>
-                                <ul className="nav flex-column ms-3 mt-1 gap-1">
+                                {/* Photo Gallery (collapsible) */}
+                                {hasViewPermission('gallery') && (
                                     <li className="nav-item">
-                                        <Link href="/admin/album" className={`sidebar-link py-2 ${isActiveRoute('/admin/album') ? 'sidebar-link-active' : ''}`}>
-                                            <i className="fas fa-folder me-2" style={{ fontSize: '0.7rem' }}></i> Albums
+                                        <div
+                                            className="sidebar-link d-flex justify-content-between align-items-center"
+                                            style={{ cursor: 'pointer' }}
+                                            onClick={() => setIsGalleryOpen(!isGalleryOpen)}
+                                        >
+                                            <span className="d-flex align-items-center">
+                                                <i className="fas fa-images me-2"></i> Galleries
+                                            </span>
+                                            <i 
+                                                className="fas fa-chevron-right" 
+                                                style={{ 
+                                                    fontSize: '0.75rem',
+                                                    transition: 'transform 0.2s ease',
+                                                    transform: isGalleryOpen ? 'rotate(90deg)' : 'rotate(0deg)',
+                                                    color: 'currentColor'
+                                                }}
+                                            ></i>
+                                        </div>
+                                        <div style={{ display: isGalleryOpen ? 'block' : 'none' }}>
+                                            <ul className="nav flex-column ms-3 mt-1 gap-1">
+                                                <li className="nav-item">
+                                                    <Link href="/admin/album" className={`sidebar-link py-2 ${isActiveRoute('/admin/album') ? 'sidebar-link-active' : ''}`}>
+                                                        <i className="fas fa-folder me-2" style={{ fontSize: '0.7rem' }}></i> Albums
+                                                    </Link>
+                                                </li>
+                                                <li className="nav-item">
+                                                    <Link href="/admin/photos" className={`sidebar-link py-2 ${isActiveRoute('/admin/photos') ? 'sidebar-link-active' : ''}`}>
+                                                        <i className="fas fa-image me-2" style={{ fontSize: '0.7rem' }}></i> Photos
+                                                    </Link>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </li>
+                                )}
+
+                                {hasViewPermission('tags') && (
+                                    <li className="nav-item">
+                                        <Link href="/admin/tags" className={`sidebar-link ${isActiveRoute('/admin/tags') ? 'sidebar-link-active' : ''}`}>
+                                            <i className="fas fa-tags me-2"></i> Tags List
                                         </Link>
                                     </li>
+                                )}
+                                {hasViewPermission('authors') && (
                                     <li className="nav-item">
-                                        <Link href="/admin/photos" className={`sidebar-link py-2 ${isActiveRoute('/admin/photos') ? 'sidebar-link-active' : ''}`}>
-                                            <i className="fas fa-image me-2" style={{ fontSize: '0.7rem' }}></i> Photos
+                                        <Link href="/admin/author" className={`sidebar-link ${isActiveRoute('/admin/author') ? 'sidebar-link-active' : ''}`}>
+                                            <i className="fas fa-pen-nib me-2"></i> Authors
                                         </Link>
                                     </li>
-                                </ul>
-                            </div>
-                        </li>
+                                )}
+                                {hasViewPermission('heroSection') && (
+                                    <li className="nav-item">
+                                        <Link href="/admin/about" className={`sidebar-link ${isActiveRoute('/admin/about') ? 'sidebar-link-active' : ''}`}>
+                                            <i className="fas fa-info-circle me-2"></i> About Section
+                                        </Link>
+                                    </li>
+                                )}
+                                {hasViewPermission('ads') && (
+                                    <li className="nav-item">
+                                        <Link href="/admin/ads" className={`sidebar-link ${isActiveRoute('/admin/ads') ? 'sidebar-link-active' : ''}`}>
+                                            <i className="fas fa-ad me-2"></i> Advertisement
+                                        </Link>
+                                    </li>
+                                )}
+                                {hasViewPermission('gallery') && (
+                                    <li className="nav-item">
+                                        <Link href="/admin/photocard-stats" className={`sidebar-link ${isActiveRoute('/admin/photocard-stats') ? 'sidebar-link-active' : ''}`}>
+                                            <i className="fas fa-image me-2"></i> Photocard Stats
+                                        </Link>
+                                    </li>
+                                )}
+                            </>
+                        )}
 
-                        <li className="nav-item">
-                            <Link href="/admin/tags" className={`sidebar-link ${isActiveRoute('/admin/tags') ? 'sidebar-link-active' : ''}`}>
-                                <i className="fas fa-tags me-2"></i> Tags List
-                            </Link>
-                        </li>
-                        <li className="nav-item">
-                            <Link href="/admin/author" className={`sidebar-link ${isActiveRoute('/admin/author') ? 'sidebar-link-active' : ''}`}>
-                                <i className="fas fa-pen-nib me-2"></i> Authors
-                            </Link>
-                        </li>
-                        <li className="nav-item">
-                            <Link href="/admin/about" className={`sidebar-link ${isActiveRoute('/admin/about') ? 'sidebar-link-active' : ''}`}>
-                                <i className="fas fa-info-circle me-2"></i> About Section
-                            </Link>
-                        </li>
-                        <li className="nav-item">
-                            <Link href="/admin/ads" className={`sidebar-link ${isActiveRoute('/admin/ads') ? 'sidebar-link-active' : ''}`}>
-                                <i className="fas fa-ad me-2"></i> Advertisement
-                            </Link>
-                        </li>
-                        <li className="nav-item">
-                            <Link href="/admin/photocard-stats" className={`sidebar-link ${isActiveRoute('/admin/photocard-stats') ? 'sidebar-link-active' : ''}`}>
-                                <i className="fas fa-image me-2"></i> Photocard Stats
-                            </Link>
-                        </li>
-
-                        <div className="sidebar-category-header">System</div>
-                        <li className="nav-item">
-                            <Link href="/admin/users" className={`sidebar-link ${isActiveRoute('/admin/users') ? 'sidebar-link-active' : ''}`}>
-                                <i className="fas fa-users-cog me-2"></i> Users
-                            </Link>
-                        </li>
-                        <li className="nav-item">
-                            <Link href="/admin/settings" className={`sidebar-link ${isActiveRoute('/admin/settings') ? 'sidebar-link-active' : ''}`}>
-                                <i className="fas fa-cog me-2"></i> Settings
-                            </Link>
-                        </li>
+                        {(hasViewPermission('users') || user?.role === 'superadmin') && (
+                            <>
+                                <div className="sidebar-category-header">System</div>
+                                {hasViewPermission('users') && (
+                                    <li className="nav-item">
+                                        <Link href="/admin/users" className={`sidebar-link ${isActiveRoute('/admin/users') ? 'sidebar-link-active' : ''}`}>
+                                            <i className="fas fa-users-cog me-2"></i> Users
+                                        </Link>
+                                    </li>
+                                )}
+                                {user?.role === 'superadmin' && (
+                                    <li className="nav-item">
+                                        <Link href="/admin/roles" className={`sidebar-link ${isActiveRoute('/admin/roles') ? 'sidebar-link-active' : ''}`}>
+                                            <i className="fas fa-user-shield me-2"></i> Roles
+                                        </Link>
+                                    </li>
+                                )}
+                                {user?.role === 'superadmin' && (
+                                    <li className="nav-item">
+                                        <Link href="/admin/settings" className={`sidebar-link ${isActiveRoute('/admin/settings') ? 'sidebar-link-active' : ''}`}>
+                                            <i className="fas fa-cog me-2"></i> Settings
+                                        </Link>
+                                    </li>
+                                )}
+                            </>
+                        )}
                     </ul>
                 </aside>
 

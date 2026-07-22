@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken");
-const User = require("../models/user-model");
+const { User, Role } = require("../models");
 
 const authMiddleware = async (req, res, next) => {
   try {
@@ -12,8 +12,10 @@ const authMiddleware = async (req, res, next) => {
     const token = authHeader.split(" ")[1];
     const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
 
-    // Find user by primary key (id)
-    const user = await User.findByPk(decoded.userId);
+    // Find user by primary key (id) with role association
+    const user = await User.findByPk(decoded.userId, {
+      include: [{ model: Role, as: 'roleRelation' }]
+    });
 
     if (!user) {
       return res.status(401).json({ message: "Unauthorized: User not found" });

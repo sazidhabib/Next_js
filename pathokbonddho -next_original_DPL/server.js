@@ -79,6 +79,7 @@ const setupExpress = () => {
     app.use('/api/designs', designRoutes);
     app.use("/api/news", newsRouter);
     app.use("/api/users", require("./router/user-router"));
+    app.use("/api/roles", require("./router/role-router"));
     app.use("/api", require("./router/photoRoutes"));
     app.use("/api/images", require("./router/imageRoutes"));
     app.use('/api/image-registry', imageRegistryRoutes);
@@ -211,6 +212,123 @@ const setupExpress = () => {
                 console.log("✅ Checked/Created table: photocard_images");
             } catch (e) {
                 console.error("❌ Error setting up photocard_images:", e);
+            }
+
+            // Auto-migration for user permissions and role management tables
+            try {
+                await sequelize.query(`
+                    CREATE TABLE IF NOT EXISTS roles (
+                        id INT AUTO_INCREMENT PRIMARY KEY,
+                        name VARCHAR(255) NOT NULL UNIQUE,
+                        permissions JSON NOT NULL,
+                        createdAt DATETIME NOT NULL,
+                        updatedAt DATETIME NOT NULL
+                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+                `);
+                console.log("✅ Checked/Created table: roles");
+
+                // Check if roleId column exists in users table
+                const [columns] = await sequelize.query("SHOW COLUMNS FROM users LIKE 'roleId'");
+                if (columns.length === 0) {
+                    await sequelize.query(`
+                        ALTER TABLE users 
+                        ADD COLUMN roleId INT NULL,
+                        ADD CONSTRAINT fk_users_roleId FOREIGN KEY (roleId) REFERENCES roles(id) ON DELETE SET NULL ON UPDATE CASCADE
+                    `);
+                    console.log("✅ Added roleId column and foreign key to users table");
+                }
+                // Seed default roles if roles table is empty
+                const [rolesCount] = await sequelize.query("SELECT COUNT(*) as count FROM roles");
+                if (rolesCount[0] && rolesCount[0].count === 0) {
+                    const sectionsList = [
+                        'dashboard', 'menu', 'heroSection', 'sections', 'articles', 'tags',
+                        'authors', 'ads', 'design', 'blog', 'news', 'gallery', 'songs',
+                        'videos', 'pageLayout', 'users'
+                    ];
+                    
+                    const defaultPerms = {};
+                    const fullPerms = {};
+                    
+                    sectionsList.forEach(sec => {
+                        defaultPerms[sec] = { view: sec === 'dashboard', edit: false, delete: false };
+                        fullPerms[sec] = { view: true, edit: true, delete: true };
+                    });
+
+                    const now = new Date();
+                    await sequelize.query(`
+                        INSERT INTO roles (name, permissions, createdAt, updatedAt) VALUES 
+                        ('Admin', ?, ?, ?),
+                        ('Editor', ?, ?, ?)
+                    `, {
+                        replacements: [
+                            JSON.stringify(fullPerms), now, now,
+                            JSON.stringify(defaultPerms), now, now
+                        ]
+                    });
+                    console.log("✅ Seeded default roles: Admin, Editor");
+                }
+
+                // Database sanitization for character-spread permissions JSON
+                try {
+                    const cleanPermissionObject = (value) => {
+                        if (!value) return null;
+                        let current = value;
+                        for (let depth = 0; depth < 5; depth++) {
+                            if (typeof current === 'string') {
+                                try {
+                                    current = JSON.parse(current);
+                                } catch (e) {
+                                    break;
+                                }
+                            } else if (current && typeof current === 'object') {
+                                if (current["0"] !== undefined) {
+                                    let jsonStr = "";
+                                    let i = 0;
+                                    while (current[String(i)] !== undefined) {
+                                        jsonStr += current[String(i)];
+                                        i++;
+                                    }
+                                    current = jsonStr;
+                                } else {
+                                    return current;
+                                }
+                            } else {
+                                break;
+                            }
+                        }
+                        if (current && typeof current === 'object' && current["0"] === undefined) {
+                            return current;
+                        }
+                        return null;
+                    };
+
+                    const [allRoles] = await sequelize.query("SELECT id, permissions FROM roles");
+                    for (const r of allRoles) {
+                        let perm = r.permissions;
+                        const cleaned = cleanPermissionObject(perm);
+                        if (cleaned) {
+                            await sequelize.query("UPDATE roles SET permissions = ? WHERE id = ?", {
+                                replacements: [JSON.stringify(cleaned), r.id]
+                            });
+                        }
+                    }
+
+                    const [allUsers] = await sequelize.query("SELECT id, permissions FROM users");
+                    for (const u of allUsers) {
+                        let perm = u.permissions;
+                        const cleaned = cleanPermissionObject(perm);
+                        if (cleaned) {
+                            await sequelize.query("UPDATE users SET permissions = ? WHERE id = ?", {
+                                replacements: [JSON.stringify(cleaned), u.id]
+                            });
+                        }
+                    }
+                    console.log("✅ Database permissions sanitization scan completed successfully.");
+                } catch (sanitiseError) {
+                    console.error("❌ Error sanitizing permissions database data:", sanitiseError);
+                }
+            } catch (e) {
+                console.error("❌ Error setting up roles database schema:", e);
             }
 
             const { Page, PageSection, Row, Column } = require("./models");

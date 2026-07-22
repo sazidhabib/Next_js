@@ -29,6 +29,38 @@ Object.keys(DEFAULT_PERMISSIONS).forEach(key => {
     FULL_PERMISSIONS[key] = { view: true, edit: true, delete: true };
 });
 
+function cleanPermissionObject(value) {
+    if (!value) return null;
+    let current = value;
+    for (let depth = 0; depth < 5; depth++) {
+        if (typeof current === 'string') {
+            try {
+                current = JSON.parse(current);
+            } catch (e) {
+                break;
+            }
+        } else if (current && typeof current === 'object') {
+            if (current["0"] !== undefined) {
+                let jsonStr = "";
+                let i = 0;
+                while (current[String(i)] !== undefined) {
+                    jsonStr += current[String(i)];
+                    i++;
+                }
+                current = jsonStr;
+            } else {
+                return current;
+            }
+        } else {
+            break;
+        }
+    }
+    if (current && typeof current === 'object' && current["0"] === undefined) {
+        return current;
+    }
+    return null;
+}
+
 const User = sequelize.define('User', {
     id: {
         type: DataTypes.INTEGER,
@@ -60,16 +92,33 @@ const User = sequelize.define('User', {
         type: DataTypes.ENUM('superadmin', 'admin', 'editor'),
         defaultValue: 'editor'
     },
+    roleId: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        references: {
+            model: 'roles',
+            key: 'id'
+        }
+    },
     permissions: {
         type: DataTypes.JSON,
         defaultValue: DEFAULT_PERMISSIONS,
         get() {
-            const rawValue = this.getDataValue('permissions');
             // If superadmin, always return full permissions
             if (this.getDataValue('role') === 'superadmin') {
                 return FULL_PERMISSIONS;
             }
-            return rawValue || DEFAULT_PERMISSIONS;
+            // If they have an assigned role relation, return the role's permissions
+            if (this.roleRelation && this.roleRelation.permissions) {
+                return this.roleRelation.permissions;
+            }
+            const rawValue = this.getDataValue('permissions');
+            const cleaned = cleanPermissionObject(rawValue);
+            return cleaned || DEFAULT_PERMISSIONS;
+        },
+        set(value) {
+            const cleaned = cleanPermissionObject(value);
+            this.setDataValue('permissions', cleaned || DEFAULT_PERMISSIONS);
         }
     },
     isActive: {
@@ -106,7 +155,9 @@ User.prototype.generateToken = function () {
             userId: this.id,
             email: this.email,
             isAdmin: this.isAdmin,
-            role: this.role
+            role: this.role,
+            roleId: this.roleId,
+            permissions: this.permissions
         },
         process.env.JWT_SECRET_KEY,
         { expiresIn: "4h" }

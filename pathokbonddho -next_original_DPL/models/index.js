@@ -7,6 +7,11 @@ const Row = require('./row');
 const Column = require('./column');
 const About = require('./about-model');
 const User = require('./user-model');
+const Role = require('./role-model');
+
+// User ↔ Role association
+User.belongsTo(Role, { foreignKey: 'roleId', as: 'roleRelation' });
+Role.hasMany(User, { foreignKey: 'roleId', as: 'users' });
 
 // Import your new models
 const Tag = require('./tag-model');
@@ -160,6 +165,7 @@ module.exports = {
     Row,
     Column,
     User,
+    Role,
     // Export new models
     Tag,
     Menu,

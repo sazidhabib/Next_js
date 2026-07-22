@@ -25,6 +25,8 @@ export const AuthProvider = ({ children }) => {
                 email: decoded.email,
                 isAdmin: decoded.isAdmin,
                 role: decoded.role,
+                roleId: decoded.roleId,
+                permissions: decoded.permissions,
                 token
             };
             setUser(userData);
@@ -64,6 +66,8 @@ export const AuthProvider = ({ children }) => {
                             email: decoded.email,
                             isAdmin: decoded.isAdmin,
                             role: decoded.role,
+                            roleId: decoded.roleId,
+                            permissions: decoded.permissions,
                             token
                         };
                         setUser(userData);
