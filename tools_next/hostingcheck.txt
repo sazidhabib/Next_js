@@ -1,0 +1,12 @@
+Can you SSH into your hosting and run these commands to check what's available?
+
+```bash
+ffmpeg -version
+libreoffice --version
+convert --version  # ImageMagick
+php -v
+node -v
+python3 --version
+```
+
+Please share the results (or if any command works/fails).
