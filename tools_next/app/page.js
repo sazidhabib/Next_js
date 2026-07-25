@@ -7,19 +7,11 @@ export default function Home() {
   return (
     <div className="flex flex-col">
       <section className="py-16 sm:py-24 px-4">
-        <div className="mx-auto max-w-3xl text-center">
-          <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-foreground">
-            Convert Any File
-          </h1>
-          <p className="mt-4 text-lg text-muted max-w-xl mx-auto">
-            Drop a file and pick what to turn it into. We handle 200+ formats across documents,
-            images, audio, video, archives and more — straight from your browser.
-          </p>
-          <div className="mt-10">
-            <ConverterWidget />
-          </div>
+        <div className="mx-auto max-w-7xl">
+          <ConverterWidget showHero={true} />
         </div>
       </section>
+
 
       <section className="py-12 px-4 bg-surface border-y border-border">
         <div className="mx-auto max-w-5xl">

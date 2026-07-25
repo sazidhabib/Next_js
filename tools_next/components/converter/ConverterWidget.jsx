@@ -1,12 +1,14 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import FilePicker from './FilePicker'
 import FormatSelector from './FormatSelector'
 import ConversionProgress from './ConversionProgress'
+import GraphifySelector from './GraphifySelector'
 import { getFormat } from '@/lib/formats'
 
-export default function ConverterWidget({ sourceFormat, targetFormat, compact = false }) {
+export default function ConverterWidget({ sourceFormat, targetFormat, compact = false, showHero = false }) {
   const [file, setFile] = useState(null)
   const [from, setFrom] = useState(sourceFormat || '')
   const [to, setTo] = useState(targetFormat || '')
@@ -15,6 +17,16 @@ export default function ConverterWidget({ sourceFormat, targetFormat, compact = 
   const [error, setError] = useState(null)
   const [downloadUrl, setDownloadUrl] = useState(null)
   const [downloadFilename, setDownloadFilename] = useState(null)
+
+  // Sync state when format props change (e.g., on page navigation)
+  useEffect(() => {
+    setFrom(sourceFormat || '')
+  }, [sourceFormat])
+
+  useEffect(() => {
+    setTo(targetFormat || '')
+  }, [targetFormat])
+
 
   const handleFileSelect = useCallback(
     (selectedFile) => {
@@ -101,14 +113,34 @@ export default function ConverterWidget({ sourceFormat, targetFormat, compact = 
     setDownloadFilename(null)
   }
 
+  const router = useRouter()
+
+  const handleFromChange = (newFrom) => {
+    setFrom(newFrom)
+    if (newFrom && to) {
+      router.push(`/${newFrom}-to-${to}`)
+    }
+  }
+
+  const handleToChange = (newTo) => {
+    setTo(newTo)
+    if (from && newTo) {
+      router.push(`/${from}-to-${newTo}`)
+    }
+  }
+
   const handleSwap = () => {
     const tempFrom = from
-    setFrom(to)
+    const tempTo = to
+    setFrom(tempTo)
     setTo(tempFrom)
     if (file) {
       setFile(null)
       setStatus('idle')
       setDownloadUrl(null)
+    }
+    if (tempTo && tempFrom) {
+      router.push(`/${tempTo}-to-${tempFrom}`)
     }
   }
 
@@ -133,32 +165,48 @@ export default function ConverterWidget({ sourceFormat, targetFormat, compact = 
   }
 
   return (
-    <div className="w-full max-w-2xl mx-auto">
+    <div className="w-full">
       {status === 'idle' && !file && (
-        <div className="space-y-4">
-          <FilePicker onFileSelect={handleFileSelect} />
-          <div className="flex items-end gap-3">
-            <div className="flex-1">
-              <FormatSelector value={from} onChange={setFrom} label="From" excludeFormat={to} />
+        showHero ? (
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-center">
+            <div className="lg:col-span-6 space-y-6 text-center lg:text-left">
+              <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-foreground">
+                Convert Any File
+              </h1>
+              <p className="text-lg text-muted max-w-xl mx-auto lg:mx-0 leading-relaxed">
+                Drop a file and pick what to turn it into. We handle 200+ formats across documents,
+                images, audio, video, archives and more — straight from your browser.
+              </p>
+              <FilePicker onFileSelect={handleFileSelect} />
             </div>
-            <button
-              onClick={handleSwap}
-              className="mb-0.5 p-2 rounded-lg border border-border hover:bg-surface transition-colors"
-              title="Swap formats"
-            >
-              <svg className="w-4 h-4 text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" />
-              </svg>
-            </button>
-            <div className="flex-1">
-              <FormatSelector value={to} onChange={setTo} label="To" excludeFormat={from} />
+            <div className="lg:col-span-6 w-full flex justify-center">
+              <GraphifySelector
+                fromValue={from}
+                toValue={to}
+                onFromChange={handleFromChange}
+                onToChange={handleToChange}
+                onSwap={handleSwap}
+              />
             </div>
           </div>
-        </div>
+        ) : (
+          <div className="space-y-6 max-w-2xl mx-auto">
+            <FilePicker onFileSelect={handleFileSelect} />
+            <GraphifySelector
+              fromValue={from}
+              toValue={to}
+              onFromChange={handleFromChange}
+              onToChange={handleToChange}
+              onSwap={handleSwap}
+            />
+          </div>
+        )
       )}
 
+
       {(file || status !== 'idle') && (
-        <div className="space-y-4">
+        <div className="w-full max-w-2xl mx-auto space-y-4">
+
           <div className="flex items-center justify-between p-3 rounded-lg bg-surface border border-border">
             <div className="flex items-center gap-3 min-w-0">
               <div className="w-8 h-8 rounded bg-primary-light flex items-center justify-center shrink-0">

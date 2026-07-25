@@ -301,7 +301,56 @@ export function isValidConversion(from, to) {
   const toFmt = getFormat(to)
   if (!fromFmt || !toFmt) return false
   if (from === to) return false
-  return true
+
+  const fromId = from.toLowerCase()
+  const toId = to.toLowerCase()
+
+  // Categories matching lib/conversions.js logic
+  const IMAGE_FORMATS = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'avif', 'tiff', 'tif', 'bmp', 'svg', 'ico', 'heic', 'heif', 'psd', 'raw']
+  const AUDIO_FORMATS = ['mp3', 'wav', 'flac', 'aac', 'ogg', 'm4a', 'wma', 'opus', 'aiff', 'amr']
+  const VIDEO_FORMATS = ['mp4', 'avi', 'mkv', 'mov', 'wmv', 'flv', 'webm', '3gp', 'mpeg', 'mpg', 'm4v', 'ogv', 'ts', 'vob']
+  const DOCUMENT_FORMATS = ['pdf', 'docx', 'doc', 'odt', 'rtf', 'txt', 'html', 'md', 'epub']
+  const ARCHIVE_FORMATS = ['zip', 'tar', 'gz', 'bz2', '7z', 'rar']
+  const SPREADSHEET_FORMATS = ['csv', 'ods', 'xls', 'xlsb', 'xlsm', 'xlsx', 'xlt', 'xltx']
+  const SLIDES_FORMATS = ['dps', 'key', 'odp', 'pot', 'potm', 'potx', 'pps', 'ppsm', 'ppsx', 'ppt', 'pptx']
+  const EBOOKS_FORMATS = ['azw', 'azw3', 'azw4', 'cbc', 'cbr', 'cbz', 'chm', 'djvu', 'epub', 'fb2', 'htmlz', 'lit', 'lrf', 'mobi', 'pdb', 'pml', 'prc', 'rb', 'snb', 'tcr', 'txtz', 'kepub']
+  const VECTOR_FORMATS = ['cgm', 'dwg', 'dxf', 'emf', 'eps', 'odg', 'pnm', 'ppm', 'ps', 'svg']
+  const CAD_FORMATS = ['dwg', 'dxf', 'stl']
+  const FONTS_FORMATS = ['otf', 'ttf', 'woff', 'woff2', 'eot']
+
+  // Image to Image
+  if (IMAGE_FORMATS.includes(fromId) && IMAGE_FORMATS.includes(toId)) return true
+
+  // Audio/Video combinations
+  const isFromAV = AUDIO_FORMATS.includes(fromId) || VIDEO_FORMATS.includes(fromId)
+  const isToAV = AUDIO_FORMATS.includes(toId) || VIDEO_FORMATS.includes(toId)
+  if (isFromAV && isToAV) return true
+
+  // Document to Document
+  if (DOCUMENT_FORMATS.includes(fromId) && DOCUMENT_FORMATS.includes(toId)) return true
+
+  // Spreadsheets
+  if (SPREADSHEET_FORMATS.includes(fromId) && SPREADSHEET_FORMATS.includes(toId)) return true
+
+  // Slides
+  if (SLIDES_FORMATS.includes(fromId) && SLIDES_FORMATS.includes(toId)) return true
+
+  // Ebooks
+  if (EBOOKS_FORMATS.includes(fromId) && EBOOKS_FORMATS.includes(toId)) return true
+
+  // Vector
+  if (VECTOR_FORMATS.includes(fromId) && VECTOR_FORMATS.includes(toId)) return true
+
+  // CAD
+  if (CAD_FORMATS.includes(fromId) && CAD_FORMATS.includes(toId)) return true
+
+  // Fonts
+  if (FONTS_FORMATS.includes(fromId) && FONTS_FORMATS.includes(toId)) return true
+
+  // Archive (Only zip to tar supported currently in code, but allow conversions among archives)
+  if (ARCHIVE_FORMATS.includes(fromId) && ARCHIVE_FORMATS.includes(toId)) return true
+
+  return false
 }
 
 export function getPopularConversions() {
