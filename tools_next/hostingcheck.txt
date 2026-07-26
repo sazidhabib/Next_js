@@ -10,3 +10,38 @@ python3 --version
 ```
 
 Please share the results (or if any command works/fails).
+
+
+
+
+1. Diagnostics Summary
+Dependency / Component	Status	Required For
+Sharp (Image Library)	WORKING	Image conversions (PNG, JPEG, WebP, AVIF, TIFF, etc.)
+FFmpeg (CLI Tool)	MISSING	Audio/Video conversions (MP4, MP3, WAV, MKV, etc.)
+LibreOffice (CLI Tool)	MISSING	Document conversions (PDF, DOCX, ODT, TXT, etc.)
+Database (MySQL)	FAILED	Storing job status, progress, and credit usage
+Storage (S3/Cloud)	FAILED	Uploading and downloading files to convert
+2. How to Make Everything Work
+To get all file conversions working, follow these steps:
+
+Step A: Install CLI Tools
+FFmpeg:
+Windows: Download from ffmpeg.org (or run winget install Gyan.FFmpeg in a PowerShell window as administrator) and ensure ffmpeg is added to your System Environment variables (PATH).
+LibreOffice:
+Windows: Download and install from libreoffice.org. Add the LibreOffice program folder (usually C:\Program Files\LibreOffice\program) to your System Environment variables (PATH) so that soffice is globally recognized.
+Step B: Configure the Environment Variables
+Create a .env.local file in the root of your project d:\Github\tools_next and configure your database and cloud storage credentials:
+
+env
+# Database Configuration
+DB_HOST=localhost
+DB_PORT=3306
+DB_USER=your_db_user
+DB_PASSWORD=your_db_password
+DB_NAME=fileconverter
+# Storage Configuration (S3 Compatible Cloud Storage)
+STORAGE_ENDPOINT=https://your-s3-endpoint.com
+STORAGE_ACCESS_KEY_ID=your_access_key
+STORAGE_SECRET_ACCESS_KEY=your_secret_key
+STORAGE_BUCKET=fileconverter
+STORAGE_PUBLIC_URL=https://your-public-cdn-url.com
