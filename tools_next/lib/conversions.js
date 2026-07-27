@@ -1,6 +1,7 @@
 import { exec } from 'child_process'
 import { promisify } from 'util'
 import { writeFile, readFile, unlink, mkdtemp } from 'fs/promises'
+import { existsSync } from 'fs'
 import { tmpdir } from 'os'
 import { join } from 'path'
 import { v4 as uuidv4 } from 'uuid'
@@ -70,7 +71,9 @@ async function convertWithFfmpeg(inputBuffer, fromFormat, toFormat, tmpDir) {
   const isAudio = AUDIO_FORMATS.includes(toFormat)
   const isVideo = VIDEO_FORMATS.includes(toFormat)
 
-  let cmd = `ffmpeg -y -i "${inputPath}"`
+  const localFfmpeg = join(process.cwd(), 'bin', 'ffmpeg.exe')
+  const ffmpegCmd = existsSync(localFfmpeg) ? `"${localFfmpeg}"` : 'ffmpeg'
+  let cmd = `${ffmpegCmd} -y -i "${inputPath}"`
 
   if (isAudio) {
     const audioCodecs = {
@@ -99,13 +102,16 @@ async function convertDocument(inputBuffer, fromFormat, toFormat, tmpDir) {
 
   await writeFile(inputPath, inputBuffer)
 
+  const localLO = join(process.cwd(), 'bin', 'libreoffice', 'program', 'soffice.exe')
+  const loCmd = existsSync(localLO) ? `"${localLO}"` : 'libreoffice'
+
   if (toFormat === 'pdf') {
-    await execAsync(`libreoffice --headless --convert-to pdf --outdir "${tmpDir}" "${inputPath}"`, { timeout: 120000 })
+    await execAsync(`${loCmd} --headless --convert-to pdf --outdir "${tmpDir}" "${inputPath}"`, { timeout: 120000 })
   } else if (fromFormat === 'pdf') {
     const convType = toFormat === 'docx' ? 'docx' : toFormat === 'txt' ? 'txt' : toFormat
-    await execAsync(`libreoffice --headless --convert-to ${convType} --outdir "${tmpDir}" "${inputPath}"`, { timeout: 120000 })
+    await execAsync(`${loCmd} --headless --convert-to ${convType} --outdir "${tmpDir}" "${inputPath}"`, { timeout: 120000 })
   } else {
-    await execAsync(`libreoffice --headless --convert-to ${toFormat} --outdir "${tmpDir}" "${inputPath}"`, { timeout: 120000 })
+    await execAsync(`${loCmd} --headless --convert-to ${toFormat} --outdir "${tmpDir}" "${inputPath}"`, { timeout: 120000 })
   }
 
   const possibleOutputs = [

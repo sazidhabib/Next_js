@@ -1,5 +1,7 @@
 import { exec } from 'child_process';
 import { promisify } from 'util';
+import { existsSync } from 'fs';
+import { join } from 'path';
 import sharp from 'sharp';
 import mysql from 'mysql2/promise';
 import { S3Client, ListObjectsV2Command } from '@aws-sdk/client-s3';
@@ -28,7 +30,9 @@ async function runDiagnostics() {
   
   // FFmpeg check
   try {
-    const { stdout } = await execAsync('ffmpeg -version');
+    const localFfmpeg = join(process.cwd(), 'bin', 'ffmpeg.exe');
+    const ffmpegCmd = existsSync(localFfmpeg) ? `"${localFfmpeg}"` : 'ffmpeg';
+    const { stdout } = await execAsync(`${ffmpegCmd} -version`);
     const firstLine = stdout.split('\n')[0];
     console.log(`   - ffmpeg: WORKING (${firstLine.trim()})`);
   } catch (err) {
@@ -38,7 +42,9 @@ async function runDiagnostics() {
 
   // LibreOffice check
   try {
-    const { stdout } = await execAsync('soffice --version');
+    const localLO = join(process.cwd(), 'bin', 'libreoffice', 'program', 'soffice.exe');
+    const loCmd = existsSync(localLO) ? `"${localLO}"` : 'soffice';
+    const { stdout } = await execAsync(`${loCmd} --version`);
     console.log(`   - libreoffice (soffice): WORKING (${stdout.trim()})`);
   } catch (err) {
     try {

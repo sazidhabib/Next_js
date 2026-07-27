@@ -1,3 +1,53 @@
+# Project Overview: Xai — Intelligence Workspace
+
+**Xai — Intelligence Workspace** is a high-fidelity, interactive Next.js application built to demonstrate the transformation of raw, unstructured data into decision-grade structured intelligence, actionable insights, and AI automations. The interface utilizes a deep-zinc dark-mode aesthetic with interactive 3D WebGL meshes, custom scroll animations, and a rich, responsive dashboard interface.
+
+## Tech Stack & Core Libraries
+
+- **Framework**: [Next.js (App Router)](file:///d:/Github/x-ai/app) & [React 19](file:///d:/Github/x-ai/package.json)
+- **Styling**: [Tailwind CSS v4](file:///d:/Github/x-ai/package.json)
+- **3D Graphics & WebGL**: [Three.js](file:///d:/Github/x-ai/package.json), [@react-three/fiber](file:///d:/Github/x-ai/package.json), and [@react-three/drei](file:///d:/Github/x-ai/package.json)
+- **Animations**: [Framer Motion](file:///d:/Github/x-ai/package.json) and [GSAP (GreenSock Animation Platform)](file:///d:/Github/x-ai/package.json)
+- **UI Components**: Radix UI primitives wrapped in Tailwind v4 styles ([components/ui](file:///d:/Github/x-ai/components/ui))
+- **Data Visualization**: [Recharts](file:///d:/Github/x-ai/package.json) for complex layout telemetry and charts
+
+## Project Structure & Architecture
+
+```
+x-ai/
+├── app/                      # Next.js page routing, layouts, and global CSS
+│   ├── globals.css           # Primary stylesheets and Tailwind imports
+│   ├── layout.tsx            # Global layout configuration
+│   └── page.tsx              # Application landing page composition
+├── components/
+│   ├── layout/               # Global page layout components (Navbar, Footer)
+│   ├── sections/             # Individual sections comprising the landing page
+│   │   ├── HeroSection.tsx   # Hero typography & WebGL particle grid
+│   │   ├── PipelineSection.tsx # Ingestion pipeline cards with GSAP node transitions
+│   │   ├── DashboardSection.tsx # Intelligence Dashboard preview UI with Recharts
+│   │   └── SignatureSection.tsx # 3D mesh morphing & mathematical telemetry display
+│   ├── three/                # WebGL / Three.js canvas & mesh logic
+│   │   ├── SceneWrapper.tsx  # Dynamic SSR-disabled client-side 3D canvas wrapper
+│   │   └── DataMesh.tsx      # Particle-line custom geometry with scroll & cursor morphing
+│   └── ui/                   # Modular, accessible UI component library primitives
+```
+
+## Signature Features & Engineering Patterns
+
+1. **Decoupled Scroll & Rendering Bridge**: Avoids React virtual DOM updates in the animation loop. Framer Motion tracks scroll state as a raw `MotionValue` written to a `useRef`. The Three.js `useFrame` loop reads this ref directly, resulting in high-performance rendering.
+2. **Dynamic 3D Mesh Morphing**: The centerpiece [DataMesh.tsx](file:///d:/Github/x-ai/components/three/DataMesh.tsx) morphs seamlessly from an **Icosahedron** (representing raw data) to a **Torus** (ingestion pipeline) to a **Sphere** (structured database intelligence).
+3. **SVG Pipeline Drawing**: GSAP dynamically draws SVG connecting lines (`strokeDashoffset`) and staggers pipeline cards into view as they cross the viewport.
+4. **WebGL Optimizations**: Custom buffers (`BufferGeometry`) package thousands of points into a single draw call. Vector allocations are pre-cached to avoid Garbage Collection stuttering, and Device Pixel Ratio (DPR) is capped to prevent rendering lag on ultra-high-resolution displays.
+
+## Key Features of the Prototype
+
+- **Dynamic Hero Viewport**: Integrates real-time telemetry markers and metrics (5.2B records, 99.4% confidence, <4ms latency) with an interactive 3D particle canvas mapping raw feed ingestions.
+- **Three-Stage Data Ingestion Pipeline**: Cascades cards and draws SVG connector lines sequentially using GSAP triggers to guide users through *Ingest*, *Analyze*, and *Generate* phases.
+- **Next-Gen Workspace Dashboard**: Fully realized dark-mode dashboard mockup complete with navigation, search controls, dynamic metric cards, and throughput performance graphs using Recharts.
+- **Signature 3D Math Engine**: Morphing 3D geometry coupled with mathematical transformer/entropy equations, allowing users to scroll and hover to visually witness the data structuralization process.
+
+---
+
 # Product Documentation: Xai — Intelligence Workspace
 
 **Product Name:** Xai – Intelligence Workspace  

@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { exec } from 'child_process';
 import { promisify } from 'util';
+import { existsSync } from 'fs';
+import { join } from 'path';
 import sharp from 'sharp';
 import mysql from 'mysql2/promise';
 import { S3Client, ListObjectsV2Command } from '@aws-sdk/client-s3';
@@ -35,19 +37,23 @@ export async function GET() {
 
   // 2. FFmpeg
   try {
-    const { stdout } = await execAsync('ffmpeg -version');
+    const localFfmpeg = join(process.cwd(), 'bin', 'ffmpeg.exe');
+    const ffmpegCmd = existsSync(localFfmpeg) ? `"${localFfmpeg}"` : 'ffmpeg';
+    const { stdout } = await execAsync(`${ffmpegCmd} -version`);
     results.ffmpeg = `working (${stdout.split('\n')[0].trim()})`;
-    log('FFmpeg: found in system PATH');
+    log(`FFmpeg: found and working (using ${existsSync(localFfmpeg) ? 'local bin' : 'system PATH'})`);
   } catch (err) {
     results.ffmpeg = 'missing';
-    log('FFmpeg error: not found in system PATH. Required for audio/video conversions.');
+    log('FFmpeg error: not found. Required for audio/video conversions.');
   }
 
   // 3. LibreOffice
   try {
-    const { stdout } = await execAsync('soffice --version');
+    const localLO = join(process.cwd(), 'bin', 'libreoffice', 'program', 'soffice.exe');
+    const loCmd = existsSync(localLO) ? `"${localLO}"` : 'soffice';
+    const { stdout } = await execAsync(`${loCmd} --version`);
     results.libreoffice = `working (${stdout.trim()})`;
-    log('LibreOffice: soffice command found in system PATH');
+    log(`LibreOffice: found and working (using ${existsSync(localLO) ? 'local bin soffice' : 'system PATH'})`);
   } catch (err) {
     try {
       const { stdout } = await execAsync('libreoffice --version');
@@ -55,7 +61,7 @@ export async function GET() {
       log('LibreOffice: libreoffice command found in system PATH');
     } catch (err2) {
       results.libreoffice = 'missing';
-      log('LibreOffice error: not found in system PATH. Required for document/office conversions.');
+      log('LibreOffice error: not found. Required for document/office conversions.');
     }
   }
 

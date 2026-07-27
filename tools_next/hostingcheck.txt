@@ -16,11 +16,11 @@ Please share the results (or if any command works/fails).
 
 1. Diagnostics Summary
 Dependency / Component	Status	Required For
-Sharp (Image Library)	WORKING	Image conversions (PNG, JPEG, WebP, AVIF, TIFF, etc.)
-FFmpeg (CLI Tool)	MISSING	Audio/Video conversions (MP4, MP3, WAV, MKV, etc.)
-LibreOffice (CLI Tool)	MISSING	Document conversions (PDF, DOCX, ODT, TXT, etc.)
-Database (MySQL)	FAILED	Storing job status, progress, and credit usage
-Storage (S3/Cloud)	FAILED	Uploading and downloading files to convert
+Sharp (Image Library)-	WORKING	Image conversions (PNG, JPEG, WebP, AVIF, TIFF, etc.)
+FFmpeg (CLI Tool)-	MISSING	Audio/Video conversions (MP4, MP3, WAV, MKV, etc.)
+LibreOffice (CLI Tool)-	MISSING	Document conversions (PDF, DOCX, ODT, TXT, etc.)
+Database (MySQL)-	FAILED	Storing job status, progress, and credit usage
+Storage (S3/Cloud)-	FAILED	Uploading and downloading files to convert
 2. How to Make Everything Work
 To get all file conversions working, follow these steps:
 
