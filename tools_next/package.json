@@ -1,12 +1,14 @@
 {
-  "name": "nextstarter_javascript",
+  "name": "next_tools",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "diagnostics": "node --env-file=.env test-env.mjs",
+    "test-conversions": "node --env-file=.env test-conversions.mjs"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1094.0",

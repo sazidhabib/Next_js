@@ -1,14 +1,16 @@
 import { exec } from 'child_process'
 import { promisify } from 'util'
-import { writeFile, readFile, unlink, mkdtemp } from 'fs/promises'
+import { writeFile, readFile, unlink, mkdtemp, mkdir } from 'fs/promises'
 import { existsSync } from 'fs'
 import { tmpdir } from 'os'
 import { join } from 'path'
 import { v4 as uuidv4 } from 'uuid'
 import sharp from 'sharp'
-import archiver from 'archiver'
-import unzipper from 'unzipper'
-import { getFileBuffer, uploadFile } from './storage'
+import * as archiverModule from 'archiver'
+import * as unzipperModule from 'unzipper'
+const archiver = archiverModule.default || archiverModule
+const unzipper = unzipperModule.default || unzipperModule
+import { getFileBuffer, uploadFile } from './storage.js'
 
 const execAsync = promisify(exec)
 
@@ -17,13 +19,26 @@ const AUDIO_FORMATS = ['mp3', 'wav', 'flac', 'aac', 'ogg', 'm4a', 'wma', 'opus',
 const VIDEO_FORMATS = ['mp4', 'avi', 'mkv', 'mov', 'wmv', 'flv', 'webm', '3gp', 'mpeg', 'mpg', 'm4v', 'ogv', 'ts', 'vob']
 const DOCUMENT_FORMATS = ['pdf', 'docx', 'doc', 'odt', 'rtf', 'txt', 'html', 'md', 'epub']
 const ARCHIVE_FORMATS = ['zip', 'tar', 'gz', 'bz2', '7z', 'rar']
+const SPREADSHEET_FORMATS = ['csv', 'ods', 'xls', 'xlsb', 'xlsm', 'xlsx', 'xlt', 'xltx']
+const SLIDES_FORMATS = ['dps', 'key', 'odp', 'pot', 'potm', 'potx', 'pps', 'ppsm', 'ppsx', 'ppt', 'pptx']
+const EBOOKS_FORMATS = ['azw', 'azw3', 'azw4', 'cbc', 'cbr', 'cbz', 'chm', 'djvu', 'epub', 'fb2', 'htmlz', 'lit', 'lrf', 'mobi', 'pdb', 'pml', 'prc', 'rb', 'snb', 'tcr', 'txtz', 'kepub']
+const VECTOR_FORMATS = ['cgm', 'dwg', 'dxf', 'emf', 'eps', 'odg', 'pnm', 'ppm', 'ps', 'svg']
+const CAD_FORMATS = ['dwg', 'dxf', 'stl']
 
 function getCategory(format) {
-  if (IMAGE_FORMATS.includes(format)) return 'image'
-  if (AUDIO_FORMATS.includes(format)) return 'audio'
-  if (VIDEO_FORMATS.includes(format)) return 'video'
-  if (DOCUMENT_FORMATS.includes(format)) return 'document'
-  if (ARCHIVE_FORMATS.includes(format)) return 'archive'
+  const fmt = format.toLowerCase()
+  if (IMAGE_FORMATS.includes(fmt)) return 'image'
+  if (AUDIO_FORMATS.includes(fmt)) return 'audio'
+  if (VIDEO_FORMATS.includes(fmt)) return 'video'
+  if (DOCUMENT_FORMATS.includes(fmt) || 
+      SPREADSHEET_FORMATS.includes(fmt) || 
+      SLIDES_FORMATS.includes(fmt) || 
+      EBOOKS_FORMATS.includes(fmt) || 
+      CAD_FORMATS.includes(fmt) || 
+      (VECTOR_FORMATS.includes(fmt) && fmt !== 'svg')) {
+    return 'document'
+  }
+  if (ARCHIVE_FORMATS.includes(fmt)) return 'archive'
   return 'unknown'
 }
 
@@ -133,6 +148,7 @@ async function convertArchive(inputBuffer, fromFormat, toFormat, tmpDir) {
     const inputPath = join(tmpDir, 'input.zip')
     await writeFile(inputPath, inputBuffer)
     const extractPath = join(tmpDir, 'extracted')
+    await mkdir(extractPath, { recursive: true })
     await unzipper.Open.file(inputPath).then((d) => d.extract({ path: extractPath, concurrency: 5 }))
     const outputPath = join(tmpDir, 'output.tar')
     await execAsync(`tar -cf "${outputPath}" -C "${extractPath}" .`, { timeout: 60000 })
@@ -160,6 +176,8 @@ export async function convertFile(inputKey, fromFormat, toFormat, options = {}) 
       outputBuffer = await convertWithFfmpeg(inputBuffer, fromFormat, toFormat, tmpDir)
     } else if (fromCat === 'document' || toCat === 'document') {
       outputBuffer = await convertDocument(inputBuffer, fromFormat, toFormat, tmpDir)
+    } else if (fromCat === 'archive' && toCat === 'archive') {
+      outputBuffer = await convertArchive(inputBuffer, fromFormat, toFormat, tmpDir)
     } else {
       throw new Error(`Conversion from ${fromFormat} to ${toFormat} is not supported`)
     }

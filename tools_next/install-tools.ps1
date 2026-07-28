@@ -62,8 +62,8 @@ if (Test-Path $LOSoffice) {
 } elseif ($GlobalLO) {
     Write-Host "LibreOffice is already installed globally on your system PATH ($($GlobalLO.Source)). Skipping download."
 } else {
-    # Using LibreOffice 24.2.5 x64 as a stable target
-    $LOUrl = "https://download.documentfoundation.org/libreoffice/stable/24.2.5/win/x86_64/LibreOffice_24.2.5_Win_x86-64.msi"
+    # Using LibreOffice 24.2.5.2 x64 from the archive (stable target)
+    $LOUrl = "https://downloadarchive.documentfoundation.org/libreoffice/old/24.2.5.2/win/x86_64/LibreOffice_24.2.5.2_Win_x86-64.msi"
     Write-Host "Downloading LibreOffice MSI from $LOUrl..."
     Invoke-WebRequest -Uri $LOUrl -OutFile $LibreOfficeMsi -UserAgent "Mozilla/5.0"
     
