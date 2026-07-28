@@ -1,11 +1,20 @@
+import Link from "next/link";
+
 const platforms = [
-  { name: "Facebook", icon: FacebookIcon, color: "from-blue-500 to-blue-600" },
-  { name: "YouTube", icon: YouTubeIcon, color: "from-red-500 to-red-600" },
-  { name: "Instagram", icon: InstagramIcon, color: "from-pink-500 to-purple-600" },
-  { name: "TikTok", icon: TikTokIcon, color: "from-gray-900 to-gray-800" },
-  { name: "Twitter / X", icon: TwitterIcon, color: "from-sky-400 to-sky-500" },
-  { name: "Reels", icon: ReelsIcon, color: "from-purple-500 to-pink-500" },
-  { name: "Shorts", icon: ShortsIcon, color: "from-red-600 to-red-700" },
+  { name: "Facebook", path: "/facebook", icon: FacebookIcon, color: "from-blue-500 to-blue-600" },
+  { name: "YouTube", path: "/youtube", icon: YouTubeIcon, color: "from-red-500 to-red-600" },
+  { name: "Instagram", path: "/instagram", icon: InstagramIcon, color: "from-pink-500 to-purple-600" },
+  { name: "TikTok", path: "/tiktok", icon: TikTokIcon, color: "from-gray-900 to-gray-800" },
+  { name: "Twitter / X", path: "/twitter", icon: TwitterIcon, color: "from-sky-400 to-sky-500" },
+  { name: "LinkedIn", path: "/linkedin", icon: LinkedInIcon, color: "from-blue-700 to-blue-800" },
+  { name: "Pinterest", path: "/pinterest", icon: PinterestIcon, color: "from-red-600 to-red-700" },
+  { name: "Douyin", path: "/douyin", icon: DouyinIcon, color: "from-cyan-500 to-rose-500" },
+  { name: "Kuaishou", path: "/kuaishou", icon: KuaishouIcon, color: "from-orange-500 to-yellow-500" },
+  { name: "Discord", path: "/discord", icon: DiscordIcon, color: "from-indigo-500 to-indigo-600" },
+  { name: "Quora", path: "/quora", icon: QuoraIcon, color: "from-red-800 to-rose-700" },
+  { name: "Tencent QQ", path: "/tencent", icon: QQIcon, color: "from-blue-400 to-indigo-600" },
+  { name: "Reels", path: "/reels", icon: ReelsIcon, color: "from-purple-500 to-pink-500" },
+  { name: "Shorts", path: "/shorts", icon: ShortsIcon, color: "from-red-600 to-red-700" },
 ];
 
 function FacebookIcon() {
@@ -48,6 +57,62 @@ function TwitterIcon() {
   );
 }
 
+function LinkedInIcon() {
+  return (
+    <svg className="h-8 w-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+      <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
+    </svg>
+  );
+}
+
+function PinterestIcon() {
+  return (
+    <svg className="h-8 w-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+      <path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.162-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.966 1.406-5.966s-.359-.72-.359-1.781c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.204 0 1.031.397 2.138.893 2.738a.36.36 0 01.083.345l-.333 1.36c-.053.22-.174.267-.402.161-1.499-.698-2.436-2.889-2.436-4.649 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-1.216 0-2.359-.631-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24 12.017 24c6.62 0 12-5.38 12-12s-5.38-12-12-12z" />
+    </svg>
+  );
+}
+
+function DouyinIcon() {
+  return (
+    <svg className="h-8 w-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+      <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z" />
+    </svg>
+  );
+}
+
+function KuaishouIcon() {
+  return (
+    <svg className="h-8 w-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+      <path d="M4 4h16v16H4V4zm4 4v8h8V8H8z" />
+    </svg>
+  );
+}
+
+function DiscordIcon() {
+  return (
+    <svg className="h-8 w-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+      <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.873-.894.077.077 0 0 1-.008-.128c.126-.093.252-.19.372-.287a.075.075 0 0 1 .077-.011c3.92 1.793 8.18 1.793 12.061 0a.073.073 0 0 1 .078.009c.12.099.246.195.373.289a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.894.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.156-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.955 2.418-2.156 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.156-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.156 2.418z" />
+    </svg>
+  );
+}
+
+function QuoraIcon() {
+  return (
+    <svg className="h-8 w-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+      <path d="M18.516 16.945c-.443-.807-.743-1.782-.743-2.906 0-3.327-2.616-5.836-5.837-5.836S6.1 10.712 6.1 14.039c0 3.327 2.615 5.836 5.836 5.836.98 0 1.884-.251 2.684-.68l3.176 3.176a1 1 0 001.414-1.414l-3.176-3.176zM11.936 17.5c-1.928 0-3.5-1.572-3.5-3.5 0-1.928 1.572-3.5 3.5-3.5 1.928 0 3.5 1.572 3.5 3.5 0 1.928-1.572 3.5-3.5 3.5z" />
+    </svg>
+  );
+}
+
+function QQIcon() {
+  return (
+    <svg className="h-8 w-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+      <path d="M12 2C6.477 2 2 6.477 2 12c0 1.959.566 3.784 1.544 5.328l-.946 3.456a.75.75 0 00.922.922l3.456-.946A9.957 9.957 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2zm1.25 14h-2.5c-.414 0-.75-.336-.75-.75s.336-.75.75-.75h2.5c.414 0 .75.336.75.75s-.336.75-.75.75zm1.5-4h-5.5c-.414 0-.75-.336-.75-.75s.336-.75.75-.75h5.5c.414 0 .75.336.75.75s-.336.75-.75.75z" />
+    </svg>
+  );
+}
+
 function ReelsIcon() {
   return (
     <svg className="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
@@ -74,15 +139,21 @@ export default function SupportedPlatforms() {
         </div>
         <div className="mt-10 grid grid-cols-2 gap-4 sm:grid-cols-4 lg:grid-cols-7">
           {platforms.map((platform) => (
-            <div key={platform.name} className="group flex flex-col items-center gap-3 rounded-2xl border border-gray-100 bg-gray-50 p-5 transition-all hover:border-gray-200 hover:bg-white hover:shadow-lg">
+            <Link key={platform.name} href={platform.path} className="group flex flex-col items-center gap-3 rounded-2xl border border-gray-100 bg-gray-50 p-5 transition-all hover:border-gray-200 hover:bg-white hover:shadow-lg text-center cursor-pointer">
               <div className={`flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br ${platform.color} shadow-md group-hover:scale-110 transition-transform`}>
                 <platform.icon />
               </div>
               <span className="text-sm font-medium text-gray-700">{platform.name}</span>
-            </div>
+            </Link>
           ))}
         </div>
       </div>
     </section>
   );
 }
+
+export { 
+  FacebookIcon, YouTubeIcon, InstagramIcon, TikTokIcon, TwitterIcon, 
+  LinkedInIcon, PinterestIcon, DouyinIcon, KuaishouIcon, DiscordIcon, 
+  QuoraIcon, QQIcon, ReelsIcon, ShortsIcon 
+};
