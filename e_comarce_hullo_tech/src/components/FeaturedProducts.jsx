@@ -6,6 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { products as mockProducts } from "../data/mockData";
+import { useCart } from "../lib/CartContext";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -31,6 +32,7 @@ const itemVariants = {
 };
 
 export default function FeaturedProducts() {
+  const { addToCart } = useCart();
   const [featuredList, setFeaturedList] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -98,10 +100,17 @@ export default function FeaturedProducts() {
               />
               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/[0.02] transition-colors duration-500" />
               <div className="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0">
-                <span className="flex items-center gap-1.5 bg-white/90 backdrop-blur-sm text-gray-900 text-xs font-semibold px-3 py-2 rounded-full shadow-lg hover:bg-blue-600 hover:text-white transition-all cursor-pointer active:scale-95">
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    addToCart(product, 1);
+                  }}
+                  className="flex items-center gap-1.5 bg-white/90 backdrop-blur-sm text-gray-900 text-xs font-semibold px-3 py-2 rounded-full shadow-lg hover:bg-blue-600 hover:text-white transition-all cursor-pointer active:scale-95 border-0"
+                >
                   <ShoppingCart className="w-3.5 h-3.5" />
                   Add to Cart
-                </span>
+                </button>
               </div>
             </div>
             <div className="p-4">

@@ -1,0 +1,132 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+model Font {
+  id              Int              @id @default(autoincrement())
+  name            String           @db.VarChar(200)
+  slug            String           @unique @db.VarChar(200)
+  description     String?          @db.Text
+  fontType        FontType         @default(FREE)
+  style           FontStyle        @default(GENERAL)
+  encoding        String           @default("[]") @db.Text
+  price           Float?
+  salePrice       Float?
+  downloadCount   Int              @default(0)
+  viewCount       Int              @default(0)
+  fontFileUrl     String           @db.VarChar(500)
+  previewImageUrl String?          @db.VarChar(500)
+  featured        Boolean          @default(false)
+  published       Boolean          @default(true)
+  designerId      Int
+  developerId     Int?
+  designer        Designer         @relation(fields: [designerId], references: [id])
+  developer       Developer?       @relation(fields: [developerId], references: [id])
+  downloads       Download[]
+  orders          Order[]
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  @@index([fontType])
+  @@index([style])
+  @@index([designerId])
+  @@index([downloadCount])
+}
+
+model Designer {
+  id          Int      @id @default(autoincrement())
+  name        String   @db.VarChar(200)
+  slug        String   @unique @db.VarChar(200)
+  photo       String?  @db.VarChar(500)
+  bio         String?  @db.Text
+  socialLinks String?  @db.Text
+  email       String?  @db.VarChar(200)
+  fonts       Font[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Developer {
+  id          Int      @id @default(autoincrement())
+  name        String   @db.VarChar(200)
+  slug        String   @unique @db.VarChar(200)
+  photo       String?  @db.VarChar(500)
+  bio         String?  @db.Text
+  socialLinks String?  @db.Text
+  email       String?  @db.VarChar(200)
+  fonts       Font[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Download {
+  id        Int      @id @default(autoincrement())
+  fontId    Int
+  font      Font     @relation(fields: [fontId], references: [id])
+  ipHash    String?  @db.VarChar(64)
+  userAgent String?  @db.Text
+  createdAt DateTime @default(now())
+
+  @@index([fontId])
+  @@index([createdAt])
+}
+
+model Order {
+  id             Int         @id @default(autoincrement())
+  fontId         Int
+  font           Font        @relation(fields: [fontId], references: [id])
+  customerEmail  String      @db.VarChar(200)
+  customerName   String      @db.VarChar(200)
+  amount         Float
+  currency       String      @default("BDT") @db.VarChar(10)
+  paymentMethod  String?     @db.VarChar(50)
+  paymentId      String?     @unique @db.VarChar(200)
+  transactionId  String?     @db.VarChar(200)
+  status         OrderStatus @default(PENDING)
+  downloadToken  String      @unique @db.VarChar(64)
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  @@index([fontId])
+  @@index([status])
+  @@index([customerEmail])
+}
+
+model AdminUser {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique @db.VarChar(200)
+  password  String   @db.VarChar(200)
+  name      String   @db.VarChar(200)
+  role      AdminRole @default(ADMIN)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum FontType {
+  FREE
+  PREMIUM
+}
+
+enum FontStyle {
+  HANDWRITING
+  HEADING
+  PARAGRAPH
+  STYLISH
+  GENERAL
+}
+
+enum OrderStatus {
+  PENDING
+  COMPLETED
+  REFUNDED
+  FAILED
+}
+
+enum AdminRole {
+  ADMIN
+  SUPERADMIN
+}

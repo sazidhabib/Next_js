@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useCart } from "../../../lib/CartContext";
 import {
   ShoppingCart,
   Heart,
@@ -23,6 +24,8 @@ import { motion, AnimatePresence } from "framer-motion";
 const TABS = ["Specification", "Description", "Reviews"];
 
 export default function ProductDetailContent({ product, category, relatedProducts }) {
+  const { addToCart } = useCart();
+  const [addedToCart, setAddedToCart] = useState(false);
   const [activeTab, setActiveTab] = useState("Specification");
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
@@ -293,11 +296,27 @@ export default function ProductDetailContent({ product, category, relatedProduct
               </button>
             </div>
             <button
-              className="flex-1 h-12 bg-gray-900 text-white font-semibold rounded-xl hover:bg-gray-800 transition-all active:scale-[0.98] flex items-center justify-center gap-2.5 text-sm disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-gray-900/10"
+              onClick={() => {
+                addToCart(product, quantity);
+                setAddedToCart(true);
+                setTimeout(() => setAddedToCart(false), 2000);
+              }}
+              className={`flex-1 h-12 font-semibold rounded-xl transition-all active:scale-[0.98] flex items-center justify-center gap-2.5 text-sm disabled:opacity-50 disabled:cursor-not-allowed shadow-lg ${
+                addedToCart ? "bg-green-600 hover:bg-green-500 shadow-green-600/10 text-white" : "bg-gray-900 hover:bg-gray-800 shadow-gray-900/10 text-white"
+              }`}
               disabled={!product.stock}
             >
-              <ShoppingCart className="w-4 h-4" />
-              Add to Cart
+              {addedToCart ? (
+                <>
+                  <Check className="w-4 h-4" />
+                  Added!
+                </>
+              ) : (
+                <>
+                  <ShoppingCart className="w-4 h-4" />
+                  Add to Cart
+                </>
+              )}
             </button>
           </div>
 

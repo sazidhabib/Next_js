@@ -6,6 +6,7 @@ import Image from "next/image";
 import { Search, ShoppingCart, User, Menu, X, Gift, Zap, Wrench, BarChart3, ChevronRight, ChevronDown } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
+import { useCart } from "../lib/CartContext";
 
 const categories = [
   {
@@ -207,6 +208,7 @@ const categories = [
 ];
 
 export default function Navbar() {
+  const { cartCount } = useCart();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeMegaMenu, setActiveMegaMenu] = useState(null);
   const [activeSubCategory, setActiveSubCategory] = useState(null);
@@ -349,12 +351,16 @@ export default function Navbar() {
                 <Link href="/cart" className="flex flex-col items-center text-star-text hover:text-star-blue relative transition-colors font-medium">
                   <ShoppingCart className="w-6 h-6" />
                   <span className="text-xs">Cart</span>
-                  <motion.span
-                    className="absolute -top-1 -right-2 bg-star-red text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold"
-                    whileHover={{ scale: 1.1 }}
-                  >
-                    0
-                  </motion.span>
+                  {cartCount > 0 && (
+                    <motion.span
+                      className="absolute -top-1 -right-2 bg-star-red text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold"
+                      whileHover={{ scale: 1.1 }}
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                    >
+                      {cartCount}
+                    </motion.span>
+                  )}
                 </Link>
               </motion.div>
               <motion.button

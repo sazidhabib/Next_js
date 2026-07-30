@@ -8,6 +8,7 @@ const authRouter = require('./auth-router');
 const settingRouter = require('./setting-router');
 const categoryRouter = require('./category-router');
 const productRouter = require('./product-router');
+const orderRouter = require('./order-router');
 
 // Health Check Route
 router.get('/health', (req, res) => {
@@ -129,5 +130,6 @@ router.use('/auth', authRouter);
 router.use('/settings', settingRouter);
 router.use('/categories', categoryRouter);
 router.use('/products', productRouter);
+router.use('/orders', orderRouter);
 
 module.exports = router;

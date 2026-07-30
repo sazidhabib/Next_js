@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Star, ShoppingCart } from "lucide-react";
 import { motion } from "framer-motion";
+import { useCart } from "../lib/CartContext";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -29,6 +30,7 @@ const itemVariants = {
 };
 
 export default function ProductGrid({ products, title }) {
+  const { addToCart } = useCart();
   return (
     <div>
       {title && (
@@ -75,7 +77,11 @@ export default function ProductGrid({ products, title }) {
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.95 }}
                   transition={{ duration: 0.2 }}
-                  onClick={(e) => e.preventDefault()}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    addToCart(product, 1);
+                  }}
                 >
                   <ShoppingCart className="w-4 h-4" />
                 </motion.button>

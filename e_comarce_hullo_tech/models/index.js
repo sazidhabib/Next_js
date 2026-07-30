@@ -4,6 +4,8 @@ let Category;
 let Product;
 let User;
 let SiteSetting;
+let Order;
+let OrderItem;
 
 // Only load models if sequelize is available
 if (sequelize) {
@@ -11,10 +13,14 @@ if (sequelize) {
   Product = require('./Product');
   User = require('./User');
   SiteSetting = require('./SiteSetting');
+  Order = require('./Order');
+  OrderItem = require('./OrderItem');
 
-  // Associations (if any)
-  // E.g. Category.hasMany(Product, { foreignKey: 'categoryId' })
-  // Product.belongsTo(Category, { foreignKey: 'categoryId' })
+  // Associations
+  Order.hasMany(OrderItem, { foreignKey: 'orderId', as: 'items', onDelete: 'CASCADE' });
+  OrderItem.belongsTo(Order, { foreignKey: 'orderId' });
+  
+  OrderItem.belongsTo(Product, { foreignKey: 'productId', as: 'product' });
 } else {
   console.warn('⚠️  Database not initialized - models will be unavailable');
 }
@@ -25,4 +31,6 @@ module.exports = {
   Product,
   User,
   SiteSetting,
+  Order,
+  OrderItem,
 };
