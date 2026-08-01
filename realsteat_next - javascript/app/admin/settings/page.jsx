@@ -251,7 +251,6 @@ export default function AdminSettingsPage() {
         { id: "contact", label: "Contact", icon: Phone },
         { id: "content", label: "Content", icon: FileText },
         { id: "social", label: "Social", icon: Globe },
-        { id: "hero", label: "Hero", icon: Star },
     ];
 
     if (isLoading) {
@@ -712,106 +711,11 @@ export default function AdminSettingsPage() {
                     </div>
                 )}
 
-                {activeTab === "hero" && (
-                    <div className="p-6 md:p-8 space-y-8">
-                        <div>
-                            <h3 className="text-lg font-bold text-foreground mb-1">Homepage Hero Section</h3>
-                            <p className="text-sm text-muted-foreground">
-                                Control the main heading, description, and slider images on the homepage.
-                            </p>
-                        </div>
 
-                        <div className="space-y-6">
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium text-foreground">
-                                    Hero Heading (H1)
-                                </label>
-                                <textarea
-                                    rows={2}
-                                    value={heroTitle}
-                                    onChange={(e) => setHeroTitle(e.target.value)}
-                                    placeholder="e.g. Elevating Luxury Living"
-                                    className="w-full p-3 bg-background border border-border rounded-lg focus:outline-none focus:border-primary text-foreground"
-                                />
-                            </div>
-
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium text-foreground">
-                                    Hero Short Description
-                                </label>
-                                <textarea
-                                    rows={3}
-                                    value={heroDescription}
-                                    onChange={(e) => setHeroDescription(e.target.value)}
-                                    placeholder="Discover a curated selection of exquisite residences..."
-                                    className="w-full p-3 bg-background border border-border rounded-lg focus:outline-none focus:border-primary text-foreground"
-                                />
-                            </div>
-
-                            <hr className="border-border" />
-
-                            <div className="space-y-4">
-                                <label className="text-sm font-medium text-foreground flex items-center gap-2">
-                                    <ImageIcon size={16} className="text-primary" />
-                                    Hero Slider Images
-                                </label>
-
-                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                                    {existingHeroImages.map((img, index) => (
-                                        <div key={`existing-${index}`} className="relative group aspect-video rounded-lg overflow-hidden border border-border bg-background">
-                                            <img src={img} className="w-full h-full object-cover" alt="Hero" />
-                                            <button
-                                                onClick={() => removeExistingHeroImage(index)}
-                                                className="absolute top-1 right-1 bg-destructive text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                                            >
-                                                <X size={12} />
-                                            </button>
-                                        </div>
-                                    ))}
-
-                                    {heroPreviews.map((preview, index) => (
-                                        <div key={`new-${index}`} className="relative group aspect-video rounded-lg overflow-hidden border-2 border-emerald-500/30 bg-emerald-500/5">
-                                            <img src={preview} className="w-full h-full object-cover" alt="New Hero" />
-                                            <button
-                                                onClick={() => removeNewHeroImage(index)}
-                                                className="absolute top-1 right-1 bg-destructive text-white p-1 rounded-full"
-                                            >
-                                                <X size={12} />
-                                            </button>
-                                            <div className="absolute bottom-0 left-0 right-0 bg-emerald-500 text-white text-[10px] text-center py-0.5">
-                                                New
-                                            </div>
-                                        </div>
-                                    ))}
-
-                                    <button
-                                        type="button"
-                                        onClick={() => heroInputRef.current?.click()}
-                                        className="aspect-video rounded-lg border-2 border-dashed border-primary/30 flex flex-col items-center justify-center bg-primary/5 hover:bg-primary/10 hover:border-primary/50 transition-all group"
-                                    >
-                                        <Upload size={20} className="text-primary/60 group-hover:text-primary mb-1" />
-                                        <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">Add Image</span>
-                                    </button>
-                                    <input
-                                        ref={heroInputRef}
-                                        type="file"
-                                        multiple
-                                        accept="image/*"
-                                        onChange={handleHeroImagesSelect}
-                                        className="hidden"
-                                    />
-                                </div>
-                                <p className="text-xs text-muted-foreground">
-                                    Upload up to 10 images for the homepage slider. Recommended size: 1920x1080px.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                )}
 
                 <div className="p-6 md:p-8 bg-secondary/5 border-t border-border flex items-center justify-between">
                     <p className="text-sm text-muted-foreground hidden sm:block">
-                        Changes are saved only when you click "Save Settings"
+                        Changes are saved only when you click &quot;Save Settings&quot;
                     </p>
                     <Button
                         onClick={handleSave}

@@ -19,6 +19,52 @@ export default function AboutPage() {
         };
         fetchAboutData();
     }, []);
+    let storyImages = [];
+    try {
+        storyImages = aboutData?.story_images
+            ? (typeof aboutData.story_images === "string" ? JSON.parse(aboutData.story_images) : aboutData.story_images)
+            : [];
+    } catch (e) {
+        console.error("Error parsing story_images", e);
+    }
+    if (!storyImages || storyImages.length === 0) {
+        storyImages = [
+            "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+            "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+        ];
+    }
+
+    let coreValues = [];
+    try {
+        coreValues = aboutData?.core_values
+            ? (typeof aboutData.core_values === "string" ? JSON.parse(aboutData.core_values) : aboutData.core_values)
+            : [];
+    } catch (e) {
+        console.error("Error parsing core_values", e);
+    }
+    if (!coreValues || coreValues.length === 0) {
+        coreValues = [
+            { title: "Innovation", description: "Embracing the latest technologies and design trends to craft modern living spaces." },
+            { title: "Integrity", description: "Operating with complete transparency and honesty in all our dealings." },
+            { title: "Excellence", description: "Pursuing perfection in every detail, from foundation to the final finish." }
+        ];
+    }
+
+    let leadershipTeam = [];
+    try {
+        leadershipTeam = aboutData?.leadership_team
+            ? (typeof aboutData.leadership_team === "string" ? JSON.parse(aboutData.leadership_team) : aboutData.leadership_team)
+            : [];
+    } catch (e) {
+        console.error("Error parsing leadership_team", e);
+    }
+    if (!leadershipTeam || leadershipTeam.length === 0) {
+        leadershipTeam = [
+            { role: "Chairman", name: "Ahmed Rahman", image_url: "" },
+            { role: "Managing Director", name: "Tariq Hasan", image_url: "" },
+            { role: "Director of Architecture", name: "Sarah Khan", image_url: "" }
+        ];
+    }
 
     return (
         <div className="pt-24 pb-20 min-h-screen bg-background">
@@ -38,7 +84,7 @@ export default function AboutPage() {
                         {aboutData?.subtitle || "Corporate Profile"}
                     </span>
                     <h1 className="text-5xl md:text-7xl font-serif font-bold text-foreground">
-                        About President Properties
+                        About President Properties Ltd.
                     </h1>
                 </div>
             </section>
@@ -58,12 +104,11 @@ export default function AboutPage() {
                         </p>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
-                        <div className="relative h-64 w-full">
-                            <Image src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Work 1" fill sizes="(max-width: 1024px) 50vw, 25vw" className="object-cover" />
-                        </div>
-                        <div className="relative h-64 w-full translate-y-8">
-                            <Image src="https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Work 2" fill sizes="(max-width: 1024px) 50vw, 25vw" className="object-cover" />
-                        </div>
+                        {storyImages.slice(0, 2).map((imgUrl, sIdx) => (
+                            <div key={sIdx} className={`relative h-64 w-full ${sIdx === 1 ? "translate-y-8" : ""}`}>
+                                <Image src={imgUrl} alt={`Story image ${sIdx + 1}`} fill sizes="(max-width: 1024px) 50vw, 25vw" className="object-cover" />
+                            </div>
+                        ))}
                     </div>
                 </div>
             </section>
@@ -73,18 +118,12 @@ export default function AboutPage() {
                 <div className="container mx-auto px-6 lg:px-12 text-center max-w-4xl">
                     <h2 className="text-3xl font-serif text-foreground mb-12">Our Core Values</h2>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-                        <div>
-                            <h3 className="text-xl text-primary font-semibold mb-4 uppercase tracking-widest">Innovation</h3>
-                            <p className="text-muted-foreground">Embracing the latest technologies and design trends to craft modern living spaces.</p>
-                        </div>
-                        <div>
-                            <h3 className="text-xl text-primary font-semibold mb-4 uppercase tracking-widest">Integrity</h3>
-                            <p className="text-muted-foreground">Operating with complete transparency and honesty in all our dealings.</p>
-                        </div>
-                        <div>
-                            <h3 className="text-xl text-primary font-semibold mb-4 uppercase tracking-widest">Excellence</h3>
-                            <p className="text-muted-foreground">Pursuing perfection in every detail, from foundation to the final finish.</p>
-                        </div>
+                        {coreValues.map((val, idx) => (
+                            <div key={idx}>
+                                <h3 className="text-xl text-primary font-semibold mb-4 uppercase tracking-widest">{val.title}</h3>
+                                <p className="text-muted-foreground">{val.description}</p>
+                            </div>
+                        ))}
                     </div>
                 </div>
             </section>
@@ -94,17 +133,17 @@ export default function AboutPage() {
                 <div className="container mx-auto px-6 lg:px-12">
                     <h2 className="text-3xl font-serif text-foreground mb-16 text-center">Leadership Team</h2>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                        {[
-                            { role: "Chairman", name: "Ahmed Rahman" },
-                            { role: "Managing Director", name: "Tariq Hasan" },
-                            { role: "Director of Architecture", name: "Sarah Khan" }
-                        ].map((leader, idx) => (
+                        {leadershipTeam.map((leader, idx) => (
                             <div key={idx} className="text-center group">
                                 <div className="relative w-48 h-48 mx-auto mb-6 rounded-full overflow-hidden border-2 border-border group-hover:border-primary transition-colors">
-                                    <div className="absolute inset-0 bg-border"></div> {/* Placeholder for image */}
+                                    {leader.image_url ? (
+                                        <Image src={leader.image_url} alt={leader.name} fill className="object-cover" />
+                                    ) : (
+                                        <div className="absolute inset-0 bg-border flex items-center justify-center text-muted-foreground text-sm uppercase">No Pic</div>
+                                    )}
                                 </div>
                                 <h4 className="text-xl text-foreground font-medium mb-1">{leader.name}</h4>
-                                <p className="text-primary text-sm uppercase tracking-widest">{leader.role}</p>
+                                <p className="text-primary text-sm uppercase tracking-widest">{leader.role || leader.designation}</p>
                             </div>
                         ))}
                     </div>

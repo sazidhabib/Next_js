@@ -47,10 +47,27 @@ exports.getPageByKey = async (req, res) => {
     }
 };
 
+// Upload image handler
+exports.uploadImage = async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ message: 'No file uploaded' });
+        }
+        const serverUrl = process.env.SERVER_URL || `${req.protocol}://${req.get('host')}`;
+        const outputFilename = await processImage(req.file);
+        const image_url = `${serverUrl}/uploads/frames/${outputFilename}`;
+        res.status(200).json({ image_url });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: error.message });
+    }
+};
+
 // Create or update page configuration
 exports.upsertPage = async (req, res) => {
-    const { page_key } = req.params;
-    const { title, subtitle, content } = req.body;
+    const page_key = req.params.key;
+    console.log("UpsertPage called - req.params:", req.params, "page_key:", page_key);
+    const { title, subtitle, content, story_images, core_values, leadership_team } = req.body;
 
     try {
         let image_url = req.body.image_url || null;
@@ -68,14 +85,32 @@ exports.upsertPage = async (req, res) => {
             // Update
             const finalImageUrl = image_url !== null ? image_url : existing[0].image_url;
             await pool.query(
-                'UPDATE re_pages SET title = ?, subtitle = ?, content = ?, image_url = ? WHERE page_key = ?',
-                [title !== undefined ? title : existing[0].title, subtitle !== undefined ? subtitle : existing[0].subtitle, content !== undefined ? content : existing[0].content, finalImageUrl, page_key]
+                'UPDATE re_pages SET title = ?, subtitle = ?, content = ?, image_url = ?, story_images = ?, core_values = ?, leadership_team = ? WHERE page_key = ?',
+                [
+                    title !== undefined ? title : existing[0].title,
+                    subtitle !== undefined ? subtitle : existing[0].subtitle,
+                    content !== undefined ? content : existing[0].content,
+                    finalImageUrl,
+                    story_images !== undefined ? story_images : existing[0].story_images,
+                    core_values !== undefined ? core_values : existing[0].core_values,
+                    leadership_team !== undefined ? leadership_team : existing[0].leadership_team,
+                    page_key
+                ]
             );
         } else {
             // Insert
             await pool.query(
-                'INSERT INTO re_pages (page_key, title, subtitle, content, image_url) VALUES (?, ?, ?, ?, ?)',
-                [page_key, title || '', subtitle || '', content || '', image_url]
+                'INSERT INTO re_pages (page_key, title, subtitle, content, image_url, story_images, core_values, leadership_team) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+                [
+                    page_key,
+                    title || '',
+                    subtitle || '',
+                    content || '',
+                    image_url,
+                    story_images || null,
+                    core_values || null,
+                    leadership_team || null
+                ]
             );
         }
 

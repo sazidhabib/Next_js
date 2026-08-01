@@ -299,7 +299,8 @@ const initDb = async () => {
                 { name: 'hotline_number', type: 'VARCHAR(255)' },
                 { name: 'secondary_email', type: 'VARCHAR(255)' },
                 { name: 'business_hours', type: 'TEXT' },
-                { name: 'hero_images', type: 'LONGTEXT' }
+                { name: 'hero_images', type: 'LONGTEXT' },
+                { name: 'homepage_statistics', type: 'TEXT' }
             ];
 
             for (const col of settingColumns) {
@@ -323,9 +324,29 @@ const initDb = async () => {
                 subtitle TEXT,
                 content TEXT,
                 image_url VARCHAR(500),
+                story_images TEXT,
+                core_values TEXT,
+                leadership_team TEXT,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
             )
         `);
+
+        // Alter table for existing databases
+        try {
+            await pool.query("ALTER TABLE re_pages ADD COLUMN story_images TEXT");
+        } catch (e) {
+            // ignore
+        }
+        try {
+            await pool.query("ALTER TABLE re_pages ADD COLUMN core_values TEXT");
+        } catch (e) {
+            // ignore
+        }
+        try {
+            await pool.query("ALTER TABLE re_pages ADD COLUMN leadership_team TEXT");
+        } catch (e) {
+            // ignore
+        }
 
         // Create re_testimonials table
         await pool.query(`

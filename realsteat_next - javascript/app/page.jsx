@@ -12,10 +12,32 @@ import { TestimonialsSection } from "@/components/ui/TestimonialsSection";
 import { SearchSection } from "@/components/ui/SearchSection";
 import { useState, useEffect } from "react";
 
+const IconMap = {
+  Trophy: Trophy,
+  Building: Building,
+  Users: Users,
+  ShieldCheck: ShieldCheck
+};
+
 export default function Home() {
   const [settings, setSettings] = useState(null);
   const [heroImages, setHeroImages] = useState([]);
   const [aboutData, setAboutData] = useState(null);
+
+  let stats = [];
+  try {
+    stats = settings?.homepage_statistics
+      ? (typeof settings.homepage_statistics === 'string' ? JSON.parse(settings.homepage_statistics) : settings.homepage_statistics)
+      : [];
+  } catch(e){}
+  if (!stats || stats.length === 0) {
+    stats = [
+      { value: "25+", label: "Years of Experience", icon: "Trophy" },
+      { value: "150+", label: "Projects Delivered", icon: "Building" },
+      { value: "8k+", label: "Happy Families", icon: "Users" },
+      { value: "100%", label: "Handover Accuracy", icon: "ShieldCheck" }
+    ];
+  }
 
   useEffect(() => {
     const fetchSettings = async () => {
@@ -207,29 +229,16 @@ export default function Home() {
 
         <div className="container mx-auto px-6 lg:px-12 relative z-10">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12 text-center">
-            <div className="flex flex-col items-center justify-center p-8 border border-border dark:border-white/5 bg-background/40 backdrop-blur-sm">
-              <Trophy className="text-primary mb-6" size={40} />
-              <h4 className="text-5xl md:text-6xl font-serif font-bold text-foreground mb-4">25+</h4>
-              <p className="text-muted-foreground uppercase tracking-wider text-sm font-medium">Years of Experience</p>
-            </div>
-
-            <div className="flex flex-col items-center justify-center p-8 border border-border dark:border-white/5 bg-background/40 backdrop-blur-sm">
-              <Building className="text-primary mb-6" size={40} />
-              <h4 className="text-5xl md:text-6xl font-serif font-bold text-foreground mb-4">150+</h4>
-              <p className="text-muted-foreground uppercase tracking-wider text-sm font-medium">Projects Delivered</p>
-            </div>
-
-            <div className="flex flex-col items-center justify-center p-8 border border-border dark:border-white/5 bg-background/40 backdrop-blur-sm">
-              <Users className="text-primary mb-6" size={40} />
-              <h4 className="text-5xl md:text-6xl font-serif font-bold text-foreground mb-4">8k+</h4>
-              <p className="text-muted-foreground uppercase tracking-wider text-sm font-medium">Happy Families</p>
-            </div>
-
-            <div className="flex flex-col items-center justify-center p-8 border border-border dark:border-white/5 bg-background/40 backdrop-blur-sm">
-              <ShieldCheck className="text-primary mb-6" size={40} />
-              <h4 className="text-5xl md:text-6xl font-serif font-bold text-foreground mb-4">100%</h4>
-              <p className="text-muted-foreground uppercase tracking-wider text-sm font-medium">Handover Accuracy</p>
-            </div>
+            {stats.map((stat, idx) => {
+              const IconComponent = IconMap[stat.icon] || Trophy;
+              return (
+                <div key={idx} className="flex flex-col items-center justify-center p-8 border border-border dark:border-white/5 bg-background/40 backdrop-blur-sm">
+                  <IconComponent className="text-primary mb-6" size={40} />
+                  <h4 className="text-5xl md:text-6xl font-serif font-bold text-foreground mb-4">{stat.value}</h4>
+                  <p className="text-muted-foreground uppercase tracking-wider text-sm font-medium">{stat.label}</p>
+                </div>
+              );
+            })}
           </div>
         </div>
       </section>

@@ -23,7 +23,8 @@ exports.updateSettings = async (req, res) => {
         site_title, support_email, helpline_number, footer_text, site_description,
         facebook_url, youtube_url, website_url, address_text, hero_frame_id,
         hero_title, hero_description, instagram_url, x_url,
-        hotline_number, secondary_email, business_hours, existing_hero_images
+        hotline_number, secondary_email, business_hours, existing_hero_images,
+        homepage_statistics
     } = req.body;
 
     // DB columns: site_name, contact_email, helpline_number, footer_text, logo_url, favicon_url
@@ -81,7 +82,8 @@ exports.updateSettings = async (req, res) => {
                 logo_url = ?, favicon_url = ?, site_description = ?, facebook_url = ?, 
                 youtube_url = ?, website_url = ?, address_text = ?, hero_frame_id = ?,
                 hero_title = ?, hero_description = ?, instagram_url = ?, x_url = ?,
-                hotline_number = ?, secondary_email = ?, business_hours = ?, hero_images = ?
+                hotline_number = ?, secondary_email = ?, business_hours = ?, hero_images = ?,
+                homepage_statistics = ?
             WHERE id = 1`,
             [
                 site_title || current.site_name,
@@ -103,7 +105,8 @@ exports.updateSettings = async (req, res) => {
                 hotline_number !== undefined ? hotline_number : current.hotline_number,
                 secondary_email !== undefined ? secondary_email : current.secondary_email,
                 business_hours !== undefined ? business_hours : current.business_hours,
-                hero_images !== undefined ? hero_images : current.hero_images
+                hero_images !== undefined ? hero_images : current.hero_images,
+                homepage_statistics !== undefined ? homepage_statistics : current.homepage_statistics
             ]
         );
 

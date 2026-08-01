@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ChevronLeft, ChevronRight, Home } from "lucide-react";
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 
 const locations = [
     { id: 1, city: "Munich", rentImage: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&q=80", saleImage: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80", rentLabel: "CABIN RETREATS", saleLabel: "URBAN APARTMENTS" },
@@ -18,6 +18,34 @@ const locations = [
 
 export function LocationsSection() {
     const scrollRef = useRef(null);
+    const [dbLocations, setDbLocations] = useState([]);
+
+    useEffect(() => {
+        const fetchLocs = async () => {
+            try {
+                const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "/api"}/locations`);
+                if (res.ok) {
+                    const data = await res.json();
+                    setDbLocations(data);
+                }
+            } catch (err) {
+                console.error("Failed to fetch locations", err);
+            }
+        };
+        fetchLocs();
+    }, []);
+
+    const displayLocations = dbLocations.length > 0
+        ? dbLocations.map((loc) => ({
+              id: loc.id,
+              city: loc.name,
+              rentImage: loc.image_url || "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&q=80",
+              saleImage: loc.image_url || "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80",
+              rentLabel: "CABIN RETREATS",
+              saleLabel: "URBAN APARTMENTS"
+          }))
+        : locations;
+
 
     useEffect(() => {
         const interval = setInterval(() => {
@@ -115,7 +143,7 @@ export function LocationsSection() {
                         className="flex gap-6 overflow-x-auto pb-8 snap-x snap-mandatory hide-scrollbar"
                         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
                     >
-                        {locations.map((loc) => (
+                        {displayLocations.map((loc) => (
                             <Link
                                 key={loc.id}
                                 href={`/projects?location=${encodeURIComponent(loc.city)}`}
