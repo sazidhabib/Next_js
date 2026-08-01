@@ -81,7 +81,7 @@ const processImage = async (file) => {
 
 // Create new frame
 exports.createFrame = async (req, res) => {
-    const { title, category_id, description, is_popular, status, video_url, location, price, bedrooms, bathrooms, sqft, floors, amenities } = req.body;
+    const { title, category_id, description, is_popular, status, video_url, location, location_details, price, bedrooms, bathrooms, sqft, floors, amenities, latitude, longitude, land_area, land_orientation, front_road, num_units, unit_size, num_basements, car_parking } = req.body;
 
     try {
         let image_url = null;
@@ -108,10 +108,10 @@ exports.createFrame = async (req, res) => {
         const amenitiesJson = amenities ? (typeof amenities === 'string' ? amenities : JSON.stringify(amenities)) : null;
 
         const [result] = await pool.query(
-            'INSERT INTO re_projects (title, image_url, images, video_url, category_id, description, is_popular, status, user_id, location, price, bedrooms, bathrooms, sqft, floors, amenities) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-            [title, image_url, imagesJson, video_url || null, category_id || null, description, is_popular === 'true' || is_popular === true, initialStatus, req.user ? req.user.id : null, location || null, price || null, bedrooms || null, bathrooms || null, sqft || null, floors || null, amenitiesJson]
+            'INSERT INTO re_projects (title, image_url, images, video_url, category_id, description, is_popular, status, user_id, location, location_details, price, bedrooms, bathrooms, sqft, floors, amenities, latitude, longitude, land_area, land_orientation, front_road, num_units, unit_size, num_basements, car_parking) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            [title, image_url, imagesJson, video_url || null, category_id || null, description, is_popular === 'true' || is_popular === true, initialStatus, req.user ? req.user.id : null, location || null, location_details || null, price || null, bedrooms || null, bathrooms || null, sqft || null, floors || null, amenitiesJson, latitude || null, longitude || null, land_area || null, land_orientation || null, front_road || null, num_units || null, unit_size || null, num_basements || null, car_parking || null]
         );
-        res.status(201).json({ id: result.insertId, title, image_url, images: imagesJson ? JSON.parse(imagesJson) : [], video_url: video_url || null, category_id, description, is_popular, status: initialStatus, user_id: req.user ? req.user.id : null, location, price, bedrooms, bathrooms, sqft, floors, amenities: amenitiesJson });
+        res.status(201).json({ id: result.insertId, title, image_url, images: imagesJson ? JSON.parse(imagesJson) : [], video_url: video_url || null, category_id, description, is_popular, status: initialStatus, user_id: req.user ? req.user.id : null, location, location_details, price, bedrooms, bathrooms, sqft, floors, amenities: amenitiesJson, latitude: latitude || null, longitude: longitude || null, land_area, land_orientation, front_road, num_units, unit_size, num_basements, car_parking });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: error.message });
@@ -120,7 +120,7 @@ exports.createFrame = async (req, res) => {
 
 // Update frame
 exports.updateFrame = async (req, res) => {
-    const { title, category_id, description, is_popular, status, video_url, location, price, bedrooms, bathrooms, sqft, floors, amenities } = req.body;
+    const { title, category_id, description, is_popular, status, video_url, location, location_details, price, bedrooms, bathrooms, sqft, floors, amenities, latitude, longitude, land_area, land_orientation, front_road, num_units, unit_size, num_basements, car_parking } = req.body;
     const userId = req.user.id;
     const userRole = req.user.role;
 
@@ -170,11 +170,11 @@ exports.updateFrame = async (req, res) => {
         const amenitiesJson = amenities !== undefined ? (amenities ? (typeof amenities === 'string' ? amenities : JSON.stringify(amenities)) : null) : frame.amenities;
 
         const [result] = await pool.query(
-            'UPDATE re_projects SET title = ?, image_url = ?, images = ?, video_url = ?, category_id = ?, description = ?, is_popular = ?, status = ?, location = ?, price = ?, bedrooms = ?, bathrooms = ?, sqft = ?, floors = ?, amenities = ? WHERE id = ?',
-            [title, image_url, imagesJson, newVideoUrl, category_id || null, description, is_popular === 'true' || is_popular === true, newStatus, location || null, price || null, bedrooms || null, bathrooms || null, sqft || null, floors || null, amenitiesJson, req.params.id]
+            'UPDATE re_projects SET title = ?, image_url = ?, images = ?, video_url = ?, category_id = ?, description = ?, is_popular = ?, status = ?, location = ?, location_details = ?, price = ?, bedrooms = ?, bathrooms = ?, sqft = ?, floors = ?, amenities = ?, latitude = ?, longitude = ?, land_area = ?, land_orientation = ?, front_road = ?, num_units = ?, unit_size = ?, num_basements = ?, car_parking = ? WHERE id = ?',
+            [title, image_url, imagesJson, newVideoUrl, category_id || null, description, is_popular === 'true' || is_popular === true, newStatus, location || null, location_details || null, price || null, bedrooms || null, bathrooms || null, sqft || null, floors || null, amenitiesJson, latitude !== undefined ? (latitude || null) : frame.latitude, longitude !== undefined ? (longitude || null) : frame.longitude, land_area !== undefined ? (land_area || null) : frame.land_area, land_orientation !== undefined ? (land_orientation || null) : frame.land_orientation, front_road !== undefined ? (front_road || null) : frame.front_road, num_units !== undefined ? (num_units || null) : frame.num_units, unit_size !== undefined ? (unit_size || null) : frame.unit_size, num_basements !== undefined ? (num_basements || null) : frame.num_basements, car_parking !== undefined ? (car_parking || null) : frame.car_parking, req.params.id]
         );
 
-        res.status(200).json({ message: 'Frame updated successfully', image_url, images: imagesJson ? JSON.parse(imagesJson) : [], video_url: newVideoUrl, status: newStatus });
+        res.status(200).json({ message: 'Frame updated successfully', image_url, images: imagesJson ? JSON.parse(imagesJson) : [], video_url: newVideoUrl, status: newStatus, latitude: latitude !== undefined ? (latitude || null) : frame.latitude, longitude: longitude !== undefined ? (longitude || null) : frame.longitude, land_area, land_orientation, front_road, num_units, unit_size, num_basements, car_parking, location_details });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }

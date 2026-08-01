@@ -9,7 +9,7 @@ import dynamic from "next/dynamic";
 
 const MapPicker = dynamic(() => import("@/components/ui/MapPicker"), { ssr: false });
 
-export default function NewProjectForm() {
+export default function NewPropertyForm() {
     const router = useRouter();
     const fileInputRef = useRef(null);
 
@@ -36,6 +36,7 @@ export default function NewProjectForm() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState("");
     const [dbLocations, setDbLocations] = useState([]);
+    const [dbAmenities, setDbAmenities] = useState([]);
     const [landArea, setLandArea] = useState("");
     const [landOrientation, setLandOrientation] = useState("");
     const [frontRoad, setFrontRoad] = useState("");
@@ -44,7 +45,6 @@ export default function NewProjectForm() {
     const [numBasements, setNumBasements] = useState("");
     const [carParking, setCarParking] = useState("");
     const [locationDetails, setLocationDetails] = useState("");
-    const [dbAmenities, setDbAmenities] = useState([]);
 
     useEffect(() => {
         const fetchFormMetadata = async () => {
@@ -107,7 +107,7 @@ export default function NewProjectForm() {
 
     const handleSubmit = async () => {
         if (!title.trim()) {
-            setError("Project title is required.");
+            setError("Property title is required.");
             return;
         }
 
@@ -150,7 +150,7 @@ export default function NewProjectForm() {
                 formData.append("images", file);
             }
 
-            const res = await fetch(`${apiUrl}/frames`, {
+            const res = await fetch(`${apiUrl}/properties`, {
                 method: "POST",
                 headers: {
                     "Authorization": `Bearer ${token}`,
@@ -161,10 +161,10 @@ export default function NewProjectForm() {
             const data = await res.json();
 
             if (!res.ok) {
-                throw new Error(data.message || "Failed to create project");
+                throw new Error(data.message || "Failed to create property");
             }
 
-            router.push("/admin");
+            router.push("/admin/properties");
         } catch (err) {
             setError(err.message);
         } finally {
@@ -175,13 +175,13 @@ export default function NewProjectForm() {
     return (
         <div className="max-w-4xl mx-auto space-y-6 pb-12">
             <div className="flex items-center gap-4">
-                <Link href="/admin/projects">
+                <Link href="/admin/properties">
                     <Button variant="ghost" size="icon" className="rounded-full">
                         <ArrowLeft size={20} />
                     </Button>
                 </Link>
                 <div>
-                    <h1 className="text-3xl font-serif font-bold text-foreground">Add New Project</h1>
+                    <h1 className="text-3xl font-serif font-bold text-foreground">Add New Property</h1>
                     <p className="text-muted-foreground mt-1">Fill out the details to create a new property listing.</p>
                 </div>
             </div>
@@ -200,15 +200,15 @@ export default function NewProjectForm() {
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-foreground">Project Title <span className="text-destructive">*</span></label>
-                                <input type="text" placeholder="e.g. The Oasis Residences" value={title} onChange={(e) => setTitle(e.target.value)} className="w-full p-3 bg-background border border-border rounded-lg focus:outline-none focus:border-primary text-foreground" required />
+                                <label className="text-sm font-medium text-foreground">Property Title <span className="text-destructive">*</span></label>
+                                <input type="text" placeholder="e.g. Amberwood Apartments" value={title} onChange={(e) => setTitle(e.target.value)} className="w-full p-3 bg-background border border-border rounded-lg focus:outline-none focus:border-primary text-foreground" required />
                             </div>
 
-                             <div className="space-y-2">
+                            <div className="space-y-2">
                                 <label className="text-sm font-medium text-foreground">Location <span className="text-destructive">*</span></label>
-                                <select
-                                    value={location}
-                                    onChange={(e) => setLocation(e.target.value)}
+                                <select 
+                                    value={location} 
+                                    onChange={(e) => setLocation(e.target.value)} 
                                     className="w-full p-3 bg-background border border-border rounded-lg focus:outline-none focus:border-primary text-foreground cursor-pointer"
                                     required
                                 >
@@ -237,7 +237,7 @@ export default function NewProjectForm() {
 
                             <div className="space-y-2">
                                 <label className="text-sm font-medium text-foreground">Price</label>
-                                <input type="text" placeholder="e.g. $1,200,000 or 'Contact for Price'" value={price} onChange={(e) => setPrice(e.target.value)} className="w-full p-3 bg-background border border-border rounded-lg focus:outline-none focus:border-primary text-foreground" />
+                                <input type="text" placeholder="e.g. $509,300 or 'Contact for Price'" value={price} onChange={(e) => setPrice(e.target.value)} className="w-full p-3 bg-background border border-border rounded-lg focus:outline-none focus:border-primary text-foreground" />
                             </div>
 
                             <div className="space-y-2">
@@ -367,94 +367,80 @@ export default function NewProjectForm() {
                         </div>
                     </div>
 
-                    <div className="p-6 md:p-8 space-y-6">
-                        <h3 className="text-lg font-bold text-foreground border-b border-border pb-2 flex items-center gap-2">
-                            <ImageIcon size={20} className="text-primary" />
-                            Property Images
-                        </h3>
-
-                        {imagePreviews.length > 0 && (
-                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                                {imagePreviews.map((preview, idx) => (
-                                    <div key={idx} className="relative group aspect-square rounded-lg overflow-hidden border border-border bg-secondary/20">
-                                        <img src={preview} alt={`Preview ${idx + 1}`} className="w-full h-full object-cover" />
-                                        {idx === 0 && (
-                                            <span className="absolute top-2 left-2 bg-primary text-primary-foreground text-xs font-bold px-2 py-0.5 rounded">
-                                                Thumbnail
-                                            </span>
-                                        )}
-                                        <button
-                                            type="button"
-                                            onClick={() => handleRemoveImage(idx)}
-                                            className="absolute top-2 right-2 bg-destructive text-destructive-foreground p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-md"
-                                        >
-                                            <X size={14} />
-                                        </button>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-
-                        <div
-                            onClick={() => fileInputRef.current?.click()}
-                            onDragOver={(e) => e.preventDefault()}
-                            onDrop={handleDrop}
-                            className="border-2 border-dashed border-border rounded-xl p-8 flex flex-col items-center justify-center text-center bg-background/50 hover:bg-secondary/20 transition-colors cursor-pointer"
-                        >
-                            <UploadCloud size={40} className="text-muted-foreground mb-4" />
-                            <h4 className="font-medium text-foreground mb-1">
-                                {imagePreviews.length > 0 ? "Add More Images" : "Upload Property Images"}
-                            </h4>
-                            <p className="text-sm text-muted-foreground mb-4">Drag and drop images here, or click to browse</p>
-                            <Button type="button" variant="outline" size="sm">Select Files</Button>
-                            <p className="text-xs text-muted-foreground mt-4">JPG, PNG, WEBP up to 5MB each · Max 10 images</p>
-                        </div>
-
-                        <input
-                            ref={fileInputRef}
-                            type="file"
-                            accept="image/*"
-                            multiple
-                            onChange={handleFileSelect}
-                            className="hidden"
-                        />
-                    </div>
-
                     <div className="p-6 md:p-8 space-y-6 bg-secondary/10">
-                        <h3 className="text-lg font-bold text-foreground border-b border-border pb-2 flex items-center gap-2">
-                            <Video size={20} className="text-primary" />
-                            Video Tour
-                        </h3>
-                        <div className="space-y-2">
-                            <label className="text-sm font-medium text-foreground">YouTube Video URL</label>
-                            <input
-                                type="url"
-                                value={videoUrl}
-                                onChange={(e) => setVideoUrl(e.target.value)}
-                                placeholder="https://www.youtube.com/watch?v=..."
-                                className="w-full p-3 bg-background border border-border rounded-lg focus:outline-none focus:border-primary text-foreground"
-                            />
-                            <p className="text-xs text-muted-foreground">Paste a YouTube video URL to add a virtual tour or walkthrough video.</p>
+                        <div className="flex items-center gap-2 border-b border-border pb-2">
+                            <ImageIcon size={20} className="text-primary" />
+                            <h3 className="text-lg font-bold text-foreground">Property Images</h3>
                         </div>
 
-                        {videoUrl && videoUrl.includes("youtube") && (
-                            <div className="aspect-video rounded-lg overflow-hidden border border-border bg-black">
-                                <iframe
-                                    src={`https://www.youtube.com/embed/${videoUrl.includes("v=") ? videoUrl.split("v=")[1]?.split("&")[0] : videoUrl.split("/").pop()}`}
-                                    className="w-full h-full"
-                                    allowFullScreen
-                                    title="Video preview"
-                                />
+                        <div className="space-y-4">
+                            <div
+                                onDragOver={(e) => e.preventDefault()}
+                                onDrop={handleDrop}
+                                onClick={() => fileInputRef.current?.click()}
+                                className="border-2 border-dashed border-border hover:border-primary rounded-xl p-8 text-center cursor-pointer bg-background/50 transition-colors"
+                            >
+                                <UploadCloud size={40} className="mx-auto text-muted-foreground mb-4" />
+                                <p className="text-sm font-medium text-foreground">Drag & drop images here, or click to browse</p>
+                                <p className="text-xs text-muted-foreground mt-1">Supports JPG, PNG, WEBP (Max 5MB each)</p>
+                                <input type="file" ref={fileInputRef} onChange={handleFileSelect} className="hidden" multiple accept="image/*" />
                             </div>
-                        )}
+
+                            {imagePreviews.length > 0 && (
+                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                                    {imagePreviews.map((preview, index) => (
+                                        <div key={index} className="relative group aspect-video rounded-lg overflow-hidden border border-border bg-background">
+                                            <img src={preview} alt="Preview" className="w-full h-full object-cover" />
+                                            <button type="button" onClick={() => handleRemoveImage(index)} className="absolute top-2 right-2 p-1.5 bg-black/70 hover:bg-red-600 rounded-full text-white transition-colors">
+                                                <X size={14} />
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
                     </div>
 
-                    <div className="p-6 md:p-8 bg-secondary/5 flex items-center justify-end gap-4">
-                        <Link href="/admin/projects">
-                            <Button variant="outline" type="button">Cancel</Button>
+                    <div className="p-6 md:p-8 space-y-6">
+                        <div className="flex items-center gap-2 border-b border-border pb-2">
+                            <Video size={20} className="text-primary" />
+                            <h3 className="text-lg font-bold text-foreground">Video Tour</h3>
+                        </div>
+
+                        <div className="space-y-4">
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-foreground">YouTube Video URL</label>
+                                <input
+                                    type="url"
+                                    placeholder="https://www.youtube.com/watch?v=..."
+                                    value={videoUrl}
+                                    onChange={(e) => setVideoUrl(e.target.value)}
+                                    className="w-full p-3 bg-background border border-border rounded-lg focus:outline-none focus:border-primary text-foreground"
+                                />
+                                <p className="text-xs text-muted-foreground">Paste a YouTube video URL to add a virtual tour or walkthrough video.</p>
+                            </div>
+
+                            {videoUrl && videoUrl.includes("youtube") && (
+                                <div className="aspect-video rounded-lg overflow-hidden border border-border bg-black">
+                                    <iframe
+                                        className="w-full h-full"
+                                        src={`https://www.youtube.com/embed/${videoUrl.includes("v=") ? videoUrl.split("v=")[1]?.split("&")[0] : videoUrl.split("/").pop()}`}
+                                        title="Video preview"
+                                        frameBorder="0"
+                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                        allowFullScreen
+                                    ></iframe>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    <div className="p-6 md:p-8 flex items-center justify-end gap-4 bg-background">
+                        <Link href="/admin/properties">
+                            <Button type="button" variant="outline">Cancel</Button>
                         </Link>
-                        <Button type="submit" disabled={isSubmitting}>
-                            {isSubmitting ? "Saving..." : "Save Project"}
+                        <Button type="button" onClick={handleSubmit} disabled={isSubmitting} className="px-8">
+                            {isSubmitting ? "Saving..." : "Save Property"}
                         </Button>
                     </div>
 

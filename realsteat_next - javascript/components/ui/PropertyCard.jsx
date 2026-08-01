@@ -12,9 +12,10 @@ export function PropertyCard({
     baths,
     sqft,
     status,
+    linkPrefix = "projects"
 }) {
     return (
-        <Link href={`/projects/${id}`} className="group block w-full overflow-hidden bg-card border border-white/5 hover:border-primary/50 transition-all duration-500">
+        <Link href={`/${linkPrefix}/${id}`} className="group block w-full overflow-hidden bg-card border border-white/5 hover:border-primary/50 transition-all duration-500">
             <div className="relative h-72 w-full overflow-hidden">
                 <div className="absolute top-4 left-4 z-10 bg-background/60 backdrop-blur-md text-foreground px-3 py-1 text-xs font-semibold tracking-wider uppercase border border-border">
                     {status}

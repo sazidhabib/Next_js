@@ -5,6 +5,9 @@ import { Button } from "@/components/ui/Button";
 import { ArrowLeft, UploadCloud, Plus, X, Video, ImageIcon, Save } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { useRouter, useParams } from "next/navigation";
+import dynamic from "next/dynamic";
+
+const MapPicker = dynamic(() => import("@/components/ui/MapPicker"), { ssr: false });
 
 export default function EditProjectPage() {
     const router = useRouter();
@@ -31,6 +34,8 @@ export default function EditProjectPage() {
     const [bathrooms, setBathrooms] = useState("");
     const [sqft, setSqft] = useState("");
     const [floors, setFloors] = useState("");
+    const [latitude, setLatitude] = useState("");
+    const [longitude, setLongitude] = useState("");
     const [amenities, setAmenities] = useState([]);
     const [newAmenity, setNewAmenity] = useState("");
 
@@ -38,6 +43,16 @@ export default function EditProjectPage() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
+    const [dbLocations, setDbLocations] = useState([]);
+    const [dbAmenities, setDbAmenities] = useState([]);
+    const [landArea, setLandArea] = useState("");
+    const [landOrientation, setLandOrientation] = useState("");
+    const [frontRoad, setFrontRoad] = useState("");
+    const [numUnits, setNumUnits] = useState("");
+    const [unitSize, setUnitSize] = useState("");
+    const [numBasements, setNumBasements] = useState("");
+    const [carParking, setCarParking] = useState("");
+    const [locationDetails, setLocationDetails] = useState("");
 
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || "/api";
 
@@ -46,9 +61,11 @@ export default function EditProjectPage() {
             try {
                 const token = localStorage.getItem("token");
 
-                const [projectRes, categoriesRes] = await Promise.all([
+                const [projectRes, categoriesRes, locationsRes, amenitiesRes] = await Promise.all([
                     fetch(`${apiUrl}/frames/${projectId}`),
                     fetch(`${apiUrl}/categories`),
+                    fetch(`${apiUrl}/locations`),
+                    fetch(`${apiUrl}/amenities`)
                 ]);
 
                 if (!projectRes.ok) throw new Error("Project not found");
@@ -66,6 +83,16 @@ export default function EditProjectPage() {
                 setBathrooms(project.bathrooms ? String(project.bathrooms) : "");
                 setSqft(project.sqft ? String(project.sqft) : "");
                 setFloors(project.floors ? String(project.floors) : "");
+                setLatitude(project.latitude ? String(project.latitude) : "");
+                setLongitude(project.longitude ? String(project.longitude) : "");
+                setLandArea(project.land_area || "");
+                setLandOrientation(project.land_orientation || "");
+                setFrontRoad(project.front_road || "");
+                setNumUnits(project.num_units || "");
+                setUnitSize(project.unit_size || "");
+                setNumBasements(project.num_basements || "");
+                setCarParking(project.car_parking || "");
+                setLocationDetails(project.location_details || "");
                 if (project.amenities) {
                     try {
                         const a = typeof project.amenities === "string" ? JSON.parse(project.amenities) : project.amenities;
@@ -86,6 +113,12 @@ export default function EditProjectPage() {
 
                 if (categoriesRes.ok) {
                     setCategories(await categoriesRes.json());
+                }
+                if (locationsRes.ok) {
+                    setDbLocations(await locationsRes.json());
+                }
+                if (amenitiesRes.ok) {
+                    setDbAmenities(await amenitiesRes.json());
                 }
             } catch (err) {
                 setError(err.message);
@@ -158,12 +191,22 @@ export default function EditProjectPage() {
             formData.append("is_popular", String(isPopular));
             formData.append("status", status);
             formData.append("location", location);
+            formData.append("location_details", locationDetails);
+            formData.append("latitude", latitude);
+            formData.append("longitude", longitude);
             formData.append("price", price);
             formData.append("bedrooms", bedrooms);
             formData.append("bathrooms", bathrooms);
             formData.append("sqft", sqft);
             formData.append("floors", floors);
             formData.append("amenities", JSON.stringify(amenities));
+            formData.append("land_area", landArea);
+            formData.append("land_orientation", landOrientation);
+            formData.append("front_road", frontRoad);
+            formData.append("num_units", numUnits);
+            formData.append("unit_size", unitSize);
+            formData.append("num_basements", numBasements);
+            formData.append("car_parking", carParking);
 
             if (videoUrl.trim()) {
                 formData.append("video_url", videoUrl.trim());
@@ -260,9 +303,35 @@ export default function EditProjectPage() {
                                 />
                             </div>
 
-                            <div className="space-y-2">
+                             <div className="space-y-2">
                                 <label className="text-sm font-medium text-foreground">Location <span className="text-destructive">*</span></label>
-                                <input type="text" placeholder="e.g. Gulshan, Dhaka" value={location} onChange={(e) => setLocation(e.target.value)} className="w-full p-3 bg-background border border-border rounded-lg focus:outline-none focus:border-primary text-foreground" />
+                                <select 
+                                    value={location} 
+                                    onChange={(e) => setLocation(e.target.value)} 
+                                    className="w-full p-3 bg-background border border-border rounded-lg focus:outline-none focus:border-primary text-foreground cursor-pointer"
+                                    required
+                                >
+                                    <option value="">Select Location</option>
+                                    {dbLocations.map((loc) => (
+                                        <option key={loc.id} value={loc.name}>{loc.name}</option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-foreground">Location Details</label>
+                                <input type="text" placeholder="e.g. Road 12, Block B, Gulshan" value={locationDetails} onChange={(e) => setLocationDetails(e.target.value)} className="w-full p-3 bg-background border border-border rounded-lg focus:outline-none focus:border-primary text-foreground" />
+                            </div>
+
+                            <div className="space-y-2 md:col-span-2">
+                                <MapPicker
+                                    latitude={latitude}
+                                    longitude={longitude}
+                                    onChange={(lat, lng) => {
+                                        setLatitude(lat);
+                                        setLongitude(lng);
+                                    }}
+                                />
                             </div>
 
                             <div className="space-y-2">
@@ -345,37 +414,80 @@ export default function EditProjectPage() {
                                 <input type="number" min="0" placeholder="e.g. 2500" value={sqft} onChange={(e) => setSqft(e.target.value)} className="w-full p-3 bg-background border border-border rounded-lg focus:outline-none focus:border-primary text-foreground" />
                             </div>
 
-                            <div className="space-y-2">
+                             <div className="space-y-2">
                                 <label className="text-sm font-medium text-foreground">Total Floors</label>
-                                <input type="number" min="0" placeholder="0" value={floors} onChange={(e) => setFloors(e.target.value)} className="w-full p-3 bg-background border border-border rounded-lg focus:outline-none focus:border-primary text-foreground" />
+                                <input type="text" placeholder="e.g. G + 12" value={floors} onChange={(e) => setFloors(e.target.value)} className="w-full p-3 bg-background border border-border rounded-lg focus:outline-none focus:border-primary text-foreground" />
                             </div>
                         </div>
                     </div>
 
-                    <div className="p-6 md:p-8 space-y-4">
-                        <h3 className="text-lg font-bold text-foreground border-b border-border pb-2">Amenities</h3>
-                        <div className="flex flex-wrap gap-2">
-                            {amenities.map((amenity, idx) => (
-                                <div key={idx} className="flex items-center gap-2 bg-secondary/50 px-3 py-1.5 rounded-full text-sm text-foreground">
-                                    <span>{amenity}</span>
-                                    <button type="button" onClick={() => handleRemoveAmenity(idx)} className="text-muted-foreground hover:text-destructive transition-colors">
-                                        <X size={14} />
-                                    </button>
-                                </div>
-                            ))}
+                    <div className="p-6 md:p-8 space-y-6">
+                        <h3 className="text-lg font-bold text-foreground border-b border-border pb-2">Land & Building Details</h3>
+
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-foreground">Land Area</label>
+                                <input type="text" placeholder="e.g. 20 Kathas" value={landArea} onChange={(e) => setLandArea(e.target.value)} className="w-full p-3 bg-background border border-border rounded-lg focus:outline-none focus:border-primary text-foreground" />
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-foreground">Land Orientation</label>
+                                <input type="text" placeholder="e.g. North, lakeside plot" value={landOrientation} onChange={(e) => setLandOrientation(e.target.value)} className="w-full p-3 bg-background border border-border rounded-lg focus:outline-none focus:border-primary text-foreground" />
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-foreground">Front Road</label>
+                                <input type="text" placeholder="e.g. 40 feet" value={frontRoad} onChange={(e) => setFrontRoad(e.target.value)} className="w-full p-3 bg-background border border-border rounded-lg focus:outline-none focus:border-primary text-foreground" />
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-foreground">Number of Units</label>
+                                <input type="text" placeholder="e.g. 24" value={numUnits} onChange={(e) => setNumUnits(e.target.value)} className="w-full p-3 bg-background border border-border rounded-lg focus:outline-none focus:border-primary text-foreground" />
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-foreground">Size of Units</label>
+                                <input type="text" placeholder="e.g. 3,700 - 4,200 sft" value={unitSize} onChange={(e) => setUnitSize(e.target.value)} className="w-full p-3 bg-background border border-border rounded-lg focus:outline-none focus:border-primary text-foreground" />
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-foreground">Number of Basements</label>
+                                <input type="text" placeholder="e.g. 02" value={numBasements} onChange={(e) => setNumBasements(e.target.value)} className="w-full p-3 bg-background border border-border rounded-lg focus:outline-none focus:border-primary text-foreground" />
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-foreground">Car Parking</label>
+                                <input type="text" placeholder="e.g. 48" value={carParking} onChange={(e) => setCarParking(e.target.value)} className="w-full p-3 bg-background border border-border rounded-lg focus:outline-none focus:border-primary text-foreground" />
+                            </div>
                         </div>
-                        <div className="flex items-center gap-3">
-                            <input
-                                type="text"
-                                value={newAmenity}
-                                onChange={(e) => setNewAmenity(e.target.value)}
-                                onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddAmenity())}
-                                placeholder="Add a feature (e.g. 24/7 Security)"
-                                className="flex-1 max-w-sm p-3 bg-background border border-border rounded-lg focus:outline-none focus:border-primary text-foreground text-sm"
-                            />
-                            <Button type="button" variant="outline" onClick={handleAddAmenity} className="gap-2">
-                                <Plus size={16} /> Add
-                            </Button>
+                    </div>
+
+                    <div className="p-6 md:p-8 space-y-6">
+                        <h3 className="text-lg font-bold text-foreground border-b border-border pb-2">Amenities</h3>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            {dbAmenities.map((amenity) => {
+                                const isChecked = amenities.includes(amenity.name);
+                                return (
+                                    <label key={amenity.id} className="flex items-center gap-3 cursor-pointer p-3 rounded-lg border border-border hover:bg-secondary/35 transition-colors">
+                                        <input
+                                            type="checkbox"
+                                            checked={isChecked}
+                                            onChange={(e) => {
+                                                if (e.target.checked) {
+                                                    setAmenities([...amenities, amenity.name]);
+                                                } else {
+                                                    setAmenities(amenities.filter(a => a !== amenity.name));
+                                                }
+                                            }}
+                                            className="rounded border-border text-primary focus:ring-primary w-4 h-4"
+                                        />
+                                        <span className="text-sm text-foreground flex items-center gap-2">
+                                            {amenity.icon_url && <img src={amenity.icon_url} alt={amenity.name} className="w-5 h-5 object-cover rounded" />}
+                                            {amenity.name}
+                                        </span>
+                                    </label>
+                                );
+                            })}
                         </div>
                     </div>
 

@@ -22,6 +22,7 @@ export function Navbar() {
     const navLinks = [
         { name: "Home", href: "/" },
         { name: "Projects", href: "/projects" },
+        { name: "Properties", href: "/properties" },
         { name: "About Us", href: "/about" },
         { name: "Contact", href: "/contact" },
     ];
@@ -43,15 +44,22 @@ export function Navbar() {
                 </Link>
 
                 <nav className="hidden md:flex gap-8">
-                    {navLinks.map((link) => (
-                        <Link
-                            key={link.name}
-                            href={link.href}
-                            className="text-sm font-medium tracking-wide text-foreground/80 hover:text-primary transition-colors"
-                        >
-                            {link.name}
-                        </Link>
-                    ))}
+                    {navLinks.map((link) => {
+                        const isActive = pathname === link.href || (link.href !== "/" && pathname.startsWith(link.href));
+                        return (
+                            <Link
+                                key={link.name}
+                                href={link.href}
+                                className={`text-sm font-medium tracking-wide transition-all ${
+                                    isActive
+                                        ? "text-primary border-b border-primary/50 pb-0.5"
+                                        : "text-foreground/80 hover:text-primary"
+                                }`}
+                            >
+                                {link.name}
+                            </Link>
+                        );
+                    })}
                 </nav>
 
                 <div className="hidden md:flex items-center gap-4">
@@ -77,16 +85,21 @@ export function Navbar() {
 
             {mobileMenuOpen && (
                 <div className="md:hidden absolute top-full left-0 w-full bg-background/95 backdrop-blur-lg border-b border-border flex flex-col items-center py-8 space-y-6">
-                    {navLinks.map((link) => (
-                        <Link
-                            key={link.name}
-                            href={link.href}
-                            className="text-lg font-medium text-foreground hover:text-primary transition-colors"
-                            onClick={() => setMobileMenuOpen(false)}
-                        >
-                            {link.name}
-                        </Link>
-                    ))}
+                    {navLinks.map((link) => {
+                        const isActive = pathname === link.href || (link.href !== "/" && pathname.startsWith(link.href));
+                        return (
+                            <Link
+                                key={link.name}
+                                href={link.href}
+                                className={`text-lg font-medium transition-all ${
+                                    isActive ? "text-primary font-semibold" : "text-foreground hover:text-primary"
+                                }`}
+                                onClick={() => setMobileMenuOpen(false)}
+                            >
+                                {link.name}
+                            </Link>
+                        );
+                    })}
                     <Link
                         href="/contact"
                         className="px-8 py-3 w-3/4 text-center border border-primary text-primary hover:bg-primary hover:text-black transition-all duration-300 uppercase tracking-widest text-sm font-semibold mt-4"

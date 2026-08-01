@@ -104,10 +104,10 @@ export function LocationsSection() {
                 <div className="relative">
                     <button
                         onClick={() => scroll("left")}
-                        className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-12 h-12 bg-white shadow-lg flex items-center justify-center -ml-6 hover:bg-gray-50 transition-colors hidden md:flex"
+                        className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-12 h-12 bg-card border border-border text-foreground shadow-lg flex items-center justify-center -ml-6 hover:bg-muted transition-colors hidden md:flex cursor-pointer"
                         aria-label="Previous locations"
                     >
-                        <ChevronLeft className="w-6 h-6 text-slate-800" />
+                        <ChevronLeft className="w-6 h-6" />
                     </button>
 
                     <div
@@ -119,25 +119,25 @@ export function LocationsSection() {
                             <Link
                                 key={loc.id}
                                 href={`/projects?location=${encodeURIComponent(loc.city)}`}
-                                className="loc-slide relative shrink-0 w-[350px] sm:w-[400px] h-[450px] overflow-hidden snap-center group shadow-md transition-all duration-700 opacity-100 blur-0 scale-100 cursor-pointer block"
+                                className="loc-slide relative shrink-0 w-[350px] sm:w-[400px] h-[450px] overflow-hidden snap-center group border border-border/50 bg-card hover:border-primary/50 transition-all duration-700 opacity-100 blur-0 scale-100 cursor-pointer block"
                             >
                                 <div className="absolute top-0 inset-x-0 h-12 flex z-20 font-bold text-xs">
-                                    <div className="flex-1 bg-[#1e3250] text-white flex items-center justify-center tracking-wider">
+                                    <div className="flex-1 bg-primary/20 text-primary flex items-center justify-center tracking-wider">
                                         FOR RENT
                                     </div>
-                                    <div className="flex-1 bg-[#2a4365] text-white flex items-center justify-center tracking-wider">
+                                    <div className="flex-1 bg-primary/30 text-primary flex items-center justify-center tracking-wider">
                                         FOR SALE
                                     </div>
                                 </div>
 
                                 <div className="absolute top-16 inset-x-0 flex px-4 gap-4 z-20">
                                     <div className="flex-1 text-center">
-                                        <span className="inline-block px-3 py-1 bg-black/60 text-white text-[10px] font-bold tracking-wider rounded-sm backdrop-blur-sm">
+                                        <span className="inline-block px-3 py-1 bg-background/80 border border-border/50 text-foreground text-[10px] font-bold tracking-wider rounded-sm backdrop-blur-sm">
                                             {loc.rentLabel}
                                         </span>
                                     </div>
                                     <div className="flex-1 text-center">
-                                        <span className="inline-block px-3 py-1 bg-black/60 text-white text-[10px] font-bold tracking-wider rounded-sm backdrop-blur-sm">
+                                        <span className="inline-block px-3 py-1 bg-background/80 border border-border/50 text-foreground text-[10px] font-bold tracking-wider rounded-sm backdrop-blur-sm">
                                             {loc.saleLabel}
                                         </span>
                                     </div>
@@ -165,22 +165,22 @@ export function LocationsSection() {
                                     </div>
                                 </div>
 
-                                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-30 bg-white/90 backdrop-blur-md px-4 py-2 flex flex-col items-center justify-center text-[#1e3250] shadow-lg rounded-sm">
-                                    <Home className="w-8 h-8 mb-1" />
+                                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-30 bg-card/90 border border-border backdrop-blur-md px-4 py-2 flex flex-col items-center justify-center text-foreground shadow-lg rounded-sm">
+                                    <Home className="w-8 h-8 mb-1 text-primary" />
                                     <span className="font-bold text-sm tracking-widest uppercase">Estate</span>
-                                    <span className="font-bold text-sm tracking-widest uppercase text-slate-500">Finder</span>
+                                    <span className="font-bold text-sm tracking-widest uppercase text-muted-foreground">Finder</span>
                                 </div>
 
-                                <div className="absolute bottom-0 inset-x-0 p-6 bg-gradient-to-t from-[#1e3250]/90 to-transparent z-20 flex flex-col justify-end h-1/2">
+                                <div className="absolute bottom-0 inset-x-0 p-6 bg-gradient-to-t from-background/95 via-background/40 to-transparent z-20 flex flex-col justify-end h-1/2">
                                     <div className="flex justify-between items-center mb-2">
-                                        <button className="text-[10px] text-white/70 hover:text-white uppercase tracking-wider font-semibold transition-colors flex items-center gap-1">
+                                        <button className="text-[10px] text-muted-foreground hover:text-foreground uppercase tracking-wider font-semibold transition-colors flex items-center gap-1 cursor-pointer">
                                             FIND YOUR LEASE &gt;
                                         </button>
-                                        <button className="text-[10px] text-white/70 hover:text-white uppercase tracking-wider font-semibold transition-colors flex items-center gap-1">
+                                        <button className="text-[10px] text-muted-foreground hover:text-foreground uppercase tracking-wider font-semibold transition-colors flex items-center gap-1 cursor-pointer">
                                             BUY YOUR HOME &gt;
                                         </button>
                                     </div>
-                                    <h3 className="text-white text-2xl font-bold">{loc.city}</h3>
+                                    <h3 className="text-foreground text-2xl font-bold">{loc.city}</h3>
                                 </div>
                             </Link>
                         ))}
@@ -188,10 +188,10 @@ export function LocationsSection() {
 
                     <button
                         onClick={() => scroll("right")}
-                        className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-12 h-12 bg-white shadow-lg flex items-center justify-center -mr-6 hover:bg-gray-50 transition-colors hidden md:flex"
+                        className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-12 h-12 bg-card border border-border text-foreground shadow-lg flex items-center justify-center -mr-6 hover:bg-muted transition-colors hidden md:flex cursor-pointer"
                         aria-label="Next locations"
                     >
-                        <ChevronRight className="w-6 h-6 text-slate-800" />
+                        <ChevronRight className="w-6 h-6" />
                     </button>
                 </div>
             </div>

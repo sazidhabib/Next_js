@@ -15,6 +15,7 @@ import { useState, useEffect } from "react";
 export default function Home() {
   const [settings, setSettings] = useState(null);
   const [heroImages, setHeroImages] = useState([]);
+  const [aboutData, setAboutData] = useState(null);
 
   useEffect(() => {
     const fetchSettings = async () => {
@@ -39,71 +40,63 @@ export default function Home() {
         console.error("Failed to fetch settings", err);
       }
     };
+
+    const fetchAboutData = async () => {
+      try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "/api"}/pages/about_us`);
+        if (res.ok) {
+          const data = await res.json();
+          setAboutData(data);
+        }
+      } catch (err) {
+        console.error("Failed to fetch about data", err);
+      }
+    };
+
     fetchSettings();
+    fetchAboutData();
   }, []);
 
-  const featuredProjects = [
-    {
-      id: "1",
-      title: "The Oasis Residences",
-      location: "Gulshan, Dhaka",
-      image: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&auto=format&fit=crop&w=2075&q=80",
-      price: "Start from $1,200,000",
-      beds: 4,
-      baths: 4,
-      sqft: 3500,
-      status: "Ongoing",
-    },
-    {
-      id: "2",
-      title: "Azure Commercial Skyline",
-      location: "Banani, Dhaka",
-      image: "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?ixlib=rb-4.0.3&auto=format&fit=crop&w=1170&q=80",
-      price: "Contact for Details",
-      status: "Ready",
-    },
-    {
-      id: "3",
-      title: "Crescent Lake Villas",
-      location: "Bashundhara R/A",
-      image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?ixlib=rb-4.0.3&auto=format&fit=crop&w=1170&q=80",
-      price: "Sold Out",
-      beds: 5,
-      baths: 6,
-      sqft: 4800,
-      status: "Ready",
-    },
-    {
-      id: "4",
-      title: "The Oasis Residences",
-      location: "Gulshan, Dhaka",
-      image: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&auto=format&fit=crop&w=2075&q=80",
-      price: "Start from $1,200,000",
-      beds: 4,
-      baths: 4,
-      sqft: 3500,
-      status: "Ongoing",
-    },
-    {
-      id: "5",
-      title: "Azure Commercial Skyline",
-      location: "Banani, Dhaka",
-      image: "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?ixlib=rb-4.0.3&auto=format&fit=crop&w=1170&q=80",
-      price: "Contact for Details",
-      status: "Ready",
-    },
-    {
-      id: "6",
-      title: "Crescent Lake Villas",
-      location: "Bashundhara R/A",
-      image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?ixlib=rb-4.0.3&auto=format&fit=crop&w=1170&q=80",
-      price: "Sold Out",
-      beds: 5,
-      baths: 6,
-      sqft: 4800,
-      status: "Ready",
-    }
-  ];
+  const [featuredProjects, setFeaturedProjects] = useState([]);
+
+  useEffect(() => {
+    const fetchFeatured = async () => {
+      try {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || "/api";
+        const res = await fetch(`${apiUrl}/frames`);
+        if (res.ok) {
+          const data = await res.json();
+          const active = data.filter(p => p.status === "active" || p.status === "pending").slice(0, 6);
+          const mapped = active.map(p => {
+            let img = p.image_url || "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&auto=format&fit=crop&w=2075&q=80";
+            if (p.images) {
+              try {
+                const parsed = typeof p.images === "string" ? JSON.parse(p.images) : p.images;
+                if (Array.isArray(parsed) && parsed.length > 0) {
+                  img = parsed[0];
+                }
+              } catch (e) {}
+            }
+            return {
+              id: String(p.id),
+              title: p.title,
+              location: p.location,
+              image: img,
+              price: p.price || "Contact for Price",
+              beds: p.bedrooms,
+              baths: p.bathrooms,
+              sqft: p.sqft,
+              status: p.status === "active" ? "Ready" : "Ongoing",
+            };
+          });
+          setFeaturedProjects(mapped);
+        }
+      } catch (err) {
+        console.error("Failed to fetch featured projects:", err);
+      }
+    };
+    fetchFeatured();
+  }, []);
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -145,15 +138,17 @@ export default function Home() {
         <div className="container mx-auto px-6 lg:px-12">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             <div>
-              <span className="text-primary font-bold tracking-[0.15em] uppercase text-sm mb-4 block">The Legacy</span>
+              <span className="text-primary font-bold tracking-[0.15em] uppercase text-sm mb-4 block">
+                {aboutData?.subtitle || "The Legacy"}
+              </span>
               <h2 className="text-4xl md:text-5xl font-serif font-bold text-foreground mb-8 leading-tight">
-                Crafting Architectural Masterpieces Since 1995
+                {aboutData?.title || "Crafting Architectural Masterpieces Since 1995"}
               </h2>
               <p className="text-muted-foreground text-lg leading-relaxed mb-6">
-                PRESIDENT PROPERTIES is synonymous with innovation, quality, and architectural brilliance in the real estate sector. With over two decades of experience, we have transformed city skylines and delivered premium lifestyles.
+                {aboutData?.content ? aboutData.content.split("\n\n")[0] : "PRESIDENT PROPERTIES is synonymous with innovation, quality, and architectural brilliance in the real estate sector. With over two decades of experience, we have transformed city skylines and delivered premium lifestyles."}
               </p>
               <p className="text-muted-foreground text-lg leading-relaxed mb-10">
-                Our uncompromising commitment to perfection, use of high-end materials, and dedication to timely delivery make us the most trusted name in luxury real estate.
+                {aboutData?.content ? aboutData.content.split("\n\n")[1] : "Our uncompromising commitment to perfection, use of high-end materials, and dedication to timely delivery make us the most trusted name in luxury real estate."}
               </p>
               <Link href="/about" className="inline-flex items-center gap-2 text-primary font-semibold uppercase tracking-widest hover:text-foreground transition-colors duration-300">
                 Discover Our Story <ArrowRight size={18} />
@@ -162,7 +157,7 @@ export default function Home() {
 
             <div className="relative h-[600px] w-full hidden lg:block border border-border dark:border-white/10 p-2">
               <Image
-                src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?ixlib=rb-4.0.3&auto=format&fit=crop&w=1083&q=80"
+                src={aboutData?.image_url || "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?ixlib=rb-4.0.3&auto=format&fit=crop&w=1083&q=80"}
                 alt="Corporate Building"
                 fill
                 sizes="(max-width: 1024px) 100vw, 50vw"

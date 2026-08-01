@@ -1,13 +1,32 @@
+"use client";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 
 export default function AboutPage() {
+    const [aboutData, setAboutData] = useState(null);
+
+    useEffect(() => {
+        const fetchAboutData = async () => {
+            try {
+                const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "/api"}/pages/about_us`);
+                if (res.ok) {
+                    const data = await res.json();
+                    setAboutData(data);
+                }
+            } catch (err) {
+                console.error("Failed to fetch about data", err);
+            }
+        };
+        fetchAboutData();
+    }, []);
+
     return (
         <div className="pt-24 pb-20 min-h-screen bg-background">
             {/* Header */}
             <section className="bg-background py-20 border-b border-border flex items-center justify-center text-center relative overflow-hidden h-[40vh]">
                 <div className="absolute inset-0 z-0 opacity-40">
                     <Image
-                        src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80"
+                        src={aboutData?.image_url || "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80"}
                         alt="Corporate"
                         fill
                         sizes="100vw"
@@ -15,8 +34,12 @@ export default function AboutPage() {
                     />
                 </div>
                 <div className="relative z-10 px-6">
-                    <span className="text-primary font-bold tracking-[0.2em] uppercase text-sm mb-4 block">Corporate Profile</span>
-                    <h1 className="text-5xl md:text-7xl font-serif font-bold text-foreground">About President Properties</h1>
+                    <span className="text-primary font-bold tracking-[0.2em] uppercase text-sm mb-4 block">
+                        {aboutData?.subtitle || "Corporate Profile"}
+                    </span>
+                    <h1 className="text-5xl md:text-7xl font-serif font-bold text-foreground">
+                        About President Properties
+                    </h1>
                 </div>
             </section>
 
@@ -25,13 +48,13 @@ export default function AboutPage() {
                 <div className="container mx-auto px-6 lg:px-12 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
                     <div>
                         <h2 className="text-3xl md:text-4xl font-serif text-foreground mb-6 leading-tight">
-                            A Legacy Built on Trust, Quality, and Perfection.
+                            {aboutData?.title || "A Legacy Built on Trust, Quality, and Perfection."}
                         </h2>
                         <p className="text-muted-foreground text-lg leading-relaxed mb-6">
-                            Founded in 1995, President Properties embarked on a journey to redefine the real estate landscape. From our humble beginnings to becoming a leading property developer, our sole focus has been on delivering uncompromised quality and bringing architectural visions to life.
+                            {aboutData?.content ? aboutData.content.split("\n\n")[0] : "Founded in 1995, President Properties embarked on a journey to redefine the real estate landscape. From our humble beginnings to becoming a leading property developer, our sole focus has been on delivering uncompromised quality and bringing architectural visions to life."}
                         </p>
                         <p className="text-muted-foreground text-lg leading-relaxed">
-                            We don&apos;t just build structures; we build communities. Every project is meticulously planned to ensure sustainability, aesthetic brilliance, and maximum return on investment for our clients.
+                            {aboutData?.content ? aboutData.content.split("\n\n")[1] : "We don't just build structures; we build communities. Every project is meticulously planned to ensure sustainability, aesthetic brilliance, and maximum return on investment for our clients."}
                         </p>
                     </div>
                     <div className="grid grid-cols-2 gap-4">

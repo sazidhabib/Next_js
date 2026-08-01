@@ -129,12 +129,22 @@ const initDb = async () => {
             // Property detail columns migration
             const projectDetailColumns = [
                 { name: 'location', type: 'VARCHAR(500)' },
+                { name: 'location_details', type: 'VARCHAR(500) DEFAULT NULL' },
                 { name: 'price', type: 'VARCHAR(255)' },
                 { name: 'bedrooms', type: 'INT' },
                 { name: 'bathrooms', type: 'INT' },
                 { name: 'sqft', type: 'INT' },
-                { name: 'floors', type: 'INT' },
+                { name: 'floors', type: 'VARCHAR(255) DEFAULT NULL' },
                 { name: 'amenities', type: 'TEXT' },
+                { name: 'latitude', type: 'DECIMAL(10, 8) DEFAULT NULL' },
+                { name: 'longitude', type: 'DECIMAL(11, 8) DEFAULT NULL' },
+                { name: 'land_area', type: 'VARCHAR(255) DEFAULT NULL' },
+                { name: 'land_orientation', type: 'VARCHAR(255) DEFAULT NULL' },
+                { name: 'front_road', type: 'VARCHAR(255) DEFAULT NULL' },
+                { name: 'num_units', type: 'VARCHAR(255) DEFAULT NULL' },
+                { name: 'unit_size', type: 'VARCHAR(255) DEFAULT NULL' },
+                { name: 'num_basements', type: 'VARCHAR(255) DEFAULT NULL' },
+                { name: 'car_parking', type: 'VARCHAR(255) DEFAULT NULL' },
             ];
 
             for (const col of projectDetailColumns) {
@@ -143,6 +153,12 @@ const initDb = async () => {
                     console.log(`Migrating: Adding ${col.name} column to re_projects...`);
                     await pool.query(`ALTER TABLE re_projects ADD COLUMN ${col.name} ${col.type}`);
                 }
+            }
+
+            const [floorsCol] = await pool.query("SHOW COLUMNS FROM re_projects LIKE 'floors'");
+            if (floorsCol.length > 0 && floorsCol[0].Type.includes('int')) {
+                console.log('Migrating: Changing floors column type to VARCHAR(255) in re_projects...');
+                await pool.query("ALTER TABLE re_projects MODIFY COLUMN floors VARCHAR(255) DEFAULT NULL");
             }
 
             // Check if 'phone_number' column exists in re_users
@@ -172,6 +188,79 @@ const initDb = async () => {
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     FOREIGN KEY (category_id) REFERENCES re_categories(id) ON DELETE SET NULL,
                     FOREIGN KEY (parent_id) REFERENCES re_menu_items(id) ON DELETE SET NULL
+                )
+            `);
+
+            // Create re_properties table if not exists
+            await pool.query(`
+                CREATE TABLE IF NOT EXISTS re_properties (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    title VARCHAR(255) NOT NULL,
+                    image_url TEXT,
+                    images TEXT,
+                    video_url VARCHAR(500),
+                    category_id INT DEFAULT NULL,
+                    category VARCHAR(255), 
+                    description TEXT,
+                    location VARCHAR(500),
+                    location_details VARCHAR(500) DEFAULT NULL,
+                    price VARCHAR(255),
+                    bedrooms INT,
+                    bathrooms INT,
+                    sqft INT,
+                    floors VARCHAR(255) DEFAULT NULL,
+                    amenities TEXT,
+                    latitude DECIMAL(10, 8) DEFAULT NULL,
+                    longitude DECIMAL(11, 8) DEFAULT NULL,
+                    land_area VARCHAR(255) DEFAULT NULL,
+                    land_orientation VARCHAR(255) DEFAULT NULL,
+                    front_road VARCHAR(255) DEFAULT NULL,
+                    num_units VARCHAR(255) DEFAULT NULL,
+                    unit_size VARCHAR(255) DEFAULT NULL,
+                    num_basements VARCHAR(255) DEFAULT NULL,
+                    car_parking VARCHAR(255) DEFAULT NULL,
+                    is_popular BOOLEAN DEFAULT FALSE,
+                    status ENUM('active', 'pending', 'inactive', 'rejected', 'trash') DEFAULT 'pending',
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    user_id INT DEFAULT NULL,
+                    view_count INT DEFAULT 0,
+                    use_count INT DEFAULT 0,
+                    FOREIGN KEY (category_id) REFERENCES re_categories(id) ON DELETE SET NULL
+                )
+            `);
+
+            // Run migration for re_properties fields
+            for (const col of projectDetailColumns) {
+                const [cols] = await pool.query(`SHOW COLUMNS FROM re_properties LIKE '${col.name}'`);
+                if (cols.length === 0) {
+                    console.log(`Migrating: Adding ${col.name} column to re_properties...`);
+                    await pool.query(`ALTER TABLE re_properties ADD COLUMN ${col.name} ${col.type}`);
+                }
+            }
+
+            const [propFloorsCol] = await pool.query("SHOW COLUMNS FROM re_properties LIKE 'floors'");
+            if (propFloorsCol.length > 0 && propFloorsCol[0].Type.includes('int')) {
+                console.log('Migrating: Changing floors column type to VARCHAR(255) in re_properties...');
+                await pool.query("ALTER TABLE re_properties MODIFY COLUMN floors VARCHAR(255) DEFAULT NULL");
+            }
+
+            // Create re_locations table if not exists
+            await pool.query(`
+                CREATE TABLE IF NOT EXISTS re_locations (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    name VARCHAR(255) NOT NULL,
+                    image_url TEXT DEFAULT NULL,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            `);
+
+            // Create re_amenities table if not exists
+            await pool.query(`
+                CREATE TABLE IF NOT EXISTS re_amenities (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    name VARCHAR(255) NOT NULL,
+                    icon_url TEXT DEFAULT NULL,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 )
             `);
 
@@ -224,6 +313,32 @@ const initDb = async () => {
         } catch (settingMigError) {
             console.error('Settings Migration error:', settingMigError);
         }
+
+        // Create re_pages table
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS re_pages (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                page_key VARCHAR(255) UNIQUE NOT NULL,
+                title VARCHAR(500),
+                subtitle TEXT,
+                content TEXT,
+                image_url VARCHAR(500),
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+            )
+        `);
+
+        // Create re_testimonials table
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS re_testimonials (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                name VARCHAR(255) NOT NULL,
+                designation VARCHAR(255),
+                review TEXT NOT NULL,
+                rating INT DEFAULT 5,
+                image_url VARCHAR(500),
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
 
         // Seed Admin
         await seedAdmin();

@@ -17,6 +17,11 @@ const userRoutes = require("./server-api/routes/userRoutes");
 const settingRoutes = require("./server-api/routes/settingRoutes");
 const categoryRoutes = require("./server-api/routes/categoryRoutes");
 const menuRoutes = require("./server-api/routes/menuRoutes");
+const propertyRoutes = require("./server-api/routes/propertyRoutes");
+const locationRoutes = require("./server-api/routes/locationRoutes");
+const amenityRoutes = require("./server-api/routes/amenityRoutes");
+const pageRoutes = require("./server-api/routes/pageRoutes");
+const testimonialRoutes = require("./server-api/routes/testimonialRoutes");
 
 nextApp.prepare().then(() => {
     const app = express();
@@ -79,6 +84,11 @@ nextApp.prepare().then(() => {
     app.use("/api/settings", settingRoutes);
     app.use("/api/categories", categoryRoutes);
     app.use("/api/menu", menuRoutes);
+    app.use("/api/properties", propertyRoutes);
+    app.use("/api/locations", locationRoutes);
+    app.use("/api/amenities", amenityRoutes);
+    app.use("/api/pages", pageRoutes);
+    app.use("/api/testimonials", testimonialRoutes);
 
     // Next.js Request Handler (Catch-all)
     app.all(/(.*)/, (req, res) => {

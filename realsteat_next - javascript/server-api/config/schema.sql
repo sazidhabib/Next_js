@@ -27,16 +27,75 @@ CREATE TABLE IF NOT EXISTS re_projects (
     category VARCHAR(255), 
     description TEXT,
     location VARCHAR(500),
+    location_details VARCHAR(500) DEFAULT NULL,
     price VARCHAR(255),
     bedrooms INT,
     bathrooms INT,
     sqft INT,
-    floors INT,
+    floors VARCHAR(255) DEFAULT NULL,
     amenities TEXT,
+    latitude DECIMAL(10, 8) DEFAULT NULL,
+    longitude DECIMAL(11, 8) DEFAULT NULL,
+    land_area VARCHAR(255) DEFAULT NULL,
+    land_orientation VARCHAR(255) DEFAULT NULL,
+    front_road VARCHAR(255) DEFAULT NULL,
+    num_units VARCHAR(255) DEFAULT NULL,
+    unit_size VARCHAR(255) DEFAULT NULL,
+    num_basements VARCHAR(255) DEFAULT NULL,
+    car_parking VARCHAR(255) DEFAULT NULL,
     is_popular BOOLEAN DEFAULT FALSE,
     status ENUM('active', 'inactive') DEFAULT 'active',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (category_id) REFERENCES re_categories(id) ON DELETE SET NULL
+);
+
+CREATE TABLE IF NOT EXISTS re_properties (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    image_url TEXT,
+    images TEXT,
+    video_url VARCHAR(500),
+    category_id INT,
+    category VARCHAR(255), 
+    description TEXT,
+    location VARCHAR(500),
+    location_details VARCHAR(500) DEFAULT NULL,
+    price VARCHAR(255),
+    bedrooms INT,
+    bathrooms INT,
+    sqft INT,
+    floors VARCHAR(255) DEFAULT NULL,
+    amenities TEXT,
+    latitude DECIMAL(10, 8) DEFAULT NULL,
+    longitude DECIMAL(11, 8) DEFAULT NULL,
+    land_area VARCHAR(255) DEFAULT NULL,
+    land_orientation VARCHAR(255) DEFAULT NULL,
+    front_road VARCHAR(255) DEFAULT NULL,
+    num_units VARCHAR(255) DEFAULT NULL,
+    unit_size VARCHAR(255) DEFAULT NULL,
+    num_basements VARCHAR(255) DEFAULT NULL,
+    car_parking VARCHAR(255) DEFAULT NULL,
+    is_popular BOOLEAN DEFAULT FALSE,
+    status ENUM('active', 'pending', 'inactive', 'rejected', 'trash') DEFAULT 'pending',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    user_id INT DEFAULT NULL,
+    view_count INT DEFAULT 0,
+    use_count INT DEFAULT 0,
+    FOREIGN KEY (category_id) REFERENCES re_categories(id) ON DELETE SET NULL
+);
+
+CREATE TABLE IF NOT EXISTS re_locations (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    image_url TEXT DEFAULT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS re_amenities (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    icon_url TEXT DEFAULT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 SET FOREIGN_KEY_CHECKS=0;
@@ -79,6 +138,26 @@ CREATE TABLE IF NOT EXISTS re_menu_items (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (category_id) REFERENCES re_categories(id) ON DELETE SET NULL,
     FOREIGN KEY (parent_id) REFERENCES re_menu_items(id) ON DELETE SET NULL
+);
+
+CREATE TABLE IF NOT EXISTS re_pages (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    page_key VARCHAR(255) UNIQUE NOT NULL,
+    title VARCHAR(500),
+    subtitle TEXT,
+    content TEXT,
+    image_url VARCHAR(500),
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS re_testimonials (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    designation VARCHAR(255),
+    review TEXT NOT NULL,
+    rating INT DEFAULT 5,
+    image_url VARCHAR(500),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Initial Settings
