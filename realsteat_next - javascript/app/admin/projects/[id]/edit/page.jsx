@@ -30,6 +30,7 @@ export default function EditProjectPage() {
     const [description, setDescription] = useState("");
     const [status, setStatus] = useState("active");
     const [isPopular, setIsPopular] = useState(false);
+    const [isFeatured, setIsFeatured] = useState(false);
     const [bedrooms, setBedrooms] = useState("");
     const [bathrooms, setBathrooms] = useState("");
     const [sqft, setSqft] = useState("");
@@ -77,6 +78,7 @@ export default function EditProjectPage() {
                 setDescription(project.description || "");
                 setStatus(project.status || "active");
                 setIsPopular(project.is_popular === 1 || project.is_popular === true);
+                setIsFeatured(project.is_featured === 1 || project.is_featured === true);
                 setVideoUrl(project.video_url || "");
                 setSelectedCategoryId(project.category_id ? String(project.category_id) : "");
                 setBedrooms(project.bedrooms ? String(project.bedrooms) : "");
@@ -189,6 +191,7 @@ export default function EditProjectPage() {
             formData.append("description", description);
             formData.append("category_id", selectedCategoryId || "");
             formData.append("is_popular", String(isPopular));
+            formData.append("is_featured", String(isFeatured));
             formData.append("status", status);
             formData.append("location", location);
             formData.append("location_details", locationDetails);
@@ -379,6 +382,18 @@ export default function EditProjectPage() {
                                         className="rounded border-border text-primary focus:ring-primary w-4 h-4"
                                     />
                                     <span className="text-sm font-medium text-foreground">Mark as Popular</span>
+                                </label>
+                            </div>
+
+                            <div className="space-y-2 flex items-end">
+                                <label className="flex items-center gap-3 cursor-pointer p-3">
+                                    <input
+                                        type="checkbox"
+                                        checked={isFeatured}
+                                        onChange={(e) => setIsFeatured(e.target.checked)}
+                                        className="rounded border-border text-primary focus:ring-primary w-4 h-4"
+                                    />
+                                    <span className="text-sm font-medium text-foreground">Featured Project (Limit: 6)</span>
                                 </label>
                             </div>
 

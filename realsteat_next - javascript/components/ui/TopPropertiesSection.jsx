@@ -12,12 +12,15 @@ export function TopPropertiesSection() {
         const fetchProjects = async () => {
             try {
                 const apiUrl = process.env.NEXT_PUBLIC_API_URL || "/api";
-                const res = await fetch(`${apiUrl}/frames`);
+                const res = await fetch(`${apiUrl}/properties`);
                 if (res.ok) {
                     const data = await res.json();
-                    // Filter active/published projects
-                    const activeProjects = data.filter(p => p.status === "active" || p.status === "pending");
-                    setProjects(activeProjects);
+                    // Filter active properties that are marked as 'is_best', sorted by best_clicked_at DESC, limit 4
+                    const activeProperties = data
+                        .filter(p => (p.status === "active" || p.status === "pending") && (p.is_best === 1 || p.is_best === true))
+                        .sort((a, b) => new Date(b.best_clicked_at) - new Date(a.best_clicked_at))
+                        .slice(0, 4);
+                    setProjects(activeProperties);
                 }
             } catch (err) {
                 console.error("Failed to fetch top properties:", err);
@@ -68,7 +71,7 @@ export function TopPropertiesSection() {
                         </h2>
                     </div>
                     <Link
-                        href="/projects"
+                        href="/properties"
                         className="inline-flex items-center gap-2 text-primary font-semibold uppercase tracking-widest hover:text-foreground transition-colors duration-300"
                     >
                         View All <ArrowRight className="w-4 h-4" />
@@ -78,7 +81,7 @@ export function TopPropertiesSection() {
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
                     {/* Featured Large Card */}
                     {featuredProject && (
-                        <Link href={`/projects/${featuredProject.id}`} className="lg:col-span-7 bg-card border border-border/50 hover:border-primary/50 overflow-hidden flex flex-col group cursor-pointer transition-all duration-500">
+                        <Link href={`/properties/${featuredProject.id}`} className="lg:col-span-7 bg-card border border-border/50 hover:border-primary/50 overflow-hidden flex flex-col group cursor-pointer transition-all duration-500">
                             <div className="relative h-[400px] w-full overflow-hidden">
                                 <Image
                                     src={getImages(featuredProject)[0]}
@@ -89,7 +92,7 @@ export function TopPropertiesSection() {
                                 />
                                 <div className="absolute top-4 left-4 flex gap-2 z-10">
                                     <span className="bg-emerald-500 text-white text-[10px] uppercase font-bold px-2 py-1">
-                                        Featured
+                                        Best Value
                                     </span>
                                     <span className="bg-[#e13b3b] text-white text-[10px] uppercase font-bold px-2 py-1">
                                         Active
@@ -138,7 +141,7 @@ export function TopPropertiesSection() {
                     {/* Side Small Cards */}
                     <div className="lg:col-span-5 flex flex-col gap-6">
                         {sideProjects.map((project) => (
-                            <Link href={`/projects/${project.id}`} key={project.id} className="bg-card border border-border/50 hover:border-primary/50 p-3 flex flex-col sm:flex-row gap-4 group cursor-pointer transition-all duration-500">
+                            <Link href={`/properties/${project.id}`} key={project.id} className="bg-card border border-border/50 hover:border-primary/50 p-3 flex flex-col sm:flex-row gap-4 group cursor-pointer transition-all duration-500">
                                 <div className="relative w-full sm:w-[160px] h-[160px] overflow-hidden shrink-0">
                                     <Image
                                         src={getImages(project)[0]}
@@ -148,7 +151,7 @@ export function TopPropertiesSection() {
                                         className="object-cover transition-transform duration-700 group-hover:scale-105"
                                     />
                                     <div className="absolute top-2 left-2 flex flex-col gap-1 z-10">
-                                        <span className="bg-emerald-500 text-white text-[9px] uppercase font-bold px-1.5 py-0.5 w-fit">Featured</span>
+                                        <span className="bg-emerald-500 text-white text-[9px] uppercase font-bold px-1.5 py-0.5 w-fit">Best</span>
                                     </div>
                                     <button className="absolute top-2 right-2 w-6 h-6 bg-black/40 backdrop-blur-sm rounded flex items-center justify-center text-white hover:bg-[#e13b3b] transition-colors z-10">
                                         <Heart className="w-3 h-3" />

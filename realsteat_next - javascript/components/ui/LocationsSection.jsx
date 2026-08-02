@@ -171,21 +171,11 @@ export function LocationsSection() {
                                     </div>
                                 </div>
 
-                                <div className="absolute inset-0 flex mt-12">
-                                    <div className="relative flex-1 h-full">
+                                <div className="absolute inset-0 mt-12">
+                                    <div className="relative w-full h-full">
                                         <Image
                                             src={loc.rentImage}
-                                            alt={`${loc.city} Rent`}
-                                            fill
-                                            sizes="(max-width: 768px) 100vw, 400px"
-                                            className="object-cover transition-transform duration-700 group-hover:scale-110"
-                                        />
-                                    </div>
-                                    <div className="w-[2px] bg-white/20 h-full relative z-10"></div>
-                                    <div className="relative flex-1 h-full">
-                                        <Image
-                                            src={loc.saleImage}
-                                            alt={`${loc.city} Sale`}
+                                            alt={loc.city}
                                             fill
                                             sizes="(max-width: 768px) 100vw, 400px"
                                             className="object-cover transition-transform duration-700 group-hover:scale-110"

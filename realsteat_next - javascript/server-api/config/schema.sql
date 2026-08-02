@@ -44,6 +44,8 @@ CREATE TABLE IF NOT EXISTS re_projects (
     num_basements VARCHAR(255) DEFAULT NULL,
     car_parking VARCHAR(255) DEFAULT NULL,
     is_popular BOOLEAN DEFAULT FALSE,
+    is_featured BOOLEAN DEFAULT FALSE,
+    featured_clicked_at TIMESTAMP NULL DEFAULT NULL,
     status ENUM('active', 'inactive') DEFAULT 'active',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (category_id) REFERENCES re_categories(id) ON DELETE SET NULL
@@ -76,6 +78,8 @@ CREATE TABLE IF NOT EXISTS re_properties (
     num_basements VARCHAR(255) DEFAULT NULL,
     car_parking VARCHAR(255) DEFAULT NULL,
     is_popular BOOLEAN DEFAULT FALSE,
+    is_best BOOLEAN DEFAULT FALSE,
+    best_clicked_at TIMESTAMP NULL DEFAULT NULL,
     status ENUM('active', 'pending', 'inactive', 'rejected', 'trash') DEFAULT 'pending',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     user_id INT DEFAULT NULL,

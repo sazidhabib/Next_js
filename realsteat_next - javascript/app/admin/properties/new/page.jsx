@@ -35,6 +35,7 @@ export default function NewPropertyForm() {
     const [longitude, setLongitude] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState("");
+    const [isBest, setIsBest] = useState(false);
     const [dbLocations, setDbLocations] = useState([]);
     const [dbAmenities, setDbAmenities] = useState([]);
     const [landArea, setLandArea] = useState("");
@@ -123,6 +124,7 @@ export default function NewPropertyForm() {
             formData.append("description", description);
             formData.append("category_id", selectedCategoryId || "");
             formData.append("is_popular", "false");
+            formData.append("is_best", isBest);
             formData.append("status", "active");
             formData.append("location", location);
             formData.append("location_details", locationDetails);
@@ -262,6 +264,18 @@ export default function NewPropertyForm() {
                                         <option key={cat.id} value={cat.id}>{cat.name}</option>
                                     ))}
                                 </select>
+                            </div>
+
+                            <div className="space-y-2 flex items-center pt-8">
+                                <label className="flex items-center gap-3 cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        checked={isBest}
+                                        onChange={(e) => setIsBest(e.target.checked)}
+                                        className="rounded border-border text-primary focus:ring-primary w-5 h-5 cursor-pointer"
+                                    />
+                                    <span className="text-sm font-medium text-foreground select-none">Best Property (Limit: 4)</span>
+                                </label>
                             </div>
 
                             <div className="space-y-2 md:col-span-2">

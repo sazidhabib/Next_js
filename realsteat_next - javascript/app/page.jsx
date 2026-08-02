@@ -29,7 +29,7 @@ export default function Home() {
     stats = settings?.homepage_statistics
       ? (typeof settings.homepage_statistics === 'string' ? JSON.parse(settings.homepage_statistics) : settings.homepage_statistics)
       : [];
-  } catch(e){}
+  } catch (e) { }
   if (!stats || stats.length === 0) {
     stats = [
       { value: "25+", label: "Years of Experience", icon: "Trophy" },
@@ -88,7 +88,10 @@ export default function Home() {
         const res = await fetch(`${apiUrl}/frames`);
         if (res.ok) {
           const data = await res.json();
-          const active = data.filter(p => p.status === "active" || p.status === "pending").slice(0, 6);
+          const active = data
+            .filter(p => (p.status === "active" || p.status === "pending") && (p.is_featured === 1 || p.is_featured === true))
+            .sort((a, b) => new Date(b.featured_clicked_at) - new Date(a.featured_clicked_at))
+            .slice(0, 6);
           const mapped = active.map(p => {
             let img = p.image_url || "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&auto=format&fit=crop&w=2075&q=80";
             if (p.images) {
@@ -97,7 +100,7 @@ export default function Home() {
                 if (Array.isArray(parsed) && parsed.length > 0) {
                   img = parsed[0];
                 }
-              } catch (e) {}
+              } catch (e) { }
             }
             return {
               id: String(p.id),
@@ -199,7 +202,7 @@ export default function Home() {
             <div className="max-w-xl">
               <span className="text-primary font-bold tracking-[0.15em] uppercase text-sm mb-4 block">Portfolio</span>
               <h2 className="text-4xl md:text-5xl font-serif font-bold text-foreground mb-6">
-                Featured Properties
+                Featured Projects
               </h2>
               <p className="text-muted-foreground text-lg">
                 Explore our signature developments combining elegant design with state-of-the-art amenities.

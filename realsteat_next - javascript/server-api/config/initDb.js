@@ -264,6 +264,22 @@ const initDb = async () => {
                 )
             `);
 
+            // Migration for featured projects (re_projects)
+            const [featuredCol] = await pool.query("SHOW COLUMNS FROM re_projects LIKE 'is_featured'");
+            if (featuredCol.length === 0) {
+                console.log('Migrating: Adding is_featured and featured_clicked_at columns to re_projects...');
+                await pool.query("ALTER TABLE re_projects ADD COLUMN is_featured BOOLEAN DEFAULT FALSE");
+                await pool.query("ALTER TABLE re_projects ADD COLUMN featured_clicked_at TIMESTAMP NULL DEFAULT NULL");
+            }
+
+            // Migration for best properties (re_properties)
+            const [bestCol] = await pool.query("SHOW COLUMNS FROM re_properties LIKE 'is_best'");
+            if (bestCol.length === 0) {
+                console.log('Migrating: Adding is_best and best_clicked_at columns to re_properties...');
+                await pool.query("ALTER TABLE re_properties ADD COLUMN is_best BOOLEAN DEFAULT FALSE");
+                await pool.query("ALTER TABLE re_properties ADD COLUMN best_clicked_at TIMESTAMP NULL DEFAULT NULL");
+            }
+
         } catch (migError) {
             console.error('Migration error:', migError);
         }

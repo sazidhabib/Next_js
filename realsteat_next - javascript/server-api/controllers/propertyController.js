@@ -3,6 +3,15 @@ const sharp = require('sharp');
 const path = require('path');
 const fs = require('fs');
 
+const enforceBestPropertiesLimit = async () => {
+    const [rows] = await pool.query('SELECT id FROM re_properties WHERE is_best = TRUE ORDER BY best_clicked_at ASC');
+    if (rows.length > 4) {
+        const extraCount = rows.length - 4;
+        const idsToDeselect = rows.slice(0, extraCount).map(r => r.id);
+        await pool.query('UPDATE re_properties SET is_best = FALSE, best_clicked_at = NULL WHERE id IN (?)', [idsToDeselect]);
+    }
+};
+
 // Get all properties
 exports.getAllProperties = async (req, res) => {
     try {
@@ -59,9 +68,8 @@ const processImage = async (file) => {
     return outputFilename;
 };
 
-// Create new property
 exports.createProperty = async (req, res) => {
-    const { title, category_id, description, is_popular, status, video_url, location, location_details, price, bedrooms, bathrooms, sqft, floors, amenities, latitude, longitude, land_area, land_orientation, front_road, num_units, unit_size, num_basements, car_parking } = req.body;
+    const { title, category_id, description, is_popular, is_best, status, video_url, location, location_details, price, bedrooms, bathrooms, sqft, floors, amenities, latitude, longitude, land_area, land_orientation, front_road, num_units, unit_size, num_basements, car_parking } = req.body;
 
     try {
         let image_url = null;
@@ -87,11 +95,19 @@ exports.createProperty = async (req, res) => {
         // Handle amenities - store as JSON string
         const amenitiesJson = amenities ? (typeof amenities === 'string' ? amenities : JSON.stringify(amenities)) : null;
 
+        const isBestBool = is_best === 'true' || is_best === true;
+        const bestClickedAt = isBestBool ? new Date() : null;
+
         const [result] = await pool.query(
-            'INSERT INTO re_properties (title, image_url, images, video_url, category_id, description, is_popular, status, user_id, location, location_details, price, bedrooms, bathrooms, sqft, floors, amenities, latitude, longitude, land_area, land_orientation, front_road, num_units, unit_size, num_basements, car_parking) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-            [title, image_url, imagesJson, video_url || null, category_id || null, description, is_popular === 'true' || is_popular === true, initialStatus, req.user ? req.user.id : null, location || null, location_details || null, price || null, bedrooms || null, bathrooms || null, sqft || null, floors || null, amenitiesJson, latitude || null, longitude || null, land_area || null, land_orientation || null, front_road || null, num_units || null, unit_size || null, num_basements || null, car_parking || null]
+            'INSERT INTO re_properties (title, image_url, images, video_url, category_id, description, is_popular, is_best, best_clicked_at, status, user_id, location, location_details, price, bedrooms, bathrooms, sqft, floors, amenities, latitude, longitude, land_area, land_orientation, front_road, num_units, unit_size, num_basements, car_parking) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            [title, image_url, imagesJson, video_url || null, category_id || null, description, is_popular === 'true' || is_popular === true, isBestBool, bestClickedAt, initialStatus, req.user ? req.user.id : null, location || null, location_details || null, price || null, bedrooms || null, bathrooms || null, sqft || null, floors || null, amenitiesJson, latitude || null, longitude || null, land_area || null, land_orientation || null, front_road || null, num_units || null, unit_size || null, num_basements || null, car_parking || null]
         );
-        res.status(201).json({ id: result.insertId, title, image_url, images: imagesJson ? JSON.parse(imagesJson) : [], video_url: video_url || null, category_id, description, is_popular, status: initialStatus, user_id: req.user ? req.user.id : null, location, location_details, price, bedrooms, bathrooms, sqft, floors, amenities: amenitiesJson, latitude: latitude || null, longitude: longitude || null, land_area, land_orientation, front_road, num_units, unit_size, num_basements, car_parking });
+
+        if (isBestBool) {
+            await enforceBestPropertiesLimit();
+        }
+
+        res.status(201).json({ id: result.insertId, title, image_url, images: imagesJson ? JSON.parse(imagesJson) : [], video_url: video_url || null, category_id, description, is_popular, is_best: isBestBool, status: initialStatus, user_id: req.user ? req.user.id : null, location, location_details, price, bedrooms, bathrooms, sqft, floors, amenities: amenitiesJson, latitude: latitude || null, longitude: longitude || null, land_area, land_orientation, front_road, num_units, unit_size, num_basements, car_parking });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: error.message });
@@ -100,7 +116,7 @@ exports.createProperty = async (req, res) => {
 
 // Update property
 exports.updateProperty = async (req, res) => {
-    const { title, category_id, description, is_popular, status, video_url, location, location_details, price, bedrooms, bathrooms, sqft, floors, amenities, latitude, longitude, land_area, land_orientation, front_road, num_units, unit_size, num_basements, car_parking } = req.body;
+    const { title, category_id, description, is_popular, is_best, status, video_url, location, location_details, price, bedrooms, bathrooms, sqft, floors, amenities, latitude, longitude, land_area, land_orientation, front_road, num_units, unit_size, num_basements, car_parking } = req.body;
     const userId = req.user.id;
     const userRole = req.user.role;
 
@@ -149,10 +165,25 @@ exports.updateProperty = async (req, res) => {
         // 6. Handle amenities
         const amenitiesJson = amenities !== undefined ? (amenities ? (typeof amenities === 'string' ? amenities : JSON.stringify(amenities)) : null) : property.amenities;
 
+        // 7. Handle is_best
+        let finalIsBest = property.is_best;
+        let finalBestClickedAt = property.best_clicked_at;
+        if (is_best !== undefined) {
+            const isBestBool = is_best === 'true' || is_best === true;
+            if (isBestBool !== (property.is_best === 1 || property.is_best === true)) {
+                finalIsBest = isBestBool;
+                finalBestClickedAt = isBestBool ? new Date() : null;
+            }
+        }
+
         const [result] = await pool.query(
-            'UPDATE re_properties SET title = ?, image_url = ?, images = ?, video_url = ?, category_id = ?, description = ?, is_popular = ?, status = ?, location = ?, location_details = ?, price = ?, bedrooms = ?, bathrooms = ?, sqft = ?, floors = ?, amenities = ?, latitude = ?, longitude = ?, land_area = ?, land_orientation = ?, front_road = ?, num_units = ?, unit_size = ?, num_basements = ?, car_parking = ? WHERE id = ?',
-            [title, image_url, imagesJson, newVideoUrl, category_id || null, description, is_popular === 'true' || is_popular === true, newStatus, location || null, location_details || null, price || null, bedrooms || null, bathrooms || null, sqft || null, floors || null, amenitiesJson, latitude !== undefined ? (latitude || null) : property.latitude, longitude !== undefined ? (longitude || null) : property.longitude, land_area !== undefined ? (land_area || null) : property.land_area, land_orientation !== undefined ? (land_orientation || null) : property.land_orientation, front_road !== undefined ? (front_road || null) : property.front_road, num_units !== undefined ? (num_units || null) : property.num_units, unit_size !== undefined ? (unit_size || null) : property.unit_size, num_basements !== undefined ? (num_basements || null) : property.num_basements, car_parking !== undefined ? (car_parking || null) : property.car_parking, req.params.id]
+            'UPDATE re_properties SET title = ?, image_url = ?, images = ?, video_url = ?, category_id = ?, description = ?, is_popular = ?, is_best = ?, best_clicked_at = ?, status = ?, location = ?, location_details = ?, price = ?, bedrooms = ?, bathrooms = ?, sqft = ?, floors = ?, amenities = ?, latitude = ?, longitude = ?, land_area = ?, land_orientation = ?, front_road = ?, num_units = ?, unit_size = ?, num_basements = ?, car_parking = ? WHERE id = ?',
+            [title, image_url, imagesJson, newVideoUrl, category_id || null, description, is_popular === 'true' || is_popular === true, finalIsBest, finalBestClickedAt, newStatus, location || null, location_details || null, price || null, bedrooms || null, bathrooms || null, sqft || null, floors || null, amenitiesJson, latitude !== undefined ? (latitude || null) : property.latitude, longitude !== undefined ? (longitude || null) : property.longitude, land_area !== undefined ? (land_area || null) : property.land_area, land_orientation !== undefined ? (land_orientation || null) : property.land_orientation, front_road !== undefined ? (front_road || null) : property.front_road, num_units !== undefined ? (num_units || null) : property.num_units, unit_size !== undefined ? (unit_size || null) : property.unit_size, num_basements !== undefined ? (num_basements || null) : property.num_basements, car_parking !== undefined ? (car_parking || null) : property.car_parking, req.params.id]
         );
+
+        if (finalIsBest) {
+            await enforceBestPropertiesLimit();
+        }
 
         res.status(200).json({ message: 'Property updated successfully', image_url, images: imagesJson ? JSON.parse(imagesJson) : [], video_url: newVideoUrl, status: newStatus, latitude: latitude !== undefined ? (latitude || null) : property.latitude, longitude: longitude !== undefined ? (longitude || null) : property.longitude, land_area, land_orientation, front_road, num_units, unit_size, num_basements, car_parking, location_details });
     } catch (error) {
