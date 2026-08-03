@@ -1,23 +1,27 @@
 import "./globals.css";
 import Header from "../components/Header";
+import Sidebar from "../components/Sidebar";
 import Footer from "../components/Footer";
 
 export const metadata = {
-  title: "ফন্টবিডি - FREE Bangla Font | বাংলাদেশের সর্ববৃহৎ ফন্ট ফাউন্ড্রি",
+  title: "BanglaType - বাংলা ফন্ট টাইপোগ্রাফির নতুন দিগন্ত",
   description: "বাংলাদেশের সর্ববৃহৎ ফন্ট ফাউন্ড্রি। বিনামূল্যে বাংলা ফন্ট ডাউনলোড করুন। Download free Bangla fonts.",
 };
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="bn" className="h-full antialiased">
+    <html lang="bn" className="h-full antialiased dark">
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;500;600;700&display=swap" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
       </head>
-      <body className="min-h-full flex flex-col">
+      <body className="min-h-full flex flex-col bg-[#090a0f] text-gray-100">
         <Header />
-        <main className="flex-1">{children}</main>
+        <div className="flex flex-1">
+          <Sidebar />
+          <main className="flex-1 min-w-0">{children}</main>
+        </div>
         <Footer />
       </body>
     </html>
