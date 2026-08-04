@@ -2,12 +2,21 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import {
+  IconStar,
+  IconCheck,
+  IconHeart,
+  IconShare2,
+  IconShoppingCart,
+  IconDownload,
+} from "./Icons";
 
 export default function DarkFontDetailPage({ font }) {
   const [activeTab, setActiveTab] = useState("Preview");
   const [previewText, setPreviewText] = useState("বাংলা ডিজাইন মানেই নান্দনিকতার ছোঁয়া");
   const [fontSize, setFontSize] = useState(64);
   const [selectedWeight, setSelectedWeight] = useState("Bold");
+  const fontFam = `font-detail-preview-${font.id}`;
 
   const encodings = JSON.parse(font.encoding || "[]");
   const isPro = font.fontType === "PREMIUM";
@@ -42,8 +51,19 @@ export default function DarkFontDetailPage({ font }) {
     { code: "frac", label: "Fractions", desc: "Mathematical fraction glyphs" },
   ];
 
+  const previewFontUrl = font.previewImageUrl || font.fontFileUrl;
+
   return (
     <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-8">
+      {previewFontUrl && (
+        <style dangerouslySetInnerHTML={{ __html: `
+          @font-face {
+            font-family: '${fontFam}';
+            src: url('${previewFontUrl}');
+            font-display: swap;
+          }
+        `}} />
+      )}
       {/* Top Breadcrumb Header */}
       <div className="flex items-center gap-2 text-xs text-gray-400">
         <Link href="/" className="hover:text-white">Home</Link>
@@ -69,14 +89,18 @@ export default function DarkFontDetailPage({ font }) {
               </div>
 
               <div className="flex items-center gap-1.5 text-xs text-amber-400">
-                <span>⭐ 4.9</span>
+                <IconStar className="fill-amber-400" />
+                <span>4.9</span>
                 <span className="text-gray-500">(128 reviews)</span>
               </div>
             </div>
 
             {/* Giant Font Title Display */}
             <div className="py-6 border-y border-white/10 my-4 text-center sm:text-left">
-              <h1 className="text-4xl sm:text-6xl font-bold text-white tracking-tight leading-tight">
+              <h1 
+                className="text-4xl sm:text-6xl font-bold text-white tracking-tight leading-tight"
+                style={{ fontFamily: previewFontUrl ? `'${fontFam}', sans-serif` : 'inherit' }}
+              >
                 বাংলা টাইপোগ্রাফি <br />
                 <span className="bg-gradient-to-r from-teal-300 via-[#00e599] to-emerald-400 bg-clip-text text-transparent">
                   একটি শিল্পময় অভিজ্ঞতা
@@ -104,10 +128,10 @@ export default function DarkFontDetailPage({ font }) {
 
               <div className="flex items-center gap-2">
                 <button type="button" className="p-2 rounded-xl bg-white/5 border border-white/10 text-gray-300 hover:text-white">
-                  🤍
+                  <IconHeart />
                 </button>
                 <button type="button" className="p-2 rounded-xl bg-white/5 border border-white/10 text-gray-300 hover:text-white">
-                  🔗
+                  <IconShare2 />
                 </button>
               </div>
             </div>
@@ -183,7 +207,7 @@ export default function DarkFontDetailPage({ font }) {
             <div className="bg-[#171a28] rounded-xl p-8 border border-white/5 min-h-[160px] flex items-center overflow-x-auto">
               <p
                 className="text-white leading-tight break-words w-full"
-                style={{ fontSize: `${fontSize}px` }}
+                style={{ fontSize: `${fontSize}px`, fontFamily: previewFontUrl ? `'${fontFam}', sans-serif` : 'inherit' }}
               >
                 {previewText || font.name}
               </p>
@@ -202,6 +226,7 @@ export default function DarkFontDetailPage({ font }) {
                 <div
                   key={ch}
                   className="aspect-square flex items-center justify-center bg-[#181a28] border border-white/5 rounded-xl text-xl text-gray-200 hover:border-[#00e599] hover:text-[#00e599] transition-all cursor-pointer"
+                  style={{ fontFamily: previewFontUrl ? `'${fontFam}', sans-serif` : 'inherit' }}
                 >
                   {ch}
                 </div>
@@ -241,13 +266,13 @@ export default function DarkFontDetailPage({ font }) {
             {/* License Features List */}
             <ul className="space-y-2.5 text-xs text-gray-300">
               <li className="flex items-center gap-2 text-[#00e599]">
-                ✓ <span>Lifetime Usage</span>
+                <IconCheck /> <span>Lifetime Usage</span>
               </li>
               <li className="flex items-center gap-2 text-[#00e599]">
-                ✓ <span>1 User License</span>
+                <IconCheck /> <span>1 User License</span>
               </li>
               <li className="flex items-center gap-2 text-[#00e599]">
-                ✓ <span>Desktop & Webfont Included</span>
+                <IconCheck /> <span>Desktop & Webfont Included</span>
               </li>
             </ul>
 
@@ -256,17 +281,19 @@ export default function DarkFontDetailPage({ font }) {
               {isPro ? (
                 <Link
                   href={`/checkout?font=${font.slug}`}
-                  className="block w-full py-3.5 bg-[#00e599] text-gray-950 font-bold text-sm text-center rounded-xl hover:bg-[#00c784] transition-colors shadow-lg shadow-[#00e599]/20"
+                  className="w-full py-3.5 bg-[#00e599] text-gray-950 font-bold text-sm rounded-xl hover:bg-[#00c784] transition-colors shadow-lg shadow-[#00e599]/20 flex items-center justify-center gap-2"
                 >
-                  🛒 Add to Cart
+                  <IconShoppingCart />
+                  <span>Add to Cart</span>
                 </Link>
               ) : (
                 <a
                   href={font.fontFileUrl}
                   download
-                  className="block w-full py-3.5 bg-[#00e599] text-gray-950 font-bold text-sm text-center rounded-xl hover:bg-[#00c784] transition-colors shadow-lg shadow-[#00e599]/20"
+                  className="w-full py-3.5 bg-[#00e599] text-gray-950 font-bold text-sm rounded-xl hover:bg-[#00c784] transition-colors shadow-lg shadow-[#00e599]/20 flex items-center justify-center gap-2"
                 >
-                  📥 Download Free Font
+                  <IconDownload />
+                  <span>Download Free Font</span>
                 </a>
               )}
 
@@ -299,3 +326,4 @@ export default function DarkFontDetailPage({ font }) {
     </div>
   );
 }
+

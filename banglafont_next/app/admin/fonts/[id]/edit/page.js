@@ -1,10 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, use } from "react";
 import { useRouter } from "next/navigation";
 
-export default function NewFontPage() {
+export default function EditFontPage({ params }) {
   const router = useRouter();
+  const resolvedParams = use(params);
+  const id = resolvedParams.id;
+
   const [designers, setDesigners] = useState([]);
   const [developers, setDevelopers] = useState([]);
   const [form, setForm] = useState({
@@ -12,19 +15,59 @@ export default function NewFontPage() {
     style: "GENERAL", encoding: "UNICODE", price: "",
     fontFileUrl: "", previewImageUrl: "", designerId: "", developerId: "", featured: false,
   });
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [zipFile, setZipFile] = useState(null);
   const [previewFile, setPreviewFile] = useState(null);
   const [uploadError, setUploadError] = useState("");
 
   useEffect(() => {
-    fetch("/api/designers").then((r) => r.json()).then((d) => setDesigners(d.designers));
-    fetch("/api/developers").then((r) => r.json()).then((d) => setDevelopers(d.developers));
-  }, []);
+    // Fetch designers, developers, and single font data
+    Promise.all([
+      fetch("/api/designers").then((r) => r.json()),
+      fetch("/api/developers").then((r) => r.json()),
+      fetch(`/api/admin/fonts/${id}`).then((r) => r.json()),
+    ])
+      .then(([designersData, developersData, fontData]) => {
+        setDesigners(designersData.designers || []);
+        setDevelopers(developersData.developers || []);
+        if (fontData.font) {
+          const f = fontData.font;
+          let rawEncoding = f.encoding || "[]";
+          try {
+            const parsed = JSON.parse(rawEncoding);
+            if (Array.isArray(parsed)) {
+              rawEncoding = parsed.join(", ");
+            }
+          } catch (e) {
+            // Keep original if parsing fails
+          }
+          setForm({
+            name: f.name || "",
+            slug: f.slug || "",
+            description: f.description || "",
+            fontType: f.fontType || "FREE",
+            style: f.style || "GENERAL",
+            encoding: rawEncoding,
+            price: f.price !== null ? String(f.price) : "",
+            fontFileUrl: f.fontFileUrl || "",
+            previewImageUrl: f.previewImageUrl || "",
+            designerId: f.designerId || "",
+            developerId: f.developerId || "",
+            featured: f.featured || false,
+          });
+        }
+      })
+      .catch((err) => {
+        console.error("Fetch error:", err);
+        setUploadError("ফন্ট ডেটা লোড করতে ব্যর্থ হয়েছে।");
+      })
+      .finally(() => setLoading(false));
+  }, [id]);
 
   async function handleSubmit(e) {
     e.preventDefault();
-    setLoading(true);
+    setSaving(true);
     setUploadError("");
 
     let currentFontFileUrl = form.fontFileUrl;
@@ -56,14 +99,14 @@ export default function NewFontPage() {
         }
       } catch (err) {
         setUploadError(err.message);
-        setLoading(false);
+        setSaving(false);
         return;
       }
     }
 
     try {
-      const res = await fetch("/api/admin/fonts", {
-        method: "POST",
+      const res = await fetch(`/api/admin/fonts/${id}`, {
+        method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...form,
@@ -75,15 +118,24 @@ export default function NewFontPage() {
           encoding: JSON.stringify(form.encoding.split(",").map((s) => s.trim())),
         }),
       });
-      if (res.ok) router.push("/admin/fonts");
+      if (res.ok) {
+        router.push("/admin/fonts");
+      } else {
+        const errData = await res.json();
+        throw new Error(errData.error || "Update failed");
+      }
+    } catch (err) {
+      setUploadError(err.message);
     } finally {
-      setLoading(false);
+      setSaving(false);
     }
   }
 
+  if (loading) return <p className="text-gray-500">লোড হচ্ছে...</p>;
+
   return (
     <div className="max-w-2xl">
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">নতুন ফন্ট</h1>
+      <h1 className="text-2xl font-bold text-gray-900 mb-6">ফন্ট এডিট করুন</h1>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
           <div>
@@ -138,13 +190,14 @@ export default function NewFontPage() {
             </select>
           </div>
         </div>
+
         {uploadError && (
           <p className="text-red-500 text-sm font-medium mt-2 bg-red-50 border border-red-200 rounded-lg p-3">{uploadError}</p>
         )}
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">ফন্ট ডাউনলোড ফাইল (ZIP) *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">নতুন ফন্ট ফাইল (ZIP)</label>
             <input 
               type="file" 
               accept=".zip" 
@@ -160,7 +213,7 @@ export default function NewFontPage() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">ফন্ট প্রিভিউ ফাইল (TTF/WOFF2)</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">নতুন ফন্ট প্রিভিউ (TTF/WOFF2)</label>
             <input 
               type="file" 
               accept=".ttf,.otf,.woff,.woff2" 
@@ -187,8 +240,8 @@ export default function NewFontPage() {
           <input type="checkbox" checked={form.featured} onChange={(e) => setForm({ ...form, featured: e.target.checked })} className="rounded" />
           <span className="text-sm text-gray-700">ফিচার্ড</span>
         </label>
-        <button type="submit" disabled={loading} className="px-6 py-3 bg-primary text-white rounded-lg font-semibold hover:bg-primary-dark disabled:opacity-50 cursor-pointer">
-          {loading ? "সেভ হচ্ছে..." : "সেভ করুন"}
+        <button type="submit" disabled={saving} className="px-6 py-3 bg-primary text-white rounded-lg font-semibold hover:bg-primary-dark disabled:opacity-50 cursor-pointer">
+          {saving ? "সেভ হচ্ছে..." : "সেভ করুন"}
         </button>
       </form>
     </div>

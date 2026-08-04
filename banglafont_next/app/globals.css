@@ -13,6 +13,20 @@
   --text-muted: #9ca3af;
 }
 
+html.dark {
+  color-scheme: dark;
+}
+
+html.light {
+  --background: #f9fafb;
+  --foreground: #111827;
+  --border: #d1d5db;
+  --surface: #ffffff;
+  --surface-card: #ffffff;
+  --text-muted: #6b7280;
+  color-scheme: light;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -30,7 +44,6 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: "Noto Sans Bengali", Arial, Helvetica, sans-serif;
-  color-scheme: dark;
 }
 
 /* Custom Scrollbar */

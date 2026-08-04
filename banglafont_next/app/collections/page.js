@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { IconArrowRight } from "../../components/Icons";
 
 export default function CollectionsPage() {
   const collections = [
@@ -125,7 +126,7 @@ export default function CollectionsPage() {
                 href="/free-fonts"
                 className="w-9 h-9 rounded-2xl bg-[#1d202c] group-hover:bg-[#00e599] group-hover:text-gray-950 text-gray-300 flex items-center justify-center transition-all shadow-md"
               >
-                ➔
+                <IconArrowRight />
               </Link>
             </div>
           </div>

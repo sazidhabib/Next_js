@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { IconEdit3, IconArrowRight } from "./Icons";
 
 const CATEGORIES = [
   { value: "ALL", label: "সকল" },
@@ -39,8 +40,22 @@ export default function HomeTypeTester({ fonts = [] }) {
 
   return (
     <div className="bg-[#12141f] border border-white/10 rounded-3xl p-6 sm:p-8 shadow-2xl">
+      {/* Dynamic @font-face rules for all fonts in type tester */}
+      {fonts.map((f) => {
+        const previewFontUrl = f.previewImageUrl || f.fontFileUrl;
+        return previewFontUrl && (
+          <style key={f.slug} dangerouslySetInnerHTML={{ __html: `
+            @font-face {
+              font-family: 'font-tester-${f.slug}';
+              src: url('${previewFontUrl}');
+              font-display: swap;
+            }
+          `}} />
+        );
+      })}
+
       <div className="flex items-center gap-2 mb-6">
-        <span className="text-xl">✍️</span>
+        <IconEdit3 className="text-xl text-[#00e599]" />
         <h3 className="text-lg font-bold text-white tracking-tight">Interactive Type Tester</h3>
       </div>
 
@@ -115,6 +130,7 @@ export default function HomeTypeTester({ fonts = [] }) {
                   lineHeight: lineHeight,
                   textAlign: textAlign,
                   fontWeight: isBold ? "bold" : "normal",
+                  fontFamily: (selectedFont?.previewImageUrl || selectedFont?.fontFileUrl) ? `'font-tester-${selectedFont.slug}', sans-serif` : 'inherit'
                 }}
               />
             </div>
@@ -216,10 +232,11 @@ export default function HomeTypeTester({ fonts = [] }) {
                     <span className="text-sm font-medium truncate">{f.name}</span>
                     <Link
                       href={`/free-font/${f.slug}`}
-                      className="text-[10px] text-[#00e599] hover:underline"
+                      className="text-[10px] text-[#00e599] hover:underline flex items-center gap-1"
                       onClick={(e) => e.stopPropagation()}
                     >
-                      বিস্তারিত &rarr;
+                      <span>বিস্তারিত</span>
+                      <IconArrowRight />
                     </Link>
                   </div>
                 </div>
@@ -231,3 +248,4 @@ export default function HomeTypeTester({ fonts = [] }) {
     </div>
   );
 }
+

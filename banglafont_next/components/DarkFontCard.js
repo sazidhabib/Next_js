@@ -1,8 +1,10 @@
 import Link from "next/link";
+import { IconDownload } from "./Icons";
 
 export default function DarkFontCard({ font }) {
   const isPro = font.fontType === "PREMIUM";
   const priceDisplay = font.price ? `৳ ${font.price.toLocaleString("bn-BD")}` : "Free";
+  const fontFam = `font-card-preview-${font.id}`;
 
   // Card gradient variations matching screenshot cards
   const gradients = [
@@ -12,9 +14,20 @@ export default function DarkFontCard({ font }) {
     "from-[#241322] via-[#15121c] to-[#0f111a]",
   ];
   const bgGradient = gradients[(font.id || 0) % gradients.length];
+  const previewFontUrl = font.previewImageUrl || font.fontFileUrl;
 
   return (
     <div className="group relative bg-[#13151f] border border-white/10 hover:border-[#00e599]/50 rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-[0_0_25px_rgba(0,229,153,0.15)] flex flex-col justify-between">
+      {previewFontUrl && (
+        <style dangerouslySetInnerHTML={{ __html: `
+          @font-face {
+            font-family: '${fontFam}';
+            src: url('${previewFontUrl}');
+            font-display: swap;
+          }
+        `}} />
+      )}
+
       {/* Top Header Row */}
       <div className="p-4 pb-0 flex items-center justify-between z-10">
         <span className="text-xs font-medium text-gray-400 group-hover:text-gray-200 transition-colors">
@@ -34,7 +47,10 @@ export default function DarkFontCard({ font }) {
       {/* Font Sample Text Banner */}
       <Link href={`/free-font/${font.slug}`} className="block p-5 py-6 my-1">
         <div className={`rounded-xl p-5 bg-gradient-to-br ${bgGradient} border border-white/5 group-hover:border-white/10 transition-all text-center min-h-[110px] flex items-center justify-center`}>
-          <h3 className="text-2xl sm:text-3xl font-normal text-gray-100 tracking-tight leading-snug group-hover:scale-[1.02] transition-transform">
+          <h3 
+            className="text-2xl sm:text-3xl font-normal text-gray-100 tracking-tight leading-snug group-hover:scale-[1.02] transition-transform"
+            style={{ fontFamily: previewFontUrl ? `'${fontFam}', sans-serif` : 'inherit' }}
+          >
             {font.name === "SutonnyMJ"
               ? "সুন্দর এবং পাঠযোগ্য বাংলা টাইপফেস"
               : font.name === "NikoshBAN"
@@ -62,10 +78,11 @@ export default function DarkFontCard({ font }) {
             className="w-8 h-8 rounded-xl bg-[#1d202c] group-hover:bg-[#00e599] group-hover:text-gray-950 text-gray-300 flex items-center justify-center transition-all"
             title="Download / Details"
           >
-            📥
+            <IconDownload className="text-sm" />
           </Link>
         </div>
       </div>
     </div>
   );
 }
+

@@ -2,17 +2,6 @@ import Link from "next/link";
 import { prisma } from "../../lib/prisma";
 import DarkFontCard from "../../components/DarkFontCard";
 
-const CATEGORIES = [
-  { name: "All Fonts", count: 2438, active: true },
-  { name: "Sans-Serif", count: 856 },
-  { name: "Serif", count: 632 },
-  { name: "Display", count: 482 },
-  { name: "Handwritten", count: 286 },
-  { name: "Monospace", count: 182 },
-  { name: "Calligraphic", count: 134 },
-  { name: "Blackletter", count: 96 },
-];
-
 const STYLES = [
   { value: "ALL", label: "All Fonts" },
   { value: "HANDWRITING", label: "Handwritten" },
@@ -82,66 +71,15 @@ export default async function FreeFontsPage({ searchParams }) {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        {/* Left Filter Sidebar matching Screenshot 3 */}
-        <div className="lg:col-span-3 bg-[#11131a] border border-white/10 rounded-2xl p-5 space-y-6 hidden lg:block">
-          <div>
-            <h3 className="text-xs font-bold text-white uppercase tracking-wider mb-3">Categories</h3>
-            <ul className="space-y-1">
-              {CATEGORIES.map((cat) => (
-                <li key={cat.name}>
-                  <button
-                    type="button"
-                    className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition-colors ${
-                      cat.active
-                        ? "bg-[#00e599]/10 text-[#00e599] font-bold"
-                        : "text-gray-400 hover:text-white hover:bg-white/5"
-                    }`}
-                  >
-                    <span>{cat.name}</span>
-                    <span className="text-[10px] text-gray-500">{cat.count}</span>
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div className="border-t border-white/5 pt-4">
-            <h3 className="text-xs font-bold text-white uppercase tracking-wider mb-3">Price</h3>
-            <div className="space-y-2 text-xs text-gray-400">
-              <label className="flex items-center justify-between cursor-pointer">
-                <span className="flex items-center gap-2">
-                  <input type="checkbox" defaultChecked className="accent-[#00e599] rounded" /> Free
-                </span>
-                <span className="text-[10px] text-gray-500">1,243</span>
-              </label>
-              <label className="flex items-center justify-between cursor-pointer">
-                <span className="flex items-center gap-2">
-                  <input type="checkbox" defaultChecked className="accent-[#00e599] rounded" /> Pro
-                </span>
-                <span className="text-[10px] text-gray-500">1,195</span>
-              </label>
-            </div>
-          </div>
-
-          <div className="border-t border-white/5 pt-4">
-            <button
-              type="button"
-              className="w-full py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-semibold text-xs rounded-xl hover:opacity-90 transition-opacity"
-            >
-              Reset Filters
-            </button>
-          </div>
-        </div>
-
-        {/* Right Fonts Grid */}
-        <div className="lg:col-span-9 space-y-8">
+        {/* Right Fonts Grid - Now spans full width */}
+        <div className="lg:col-span-12 space-y-8">
           {fonts.length === 0 ? (
             <div className="text-center py-20 bg-[#12141f] rounded-2xl border border-white/10">
               <p className="text-gray-400 text-sm">কোনো ফন্ট পাওয়া যায়নি।</p>
             </div>
           ) : (
             <>
-              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-5">
                 {fonts.map((font) => (
                   <DarkFontCard key={font.id} font={font} />
                 ))}

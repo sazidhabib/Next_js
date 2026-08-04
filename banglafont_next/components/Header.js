@@ -2,13 +2,25 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { IconSearch, IconShoppingCart, IconUser } from "./Icons";
 
-export default function Header() {
+export default function Header({ onMenuClick }) {
   const [search, setSearch] = useState("");
 
   return (
     <header className="border-b border-white/10 bg-[#0d0e14]/90 backdrop-blur-md sticky top-0 z-50 text-white">
       <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between gap-6">
+        {/* Hamburger Menu Toggle Button */}
+        <button
+          onClick={onMenuClick}
+          className="p-2.5 text-gray-300 hover:text-white hover:bg-white/5 rounded-xl border border-white/10 flex items-center justify-center cursor-pointer transition-colors"
+          title="Toggle Navigation Menu"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16"></path>
+          </svg>
+        </button>
+
         {/* Brand Logo */}
         <Link href="/" className="flex items-center gap-2.5 group shrink-0">
           <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-[#00e599] to-emerald-400 flex items-center justify-center text-gray-950 font-black text-lg shadow-[0_0_15px_rgba(0,229,153,0.3)]">
@@ -21,7 +33,7 @@ export default function Header() {
 
         {/* Search Bar */}
         <div className="hidden md:flex flex-1 max-w-md items-center relative">
-          <span className="absolute left-3.5 text-gray-400 text-xs">🔍</span>
+          <IconSearch className="absolute left-3.5 text-gray-400 text-sm" />
           <input
             type="text"
             value={search}
@@ -60,7 +72,7 @@ export default function Header() {
             className="relative p-2 text-gray-300 hover:text-white bg-[#161822] rounded-xl border border-white/10 transition-colors"
             title="Cart"
           >
-            🛒
+            <IconShoppingCart className="text-base" />
             <span className="absolute -top-1 -right-1 bg-[#00e599] text-gray-950 text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
               2
             </span>
@@ -70,7 +82,7 @@ export default function Header() {
             href="/admin"
             className="text-xs font-semibold px-4 py-2 bg-[#161822] text-gray-200 rounded-xl border border-white/10 hover:border-white/30 transition-all flex items-center gap-1.5"
           >
-            <span>👤</span>
+            <IconUser className="text-sm" />
             <span>Sign In</span>
           </Link>
         </div>
@@ -78,3 +90,4 @@ export default function Header() {
     </header>
   );
 }
+

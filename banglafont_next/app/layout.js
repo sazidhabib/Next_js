@@ -1,7 +1,5 @@
 import "./globals.css";
-import Header from "../components/Header";
-import Sidebar from "../components/Sidebar";
-import Footer from "../components/Footer";
+import RootLayoutContent from "../components/RootLayoutContent";
 
 export const metadata = {
   title: "BanglaType - বাংলা ফন্ট টাইপোগ্রাফির নতুন দিগন্ত",
@@ -17,12 +15,7 @@ export default function RootLayout({ children }) {
         <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
       </head>
       <body className="min-h-full flex flex-col bg-[#090a0f] text-gray-100">
-        <Header />
-        <div className="flex flex-1">
-          <Sidebar />
-          <main className="flex-1 min-w-0">{children}</main>
-        </div>
-        <Footer />
+        <RootLayoutContent>{children}</RootLayoutContent>
       </body>
     </html>
   );
