@@ -3,6 +3,7 @@ import { prisma } from "../lib/prisma";
 import DarkFontCard from "../components/DarkFontCard";
 import HomeTypeTester from "../components/HomeTypeTester";
 import Hero from "../components/Hero";
+import DownloadMarquee from "../components/DownloadMarquee";
 
 async function getHomeData() {
   const [totalFonts, totalDownloads, featuredFonts, topFonts, allFonts] = await Promise.all([
@@ -49,6 +50,14 @@ export default async function HomePage() {
       {/* Hero Banner Slider Component */}
       <Hero />
 
+      {/* Highest Downloads Marquee */}
+      <DownloadMarquee fonts={data.topFonts} />
+
+      {/* Type Tester Component */}
+      <section className="pt-4">
+        <HomeTypeTester fonts={data.allFonts} />
+      </section>
+
       {/* Popular Fonts Section */}
       <section className="space-y-6">
         <div className="flex items-center justify-between">
@@ -74,10 +83,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Type Tester Component */}
-      <section className="pt-4">
-        <HomeTypeTester fonts={data.allFonts} />
-      </section>
+
     </div>
   );
 }

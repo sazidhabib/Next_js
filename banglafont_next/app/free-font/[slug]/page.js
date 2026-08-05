@@ -18,7 +18,7 @@ export default async function FontDetailPage({ params }) {
   const { slug } = await params;
   const font = await prisma.font.findUnique({
     where: { slug, published: true },
-    include: { designer: true, developer: true },
+    include: { designer: true, developer: true, variants: true },
   });
 
   if (!font) notFound();

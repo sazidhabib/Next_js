@@ -15,7 +15,20 @@ export default function DarkFontDetailPage({ font }) {
   const [activeTab, setActiveTab] = useState("Preview");
   const [previewText, setPreviewText] = useState("বাংলা ডিজাইন মানেই নান্দনিকতার ছোঁয়া");
   const [fontSize, setFontSize] = useState(64);
-  const [selectedWeight, setSelectedWeight] = useState("Bold");
+  const weightMap = {
+    "ExtraLight": 200,
+    "Light": 300,
+    "Regular": 400,
+    "Medium": 500,
+    "SemiBold": 600,
+    "Bold": 700,
+    "ExtraBold": 800,
+    "Black": 900
+  };
+
+  const [selectedWeight, setSelectedWeight] = useState(
+    font.variants && font.variants.length > 0 ? font.variants[0].weight : "Regular"
+  );
   const fontFam = `font-detail-preview-${font.id}`;
 
   const encodings = JSON.parse(font.encoding || "[]");
@@ -32,6 +45,14 @@ export default function DarkFontDetailPage({ font }) {
     { label: "ExtraBold", weight: 800, sample: "অ" },
     { label: "Black", weight: 900, sample: "অ" },
   ];
+
+  const activeWeights = font.variants && font.variants.length > 0
+    ? font.variants.map((v) => ({
+        label: v.weight,
+        weight: weightMap[v.weight] || 400,
+        sample: "অ"
+      }))
+    : fontWeights;
 
   const glyphChars = [
     "অ", "আ", "ই", "ঈ", "উ", "ঊ", "ঋ", "এ", "ঐ", "ও", "ঔ",
@@ -55,14 +76,26 @@ export default function DarkFontDetailPage({ font }) {
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-8">
-      {previewFontUrl && (
-        <style dangerouslySetInnerHTML={{ __html: `
+      {font.variants && font.variants.length > 0 ? (
+        <style dangerouslySetInnerHTML={{ __html: font.variants.map((v) => `
           @font-face {
             font-family: '${fontFam}';
-            src: url('${previewFontUrl}');
+            src: url('${v.fileUrl}');
+            font-weight: ${weightMap[v.weight] || 400};
+            font-style: normal;
             font-display: swap;
           }
-        `}} />
+        `).join('\n') }} />
+      ) : (
+        previewFontUrl && (
+          <style dangerouslySetInnerHTML={{ __html: `
+            @font-face {
+              font-family: '${fontFam}';
+              src: url('${previewFontUrl}');
+              font-display: swap;
+            }
+          `}} />
+        )
       )}
       {/* Top Breadcrumb Header */}
       <div className="flex items-center gap-2 text-xs text-gray-400">
@@ -184,8 +217,8 @@ export default function DarkFontDetailPage({ font }) {
             {/* Weights Selector Cards */}
             <div>
               <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Font Weights</div>
-              <div className="grid grid-cols-4 sm:grid-cols-8 gap-2">
-                {fontWeights.map((w) => (
+              <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-2">
+                {activeWeights.map((w) => (
                   <button
                     key={w.label}
                     type="button"
@@ -196,7 +229,7 @@ export default function DarkFontDetailPage({ font }) {
                         : "border-white/5 bg-[#181a28] text-gray-400 hover:border-white/20"
                     }`}
                   >
-                    <div className="text-2xl mb-1">{w.sample}</div>
+                    <div className="text-2xl mb-1" style={{ fontFamily: previewFontUrl ? `'${fontFam}', sans-serif` : 'inherit', fontWeight: w.weight }}>{w.sample}</div>
                     <div className="text-[10px] truncate">{w.label}</div>
                   </button>
                 ))}
@@ -207,7 +240,11 @@ export default function DarkFontDetailPage({ font }) {
             <div className="bg-[#171a28] rounded-xl p-8 border border-white/5 min-h-[160px] flex items-center overflow-x-auto">
               <p
                 className="text-white leading-tight break-words w-full"
-                style={{ fontSize: `${fontSize}px`, fontFamily: previewFontUrl ? `'${fontFam}', sans-serif` : 'inherit' }}
+                style={{
+                  fontSize: `${fontSize}px`,
+                  fontFamily: previewFontUrl ? `'${fontFam}', sans-serif` : 'inherit',
+                  fontWeight: weightMap[selectedWeight] || 400
+                }}
               >
                 {previewText || font.name}
               </p>

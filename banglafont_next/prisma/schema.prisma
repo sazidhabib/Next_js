@@ -28,6 +28,7 @@ model Font {
   developer       Developer?       @relation(fields: [developerId], references: [id])
   downloads       Download[]
   orders          Order[]
+  variants        FontVariant[]
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
 
@@ -35,6 +36,16 @@ model Font {
   @@index([style])
   @@index([designerId])
   @@index([downloadCount])
+}
+
+model FontVariant {
+  id        Int      @id @default(autoincrement())
+  weight    String   @db.VarChar(50)  // e.g. "Regular", "Bold", "SemiBold", etc.
+  fileUrl   String   @db.VarChar(500)
+  fontId    Int
+  font      Font     @relation(fields: [fontId], references: [id], onDelete: Cascade)
+
+  @@index([fontId])
 }
 
 model Designer {

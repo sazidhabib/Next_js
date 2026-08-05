@@ -160,7 +160,7 @@ async function main() {
       continue;
     }
 
-    await prisma.font.upsert({
+    const font = await prisma.font.upsert({
       where: { slug: f.slug },
       update: {},
       create: {
@@ -177,7 +177,20 @@ async function main() {
         developerId: developer?.id ?? null,
       },
     });
-    console.log(`  ✓ Font: ${f.name}`);
+
+    // Clear and seed FontVariants for idempotency
+    await prisma.fontVariant.deleteMany({ where: { fontId: font.id } });
+    const defaultWeights = ["Regular", "Medium", "Bold"];
+    for (const weight of defaultWeights) {
+      await prisma.fontVariant.create({
+        data: {
+          weight,
+          fileUrl: f.fontFileUrl, // Use the default font file url for simplicity
+          fontId: font.id,
+        },
+      });
+    }
+    console.log(`  ✓ Font: ${f.name} (with variants: ${defaultWeights.join(", ")})`);
   }
 
   console.log("\n✅ Seed completed!");
