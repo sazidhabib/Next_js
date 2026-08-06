@@ -11,7 +11,7 @@ export default function EditFontPage({ params }) {
   const [designers, setDesigners] = useState([]);
   const [developers, setDevelopers] = useState([]);
   const [form, setForm] = useState({
-    name: "", slug: "", description: "", fontType: "FREE",
+    name: "", slug: "", description: "", detailsDescription: "", fontType: "FREE",
     style: "GENERAL", encoding: "UNICODE", price: "",
     fontFileUrl: "", previewImageUrl: "", designerId: "", developerId: "", featured: false,
   });
@@ -46,6 +46,7 @@ export default function EditFontPage({ params }) {
             name: f.name || "",
             slug: f.slug || "",
             description: f.description || "",
+            detailsDescription: f.detailsDescription || "",
             fontType: f.fontType || "FREE",
             style: f.style || "GENERAL",
             encoding: rawEncoding,
@@ -148,8 +149,12 @@ export default function EditFontPage({ params }) {
           </div>
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">বর্ণনা</label>
-          <textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={3} className="w-full border border-border bg-white text-gray-900 placeholder-gray-400 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" />
+          <label className="block text-sm font-medium text-gray-700 mb-1">Preview বর্ণনা</label>
+          <textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={2} className="w-full border border-border bg-white text-gray-900 placeholder-gray-400 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Details বর্ণনা</label>
+          <textarea value={form.detailsDescription} onChange={(e) => setForm({ ...form, detailsDescription: e.target.value })} rows={4} className="w-full border border-border bg-white text-gray-900 placeholder-gray-400 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" />
         </div>
         <div className="grid grid-cols-3 gap-4">
           <div>

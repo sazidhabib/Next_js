@@ -70,6 +70,8 @@ function SidebarContent({ isOpen, onClose }) {
     { name: "Blackletter", count: 96, value: "BLACKLETTER" },
   ];
 
+  const isDetailPage = pathname.startsWith("/free-font/");
+  const activeDetailTab = searchParams ? (searchParams.get("tab") || "Overview") : "Overview";
   const isFilterActive = pathname === "/free-fonts" && !forceMainMenu;
 
   return (
@@ -80,74 +82,36 @@ function SidebarContent({ isOpen, onClose }) {
     }`}>
       {/* Sliding Viewport */}
       <div className="w-full overflow-hidden flex flex-col flex-1">
-        <div 
-          className="flex w-[200%] flex-1 transition-transform duration-300 ease-in-out"
-          style={{ transform: isFilterActive ? 'translateX(-50%)' : 'translateX(0%)' }}
-        >
-          {/* Panel 1: Main Menu */}
-          <div className="w-1/2 shrink-0 flex flex-col justify-between pr-2">
+        {isDetailPage ? (
+          <div className="flex flex-col justify-between flex-1">
             <div className="space-y-6">
-              {/* Main Nav */}
+              {/* Back Link */}
+              <div className="pb-4 border-b border-white/5">
+                <Link
+                  href="/free-fonts"
+                  className="flex items-center gap-2 text-xs text-gray-400 hover:text-white transition-colors cursor-pointer"
+                >
+                  <IconArrowLeft className="text-sm" />
+                  <span>Back to All Fonts</span>
+                </Link>
+              </div>
+
+              {/* Detail Navigation Options */}
               <div>
                 <ul className="space-y-1">
-                  {mainNav.map((item) => {
-                    const active = pathname === item.href;
-                    const Icon = item.icon;
+                  {["Overview", "Glyphs", "Features", "Details", "License", "Related Fonts"].map((tab) => {
+                    const active = activeDetailTab === tab;
                     return (
-                      <li key={item.label}>
+                      <li key={tab}>
                         <Link
-                          href={item.href}
-                          onClick={() => {
-                            if (item.href.includes("/free-fonts")) {
-                              setForceMainMenu(false);
-                            }
-                          }}
-                          className={`flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium transition-colors ${
+                          href={`${pathname}?tab=${tab}`}
+                          className={`flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition-all ${
                             active
-                              ? "bg-white/10 text-[#00e599] font-semibold"
-                              : "text-gray-400 hover:text-white hover:bg-white/5"
+                              ? "bg-[#00e599]/10 text-[#00e599] font-bold border border-[#00e599]/10"
+                              : "text-gray-400 hover:text-white hover:bg-white/5 border border-transparent"
                           }`}
                         >
-                          <Icon className="text-base" />
-                          <span>{item.label}</span>
-                        </Link>
-                      </li>
-                    );
-                  })}
-                </ul>
-              </div>
-
-              <div className="border-t border-white/5 pt-4">
-                <ul className="space-y-1">
-                  {toolsNav.map((item) => {
-                    const Icon = item.icon;
-                    return (
-                      <li key={item.label}>
-                        <Link
-                          href={item.href}
-                          className="flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium text-gray-400 hover:text-white hover:bg-white/5 transition-colors"
-                        >
-                          <Icon className="text-base" />
-                          <span>{item.label}</span>
-                        </Link>
-                      </li>
-                    );
-                  })}
-                </ul>
-              </div>
-
-              <div className="border-t border-white/5 pt-4">
-                <ul className="space-y-1">
-                  {userNav.map((item) => {
-                    const Icon = item.icon;
-                    return (
-                      <li key={item.label}>
-                        <Link
-                          href={item.href}
-                          className="flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium text-gray-400 hover:text-white hover:bg-white/5 transition-colors"
-                        >
-                          <Icon className="text-base" />
-                          <span>{item.label}</span>
+                          <span>{tab}</span>
                         </Link>
                       </li>
                     );
@@ -156,7 +120,7 @@ function SidebarContent({ isOpen, onClose }) {
               </div>
             </div>
 
-            {/* Upgrade to Pro Promotion Banner inside Main Menu */}
+            {/* Upgrade to Pro Promotion Banner */}
             <div className="mt-8 p-4 rounded-2xl bg-gradient-to-br from-purple-900/40 via-indigo-900/30 to-[#12131a] border border-purple-500/20 text-center relative overflow-hidden group">
               <div className="w-10 h-10 rounded-full bg-purple-500/20 text-purple-400 flex items-center justify-center mx-auto mb-2 text-lg">
                 <IconCrown className="text-xl" />
@@ -167,15 +131,109 @@ function SidebarContent({ isOpen, onClose }) {
               </p>
               <Link
                 href="/premium-font"
-                className="inline-block w-full py-2 bg-gradient-to-r from-[#00e599] to-emerald-500 text-gray-950 font-bold text-[11px] rounded-xl hover:opacity-90 transition-opacity"
+                className="inline-block w-full py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold text-[11px] rounded-xl hover:opacity-90 transition-opacity"
               >
                 Go Pro
               </Link>
             </div>
           </div>
+        ) : (
+          <div 
+            className="flex w-[200%] flex-1 transition-transform duration-300 ease-in-out"
+            style={{ transform: isFilterActive ? 'translateX(-50%)' : 'translateX(0%)' }}
+          >
+            {/* Panel 1: Main Menu */}
+            <div className="w-1/2 shrink-0 flex flex-col justify-between pr-2">
+              <div className="space-y-6">
+                {/* Main Nav */}
+                <div>
+                  <ul className="space-y-1">
+                    {mainNav.map((item) => {
+                      const active = pathname === item.href;
+                      const Icon = item.icon;
+                      return (
+                        <li key={item.label}>
+                          <Link
+                            href={item.href}
+                            onClick={() => {
+                              if (item.href.includes("/free-fonts")) {
+                                setForceMainMenu(false);
+                              }
+                            }}
+                            className={`flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium transition-colors ${
+                              active
+                                ? "bg-white/10 text-[#00e599] font-semibold"
+                                : "text-gray-400 hover:text-white hover:bg-white/5"
+                            }`}
+                          >
+                            <Icon className="text-base" />
+                            <span>{item.label}</span>
+                          </Link>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
 
-          {/* Panel 2: Filters Menu */}
-          <div className="w-1/2 shrink-0 flex flex-col justify-between pl-2">
+                <div className="border-t border-white/5 pt-4">
+                  <ul className="space-y-1">
+                    {toolsNav.map((item) => {
+                      const Icon = item.icon;
+                      return (
+                        <li key={item.label}>
+                          <Link
+                            href={item.href}
+                            className="flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium text-gray-400 hover:text-white hover:bg-white/5 transition-colors"
+                          >
+                            <Icon className="text-base" />
+                            <span>{item.label}</span>
+                          </Link>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+
+                <div className="border-t border-white/5 pt-4">
+                  <ul className="space-y-1">
+                    {userNav.map((item) => {
+                      const Icon = item.icon;
+                      return (
+                        <li key={item.label}>
+                          <Link
+                            href={item.href}
+                            className="flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium text-gray-400 hover:text-white hover:bg-white/5 transition-colors"
+                          >
+                            <Icon className="text-base" />
+                            <span>{item.label}</span>
+                          </Link>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+              </div>
+
+              {/* Upgrade to Pro Promotion Banner inside Main Menu */}
+              <div className="mt-8 p-4 rounded-2xl bg-gradient-to-br from-purple-900/40 via-indigo-900/30 to-[#12131a] border border-purple-500/20 text-center relative overflow-hidden group">
+                <div className="w-10 h-10 rounded-full bg-purple-500/20 text-purple-400 flex items-center justify-center mx-auto mb-2 text-lg">
+                  <IconCrown className="text-xl" />
+                </div>
+                <h4 className="text-xs font-bold text-white mb-1">Upgrade to Pro</h4>
+                <p className="text-[10px] text-gray-400 mb-3 leading-tight">
+                  Unlock premium fonts, exclusive glyphs & more.
+                </p>
+                <Link
+                  href="/premium-font"
+                  className="inline-block w-full py-2 bg-gradient-to-r from-[#00e599] to-emerald-500 text-gray-950 font-bold text-[11px] rounded-xl hover:opacity-90 transition-opacity"
+                >
+                  Go Pro
+                </Link>
+              </div>
+            </div>
+
+            {/* Panel 2: Filters Menu */}
+            <div className="w-1/2 shrink-0 flex flex-col justify-between pl-2">
             <div className="space-y-6">
               {/* Back Button */}
               <div className="pb-4 border-b border-white/5">
@@ -260,7 +318,8 @@ function SidebarContent({ isOpen, onClose }) {
               </Link>
             </div>
           </div>
-        </div>
+          </div>
+        )}
       </div>
     </aside>
   );

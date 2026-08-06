@@ -23,7 +23,17 @@ export default async function FontDetailPage({ params }) {
 
   if (!font) notFound();
 
-  return <DarkFontDetailPage font={font} />;
+  const relatedFonts = await prisma.font.findMany({
+    where: {
+      style: font.style,
+      id: { not: font.id },
+      published: true,
+    },
+    include: { designer: true },
+    take: 5,
+  });
+
+  return <DarkFontDetailPage font={font} relatedFonts={relatedFonts} />;
 }
 
 

@@ -20,6 +20,7 @@ model Font {
   viewCount       Int              @default(0)
   fontFileUrl     String           @db.VarChar(500)
   previewImageUrl String?          @db.VarChar(500)
+  detailsDescription String?       @db.Text
   featured        Boolean          @default(false)
   published       Boolean          @default(true)
   designerId      Int

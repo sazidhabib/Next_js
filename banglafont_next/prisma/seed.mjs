@@ -167,6 +167,7 @@ async function main() {
         name: f.name,
         slug: f.slug,
         description: f.description,
+        detailsDescription: `${f.name} একটি চমৎকার বাংলা টাইপফেস। এটি পরিষ্কার লেটারফর্ম ও সুন্দর ড্রয়িংয়ের সাথে ডিজাইন করা হয়েছে যা আপনার যেকোনো ডিজিটাল বা প্রিন্ট ডিজাইনের প্রকাশভঙ্গিকে এক নতুন শৈল্পিক রূপ দেবে।`,
         fontType: "FREE",
         style: f.style,
         encoding: f.encoding,
