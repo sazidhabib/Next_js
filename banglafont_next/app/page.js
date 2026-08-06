@@ -5,6 +5,8 @@ import HomeTypeTester from "../components/HomeTypeTester";
 import Hero from "../components/Hero";
 import DownloadMarquee from "../components/DownloadMarquee";
 
+export const dynamic = "force-dynamic";
+
 async function getHomeData() {
   const [totalFonts, totalDownloads, featuredFonts, topFonts, allFonts] = await Promise.all([
     prisma.font.count({ where: { published: true } }),

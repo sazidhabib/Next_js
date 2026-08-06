@@ -163,7 +163,7 @@ function FontDetailPageContent({ font, relatedFonts = [] }) {
                   className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white tracking-tight leading-tight"
                   style={{ fontFamily: previewFontUrl ? `'${fontFam}', sans-serif` : 'inherit', fontWeight: weightMap[selectedWeight] || 400 }}
                 >
-                  {font.name}
+                  {font.banglaName || font.name} {font.banglaName && <span className="text-xl sm:text-2xl lg:text-3xl font-medium text-gray-400 block sm:inline sm:ml-4 font-sans">({font.name})</span>}
                 </h1>
                 <p className="text-xs sm:text-sm text-gray-400 mt-2 max-w-xl leading-relaxed">
                   {font.detailsDescription || font.description}

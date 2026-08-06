@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function AdminLayout({ children }) {
   const router = useRouter();
@@ -85,6 +87,7 @@ export default function AdminLayout({ children }) {
         </div>
       </aside>
       <div className="flex-1 p-8">{children}</div>
+      <ToastContainer position="top-right" autoClose={3000} />
     </div>
   );
 }

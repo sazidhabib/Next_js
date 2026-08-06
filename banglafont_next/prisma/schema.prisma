@@ -9,6 +9,7 @@ datasource db {
 model Font {
   id              Int              @id @default(autoincrement())
   name            String           @db.VarChar(200)
+  banglaName      String?          @db.VarChar(200)
   slug            String           @unique @db.VarChar(200)
   description     String?          @db.Text
   fontType        FontType         @default(FREE)
@@ -52,6 +53,7 @@ model FontVariant {
 model Designer {
   id          Int      @id @default(autoincrement())
   name        String   @db.VarChar(200)
+  banglaName  String?  @db.VarChar(200)
   slug        String   @unique @db.VarChar(200)
   photo       String?  @db.VarChar(500)
   bio         String?  @db.Text
@@ -65,6 +67,7 @@ model Designer {
 model Developer {
   id          Int      @id @default(autoincrement())
   name        String   @db.VarChar(200)
+  banglaName  String?  @db.VarChar(200)
   slug        String   @unique @db.VarChar(200)
   photo       String?  @db.VarChar(500)
   bio         String?  @db.Text

@@ -3,9 +3,12 @@ import { notFound } from "next/navigation";
 import { prisma } from "../../../lib/prisma";
 import FontCard from "../../../components/FontCard";
 
+export const dynamic = "force-dynamic";
+
 export default async function DeveloperDetailPage({ params }) {
+  const resolvedParams = await params;
   const developer = await prisma.developer.findUnique({
-    where: { slug: params.slug },
+    where: { slug: resolvedParams.slug },
     include: {
       fonts: {
         where: { published: true },
@@ -24,7 +27,9 @@ export default async function DeveloperDetailPage({ params }) {
           {developer.name.charAt(0)}
         </div>
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">{developer.name}</h1>
+          <h1 className="text-3xl font-bold text-gray-900">
+            {developer.name} {developer.banglaName && <span className="text-lg font-medium text-gray-500 ml-2">({developer.banglaName})</span>}
+          </h1>
           {developer.bio && <p className="text-gray-500 mt-1">{developer.bio}</p>}
           <p className="text-sm text-gray-400 mt-1">{developer.fonts.length}টি ফন্ট</p>
         </div>

@@ -2,6 +2,8 @@ import { notFound } from "next/navigation";
 import { prisma } from "../../../lib/prisma";
 import DarkFontDetailPage from "../../../components/DarkFontDetailPage";
 
+export const dynamic = "force-dynamic";
+
 export async function generateMetadata({ params }) {
   const { slug } = await params;
   const font = await prisma.font.findUnique({

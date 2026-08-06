@@ -26,7 +26,7 @@ export async function POST(request) {
     const token = jwt.sign(
       { id: admin.id, email: admin.email, role: admin.role },
       JWT_SECRET,
-      { expiresIn: "7d" }
+      { expiresIn: "3h" }
     );
 
     const response = NextResponse.json({
@@ -37,7 +37,7 @@ export async function POST(request) {
     response.cookies.set("token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      maxAge: 7 * 24 * 60 * 60,
+      maxAge: 3 * 60 * 60,
       path: "/",
     });
 

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, use } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "react-toastify";
 
 export default function EditFontPage({ params }) {
   const router = useRouter();
@@ -11,7 +12,7 @@ export default function EditFontPage({ params }) {
   const [designers, setDesigners] = useState([]);
   const [developers, setDevelopers] = useState([]);
   const [form, setForm] = useState({
-    name: "", slug: "", description: "", detailsDescription: "", fontType: "FREE",
+    name: "", banglaName: "", slug: "", description: "", detailsDescription: "", fontType: "FREE",
     style: "GENERAL", encoding: "UNICODE", price: "",
     fontFileUrl: "", previewImageUrl: "", designerId: "", developerId: "", featured: false,
   });
@@ -19,7 +20,30 @@ export default function EditFontPage({ params }) {
   const [saving, setSaving] = useState(false);
   const [zipFile, setZipFile] = useState(null);
   const [previewFile, setPreviewFile] = useState(null);
-  const [uploadError, setUploadError] = useState("");
+
+  const slugify = (text) => {
+    return text
+      .toLowerCase()
+      .replace(/\s+/g, "-")
+      .replace(/-+/g, "-");
+  };
+
+  const handleNameChange = (nameVal) => {
+    const oldSlugify = slugify(form.name);
+    const isSlugAuto = !form.slug || form.slug === oldSlugify;
+    setForm({
+      ...form,
+      name: nameVal,
+      slug: isSlugAuto ? slugify(nameVal) : form.slug,
+    });
+  };
+
+  const handleSlugChange = (slugVal) => {
+    setForm({
+      ...form,
+      slug: slugify(slugVal),
+    });
+  };
 
   useEffect(() => {
     // Fetch designers, developers, and single font data
@@ -44,6 +68,7 @@ export default function EditFontPage({ params }) {
           }
           setForm({
             name: f.name || "",
+            banglaName: f.banglaName || "",
             slug: f.slug || "",
             description: f.description || "",
             detailsDescription: f.detailsDescription || "",
@@ -61,7 +86,7 @@ export default function EditFontPage({ params }) {
       })
       .catch((err) => {
         console.error("Fetch error:", err);
-        setUploadError("ফন্ট ডেটা লোড করতে ব্যর্থ হয়েছে।");
+        toast.error("ফন্ট ডেটা লোড করতে ব্যর্থ হয়েছে।");
       })
       .finally(() => setLoading(false));
   }, [id]);
@@ -69,7 +94,6 @@ export default function EditFontPage({ params }) {
   async function handleSubmit(e) {
     e.preventDefault();
     setSaving(true);
-    setUploadError("");
 
     let currentFontFileUrl = form.fontFileUrl;
     let currentPreviewImageUrl = form.previewImageUrl;
@@ -99,7 +123,7 @@ export default function EditFontPage({ params }) {
           currentPreviewImageUrl = uploadData.previewUrl;
         }
       } catch (err) {
-        setUploadError(err.message);
+        toast.error(err.message);
         setSaving(false);
         return;
       }
@@ -120,13 +144,14 @@ export default function EditFontPage({ params }) {
         }),
       });
       if (res.ok) {
+        toast.success("ফন্ট সফলভাবে আপডেট করা হয়েছে।");
         router.push("/admin/fonts");
       } else {
         const errData = await res.json();
         throw new Error(errData.error || "Update failed");
       }
     } catch (err) {
-      setUploadError(err.message);
+      toast.error(err.message);
     } finally {
       setSaving(false);
     }
@@ -138,14 +163,18 @@ export default function EditFontPage({ params }) {
     <div className="max-w-2xl">
       <h1 className="text-2xl font-bold text-gray-900 mb-6">ফন্ট এডিট করুন</h1>
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-3 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">নাম *</label>
-            <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="w-full border border-border bg-white text-gray-900 placeholder-gray-400 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" required />
+            <label className="block text-sm font-medium text-gray-700 mb-1">নাম (English) *</label>
+            <input value={form.name} onChange={(e) => handleNameChange(e.target.value)} className="w-full border border-border bg-white text-gray-900 placeholder-gray-400 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" required />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">বাংলা নাম</label>
+            <input value={form.banglaName} onChange={(e) => setForm({ ...form, banglaName: e.target.value })} className="w-full border border-border bg-white text-gray-900 placeholder-gray-400 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Slug *</label>
-            <input value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} className="w-full border border-border bg-white text-gray-900 placeholder-gray-400 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" required />
+            <input value={form.slug} onChange={(e) => handleSlugChange(e.target.value)} className="w-full border border-border bg-white text-gray-900 placeholder-gray-400 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" required />
           </div>
         </div>
         <div>
@@ -196,9 +225,7 @@ export default function EditFontPage({ params }) {
           </div>
         </div>
 
-        {uploadError && (
-          <p className="text-red-500 text-sm font-medium mt-2 bg-red-50 border border-red-200 rounded-lg p-3">{uploadError}</p>
-        )}
+
 
         <div className="grid grid-cols-2 gap-4">
           <div>

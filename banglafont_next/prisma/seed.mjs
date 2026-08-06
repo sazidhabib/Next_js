@@ -26,9 +26,15 @@ async function main() {
   const designers = await Promise.all([
     prisma.designer.upsert({
       where: { slug: "ahmad-tofayel" },
-      update: {},
+      update: {
+        name: "Ahmad Tofayel",
+        banglaName: "আহমদ তোফায়েল",
+        bio: "বাংলা টাইপোগ্রাফি ডিজাইনার",
+        photo: "/uploads/images/placeholder-designer.jpg",
+      },
       create: {
         name: "Ahmad Tofayel",
+        banglaName: "আহমদ তোফায়েল",
         slug: "ahmad-tofayel",
         bio: "বাংলা টাইপোগ্রাফি ডিজাইনার",
         photo: "/uploads/images/placeholder-designer.jpg",
@@ -36,9 +42,15 @@ async function main() {
     }),
     prisma.designer.upsert({
       where: { slug: "jayed-ahsan-sad" },
-      update: {},
+      update: {
+        name: "Jayed Ahsan Sad",
+        banglaName: "জায়েদ আহসান সাদ",
+        bio: "Founder of Codepotro",
+        photo: "/uploads/images/placeholder-designer.jpg",
+      },
       create: {
         name: "Jayed Ahsan Sad",
+        banglaName: "জায়েদ আহসান সাদ",
         slug: "jayed-ahsan-sad",
         bio: "Founder of Codepotro",
         photo: "/uploads/images/placeholder-designer.jpg",
@@ -46,9 +58,15 @@ async function main() {
     }),
     prisma.designer.upsert({
       where: { slug: "masuda-akter-lima" },
-      update: {},
+      update: {
+        name: "Masuda Akter Lima",
+        banglaName: "মাসুদা আক্তার লিমা",
+        bio: "Typography Designer",
+        photo: "/uploads/images/placeholder-designer.jpg",
+      },
       create: {
         name: "Masuda Akter Lima",
+        banglaName: "মাসুদা আক্তার লিমা",
         slug: "masuda-akter-lima",
         bio: "Typography Designer",
         photo: "/uploads/images/placeholder-designer.jpg",
@@ -56,9 +74,14 @@ async function main() {
     }),
     prisma.designer.upsert({
       where: { slug: "codepotro-fonts" },
-      update: {},
+      update: {
+        name: "Codepotro Fonts",
+        banglaName: "কোডপত্র ফন্টস",
+        bio: "বাংলা ফন্ট ডেভেলপমেন্ট টিম",
+      },
       create: {
         name: "Codepotro Fonts",
+        banglaName: "কোডপত্র ফন্টস",
         slug: "codepotro-fonts",
         bio: "বাংলা ফন্ট ডেভেলপমেন্ট টিম",
       },
@@ -69,9 +92,15 @@ async function main() {
   const developers = await Promise.all([
     prisma.developer.upsert({
       where: { slug: "ehsan-al-mahfuz" },
-      update: {},
+      update: {
+        name: "Ehsan Al Mahfuz",
+        banglaName: "এহসান আল মাহফুজ",
+        bio: "Font Developer",
+        photo: "/uploads/images/placeholder-developer.jpg",
+      },
       create: {
         name: "Ehsan Al Mahfuz",
+        banglaName: "এহসান আল মাহফুজ",
         slug: "ehsan-al-mahfuz",
         bio: "Font Developer",
         photo: "/uploads/images/placeholder-developer.jpg",
@@ -79,9 +108,14 @@ async function main() {
     }),
     prisma.developer.upsert({
       where: { slug: "codepotro-dev" },
-      update: {},
+      update: {
+        name: "Codepotro Dev",
+        banglaName: "কোডপত্র দেব",
+        bio: "Software Development Team",
+      },
       create: {
         name: "Codepotro Dev",
+        banglaName: "কোডপত্র দেব",
         slug: "codepotro-dev",
         bio: "Software Development Team",
       },
@@ -91,58 +125,63 @@ async function main() {
 
   const fontData = [
     {
-      name: "বর্ণ বাংলা",
+      name: "Borno Bangla",
+      banglaName: "বর্ণ বাংলা",
       slug: "borno-bangla",
       description: "বর্ণ বাংলা একটি ফ্রি বাংলা ফন্ট। ইউনিকোড এবং ANSI সাপোর্টেড।",
       style: "GENERAL",
       encoding: JSON.stringify(["UNICODE", "ANSI"]),
       downloadCount: 549,
-      fontFileUrl: "/uploads/fonts/placeholder-font.ttf",
+      fontFileUrl: "/uploads/fonts/Atma-preview.ttf",
       featured: true,
       designerSlug: "ahmad-tofayel",
     },
     {
-      name: "শহীদ আবু সাঈদ",
+      name: "Abu Sayed",
+      banglaName: "শহীদ আবু সাঈদ",
       slug: "abu-sayed",
       description: "শহীদ আবু সাঈদ একটি হেডিং বাংলা ফন্ট।",
       style: "HEADING",
       encoding: JSON.stringify(["UNICODE"]),
       downloadCount: 149398,
-      fontFileUrl: "/uploads/fonts/placeholder-font.ttf",
+      fontFileUrl: "/uploads/fonts/abu-sayed-preview.ttf",
       featured: true,
       designerSlug: "jayed-ahsan-sad",
     },
     {
-      name: "হাদি",
+      name: "Hadi",
+      banglaName: "হাদি",
       slug: "hadi",
       description: "হাদি একটি সাধারণ বাংলা ফন্ট। ইউনিকোড সাপোর্টেড।",
       style: "GENERAL",
       encoding: JSON.stringify(["UNICODE"]),
       downloadCount: 49646,
-      fontFileUrl: "/uploads/fonts/placeholder-font.ttf",
+      fontFileUrl: "/uploads/fonts/Hind-Siliguri-preview.ttf",
       featured: true,
       designerSlug: "codepotro-fonts",
     },
     {
-      name: "লিমা বসন্ত",
+      name: "Lima Bosonto",
+      banglaName: "লিমা বসন্ত",
       slug: "lima-bosonto",
       description: "লিমা বসন্ত একটি ফ্রি বাংলা ফন্ট, ইউনিকোড, আনসি এবং বর্ণ এনকোডিং সমর্থন।",
       style: "GENERAL",
       encoding: JSON.stringify(["UNICODE", "ANSI", "BORNA"]),
       downloadCount: 261663,
-      fontFileUrl: "/uploads/fonts/placeholder-font.ttf",
+      fontFileUrl: "/uploads/fonts/lima-bosonto-preview.ttf",
       featured: true,
       designerSlug: "masuda-akter-lima",
       developerSlug: "ehsan-al-mahfuz",
     },
     {
-      name: "মাহিন দুই দশক",
+      name: "Mahin Dui Dashok",
+      banglaName: "মাহিন দুই দশক",
       slug: "mahin-dui-dashok",
       description: "মাহিন দুই দশক একটি স্টাইলিশ বাংলা ফন্ট।",
       style: "STYLISH",
       encoding: JSON.stringify(["UNICODE"]),
       downloadCount: 100322,
-      fontFileUrl: "/uploads/fonts/placeholder-font.ttf",
+      fontFileUrl: "/uploads/fonts/Atma-preview.ttf",
       featured: true,
       designerSlug: "jayed-ahsan-sad",
       developerSlug: "codepotro-dev",
@@ -162,9 +201,17 @@ async function main() {
 
     const font = await prisma.font.upsert({
       where: { slug: f.slug },
-      update: {},
+      update: {
+        name: f.name,
+        banglaName: f.banglaName,
+        description: f.description,
+        fontFileUrl: f.fontFileUrl,
+        designerId: designer.id,
+        developerId: developer?.id ?? null,
+      },
       create: {
         name: f.name,
+        banglaName: f.banglaName,
         slug: f.slug,
         description: f.description,
         detailsDescription: `${f.name} একটি চমৎকার বাংলা টাইপফেস। এটি পরিষ্কার লেটারফর্ম ও সুন্দর ড্রয়িংয়ের সাথে ডিজাইন করা হয়েছে যা আপনার যেকোনো ডিজিটাল বা প্রিন্ট ডিজাইনের প্রকাশভঙ্গিকে এক নতুন শৈল্পিক রূপ দেবে।`,

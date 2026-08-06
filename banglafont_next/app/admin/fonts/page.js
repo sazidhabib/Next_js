@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { toast } from "react-toastify";
 
 export default function AdminFontsPage() {
   const [fonts, setFonts] = useState([]);
@@ -16,8 +17,18 @@ export default function AdminFontsPage() {
 
   async function deleteFont(id) {
     if (!confirm("Are you sure?")) return;
-    await fetch(`/api/admin/fonts/${id}`, { method: "DELETE" });
-    setFonts((prev) => prev.filter((f) => f.id !== id));
+    try {
+      const res = await fetch(`/api/admin/fonts/${id}`, { method: "DELETE" });
+      if (res.ok) {
+        setFonts((prev) => prev.filter((f) => f.id !== id));
+        toast.success("ফন্টটি সফলভাবে ডিলিট করা হয়েছে।");
+      } else {
+        const data = await res.json();
+        toast.error(data.error || "ডিলিট করতে ব্যর্থ হয়েছে।");
+      }
+    } catch (err) {
+      toast.error("একটি ত্রুটি ঘটেছে।");
+    }
   }
 
   if (loading) return <p className="text-gray-500">Loading...</p>;
