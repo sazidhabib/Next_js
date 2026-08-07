@@ -8,13 +8,13 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="bn" className="h-full antialiased dark">
+    <html lang="bn" className="h-full antialiased dark" suppressHydrationWarning>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
       </head>
-      <body className="min-h-full flex flex-col bg-[#090a0f] text-gray-100">
+      <body className="min-h-full flex flex-col bg-[#090a0f] text-gray-100" suppressHydrationWarning>
         <RootLayoutContent>{children}</RootLayoutContent>
       </body>
     </html>

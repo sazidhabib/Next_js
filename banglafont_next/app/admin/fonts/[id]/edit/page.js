@@ -20,6 +20,18 @@ export default function EditFontPage({ params }) {
   const [saving, setSaving] = useState(false);
   const [zipFile, setZipFile] = useState(null);
   const [previewFile, setPreviewFile] = useState(null);
+  const [encodingDropdownOpen, setEncodingDropdownOpen] = useState(false);
+
+  const handleEncodingToggle = (val) => {
+    const current = form.encoding ? form.encoding.split(",").map(s => s.trim().toUpperCase()).filter(Boolean) : [];
+    let updated;
+    if (current.includes(val)) {
+      updated = current.filter(item => item !== val);
+    } else {
+      updated = [...current, val];
+    }
+    setForm({ ...form, encoding: updated.join(", ") });
+  };
 
   const slugify = (text) => {
     return text
@@ -203,9 +215,36 @@ export default function EditFontPage({ params }) {
               <option value="STYLISH">Stylish</option>
             </select>
           </div>
-          <div>
+          <div className="relative">
             <label className="block text-sm font-medium text-gray-700 mb-1">এনকোডিং</label>
-            <input value={form.encoding} onChange={(e) => setForm({ ...form, encoding: e.target.value })} placeholder="UNICODE, ANSI" className="w-full border border-border bg-white text-gray-900 placeholder-gray-400 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" />
+            <button
+              type="button"
+              onClick={() => setEncodingDropdownOpen(!encodingDropdownOpen)}
+              className="w-full border border-border bg-white text-gray-900 rounded-lg px-4 py-2.5 text-left focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary flex justify-between items-center text-sm min-h-[46px]"
+            >
+              <span>{form.encoding || "নির্বাচন করুন"}</span>
+              <span className="text-gray-400 text-xs">▼</span>
+            </button>
+            {encodingDropdownOpen && (
+              <div className="absolute z-50 mt-1 w-full bg-white border border-border rounded-lg shadow-lg p-2 space-y-1">
+                {["UNICODE", "ANSI", "BORNA"].map((enc) => {
+                  const isSelected = form.encoding
+                    ? form.encoding.split(",").map(s => s.trim().toUpperCase()).includes(enc)
+                    : false;
+                  return (
+                    <label key={enc} className="flex items-center gap-2 px-2 py-1.5 hover:bg-gray-50 rounded cursor-pointer text-sm text-gray-700 font-normal">
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={() => handleEncodingToggle(enc)}
+                        className="rounded border-gray-300 text-primary focus:ring-primary"
+                      />
+                      {enc}
+                    </label>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </div>
         <div className="grid grid-cols-2 gap-4">

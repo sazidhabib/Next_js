@@ -28,6 +28,7 @@ async function getHomeData() {
       select: {
         id: true,
         name: true,
+        banglaName: true,
         slug: true,
         style: true,
         fontFileUrl: true,

@@ -44,7 +44,8 @@ export default function HomeTypeTester({ fonts = [] }) {
       {fonts.map((f) => {
         const previewFontUrl = f.previewImageUrl || f.fontFileUrl;
         return previewFontUrl && (
-          <style key={f.slug} dangerouslySetInnerHTML={{ __html: `
+          <style key={f.slug} dangerouslySetInnerHTML={{
+            __html: `
             @font-face {
               font-family: 'font-tester-${f.slug}';
               src: url('${previewFontUrl}');
@@ -173,9 +174,20 @@ export default function HomeTypeTester({ fonts = [] }) {
               <a
                 href={selectedFont.fontFileUrl || `/free-font/${selectedFont.slug}`}
                 download
-                className="px-6 py-2.5 bg-[#00e599] text-gray-950 font-bold text-xs rounded-xl hover:bg-[#00c784] transition-colors shadow-lg shadow-[#00e599]/10"
+                className="px-6 py-2.5 bg-[#00e599] text-gray-950 font-bold text-sm rounded-xl hover:bg-[#00c784] transition-colors shadow-lg shadow-[#00e599]/10"
               >
-                ডাউনলোড ফন্ট ({selectedFont.name})
+                ডাউনলোড ফন্ট (
+                <span
+                  style={{
+                    fontFamily: (selectedFont.previewImageUrl || selectedFont.fontFileUrl)
+                      ? `'font-tester-${selectedFont.slug}', sans-serif`
+                      : 'inherit',
+                    fontWeight: 'normal'
+                  }}
+                >
+                  {selectedFont.banglaName || selectedFont.name}
+                </span>
+                )
               </a>
             ) : (
               <span className="px-6 py-2.5 bg-gray-800 text-gray-500 font-medium text-xs rounded-xl">
@@ -203,11 +215,10 @@ export default function HomeTypeTester({ fonts = [] }) {
                 key={cat.value}
                 type="button"
                 onClick={() => setSelectedCategory(cat.value)}
-                className={`px-2.5 py-1 rounded-lg text-[11px] font-medium transition-colors ${
-                  selectedCategory === cat.value
+                className={`px-2.5 py-1 rounded-lg text-[11px] font-medium transition-colors ${selectedCategory === cat.value
                     ? "bg-[#00e599] text-gray-950 font-bold"
                     : "bg-[#1d2030] text-gray-400 hover:text-white"
-                }`}
+                  }`}
               >
                 {cat.label}
               </button>
@@ -222,14 +233,18 @@ export default function HomeTypeTester({ fonts = [] }) {
                 <div
                   key={f.id}
                   onClick={() => setSelectedFontSlug(f.slug)}
-                  className={`p-3 rounded-xl border cursor-pointer transition-all ${
-                    selectedFontSlug === f.slug
+                  className={`p-3 rounded-xl border cursor-pointer transition-all ${selectedFontSlug === f.slug
                       ? "border-[#00e599] bg-[#00e599]/10 text-white"
                       : "border-transparent bg-[#1b1e2c] hover:bg-[#222638] text-gray-300"
-                  }`}
+                    }`}
                 >
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium truncate">{f.name}</span>
+                    <span
+                      className="text-sm font-medium truncate"
+                      style={{ fontFamily: (f.previewImageUrl || f.fontFileUrl) ? `'font-tester-${f.slug}', sans-serif` : 'inherit' }}
+                    >
+                      {f.banglaName || f.name}
+                    </span>
                     <Link
                       href={`/free-font/${f.slug}`}
                       className="text-[10px] text-[#00e599] hover:underline flex items-center gap-1"

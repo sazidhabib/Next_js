@@ -47,19 +47,18 @@ export default function Hero() {
       <div className="absolute bottom-0 left-1/3 w-80 h-80 bg-purple-600/10 blur-[100px] pointer-events-none rounded-full" />
 
       {/* Absolute Background Slider */}
-      <div className="absolute right-0 top-0 bottom-0 w-full lg:w-[65%] pointer-events-none z-0 overflow-hidden">
+      <div className="absolute right-0 top-0 bottom-0 w-full lg:w-[100%] pointer-events-none z-0 overflow-hidden">
         <div className="relative w-full h-full">
           {/* Smooth black gradient fade on the left to merge under text */}
           <div className="absolute inset-y-0 left-0 w-48 bg-gradient-to-r from-[#121422] via-[#0f111a]/80 to-transparent z-10 hidden lg:block" />
-          
+
           {slides.map((src, index) => (
             <img
               key={src}
               src={src}
               alt={`Slide ${index + 1}`}
-              className={`absolute inset-0 w-full h-full object-cover object-right transition-opacity duration-1000 ${
-                index === currentSlide ? "opacity-60" : "opacity-0"
-              }`}
+              className={`absolute inset-0 w-full h-full object-cover object-right transition-opacity duration-1000 ${index === currentSlide ? "opacity-60" : "opacity-0"
+                }`}
             />
           ))}
         </div>
@@ -114,11 +113,10 @@ export default function Hero() {
                 <button
                   key={c.label}
                   type="button"
-                  className={`px-3.5 py-1.5 rounded-xl text-xs font-medium border transition-all cursor-pointer ${
-                    c.active
+                  className={`px-3.5 py-1.5 rounded-xl text-xs font-medium border transition-all cursor-pointer ${c.active
                       ? "bg-[#00e599] text-gray-950 border-[#00e599] font-semibold"
                       : "bg-[#161824] text-gray-400 border-white/10 hover:text-white hover:bg-white/10"
-                  }`}
+                    }`}
                 >
                   {c.label}
                 </button>
@@ -141,11 +139,10 @@ export default function Hero() {
                 <button
                   key={index}
                   onClick={() => setCurrentSlide(index)}
-                  className={`w-1.5 h-1.5 rounded-full transition-all duration-300 cursor-pointer ${
-                    index === currentSlide
+                  className={`w-1.5 h-1.5 rounded-full transition-all duration-300 cursor-pointer ${index === currentSlide
                       ? "bg-[#00e599] w-3"
                       : "bg-white/30 hover:bg-white/50"
-                  }`}
+                    }`}
                   title={`Go to slide ${index + 1}`}
                 />
               ))}
