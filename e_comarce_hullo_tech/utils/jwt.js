@@ -26,11 +26,11 @@ const signToken = (payload, options = {}) => {
 
   const encodedHeader = base64url(JSON.stringify(header));
   
-  // Add expiration time to payload if needed (default 30 days)
+  // Add expiration time to payload if needed (default 4 hours)
   const finalPayload = {
     ...payload,
     iat: Math.floor(Date.now() / 1000),
-    exp: Math.floor(Date.now() / 1000) + (30 * 24 * 60 * 60)
+    exp: Math.floor(Date.now() / 1000) + (4 * 60 * 60)
   };
   
   const encodedPayload = base64url(JSON.stringify(finalPayload));

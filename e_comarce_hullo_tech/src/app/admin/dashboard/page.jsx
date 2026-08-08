@@ -15,7 +15,8 @@ import {
   AlertTriangle,
   Settings,
   LogOut,
-  FileImage
+  FileImage,
+  ClipboardList
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -28,7 +29,9 @@ export default function AdminDashboard() {
     totalProducts: 0,
     totalCategories: 0,
     lowStockItems: 0,
-    totalSales: 0
+    totalSales: 0,
+    totalOrders: 0,
+    pendingOrders: 0
   });
   const [loading, setLoading] = useState(true);
 
@@ -49,13 +52,25 @@ export default function AdminDashboard() {
       // Fetch categories count
       const categoriesRes = await fetch('/api/categories');
       const categoriesData = await categoriesRes.json();
+
+      // Fetch orders
+      const ordersRes = await fetch('/api/orders');
+      const ordersData = await ordersRes.json();
       
       if (productsData.success && categoriesData.success) {
+        const ordersList = ordersData.success ? ordersData.data : [];
+        const completedSales = ordersList
+          .filter(o => o.status === 'completed' || o.status === 'processing')
+          .reduce((sum, o) => sum + Number(o.totalAmount), 0);
+        const pendingCount = ordersList.filter(o => o.status === 'pending').length;
+
         setStats({
           totalProducts: productsData.data.length,
           totalCategories: categoriesData.data.length,
           lowStockItems: productsData.data.filter(p => !p.stock).length,
-          totalSales: 0 // Placeholder
+          totalSales: completedSales,
+          totalOrders: ordersList.length,
+          pendingOrders: pendingCount
         });
       }
     } catch (err) {
@@ -117,6 +132,21 @@ export default function AdminDashboard() {
           >
             <Settings className="w-5 h-5" />
             <span>Site Configuration</span>
+          </Link>
+
+          <Link
+            href="/admin/orders"
+            className="w-full flex items-center justify-between px-4 py-3 rounded-xl transition text-left hover:bg-slate-800 hover:text-slate-200"
+          >
+            <div className="flex items-center space-x-3">
+              <ClipboardList className="w-5 h-5" />
+              <span>Orders Management</span>
+            </div>
+            {stats.pendingOrders > 0 && (
+              <span className="bg-red-500 text-white font-extrabold text-[10px] px-2 py-0.5 rounded-full animate-pulse">
+                {stats.pendingOrders}
+              </span>
+            )}
           </Link>
 
           <Link
@@ -197,18 +227,18 @@ export default function AdminDashboard() {
             
             <div className="bg-slate-900/30 border border-slate-800 rounded-xl p-6">
               <div className="flex items-center justify-between mb-4">
-                <div className="text-slate-400 text-sm">Low Stock Items</div>
-                <div className="text-2xl font-bold text-slate-100">{stats.lowStockItems}</div>
+                <div className="text-slate-400 text-sm">Pending Orders</div>
+                <div className="text-2xl font-bold text-yellow-500">{stats.pendingOrders}</div>
               </div>
-              <AlertTriangle className="w-8 h-8 text-orange-400 opacity-50" />
+              <AlertTriangle className="w-8 h-8 text-yellow-400 opacity-50" />
             </div>
             
             <div className="bg-slate-900/30 border border-slate-800 rounded-xl p-6">
               <div className="flex items-center justify-between mb-4">
-                <div className="text-slate-400 text-sm">Total Sales</div>
-                <div className="text-2xl font-bold text-slate-100">$0</div>
+                <div className="text-slate-400 text-sm">Total Revenue</div>
+                <div className="text-2xl font-bold text-emerald-400">৳{Math.round(stats.totalSales).toLocaleString()}</div>
               </div>
-              <DollarSign className="w-8 h-8 text-green-400 opacity-50" />
+              <DollarSign className="w-8 h-8 text-emerald-400 opacity-50" />
             </div>
           </div>
         </div>

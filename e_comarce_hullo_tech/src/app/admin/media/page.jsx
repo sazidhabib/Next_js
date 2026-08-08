@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAdminAuth, handleAdminLogout } from '../../../lib/admin-auth';
 import {
   Package, LayoutDashboard, Settings, Grid, LogOut, Check,
-  AlertCircle, Search, Upload, Trash2, Loader2, FileImage
+  AlertCircle, Search, Upload, Trash2, Loader2, FileImage, ClipboardList
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -218,6 +218,14 @@ export default function AdminMedia() {
           >
             <Settings className="w-5 h-5" />
             <span>Site Configuration</span>
+          </Link>
+
+          <Link
+            href="/admin/orders"
+            className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition text-left hover:bg-slate-800 hover:text-slate-200"
+          >
+            <ClipboardList className="w-5 h-5" />
+            <span>Orders Management</span>
           </Link>
 
           <Link

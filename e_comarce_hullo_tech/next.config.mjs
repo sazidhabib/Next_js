@@ -22,6 +22,14 @@ const nextConfig = {
         destination: 'http://localhost:5000/api/products/:path*',
       },
       {
+        source: '/api/orders',
+        destination: 'http://localhost:5000/api/orders',
+      },
+      {
+        source: '/api/orders/:path*',
+        destination: 'http://localhost:5000/api/orders/:path*',
+      },
+      {
         source: '/api/upload',
         destination: 'http://localhost:5000/api/upload',
       },

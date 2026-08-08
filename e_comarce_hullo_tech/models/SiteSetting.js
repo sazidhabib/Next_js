@@ -37,6 +37,14 @@ if (sequelize) {
     socialLinks: {
       type: DataTypes.JSON, // { facebook: 'url', twitter: 'url' }
       defaultValue: {},
+    },
+    deliveryCharge: {
+      type: DataTypes.INTEGER,
+      defaultValue: 120,
+    },
+    freeShippingThreshold: {
+      type: DataTypes.INTEGER,
+      defaultValue: 5000,
     }
   }, {
     timestamps: true,

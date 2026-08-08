@@ -8,7 +8,9 @@ let fallbackSettings = {
   contactPhone: '+880 1234 567890',
   contactAddress: 'Dhaka, Bangladesh',
   footerText: '© 2026 HulloTech. All rights reserved.',
-  socialLinks: {}
+  socialLinks: {},
+  deliveryCharge: 120,
+  freeShippingThreshold: 5000
 };
 
 // Initialize settings if not exists
@@ -44,7 +46,7 @@ const getSettings = async (req, res) => {
 
 const updateSettings = async (req, res) => {
   try {
-    const { siteTitle, siteDescription, contactEmail, contactPhone, contactAddress, footerText, socialLinks } = req.body;
+    const { siteTitle, siteDescription, contactEmail, contactPhone, contactAddress, footerText, socialLinks, deliveryCharge, freeShippingThreshold } = req.body;
     
     if (!SiteSetting) {
       fallbackSettings = {
@@ -54,7 +56,9 @@ const updateSettings = async (req, res) => {
         contactPhone: contactPhone || fallbackSettings.contactPhone,
         contactAddress: contactAddress || fallbackSettings.contactAddress,
         footerText: footerText || fallbackSettings.footerText,
-        socialLinks: socialLinks || fallbackSettings.socialLinks
+        socialLinks: socialLinks || fallbackSettings.socialLinks,
+        deliveryCharge: deliveryCharge !== undefined ? Number(deliveryCharge) : fallbackSettings.deliveryCharge,
+        freeShippingThreshold: freeShippingThreshold !== undefined ? Number(freeShippingThreshold) : fallbackSettings.freeShippingThreshold
       };
       return res.json({ success: true, data: fallbackSettings });
     }
@@ -72,6 +76,8 @@ const updateSettings = async (req, res) => {
       settings.contactAddress = contactAddress || settings.contactAddress;
       settings.footerText = footerText || settings.footerText;
       settings.socialLinks = socialLinks || settings.socialLinks;
+      if (deliveryCharge !== undefined) settings.deliveryCharge = Number(deliveryCharge);
+      if (freeShippingThreshold !== undefined) settings.freeShippingThreshold = Number(freeShippingThreshold);
 
       await settings.save();
       
@@ -85,7 +91,9 @@ const updateSettings = async (req, res) => {
         contactPhone: contactPhone || fallbackSettings.contactPhone,
         contactAddress: contactAddress || fallbackSettings.contactAddress,
         footerText: footerText || fallbackSettings.footerText,
-        socialLinks: socialLinks || fallbackSettings.socialLinks
+        socialLinks: socialLinks || fallbackSettings.socialLinks,
+        deliveryCharge: deliveryCharge !== undefined ? Number(deliveryCharge) : fallbackSettings.deliveryCharge,
+        freeShippingThreshold: freeShippingThreshold !== undefined ? Number(freeShippingThreshold) : fallbackSettings.freeShippingThreshold
       };
       return res.json({ success: true, data: fallbackSettings });
     }

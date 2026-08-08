@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useCart } from "../../lib/CartContext";
@@ -20,15 +20,35 @@ export default function CheckoutPage() {
   const [error, setError] = useState("");
   const [orderSuccess, setOrderSuccess] = useState(null);
 
-  if (!isLoaded) {
-    return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <Loader2 className="w-10 h-10 text-blue-600 animate-spin" />
-      </div>
-    );
-  }
+  const [shippingConfig, setShippingConfig] = useState({
+    deliveryCharge: 120,
+    freeShippingThreshold: 5000,
+    siteTitle: 'HulloTech',
+    contactEmail: 'support@hullotech.com',
+    contactPhone: '+880 1234 567890',
+    contactAddress: 'Dhaka, Bangladesh'
+  });
 
-  const deliveryFee = cartSubtotal > 5000 ? 0 : 120;
+  useEffect(() => {
+    // Fetch settings
+    fetch('/api/settings')
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && data.data) {
+          setShippingConfig({
+            deliveryCharge: Number(data.data.deliveryCharge) !== undefined ? Number(data.data.deliveryCharge) : 120,
+            freeShippingThreshold: Number(data.data.freeShippingThreshold) !== undefined ? Number(data.data.freeShippingThreshold) : 5000,
+            siteTitle: data.data.siteTitle || 'HulloTech',
+            contactEmail: data.data.contactEmail || 'support@hullotech.com',
+            contactPhone: data.data.contactPhone || '+880 1234 567890',
+            contactAddress: data.data.contactAddress || 'Dhaka, Bangladesh'
+          });
+        }
+      })
+      .catch(err => console.error("Failed to load settings:", err));
+  }, []);
+
+  const deliveryFee = cartSubtotal > shippingConfig.freeShippingThreshold ? 0 : shippingConfig.deliveryCharge;
   const grandTotal = cartSubtotal + deliveryFee;
 
   const handleChange = (e) => {
@@ -53,6 +73,7 @@ export default function CheckoutPage() {
         shippingAddress: formData.shippingAddress,
         paymentMethod: formData.paymentMethod,
         totalAmount: grandTotal,
+        deliveryCharge: deliveryFee,
         items: cart.map(item => ({
           productId: item.product.id,
           quantity: item.quantity,
@@ -68,7 +89,18 @@ export default function CheckoutPage() {
 
       const data = await res.json();
       if (data.success) {
-        setOrderSuccess(data.data);
+        const enrichedItems = data.data.items ? data.data.items.map(item => {
+          const cartItem = cart.find(c => c.product.id === item.productId);
+          return {
+            ...item,
+            productName: cartItem ? cartItem.product.name : `Product #${item.productId}`
+          };
+        }) : [];
+
+        setOrderSuccess({
+          ...data.data,
+          items: enrichedItems
+        });
         clearCart();
       } else {
         setError(data.message || "Failed to place order. Please try again.");
@@ -81,49 +113,152 @@ export default function CheckoutPage() {
     }
   };
 
+  if (!isLoaded) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <Loader2 className="w-10 h-10 text-blue-600 animate-spin" />
+      </div>
+    );
+  }
+
   if (orderSuccess) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center py-12 px-4 sm:px-6 lg:px-8 print:p-0 print:bg-white">
+        <style dangerouslySetInnerHTML={{ __html: `
+          @media print {
+            body {
+              background-color: white;
+              color: black;
+            }
+            .no-print {
+              display: none !important;
+            }
+            .print-container {
+              border: none !important;
+              box-shadow: none !important;
+              padding: 0 !important;
+              margin: 0 !important;
+              max-width: 100% !important;
+              width: 100% !important;
+            }
+          }
+        `}} />
+        
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="max-w-md w-full bg-white rounded-3xl p-8 border border-gray-100 shadow-xl text-center space-y-6"
+          className="max-w-2xl w-full bg-white rounded-3xl p-8 border border-gray-100 shadow-xl space-y-6 print-container"
         >
-          <div className="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mx-auto text-green-500">
-            <CheckCircle className="w-12 h-12" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Order Confirmed!</h1>
-            <p className="text-sm text-gray-500 mt-2">
-              Thank you for your purchase. Your order has been placed successfully.
-            </p>
-          </div>
-
-          <div className="bg-slate-50 rounded-2xl p-4 text-left space-y-3">
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-400">Order ID:</span>
-              <span className="font-bold text-gray-900">#HT-{orderSuccess.id}</span>
+          {/* Header Icon & Message (Hidden when printing) */}
+          <div className="text-center space-y-4 no-print">
+            <div className="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center mx-auto text-green-500">
+              <CheckCircle className="w-10 h-10" />
             </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-400">Customer:</span>
-              <span className="font-semibold text-gray-900">{orderSuccess.customerName}</span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-400">Total Amount:</span>
-              <span className="font-extrabold text-blue-600">৳{Math.round(grandTotal).toLocaleString()}</span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-400">Payment Status:</span>
-              <span className="font-semibold text-amber-600 capitalize">
-                {formData.paymentMethod === "cod" ? "Pay on Delivery" : "Paid"} ({formData.paymentMethod.toUpperCase()})
-              </span>
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">Order Confirmed!</h1>
+              <p className="text-sm text-gray-500 mt-2">
+                Thank you for your purchase. Our team member will contact you for confirmation within 24 hours.
+              </p>
             </div>
           </div>
 
-          <div className="pt-4 flex flex-col gap-2">
+          {/* Printable Invoice Block */}
+          <div id="printable-invoice" className="border border-gray-200 rounded-2xl p-6 space-y-6 bg-white">
+            {/* Invoice Header */}
+            <div className="flex justify-between items-start pb-6 border-b border-gray-100">
+              <div>
+                <h2 className="text-2xl font-extrabold text-blue-600 tracking-tight">{shippingConfig.siteTitle}</h2>
+                <p className="text-xs text-gray-400 mt-1">Invoice Receipt</p>
+              </div>
+              <div className="text-right text-xs text-gray-500 space-y-1">
+                <p className="font-semibold text-gray-800">{shippingConfig.siteTitle} Store</p>
+                <p>{shippingConfig.contactPhone}</p>
+                <p>{shippingConfig.contactEmail}</p>
+                <p>{shippingConfig.contactAddress}</p>
+              </div>
+            </div>
+
+            {/* Invoice Details */}
+            <div className="grid grid-cols-2 gap-4 text-xs">
+              <div>
+                <p className="text-gray-400 uppercase tracking-wider font-bold mb-1">Order Details</p>
+                <p className="text-gray-800 font-bold">ID: #HT-{orderSuccess.id}</p>
+                <p className="text-gray-600">Date: {new Date(orderSuccess.createdAt || new Date()).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                <p className="text-gray-600">Payment: Cash on Delivery</p>
+                <p className="text-amber-600 font-semibold mt-1">Status: Pending COD Confirmation</p>
+              </div>
+              <div>
+                <p className="text-gray-400 uppercase tracking-wider font-bold mb-1">Customer / Shipping</p>
+                <p className="text-gray-800 font-bold">{orderSuccess.customerName}</p>
+                <p className="text-gray-600">Phone: {orderSuccess.customerPhone}</p>
+                <p className="text-gray-600">Email: {orderSuccess.customerEmail}</p>
+                <p className="text-gray-600">Address: {orderSuccess.shippingAddress}</p>
+              </div>
+            </div>
+
+            {/* Line Items */}
+            <div className="border-t border-gray-100 pt-4">
+              <table className="w-full text-left text-xs">
+                <thead>
+                  <tr className="border-b border-gray-100 text-gray-400 uppercase font-bold">
+                    <th className="pb-2">Item</th>
+                    <th className="pb-2 text-center">Qty</th>
+                    <th className="pb-2 text-right">Price</th>
+                    <th className="pb-2 text-right">Total</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-50">
+                  {orderSuccess.items && orderSuccess.items.map((item, index) => (
+                    <tr key={index} className="text-gray-700">
+                      <td className="py-2.5 font-medium">{item.productName || `Product #${item.productId}`}</td>
+                      <td className="py-2.5 text-center font-semibold">{item.quantity}</td>
+                      <td className="py-2.5 text-right font-medium">৳{Math.round(item.price).toLocaleString()}</td>
+                      <td className="py-2.5 text-right font-bold text-gray-900">৳{Math.round(item.price * item.quantity).toLocaleString()}</td>
+                    </tr>
+                  ))}
+                  {(!orderSuccess.items || orderSuccess.items.length === 0) && cart.map(({ product, quantity }) => (
+                    <tr key={product.id} className="text-gray-700">
+                      <td className="py-2.5 font-medium">{product.name}</td>
+                      <td className="py-2.5 text-center font-semibold">{quantity}</td>
+                      <td className="py-2.5 text-right font-medium">৳{Math.round(product.price).toLocaleString()}</td>
+                      <td className="py-2.5 text-right font-bold text-gray-900">৳{Math.round(product.price * quantity).toLocaleString()}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Totals */}
+            <div className="border-t border-gray-100 pt-4 flex flex-col items-end gap-2 text-xs">
+              <div className="flex justify-between w-64 text-gray-500">
+                <span>Subtotal:</span>
+                <span className="font-semibold text-gray-800">৳{Math.round(orderSuccess.totalAmount - (orderSuccess.deliveryCharge || deliveryFee)).toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between w-64 text-gray-500">
+                <span>Delivery Charge:</span>
+                <span className="font-semibold text-gray-800">
+                  {Number(orderSuccess.deliveryCharge || deliveryFee) === 0 ? "Free" : `৳${Math.round(orderSuccess.deliveryCharge || deliveryFee)}`}
+                </span>
+              </div>
+              <div className="flex justify-between w-64 border-t border-gray-100 pt-2 text-sm text-gray-900 font-extrabold">
+                <span>Total:</span>
+                <span className="text-blue-600">৳{Math.round(orderSuccess.totalAmount).toLocaleString()}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Action Buttons (Hidden when printing) */}
+          <div className="flex gap-3 no-print pt-2">
+            <button
+              onClick={() => window.print()}
+              className="flex-1 inline-flex items-center justify-center px-6 py-3 border border-gray-200 text-sm font-semibold rounded-xl text-gray-700 bg-white hover:bg-gray-50 transition-all shadow-sm active:scale-[0.98]"
+            >
+              Print / Download PDF
+            </button>
             <Link
               href="/"
-              className="w-full inline-flex items-center justify-center px-6 py-3 border border-transparent text-sm font-semibold rounded-xl text-white bg-blue-600 hover:bg-blue-700 transition-all shadow-md shadow-blue-600/10"
+              onClick={() => clearCart()}
+              className="flex-1 inline-flex items-center justify-center px-6 py-3 border border-transparent text-sm font-semibold rounded-xl text-white bg-blue-600 hover:bg-blue-700 transition-all shadow-md shadow-blue-600/10 active:scale-[0.98]"
             >
               Continue Shopping
             </Link>
@@ -225,26 +360,29 @@ export default function CheckoutPage() {
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                   {[
-                    { id: "cod", label: "Cash on Delivery", icon: Truck },
-                    { id: "bkash", label: "bKash / Mobile", icon: CreditCard },
-                    { id: "card", label: "Credit/Debit Card", icon: DollarSign },
+                    { id: "cod", label: "Cash on Delivery", icon: Truck, disabled: false },
+                    { id: "bkash", label: "bKash (Coming Soon)", icon: CreditCard, disabled: true },
+                    { id: "card", label: "Credit/Debit (Coming Soon)", icon: DollarSign, disabled: true },
                   ].map((method) => {
                     const Icon = method.icon;
                     return (
                       <label
                         key={method.id}
-                        className={`border rounded-xl p-4 flex flex-col items-center gap-2 cursor-pointer transition-all ${
-                          formData.paymentMethod === method.id
-                            ? "border-blue-600 bg-blue-50/40 text-blue-600 shadow-sm"
-                            : "border-gray-200 text-gray-500 hover:border-gray-300 hover:bg-slate-50"
+                        className={`border rounded-xl p-4 flex flex-col items-center gap-2 transition-all ${
+                          method.disabled
+                            ? "opacity-50 cursor-not-allowed border-dashed border-gray-200 bg-slate-50 text-gray-400"
+                            : formData.paymentMethod === method.id
+                              ? "border-blue-600 bg-blue-50/40 text-blue-600 shadow-sm cursor-pointer"
+                              : "border-gray-200 text-gray-500 hover:border-gray-300 hover:bg-slate-50 cursor-pointer"
                         }`}
                       >
                         <input
                           type="radio"
                           name="paymentMethod"
                           value={method.id}
-                          checked={formData.paymentMethod === method.id}
-                          onChange={handleChange}
+                          disabled={method.disabled}
+                          checked={!method.disabled && formData.paymentMethod === method.id}
+                          onChange={!method.disabled ? handleChange : undefined}
                           className="sr-only"
                         />
                         <Icon className="w-5 h-5" />

@@ -1,11 +1,12 @@
 const { Order, OrderItem, Product } = require('../models');
+const { sendOrderNotification } = require('../utils/notification-dispatcher');
 
 // Fallback in-memory orders list in case DB is not available
 const fallbackOrders = [];
 
 const createOrder = async (req, res) => {
   try {
-    const { customerName, customerEmail, customerPhone, shippingAddress, paymentMethod, items, totalAmount } = req.body;
+    const { customerName, customerEmail, customerPhone, shippingAddress, paymentMethod, items, totalAmount, deliveryCharge } = req.body;
 
     if (!customerName || !customerEmail || !customerPhone || !shippingAddress || !paymentMethod || !items || !items.length) {
       return res.status(400).json({ success: false, message: 'Missing required order details' });
@@ -22,6 +23,7 @@ const createOrder = async (req, res) => {
         shippingAddress,
         paymentMethod,
         totalAmount,
+        deliveryCharge: deliveryCharge || 120.00,
         status: 'pending',
         items: items.map((item, index) => ({
           id: index + 1,
@@ -34,6 +36,7 @@ const createOrder = async (req, res) => {
       };
       fallbackOrders.push(newOrder);
       console.log('✅ Created order in fallback mode (in-memory):', newOrder);
+      sendOrderNotification(newOrder);
       return res.status(201).json({
         success: true,
         message: 'Order placed successfully (Fallback mode)',
@@ -50,6 +53,7 @@ const createOrder = async (req, res) => {
         shippingAddress,
         paymentMethod,
         totalAmount,
+        deliveryCharge: deliveryCharge || 120.00,
         status: 'pending',
       });
 
@@ -64,6 +68,7 @@ const createOrder = async (req, res) => {
       await OrderItem.bulkCreate(orderItemsData);
 
       console.log(`✅ Order ${order.id} saved in database.`);
+      sendOrderNotification(order);
 
       return res.status(201).json({
         success: true,
@@ -71,7 +76,14 @@ const createOrder = async (req, res) => {
         data: {
           id: order.id,
           customerName: order.customerName,
+          customerEmail: order.customerEmail,
+          customerPhone: order.customerPhone,
+          shippingAddress: order.shippingAddress,
+          paymentMethod: order.paymentMethod,
           totalAmount: order.totalAmount,
+          deliveryCharge: order.deliveryCharge,
+          items: orderItemsData,
+          createdAt: order.createdAt,
         },
       });
     } catch (dbError) {
@@ -86,6 +98,7 @@ const createOrder = async (req, res) => {
         shippingAddress,
         paymentMethod,
         totalAmount,
+        deliveryCharge: deliveryCharge || 120.00,
         status: 'pending',
         items: items.map((item, index) => ({
           id: index + 1,
@@ -97,6 +110,7 @@ const createOrder = async (req, res) => {
         createdAt: new Date(),
       };
       fallbackOrders.push(newOrder);
+      sendOrderNotification(newOrder);
       return res.status(201).json({
         success: true,
         message: 'Order placed successfully (Fallback mode - DB error)',
@@ -116,7 +130,15 @@ const getOrders = async (req, res) => {
 
     try {
       const orders = await Order.findAll({
-        include: [{ model: OrderItem, as: 'items' }],
+        include: [{
+          model: OrderItem,
+          as: 'items',
+          include: [{
+            model: Product,
+            as: 'product',
+            attributes: ['id', 'name']
+          }]
+        }],
         order: [['id', 'DESC']],
       });
       return res.json({ success: true, data: orders });
@@ -129,7 +151,47 @@ const getOrders = async (req, res) => {
   }
 };
 
+const updateOrderStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    if (!['pending', 'processing', 'completed', 'cancelled'].includes(status)) {
+      return res.status(400).json({ success: false, message: 'Invalid order status' });
+    }
+
+    if (!Order) {
+      const order = fallbackOrders.find(o => o.id === parseInt(id));
+      if (!order) {
+        return res.status(404).json({ success: false, message: 'Order not found' });
+      }
+      order.status = status;
+      return res.json({ success: true, message: 'Order status updated successfully (Fallback mode)', data: order });
+    }
+
+    try {
+      const order = await Order.findByPk(id);
+      if (!order) {
+        return res.status(404).json({ success: false, message: 'Order not found' });
+      }
+      order.status = status;
+      await order.save();
+      return res.json({ success: true, message: 'Order status updated successfully', data: order });
+    } catch (dbError) {
+      const order = fallbackOrders.find(o => o.id === parseInt(id));
+      if (!order) {
+        return res.status(404).json({ success: false, message: 'Order not found (DB error)' });
+      }
+      order.status = status;
+      return res.json({ success: true, message: 'Order status updated successfully (Fallback mode)', data: order });
+    }
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 module.exports = {
   createOrder,
   getOrders,
+  updateOrderStatus,
 };

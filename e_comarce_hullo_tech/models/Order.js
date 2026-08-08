@@ -34,6 +34,11 @@ if (sequelize) {
       type: DataTypes.DECIMAL(10, 2),
       allowNull: false,
     },
+    deliveryCharge: {
+      type: DataTypes.DECIMAL(10, 2),
+      allowNull: false,
+      defaultValue: 120.00,
+    },
     status: {
       type: DataTypes.ENUM('pending', 'processing', 'completed', 'cancelled'),
       defaultValue: 'pending',

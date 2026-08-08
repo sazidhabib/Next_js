@@ -15,9 +15,13 @@ export default function PageLayout({ children }) {
 
   return (
     <>
-      <Navbar />
+      <div className="no-print">
+        <Navbar />
+      </div>
       <main>{children}</main>
-      <Footer />
+      <div className="no-print">
+        <Footer />
+      </div>
     </>
   );
 }

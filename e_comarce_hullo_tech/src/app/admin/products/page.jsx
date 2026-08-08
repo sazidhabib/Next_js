@@ -16,7 +16,8 @@ import {
   Grid,
   LogOut,
   X,
-  FileImage
+  FileImage,
+  ClipboardList
 } from 'lucide-react';
 import Link from 'next/link';
 import RichTextEditor from '../../../components/RichTextEditor';
@@ -441,6 +442,14 @@ export default function AdminProducts() {
           >
             <Settings className="w-5 h-5" />
             <span>Site Configuration</span>
+          </Link>
+
+          <Link
+            href="/admin/orders"
+            className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition text-left hover:bg-slate-800 hover:text-slate-200"
+          >
+            <ClipboardList className="w-5 h-5" />
+            <span>Orders Management</span>
           </Link>
 
           <Link

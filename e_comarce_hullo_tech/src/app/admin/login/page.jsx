@@ -38,12 +38,12 @@ export default function AdminLogin() {
         }));
 
         // Also save to cookies for middleware access
-        document.cookie = `adminToken=${data.data.token}; path=/; max-age=${7 * 24 * 60 * 60}; SameSite=Strict`;
+        document.cookie = `adminToken=${data.data.token}; path=/; max-age=${4 * 60 * 60}; SameSite=Strict`;
         document.cookie = `adminUser=${JSON.stringify({
           id: data.data.id,
           email: data.data.email,
           role: data.data.role
-        })}; path=/; max-age=${7 * 24 * 60 * 60}; SameSite=Strict`;
+        })}; path=/; max-age=${4 * 60 * 60}; SameSite=Strict`;
 
         // Redirect to dashboard
         router.push('/admin/dashboard');

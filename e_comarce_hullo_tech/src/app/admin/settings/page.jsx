@@ -11,7 +11,8 @@ import {
   Package,
   Grid,
   LogOut,
-  FileImage
+  FileImage,
+  ClipboardList
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -26,18 +27,36 @@ export default function AdminSettings() {
     contactPhone: '',
     contactAddress: '',
     footerText: '',
-    socialLinks: {}
+    socialLinks: {},
+    deliveryCharge: 120,
+    freeShippingThreshold: 5000
   });
 
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [pendingCount, setPendingCount] = useState(0);
+
+  const fetchPendingCount = async () => {
+    try {
+      const res = await fetch('/api/orders');
+      const data = await res.json();
+      if (data.success && data.data) {
+        setPendingCount(data.data.filter(o => o.status === 'pending').length);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   // Wait for auth check to complete
   useEffect(() => {
     if (!authLoading && isAuthorized && token) {
       fetchSettings();
+      fetchPendingCount();
+      const interval = setInterval(fetchPendingCount, 15000);
+      return () => clearInterval(interval);
     }
   }, [isAuthorized, token, authLoading]);
 
@@ -143,6 +162,21 @@ export default function AdminSettings() {
           >
             <SettingsIcon className="w-5 h-5" />
             <span>Site Configuration</span>
+          </Link>
+
+          <Link
+            href="/admin/orders"
+            className="w-full flex items-center justify-between px-4 py-3 rounded-xl transition text-left hover:bg-slate-800 hover:text-slate-200"
+          >
+            <div className="flex items-center space-x-3">
+              <ClipboardList className="w-5 h-5" />
+              <span>Orders Management</span>
+            </div>
+            {pendingCount > 0 && (
+              <span className="bg-red-500 text-white font-extrabold text-[10px] px-2 py-0.5 rounded-full animate-pulse">
+                {pendingCount}
+              </span>
+            )}
           </Link>
 
           <Link
@@ -255,6 +289,28 @@ export default function AdminSettings() {
                 required
                 value={settings.contactAddress}
                 onChange={(e) => setSettings({ ...settings, contactAddress: e.target.value })}
+                className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 placeholder-slate-500 focus:outline-none focus:border-blue-500 transition"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-slate-300 mb-2">Standard Delivery Charge (৳)</label>
+              <input
+                type="number"
+                required
+                min="0"
+                value={settings.deliveryCharge || 0}
+                onChange={(e) => setSettings({ ...settings, deliveryCharge: Number(e.target.value) })}
+                className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 placeholder-slate-500 focus:outline-none focus:border-blue-500 transition"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-slate-300 mb-2">Free Delivery Minimum Order Total (৳)</label>
+              <input
+                type="number"
+                required
+                min="0"
+                value={settings.freeShippingThreshold || 0}
+                onChange={(e) => setSettings({ ...settings, freeShippingThreshold: Number(e.target.value) })}
                 className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 placeholder-slate-500 focus:outline-none focus:border-blue-500 transition"
               />
             </div>
