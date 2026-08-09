@@ -413,10 +413,10 @@ export default function ProductDetailContent({ product, category, relatedProduct
                                   return (
                                     <div
                                       key={i}
-                                      className={`flex items-start gap-4 py-3 ${i % 2 === 0 ? "bg-[#fafbfc] -mx-4 px-4 rounded-lg" : ""
+                                      className={`flex flex-col sm:flex-row items-start gap-1 sm:gap-4 py-3 ${i % 2 === 0 ? "bg-[#fafbfc] -mx-4 px-4 rounded-lg" : ""
                                       }`}
                                     >
-                                      <span className="text-sm text-gray-500 w-48 shrink-0 font-medium">
+                                      <span className="text-sm text-gray-500 w-full sm:w-48 shrink-0 font-medium">
                                         {displayKey}
                                       </span>
                                       <span className="text-sm text-gray-900 whitespace-pre-line flex-1">
@@ -447,10 +447,10 @@ export default function ProductDetailContent({ product, category, relatedProduct
                           ].filter((item) => item.value).map((item, i) => (
                             <div
                               key={i}
-                              className={`flex items-start gap-4 py-3 ${i % 2 === 0 ? "bg-[#fafbfc] -mx-4 px-4 rounded-lg" : ""
+                              className={`flex flex-col sm:flex-row items-start gap-1 sm:gap-4 py-3 ${i % 2 === 0 ? "bg-[#fafbfc] -mx-4 px-4 rounded-lg" : ""
                               }`}
                             >
-                              <span className="text-sm text-gray-500 w-48 shrink-0 font-medium">
+                              <span className="text-sm text-gray-500 w-full sm:w-48 shrink-0 font-medium">
                                 {item.label}
                               </span>
                               <span className="text-sm text-gray-900">

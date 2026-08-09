@@ -21,7 +21,7 @@ export default function AdminLayout({ children }) {
   }
 
   const navItems = [
-    { href: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
     { href: '/admin/settings', label: 'Site Configuration', icon: Settings },
     { href: '/admin/products', label: 'Product Inventory', icon: Package },
     { href: '/admin/categories', label: 'Category Manager', icon: Grid },
@@ -29,7 +29,7 @@ export default function AdminLayout({ children }) {
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col md:flex-row">
-      <main className="flex-1 max-h-screen overflow-y-auto">
+      <main className="flex-1 md:max-h-screen md:overflow-y-auto">
         {children}
       </main>
     </div>

@@ -3,8 +3,8 @@ import { NextResponse } from 'next/server';
 export function middleware(request) {
     const pathname = request.nextUrl.pathname;
 
-    // Only protect dashboard route
-    if (pathname === '/admin/dashboard') {
+    // Protect all /admin routes except /admin/login
+    if (pathname.startsWith('/admin') && pathname !== '/admin/login') {
         const token = request.cookies.get('adminToken')?.value;
 
         if (!token) {
@@ -16,5 +16,5 @@ export function middleware(request) {
 }
 
 export const config = {
-    matcher: ['/admin/dashboard'],
+    matcher: ['/admin/:path*'],
 };

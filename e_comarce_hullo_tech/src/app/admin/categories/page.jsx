@@ -19,6 +19,7 @@ import {
   ClipboardList
 } from 'lucide-react';
 import Link from 'next/link';
+import AdminSidebar from '../../../components/AdminSidebar';
 
 export default function AdminCategories() {
   const { isAuthorized, user, token, isLoading: authLoading } = useAdminAuth();
@@ -168,89 +169,10 @@ export default function AdminCategories() {
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col md:flex-row">
-      {/* Sidebar Navigation */}
-      <aside className="w-full md:w-64 bg-slate-900 border-r border-slate-800 flex flex-col">
-        <div className="p-6 border-b border-slate-800">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-lg bg-blue-600/10 border border-blue-500/30 flex items-center justify-center text-blue-500">
-              <Grid className="w-6 h-6" />
-            </div>
-            <div>
-              <h2 className="font-bold tracking-wide">HulloTech</h2>
-              <span className="text-xs text-slate-400">Admin Control</span>
-            </div>
-          </div>
-        </div>
-
-        <nav className="flex-1 p-4 space-y-2">
-          <Link
-            href="/admin/dashboard"
-            className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition text-left hover:bg-slate-800 hover:text-slate-200"
-          >
-            <LayoutDashboard className="w-5 h-5" />
-            <span>Dashboard</span>
-          </Link>
-
-          <Link
-            href="/admin/settings"
-            className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition text-left hover:bg-slate-800 hover:text-slate-200"
-          >
-            <Settings className="w-5 h-5" />
-            <span>Site Configuration</span>
-          </Link>
-
-          <Link
-            href="/admin/orders"
-            className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition text-left hover:bg-slate-800 hover:text-slate-200"
-          >
-            <ClipboardList className="w-5 h-5" />
-            <span>Orders Management</span>
-          </Link>
-
-          <Link
-            href="/admin/products"
-            className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition text-left hover:bg-slate-800 hover:text-slate-200"
-          >
-            <Package className="w-5 h-5" />
-            <span>Product Inventory</span>
-          </Link>
-
-          <Link
-            href="/admin/categories"
-            className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl bg-blue-600 text-white font-medium shadow-lg shadow-blue-600/15"
-          >
-            <Grid className="w-5 h-5" />
-            <span>Category Manager</span>
-          </Link>
-
-          <Link
-            href="/admin/media"
-            className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition text-left hover:bg-slate-800 hover:text-slate-200"
-          >
-            <FileImage className="w-5 h-5" />
-            <span>Media Gallery</span>
-          </Link>
-        </nav>
-
-        <div className="p-4 border-t border-slate-800">
-          <div className="flex items-center justify-between mb-4 px-2">
-            <div className="truncate">
-              <p className="text-sm font-semibold truncate">{user?.email}</p>
-              <p className="text-xs text-slate-400 uppercase tracking-wider">{user?.role}</p>
-            </div>
-          </div>
-          <button
-            onClick={handleLogout}
-            className="w-full flex items-center justify-center space-x-2 bg-slate-800 hover:bg-red-950/20 hover:text-red-400 border border-slate-700/50 hover:border-red-900/30 text-slate-300 py-2.5 rounded-xl transition font-medium"
-          >
-            <LogOut className="w-4 h-4" />
-            <span>Logout</span>
-          </button>
-        </div>
-      </aside>
+      <AdminSidebar />
 
       {/* Main Content Area */}
-      <main className="flex-1 p-6 md:p-10 max-h-screen overflow-y-auto">
+      <main className="flex-1 p-6 md:p-10 md:max-h-screen md:overflow-y-auto">
         {/* Alerts / Notifications */}
         {success && (
           <div className="fixed top-6 right-6 z-50 p-4 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm rounded-xl flex items-center shadow-lg shadow-emerald-950/20 animate-fade-in-down">

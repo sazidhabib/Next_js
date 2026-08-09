@@ -45,6 +45,38 @@ if (sequelize) {
     freeShippingThreshold: {
       type: DataTypes.INTEGER,
       defaultValue: 5000,
+    },
+    mainSlider: {
+      type: DataTypes.JSON,
+      defaultValue: [
+        { image: "/1st-post.jpeg" },
+        { image: "/2nd_post.jpeg" },
+        { image: "/cover.jpeg" }
+      ],
+    },
+    topSlider: {
+      type: DataTypes.JSON,
+      defaultValue: [
+        { image: "/3rd_post.png", link: "/offers" },
+        { image: "/1st-post.jpeg", link: "/offers" },
+        { image: "/cover.jpeg", link: "/offers" }
+      ],
+    },
+    bottomSlider: {
+      type: DataTypes.JSON,
+      defaultValue: [
+        { image: "/4th_post.png", link: "/offers" },
+        { image: "/2nd_post.jpeg", link: "/offers" },
+        { image: "/cover.jpeg", link: "/offers" }
+      ],
+    },
+    menuItems: {
+      type: DataTypes.JSON,
+      allowNull: true,
+    },
+    brands: {
+      type: DataTypes.JSON,
+      allowNull: true,
     }
   }, {
     timestamps: true,

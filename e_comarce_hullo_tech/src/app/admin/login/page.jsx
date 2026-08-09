@@ -46,7 +46,7 @@ export default function AdminLogin() {
         })}; path=/; max-age=${4 * 60 * 60}; SameSite=Strict`;
 
         // Redirect to dashboard
-        router.push('/admin/dashboard');
+        router.push('/admin');
       } else {
         setError(data.message || 'Invalid credentials');
       }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Search, ShoppingCart, User, Menu, X, Gift, Zap, Wrench, BarChart3, ChevronRight, ChevronDown } from "lucide-react";
@@ -8,7 +8,7 @@ import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCart } from "../lib/CartContext";
 
-const categories = [
+const staticCategories = [
   {
     name: "Desktop",
     href: "/desktops",
@@ -217,6 +217,36 @@ export default function Navbar() {
   const [searchQuery, setSearchQuery] = useState("");
   const pathname = usePathname();
 
+  // Dynamic menu items loaded from database settings
+  const [categories, setCategories] = useState(staticCategories);
+
+  useEffect(() => {
+    const parseMenu = (menuData) => {
+      if (!menuData) return staticCategories;
+      if (Array.isArray(menuData)) return menuData;
+      if (typeof menuData === 'string') {
+        try {
+          const parsed = JSON.parse(menuData);
+          return Array.isArray(parsed) && parsed.length > 0 ? parsed : staticCategories;
+        } catch {
+          return staticCategories;
+        }
+      }
+      return staticCategories;
+    };
+
+    fetch('/api/settings', { cache: 'no-store' })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && data.data) {
+          setCategories(parseMenu(data.data.menuItems));
+        }
+      })
+      .catch((err) => {
+        console.warn('Failed to load dynamic storefront menu, using static compile-time fallback:', err);
+      });
+  }, []);
+
   const handleMouseEnter = (categoryName) => {
     setActiveMegaMenu(categoryName);
     const cat = categories.find(c => c.name === categoryName);
@@ -236,7 +266,7 @@ export default function Navbar() {
     <>
       {/* Top Bar */}
       <motion.div
-        className="bg-[#010d21] text-white py-2 px-4 text-sm"
+        className="bg-[#010d21] text-white py-2 px-4 text-sm no-print"
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.6 }}
@@ -276,34 +306,34 @@ export default function Navbar() {
 
       {/* Main Navbar */}
       <motion.div
-        className="bg-white/80 backdrop-blur-md border-b border-star-gray/50 sticky top-0 z-50 shadow-sm"
+        className="bg-white border-b border-star-gray/50 relative z-40 no-print"
         initial={{ y: -80 }}
         animate={{ y: 0 }}
         transition={{ duration: 0.6, delay: 0.1 }}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16 gap-4">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 md:py-0">
+          <div className="flex items-center justify-between h-14 md:h-16 gap-4">
             {/* Logo */}
             <motion.div whileHover={{ scale: 1.05 }} transition={{ duration: 0.2 }}>
-              <Link href="/" className="flex-shrink-0 flex items-center gap-3">
-                <div className="bg-white border border-star-gray rounded px-2 py-1.5 shadow-sm">
+              <Link href="/" className="flex-shrink-0 flex items-center gap-2">
+                <div className="bg-white border border-star-gray rounded px-1.5 py-1 shadow-sm">
                   <Image
                     src="/logo.jpg"
                     alt="HulloTech Logo"
-                    width={100}
-                    height={30}
-                    className="h-8 w-auto"
+                    width={90}
+                    height={27}
+                    className="h-6 md:h-8 w-auto"
                   />
                 </div>
-                <span className="text-2xl font-extrabold bg-gradient-to-r from-star-blue to-blue-600 bg-clip-text text-transparent tracking-tight">
+                <span className="text-lg md:text-2xl font-extrabold bg-gradient-to-r from-star-blue to-blue-600 bg-clip-text text-transparent tracking-tight">
                   HulloTech
                 </span>
               </Link>
             </motion.div>
 
-            {/* Search Bar */}
+            {/* Search Bar - Desktop Only */}
             <motion.div
-              className="flex-1 max-w-2xl mx-4"
+              className="hidden md:block flex-1 max-w-2xl mx-4"
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
@@ -330,7 +360,7 @@ export default function Navbar() {
 
             {/* Right Icons */}
             <motion.div
-              className="flex items-center gap-4"
+              className="flex items-center gap-3 md:gap-4"
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
@@ -349,11 +379,11 @@ export default function Navbar() {
                 transition={{ duration: 0.2 }}
               >
                 <Link href="/cart" className="flex flex-col items-center text-star-text hover:text-star-blue relative transition-colors font-medium">
-                  <ShoppingCart className="w-6 h-6" />
-                  <span className="text-xs">Cart</span>
+                  <ShoppingCart className="w-5 h-5 md:w-6 md:h-6" />
+                  <span className="text-[10px] md:text-xs">Cart</span>
                   {cartCount > 0 && (
                     <motion.span
-                      className="absolute -top-1 -right-2 bg-star-red text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold"
+                      className="absolute -top-1 -right-2 bg-star-red text-white text-[10px] md:text-xs rounded-full w-4 h-4 md:w-5 md:h-5 flex items-center justify-center font-bold"
                       whileHover={{ scale: 1.1 }}
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
@@ -373,16 +403,36 @@ export default function Navbar() {
               </motion.button>
             </motion.div>
           </div>
-        </div>
 
-        {/* Category Navigation */}
-        <motion.div
-          className="bg-white border-t border-star-gray hidden md:block relative"
-          onMouseLeave={handleMouseLeave}
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.3 }}
-        >
+          {/* Search Bar - Mobile/Tablet Only */}
+          <div className="block md:hidden pb-2 px-1">
+            <form className="relative group" onSubmit={(e) => e.preventDefault()}>
+              <input
+                type="text"
+                placeholder="Search products..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full px-4 py-2 border border-star-gray rounded-lg focus:outline-none focus:border-star-blue text-sm font-medium"
+              />
+              <button
+                type="submit"
+                className="absolute right-0 top-0 h-full px-4 bg-star-blue text-white rounded-r-lg hover:bg-star-dark-blue transition-all"
+              >
+                <Search className="w-4 h-4" />
+              </button>
+            </form>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Category Navigation */}
+      <motion.div
+        className="bg-white/95 backdrop-blur-md border-b border-star-gray/50 hidden md:block sticky top-0 z-50 shadow-sm no-print"
+        onMouseLeave={handleMouseLeave}
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.3 }}
+      >
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between gap-1">
               {categories.map((cat, idx) => {
@@ -478,13 +528,12 @@ export default function Navbar() {
             </div>
           </div>
         </motion.div>
-      </motion.div>
 
       {/* Mobile Menu */}
       <AnimatePresence>
         {mobileMenuOpen && (
           <motion.div
-            className="md:hidden bg-white border-b border-star-gray shadow-xl fixed top-16 left-0 right-0 z-40"
+            className="md:hidden bg-white border-b border-star-gray shadow-xl fixed top-16 left-0 right-0 z-40 no-print"
             initial={{ opacity: 0, y: -20, height: 0 }}
             animate={{ opacity: 1, y: 0, height: "auto" }}
             exit={{ opacity: 0, y: -20, height: 0 }}
@@ -585,6 +634,32 @@ export default function Navbar() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Floating Cart Button */}
+      <motion.div
+        className="fixed bottom-6 right-6 z-50 no-print"
+        initial={{ scale: 0, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ type: "spring", stiffness: 260, damping: 20, delay: 0.5 }}
+      >
+        <Link
+          href="/cart"
+          className="flex items-center justify-center bg-star-blue text-white w-14 h-14 rounded-full shadow-2xl hover:bg-star-dark-blue hover:scale-105 active:scale-95 transition-all duration-300 relative group border border-white/10"
+        >
+          <ShoppingCart className="w-6 h-6 group-hover:rotate-12 transition-transform duration-200" />
+          {cartCount > 0 && (
+            <motion.span
+              key={cartCount}
+              className="absolute -top-1 -right-1 bg-star-red text-white text-xs rounded-full min-w-6 h-6 px-1.5 flex items-center justify-center font-bold border-2 border-white shadow-md"
+              initial={{ scale: 0.6 }}
+              animate={{ scale: 1 }}
+              transition={{ type: "spring", stiffness: 300, damping: 10 }}
+            >
+              {cartCount}
+            </motion.span>
+          )}
+        </Link>
+      </motion.div>
     </>
   );
 }

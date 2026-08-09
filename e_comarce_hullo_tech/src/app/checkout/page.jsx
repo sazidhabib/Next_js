@@ -31,7 +31,7 @@ export default function CheckoutPage() {
 
   useEffect(() => {
     // Fetch settings
-    fetch('/api/settings')
+    fetch('/api/settings', { cache: 'no-store' })
       .then(res => res.json())
       .then(data => {
         if (data.success && data.data) {
