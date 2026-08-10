@@ -5,6 +5,55 @@ import { Product, Category } from "../../../../models";
 import { products as mockProducts, categories as mockCategories } from "../../../data/mockData";
 import ProductDetailContent from "./ProductDetailContent";
 
+export async function generateMetadata({ params }) {
+  const { slug } = await params;
+  let product = null;
+
+  try {
+    const dbProduct = await Product.findOne({ where: { slug } });
+    if (dbProduct) {
+      product = dbProduct.toJSON();
+    }
+  } catch (error) {
+    console.error("DB Fetch failed for metadata generation:", error);
+  }
+
+  // Fallback to mockData
+  if (!product) {
+    product = mockProducts.find((p) => p.slug === slug);
+  }
+
+  if (!product) {
+    return {
+      title: "Product Not Found | HulloTech",
+      description: "The requested product could not be found."
+    };
+  }
+
+  const title = `${product.name} Price in Bangladesh | HulloTech`;
+  const description = `Get the ${product.name} at the best price in Bangladesh. Brand: ${product.brand || "N/A"}, Model: ${product.model || "N/A"}. ${product.description ? product.description.substring(0, 155) + '...' : 'Check specs, price, reviews, and detailed parameters.'}`;
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      images: [
+        {
+          url: product.image || "/icon.jpg",
+          width: 800,
+          height: 600,
+          alt: product.name,
+        },
+      ],
+    },
+    alternates: {
+      canonical: `/${product.category}/${product.slug}`,
+    },
+  };
+}
+
 export default async function ProductDetailPage({ params }) {
   const { slug, category: categorySlug } = await params;
   
@@ -59,8 +108,39 @@ export default async function ProductDetailPage({ params }) {
       .slice(0, 6);
   }
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": product.name,
+    "image": product.image ? [`https://hullotech.com${product.image}`] : [],
+    "description": product.description || `Buy ${product.name} at the best price in Bangladesh from HulloTech.`,
+    "sku": product.id?.toString() || product.slug,
+    "brand": {
+      "@type": "Brand",
+      "name": product.brand || "HulloTech"
+    },
+    "offers": {
+      "@type": "Offer",
+      "url": `https://hullotech.com/${product.category}/${product.slug}`,
+      "priceCurrency": "BDT",
+      "price": product.price,
+      "priceValidUntil": "2027-12-31",
+      "itemCondition": "https://schema.org/NewCondition",
+      "availability": product.stock ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+      "seller": {
+        "@type": "Organization",
+        "name": "HulloTech"
+      }
+    }
+  };
+
   return (
     <main className="min-h-screen bg-white">
+      {/* JSON-LD Structured Data for Search Engine Crawlers */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <section className="border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
           <ul className="flex items-center gap-2 text-sm" itemScope itemType="http://schema.org/BreadcrumbList">

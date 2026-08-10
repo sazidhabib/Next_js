@@ -31,9 +31,28 @@ export default function ProductDetailContent({ product, category, relatedProduct
   const [quantity, setQuantity] = useState(1);
   const [paymentMode, setPaymentMode] = useState("cash");
 
-  const images = Array.isArray(product.images) ? product.images : [product.image].filter(Boolean);
-  const regularPrice = product.regularPrice ? Math.round(parseFloat(product.regularPrice)) : Math.round(product.price * 1.12);
-  const hasDiscount = regularPrice > product.price;
+  const safeParse = (val, fallback) => {
+    if (!val) return fallback;
+    if (typeof val === 'string') {
+      try {
+        return JSON.parse(val);
+      } catch (e) {
+        return fallback;
+      }
+    }
+    return val;
+  };
+
+  const parsedImages = safeParse(product?.images, []);
+  const images = Array.isArray(parsedImages) && parsedImages.length > 0
+    ? parsedImages
+    : [product?.image].filter(Boolean);
+
+  const parsedSpecs = safeParse(product?.specs, []);
+  const specs = Array.isArray(parsedSpecs) ? parsedSpecs : [];
+
+  const regularPrice = product?.regularPrice ? Math.round(parseFloat(product.regularPrice)) : Math.round((product?.price || 0) * 1.12);
+  const hasDiscount = regularPrice > (product?.price || 0);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -41,7 +60,7 @@ export default function ProductDetailContent({ product, category, relatedProduct
       <div className="flex flex-col lg:flex-row gap-10 lg:gap-14 py-8 lg:py-12">
         {/* Image Gallery */}
         <div className="lg:w-[45%] lg:sticky lg:top-28 lg:self-start">
-          <div className="relative bg-[#fafbfc] rounded-2xl border border-gray-100 aspect-square flex items-center justify-center overflow-hidden">
+          <div className="relative bg-white rounded-2xl border border-gray-100 aspect-square flex items-center justify-center overflow-hidden">
             <AnimatePresence mode="wait">
               <motion.div
                 key={selectedImage}
@@ -89,7 +108,7 @@ export default function ProductDetailContent({ product, category, relatedProduct
                   className={`relative w-[72px] h-[72px] rounded-xl border-2 flex items-center justify-center bg-white overflow-hidden transition-all duration-200 ${i === selectedImage
                     ? "border-blue-600 shadow-md shadow-blue-600/10"
                     : "border-gray-100 hover:border-gray-200"
-                  }`}
+                    }`}
                 >
                   <Image
                     src={img}
@@ -166,7 +185,7 @@ export default function ProductDetailContent({ product, category, relatedProduct
               <span className={`inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full ${product.stock
                 ? "bg-emerald-50 text-emerald-700"
                 : "bg-red-50 text-red-700"
-              }`}>
+                }`}>
                 <span className={`w-1.5 h-1.5 rounded-full ${product.stock ? "bg-emerald-500" : "bg-red-500"}`} />
                 {product.stock ? "In Stock" : "Out of Stock"}
               </span>
@@ -223,14 +242,14 @@ export default function ProductDetailContent({ product, category, relatedProduct
                 className={`relative rounded-xl border-2 p-4 cursor-pointer transition-all ${paymentMode === "cash"
                   ? "border-blue-600 bg-blue-50/50 shadow-sm"
                   : "border-gray-100 hover:border-gray-200 bg-white"
-                }`}
+                  }`}
               >
                 <input
                   type="radio"
                   name="payment"
                   value="cash"
                   checked={paymentMode === "cash"}
-                  onChange={() => {}}
+                  onChange={() => { }}
                   className="sr-only"
                 />
                 <div className="flex items-start justify-between mb-2">
@@ -252,14 +271,14 @@ export default function ProductDetailContent({ product, category, relatedProduct
                 className={`relative rounded-xl border-2 p-4 cursor-pointer transition-all ${paymentMode === "emi"
                   ? "border-blue-600 bg-blue-50/50 shadow-sm"
                   : "border-gray-100 hover:border-gray-200 bg-white"
-                }`}
+                  }`}
               >
                 <input
                   type="radio"
                   name="payment"
                   value="emi"
                   checked={paymentMode === "emi"}
-                  onChange={() => {}}
+                  onChange={() => { }}
                   className="sr-only"
                 />
                 <div className="flex items-start justify-between mb-2">
@@ -301,9 +320,8 @@ export default function ProductDetailContent({ product, category, relatedProduct
                 setAddedToCart(true);
                 setTimeout(() => setAddedToCart(false), 2000);
               }}
-              className={`flex-1 h-12 font-semibold rounded-xl transition-all active:scale-[0.98] flex items-center justify-center gap-2.5 text-sm disabled:opacity-50 disabled:cursor-not-allowed shadow-lg ${
-                addedToCart ? "bg-green-600 hover:bg-green-500 shadow-green-600/10 text-white" : "bg-gray-900 hover:bg-gray-800 shadow-gray-900/10 text-white"
-              }`}
+              className={`flex-1 h-12 font-semibold rounded-xl transition-all active:scale-[0.98] flex items-center justify-center gap-2.5 text-sm disabled:opacity-50 disabled:cursor-not-allowed shadow-lg ${addedToCart ? "bg-green-600 hover:bg-green-500 shadow-green-600/10 text-white" : "bg-gray-900 hover:bg-gray-800 shadow-gray-900/10 text-white"
+                }`}
               disabled={!product.stock}
             >
               {addedToCart ? (
@@ -356,7 +374,7 @@ export default function ProductDetailContent({ product, category, relatedProduct
                   className={`pb-3.5 text-sm font-medium transition-all relative ${activeTab === tab
                     ? "text-gray-900"
                     : "text-gray-400 hover:text-gray-600"
-                  }`}
+                    }`}
                 >
                   {tab}
                   {activeTab === tab && (
@@ -414,7 +432,7 @@ export default function ProductDetailContent({ product, category, relatedProduct
                                     <div
                                       key={i}
                                       className={`flex flex-col sm:flex-row items-start gap-1 sm:gap-4 py-3 ${i % 2 === 0 ? "bg-[#fafbfc] -mx-4 px-4 rounded-lg" : ""
-                                      }`}
+                                        }`}
                                     >
                                       <span className="text-sm text-gray-500 w-full sm:w-48 shrink-0 font-medium">
                                         {displayKey}
@@ -440,15 +458,15 @@ export default function ProductDetailContent({ product, category, relatedProduct
                             { label: "Name", value: product.name },
                             { label: "Brand", value: product.brand },
                             { label: "Model", value: product.model },
-                            ...(Array.isArray(product.specs) ? product.specs.map((spec, i) => ({
+                            ...(specs.map((spec, i) => ({
                               label: `Specification ${i + 1}`,
                               value: spec,
-                            })) : []),
+                            }))),
                           ].filter((item) => item.value).map((item, i) => (
                             <div
                               key={i}
                               className={`flex flex-col sm:flex-row items-start gap-1 sm:gap-4 py-3 ${i % 2 === 0 ? "bg-[#fafbfc] -mx-4 px-4 rounded-lg" : ""
-                              }`}
+                                }`}
                             >
                               <span className="text-sm text-gray-500 w-full sm:w-48 shrink-0 font-medium">
                                 {item.label}
@@ -557,7 +575,7 @@ export default function ProductDetailContent({ product, category, relatedProduct
                       key={rp.id}
                       href={`/${rp.category}/${rp.slug}`}
                       className={`flex gap-3.5 group ${i < relatedProducts.slice(0, 5).length - 1 ? "pb-4 border-b border-gray-100" : ""
-                      }`}
+                        }`}
                     >
                       <div className="w-16 h-16 bg-[#fafbfc] rounded-xl shrink-0 flex items-center justify-center border border-gray-100 overflow-hidden group-hover:border-gray-200 transition-colors">
                         <Image

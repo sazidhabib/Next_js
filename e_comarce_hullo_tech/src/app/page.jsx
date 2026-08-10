@@ -2,12 +2,14 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, ShoppingCart, Star } from "lucide-react";
 import FeatureCards from "../components/FeatureCards";
 import FeaturedCategories from "../components/FeaturedCategories";
 import FeaturedProducts from "../components/FeaturedProducts";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { products as mockProducts } from "../data/mockData";
+import { useCart } from "../lib/CartContext";
 
 const banners = [
   {
@@ -73,6 +75,34 @@ export default function Home() {
   const [activeSideTop, setActiveSideTop] = useState(sideBannersTop);
   const [activeSideBottom, setActiveSideBottom] = useState(sideBannersBottom);
   const [brands, setBrands] = useState(staticBrands);
+
+  const { addToCart } = useCart();
+  const [newArrivals, setNewArrivals] = useState([]);
+  const [loadingNewArrivals, setLoadingNewArrivals] = useState(true);
+
+  useEffect(() => {
+    const fetchNewArrivals = async () => {
+      try {
+        const res = await fetch("/api/products");
+        const data = await res.json();
+        if (data.success && data.data && data.data.length > 0) {
+          // Sort by id DESC to get last uploaded products first
+          const sorted = [...data.data].sort((a, b) => b.id - a.id);
+          setNewArrivals(sorted.slice(0, 5));
+        } else {
+          const sorted = [...mockProducts].sort((a, b) => b.id - a.id);
+          setNewArrivals(sorted.slice(0, 5));
+        }
+      } catch (err) {
+        console.error("Failed to fetch new arrivals:", err);
+        const sorted = [...mockProducts].sort((a, b) => b.id - a.id);
+        setNewArrivals(sorted.slice(0, 5));
+      } finally {
+        setLoadingNewArrivals(false);
+      }
+    };
+    fetchNewArrivals();
+  }, []);
 
   useEffect(() => {
     const fetchSliderSettings = async () => {
@@ -273,7 +303,7 @@ export default function Home() {
             {/* Fade edges */}
             <div className="absolute left-0 top-0 bottom-0 w-16 md:w-32 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none" />
             <div className="absolute right-0 top-0 bottom-0 w-16 md:w-32 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none" />
-            
+
             <div className="flex gap-16 md:gap-24 animate-marquee whitespace-nowrap opacity-40">
               {brands.map((brand, idx) => (
                 <span key={`b1-${idx}`} className="text-base md:text-xl font-extrabold text-gray-900 tracking-wider uppercase hover:text-blue-600 transition-colors duration-300">
@@ -392,27 +422,72 @@ export default function Home() {
           </Link>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6">
-          {[1, 2, 3, 4, 5].map((item) => (
-            <div
-              key={item}
-              className="group bg-white rounded-xl border border-gray-100 overflow-hidden hover:shadow-xl hover:border-gray-200 transition-all duration-500"
-            >
-              <div className="relative aspect-square bg-[#f8fafc] flex items-center justify-center overflow-hidden">
-                <div className="w-full h-full bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
-                  <span className="text-gray-300 font-medium">New Product {item}</span>
+          {loadingNewArrivals ? (
+            [1, 2, 3, 4, 5].map((item) => (
+              <div
+                key={item}
+                className="aspect-square bg-gradient-to-br from-slate-100 to-slate-200 rounded-xl animate-pulse"
+              />
+            ))
+          ) : (
+            newArrivals.map((product) => (
+              <Link
+                key={product.id}
+                href={`/${product.category}/${product.slug}`}
+                className="group block bg-white rounded-xl border border-gray-100 overflow-hidden hover:shadow-xl hover:border-gray-200 transition-all duration-500"
+              >
+                <div className="relative aspect-square bg-[#f8fafc] overflow-hidden">
+                  {product.image ? (
+                    <Image
+                      src={product.image}
+                      alt={product.name}
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-700"
+                      sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 20vw"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
+                      <span className="text-gray-300 font-medium">No Image</span>
+                    </div>
+                  )}
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/[0.02] transition-colors duration-500" />
+                  <span className="absolute top-3 left-3 bg-blue-600 text-white text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">
+                    New
+                  </span>
+                  <div className="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0">
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        addToCart(product, 1);
+                      }}
+                      className="flex items-center gap-1.5 bg-white/90 backdrop-blur-sm text-gray-900 text-xs font-semibold px-3 py-2 rounded-full shadow-lg hover:bg-blue-600 hover:text-white transition-all cursor-pointer active:scale-95 border-0"
+                    >
+                      <ShoppingCart className="w-3.5 h-3.5" />
+                      Add to Cart
+                    </button>
+                  </div>
                 </div>
-                <span className="absolute top-3 left-3 bg-blue-600 text-white text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">
-                  New
-                </span>
-              </div>
-              <div className="p-4">
-                <h3 className="text-sm font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors">
-                  New Arrival Product {item}
-                </h3>
-                <p className="text-lg font-bold text-gray-900">$999</p>
-              </div>
-            </div>
-          ))}
+                <div className="p-4">
+                  <div className="flex items-center gap-0.5 mb-2">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <Star
+                        key={star}
+                        className="w-3 h-3 fill-amber-400 text-amber-400"
+                      />
+                    ))}
+                    <span className="text-[11px] text-gray-400 ml-1.5 font-medium">
+                      (5)
+                    </span>
+                  </div>
+                  <h3 className="text-sm font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors leading-snug">
+                    {product.name}
+                  </h3>
+                  <p className="text-lg font-bold text-gray-900">৳{product.price}</p>
+                </div>
+              </Link>
+            ))
+          )}
         </div>
       </section>
 
