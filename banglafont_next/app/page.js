@@ -8,7 +8,7 @@ import DownloadMarquee from "../components/DownloadMarquee";
 export const dynamic = "force-dynamic";
 
 async function getHomeData() {
-  const [totalFonts, totalDownloads, featuredFonts, topFonts, allFonts] = await Promise.all([
+  const [totalFonts, totalDownloads, featuredFonts, topFonts, allFonts, newFonts] = await Promise.all([
     prisma.font.count({ where: { published: true } }),
     prisma.font.aggregate({ _sum: { downloadCount: true } }),
     prisma.font.findMany({
@@ -35,6 +35,12 @@ async function getHomeData() {
       },
       orderBy: { name: "asc" },
     }),
+    prisma.font.findMany({
+      where: { published: true },
+      include: { designer: true },
+      orderBy: { createdAt: "desc" },
+      take: 8,
+    }),
   ]);
   return {
     totalFonts,
@@ -42,6 +48,7 @@ async function getHomeData() {
     featuredFonts,
     topFonts,
     allFonts,
+    newFonts,
   };
 }
 
@@ -86,6 +93,30 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {/* New Fonts Section */}
+      <section className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <h2 className="text-xl font-bold text-white tracking-tight">New Fonts</h2>
+            <span className="w-2 h-2 rounded-full bg-[#00e599]" />
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Link
+              href="/free-fonts"
+              className="text-xs text-[#00e599] hover:underline font-medium"
+            >
+              View All Fonts &rarr;
+            </Link>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+          {data.newFonts.map((font) => (
+            <DarkFontCard key={font.id} font={font} />
+          ))}
+        </div>
+      </section>
 
     </div>
   );
