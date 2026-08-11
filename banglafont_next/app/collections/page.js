@@ -76,7 +76,7 @@ export default function CollectionsPage() {
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/10">
         <div>
-          <h1 className="text-3xl font-bold text-white tracking-tight">Collections</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">Collections</h1>
           <p className="text-xs text-gray-400 mt-1">
             বিভিন্ন থিম এবং ব্যবহারের জন্য সাজানো আমাদের প্রিমিয়াম ফন্ট কালেকশনগুলো দেখুন।
           </p>
@@ -86,17 +86,17 @@ export default function CollectionsPage() {
           <input
             type="text"
             placeholder="Search collections..."
-            className="bg-[#161824] border border-white/10 text-xs text-white placeholder-gray-500 px-4 py-2 rounded-xl focus:outline-none focus:border-[#00e599]"
+            className="w-full sm:w-auto bg-[#161824] border border-white/10 text-xs text-white placeholder-gray-500 px-3 sm:px-4 py-2 rounded-xl focus:outline-none focus:border-[#00e599]"
           />
         </div>
       </div>
 
       {/* Collections Grid matching Screenshot 4 */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         {collections.map((item) => (
           <div
             key={item.id}
-            className={`group bg-gradient-to-br ${item.gradient} border border-white/10 hover:border-[#00e599]/50 rounded-3xl p-6 flex flex-col justify-between min-h-[260px] transition-all duration-300 hover:shadow-[0_0_30px_rgba(0,229,153,0.15)] relative overflow-hidden`}
+            className={`group bg-gradient-to-br ${item.gradient} border border-white/10 hover:border-[#00e599]/50 rounded-2xl sm:rounded-3xl p-4 sm:p-6 flex flex-col justify-between min-h-[220px] sm:min-h-[260px] transition-all duration-300 hover:shadow-[0_0_30px_rgba(0,229,153,0.15)] relative overflow-hidden`}
           >
             <div>
               <div className="flex items-center justify-between mb-4">
@@ -106,7 +106,7 @@ export default function CollectionsPage() {
                 <span className="text-xs text-gray-500">{item.fontCount} Fonts</span>
               </div>
 
-              <h3 className="text-2xl font-bold text-white mb-2 leading-tight group-hover:text-[#00e599] transition-colors">
+              <h3 className="text-lg sm:text-2xl font-bold text-white mb-2 leading-tight group-hover:text-[#00e599] transition-colors">
                 {item.title}
               </h3>
               <p className="text-xs text-gray-400 line-clamp-2 leading-relaxed">

@@ -9,11 +9,11 @@ export default function Header({ onMenuClick }) {
 
   return (
     <header className="border-b border-white/10 bg-[#0d0e14]/90 backdrop-blur-md sticky top-0 z-50 text-white">
-      <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between gap-6">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 h-14 sm:h-16 flex items-center justify-between gap-2 sm:gap-4 lg:gap-6">
         {/* Hamburger Menu Toggle Button */}
         <button
           onClick={onMenuClick}
-          className="p-2.5 text-gray-300 hover:text-white hover:bg-white/5 rounded-xl border border-white/10 flex items-center justify-center cursor-pointer transition-colors"
+          className="p-2 sm:p-2.5 text-gray-300 hover:text-white hover:bg-white/5 rounded-xl border border-white/10 flex items-center justify-center cursor-pointer transition-colors shrink-0"
           title="Toggle Navigation Menu"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -22,11 +22,11 @@ export default function Header({ onMenuClick }) {
         </button>
 
         {/* Brand Logo */}
-        <Link href="/" className="flex items-center gap-2.5 group shrink-0">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-[#00e599] to-emerald-400 flex items-center justify-center text-gray-950 font-black text-lg shadow-[0_0_15px_rgba(0,229,153,0.3)]">
+        <Link href="/" className="flex items-center gap-1.5 sm:gap-2.5 group shrink-0">
+          <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg sm:rounded-xl bg-gradient-to-tr from-[#00e599] to-emerald-400 flex items-center justify-center text-gray-950 font-black text-base sm:text-lg shadow-[0_0_15px_rgba(0,229,153,0.3)]">
             অ
           </div>
-          <span className="text-lg font-bold tracking-tight text-white group-hover:text-[#00e599] transition-colors">
+          <span className="text-sm sm:text-lg font-bold tracking-tight text-white group-hover:text-[#00e599] transition-colors">
             Bangla<span className="text-[#00e599]">Type</span>
           </span>
         </Link>
@@ -66,28 +66,27 @@ export default function Header({ onMenuClick }) {
         </nav>
 
         {/* Right Actions (Cart / Admin / Sign In) */}
-        <div className="flex items-center gap-3 shrink-0">
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
           <Link
             href="/checkout"
-            className="relative p-2 text-gray-300 hover:text-white bg-[#161822] rounded-xl border border-white/10 transition-colors"
+            className="relative p-1.5 sm:p-2 text-gray-300 hover:text-white bg-[#161822] rounded-lg sm:rounded-xl border border-white/10 transition-colors"
             title="Cart"
           >
-            <IconShoppingCart className="text-base" />
-            <span className="absolute -top-1 -right-1 bg-[#00e599] text-gray-950 text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+            <IconShoppingCart className="text-sm sm:text-base" />
+            <span className="absolute -top-1 -right-1 bg-[#00e599] text-gray-950 text-[9px] sm:text-[10px] font-bold w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full flex items-center justify-center">
               2
             </span>
           </Link>
 
           <Link
             href="/admin"
-            className="text-xs font-semibold px-4 py-2 bg-[#161822] text-gray-200 rounded-xl border border-white/10 hover:border-white/30 transition-all flex items-center gap-1.5"
+            className="text-[10px] sm:text-xs font-semibold px-2.5 sm:px-4 py-1.5 sm:py-2 bg-[#161822] text-gray-200 rounded-lg sm:rounded-xl border border-white/10 hover:border-white/30 transition-all flex items-center gap-1 sm:gap-1.5"
           >
-            <IconUser className="text-sm" />
-            <span>Sign In</span>
+            <IconUser className="text-xs sm:text-sm" />
+            <span className="hidden sm:inline">Sign In</span>
           </Link>
         </div>
       </div>
     </header>
   );
 }
-

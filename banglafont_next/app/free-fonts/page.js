@@ -41,7 +41,7 @@ export default async function FreeFontsPage({ searchParams }) {
       {/* Top Banner Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/10">
         <div>
-          <h1 className="text-2xl font-bold text-white flex items-center gap-2">
+          <h1 className="text-xl sm:text-2xl font-bold text-white flex items-center gap-2 flex-wrap">
             <span>Browse All Fonts</span>
             <span className="text-xs px-2.5 py-0.5 rounded-full bg-[#161824] text-[#00e599] border border-white/10 font-normal">
               {total.toLocaleString()} fonts
@@ -53,12 +53,12 @@ export default async function FreeFontsPage({ searchParams }) {
         </div>
 
         {/* Filter Badges Top Bar */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0">
+        <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto pb-1 sm:pb-0 -mx-4 px-4 sm:mx-0 sm:px-0">
           {STYLES.map((s) => (
             <Link
               key={s.value}
               href={s.value === "ALL" ? "/free-fonts" : `?style=${s.value}`}
-              className={`px-3 py-1.5 rounded-xl text-xs font-medium shrink-0 border transition-all ${
+              className={`px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-medium shrink-0 border transition-all ${
                 style === s.value
                   ? "bg-[#00e599] text-gray-950 border-[#00e599] font-semibold"
                   : "bg-[#141622] text-gray-400 border-white/10 hover:text-white hover:bg-white/10"
@@ -86,11 +86,11 @@ export default async function FreeFontsPage({ searchParams }) {
               </div>
 
               {totalPages > 1 && (
-                <div className="flex justify-center gap-2 pt-6">
+                <div className="flex justify-center gap-1.5 sm:gap-2 pt-4 sm:pt-6 flex-wrap">
                   {page > 1 && (
                     <a
                       href={`?style=${style}&page=${page - 1}`}
-                      className="px-4 py-2 border border-white/10 rounded-xl text-xs text-gray-300 hover:bg-white/10"
+                      className="px-3 sm:px-4 py-1.5 sm:py-2 border border-white/10 rounded-lg sm:rounded-xl text-[10px] sm:text-xs text-gray-300 hover:bg-white/10"
                     >
                       &larr; Prev
                     </a>
@@ -101,7 +101,7 @@ export default async function FreeFontsPage({ searchParams }) {
                       <a
                         key={p}
                         href={`?style=${style}&page=${p}`}
-                        className={`px-4 py-2 border rounded-xl text-xs font-semibold ${
+                        className={`px-3 sm:px-4 py-1.5 sm:py-2 border rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-semibold ${
                           p === page
                             ? "bg-[#00e599] text-gray-950 border-[#00e599]"
                             : "border-white/10 text-gray-400 hover:bg-white/5 hover:text-white"
@@ -113,7 +113,7 @@ export default async function FreeFontsPage({ searchParams }) {
                   {page < totalPages && (
                     <a
                       href={`?style=${style}&page=${page + 1}`}
-                      className="px-4 py-2 border border-white/10 rounded-xl text-xs text-gray-300 hover:bg-white/10"
+                      className="px-3 sm:px-4 py-1.5 sm:py-2 border border-white/10 rounded-lg sm:rounded-xl text-[10px] sm:text-xs text-gray-300 hover:bg-white/10"
                     >
                       Next &rarr;
                     </a>

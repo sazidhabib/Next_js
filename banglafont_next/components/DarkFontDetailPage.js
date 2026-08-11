@@ -114,7 +114,7 @@ function FontDetailPageContent({ font, relatedFonts = [] }) {
   };
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 space-y-8 bg-[#090a0f] text-gray-100 min-h-screen">
+    <div className="p-3 sm:p-4 md:p-6 lg:p-8 space-y-5 sm:space-y-8 bg-[#090a0f] text-gray-100 min-h-screen">
       {/* Load Fonts */}
       {font.variants && font.variants.length > 0 ? (
         <style dangerouslySetInnerHTML={{
@@ -142,13 +142,13 @@ function FontDetailPageContent({ font, relatedFonts = [] }) {
       )}
 
       {/* Main Grid: 10 Columns (Left Sidebar is at global level) */}
-      <div className="grid grid-cols-1 lg:grid-cols-10 gap-8 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-10 gap-4 sm:gap-6 lg:gap-8 items-start">
 
         {/* ================= MIDDLE CONTENT PANEL (lg:col-span-7) ================= */}
-        <div className="lg:col-span-7 space-y-8">
+        <div className="lg:col-span-7 space-y-5 sm:space-y-8">
 
           {/* Main Hero Header Card */}
-          <div className="bg-[#121420]/60 border border-white/5 rounded-3xl p-6 sm:p-8 relative overflow-hidden shadow-2xl flex flex-col md:flex-row justify-between items-stretch gap-6">
+          <div className="bg-[#121420]/60 border border-white/5 rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 relative overflow-hidden shadow-2xl flex flex-col md:flex-row justify-between items-stretch gap-4 sm:gap-6">
             {/* Left side details */}
             <div className="flex-1 flex flex-col justify-between space-y-6">
               <div className="space-y-4">
@@ -160,10 +160,10 @@ function FontDetailPageContent({ font, relatedFonts = [] }) {
                 </div>
 
                 <h1 
-                  className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white tracking-tight leading-tight"
+                  className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white tracking-tight leading-tight break-words"
                   style={{ fontFamily: previewFontUrl ? `'${fontFam}', sans-serif` : 'inherit', fontWeight: weightMap[selectedWeight] || 400 }}
                 >
-                  {font.banglaName || font.name} {font.banglaName && <span className="text-xl sm:text-2xl lg:text-3xl font-medium text-gray-400 block sm:inline sm:ml-4 font-sans">({font.name})</span>}
+                  {font.banglaName || font.name} {font.banglaName && <span className="text-base sm:text-xl md:text-2xl lg:text-3xl font-medium text-gray-400 block sm:inline sm:ml-4 font-sans">({font.name})</span>}
                 </h1>
                 <p className="text-xs sm:text-sm text-gray-400 mt-2 max-w-xl leading-relaxed">
                   {font.detailsDescription || font.description}
@@ -171,7 +171,7 @@ function FontDetailPageContent({ font, relatedFonts = [] }) {
               </div>
 
               {/* Tag Badges */}
-              <div className="flex flex-wrap items-center gap-2">
+              <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
                 <span className="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-[10px] font-medium text-gray-400">
                   {font.style || "Sans-Serif"}
                 </span>
@@ -191,8 +191,8 @@ function FontDetailPageContent({ font, relatedFonts = [] }) {
             </div>
 
             {/* Right side: Glowing 3D letter block */}
-            <div className="w-full md:w-44 flex items-center justify-center shrink-0">
-              <div className="w-full aspect-square md:h-full rounded-2xl bg-gradient-to-br from-[#1b2536] via-[#101321] to-[#0a0c16] border border-white/10 flex items-center justify-center relative overflow-hidden group shadow-2xl">
+            <div className="w-full md:w-36 lg:w-44 flex items-center justify-center shrink-0">
+              <div className="w-full aspect-square md:h-full rounded-xl sm:rounded-2xl bg-gradient-to-br from-[#1b2536] via-[#101321] to-[#0a0c16] border border-white/10 flex items-center justify-center relative overflow-hidden group shadow-2xl max-w-[200px] md:max-w-none mx-auto">
                 {/* 3D Glowing Orb Effect */}
                 <div className="absolute inset-0 bg-gradient-to-tr from-purple-500/20 via-transparent to-teal-500/20 opacity-70 group-hover:scale-110 transition-transform duration-500" />
                 <div className="absolute -top-12 -right-12 w-28 h-28 bg-[#00e599]/10 blur-2xl rounded-full" />
@@ -203,7 +203,7 @@ function FontDetailPageContent({ font, relatedFonts = [] }) {
 
                 {/* Giant Glyph Display */}
                 <span
-                  className="text-7xl font-bold bg-gradient-to-br from-teal-300 via-[#00e599] to-indigo-400 bg-clip-text text-transparent drop-shadow-[0_10px_20px_rgba(0,229,153,0.3)] z-10 font-sans group-hover:scale-105 transition-transform duration-300 select-none"
+                  className="text-5xl sm:text-6xl md:text-7xl font-bold bg-gradient-to-br from-teal-300 via-[#00e599] to-indigo-400 bg-clip-text text-transparent drop-shadow-[0_10px_20px_rgba(0,229,153,0.3)] z-10 font-sans group-hover:scale-105 transition-transform duration-300 select-none"
                   style={{ fontFamily: previewFontUrl ? `'${fontFam}', sans-serif` : 'inherit' }}
                 >
                   হ
@@ -214,7 +214,7 @@ function FontDetailPageContent({ font, relatedFonts = [] }) {
 
           {/* Interactive Weight Preview & Type Tester (Shown on Overview or active weight selector) */}
           {(activeTab === "Overview" || activeTab === "Details") && (
-            <div className="bg-[#121420]/60 border border-white/5 rounded-2xl p-6 space-y-6">
+            <div className="bg-[#121420]/60 border border-white/5 rounded-xl sm:rounded-2xl p-4 sm:p-6 space-y-4 sm:space-y-6">
               {/* Type Tester Input Controls & Mode Selection */}
               <div className="space-y-4">
                 <div className="flex flex-wrap gap-2 pb-2 border-b border-white/5">
@@ -288,7 +288,7 @@ function FontDetailPageContent({ font, relatedFonts = [] }) {
               {/* Weight Preview grid */}
               <div className="space-y-3">
                 <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider">Weight Preview</h3>
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2 sm:gap-3">
                   {activeWeights.map((w) => (
                     <button
                       key={w.label}
@@ -299,7 +299,7 @@ function FontDetailPageContent({ font, relatedFonts = [] }) {
                         : "border-white/5 bg-[#181a28]/60 text-gray-400 hover:border-white/20"
                         }`}
                     >
-                      <div className="text-3xl mb-1 select-none" style={{ fontFamily: previewFontUrl ? `'${fontFam}', sans-serif` : 'inherit', fontWeight: w.weight }}>{w.sample}</div>
+                      <div className="text-2xl sm:text-3xl mb-1 select-none" style={{ fontFamily: previewFontUrl ? `'${fontFam}', sans-serif` : 'inherit', fontWeight: w.weight }}>{w.sample}</div>
                       <div className="text-[9px] text-gray-500 font-mono truncate">{w.weight} {w.label}</div>
                     </button>
                   ))}
@@ -307,7 +307,7 @@ function FontDetailPageContent({ font, relatedFonts = [] }) {
               </div>
 
               {/* Large Preview Canvas */}
-              <div className="bg-[#171a28]/60 rounded-xl p-8 border border-white/5 min-h-[160px] flex items-center overflow-x-auto">
+              <div className="bg-[#171a28]/60 rounded-xl p-4 sm:p-6 md:p-8 border border-white/5 min-h-[120px] sm:min-h-[160px] flex items-center overflow-x-auto">
                 <p
                   className="text-white leading-relaxed break-words w-full whitespace-pre-wrap"
                   style={{
@@ -326,7 +326,7 @@ function FontDetailPageContent({ font, relatedFonts = [] }) {
 
           {/* 1. Character Map (Glyphs) */}
           {(activeTab === "Overview" || activeTab === "Glyphs") && (
-            <div className="bg-[#121420]/60 border border-white/5 rounded-2xl p-6 space-y-4">
+            <div className="bg-[#121420]/60 border border-white/5 rounded-xl sm:rounded-2xl p-4 sm:p-6 space-y-4">
               <div className="flex items-center justify-between pb-2 border-b border-white/5">
                 <div>
                   <h3 className="text-xs font-bold text-white uppercase tracking-wider">Character Map</h3>
@@ -334,14 +334,14 @@ function FontDetailPageContent({ font, relatedFonts = [] }) {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-stretch">
+              <div className="grid grid-cols-1 md:grid-cols-12 gap-4 sm:gap-6 items-stretch">
                 {/* Left Preview Box */}
-                <div className="md:col-span-4 flex items-center justify-center bg-dark hover:bg-dark/80 rounded-2xl p-8 min-h-[220px] transition-all border border-white/10 shadow-lg relative group overflow-hidden">
+                <div className="md:col-span-4 flex items-center justify-center bg-dark hover:bg-dark/80 rounded-xl sm:rounded-2xl p-4 sm:p-8 min-h-[160px] sm:min-h-[220px] transition-all border border-white/10 shadow-lg relative group overflow-hidden">
                   <div className="absolute top-2 left-3 text-[9px] font-bold text-gray-400 font-mono select-none">
                     PREVIEW
                   </div>
                   <span
-                    className="text-8xl text-white font-normal select-none transition-transform duration-200 group-hover:scale-105"
+                    className="text-6xl sm:text-7xl md:text-8xl text-white font-normal select-none transition-transform duration-200 group-hover:scale-105"
                     style={{ fontFamily: previewFontUrl ? `'${fontFam}', sans-serif` : 'inherit', fontWeight: weightMap[selectedWeight] || 400 }}
                   >
                     {selectedGlyph}
@@ -350,7 +350,7 @@ function FontDetailPageContent({ font, relatedFonts = [] }) {
 
                 {/* Right Characters Grid */}
                 <div className="md:col-span-8">
-                  <div className="grid grid-cols-6 sm:grid-cols-8 md:grid-cols-10 gap-2">
+                  <div className="grid grid-cols-5 sm:grid-cols-7 md:grid-cols-10 gap-1.5 sm:gap-2">
                     {glyphChars.map((ch) => {
                       const active = selectedGlyph === ch;
                       return (
@@ -379,12 +379,12 @@ function FontDetailPageContent({ font, relatedFonts = [] }) {
 
           {/* 2. OpenType Features */}
           {(activeTab === "Overview" || activeTab === "Features") && (
-            <div className="bg-[#121420]/60 border border-white/5 rounded-2xl p-6 space-y-4">
+            <div className="bg-[#121420]/60 border border-white/5 rounded-xl sm:rounded-2xl p-4 sm:p-6 space-y-4">
               <div>
                 <h3 className="text-xs font-bold text-white uppercase tracking-wider">OpenType Features</h3>
                 <p className="text-[10px] text-gray-500">Smart features supported by this font file</p>
               </div>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 sm:gap-3">
                 {opentypeFeatures.map((f) => (
                   <div key={f.code} className="p-3.5 bg-[#181a28]/50 border border-white/5 rounded-xl space-y-1">
                     <div className="text-xs font-bold text-[#00e599] font-mono">{f.code}</div>
@@ -484,10 +484,10 @@ function FontDetailPageContent({ font, relatedFonts = [] }) {
         </div>
 
         {/* ================= RIGHT SIDEBAR (lg:col-span-3) ================= */}
-        <div className="lg:col-span-3 space-y-6">
+        <div className="lg:col-span-3 space-y-4 sm:space-y-6">
 
           {/* License & Purchase Card */}
-          <div className="bg-[#121420]/60 border border-white/5 rounded-3xl p-6 space-y-6 shadow-2xl sticky top-24">
+          <div className="bg-[#121420]/60 border border-white/5 rounded-2xl sm:rounded-3xl p-4 sm:p-6 space-y-4 sm:space-y-6 shadow-2xl lg:sticky lg:top-24">
             <div className="flex items-center justify-between pb-4 border-b border-white/5">
               <div>
                 <span className="text-[10px] text-gray-400 block uppercase tracking-wider">Select License</span>
