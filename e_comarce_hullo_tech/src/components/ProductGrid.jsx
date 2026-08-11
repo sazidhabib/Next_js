@@ -55,11 +55,11 @@ export default function ProductGrid({ products, title }) {
           <motion.div key={product.id} variants={itemVariants}>
             <Link
               href={`/${product.category}/${product.slug}`}
-              className="group product-card bg-white rounded-lg overflow-hidden block h-full"
+              className="group product-card bg-white rounded-lg overflow-hidden flex flex-col h-full"
             >
               {/* Product Image */}
               <motion.div
-                className="relative aspect-square bg-star-light-gray overflow-hidden"
+                className="relative aspect-square bg-star-light-gray overflow-hidden flex-shrink-0"
                 whileHover={{ y: -4 }}
                 transition={{ duration: 0.3 }}
               >
@@ -88,33 +88,29 @@ export default function ProductGrid({ products, title }) {
               </motion.div>
 
               {/* Product Info */}
-              <div className="p-4 flex flex-col h-full">
-                <div className="flex items-center gap-1 mb-2">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <Star key={star} className="w-3.5 h-3.5 fill-yellow-400 text-yellow-400" />
-                  ))}
-                  <span className="text-xs text-gray-500 ml-1.5 font-medium">(5)</span>
-                </div>
-                <motion.h3
-                  className="text-sm font-semibold mb-3 line-clamp-2 text-gray-900 group-hover:text-star-blue transition-colors duration-300"
-                  whileHover={{ x: 2 }}
-                >
-                  {product.name}
-                </motion.h3>
-                <div className="space-y-1.5 mb-3 flex-grow">
-                  {product.specs?.slice(0, 2).map((spec) => (
-                    <div key={spec} className="text-xs text-gray-600 flex items-center gap-2">
-                      <span className="w-1.5 h-1.5 bg-star-blue rounded-full flex-shrink-0" />
-                      <span className="truncate">{spec}</span>
-                    </div>
-                  ))}
+              <div className="p-4 flex flex-col flex-grow justify-between">
+                <div>
+                  <motion.h3
+                    className="text-sm font-semibold mb-3 line-clamp-2 text-gray-900 group-hover:text-star-blue transition-colors duration-300"
+                    whileHover={{ x: 2 }}
+                  >
+                    {product.name}
+                  </motion.h3>
+                  <div className="space-y-1.5 mb-3">
+                    {product.specs?.slice(0, 2).map((spec) => (
+                      <div key={spec} className="text-xs text-gray-600 flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 bg-star-blue rounded-full flex-shrink-0" />
+                        <span className="truncate">{spec}</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
                 <motion.p
-                  className="text-star-blue font-bold text-lg"
+                  className="text-star-blue font-bold text-lg mt-auto"
                   whileHover={{ scale: 1.05 }}
                   transition={{ duration: 0.2 }}
                 >
-                  ${product.price}
+                  ৳{product.price}
                 </motion.p>
               </div>
             </Link>

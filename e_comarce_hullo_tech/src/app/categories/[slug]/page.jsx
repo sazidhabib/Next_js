@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { useState, useEffect, use } from "react";
 import { products as mockProducts, categories as mockCategories } from "../../../data/mockData";
+import SubCategoryHeader from "../../../components/SubCategoryHeader";
 
 export default function CategoryPage({ params }) {
   const { slug } = use(params);
@@ -84,6 +85,8 @@ export default function CategoryPage({ params }) {
         </p>
       </div>
 
+      <SubCategoryHeader />
+
       <div className="grid md:grid-cols-3 lg:grid-cols-4 gap-4">
         {categoryProducts.map((product) => (
           <Link key={product.id} href={`/${product.category}/${product.slug}`}>
@@ -92,7 +95,7 @@ export default function CategoryPage({ params }) {
                 <img src={product.image} alt={product.name} className="object-cover w-full h-full" />
               </div>
               <h3 className="text-sm font-medium mb-2 line-clamp-2">{product.name}</h3>
-              <p className="text-star-blue font-bold text-lg">${product.price}</p>
+              <p className="text-star-blue font-bold text-lg">৳{product.price}</p>
             </div>
           </Link>
         ))}

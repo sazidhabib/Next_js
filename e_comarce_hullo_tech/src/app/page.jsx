@@ -469,17 +469,6 @@ export default function Home() {
                   </div>
                 </div>
                 <div className="p-4">
-                  <div className="flex items-center gap-0.5 mb-2">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <Star
-                        key={star}
-                        className="w-3 h-3 fill-amber-400 text-amber-400"
-                      />
-                    ))}
-                    <span className="text-[11px] text-gray-400 ml-1.5 font-medium">
-                      (5)
-                    </span>
-                  </div>
                   <h3 className="text-sm font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors leading-snug">
                     {product.name}
                   </h3>

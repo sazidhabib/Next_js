@@ -304,9 +304,28 @@ export default function Navbar() {
         </div>
       </motion.div>
 
-      {/* Main Navbar */}
+      {/* Search Bar - Mobile/Tablet Only (Non-sticky, sits at top) */}
+      <div className="block md:hidden bg-white px-4 py-2 border-b border-star-gray/50 no-print">
+        <form className="relative group" onSubmit={(e) => e.preventDefault()}>
+          <input
+            type="text"
+            placeholder="Search products..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full px-4 py-2 border border-star-gray rounded-lg focus:outline-none focus:border-star-blue text-sm font-medium"
+          />
+          <button
+            type="submit"
+            className="absolute right-0 top-0 h-full px-4 bg-star-blue text-white rounded-r-lg hover:bg-star-dark-blue transition-all"
+          >
+            <Search className="w-4 h-4" />
+          </button>
+        </form>
+      </div>
+
+      {/* Main Navbar (Sticky on mobile/tablet) */}
       <motion.div
-        className="bg-white border-b border-star-gray/50 relative z-40 no-print"
+        className="bg-white border-b border-star-gray/50 sticky top-0 md:relative z-40 no-print shadow-sm md:shadow-none"
         initial={{ y: -80 }}
         animate={{ y: 0 }}
         transition={{ duration: 0.6, delay: 0.1 }}
@@ -374,7 +393,7 @@ export default function Navbar() {
                   <span className="text-xs">Account</span>
                 </Link>
               </motion.div>
-              <motion.div
+              {/* <motion.div
                 whileHover={{ y: -2 }}
                 transition={{ duration: 0.2 }}
               >
@@ -392,7 +411,7 @@ export default function Navbar() {
                     </motion.span>
                   )}
                 </Link>
-              </motion.div>
+              </motion.div> */}
               <motion.button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                 className="md:hidden p-1 text-star-text hover:text-star-blue transition-colors"
@@ -403,26 +422,113 @@ export default function Navbar() {
               </motion.button>
             </motion.div>
           </div>
-
-          {/* Search Bar - Mobile/Tablet Only */}
-          <div className="block md:hidden pb-2 px-1">
-            <form className="relative group" onSubmit={(e) => e.preventDefault()}>
-              <input
-                type="text"
-                placeholder="Search products..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full px-4 py-2 border border-star-gray rounded-lg focus:outline-none focus:border-star-blue text-sm font-medium"
-              />
-              <button
-                type="submit"
-                className="absolute right-0 top-0 h-full px-4 bg-star-blue text-white rounded-r-lg hover:bg-star-dark-blue transition-all"
-              >
-                <Search className="w-4 h-4" />
-              </button>
-            </form>
-          </div>
         </div>
+
+        {/* Mobile Menu inside sticky Main Navbar so it positions relative to the sticky container */}
+        <AnimatePresence>
+          {mobileMenuOpen && (
+            <motion.div
+              className="md:hidden bg-white border-b border-star-gray shadow-xl absolute top-full left-0 right-0 z-40 no-print"
+              initial={{ opacity: 0, y: -20, height: 0 }}
+              animate={{ opacity: 1, y: 0, height: "auto" }}
+              exit={{ opacity: 0, y: -20, height: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <motion.div
+                className="px-4 py-4 space-y-2 max-h-[calc(100vh-5rem)] overflow-y-auto"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.1 }}
+              >
+                {categories.map((cat, idx) => {
+                  const isCatExpanded = mobileExpandedCat === cat.name;
+                  const hasSubs = cat.subCategories && cat.subCategories.length > 0;
+                  return (
+                    <motion.div
+                      key={cat.name}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ duration: 0.2, delay: idx * 0.03 }}
+                      className="border-b border-gray-100 pb-1"
+                    >
+                      <div className="flex items-center justify-between py-2">
+                        <Link
+                          href={cat.href}
+                          className="text-sm font-bold text-gray-900 hover:text-star-blue transition-colors pl-2"
+                          onClick={() => setMobileMenuOpen(false)}
+                        >
+                          {cat.name}
+                        </Link>
+                        {hasSubs && (
+                          <button
+                            onClick={() => setMobileExpandedCat(isCatExpanded ? null : cat.name)}
+                            className="p-1 text-gray-500 hover:text-star-blue"
+                          >
+                            <ChevronDown className={`w-4 h-4 transition-transform ${isCatExpanded ? "rotate-180" : ""}`} />
+                          </button>
+                        )}
+                      </div>
+
+                      {hasSubs && isCatExpanded && (
+                        <motion.div
+                          className="pl-4 pb-2 space-y-2"
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: "auto" }}
+                          transition={{ duration: 0.2 }}
+                        >
+                          {cat.subCategories.map((sub) => {
+                            const isSubExpanded = mobileExpandedSub === sub.name;
+                            const hasSubSubs = sub.subCategories && sub.subCategories.length > 0;
+                            return (
+                              <div key={sub.name} className="space-y-1">
+                                <div className="flex items-center justify-between py-1">
+                                  <Link
+                                    href={sub.href}
+                                    className="text-xs font-semibold text-gray-700 hover:text-star-blue transition-colors"
+                                    onClick={() => setMobileMenuOpen(false)}
+                                  >
+                                    {sub.name}
+                                  </Link>
+                                  {hasSubs && (
+                                    <button
+                                      onClick={() => setMobileExpandedSub(isSubExpanded ? null : sub.name)}
+                                      className="p-1 text-gray-400 hover:text-star-blue"
+                                    >
+                                      <ChevronDown className={`w-3.5 h-3.5 transition-transform ${isSubExpanded ? "rotate-180" : ""}`} />
+                                    </button>
+                                  )}
+                                </div>
+                                {hasSubSubs && isSubExpanded && (
+                                  <motion.div
+                                    className="pl-3 space-y-1 border-l border-gray-200 ml-1"
+                                    initial={{ opacity: 0, height: 0 }}
+                                    animate={{ opacity: 1, height: "auto" }}
+                                    transition={{ duration: 0.15 }}
+                                  >
+                                    {sub.subCategories.map((subSub) => (
+                                      <Link
+                                        key={subSub.name}
+                                        href={subSub.href}
+                                        className="block py-1 text-[11px] text-gray-500 hover:text-star-blue transition-colors"
+                                        onClick={() => setMobileMenuOpen(false)}
+                                      >
+                                        {subSub.name}
+                                      </Link>
+                                    ))}
+                                  </motion.div>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </motion.div>
+                      )}
+                    </motion.div>
+                  );
+                })}
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </motion.div>
 
       {/* Category Navigation */}
@@ -433,207 +539,103 @@ export default function Navbar() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.3 }}
       >
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between gap-1">
-              {categories.map((cat, idx) => {
-                const isActive = activeMegaMenu === cat.name;
-                return (
-                  <div
-                    key={cat.name}
-                    className="relative"
-                    onMouseEnter={() => handleMouseEnter(cat.name)}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between gap-1">
+            {categories.map((cat, idx) => {
+              const isActive = activeMegaMenu === cat.name;
+              return (
+                <div
+                  key={cat.name}
+                  className="relative"
+                  onMouseEnter={() => handleMouseEnter(cat.name)}
+                >
+                  <Link
+                    href={cat.href}
+                    className={`inline-block py-3 px-3 text-sm font-semibold transition-all duration-300 whitespace-nowrap ${isActive
+                      ? "text-star-blue border-b-2 border-star-blue"
+                      : "text-gray-700 hover:text-star-blue border-b-2 border-transparent"
+                      }`}
                   >
-                    <Link
-                      href={cat.href}
-                      className={`inline-block py-3 px-3 text-sm font-semibold transition-all duration-300 whitespace-nowrap ${isActive
-                        ? "text-star-blue border-b-2 border-star-blue"
-                        : "text-gray-700 hover:text-star-blue border-b-2 border-transparent"
-                        }`}
-                    >
-                      {cat.name}
-                    </Link>
+                    {cat.name}
+                  </Link>
 
-                    {/* Cascading Dropdown */}
-                    <AnimatePresence>
-                      {isActive && cat.subCategories && cat.subCategories.length > 0 && (
-                        <motion.div
-                          className={`absolute top-full ${idx > categories.length - 4 ? "right-0" : "left-0"
-                            } mt-0 bg-white border border-gray-200 rounded-b-lg shadow-xl z-50 flex overflow-hidden min-h-[280px] max-h-[480px]`}
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: 10 }}
-                          transition={{ duration: 0.2 }}
-                        >
-                          {/* Panel 1: Subcategories */}
-                          <div className="w-60 py-2 bg-white flex flex-col border-r border-gray-100 overflow-y-auto">
-                            {cat.subCategories.map((sub) => {
-                              const hasSubSubs = sub.subCategories && sub.subCategories.length > 0;
-                              const isSubActive = activeSubCategory === sub.name;
-                              return (
-                                <Link
-                                  key={sub.name}
-                                  href={sub.href}
-                                  onMouseEnter={() => {
-                                    if (hasSubSubs) {
-                                      setActiveSubCategory(sub.name);
-                                    } else {
-                                      setActiveSubCategory(null);
-                                    }
-                                  }}
-                                  className={`flex items-center justify-between px-4 py-2.5 text-xs font-semibold transition-colors ${isSubActive
-                                    ? "bg-star-blue text-white"
-                                    : "text-gray-700 hover:bg-gray-50 hover:text-star-blue"
-                                    }`}
-                                >
-                                  <span>{sub.name}</span>
-                                  {hasSubSubs && (
-                                    <ChevronRight className={`w-3.5 h-3.5 ${isSubActive ? "text-white" : "text-gray-400"}`} />
-                                  )}
-                                </Link>
-                              );
-                            })}
-                          </div>
-
-                          {/* Panel 2: Sub-subcategories */}
-                          {(() => {
-                            const activeSubData = cat.subCategories.find(sub => sub.name === activeSubCategory);
-                            if (activeSubData && activeSubData.subCategories && activeSubData.subCategories.length > 0) {
-                              return (
-                                <motion.div
-                                  className="w-60 py-2 bg-gray-50/80 flex flex-col border-l border-gray-100 overflow-y-auto"
-                                  initial={{ opacity: 0, x: -10 }}
-                                  animate={{ opacity: 1, x: 0 }}
-                                  transition={{ duration: 0.15 }}
-                                >
-                                  {activeSubData.subCategories.map((subSub) => (
-                                    <Link
-                                      key={subSub.name}
-                                      href={subSub.href}
-                                      className="px-4 py-2 text-xs font-medium text-gray-600 hover:text-star-blue hover:bg-gray-100/75 transition-colors"
-                                    >
-                                      {subSub.name}
-                                    </Link>
-                                  ))}
-                                </motion.div>
-                              );
-                            }
-                            return null;
-                          })()}
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </motion.div>
-
-      {/* Mobile Menu */}
-      <AnimatePresence>
-        {mobileMenuOpen && (
-          <motion.div
-            className="md:hidden bg-white border-b border-star-gray shadow-xl fixed top-16 left-0 right-0 z-40 no-print"
-            initial={{ opacity: 0, y: -20, height: 0 }}
-            animate={{ opacity: 1, y: 0, height: "auto" }}
-            exit={{ opacity: 0, y: -20, height: 0 }}
-            transition={{ duration: 0.3 }}
-          >
-            <motion.div
-              className="px-4 py-4 space-y-2 max-h-[calc(100vh-5rem)] overflow-y-auto"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.1 }}
-            >
-              {categories.map((cat, idx) => {
-                const isCatExpanded = mobileExpandedCat === cat.name;
-                const hasSubs = cat.subCategories && cat.subCategories.length > 0;
-                return (
-                  <motion.div
-                    key={cat.name}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.2, delay: idx * 0.03 }}
-                    className="border-b border-gray-100 pb-1"
-                  >
-                    <div className="flex items-center justify-between py-2">
-                      <Link
-                        href={cat.href}
-                        className="text-sm font-bold text-gray-900 hover:text-star-blue transition-colors pl-2"
-                        onClick={() => setMobileMenuOpen(false)}
-                      >
-                        {cat.name}
-                      </Link>
-                      {hasSubs && (
-                        <button
-                          onClick={() => setMobileExpandedCat(isCatExpanded ? null : cat.name)}
-                          className="p-1 text-gray-500 hover:text-star-blue"
-                        >
-                          <ChevronDown className={`w-4 h-4 transition-transform ${isCatExpanded ? "rotate-180" : ""}`} />
-                        </button>
-                      )}
-                    </div>
-
-                    {hasSubs && isCatExpanded && (
+                  {/* Cascading Dropdown */}
+                  <AnimatePresence>
+                    {isActive && cat.subCategories && cat.subCategories.length > 0 && (
                       <motion.div
-                        className="pl-4 pb-2 space-y-2"
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: "auto" }}
+                        className={`absolute top-full ${idx > categories.length - 4 ? "right-0" : "left-0"
+                          } mt-0 bg-white border border-gray-200 rounded-b-lg shadow-xl z-50 flex overflow-hidden min-h-[280px] max-h-[480px]`}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 10 }}
                         transition={{ duration: 0.2 }}
                       >
-                        {cat.subCategories.map((sub) => {
-                          const isSubExpanded = mobileExpandedSub === sub.name;
-                          const hasSubSubs = sub.subCategories && sub.subCategories.length > 0;
-                          return (
-                            <div key={sub.name} className="space-y-1">
-                              <div className="flex items-center justify-between py-1">
-                                <Link
-                                  href={sub.href}
-                                  className="text-xs font-semibold text-gray-700 hover:text-star-blue transition-colors"
-                                  onClick={() => setMobileMenuOpen(false)}
-                                >
-                                  {sub.name}
-                                </Link>
+                        {/* Panel 1: Subcategories */}
+                        <div className="w-60 py-2 bg-white flex flex-col border-r border-gray-100 overflow-y-auto">
+                          {cat.subCategories.map((sub) => {
+                            const hasSubSubs = sub.subCategories && sub.subCategories.length > 0;
+                            const isSubActive = activeSubCategory === sub.name;
+                            return (
+                              <Link
+                                key={sub.name}
+                                href={sub.href}
+                                onMouseEnter={() => {
+                                  if (hasSubSubs) {
+                                    setActiveSubCategory(sub.name);
+                                  } else {
+                                    setActiveSubCategory(null);
+                                  }
+                                }}
+                                className={`flex items-center justify-between px-4 py-2.5 text-xs font-semibold transition-colors ${isSubActive
+                                  ? "bg-star-blue text-white"
+                                  : "text-gray-700 hover:bg-gray-50 hover:text-star-blue"
+                                  }`}
+                              >
+                                <span>{sub.name}</span>
                                 {hasSubSubs && (
-                                  <button
-                                    onClick={() => setMobileExpandedSub(isSubExpanded ? null : sub.name)}
-                                    className="p-1 text-gray-400 hover:text-star-blue"
-                                  >
-                                    <ChevronDown className={`w-3.5 h-3.5 transition-transform ${isSubExpanded ? "rotate-180" : ""}`} />
-                                  </button>
+                                  <ChevronRight className={`w-3.5 h-3.5 ${isSubActive ? "text-white" : "text-gray-400"}`} />
                                 )}
-                              </div>
-                              {hasSubSubs && isSubExpanded && (
-                                <motion.div
-                                  className="pl-3 space-y-1 border-l border-gray-200 ml-1"
-                                  initial={{ opacity: 0, height: 0 }}
-                                  animate={{ opacity: 1, height: "auto" }}
-                                  transition={{ duration: 0.15 }}
-                                >
-                                  {sub.subCategories.map((subSub) => (
-                                    <Link
-                                      key={subSub.name}
-                                      href={subSub.href}
-                                      className="block py-1 text-[11px] text-gray-500 hover:text-star-blue transition-colors"
-                                      onClick={() => setMobileMenuOpen(false)}
-                                    >
-                                      {subSub.name}
-                                    </Link>
-                                  ))}
-                                </motion.div>
-                              )}
-                            </div>
-                          );
-                        })}
+                              </Link>
+                            );
+                          })}
+                        </div>
+
+                        {/* Panel 2: Sub-subcategories */}
+                        {(() => {
+                          const activeSubData = cat.subCategories.find(sub => sub.name === activeSubCategory);
+                          if (activeSubData && activeSubData.subCategories && activeSubData.subCategories.length > 0) {
+                            return (
+                              <motion.div
+                                className="w-60 py-2 bg-gray-50/80 flex flex-col border-l border-gray-100 overflow-y-auto"
+                                initial={{ opacity: 0, x: -10 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ duration: 0.15 }}
+                              >
+                                {activeSubData.subCategories.map((subSub) => (
+                                  <Link
+                                    key={subSub.name}
+                                    href={subSub.href}
+                                    className="px-4 py-2 text-xs font-medium text-gray-600 hover:text-star-blue hover:bg-gray-100/75 transition-colors"
+                                  >
+                                    {subSub.name}
+                                  </Link>
+                                ))}
+                              </motion.div>
+                            );
+                          }
+                          return null;
+                        })()}
                       </motion.div>
                     )}
-                  </motion.div>
-                );
-              })}
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+                  </AnimatePresence>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </motion.div>
+
+
 
       {/* Floating Cart Button */}
       <motion.div

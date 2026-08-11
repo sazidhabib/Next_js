@@ -1,6 +1,7 @@
 import { products } from "../../data/mockData";
 import ProductGrid from "../../components/ProductGrid";
 import { SlidersHorizontal } from "lucide-react";
+import SubCategoryHeader from "../../components/SubCategoryHeader";
 
 export default function PhonesPage() {
   const categoryProducts = products.filter((p) => p.category === "mobile-phone");
@@ -19,6 +20,7 @@ export default function PhonesPage() {
 
       {/* Filters and Sort */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <SubCategoryHeader />
         <div className="bg-white rounded-lg border border-star-gray p-4 mb-6 flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             <button className="flex items-center gap-2 px-4 py-2 border border-star-gray rounded hover:border-star-blue transition-colors text-sm">
