@@ -3,7 +3,7 @@ import { IconDownload } from "./Icons";
 
 export default function DarkFontCard({ font }) {
   const isPro = font.fontType === "PREMIUM";
-  const priceDisplay = font.price ? `৳ ${font.price.toLocaleString("bn-BD")}` : "Free";
+  const priceDisplay = font.price ? `৳ ${font.price.toLocaleString("bn-BD")}` : null;
   const fontFam = `font-card-preview-${font.id}`;
 
   // Card gradient variations matching screenshot cards
@@ -31,12 +31,18 @@ export default function DarkFontCard({ font }) {
 
       {/* Top Header Row */}
       <div className="p-3 sm:p-4 pb-0 flex items-center justify-between z-10">
-        <span
-          className="text-[10px] sm:text-xs font-medium text-gray-400 group-hover:text-gray-200 transition-colors truncate max-w-[60%]"
-          style={{ fontFamily: previewFontUrl ? `'${fontFam}', sans-serif` : 'inherit' }}
-        >
-          {font.banglaName || font.name}
-        </span>
+        <div className="flex items-center gap-1.5 sm:gap-2 min-w-0 flex-1 mr-2">
+          <span
+            className="text-[10px] sm:text-xs font-medium text-gray-400 group-hover:text-gray-200 transition-colors truncate max-w-[65%]"
+            style={{ fontFamily: previewFontUrl ? `'${fontFam}', sans-serif` : 'inherit' }}
+          >
+            {font.banglaName || font.name}
+          </span>
+          <div className="flex items-center gap-0.5 sm:gap-1 text-[9px] sm:text-[10px] text-gray-500 shrink-0">
+            <IconDownload className="text-[9px] sm:text-[10px] text-gray-400" />
+            <span>{(font.downloadCount || 0).toLocaleString("bn-BD")}</span>
+          </div>
+        </div>
         <span
           className={`text-[9px] sm:text-[10px] font-bold px-1.5 sm:px-2 py-0.5 rounded-md shrink-0 ${isPro
               ? "bg-purple-600/30 text-purple-400 border border-purple-500/30"
@@ -75,7 +81,9 @@ export default function DarkFontCard({ font }) {
         </div>
 
         <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-          <span className="font-semibold text-gray-200 text-[11px] sm:text-xs">{priceDisplay}</span>
+          {priceDisplay && (
+            <span className="font-semibold text-gray-200 text-[11px] sm:text-xs">{priceDisplay}</span>
+          )}
           <Link
             href={`/free-font/${font.slug}`}
             className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg sm:rounded-xl bg-[#1d202c] group-hover:bg-[#00e599] group-hover:text-gray-950 text-gray-300 flex items-center justify-center transition-all"
