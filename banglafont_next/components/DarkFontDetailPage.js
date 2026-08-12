@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, Suspense } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Link from "next/link"; // Wait, Next.js import is "next/link", not "next/next"! Let's fix that.
 import { useSearchParams } from "next/navigation";
 import {
@@ -12,7 +12,10 @@ import {
   IconDownload,
   IconArrowLeft,
   IconCrown,
-  IconHelpCircle
+  IconHelpCircle,
+  IconFacebook,
+  IconTwitter,
+  IconWhatsApp
 } from "./Icons";
 
 function FontDetailPageContent({ font, relatedFonts = [] }) {
@@ -22,6 +25,60 @@ function FontDetailPageContent({ font, relatedFonts = [] }) {
   const [fontSize, setFontSize] = useState(64);
   const [selectedGlyph, setSelectedGlyph] = useState("অ");
   const [textMode, setTextMode] = useState("custom"); // "custom", "sample1", "sample2"
+
+  const [localDownloadCount, setLocalDownloadCount] = useState(font.downloadCount || 0);
+  const [localLikeCount, setLocalLikeCount] = useState(font.likeCount || 0);
+  const [isLiked, setIsLiked] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const likedFonts = JSON.parse(localStorage.getItem("liked_fonts") || "[]");
+      setIsLiked(likedFonts.includes(font.id));
+    }
+  }, [font.id]);
+
+  const handleToggleLike = async () => {
+    if (typeof window !== "undefined") {
+      const likedFonts = JSON.parse(localStorage.getItem("liked_fonts") || "[]");
+      let updated;
+      const newAction = isLiked ? "unlike" : "like";
+      if (isLiked) {
+        updated = likedFonts.filter((id) => id !== font.id);
+      } else {
+        updated = [...likedFonts, font.id];
+      }
+      localStorage.setItem("liked_fonts", JSON.stringify(updated));
+      setIsLiked(!isLiked);
+      setLocalLikeCount((prev) => Math.max(0, prev + (newAction === "like" ? 1 : -1)));
+
+      try {
+        const res = await fetch("/api/fonts/like", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ fontId: font.id, action: newAction }),
+        });
+        const data = await res.json();
+        if (data.success) {
+          setLocalLikeCount(data.likeCount);
+        }
+      } catch (error) {
+        console.error("Failed to update like count on server:", error);
+      }
+    }
+  };
+
+  const handleDownload = async () => {
+    try {
+      await fetch("/api/downloads", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fontId: font.id }),
+      });
+      setLocalDownloadCount((prev) => prev + 1);
+    } catch (error) {
+      console.error("Failed to track download:", error);
+    }
+  };
 
   const sampleText1 = `বিপদে মোরে রক্ষা করো এ নহে মোর প্রার্থনা–
 বিপদে আমি না যেন করি ভয়।
@@ -182,10 +239,25 @@ function FontDetailPageContent({ font, relatedFonts = [] }) {
                   {glyphChars.length} Glyphs
                 </span>
                 <span className="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-[10px] font-medium text-gray-400">
-                  OTF, TTF, WOFF2
+                  {localDownloadCount.toLocaleString("bn-BD")} Downloads
                 </span>
-                <button type="button" className="p-1.5 rounded-full bg-white/5 border border-white/10 text-gray-400 hover:text-white transition-colors ml-auto">
-                  <IconHeart className="text-xs" />
+                {font.formats && (
+                  <span className="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-[10px] font-medium text-gray-400">
+                    {font.formats}
+                  </span>
+                )}
+                <button
+                  type="button"
+                  onClick={handleToggleLike}
+                  className={`px-3 py-1.5 rounded-full border transition-colors ml-auto flex items-center gap-1.5 ${
+                    isLiked
+                      ? "bg-rose-500/20 border-rose-500 text-rose-500 hover:bg-rose-500/30"
+                      : "bg-white/5 border-white/10 text-gray-400 hover:text-white"
+                  }`}
+                  title={isLiked ? "Remove from wishlist" : "Add to wishlist"}
+                >
+                  <IconHeart className="text-xs" fill={isLiked ? "currentColor" : "none"} />
+                  <span className="text-[10px] font-semibold">{localLikeCount.toLocaleString("bn-BD")}</span>
                 </button>
               </div>
             </div>
@@ -531,6 +603,7 @@ function FontDetailPageContent({ font, relatedFonts = [] }) {
                 <a
                   href={font.fontFileUrl}
                   download
+                  onClick={handleDownload}
                   className="w-full py-3 bg-[#00e599] text-gray-950 font-bold text-xs rounded-xl hover:bg-[#00c784] transition-colors shadow-lg shadow-[#00e599]/15 flex items-center justify-center gap-2"
                 >
                   <IconDownload className="text-sm" />
@@ -554,28 +627,73 @@ function FontDetailPageContent({ font, relatedFonts = [] }) {
                   <span className="text-gray-500">Designer:</span>
                   <span className="text-gray-200 font-medium">{font.designer?.name || "BanglaType"}</span>
                 </div>
+                {font.foundry && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Foundry:</span>
+                    <span className="text-gray-200 font-medium">{font.foundry}</span>
+                  </div>
+                )}
+                {font.released && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Released:</span>
+                    <span className="text-gray-200 font-medium">{font.released}</span>
+                  </div>
+                )}
+                {font.version && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Version:</span>
+                    <span className="text-gray-200 font-medium">{font.version}</span>
+                  </div>
+                )}
                 <div className="flex justify-between">
-                  <span className="text-gray-500">Foundry:</span>
-                  <span className="text-gray-200 font-medium">SutonnyMJ Foundry</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-500">Released:</span>
-                  <span className="text-gray-200 font-medium">May 2024</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-500">Version:</span>
-                  <span className="text-gray-200 font-medium">1.002</span>
+                  <span className="text-gray-500">Downloads:</span>
+                  <span className="text-gray-200 font-medium">{localDownloadCount.toLocaleString("bn-BD")}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-500">Glyphs:</span>
                   <span className="text-gray-200 font-medium">{glyphChars.length}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-500">Format:</span>
-                  <span className="text-gray-200 font-medium">OTF, TTF, WOFF2</span>
-                </div>
+                {font.formats && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Format:</span>
+                    <span className="text-gray-200 font-medium">{font.formats}</span>
+                  </div>
+                )}
               </div>
             </div>
+
+            {/* About The Designer Section */}
+            {font.designer && (
+              <div className="border-t border-white/5 pt-4 space-y-3">
+                <h4 className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">About The Designer</h4>
+                <div className="flex items-center gap-3">
+                  {font.designer.photo && font.designer.photo.trim() !== "" ? (
+                    <img
+                      src={font.designer.photo}
+                      alt={font.designer.name}
+                      className="w-10 h-10 rounded-full object-cover border border-white/10 shrink-0"
+                    />
+                  ) : (
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#00e599] to-teal-500 flex items-center justify-center text-gray-950 font-bold text-sm shrink-0">
+                      {font.designer.name.charAt(0)}
+                    </div>
+                  )}
+                  <div className="min-w-0">
+                    <Link
+                      href={`/designer/${font.designer.slug}`}
+                      className="text-xs font-bold text-white hover:text-[#00e599] transition-colors truncate block"
+                    >
+                      {font.designer.name}
+                    </Link>
+                    {font.designer.banglaName && (
+                      <span className="text-[10px] text-gray-500 truncate block mt-0.5">
+                        {font.designer.banglaName}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Share Font Block */}
             <div className="border-t border-white/5 pt-4 space-y-3">
@@ -588,12 +706,33 @@ function FontDetailPageContent({ font, relatedFonts = [] }) {
                   {copySuccess ? "Link Copied!" : "Copy Link"}
                 </button>
                 <div className="flex items-center gap-1.5">
-                  <button className="w-8 h-8 rounded-lg bg-[#181a28]/60 hover:bg-white/10 text-gray-400 hover:text-white flex items-center justify-center transition-colors text-xs border border-white/5">
-                    FB
-                  </button>
-                  <button className="w-8 h-8 rounded-lg bg-[#181a28]/60 hover:bg-white/10 text-gray-400 hover:text-white flex items-center justify-center transition-colors text-xs border border-white/5">
-                    TW
-                  </button>
+                  <a
+                    href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(typeof window !== "undefined" ? window.location.href : "")}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-8 h-8 rounded-lg bg-[#181a28]/60 hover:bg-white/10 text-gray-400 hover:text-white flex items-center justify-center transition-colors border border-white/5"
+                    title="Share on Facebook"
+                  >
+                    <IconFacebook className="text-sm" />
+                  </a>
+                  <a
+                    href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(typeof window !== "undefined" ? window.location.href : "")}&text=${encodeURIComponent(`Check out this beautiful Bangla font: ${font.name}`)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-8 h-8 rounded-lg bg-[#181a28]/60 hover:bg-white/10 text-gray-400 hover:text-white flex items-center justify-center transition-colors border border-white/5"
+                    title="Share on Twitter"
+                  >
+                    <IconTwitter className="text-sm" />
+                  </a>
+                  <a
+                    href={`https://api.whatsapp.com/send?text=${encodeURIComponent(`Check out this beautiful Bangla font: ${font.name} - ${typeof window !== "undefined" ? window.location.href : ""}`)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-8 h-8 rounded-lg bg-[#181a28]/60 hover:bg-white/10 text-gray-400 hover:text-white flex items-center justify-center transition-colors border border-white/5"
+                    title="Share on WhatsApp"
+                  >
+                    <IconWhatsApp className="text-sm" />
+                  </a>
                 </div>
               </div>
             </div>

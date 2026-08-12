@@ -26,9 +26,17 @@ export default async function DesignersPage() {
               href={`/designer/${designer.slug}`}
               className="bg-[#121420] border border-white/10 hover:border-[#00e599]/50 rounded-2xl p-6 text-center hover:shadow-[0_0_25px_rgba(0,229,153,0.15)] transition-all group"
             >
-              <div className="w-20 h-20 rounded-full bg-gradient-to-tr from-[#00e599] to-teal-500 flex items-center justify-center text-gray-950 text-2xl font-black mx-auto mb-4 group-hover:scale-105 transition-transform shadow-lg shadow-[#00e599]/20">
-                {designer.name.charAt(0)}
-              </div>
+              {designer.photo && designer.photo.trim() !== "" ? (
+                <img
+                  src={designer.photo}
+                  alt={designer.name}
+                  className="w-20 h-20 rounded-full object-cover border border-white/10 mx-auto mb-4 group-hover:scale-105 transition-transform shadow-lg shadow-[#00e599]/10"
+                />
+              ) : (
+                <div className="w-20 h-20 rounded-full bg-gradient-to-tr from-[#00e599] to-teal-500 flex items-center justify-center text-gray-950 text-2xl font-black mx-auto mb-4 group-hover:scale-105 transition-transform shadow-lg shadow-[#00e599]/20">
+                  {designer.name.charAt(0)}
+                </div>
+              )}
               <h3 className="font-bold text-white group-hover:text-[#00e599] transition-colors">{designer.name}</h3>
               {designer.bio && (
                 <p className="text-xs text-gray-400 mt-1 line-clamp-2">{designer.bio}</p>

@@ -23,9 +23,17 @@ export default async function DesignerDetailPage({ params }) {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
       <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6 mb-8 sm:mb-10">
-        <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br from-[#00e599] to-teal-500 flex items-center justify-center text-gray-950 text-2xl sm:text-3xl font-bold shrink-0 shadow-lg shadow-[#00e599]/20">
-          {designer.name.charAt(0)}
-        </div>
+        {designer.photo && designer.photo.trim() !== "" ? (
+          <img
+            src={designer.photo}
+            alt={designer.name}
+            className="w-16 h-16 sm:w-20 sm:h-20 rounded-full object-cover border border-white/10 shrink-0 shadow-lg shadow-[#00e599]/10"
+          />
+        ) : (
+          <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br from-[#00e599] to-teal-500 flex items-center justify-center text-gray-950 text-2xl sm:text-3xl font-bold shrink-0 shadow-lg shadow-[#00e599]/20">
+            {designer.name.charAt(0)}
+          </div>
+        )}
         <div className="text-center sm:text-left">
           <h1 className="text-2xl sm:text-3xl font-bold text-white">
             {designer.name} {designer.banglaName && <span className="text-sm sm:text-lg font-medium text-gray-400 sm:ml-2 block sm:inline">({designer.banglaName})</span>}

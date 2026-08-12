@@ -12,6 +12,7 @@ export default function NewFontPage() {
     name: "", banglaName: "", slug: "", description: "", detailsDescription: "", fontType: "FREE",
     style: "GENERAL", encoding: "UNICODE", price: "",
     fontFileUrl: "", previewImageUrl: "", designerId: "", developerId: "", featured: false,
+    foundry: "", released: "", version: "1.000", formats: "OTF, TTF, WOFF2",
   });
   const [loading, setLoading] = useState(false);
   const [zipFile, setZipFile] = useState(null);
@@ -259,6 +260,29 @@ export default function NewFontPage() {
             <input type="number" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} className="w-full border border-border bg-white text-gray-900 placeholder-gray-400 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" />
           </div>
         </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Foundry</label>
+            <input value={form.foundry} onChange={(e) => setForm({ ...form, foundry: e.target.value })} placeholder="SutonnyMJ Foundry" className="w-full border border-border bg-white text-gray-900 placeholder-gray-400 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Released</label>
+            <input value={form.released} onChange={(e) => setForm({ ...form, released: e.target.value })} placeholder="May 2024" className="w-full border border-border bg-white text-gray-900 placeholder-gray-400 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Version</label>
+            <input value={form.version} onChange={(e) => setForm({ ...form, version: e.target.value })} placeholder="1.000" className="w-full border border-border bg-white text-gray-900 placeholder-gray-400 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Format</label>
+            <input value={form.formats} onChange={(e) => setForm({ ...form, formats: e.target.value })} placeholder="OTF, TTF, WOFF2" className="w-full border border-border bg-white text-gray-900 placeholder-gray-400 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" />
+          </div>
+        </div>
+
         <label className="flex items-center gap-2">
           <input type="checkbox" checked={form.featured} onChange={(e) => setForm({ ...form, featured: e.target.checked })} className="rounded" />
           <span className="text-sm text-gray-700">ফিচার্ড</span>

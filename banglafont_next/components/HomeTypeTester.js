@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { IconEdit3, IconArrowRight } from "./Icons";
 
@@ -24,6 +24,14 @@ export default function HomeTypeTester({ fonts = [] }) {
   const [lineHeight, setLineHeight] = useState(1.5);
   const [textAlign, setTextAlign] = useState("left");
   const [isBold, setIsBold] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    setIsMobile(window.innerWidth < 640);
+    const handleResize = () => setIsMobile(window.innerWidth < 640);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const filteredFonts = fonts.filter((f) => {
     const matchesSearch = f.name.toLowerCase().includes(searchQuery.toLowerCase());
@@ -126,7 +134,7 @@ export default function HomeTypeTester({ fonts = [] }) {
                 rows={5}
                 className="w-full resize-none border-none outline-none focus:outline-none text-gray-100 placeholder-gray-600 bg-transparent"
                 style={{
-                  fontSize: `${Math.min(fontSize, window?.innerWidth < 640 ? 48 : 96)}px`,
+                  fontSize: `${Math.min(fontSize, isMobile ? 48 : 96)}px`,
                   letterSpacing: `${letterSpacing}px`,
                   lineHeight: lineHeight,
                   textAlign: textAlign,

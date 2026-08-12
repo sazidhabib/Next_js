@@ -68,11 +68,11 @@ export default async function HomePage() {
         <HomeTypeTester fonts={data.allFonts} />
       </section>
 
-      {/* Popular Fonts Section */}
+      {/* Featured Fonts Section */}
       <section className="space-y-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <h2 className="text-xl font-bold text-white tracking-tight">Popular Fonts</h2>
+            <h2 className="text-xl font-bold text-white tracking-tight">Featured Fonts</h2>
             <span className="w-2 h-2 rounded-full bg-[#00e599]" />
           </div>
 
@@ -87,7 +87,7 @@ export default async function HomePage() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
-          {data.topFonts.map((font) => (
+          {data.featuredFonts.map((font) => (
             <DarkFontCard key={font.id} font={font} />
           ))}
         </div>

@@ -19,11 +19,16 @@ model Font {
   salePrice       Float?
   downloadCount   Int              @default(0)
   viewCount       Int              @default(0)
+  likeCount       Int              @default(0)
   fontFileUrl     String           @db.VarChar(500)
   previewImageUrl String?          @db.VarChar(500)
   detailsDescription String?       @db.Text
   featured        Boolean          @default(false)
   published       Boolean          @default(true)
+  foundry         String?          @db.VarChar(200)
+  released        String?          @db.VarChar(100)
+  version         String?          @default("1.000") @db.VarChar(50)
+  formats         String?          @default("OTF, TTF, WOFF2") @db.VarChar(100)
   designerId      Int
   developerId     Int?
   designer        Designer         @relation(fields: [designerId], references: [id])
@@ -59,6 +64,7 @@ model Designer {
   bio         String?  @db.Text
   socialLinks String?  @db.Text
   email       String?  @db.VarChar(200)
+  password    String?  @db.VarChar(200)
   fonts       Font[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
