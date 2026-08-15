@@ -96,16 +96,31 @@ export default function AboutPage() {
                         <h2 className="text-3xl md:text-4xl font-serif text-foreground mb-6 leading-tight">
                             {aboutData?.title || "A Legacy Built on Trust, Quality, and Perfection."}
                         </h2>
-                        <p className="text-muted-foreground text-lg leading-relaxed mb-6">
-                            {aboutData?.content ? aboutData.content.split("\n\n")[0] : "Founded in 1995, President Properties embarked on a journey to redefine the real estate landscape. From our humble beginnings to becoming a leading property developer, our sole focus has been on delivering uncompromised quality and bringing architectural visions to life."}
-                        </p>
-                        <p className="text-muted-foreground text-lg leading-relaxed">
-                            {aboutData?.content ? aboutData.content.split("\n\n")[1] : "We don't just build structures; we build communities. Every project is meticulously planned to ensure sustainability, aesthetic brilliance, and maximum return on investment for our clients."}
-                        </p>
+                        {aboutData?.content ? (
+                            <div className="space-y-6 mb-6">
+                                {aboutData.content
+                                    .split(/\n\s*\n/)
+                                    .filter((p) => p.trim().length > 0)
+                                    .map((para, idx) => (
+                                        <p key={idx} className="text-muted-foreground text-lg leading-relaxed whitespace-pre-line">
+                                            {para.trim()}
+                                        </p>
+                                    ))}
+                            </div>
+                        ) : (
+                            <>
+                                <p className="text-muted-foreground text-lg leading-relaxed mb-6 whitespace-pre-line">
+                                    Founded in 1995, President Properties embarked on a journey to redefine the real estate landscape. From our humble beginnings to becoming a leading property developer, our sole focus has been on delivering uncompromised quality and bringing architectural visions to life.
+                                </p>
+                                <p className="text-muted-foreground text-lg leading-relaxed whitespace-pre-line">
+                                    We don&apos;t just build structures; we build communities. Every project is meticulously planned to ensure sustainability, aesthetic brilliance, and maximum return on investment for our clients.
+                                </p>
+                            </>
+                        )}
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                         {storyImages.slice(0, 2).map((imgUrl, sIdx) => (
-                            <div key={sIdx} className={`relative h-64 w-full ${sIdx === 1 ? "translate-y-8" : ""}`}>
+                            <div key={sIdx} className={`relative md:h-99 h-64 w-full ${sIdx === 1 ? "translate-y-8" : ""}`}>
                                 <Image src={imgUrl} alt={`Story image ${sIdx + 1}`} fill sizes="(max-width: 1024px) 50vw, 25vw" className="object-cover" />
                             </div>
                         ))}

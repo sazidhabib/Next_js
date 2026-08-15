@@ -139,9 +139,9 @@ export default function PagesManager() {
                     setAboutImage(data.image_url || "");
                     
                     const content = data.content || "";
-                    const paragraphs = content.split("\n\n");
+                    const paragraphs = content.split(/\n\s*\n/);
                     setAboutPara1(paragraphs[0] || "");
-                    setAboutPara2(paragraphs[1] || "");
+                    setAboutPara2(paragraphs.slice(1).join("\n\n") || "");
 
                     // Parse story_images
                     let storyImgs = [];

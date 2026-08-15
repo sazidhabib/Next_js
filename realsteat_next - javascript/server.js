@@ -71,7 +71,7 @@ nextApp.prepare().then(() => {
     });
 
     // Serve Uploads
-    app.use("/uploads", express.static(path.join(__dirname, "server-api/uploads")));
+    app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
     // Test Route for Backend
     app.get("/api/health", (req, res) => {

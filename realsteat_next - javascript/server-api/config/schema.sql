@@ -102,10 +102,6 @@ CREATE TABLE IF NOT EXISTS re_amenities (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-SET FOREIGN_KEY_CHECKS=0;
-DROP TABLE IF EXISTS re_settings;
-SET FOREIGN_KEY_CHECKS=1;
-
 CREATE TABLE IF NOT EXISTS re_settings (
     id INT AUTO_INCREMENT PRIMARY KEY,
     site_name VARCHAR(255) DEFAULT 'PRESIDENT PROPERTIES',
@@ -129,6 +125,7 @@ CREATE TABLE IF NOT EXISTS re_settings (
     hotline_number VARCHAR(255),
     secondary_email VARCHAR(255),
     business_hours TEXT,
+    homepage_statistics TEXT,
     FOREIGN KEY (hero_frame_id) REFERENCES re_projects(id) ON DELETE SET NULL
 );
 
@@ -151,6 +148,9 @@ CREATE TABLE IF NOT EXISTS re_pages (
     subtitle TEXT,
     content TEXT,
     image_url VARCHAR(500),
+    story_images TEXT,
+    core_values TEXT,
+    leadership_team TEXT,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 

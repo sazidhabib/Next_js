@@ -102,17 +102,13 @@ CREATE TABLE IF NOT EXISTS re_amenities (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-SET FOREIGN_KEY_CHECKS=0;
-DROP TABLE IF EXISTS re_settings;
-SET FOREIGN_KEY_CHECKS=1;
-
 CREATE TABLE IF NOT EXISTS re_settings (
     id INT AUTO_INCREMENT PRIMARY KEY,
     site_name VARCHAR(255) DEFAULT 'PRESIDENT PROPERTIES',
     logo_url TEXT,
     favicon_url TEXT,
     support_email VARCHAR(255),
-    helpline_number VARCHAR(50) DEFAULT '01880578893',
+    helpline_number VARCHAR(50),
     footer_text VARCHAR(255) DEFAULT '© 2026 PRESIDENT PROPERTIES. All rights reserved.',
     site_description TEXT,
     facebook_url VARCHAR(255),
@@ -165,4 +161,4 @@ CREATE TABLE IF NOT EXISTS re_testimonials (
 );
 
 -- Initial Settings
-INSERT INTO re_settings (id, site_name) VALUES (1, 'PRESIDENT PROPERTIES') ON DUPLICATE KEY UPDATE site_name = site_name;
+INSERT INTO re_settings (id, site_name) VALUES (1, 'PRESIDENT PROPERTIES Ltd') ON DUPLICATE KEY UPDATE site_name = site_name;

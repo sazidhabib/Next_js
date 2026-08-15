@@ -169,12 +169,27 @@ export default function Home() {
               <h2 className="text-4xl md:text-5xl font-serif font-bold text-foreground mb-8 leading-tight">
                 {aboutData?.title || "Crafting Architectural Masterpieces Since 1995"}
               </h2>
-              <p className="text-muted-foreground text-lg leading-relaxed mb-6">
-                {aboutData?.content ? aboutData.content.split("\n\n")[0] : "PRESIDENT PROPERTIES is synonymous with innovation, quality, and architectural brilliance in the real estate sector. With over two decades of experience, we have transformed city skylines and delivered premium lifestyles."}
-              </p>
-              <p className="text-muted-foreground text-lg leading-relaxed mb-10">
-                {aboutData?.content ? aboutData.content.split("\n\n")[1] : "Our uncompromising commitment to perfection, use of high-end materials, and dedication to timely delivery make us the most trusted name in luxury real estate."}
-              </p>
+              {aboutData?.content ? (
+                <div className="space-y-6 mb-10">
+                  {aboutData.content
+                    .split(/\n\s*\n/)
+                    .filter((p) => p.trim().length > 0)
+                    .map((para, idx) => (
+                      <p key={idx} className="text-muted-foreground text-lg leading-relaxed whitespace-pre-line">
+                        {para.trim()}
+                      </p>
+                    ))}
+                </div>
+              ) : (
+                <>
+                  <p className="text-muted-foreground text-lg leading-relaxed mb-6 whitespace-pre-line">
+                    PRESIDENT PROPERTIES is synonymous with innovation, quality, and architectural brilliance in the real estate sector. With over two decades of experience, we have transformed city skylines and delivered premium lifestyles.
+                  </p>
+                  <p className="text-muted-foreground text-lg leading-relaxed mb-10 whitespace-pre-line">
+                    Our uncompromising commitment to perfection, use of high-end materials, and dedication to timely delivery make us the most trusted name in luxury real estate.
+                  </p>
+                </>
+              )}
               <Link href="/about" className="inline-flex items-center gap-2 text-primary font-semibold uppercase tracking-widest hover:text-foreground transition-colors duration-300">
                 Discover Our Story <ArrowRight size={18} />
               </Link>
