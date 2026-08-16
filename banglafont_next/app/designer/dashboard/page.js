@@ -58,6 +58,11 @@ function IconLogout() {
 export default function DesignerDashboard() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState("overview");
+
+  const handleTabChange = (tabName) => {
+    setActiveTab(tabName);
+    router.push(`/designer/dashboard?tab=${tabName}`);
+  };
   const [designer, setDesigner] = useState(null);
   const [fonts, setFonts] = useState([]);
   const [stats, setStats] = useState({ totalFonts: 0, totalDownloads: 0, totalLikes: 0, totalViews: 0 });
@@ -80,6 +85,16 @@ export default function DesignerDashboard() {
   useEffect(() => {
     fetchProfileAndFonts();
   }, []);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const tab = params.get("tab") || "overview";
+      if (tab !== activeTab) {
+        setActiveTab(tab);
+      }
+    }
+  });
 
   const fetchProfileAndFonts = async () => {
     setLoading(true);
@@ -281,9 +296,9 @@ export default function DesignerDashboard() {
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
         {/* Navigation Sidebar */}
-        <div className="bg-[#121420]/60 border border-white/5 rounded-2xl p-2.5 space-y-1">
+        <div className="bg-[#121420]/60 border border-white/5 rounded-2xl p-2.5 space-y-1 lg:hidden">
           <button
-            onClick={() => setActiveTab("overview")}
+            onClick={() => handleTabChange("overview")}
             className={`w-full flex items-center gap-2.5 px-4 py-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
               activeTab === "overview" ? "bg-[#00e599]/10 text-[#00e599] border-l-2 border-[#00e599]" : "text-gray-400 hover:text-white hover:bg-white/5"
             }`}
@@ -292,7 +307,7 @@ export default function DesignerDashboard() {
             <span>Overview</span>
           </button>
           <button
-            onClick={() => setActiveTab("fonts")}
+            onClick={() => handleTabChange("fonts")}
             className={`w-full flex items-center gap-2.5 px-4 py-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
               activeTab === "fonts" ? "bg-[#00e599]/10 text-[#00e599] border-l-2 border-[#00e599]" : "text-gray-400 hover:text-white hover:bg-white/5"
             }`}
@@ -301,7 +316,7 @@ export default function DesignerDashboard() {
             <span>My Fonts</span>
           </button>
           <button
-            onClick={() => setActiveTab("upload")}
+            onClick={() => handleTabChange("upload")}
             className={`w-full flex items-center gap-2.5 px-4 py-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
               activeTab === "upload" ? "bg-[#00e599]/10 text-[#00e599] border-l-2 border-[#00e599]" : "text-gray-400 hover:text-white hover:bg-white/5"
             }`}
@@ -310,7 +325,7 @@ export default function DesignerDashboard() {
             <span>Upload Font</span>
           </button>
           <button
-            onClick={() => setActiveTab("settings")}
+            onClick={() => handleTabChange("settings")}
             className={`w-full flex items-center gap-2.5 px-4 py-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
               activeTab === "settings" ? "bg-[#00e599]/10 text-[#00e599] border-l-2 border-[#00e599]" : "text-gray-400 hover:text-white hover:bg-white/5"
             }`}
@@ -321,7 +336,7 @@ export default function DesignerDashboard() {
         </div>
 
         {/* Tab Contents */}
-        <div className="lg:col-span-3">
+        <div className="lg:col-span-4">
           {/* TAB 1: OVERVIEW */}
           {activeTab === "overview" && (
             <div className="space-y-6">
@@ -394,8 +409,10 @@ export default function DesignerDashboard() {
               <form onSubmit={handleFontSubmit} className="space-y-4 text-xs">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-1">
-                    <label className="block font-semibold text-gray-400 mb-1">নাম (English) *</label>
+                    <label htmlFor="fontName" className="block font-semibold text-gray-400 mb-1">নাম (English) *</label>
                     <input
+                      id="fontName"
+                      name="fontName"
                       required
                       value={fontForm.name}
                       onChange={(e) => setFontForm({ ...fontForm, name: e.target.value })}
@@ -404,8 +421,10 @@ export default function DesignerDashboard() {
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="block font-semibold text-gray-400 mb-1">বাংলা নাম</label>
+                    <label htmlFor="fontBanglaName" className="block font-semibold text-gray-400 mb-1">বাংলা নাম</label>
                     <input
+                      id="fontBanglaName"
+                      name="fontBanglaName"
                       value={fontForm.banglaName}
                       onChange={(e) => setFontForm({ ...fontForm, banglaName: e.target.value })}
                       placeholder="যেমন: সোলায়মান লিপি"
@@ -416,8 +435,10 @@ export default function DesignerDashboard() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-1">
-                    <label className="block font-semibold text-gray-400 mb-1">স্টাইল *</label>
+                    <label htmlFor="fontStyle" className="block font-semibold text-gray-400 mb-1">স্টাইল *</label>
                     <select
+                      id="fontStyle"
+                      name="fontStyle"
                       value={fontForm.style}
                       onChange={(e) => setFontForm({ ...fontForm, style: e.target.value })}
                       className="w-full border border-white/5 bg-[#181a28]/60 text-white rounded-lg px-3 py-2.5 focus:outline-none focus:border-[#00e599]/50"
@@ -430,8 +451,10 @@ export default function DesignerDashboard() {
                     </select>
                   </div>
                   <div className="space-y-1">
-                    <label className="block font-semibold text-gray-400 mb-1">ইনকোডিং</label>
+                    <label htmlFor="fontEncoding" className="block font-semibold text-gray-400 mb-1">ইনকোডিং</label>
                     <input
+                      id="fontEncoding"
+                      name="fontEncoding"
                       value={fontForm.encoding}
                       onChange={(e) => setFontForm({ ...fontForm, encoding: e.target.value })}
                       placeholder="UNICODE, ANSI (কমা দিয়ে লিখুন)"
@@ -441,8 +464,10 @@ export default function DesignerDashboard() {
                 </div>
 
                 <div className="space-y-1">
-                  <label className="block font-semibold text-gray-400 mb-1">সংক্ষিপ্ত বিবরণ</label>
+                  <label htmlFor="fontDescription" className="block font-semibold text-gray-400 mb-1">সংক্ষিপ্ত বিবরণ</label>
                   <textarea
+                    id="fontDescription"
+                    name="fontDescription"
                     rows={2}
                     value={fontForm.description}
                     onChange={(e) => setFontForm({ ...fontForm, description: e.target.value })}
@@ -452,8 +477,10 @@ export default function DesignerDashboard() {
                 </div>
 
                 <div className="space-y-1">
-                  <label className="block font-semibold text-gray-400 mb-1">বিস্তারিত বিবরণ</label>
+                  <label htmlFor="fontDetailsDescription" className="block font-semibold text-gray-400 mb-1">বিস্তারিত বিবরণ</label>
                   <textarea
+                    id="fontDetailsDescription"
+                    name="fontDetailsDescription"
                     rows={4}
                     value={fontForm.detailsDescription}
                     onChange={(e) => setFontForm({ ...fontForm, detailsDescription: e.target.value })}
@@ -464,8 +491,10 @@ export default function DesignerDashboard() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-1">
-                    <label className="block font-semibold text-gray-400 mb-1">ফন্ট ডাউনলোড ফাইল (ZIP) *</label>
+                    <label htmlFor="zipFile" className="block font-semibold text-gray-400 mb-1">ফন্ট ডাউনলোড ফাইল (ZIP) *</label>
                     <input
+                      id="zipFile"
+                      name="zipFile"
                       type="file"
                       required
                       accept=".zip"
@@ -474,8 +503,10 @@ export default function DesignerDashboard() {
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="block font-semibold text-gray-400 mb-1">ফন্ট প্রিভিউ ফাইল (TTF/OTF)</label>
+                    <label htmlFor="previewFile" className="block font-semibold text-gray-400 mb-1">ফন্ট প্রিভিউ ফাইল (TTF/OTF)</label>
                     <input
+                      id="previewFile"
+                      name="previewFile"
                       type="file"
                       required
                       accept=".ttf,.otf,.woff2"
@@ -487,8 +518,10 @@ export default function DesignerDashboard() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
                   <div className="space-y-1">
-                    <label className="block font-semibold text-gray-400 mb-1">Foundry</label>
+                    <label htmlFor="fontFoundry" className="block font-semibold text-gray-400 mb-1">Foundry</label>
                     <input
+                      id="fontFoundry"
+                      name="fontFoundry"
                       value={fontForm.foundry}
                       onChange={(e) => setFontForm({ ...fontForm, foundry: e.target.value })}
                       placeholder="যেমন: সাকিব টাইপ Foundry"
@@ -496,8 +529,10 @@ export default function DesignerDashboard() {
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="block font-semibold text-gray-400 mb-1">Released</label>
+                    <label htmlFor="fontReleased" className="block font-semibold text-gray-400 mb-1">Released</label>
                     <input
+                      id="fontReleased"
+                      name="fontReleased"
                       value={fontForm.released}
                       onChange={(e) => setFontForm({ ...fontForm, released: e.target.value })}
                       placeholder="যেমন: May 2024"
@@ -508,8 +543,10 @@ export default function DesignerDashboard() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-1">
-                    <label className="block font-semibold text-gray-400 mb-1">Version</label>
+                    <label htmlFor="fontVersion" className="block font-semibold text-gray-400 mb-1">Version</label>
                     <input
+                      id="fontVersion"
+                      name="fontVersion"
                       value={fontForm.version}
                       onChange={(e) => setFontForm({ ...fontForm, version: e.target.value })}
                       placeholder="1.000"
@@ -517,8 +554,10 @@ export default function DesignerDashboard() {
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="block font-semibold text-gray-400 mb-1">Format</label>
+                    <label htmlFor="fontFormats" className="block font-semibold text-gray-400 mb-1">Format</label>
                     <input
+                      id="fontFormats"
+                      name="fontFormats"
                       value={fontForm.formats}
                       onChange={(e) => setFontForm({ ...fontForm, formats: e.target.value })}
                       placeholder="OTF, TTF, WOFF2"
@@ -529,8 +568,10 @@ export default function DesignerDashboard() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-1">
-                    <label className="block font-semibold text-gray-400 mb-1">মূল্য (প্রিমিয়াম হলে লিখুন)</label>
+                    <label htmlFor="fontPrice" className="block font-semibold text-gray-400 mb-1">মূল্য (প্রিমিয়াম হলে লিখুন)</label>
                     <input
+                      id="fontPrice"
+                      name="fontPrice"
                       type="number"
                       value={fontForm.price}
                       onChange={(e) => setFontForm({ ...fontForm, price: e.target.value })}
@@ -558,8 +599,10 @@ export default function DesignerDashboard() {
               <form onSubmit={handleProfileSubmit} className="space-y-4 text-xs">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-1">
-                    <label className="block font-semibold text-gray-400 mb-1">ডিজাইনার নাম (English) *</label>
+                    <label htmlFor="designerName" className="block font-semibold text-gray-400 mb-1">ডিজাইনার নাম (English) *</label>
                     <input
+                      id="designerName"
+                      name="designerName"
                       required
                       value={profileForm.name}
                       onChange={(e) => setProfileForm({ ...profileForm, name: e.target.value })}
@@ -567,8 +610,10 @@ export default function DesignerDashboard() {
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="block font-semibold text-gray-400 mb-1">বাংলা নাম</label>
+                    <label htmlFor="designerBanglaName" className="block font-semibold text-gray-400 mb-1">বাংলা নাম</label>
                     <input
+                      id="designerBanglaName"
+                      name="designerBanglaName"
                       value={profileForm.banglaName}
                       onChange={(e) => setProfileForm({ ...profileForm, banglaName: e.target.value })}
                       className="w-full border border-white/5 bg-[#181a28]/60 text-white rounded-lg px-4 py-2.5 focus:outline-none"
@@ -577,8 +622,10 @@ export default function DesignerDashboard() {
                 </div>
 
                 <div className="space-y-1">
-                  <label className="block font-semibold text-gray-400 mb-1">বায়োগ্রাফি (Bio)</label>
+                  <label htmlFor="designerBio" className="block font-semibold text-gray-400 mb-1">বায়োগ্রাফি (Bio)</label>
                   <textarea
+                    id="designerBio"
+                    name="designerBio"
                     rows={3}
                     value={profileForm.bio}
                     onChange={(e) => setProfileForm({ ...profileForm, bio: e.target.value })}
@@ -588,8 +635,10 @@ export default function DesignerDashboard() {
                 </div>
 
                 <div className="space-y-1">
-                  <label className="block font-semibold text-gray-400 mb-1">সোশ্যাল মিডিয়া লিঙ্কসমূহ</label>
+                  <label htmlFor="designerSocialLinks" className="block font-semibold text-gray-400 mb-1">সোশ্যাল মিডিয়া লিঙ্কসমূহ</label>
                   <input
+                    id="designerSocialLinks"
+                    name="designerSocialLinks"
                     value={profileForm.socialLinks}
                     onChange={(e) => setProfileForm({ ...profileForm, socialLinks: e.target.value })}
                     placeholder="যেমন: Facebook: url, Twitter: url"
@@ -598,8 +647,10 @@ export default function DesignerDashboard() {
                 </div>
 
                 <div className="space-y-1">
-                  <label className="block font-semibold text-gray-400 mb-1">প্রোফাইল ছবি (Photo)</label>
+                  <label htmlFor="designerPhoto" className="block font-semibold text-gray-400 mb-1">প্রোফাইল ছবি (Photo)</label>
                   <input
+                    id="designerPhoto"
+                    name="designerPhoto"
                     type="file"
                     accept="image/*"
                     onChange={(e) => setDesignerPhotoFile(e.target.files[0])}

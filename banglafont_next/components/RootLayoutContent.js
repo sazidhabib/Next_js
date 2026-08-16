@@ -9,6 +9,7 @@ import Footer from "./Footer";
 export default function RootLayoutContent({ children }) {
   const pathname = usePathname();
   const isAdmin = pathname.startsWith("/admin");
+  const isAuthPage = pathname === "/designer/login" || pathname === "/designer/register";
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
@@ -26,11 +27,11 @@ export default function RootLayoutContent({ children }) {
   // Set default open state for desktop viewport and close drawer on navigation
   useEffect(() => {
     if (typeof window !== "undefined" && window.innerWidth >= 1024) {
-      setSidebarOpen(true);
+      setSidebarOpen(!isAuthPage);
     } else {
       setSidebarOpen(false);
     }
-  }, [pathname]);
+  }, [pathname, isAuthPage]);
 
   if (isAdmin) {
     return <main className="flex-1 min-w-0">{children}</main>;
@@ -40,13 +41,13 @@ export default function RootLayoutContent({ children }) {
     <>
       <Header onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
       <div className="flex flex-1 relative">
-        {sidebarOpen && (
+        {sidebarOpen && !isAuthPage && (
           <div
             onClick={() => setSidebarOpen(false)}
             className="fixed inset-0 bg-black/60 z-30 lg:hidden cursor-pointer"
           />
         )}
-        <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+        {!isAuthPage && <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />}
         <main className="flex-1 min-w-0">{children}</main>
       </div>
       <Footer />

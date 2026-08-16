@@ -1,11 +1,31 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { usePathname } from "next/navigation";
 import { IconSearch, IconShoppingCart, IconUser } from "./Icons";
 
 export default function Header({ onMenuClick }) {
   const [search, setSearch] = useState("");
+  const pathname = usePathname();
+  const [designer, setDesigner] = useState(null);
+
+  useEffect(() => {
+    async function checkAuth() {
+      try {
+        const res = await fetch("/api/designer/profile");
+        const data = await res.json();
+        if (res.ok && data.success) {
+          setDesigner(data.designer);
+        } else {
+          setDesigner(null);
+        }
+      } catch (err) {
+        setDesigner(null);
+      }
+    }
+    checkAuth();
+  }, [pathname]);
 
   return (
     <header className="border-b border-white/10 bg-[#0d0e14]/90 backdrop-blur-md sticky top-0 z-50 text-white">
@@ -48,43 +68,61 @@ export default function Header({ onMenuClick }) {
 
         {/* Navigation Links */}
         <nav className="hidden lg:flex items-center gap-6 text-xs font-medium text-gray-300">
-          <Link href="/free-fonts" className="hover:text-[#00e599] transition-colors">
-            Fonts
-          </Link>
-          <Link href="/designer" className="hover:text-[#00e599] transition-colors">
-            Foundry
-          </Link>
-          <Link href="/collections" className="hover:text-[#00e599] transition-colors">
-            Collections
-          </Link>
-          <Link href="/developer" className="hover:text-[#00e599] transition-colors">
-            Developer
+          <Link href="/designer/dashboard?tab=upload" className="hover:text-[#00e599] transition-colors">
+            Upload Font
           </Link>
           <Link href="/about-us" className="hover:text-[#00e599] transition-colors">
             About
           </Link>
         </nav>
 
-        {/* Right Actions (Cart / Admin / Sign In) */}
+        {/* Right Actions (Cart / Profile / Sign In / Sign Up) */}
         <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-          <Link
-            href="/checkout"
-            className="relative p-1.5 sm:p-2 text-gray-300 hover:text-white bg-[#161822] rounded-lg sm:rounded-xl border border-white/10 transition-colors"
-            title="Cart"
-          >
-            <IconShoppingCart className="text-sm sm:text-base" />
-            <span className="absolute -top-1 -right-1 bg-[#00e599] text-gray-950 text-[9px] sm:text-[10px] font-bold w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full flex items-center justify-center">
-              2
-            </span>
-          </Link>
+          {!designer && (
+            <>
+              <Link
+                href="/checkout"
+                className="relative p-1.5 sm:p-2 text-gray-300 hover:text-white bg-[#161822] rounded-lg sm:rounded-xl border border-white/10 transition-colors"
+                title="Cart"
+              >
+                <IconShoppingCart className="text-sm sm:text-base" />
+                <span className="absolute -top-1 -right-1 bg-[#00e599] text-gray-950 text-[9px] sm:text-[10px] font-bold w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full flex items-center justify-center">
+                  2
+                </span>
+              </Link>
 
-          <Link
-            href="/admin"
-            className="text-[10px] sm:text-xs font-semibold px-2.5 sm:px-4 py-1.5 sm:py-2 bg-[#161822] text-gray-200 rounded-lg sm:rounded-xl border border-white/10 hover:border-white/30 transition-all flex items-center gap-1 sm:gap-1.5"
-          >
-            <IconUser className="text-xs sm:text-sm" />
-            <span className="hidden sm:inline">Sign In</span>
-          </Link>
+              <Link
+                href="/designer/login"
+                className="text-[10px] sm:text-xs font-semibold px-2.5 sm:px-4 py-1.5 sm:py-2 bg-[#161822] text-gray-200 rounded-lg sm:rounded-xl border border-white/10 hover:border-white/30 transition-all flex items-center gap-1 sm:gap-1.5"
+              >
+                <IconUser className="text-xs sm:text-sm" />
+                <span>Sign In</span>
+              </Link>
+
+              <Link
+                href="/designer/register"
+                className="text-[10px] sm:text-xs font-bold px-2.5 sm:px-4 py-1.5 sm:py-2 bg-[#00e599] text-gray-955 rounded-lg sm:rounded-xl hover:bg-[#00c784] transition-all"
+              >
+                Sign Up
+              </Link>
+            </>
+          )}
+
+          {designer && (
+            <Link
+              href="/designer/dashboard"
+              className="w-8 h-8 rounded-full overflow-hidden border border-[#00e599]/30 hover:border-[#00e599] transition-all flex items-center justify-center bg-[#161822]"
+              title="Dashboard"
+            >
+              {designer.photo ? (
+                <img src={designer.photo} alt={designer.name} className="w-full h-full object-cover" />
+              ) : (
+                <div className="w-full h-full bg-gradient-to-tr from-[#00e599] to-emerald-400 flex items-center justify-center text-gray-955 font-bold text-xs">
+                  {designer.name.charAt(0)}
+                </div>
+              )}
+            </Link>
+          )}
         </div>
       </div>
     </header>

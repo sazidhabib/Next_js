@@ -9,6 +9,8 @@ export default function DesignerRegisterPage() {
   const router = useRouter();
   const [form, setForm] = useState({ name: "", email: "", password: "", confirmPassword: "" });
   const [loading, setLoading] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [countdown, setCountdown] = useState(5);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -33,8 +35,16 @@ export default function DesignerRegisterPage() {
 
       const data = await res.json();
       if (res.ok && data.success) {
-        toast.success("নিবন্ধন সফল হয়েছে! অনুগ্রহ করে লগইন করুন।");
-        router.push("/designer/login");
+        setShowModal(true);
+        let count = 5;
+        const interval = setInterval(() => {
+          count -= 1;
+          setCountdown(count);
+          if (count <= 0) {
+            clearInterval(interval);
+            router.push("/designer/login");
+          }
+        }, 1000);
       } else {
         throw new Error(data.error || "নিবন্ধন করতে ব্যর্থ হয়েছে।");
       }
@@ -46,7 +56,7 @@ export default function DesignerRegisterPage() {
   };
 
   return (
-    <div className="min-h-[80vh] flex items-center justify-center p-4">
+    <div className="min-h-[80vh] flex items-center justify-center p-4 relative">
       <div className="w-full max-w-md bg-[#121420]/60 border border-white/10 rounded-2xl sm:rounded-3xl p-6 sm:p-8 shadow-2xl relative overflow-hidden">
         {/* Glow */}
         <div className="absolute -top-24 -left-24 w-48 h-48 bg-[#00e599]/5 blur-3xl rounded-full pointer-events-none" />
@@ -122,6 +132,36 @@ export default function DesignerRegisterPage() {
           </Link>
         </div>
       </div>
+
+      {/* Congratulation Modal */}
+      {showModal && (
+        <div className="fixed inset-0 bg-[#090a0f]/80 backdrop-blur-md flex items-center justify-center p-4 z-50 animate-fade-in">
+          <div className="w-full max-w-md bg-[#121420]/90 border border-[#00e599]/30 rounded-3xl p-8 text-center shadow-[0_0_50px_rgba(0,229,153,0.15)] relative overflow-hidden space-y-6">
+            {/* Success icon / decoration */}
+            <div className="w-20 h-20 rounded-full bg-gradient-to-tr from-[#00e599] to-emerald-400 flex items-center justify-center text-gray-950 font-black text-3xl mx-auto shadow-[0_0_30px_rgba(0,229,153,0.3)] animate-bounce">
+              ✓
+            </div>
+            
+            <div className="space-y-2">
+              <h2 className="text-2xl font-bold text-white tracking-tight">অভিনন্দন! 🎉</h2>
+              <p className="text-sm text-gray-300">আপনার ডিজাইনার অ্যাকাউন্টটি সফলভাবে তৈরি হয়েছে।</p>
+            </div>
+
+            <div className="p-4 bg-[#181a28]/60 border border-white/5 rounded-2xl">
+              <p className="text-xs text-gray-400 leading-relaxed">
+                আপনাকে আগামী <span className="text-[#00e599] font-bold text-sm">{countdown}</span> সেকেন্ডের মধ্যে লগইন পেজে রিডাইরেক্ট করা হচ্ছে...
+              </p>
+            </div>
+
+            <Link
+              href="/designer/login"
+              className="inline-block w-full py-3 bg-[#00e599] text-gray-950 font-bold text-xs rounded-xl hover:bg-[#00c784] transition-all shadow-md hover:shadow-[#00e599]/15"
+            >
+              এখনই লগইন করুন
+            </Link>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

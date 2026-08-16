@@ -69,8 +69,17 @@ function SidebarContent({ isOpen, onClose }) {
   ];
 
   const isDetailPage = pathname.startsWith("/free-font/");
+  const isDashboard = pathname.startsWith("/designer/dashboard");
   const activeDetailTab = searchParams ? (searchParams.get("tab") || "Overview") : "Overview";
+  const activeDashboardTab = searchParams ? (searchParams.get("tab") || "overview") : "overview";
   const isFilterActive = pathname === "/free-fonts" && !forceMainMenu;
+
+  const dashboardNav = [
+    { label: "Overview", tab: "overview", icon: IconHome },
+    { label: "My Fonts", tab: "fonts", icon: IconType },
+    { label: "Upload Font", tab: "upload", icon: IconZap },
+    { label: "Profile Settings", tab: "settings", icon: IconHelpCircle },
+  ];
 
   return (
     <aside className={`bg-[#0d0e14] flex flex-col justify-between transition-all duration-300 ease-in-out overflow-y-auto ${isOpen
@@ -79,7 +88,46 @@ function SidebarContent({ isOpen, onClose }) {
       }`}>
       {/* Sliding Viewport */}
       <div className="w-full overflow-hidden flex flex-col flex-1">
-        {isDetailPage ? (
+        {isDashboard ? (
+          <div className="flex flex-col justify-between flex-1">
+            <div className="space-y-6">
+              {/* Back Link */}
+              <div className="pb-4 border-b border-white/5">
+                <Link
+                  href="/"
+                  className="flex items-center gap-2 text-xs text-gray-400 hover:text-white transition-colors cursor-pointer font-bold"
+                >
+                  <IconArrowLeft className="text-sm" />
+                  <span>Back to Main Menu</span>
+                </Link>
+              </div>
+
+              {/* Dashboard Navigation Options */}
+              <div>
+                <ul className="space-y-1">
+                  {dashboardNav.map((item) => {
+                    const active = activeDashboardTab === item.tab;
+                    const Icon = item.icon;
+                    return (
+                      <li key={item.label}>
+                        <Link
+                          href={`/designer/dashboard?tab=${item.tab}`}
+                          className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition-all ${active
+                              ? "bg-[#00e599]/10 text-[#00e599] font-bold border border-[#00e599]/10"
+                              : "text-gray-400 hover:text-white hover:bg-white/5 border border-transparent"
+                            }`}
+                        >
+                          <Icon className="text-base" />
+                          <span>{item.label}</span>
+                        </Link>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            </div>
+          </div>
+        ) : isDetailPage ? (
           <div className="flex flex-col justify-between flex-1">
             <div className="space-y-6">
               {/* Back Link */}
