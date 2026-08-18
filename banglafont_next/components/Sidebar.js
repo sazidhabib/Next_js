@@ -19,6 +19,7 @@ import {
   IconHelpCircle,
   IconCrown,
   IconArrowLeft,
+  IconCpu,
 } from "./Icons";
 
 function SidebarContent({ isOpen, onClose }) {
@@ -47,7 +48,7 @@ function SidebarContent({ isOpen, onClose }) {
 
   const toolsNav = [
     { label: "Type Tester", href: "/type-tester", icon: IconEdit3 },
-
+    { label: "Unicode to ANSI", href: "/unicode-to-ansi-converter", icon: IconCpu },
   ];
 
   const userNav = [

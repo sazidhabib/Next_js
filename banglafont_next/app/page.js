@@ -2,6 +2,7 @@ import Link from "next/link";
 import { prisma } from "../lib/prisma";
 import DarkFontCard from "../components/DarkFontCard";
 import HomeTypeTester from "../components/HomeTypeTester";
+import HomeUnicodeConverter from "../components/HomeUnicodeConverter";
 import Hero from "../components/Hero";
 import DownloadMarquee from "../components/DownloadMarquee";
 
@@ -116,6 +117,11 @@ export default async function HomePage() {
             <DarkFontCard key={font.id} font={font} />
           ))}
         </div>
+      </section>
+
+      {/* Unicode to ANSI Converter Section */}
+      <section className="pt-4">
+        <HomeUnicodeConverter />
       </section>
 
     </div>

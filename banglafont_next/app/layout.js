@@ -2,8 +2,8 @@ import "./globals.css";
 import RootLayoutContent from "../components/RootLayoutContent";
 
 export const metadata = {
-  title: "BanglaType - বাংলা ফন্ট টাইপোগ্রাফির নতুন দিগন্ত",
-  description: "বাংলাদেশের সর্ববৃহৎ ফন্ট ফাউন্ড্রি। বিনামূল্যে বাংলা ফন্ট ডাউনলোড করুন। Download free Bangla fonts.",
+  title: "NextType - বাংলা ফন্ট টাইপোগ্রাফির নতুন দিগন্ত",
+  description: "সেরা বাংলা ফন্ট টাইপোগ্রাফি প্ল্যাটফর্ম। বিনামূল্যে বাংলা ফন্ট ডাউনলোড করুন এবং ডিজাইন উন্নত করুন।",
 };
 
 export default function RootLayout({ children }) {

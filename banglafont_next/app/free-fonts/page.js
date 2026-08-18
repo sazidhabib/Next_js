@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { prisma } from "../../lib/prisma";
-import DarkFontCard from "../../components/DarkFontCard";
+import FontGridWithLoadMore from "../../components/FontGridWithLoadMore";
 
 const STYLES = [
   { value: "ALL", label: "All Fonts" },
@@ -14,9 +14,7 @@ const STYLES = [
 export default async function FreeFontsPage({ searchParams }) {
   const params = await searchParams;
   const style = params?.style || "ALL";
-  const page = parseInt(params?.page || "1", 10);
-  const limit = 12;
-  const skip = (page - 1) * limit;
+  const limit = 20;
 
   const where = { published: true, fontType: "FREE" };
   if (style !== "ALL") {
@@ -28,13 +26,10 @@ export default async function FreeFontsPage({ searchParams }) {
       where,
       include: { designer: true },
       orderBy: { downloadCount: "desc" },
-      skip,
       take: limit,
     }),
     prisma.font.count({ where }),
   ]);
-
-  const totalPages = Math.ceil(total / limit);
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
@@ -78,49 +73,7 @@ export default async function FreeFontsPage({ searchParams }) {
               <p className="text-gray-400 text-sm">কোনো ফন্ট পাওয়া যায়নি।</p>
             </div>
           ) : (
-            <>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-5">
-                {fonts.map((font) => (
-                  <DarkFontCard key={font.id} font={font} />
-                ))}
-              </div>
-
-              {totalPages > 1 && (
-                <div className="flex justify-center gap-1.5 sm:gap-2 pt-4 sm:pt-6 flex-wrap">
-                  {page > 1 && (
-                    <a
-                      href={`?style=${style}&page=${page - 1}`}
-                      className="px-3 sm:px-4 py-1.5 sm:py-2 border border-white/10 rounded-lg sm:rounded-xl text-[10px] sm:text-xs text-gray-300 hover:bg-white/10"
-                    >
-                      &larr; Prev
-                    </a>
-                  )}
-                  {Array.from({ length: totalPages }, (_, i) => i + 1)
-                    .filter((p) => p === 1 || p === totalPages || Math.abs(p - page) <= 2)
-                    .map((p) => (
-                      <a
-                        key={p}
-                        href={`?style=${style}&page=${p}`}
-                        className={`px-3 sm:px-4 py-1.5 sm:py-2 border rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-semibold ${
-                          p === page
-                            ? "bg-[#00e599] text-gray-950 border-[#00e599]"
-                            : "border-white/10 text-gray-400 hover:bg-white/5 hover:text-white"
-                        }`}
-                      >
-                        {p}
-                      </a>
-                    ))}
-                  {page < totalPages && (
-                    <a
-                      href={`?style=${style}&page=${page + 1}`}
-                      className="px-3 sm:px-4 py-1.5 sm:py-2 border border-white/10 rounded-lg sm:rounded-xl text-[10px] sm:text-xs text-gray-300 hover:bg-white/10"
-                    >
-                      Next &rarr;
-                    </a>
-                  )}
-                </div>
-              )}
-            </>
+            <FontGridWithLoadMore initialFonts={fonts} totalCount={total} currentStyle={style} />
           )}
         </div>
       </div>
