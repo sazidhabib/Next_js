@@ -2,6 +2,14 @@ import Link from "next/link";
 import { prisma } from "../../lib/prisma";
 import DarkFontCard from "../../components/DarkFontCard";
 
+export const metadata = {
+  title: "প্রিমিয়াম বাংলা ফন্ট সংগ্রহ — NextType",
+  description: "আপনার প্রজেক্টকে অন্য স্তরে নিয়ে যেতে সেরা ডিজাইন ও কোয়ালিটির প্রিমিয়াম বাংলা ফন্ট সংগ্রহ।",
+  alternates: {
+    canonical: "/premium-font",
+  },
+};
+
 export default async function PremiumFontPage() {
   const fonts = await prisma.font.findMany({
     where: { published: true, fontType: "PREMIUM" },

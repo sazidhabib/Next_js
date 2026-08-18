@@ -2,9 +2,12 @@ import { prisma } from "../../lib/prisma";
 import TypeTesterPage from "../../components/TypeTesterPage";
 
 export const metadata = {
-  title: "টাইপ টেস্টার — BanglaType",
+  title: "টাইপ টেস্টার — NextType",
   description:
     "আপনার পছন্দের বাংলা ফন্ট নির্বাচন করুন এবং রিয়েল-টাইমে টাইপোগ্রাফি টেস্ট করুন। ফন্ট সাইজ, স্পেসিং, কালার এবং আরও অনেক কিছু কাস্টমাইজ করুন।",
+  alternates: {
+    canonical: "/type-tester",
+  },
 };
 
 export const dynamic = "force-dynamic";

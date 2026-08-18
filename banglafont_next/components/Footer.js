@@ -11,7 +11,7 @@ export default function Footer() {
                 অ
               </div>
               <span className="text-base font-bold text-white tracking-tight">
-                Bangla<span className="text-[#00e599]">Type</span>
+                Next<span className="text-[#00e599]">Type</span>
               </span>
             </div>
             <p className="text-[10px] sm:text-xs text-gray-400 leading-relaxed">
@@ -42,11 +42,11 @@ export default function Footer() {
             <h4 className="text-[10px] sm:text-xs font-bold text-white tracking-wider uppercase mb-2 sm:mb-3">
               যোগাযোগ
             </h4>
-            <p className="text-[10px] sm:text-xs text-gray-400 break-all">support@banglatype.com</p>
+            <p className="text-[10px] sm:text-xs text-gray-400 break-all">support@nexttype.com</p>
           </div>
         </div>
         <div className="border-t border-white/5 mt-6 sm:mt-8 pt-4 sm:pt-6 text-[10px] sm:text-xs text-center text-gray-500">
-          © {new Date().getFullYear()} BanglaType. All rights reserved.
+          © {new Date().getFullYear()} NextType. All rights reserved.
         </div>
       </div>
     </footer>

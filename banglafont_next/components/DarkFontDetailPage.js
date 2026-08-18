@@ -211,7 +211,7 @@ function FontDetailPageContent({ font, relatedFonts = [] }) {
               <div className="space-y-4">
                 <div className="flex items-center gap-2">
                   <span className="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-md flex items-center gap-1">
-                    <span>{font.designer?.name || "BanglaType"} Foundry</span>
+                    <span>{font.designer?.name || "NextType"} Foundry</span>
                     <span className="text-emerald-400">✓</span>
                   </span>
                 </div>
@@ -543,7 +543,7 @@ function FontDetailPageContent({ font, relatedFonts = [] }) {
                         <h4 className="text-xs font-bold text-white group-hover:text-[#00e599] transition-colors">{item.name}</h4>
                       </div>
                       <div className="flex items-center justify-between pt-4 mt-4 border-t border-white/5 text-[10px]">
-                        <span className="text-gray-400">{item.designer?.name || "BanglaType"}</span>
+                        <span className="text-gray-400">{item.designer?.name || "NextType"}</span>
                         <span className="text-[#00e599] font-bold">{itemPrice}</span>
                       </div>
                     </Link>
@@ -625,7 +625,7 @@ function FontDetailPageContent({ font, relatedFonts = [] }) {
               <div className="space-y-2">
                 <div className="flex justify-between">
                   <span className="text-gray-500">Designer:</span>
-                  <span className="text-gray-200 font-medium">{font.designer?.name || "BanglaType"}</span>
+                  <span className="text-gray-200 font-medium">{font.designer?.name || "NextType"}</span>
                 </div>
                 {font.foundry && (
                   <div className="flex justify-between">

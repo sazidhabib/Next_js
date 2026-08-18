@@ -2,6 +2,14 @@ import Link from "next/link";
 import { prisma } from "../../lib/prisma";
 import FontGridWithLoadMore from "../../components/FontGridWithLoadMore";
 
+export const metadata = {
+  title: "ফ্রি বাংলা ফন্ট ডাউনলোড — NextType",
+  description: "সেরা এবং সম্পূর্ণ ফ্রি বাংলা ফন্টগুলোর বিশাল সংগ্রহ। সহজে ডাউনলোড করুন এবং প্রজেক্টে ব্যবহার করুন।",
+  alternates: {
+    canonical: "/free-fonts",
+  },
+};
+
 const STYLES = [
   { value: "ALL", label: "All Fonts" },
   { value: "HANDWRITING", label: "Handwritten" },

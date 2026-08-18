@@ -1,5 +1,13 @@
 import Link from "next/link";
 
+export const metadata = {
+  title: "আমাদের সম্পর্কে — NextType",
+  description: "NextType-এর লক্ষ্য এবং বাংলা টাইপোগ্রাফির অগ্রগতি নিয়ে আমাদের কার্যক্রম সম্পর্কে জানুন।",
+  alternates: {
+    canonical: "/about-us",
+  },
+};
+
 export default function AboutPage() {
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12">

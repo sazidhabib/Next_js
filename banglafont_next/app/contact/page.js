@@ -150,7 +150,7 @@ export default function ContactPage() {
             </div>
             <div className="space-y-1">
               <h3 className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">ইমেইল করুন</h3>
-              <p className="text-sm font-semibold text-white">support@banglatype.com</p>
+              <p className="text-sm font-semibold text-white">support@nexttype.com</p>
               <p className="text-[10px] text-gray-500">আমরা ২৪ ঘণ্টার মধ্যে উত্তর দেওয়ার চেষ্টা করি</p>
             </div>
           </div>

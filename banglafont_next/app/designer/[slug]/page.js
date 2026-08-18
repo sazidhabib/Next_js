@@ -5,6 +5,21 @@ import FontCard from "../../../components/FontCard";
 
 export const dynamic = "force-dynamic";
 
+export async function generateMetadata({ params }) {
+  const { slug } = await params;
+  const designer = await prisma.designer.findUnique({
+    where: { slug },
+  });
+  if (!designer) return {};
+  return {
+    title: `${designer.name} — NextType Designer Profile`,
+    description: designer.bio?.substring(0, 160) || `${designer.name}-এর ডিজাইন করা বাংলা ফন্টগুলোর চমৎকার সংগ্রহ।`,
+    alternates: {
+      canonical: `/designer/${slug}`,
+    },
+  };
+}
+
 export default async function DesignerDetailPage({ params }) {
   const resolvedParams = await params;
   const designer = await prisma.designer.findUnique({

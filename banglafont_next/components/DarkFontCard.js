@@ -76,7 +76,7 @@ export default function DarkFontCard({ font }) {
         <div className="min-w-0 flex-1 mr-2">
           <div className="text-gray-200 font-medium text-[11px] sm:text-xs truncate">{font.name}</div>
           <div className="text-[9px] sm:text-[10px] text-gray-500 truncate">
-            {font.designer?.name || "BanglaType"} • {font.style || "Serif"}
+            {font.designer?.name || "NextType"} • {font.style || "Serif"}
           </div>
         </div>
 

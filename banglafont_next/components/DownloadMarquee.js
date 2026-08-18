@@ -65,7 +65,7 @@ export default function DownloadMarquee({ fonts }) {
                       {font.banglaName || font.name}
                     </span>
                     <span className="text-[10px] text-gray-500 font-sans">
-                      {font.designer?.name || "BanglaType"}
+                      {font.designer?.name || "NextType"}
                     </span>
                   </div>
 

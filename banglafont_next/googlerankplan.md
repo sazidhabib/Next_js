@@ -1,12 +1,12 @@
-# 🚀 BanglaType — Google Ranking & SEO Master Plan
+# 🚀 NextType — Google Ranking & SEO Master Plan
 
-> **লক্ষ্য:** গুগল সার্চে "Bangla Font", "বাংলা ফন্ট ডাউনলোড", নির্দিষ্ট ফন্টের নাম এবং টাইপোগ্রাফি সম্পর্কিত সকল সার্চে **BanglaType**-কে প্রথম পেজে র‍্যাংক করানো।
+> **লক্ষ্য:** গুগল সার্চে "Bangla Font", "বাংলা ফন্ট ডাউনলোড", নির্দিষ্ট ফন্টের নাম এবং টাইপোগ্রাফি সম্পর্কিত সকল সার্চে **NextType**-কে প্রথম পেজে র‍্যাংক করানো।
 
 ---
 
 ## 📑 সূচিপত্র
 1. [এক নজরে: কার কী দায়িত্ব (You vs Antigravity)](#১-এক-নজরে-কার-কী-দায়িত্ব)
-2. [ফেজ ১: টেকনিক্যাল এসইও (Technical SEO)](#ফেজ-১-টেকনিক্যাল-এসইও-technical-seo)
+2. [ফেজ ১: টেকনিক্যাল এসইও (Technical SEO) [সম্পূর্ণ / Completed ✅]](#ফেজ-১-টেকনিক্যাল-এসইও-technical-seo)
 3. [ফেজ ২: অন-পেজ এসইও ও মেটাডাটা (On-Page SEO)](#ফেজ-২-অন-পেজ-এসইও-ও-মেটাডাটা-on-page-seo)
 4. [ফেজ ৩: স্কিমা ও স্ট্রাকচার্ড ডাটা (Schema.org / JSON-LD)](#ফেজ-৩-স্কিমা-ও-স্ট্রাকচার্ড-ডাটা-schemaorg--json-ld)
 5. [ফেজ ৪: গুগল সার্চ কনসোল ও ইনডেক্সিং (Google Search Console)](#ফেজ-৪-গুগল-সার্চ-কনসোল-ও-ইনডেক্সিং-google-search-console)
@@ -19,28 +19,28 @@
 
 | কাজ / ফিচার | 🤖 Antigravity যা কোড করে করে দিবে | 👤 আপনি নিজে যা করবেন |
 | :--- | :--- | :--- |
-| **Sitemap & Robots** | ডাইনামিক `app/sitemap.js` এবং `app/robots.js` তৈরি | গুগলে `sitemap.xml` সাবমিট করা |
+| **Sitemap & Robots** | ডাইনামিক `app/sitemap.js` এবং `app/robots.js` তৈরি [DONE ✅] | গুগলে `sitemap.xml` সাবমিট করা |
 | **Metadata & OpenGraph** | সব পেজ ও ফন্টের জন্য ডাইনামিক Title, Description, Keywords, OG Tags তৈরি | ডোমেইন কেনা ও হোস্টিং সেটআপ |
 | **Structured Data** | `SoftwareApplication` / `Product` JSON-LD স্কিমা ইনজেকশন | Google Search Console একাউন্ট খোলা |
-| **Canonical URLs** | ডুপ্লিকেট কন্টেন্ট রোধে স্বয়ংক্রিয় Canonical ট্যাগ সেটআপ | Google Analytics (GA4) সেটআপ |
+| **Canonical URLs** | ডুপ্লিকেট কন্টেন্ট রোধে স্বয়ংক্রিয় Canonical ট্যাগ সেটআপ [DONE ✅] | Google Analytics (GA4) সেটআপ |
 | **Performance / Core Web Vitals** | ইমেজ অপটিমাইজেশন, ফন্ট লেটেন্সি কমানো, ফাস্ট লোডিং কোড | সোশ্যাল মিডিয়া ও ফেসবুক গ্রুপে শেয়ার |
 | **Keyword Rich Copy** | ফন্ট ল্যান্ডিং পেজে SEO-বান্ধব টেক্সট টেমপ্লেট | ব্যাকলিংক তৈরি ও ডিজাইনারদের যুক্ত করা |
 
 ---
 
-## ফেজ ১: টেকনিক্যাল এসইও (Technical SEO)
+## ফেজ ১: টেকনিক্যাল এসইও (Technical SEO) [সম্পূর্ণ / Completed ✅]
 
-### ১.১ ডাইনামিক `sitemap.xml` তৈরি (`app/sitemap.js`)
+### ১.১ ডাইনামিক `sitemap.xml` তৈরি (`app/sitemap.js`) ✅
 গুগলের বট সাইটে ঢুকলে যেন ১ সেকেন্ডের মধ্যে সব ফন্ট, ক্যাটাগরি ও ডিজাইনার পেজ খুঁজে পায়।
 * **স্ট্যাটিক রাউট:** `/`, `/free-fonts`, `/premium-font`, `/unicode-to-ansi-converter`, `/type-tester`, `/about-us`
 * **ডাইনামিক রাউট:** ডাটাবেস থেকে সব `/free-font/[slug]` ও `/premium-font/[slug]`, এবং ডিজাইনার পেজ `/designer/[slug]`
 
-### ১.২ `robots.txt` কনফিগারেশন (`app/robots.js`)
+### ১.২ `robots.txt` কনফিগারেশন (`app/robots.js`) ✅
 * গুগলের জন্য পাবলিক পেজগুলো এলাউ (Allow) রাখা।
 * প্রাইভেট রাউটগুলো ডিস-এলাউ (Disallow) করা: `/admin/`, `/api/`, `/checkout/`।
 * ফাইলের নিচে সাইটম্যাপের লিংক উল্লেখ করা।
 
-### ১.৩ Canonical Tag ও Clean URLs
+### ১.৩ Canonical Tag ও Clean URLs ✅
 প্রতিটি পেজের ইউনিক ইউআরএল নির্ধারণ করা যেন `?page=1` বা ট্র্যাকিং প্যারামিটারের কারণে গুগল ডুপ্লিকেট না ধরে।
 
 ---
@@ -51,8 +51,8 @@
 গুগল ব্যবহারকারীরা বাংলা ও ইংরেজি উভয় ভাষায় সার্চ করে। তাই মেটা টাইটেল হতে হবে ক্লিক-আকর্ষক:
 
 * **Title Format:**
-  `[Font Name] ([Bangla Name]) ফন্ট ফ্রি ডাউনলোড | BanglaType`
-  * *উদাহরণ:* `Shonar Bangla (সোনার বাংলা) ফন্ট ফ্রি ডাউনলোড - TTF, OTF | BanglaType`
+  `[Font Name] ([Bangla Name]) ফন্ট ফ্রি ডাউনলোড | NextType`
+  * *উদাহরণ:* `Shonar Bangla (সোনার বাংলা) ফন্ট ফ্রি ডাউনলোড - TTF, OTF | NextType`
 * **Meta Description:**
   `ডাউনলোড করুন [Font Name] বাংলা ফন্ট সম্পূর্ণ বিনামূল্যে। ইউনিকোড ও এএনএসআই সাপোর্ট সহ গ্রাফিক্স ডিজাইন ও টাইপোগ্রাফির জন্য সেরা ফন্ট।`
 * **OpenGraph Image:** প্রতিটি ফন্টের প্রিভিউ ইমেজ যেন ফেসবুক ও টুইটারে শেয়ার করলে সুন্দর থাম্বনেইল হিসেবে শো করে।
@@ -90,7 +90,7 @@
 
 ## ফেজ ৪: গুগল সার্চ কনসোল ও ইনডেক্সিং (আপনার করণীয়)
 
-সাইটটি যখন লাইভ ডোমেইনে (যেমন `https://banglatype.com`) ডিপ্লয় করবেন, তখন নিচের ধাপগুলো অনুসরণ করতে হবে:
+সাইটটি যখন লাইভ ডোমেইনে (যেমন `https://nexttype.com`) ডিপ্লয় করবেন, তখন নিচের ধাপগুলো অনুসরণ করতে হবে:
 
 1. **Google Search Console-এ প্রজেক্ট যুক্ত করুন:**
    * [https://search.google.com/search-console](https://search.google.com/search-console) এ যান।

@@ -47,7 +47,7 @@ export default function Header({ onMenuClick }) {
             অ
           </div>
           <span className="text-sm sm:text-lg font-bold tracking-tight text-white group-hover:text-[#00e599] transition-colors">
-            Bangla<span className="text-[#00e599]">Type</span>
+            Next<span className="text-[#00e599]">Type</span>
           </span>
         </Link>
 

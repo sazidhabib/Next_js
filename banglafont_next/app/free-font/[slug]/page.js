@@ -9,10 +9,12 @@ export async function generateMetadata({ params }) {
   const font = await prisma.font.findUnique({
     where: { slug },
   });
-  if (!font) return {};
   return {
-    title: `${font.name} - BanglaType Font Download`,
+    title: `${font.name} - NextType Font Download`,
     description: font.description?.substring(0, 160) || "",
+    alternates: {
+      canonical: `/free-font/${slug}`,
+    },
   };
 }
 
