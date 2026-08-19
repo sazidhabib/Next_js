@@ -43,8 +43,8 @@ export default function Header({ onMenuClick }) {
 
         {/* Brand Logo */}
         <Link href="/" className="flex items-center gap-1.5 sm:gap-2.5 group shrink-0">
-          <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg sm:rounded-xl bg-gradient-to-tr from-[#00e599] to-emerald-400 flex items-center justify-center text-gray-950 font-black text-base sm:text-lg shadow-[0_0_15px_rgba(0,229,153,0.3)]">
-            অ
+          <div className="w-10 sm:w-30 sm:h-12 rounded-lg sm:rounded-xl flex items-center bg-black justify-center text-gray-950 font-black text-base sm:text-lg ">
+            <img src="/nexttype.png" alt="logo" className="w-full h-full object-cover rounded-lg sm:rounded-xl" />
           </div>
           <span className="text-sm sm:text-lg font-bold tracking-tight text-white group-hover:text-[#00e599] transition-colors">
             Next<span className="text-[#00e599]">Type</span>

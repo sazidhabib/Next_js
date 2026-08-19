@@ -359,7 +359,7 @@ function FontDetailPageContent({ font, relatedFonts = [] }) {
 
               {/* Weight Preview grid */}
               <div className="space-y-3">
-                <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider">Weight Preview</h3>
+                <h2 className="text-xs font-bold text-gray-400 uppercase tracking-wider">ফন্ট প্রিভিউ ও টাইপটেস্টার</h2>
                 <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2 sm:gap-3">
                   {activeWeights.map((w) => (
                     <button
@@ -401,7 +401,7 @@ function FontDetailPageContent({ font, relatedFonts = [] }) {
             <div className="bg-[#121420]/60 border border-white/5 rounded-xl sm:rounded-2xl p-4 sm:p-6 space-y-4">
               <div className="flex items-center justify-between pb-2 border-b border-white/5">
                 <div>
-                  <h3 className="text-xs font-bold text-white uppercase tracking-wider">Character Map</h3>
+                  <h2 className="text-xs font-bold text-white uppercase tracking-wider">ক্যারেক্টার ম্যাপ ও গ্লিফ</h2>
                   <p className="text-[10px] text-gray-500">Explore all characters in this font</p>
                 </div>
               </div>
@@ -453,7 +453,7 @@ function FontDetailPageContent({ font, relatedFonts = [] }) {
           {(activeTab === "Overview" || activeTab === "Features") && (
             <div className="bg-[#121420]/60 border border-white/5 rounded-xl sm:rounded-2xl p-4 sm:p-6 space-y-4">
               <div>
-                <h3 className="text-xs font-bold text-white uppercase tracking-wider">OpenType Features</h3>
+                <h2 className="text-xs font-bold text-white uppercase tracking-wider">ওপেনটাইপ ফিচারসমূহ (OpenType Features)</h2>
                 <p className="text-[10px] text-gray-500">Smart features supported by this font file</p>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 sm:gap-3">
@@ -471,7 +471,7 @@ function FontDetailPageContent({ font, relatedFonts = [] }) {
           {/* 3. Details tab */}
           {(activeTab === "Details") && (
             <div className="bg-[#121420]/60 border border-white/5 rounded-2xl p-6 space-y-4">
-              <h3 className="text-xs font-bold text-white uppercase tracking-wider">About {font.name}</h3>
+              <h2 className="text-xs font-bold text-white uppercase tracking-wider">ফন্টের বিবরণ (About {font.name})</h2>
               <p className="text-xs text-gray-400 leading-relaxed">
                 {font.description || `${font.name} একটি চমৎকার আধুনিক বাংলা টাইপফেস। এটি ডিজাইন করা হয়েছে ডিজিটাল ও প্রিন্ট মিডিয়ার চমৎকার ভিজ্যুয়ালের জন্য। এর পরিষ্কার লেটারফর্ম ও সুন্দর ড্রয়িং বাংলা ভাষার শৈল্পিকতাকে আরও ফুটিয়ে তোলে।`}
               </p>
@@ -491,7 +491,7 @@ function FontDetailPageContent({ font, relatedFonts = [] }) {
           {/* 4. License tab */}
           {(activeTab === "License") && (
             <div className="bg-[#121420]/60 border border-white/5 rounded-2xl p-6 space-y-4">
-              <h3 className="text-xs font-bold text-white uppercase tracking-wider">License Guidelines</h3>
+              <h2 className="text-xs font-bold text-white uppercase tracking-wider">লাইসেন্স নির্দেশিকা (License Guidelines)</h2>
               <div className="space-y-4 text-xs text-gray-300">
                 <div className="p-4 bg-white/5 border border-white/10 rounded-xl space-y-2">
                   <span className="font-bold text-[#00e599]">General Terms</span>
@@ -521,7 +521,7 @@ function FontDetailPageContent({ font, relatedFonts = [] }) {
           {(activeTab === "Overview" || activeTab === "Related Fonts") && relatedFonts.length > 0 && (
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <h3 className="text-xs font-bold text-white uppercase tracking-wider">Related Fonts</h3>
+                <h2 className="text-xs font-bold text-white uppercase tracking-wider">সম্পর্কিত অন্যান্য বাংলা ফন্ট</h2>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                 {relatedFonts.map((item) => {
