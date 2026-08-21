@@ -11,6 +11,10 @@
   --surface-card: #161822;
   --border: rgba(255, 255, 255, 0.08);
   --text-muted: #9ca3af;
+  --card-gradient-1: linear-gradient(135deg, #19152b, #121422, #0f111a);
+  --card-gradient-2: linear-gradient(135deg, #111a2e, #111422, #0f111a);
+  --card-gradient-3: linear-gradient(135deg, #181d1a, #11161a, #0f111a);
+  --card-gradient-4: linear-gradient(135deg, #241322, #15121c, #0f111a);
 }
 
 html.dark {
@@ -24,6 +28,10 @@ html.light {
   --surface: #ffffff;
   --surface-card: #ffffff;
   --text-muted: #6b7280;
+  --card-gradient-1: linear-gradient(135deg, #f3f0ff, #faf9ff, #ffffff);
+  --card-gradient-2: linear-gradient(135deg, #f0f7ff, #fafcff, #ffffff);
+  --card-gradient-3: linear-gradient(135deg, #f0fdf4, #fafdfa, #ffffff);
+  --card-gradient-4: linear-gradient(135deg, #fff1f2, #fffafd, #ffffff);
   color-scheme: light;
 }
 

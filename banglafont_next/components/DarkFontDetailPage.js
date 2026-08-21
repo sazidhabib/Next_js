@@ -171,7 +171,7 @@ function FontDetailPageContent({ font, relatedFonts = [] }) {
   };
 
   return (
-    <div className="p-3 sm:p-4 md:p-6 lg:p-8 space-y-5 sm:space-y-8 bg-[#090a0f] text-gray-100 min-h-screen">
+    <div className="p-3 sm:p-4 md:p-6 lg:p-8 space-y-5 sm:space-y-8 bg-background text-foreground min-h-screen">
       {/* Load Fonts */}
       {font.variants && font.variants.length > 0 ? (
         <style dangerouslySetInnerHTML={{
@@ -205,7 +205,7 @@ function FontDetailPageContent({ font, relatedFonts = [] }) {
         <div className="lg:col-span-7 space-y-5 sm:space-y-8">
 
           {/* Main Hero Header Card */}
-          <div className="bg-[#121420]/60 border border-white/5 rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 relative overflow-hidden shadow-2xl flex flex-col md:flex-row justify-between items-stretch gap-4 sm:gap-6">
+          <div className="bg-surface-card border border-border rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 relative overflow-hidden shadow-2xl flex flex-col md:flex-row justify-between items-stretch gap-4 sm:gap-6">
             {/* Left side details */}
             <div className="flex-1 flex flex-col justify-between space-y-6">
               <div className="space-y-4">
@@ -217,32 +217,32 @@ function FontDetailPageContent({ font, relatedFonts = [] }) {
                 </div>
 
                 <h1 
-                  className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white tracking-tight leading-tight break-words"
+                  className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-foreground tracking-tight leading-tight break-words"
                   style={{ fontFamily: previewFontUrl ? `'${fontFam}', sans-serif` : 'inherit', fontWeight: weightMap[selectedWeight] || 400 }}
                 >
-                  {font.banglaName || font.name} {font.banglaName && <span className="text-base sm:text-xl md:text-2xl lg:text-3xl font-medium text-gray-400 block sm:inline sm:ml-4 font-sans">({font.name})</span>}
+                  {font.banglaName || font.name} {font.banglaName && <span className="text-base sm:text-xl md:text-2xl lg:text-3xl font-medium text-text-muted block sm:inline sm:ml-4 font-sans font-sans font-sans">({font.name})</span>}
                 </h1>
-                <p className="text-xs sm:text-sm text-gray-400 mt-2 max-w-xl leading-relaxed">
+                <p className="text-xs sm:text-sm text-text-muted mt-2 max-w-xl leading-relaxed">
                   {font.detailsDescription || font.description}
                 </p>
               </div>
 
               {/* Tag Badges */}
               <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
-                <span className="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-[10px] font-medium text-gray-400">
+                <span className="px-3 py-1 bg-surface border border-border rounded-full text-[10px] font-medium text-text-muted">
                   {font.style || "Sans-Serif"}
                 </span>
-                <span className="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-[10px] font-medium text-gray-400">
+                <span className="px-3 py-1 bg-surface border border-border rounded-full text-[10px] font-medium text-text-muted">
                   {font.variants?.length || 1} Styles
                 </span>
-                <span className="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-[10px] font-medium text-gray-400">
+                <span className="px-3 py-1 bg-surface border border-border rounded-full text-[10px] font-medium text-text-muted">
                   {glyphChars.length} Glyphs
                 </span>
-                <span className="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-[10px] font-medium text-gray-400">
+                <span className="px-3 py-1 bg-surface border border-border rounded-full text-[10px] font-medium text-text-muted">
                   {localDownloadCount.toLocaleString("bn-BD")} Downloads
                 </span>
                 {font.formats && (
-                  <span className="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-[10px] font-medium text-gray-400">
+                  <span className="px-3 py-1 bg-surface border border-border rounded-full text-[10px] font-medium text-text-muted">
                     {font.formats}
                   </span>
                 )}
@@ -252,7 +252,7 @@ function FontDetailPageContent({ font, relatedFonts = [] }) {
                   className={`px-3 py-1.5 rounded-full border transition-colors ml-auto flex items-center gap-1.5 ${
                     isLiked
                       ? "bg-rose-500/20 border-rose-500 text-rose-500 hover:bg-rose-500/30"
-                      : "bg-white/5 border-white/10 text-gray-400 hover:text-white"
+                      : "bg-surface border-border text-text-muted hover:text-foreground"
                   }`}
                   title={isLiked ? "Remove from wishlist" : "Add to wishlist"}
                 >
@@ -264,14 +264,14 @@ function FontDetailPageContent({ font, relatedFonts = [] }) {
 
             {/* Right side: Glowing 3D letter block */}
             <div className="w-full md:w-36 lg:w-44 flex items-center justify-center shrink-0">
-              <div className="w-full aspect-square md:h-full rounded-xl sm:rounded-2xl bg-gradient-to-br from-[#1b2536] via-[#101321] to-[#0a0c16] border border-white/10 flex items-center justify-center relative overflow-hidden group shadow-2xl max-w-[200px] md:max-w-none mx-auto">
+              <div className="w-full aspect-square md:h-full rounded-xl sm:rounded-2xl bg-gradient-to-br from-surface via-surface-card to-background border border-border flex items-center justify-center relative overflow-hidden group shadow-2xl max-w-[200px] md:max-w-none mx-auto">
                 {/* 3D Glowing Orb Effect */}
                 <div className="absolute inset-0 bg-gradient-to-tr from-purple-500/20 via-transparent to-teal-500/20 opacity-70 group-hover:scale-110 transition-transform duration-500" />
                 <div className="absolute -top-12 -right-12 w-28 h-28 bg-[#00e599]/10 blur-2xl rounded-full" />
                 <div className="absolute -bottom-12 -left-12 w-28 h-28 bg-purple-500/10 blur-2xl rounded-full" />
 
                 {/* Translucent Backdrop Layer */}
-                <div className="absolute inset-2 rounded-xl bg-white/[0.02] border border-white/5 backdrop-blur-md" />
+                <div className="absolute inset-2 rounded-xl bg-surface/5 border border-border/50 backdrop-blur-md" />
 
                 {/* Giant Glyph Display */}
                 <span
@@ -286,16 +286,16 @@ function FontDetailPageContent({ font, relatedFonts = [] }) {
 
           {/* Interactive Weight Preview & Type Tester (Shown on Overview or active weight selector) */}
           {(activeTab === "Overview" || activeTab === "Details") && (
-            <div className="bg-[#121420]/60 border border-white/5 rounded-xl sm:rounded-2xl p-4 sm:p-6 space-y-4 sm:space-y-6">
+            <div className="bg-surface-card border border-border rounded-xl sm:rounded-2xl p-4 sm:p-6 space-y-4 sm:space-y-6">
               {/* Type Tester Input Controls & Mode Selection */}
               <div className="space-y-4">
-                <div className="flex flex-wrap gap-2 pb-2 border-b border-white/5">
+                <div className="flex flex-wrap gap-2 pb-2 border-b border-border/50">
                   <button
                     type="button"
                     onClick={() => setTextMode("custom")}
                     className={`px-3 py-1.5 rounded-lg text-[10px] font-semibold transition-all ${textMode === "custom"
                       ? "bg-[#00e599]/10 text-[#00e599] border border-[#00e599]/20"
-                      : "text-gray-400 hover:text-white border border-transparent"
+                      : "text-text-muted hover:text-foreground border border-transparent"
                       }`}
                   >
                     Type Tester
@@ -308,7 +308,7 @@ function FontDetailPageContent({ font, relatedFonts = [] }) {
                     }}
                     className={`px-3 py-1.5 rounded-lg text-[10px] font-semibold transition-all ${textMode === "sample1"
                       ? "bg-[#00e599]/10 text-[#00e599] border border-[#00e599]/20"
-                      : "text-gray-400 hover:text-white border border-transparent"
+                      : "text-text-muted hover:text-foreground border border-transparent"
                       }`}
                   >
                     Classical Prose (Tagore)
@@ -321,7 +321,7 @@ function FontDetailPageContent({ font, relatedFonts = [] }) {
                     }}
                     className={`px-3 py-1.5 rounded-lg text-[10px] font-semibold transition-all ${textMode === "sample2"
                       ? "bg-[#00e599]/10 text-[#00e599] border border-[#00e599]/20"
-                      : "text-gray-400 hover:text-white border border-transparent"
+                      : "text-text-muted hover:text-foreground border border-transparent"
                       }`}
                   >
                     Modern Typography
@@ -334,11 +334,11 @@ function FontDetailPageContent({ font, relatedFonts = [] }) {
                       type="text"
                       value={previewText}
                       onChange={(e) => setPreviewText(e.target.value)}
-                      className="w-full sm:flex-1 bg-[#181a28]/80 text-xs text-white placeholder-gray-500 px-4 py-2.5 rounded-xl border border-white/5 focus:outline-none focus:border-[#00e599] transition-colors"
+                      className="w-full sm:flex-1 bg-surface text-xs text-foreground placeholder-text-muted/65 px-4 py-2.5 rounded-xl border border-border focus:outline-none focus:border-[#00e599]/60 transition-colors"
                       placeholder="এখানে আপনার টেক্সট লিখুন..."
                     />
                   ) : (
-                    <div className="text-[10px] text-gray-500 italic select-none sm:flex-1 py-2">
+                    <div className="text-[10px] text-text-muted italic select-none sm:flex-1 py-2">
                       Long prose sample preview active. Adjust font size and weight below.
                     </div>
                   )}
@@ -350,38 +350,17 @@ function FontDetailPageContent({ font, relatedFonts = [] }) {
                       max="120"
                       value={fontSize}
                       onChange={(e) => setFontSize(Number(e.target.value))}
-                      className="w-24 accent-[#00e599] cursor-pointer h-1 bg-gray-800 rounded-lg appearance-none"
+                      className="w-24 sm:w-28 accent-[#00e599] cursor-pointer h-1.5 bg-border rounded-lg appearance-none"
                     />
-                    <span className="text-[10px] font-mono text-gray-400 w-10">{fontSize}px</span>
+                    <span className="text-[10px] font-mono text-text-muted w-8 text-right">{fontSize}px</span>
                   </div>
                 </div>
               </div>
 
-              {/* Weight Preview grid */}
-              <div className="space-y-3">
-                <h2 className="text-xs font-bold text-gray-400 uppercase tracking-wider">ফন্ট প্রিভিউ ও টাইপটেস্টার</h2>
-                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2 sm:gap-3">
-                  {activeWeights.map((w) => (
-                    <button
-                      key={w.label}
-                      type="button"
-                      onClick={() => setSelectedWeight(w.label)}
-                      className={`p-3 rounded-xl border text-center transition-all duration-200 ${selectedWeight === w.label
-                        ? "border-[#00e599] bg-[#00e599]/10 text-white font-bold"
-                        : "border-white/5 bg-[#181a28]/60 text-gray-400 hover:border-white/20"
-                        }`}
-                    >
-                      <div className="text-2xl sm:text-3xl mb-1 select-none" style={{ fontFamily: previewFontUrl ? `'${fontFam}', sans-serif` : 'inherit', fontWeight: w.weight }}>{w.sample}</div>
-                      <div className="text-[9px] text-gray-500 font-mono truncate">{w.weight} {w.label}</div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
               {/* Large Preview Canvas */}
-              <div className="bg-[#171a28]/60 rounded-xl p-4 sm:p-6 md:p-8 border border-white/5 min-h-[120px] sm:min-h-[160px] flex items-center overflow-x-auto">
+              <div className="bg-surface rounded-xl p-4 sm:p-6 md:p-8 border border-border min-h-[120px] sm:min-h-[160px] flex items-center overflow-x-auto">
                 <p
-                  className="text-white leading-relaxed break-words w-full whitespace-pre-wrap"
+                  className="text-foreground leading-relaxed break-words w-full whitespace-pre-wrap"
                   style={{
                     fontSize: `${fontSize}px`,
                     fontFamily: previewFontUrl ? `'${fontFam}', sans-serif` : 'inherit',
@@ -398,22 +377,22 @@ function FontDetailPageContent({ font, relatedFonts = [] }) {
 
           {/* 1. Character Map (Glyphs) */}
           {(activeTab === "Overview" || activeTab === "Glyphs") && (
-            <div className="bg-[#121420]/60 border border-white/5 rounded-xl sm:rounded-2xl p-4 sm:p-6 space-y-4">
-              <div className="flex items-center justify-between pb-2 border-b border-white/5">
+            <div className="bg-surface-card border border-border rounded-xl sm:rounded-2xl p-4 sm:p-6 space-y-4">
+              <div className="flex items-center justify-between pb-2 border-b border-border/50">
                 <div>
-                  <h2 className="text-xs font-bold text-white uppercase tracking-wider">ক্যারেক্টার ম্যাপ ও গ্লিফ</h2>
-                  <p className="text-[10px] text-gray-500">Explore all characters in this font</p>
+                  <h2 className="text-xs font-bold text-foreground uppercase tracking-wider">ক্যারেক্টার ম্যাপ ও গ্লিফ</h2>
+                  <p className="text-[10px] text-text-muted">Explore all characters in this font</p>
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-12 gap-4 sm:gap-6 items-stretch">
                 {/* Left Preview Box */}
-                <div className="md:col-span-4 flex items-center justify-center bg-dark hover:bg-dark/80 rounded-xl sm:rounded-2xl p-4 sm:p-8 min-h-[160px] sm:min-h-[220px] transition-all border border-white/10 shadow-lg relative group overflow-hidden">
-                  <div className="absolute top-2 left-3 text-[9px] font-bold text-gray-400 font-mono select-none">
+                <div className="md:col-span-4 flex items-center justify-center bg-surface hover:bg-surface-card rounded-xl sm:rounded-2xl p-4 sm:p-8 min-h-[160px] sm:min-h-[220px] transition-all border border-border shadow-lg relative group overflow-hidden">
+                  <div className="absolute top-2 left-3 text-[9px] font-bold text-text-muted font-mono select-none">
                     PREVIEW
                   </div>
                   <span
-                    className="text-6xl sm:text-7xl md:text-8xl text-white font-normal select-none transition-transform duration-200 group-hover:scale-105"
+                    className="text-6xl sm:text-7xl md:text-8xl text-foreground font-normal select-none transition-transform duration-200 group-hover:scale-105"
                     style={{ fontFamily: previewFontUrl ? `'${fontFam}', sans-serif` : 'inherit', fontWeight: weightMap[selectedWeight] || 400 }}
                   >
                     {selectedGlyph}
@@ -431,8 +410,8 @@ function FontDetailPageContent({ font, relatedFonts = [] }) {
                           type="button"
                           onClick={() => setSelectedGlyph(ch)}
                           className={`aspect-square flex items-center justify-center border rounded-xl text-lg transition-all duration-200 select-none ${active
-                            ? "bg-[#00e599] text-gray-950 border-[#00e599] font-bold"
-                            : "bg-[#181a28]/40 border-white/5 text-gray-300 hover:border-[#00e599] hover:text-[#00e599]"
+                            ? "bg-[#00e599] text-gray-955 border-[#00e599] font-bold"
+                            : "bg-surface border-border text-text-muted hover:border-[#00e599] hover:text-[#00e599] hover:bg-surface-card"
                             }`}
                           style={{ fontFamily: previewFontUrl ? `'${fontFam}', sans-serif` : 'inherit' }}
                         >
@@ -440,7 +419,7 @@ function FontDetailPageContent({ font, relatedFonts = [] }) {
                         </button>
                       );
                     })}
-                    <div className="aspect-square flex flex-col items-center justify-center bg-[#181a28]/60 border border-white/5 hover:border-white/10 rounded-xl text-[10px] text-gray-500 font-bold transition-all cursor-pointer">
+                    <div className="aspect-square flex flex-col items-center justify-center bg-surface border border-border hover:border-border/80 rounded-xl text-[10px] text-text-muted font-bold transition-all cursor-pointer">
                       <span>+ More</span>
                     </div>
                   </div>
@@ -451,17 +430,17 @@ function FontDetailPageContent({ font, relatedFonts = [] }) {
 
           {/* 2. OpenType Features */}
           {(activeTab === "Overview" || activeTab === "Features") && (
-            <div className="bg-[#121420]/60 border border-white/5 rounded-xl sm:rounded-2xl p-4 sm:p-6 space-y-4">
+            <div className="bg-surface-card border border-border rounded-xl sm:rounded-2xl p-4 sm:p-6 space-y-4">
               <div>
-                <h2 className="text-xs font-bold text-white uppercase tracking-wider">ওপেনটাইপ ফিচারসমূহ (OpenType Features)</h2>
-                <p className="text-[10px] text-gray-500">Smart features supported by this font file</p>
+                <h2 className="text-xs font-bold text-foreground uppercase tracking-wider">ওপেনটাইপ ফিচারসমূহ (OpenType Features)</h2>
+                <p className="text-[10px] text-text-muted">Smart features supported by this font file</p>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 sm:gap-3">
                 {opentypeFeatures.map((f) => (
-                  <div key={f.code} className="p-3.5 bg-[#181a28]/50 border border-white/5 rounded-xl space-y-1">
+                  <div key={f.code} className="p-3.5 bg-surface border border-border rounded-xl space-y-1">
                     <div className="text-xs font-bold text-[#00e599] font-mono">{f.code}</div>
-                    <div className="text-xs font-medium text-gray-200">{f.label}</div>
-                    <div className="text-[9px] text-gray-500 leading-normal">{f.desc}</div>
+                    <div className="text-xs font-medium text-foreground">{f.label}</div>
+                    <div className="text-[9px] text-text-muted leading-normal">{f.desc}</div>
                   </div>
                 ))}
               </div>
@@ -470,19 +449,19 @@ function FontDetailPageContent({ font, relatedFonts = [] }) {
 
           {/* 3. Details tab */}
           {(activeTab === "Details") && (
-            <div className="bg-[#121420]/60 border border-white/5 rounded-2xl p-6 space-y-4">
-              <h2 className="text-xs font-bold text-white uppercase tracking-wider">ফন্টের বিবরণ (About {font.name})</h2>
-              <p className="text-xs text-gray-400 leading-relaxed">
+            <div className="bg-surface-card border border-border rounded-2xl p-6 space-y-4">
+              <h2 className="text-xs font-bold text-foreground uppercase tracking-wider">ফন্টের বিবরণ (About {font.name})</h2>
+              <p className="text-xs text-text-muted leading-relaxed">
                 {font.description || `${font.name} একটি চমৎকার আধুনিক বাংলা টাইপফেস। এটি ডিজাইন করা হয়েছে ডিজিটাল ও প্রিন্ট মিডিয়ার চমৎকার ভিজ্যুয়ালের জন্য। এর পরিষ্কার লেটারফর্ম ও সুন্দর ড্রয়িং বাংলা ভাষার শৈল্পিকতাকে আরও ফুটিয়ে তোলে।`}
               </p>
               <div className="grid grid-cols-2 gap-4 pt-2">
-                <div className="p-3 bg-[#181a28]/40 border border-white/5 rounded-xl">
-                  <span className="text-[10px] text-gray-500 block">Style</span>
-                  <span className="text-xs font-semibold text-white">{font.style || "Display"}</span>
+                <div className="p-3 bg-surface border border-border rounded-xl">
+                  <span className="text-[10px] text-text-muted block">Style</span>
+                  <span className="text-xs font-semibold text-foreground">{font.style || "Display"}</span>
                 </div>
-                <div className="p-3 bg-[#181a28]/40 border border-white/5 rounded-xl">
-                  <span className="text-[10px] text-gray-500 block">Encoding</span>
-                  <span className="text-xs font-semibold text-white">{encodings.join(", ") || "Unicode"}</span>
+                <div className="p-3 bg-surface border border-border rounded-xl">
+                  <span className="text-[10px] text-text-muted block">Encoding</span>
+                  <span className="text-xs font-semibold text-foreground">{encodings.join(", ") || "Unicode"}</span>
                 </div>
               </div>
             </div>
@@ -490,12 +469,12 @@ function FontDetailPageContent({ font, relatedFonts = [] }) {
 
           {/* 4. License tab */}
           {(activeTab === "License") && (
-            <div className="bg-[#121420]/60 border border-white/5 rounded-2xl p-6 space-y-4">
-              <h2 className="text-xs font-bold text-white uppercase tracking-wider">লাইসেন্স নির্দেশিকা (License Guidelines)</h2>
-              <div className="space-y-4 text-xs text-gray-300">
-                <div className="p-4 bg-white/5 border border-white/10 rounded-xl space-y-2">
+            <div className="bg-surface-card border border-border rounded-2xl p-6 space-y-4">
+              <h2 className="text-xs font-bold text-foreground uppercase tracking-wider">লাইসেন্স নির্দেশিকা (License Guidelines)</h2>
+              <div className="space-y-4 text-xs text-text-muted">
+                <div className="p-4 bg-surface border border-border rounded-xl space-y-2">
                   <span className="font-bold text-[#00e599]">General Terms</span>
-                  <p className="text-[11px] text-gray-400 leading-relaxed">
+                  <p className="text-[11px] text-text-muted leading-relaxed">
                     By downloading this font, you agree to the conditions defined under standard font delivery licenses. Use in layouts, digital presentations, logo prototypes, and websites is permitted under the personal-use terms unless upgraded to Pro.
                   </p>
                 </div>
@@ -516,12 +495,10 @@ function FontDetailPageContent({ font, relatedFonts = [] }) {
               </div>
             </div>
           )}
-
-          {/* 5. Related Fonts tab / section */}
           {(activeTab === "Overview" || activeTab === "Related Fonts") && relatedFonts.length > 0 && (
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <h2 className="text-xs font-bold text-white uppercase tracking-wider">সম্পর্কিত অন্যান্য বাংলা ফন্ট</h2>
+                <h2 className="text-xs font-bold text-foreground uppercase tracking-wider">সম্পর্কিত অন্যান্য বাংলা ফন্ট</h2>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                 {relatedFonts.map((item) => {
@@ -531,19 +508,19 @@ function FontDetailPageContent({ font, relatedFonts = [] }) {
                     <Link
                       key={item.id}
                       href={`/free-font/${item.slug}`}
-                      className="group p-4 bg-[#121420]/60 hover:bg-[#161826] border border-white/5 hover:border-[#00e599]/30 rounded-2xl flex flex-col justify-between transition-all duration-300"
+                      className="group p-4 bg-surface-card hover:bg-surface border border-border hover:border-[#00e599]/30 rounded-2xl flex flex-col justify-between transition-all duration-300"
                     >
                       <div className="space-y-1">
                         <div className="flex items-center justify-between">
-                          <span className="text-[10px] text-gray-500 font-mono">{item.style || "Display"}</span>
+                          <span className="text-[10px] text-text-muted font-mono">{item.style || "Display"}</span>
                           <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${itemIsPro ? 'bg-purple-500/20 text-purple-400' : 'bg-emerald-500/20 text-[#00e599]'}`}>
                             {itemIsPro ? "Pro" : "Free"}
                           </span>
                         </div>
-                        <h4 className="text-xs font-bold text-white group-hover:text-[#00e599] transition-colors">{item.name}</h4>
+                        <h4 className="text-xs font-bold text-foreground group-hover:text-[#00e599] transition-colors">{item.name}</h4>
                       </div>
-                      <div className="flex items-center justify-between pt-4 mt-4 border-t border-white/5 text-[10px]">
-                        <span className="text-gray-400">{item.designer?.name || "NextType"}</span>
+                      <div className="flex items-center justify-between pt-4 mt-4 border-t border-border/50 text-[10px]">
+                        <span className="text-text-muted">{item.designer?.name || "NextType"}</span>
                         <span className="text-[#00e599] font-bold">{itemPrice}</span>
                       </div>
                     </Link>
@@ -559,11 +536,11 @@ function FontDetailPageContent({ font, relatedFonts = [] }) {
         <div className="lg:col-span-3 space-y-4 sm:space-y-6">
 
           {/* License & Purchase Card */}
-          <div className="bg-[#121420]/60 border border-white/5 rounded-2xl sm:rounded-3xl p-4 sm:p-6 space-y-4 sm:space-y-6 shadow-2xl lg:sticky lg:top-24">
-            <div className="flex items-center justify-between pb-4 border-b border-white/5">
+          <div className="bg-surface-card border border-border rounded-2xl sm:rounded-3xl p-4 sm:p-6 space-y-4 sm:space-y-6 shadow-2xl lg:sticky lg:top-24">
+            <div className="flex items-center justify-between pb-4 border-b border-border/50">
               <div>
-                <span className="text-[10px] text-gray-400 block uppercase tracking-wider">Select License</span>
-                <span className="text-2xl font-bold text-white">{priceDisplay}</span>
+                <span className="text-[10px] text-text-muted block uppercase tracking-wider">Select License</span>
+                <span className="text-2xl font-bold text-foreground">{priceDisplay}</span>
               </div>
               <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${isPro
                 ? "bg-purple-500/20 text-purple-400 border-purple-500/30"
@@ -574,7 +551,7 @@ function FontDetailPageContent({ font, relatedFonts = [] }) {
             </div>
 
             {/* License Features List */}
-            <ul className="space-y-2.5 text-xs text-gray-300">
+            <ul className="space-y-2.5 text-xs text-text-muted">
               <li className="flex items-center gap-2">
                 <IconCheck className="text-[#00e599] text-xs" />
                 <span>Lifetime Usage</span>
@@ -594,7 +571,7 @@ function FontDetailPageContent({ font, relatedFonts = [] }) {
               {isPro ? (
                 <Link
                   href={`/checkout?font=${font.slug}`}
-                  className="w-full py-3 bg-[#00e599] text-gray-950 font-bold text-xs rounded-xl hover:bg-[#00c784] transition-colors shadow-lg shadow-[#00e599]/15 flex items-center justify-center gap-2"
+                  className="w-full py-3 bg-[#00e599] text-gray-955 font-bold text-xs rounded-xl hover:bg-[#00c784] transition-colors shadow-lg shadow-[#00e599]/15 flex items-center justify-center gap-2"
                 >
                   <IconShoppingCart className="text-sm" />
                   <span>Add to Cart</span>
@@ -604,7 +581,7 @@ function FontDetailPageContent({ font, relatedFonts = [] }) {
                   href={font.fontFileUrl}
                   download
                   onClick={handleDownload}
-                  className="w-full py-3 bg-[#00e599] text-gray-950 font-bold text-xs rounded-xl hover:bg-[#00c784] transition-colors shadow-lg shadow-[#00e599]/15 flex items-center justify-center gap-2"
+                  className="w-full py-3 bg-[#00e599] text-gray-955 font-bold text-xs rounded-xl hover:bg-[#00c784] transition-colors shadow-lg shadow-[#00e599]/15 flex items-center justify-center gap-2"
                 >
                   <IconDownload className="text-sm" />
                   <span>Download Free Font</span>
@@ -613,80 +590,80 @@ function FontDetailPageContent({ font, relatedFonts = [] }) {
 
               <button
                 type="button"
-                className="w-full py-2.5 bg-[#181a28]/60 text-white font-semibold text-xs rounded-xl border border-white/5 hover:border-white/10 transition-all"
+                className="w-full py-2.5 bg-surface text-foreground font-semibold text-xs rounded-xl border border-border hover:bg-surface-card hover:border-border/80 transition-all"
               >
                 Buy Now
               </button>
             </div>
 
             {/* Additional Font Info Metadata */}
-            <div className="border-t border-white/5 pt-4 space-y-3 text-xs">
-              <h4 className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Font Info</h4>
+            <div className="border-t border-border/50 pt-4 space-y-3 text-xs">
+              <h4 className="text-[10px] font-bold text-text-muted uppercase tracking-wider">Font Info</h4>
               <div className="space-y-2">
                 <div className="flex justify-between">
-                  <span className="text-gray-500">Designer:</span>
-                  <span className="text-gray-200 font-medium">{font.designer?.name || "NextType"}</span>
+                  <span className="text-text-muted">Designer:</span>
+                  <span className="text-foreground font-medium">{font.designer?.name || "NextType"}</span>
                 </div>
                 {font.foundry && (
                   <div className="flex justify-between">
-                    <span className="text-gray-500">Foundry:</span>
-                    <span className="text-gray-200 font-medium">{font.foundry}</span>
+                    <span className="text-text-muted">Foundry:</span>
+                    <span className="text-foreground font-medium">{font.foundry}</span>
                   </div>
                 )}
                 {font.released && (
                   <div className="flex justify-between">
-                    <span className="text-gray-500">Released:</span>
-                    <span className="text-gray-200 font-medium">{font.released}</span>
+                    <span className="text-text-muted">Released:</span>
+                    <span className="text-foreground font-medium">{font.released}</span>
                   </div>
                 )}
                 {font.version && (
                   <div className="flex justify-between">
-                    <span className="text-gray-500">Version:</span>
-                    <span className="text-gray-200 font-medium">{font.version}</span>
+                    <span className="text-text-muted">Version:</span>
+                    <span className="text-foreground font-medium">{font.version}</span>
                   </div>
                 )}
                 <div className="flex justify-between">
-                  <span className="text-gray-500">Downloads:</span>
-                  <span className="text-gray-200 font-medium">{localDownloadCount.toLocaleString("bn-BD")}</span>
+                  <span className="text-text-muted">Downloads:</span>
+                  <span className="text-foreground font-medium">{localDownloadCount.toLocaleString("bn-BD")}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-500">Glyphs:</span>
-                  <span className="text-gray-200 font-medium">{glyphChars.length}</span>
+                  <span className="text-text-muted">Glyphs:</span>
+                  <span className="text-foreground font-medium">{glyphChars.length}</span>
                 </div>
                 {font.formats && (
                   <div className="flex justify-between">
-                    <span className="text-gray-500">Format:</span>
-                    <span className="text-gray-200 font-medium">{font.formats}</span>
+                    <span className="text-text-muted">Format:</span>
+                    <span className="text-foreground font-medium">{font.formats}</span>
                   </div>
                 )}
               </div>
             </div>
 
-            {/* About The Designer Section */}
+                {/* About The Designer Section */}
             {font.designer && (
-              <div className="border-t border-white/5 pt-4 space-y-3">
-                <h4 className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">About The Designer</h4>
+              <div className="border-t border-border/50 pt-4 space-y-3">
+                <h4 className="text-[10px] font-bold text-text-muted uppercase tracking-wider">About The Designer</h4>
                 <div className="flex items-center gap-3">
                   {font.designer.photo && font.designer.photo.trim() !== "" ? (
                     <img
                       src={font.designer.photo}
                       alt={font.designer.name}
-                      className="w-10 h-10 rounded-full object-cover border border-white/10 shrink-0"
+                      className="w-10 h-10 rounded-full object-cover border border-border shrink-0"
                     />
                   ) : (
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#00e599] to-teal-500 flex items-center justify-center text-gray-950 font-bold text-sm shrink-0">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#00e599] to-teal-500 flex items-center justify-center text-gray-955 font-bold text-sm shrink-0">
                       {font.designer.name.charAt(0)}
                     </div>
                   )}
                   <div className="min-w-0">
                     <Link
                       href={`/designer/${font.designer.slug}`}
-                      className="text-xs font-bold text-white hover:text-[#00e599] transition-colors truncate block"
+                      className="text-xs font-bold text-foreground hover:text-[#00e599] transition-colors truncate block"
                     >
                       {font.designer.name}
                     </Link>
                     {font.designer.banglaName && (
-                      <span className="text-[10px] text-gray-500 truncate block mt-0.5">
+                      <span className="text-[10px] text-text-muted truncate block mt-0.5">
                         {font.designer.banglaName}
                       </span>
                     )}
@@ -696,12 +673,12 @@ function FontDetailPageContent({ font, relatedFonts = [] }) {
             )}
 
             {/* Share Font Block */}
-            <div className="border-t border-white/5 pt-4 space-y-3">
-              <h4 className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Share Font</h4>
+            <div className="border-t border-border/50 pt-4 space-y-3">
+              <h4 className="text-[10px] font-bold text-text-muted uppercase tracking-wider">Share Font</h4>
               <div className="flex items-center gap-2">
                 <button
                   onClick={handleCopyLink}
-                  className="flex-1 py-2 bg-white/5 hover:bg-white/10 border border-white/5 rounded-lg text-[10px] font-semibold transition-colors"
+                  className="flex-1 py-2 bg-surface hover:bg-surface-card border border-border rounded-lg text-[10px] font-semibold transition-colors"
                 >
                   {copySuccess ? "Link Copied!" : "Copy Link"}
                 </button>
@@ -710,7 +687,7 @@ function FontDetailPageContent({ font, relatedFonts = [] }) {
                     href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(typeof window !== "undefined" ? window.location.href : "")}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-8 h-8 rounded-lg bg-[#181a28]/60 hover:bg-white/10 text-gray-400 hover:text-white flex items-center justify-center transition-colors border border-white/5"
+                    className="w-8 h-8 rounded-lg bg-surface hover:bg-surface-card text-text-muted hover:text-foreground flex items-center justify-center transition-colors border border-border"
                     title="Share on Facebook"
                   >
                     <IconFacebook className="text-sm" />
@@ -719,7 +696,7 @@ function FontDetailPageContent({ font, relatedFonts = [] }) {
                     href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(typeof window !== "undefined" ? window.location.href : "")}&text=${encodeURIComponent(`Check out this beautiful Bangla font: ${font.name}`)}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-8 h-8 rounded-lg bg-[#181a28]/60 hover:bg-white/10 text-gray-400 hover:text-white flex items-center justify-center transition-colors border border-white/5"
+                    className="w-8 h-8 rounded-lg bg-surface hover:bg-surface-card text-text-muted hover:text-foreground flex items-center justify-center transition-colors border border-border"
                     title="Share on Twitter"
                   >
                     <IconTwitter className="text-sm" />
@@ -728,7 +705,7 @@ function FontDetailPageContent({ font, relatedFonts = [] }) {
                     href={`https://api.whatsapp.com/send?text=${encodeURIComponent(`Check out this beautiful Bangla font: ${font.name} - ${typeof window !== "undefined" ? window.location.href : ""}`)}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-8 h-8 rounded-lg bg-[#181a28]/60 hover:bg-white/10 text-gray-400 hover:text-white flex items-center justify-center transition-colors border border-white/5"
+                    className="w-8 h-8 rounded-lg bg-surface hover:bg-surface-card text-text-muted hover:text-foreground flex items-center justify-center transition-colors border border-border"
                     title="Share on WhatsApp"
                   >
                     <IconWhatsApp className="text-sm" />
@@ -738,13 +715,13 @@ function FontDetailPageContent({ font, relatedFonts = [] }) {
             </div>
 
             {/* Need Help Box */}
-            <div className="border-t border-white/5 pt-4 flex items-start gap-3">
+            <div className="border-t border-border/50 pt-4 flex items-start gap-3">
               <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-[#00e599] flex items-center justify-center shrink-0">
                 <IconHelpCircle className="text-sm" />
               </div>
               <div className="space-y-0.5">
-                <h5 className="text-[11px] font-bold text-white">Need Help?</h5>
-                <p className="text-[9px] text-gray-500 leading-normal">We're here to help you</p>
+                <h5 className="text-[11px] font-bold text-foreground">Need Help?</h5>
+                <p className="text-[9px] text-text-muted leading-normal">We're here to help you</p>
                 <Link href="/contact" className="text-[9px] text-[#00e599] hover:underline font-semibold block pt-0.5">
                   Contact Support
                 </Link>
@@ -758,10 +735,9 @@ function FontDetailPageContent({ font, relatedFonts = [] }) {
     </div>
   );
 }
-
 export default function DarkFontDetailPage(props) {
   return (
-    <Suspense fallback={<div className="p-8 text-center text-xs text-gray-500">Loading details...</div>}>
+    <Suspense fallback={<div className="p-8 text-center text-xs text-text-muted">Loading details...</div>}>
       <FontDetailPageContent {...props} />
     </Suspense>
   );

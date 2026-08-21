@@ -11,7 +11,7 @@ export default function DownloadMarquee({ fonts }) {
   const marqueeItems = [...fonts, ...fonts, ...fonts, ...fonts];
 
   return (
-    <div className="relative w-full overflow-hidden bg-gradient-to-r from-purple-950/20 via-surface/40 to-emerald-950/20 border-y border-white/5 py-4 sm:py-5 my-2">
+    <div className="relative w-full overflow-hidden bg-surface-card border-y border-border py-4 sm:py-5 my-2">
       {uniqueFonts.map((font) => {
         const fontFam = `font-marquee-${font.id}`;
         const previewFontUrl = font.previewImageUrl || font.fontFileUrl;
@@ -35,12 +35,12 @@ export default function DownloadMarquee({ fonts }) {
       {/* Container holding label & marquee */}
       <div className="flex flex-col md:flex-row items-center gap-4 px-4 max-w-7xl mx-auto">
         {/* Label Badge */}
-        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 shrink-0 select-none z-10 shadow-lg shadow-black/30">
+        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface border border-border shrink-0 select-none z-10 shadow-sm">
           <span className="flex h-2 w-2 relative">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00e599] opacity-75"></span>
             <span className="relative inline-flex rounded-full h-2 w-2 bg-[#00e599]"></span>
           </span>
-          <span className="text-[11px] sm:text-xs font-semibold tracking-wider text-gray-300 uppercase">
+          <span className="text-[11px] sm:text-xs font-semibold tracking-wider text-text-muted uppercase">
             Trending Downloads
           </span>
         </div>
@@ -55,21 +55,21 @@ export default function DownloadMarquee({ fonts }) {
                 <Link
                   key={`${font.id}-${idx}`}
                   href={`/free-font/${font.slug}`}
-                  className="flex items-center gap-3 bg-[#11131a]/80 hover:bg-[#161822] hover:border-[#00e599]/40 border border-white/5 px-4 py-2 rounded-xl transition-all duration-300 group shrink-0"
+                  className="flex items-center gap-3 bg-surface hover:bg-surface-card hover:border-[#00e599]/40 border border-border px-4 py-2 rounded-xl transition-all duration-300 group shrink-0"
                 >
                   <div className="flex flex-col items-start">
                     <span
-                      className="text-md text-white group-hover:text-[#00e599] transition-colors"
+                      className="text-md text-foreground group-hover:text-[#00e599] transition-colors"
                       style={{ fontFamily: previewFontUrl ? `'${fontFam}', sans-serif` : 'inherit' }}
                     >
                       {font.banglaName || font.name}
                     </span>
-                    <span className="text-[10px] text-gray-500 font-sans">
+                    <span className="text-[10px] text-text-muted font-sans">
                       {font.designer?.name || "NextType"}
                     </span>
                   </div>
 
-                  <div className="h-6 w-px bg-white/10" />
+                  <div className="h-6 w-px bg-border" />
 
                   <div className="flex items-center gap-1.5 text-[#00e599] bg-[#00e599]/10 px-2 py-0.5 rounded-lg text-xs font-semibold">
                     <IconDownload className="text-[10px]" />

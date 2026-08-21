@@ -11,6 +11,14 @@ export default function RootLayoutContent({ children }) {
   const isAdmin = pathname.startsWith("/admin");
   const isAuthPage = pathname === "/designer/login" || pathname === "/designer/register";
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [theme, setTheme] = useState("dark");
+
+  useEffect(() => {
+    const savedTheme = localStorage.getItem("theme");
+    if (savedTheme) {
+      setTheme(savedTheme);
+    }
+  }, []);
 
   useEffect(() => {
     if (isAdmin) {
@@ -18,11 +26,23 @@ export default function RootLayoutContent({ children }) {
       document.documentElement.classList.add("light");
       document.body.className = "min-h-full bg-gray-50 text-gray-900";
     } else {
-      document.documentElement.classList.remove("light");
-      document.documentElement.classList.add("dark");
-      document.body.className = "min-h-full flex flex-col bg-[#090a0f] text-gray-100";
+      if (theme === "dark") {
+        document.documentElement.classList.remove("light");
+        document.documentElement.classList.add("dark");
+        document.body.className = "min-h-full flex flex-col bg-[#090a0f] text-gray-100";
+      } else {
+        document.documentElement.classList.remove("dark");
+        document.documentElement.classList.add("light");
+        document.body.className = "min-h-full flex flex-col bg-gray-50 text-gray-900";
+      }
     }
-  }, [isAdmin]);
+  }, [isAdmin, theme]);
+
+  const toggleTheme = () => {
+    const nextTheme = theme === "dark" ? "light" : "dark";
+    setTheme(nextTheme);
+    localStorage.setItem("theme", nextTheme);
+  };
 
   // Set default open state for desktop viewport and close drawer on navigation
   useEffect(() => {
@@ -39,7 +59,7 @@ export default function RootLayoutContent({ children }) {
 
   return (
     <>
-      <Header onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
+      <Header onMenuClick={() => setSidebarOpen(!sidebarOpen)} theme={theme} toggleTheme={toggleTheme} />
       <div className="flex flex-1 relative">
         {sidebarOpen && !isAuthPage && (
           <div

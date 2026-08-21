@@ -73,7 +73,7 @@ export default async function HomePage() {
       <section className="space-y-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <h2 className="text-xl font-bold text-white tracking-tight">Featured Fonts</h2>
+            <h2 className="text-xl font-bold text-foreground tracking-tight">Featured Fonts</h2>
             <span className="w-2 h-2 rounded-full bg-[#00e599]" />
           </div>
 
@@ -98,7 +98,7 @@ export default async function HomePage() {
       <section className="space-y-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <h2 className="text-xl font-bold text-white tracking-tight">New Fonts</h2>
+            <h2 className="text-xl font-bold text-foreground tracking-tight">New Fonts</h2>
             <span className="w-2 h-2 rounded-full bg-[#00e599]" />
           </div>
 
