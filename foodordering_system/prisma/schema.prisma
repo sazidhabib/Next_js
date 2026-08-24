@@ -1,0 +1,279 @@
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  SUPER_ADMIN
+  RESTAURANT_ADMIN
+  STAFF_OPERATOR
+  CUSTOMER
+}
+
+enum OrderType {
+  DELIVERY
+  PICKUP
+  DINE_IN
+}
+
+enum OrderStatus {
+  PENDING
+  ACCEPTED
+  PREPARING
+  READY_FOR_PICKUP
+  OUT_FOR_DELIVERY
+  COMPLETED
+  REJECTED
+  CANCELLED
+}
+
+enum PaymentMethod {
+  CASH_ON_DELIVERY
+  CASH_ON_PICKUP
+  CARD_ONLINE
+  CARD_ON_DELIVERY
+}
+
+enum PaymentStatus {
+  UNPAID
+  PAID
+  REFUNDED
+}
+
+model User {
+  id              String               @id @default(uuid())
+  name            String
+  email           String               @unique
+  passwordHash    String
+  phone           String?
+  role            Role                 @default(CUSTOMER)
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+  restaurantRoles UserRestaurantRole[]
+  orders          Order[]
+}
+
+model Restaurant {
+  id               String               @id @default(uuid())
+  name             String
+  slug             String               @unique
+  description      String?              @db.Text
+  logoUrl          String?
+  bannerUrl        String?
+  phone            String
+  email            String
+  address          String
+  latitude         Float?
+  longitude        Float?
+  currency         String               @default("USD")
+  currencySymbol   String               @default("$")
+  taxRatePercent   Float                @default(0.0)
+  enableDelivery   Boolean              @default(true)
+  enablePickup     Boolean              @default(true)
+  enableDineIn     Boolean              @default(false)
+  autoAcceptOrders Boolean              @default(false)
+  estimatedPrepTime Int                 @default(25)
+  isActive         Boolean              @default(true)
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
+
+  staffRoles       UserRestaurantRole[]
+  categories       Category[]
+  optionGroups     OptionGroup[]
+  deliveryZones    DeliveryZone[]
+  operatingHours   OperatingHour[]
+  orders           Order[]
+  invoices         Invoice[]
+}
+
+model UserRestaurantRole {
+  id           String     @id @default(uuid())
+  userId       String
+  restaurantId String
+  role         Role
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, restaurantId])
+}
+
+model Category {
+  id           String      @id @default(uuid())
+  restaurantId String
+  name         String
+  description  String?     @db.Text
+  imageUrl     String?
+  displayOrder Int         @default(0)
+  isActive     Boolean     @default(true)
+  restaurant   Restaurant  @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  items        MenuItem[]
+}
+
+model MenuItem {
+  id            String                 @id @default(uuid())
+  categoryId    String
+  name          String
+  description   String?                @db.Text
+  imageUrl      String?
+  basePrice     Float
+  isAvailable   Boolean                @default(true)
+  isFeatured    Boolean                @default(false)
+  dietaryTags   String?                // Comma separated e.g. "Vegetarian,Spicy,Gluten-Free"
+  displayOrder  Int                    @default(0)
+  category      Category               @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  optionGroups  MenuItemOptionGroup[]
+  orderItems    OrderItem[]
+}
+
+model OptionGroup {
+  id            String                 @id @default(uuid())
+  restaurantId  String
+  name          String                 // e.g. "Choose Size", "Extra Toppings", "Crust Type"
+  minSelections Int                    @default(0) // 0 = optional, 1 = required single, 2+ = min required
+  maxSelections Int                    @default(1) // 1 = radio button, >1 = checkboxes up to max
+  restaurant    Restaurant             @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  items         OptionItem[]
+  menuItems     MenuItemOptionGroup[]
+}
+
+model MenuItemOptionGroup {
+  id            String       @id @default(uuid())
+  menuItemId    String
+  optionGroupId String
+  displayOrder  Int          @default(0)
+  menuItem      MenuItem     @relation(fields: [menuItemId], references: [id], onDelete: Cascade)
+  optionGroup   OptionGroup  @relation(fields: [optionGroupId], references: [id], onDelete: Cascade)
+
+  @@unique([menuItemId, optionGroupId])
+}
+
+model OptionItem {
+  id               String            @id @default(uuid())
+  optionGroupId    String
+  name             String            // e.g. "Large (+ $4.00)", "Extra Cheese (+ $1.50)"
+  price            Float             @default(0.0)
+  isDefault        Boolean           @default(false)
+  isAvailable      Boolean           @default(true)
+  displayOrder     Int               @default(0)
+  optionGroup      OptionGroup       @relation(fields: [optionGroupId], references: [id], onDelete: Cascade)
+  orderItemOptions OrderItemOption[]
+}
+
+model DeliveryZone {
+  id                    String      @id @default(uuid())
+  restaurantId          String
+  name                  String      // e.g. "Zone 1 - 0-3km", "Downtown Express"
+  zoneType              String      @default("RADIUS") // "RADIUS", "POLYGON", "POSTAL"
+  radiusKm              Float?      // e.g. 5.0
+  polygonGeoJson        String?     @db.LongText
+  postalCodes           String?     @db.Text
+  minOrderAmount        Float       @default(0.0)
+  deliveryFee           Float       @default(0.0)
+  freeDeliveryThreshold Float?
+  estimatedTimeMin      Int         @default(35)
+  isActive              Boolean     @default(true)
+  restaurant            Restaurant  @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+}
+
+model OperatingHour {
+  id           String     @id @default(uuid())
+  restaurantId String
+  dayOfWeek    Int        // 0 = Sunday, 1 = Monday, ... 6 = Saturday
+  openTime     String     // e.g. "10:00"
+  closeTime    String     // e.g. "22:00"
+  serviceType  OrderType  @default(DELIVERY)
+  isClosed     Boolean    @default(false)
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+}
+
+model Order {
+  id               String           @id @default(uuid())
+  orderNumber      String           @unique
+  restaurantId     String
+  userId           String?
+  customerName     String
+  customerEmail    String
+  customerPhone    String
+  orderType        OrderType        @default(DELIVERY)
+  status           OrderStatus      @default(PENDING)
+  deliveryAddress  String?
+  deliveryLat      Float?
+  deliveryLng      Float?
+  deliveryZoneId   String?
+  specialNotes     String?          @db.Text
+  subtotal         Float
+  taxAmount        Float
+  deliveryFee      Float            @default(0.0)
+  discountAmount   Float            @default(0.0)
+  totalAmount      Float
+  paymentMethod    PaymentMethod    @default(CASH_ON_DELIVERY)
+  paymentStatus    PaymentStatus    @default(UNPAID)
+  scheduledFor     DateTime?
+  acceptedAt       DateTime?
+  estimatedReadyAt DateTime?
+  rejectionReason  String?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  restaurant       Restaurant       @relation(fields: [restaurantId], references: [id])
+  user             User?            @relation(fields: [userId], references: [id])
+  items            OrderItem[]
+  statusLogs       OrderStatusLog[]
+  invoice          Invoice?
+}
+
+model OrderItem {
+  id              String            @id @default(uuid())
+  orderId         String
+  menuItemId      String?
+  itemName        String
+  itemPrice       Float
+  quantity        Int               @default(1)
+  itemTotal       Float
+  specialNotes    String?
+  order           Order             @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  menuItem        MenuItem?         @relation(fields: [menuItemId], references: [id])
+  selectedOptions OrderItemOption[]
+}
+
+model OrderItemOption {
+  id           String      @id @default(uuid())
+  orderItemId  String
+  optionItemId String?
+  groupName    String
+  optionName   String
+  optionPrice  Float       @default(0.0)
+  orderItem    OrderItem   @relation(fields: [orderItemId], references: [id], onDelete: Cascade)
+  optionItem   OptionItem? @relation(fields: [optionItemId], references: [id])
+}
+
+model OrderStatusLog {
+  id        String      @id @default(uuid())
+  orderId   String
+  status    OrderStatus
+  note      String?
+  timestamp DateTime    @default(now())
+  order     Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
+}
+
+model Invoice {
+  id            String        @id @default(uuid())
+  invoiceNumber String        @unique
+  orderId       String        @unique
+  restaurantId  String
+  subtotal      Float
+  taxAmount     Float
+  deliveryFee   Float
+  totalAmount   Float
+  paymentMethod PaymentMethod
+  paymentStatus PaymentStatus
+  pdfUrl        String?
+  issuedAt      DateTime      @default(now())
+
+  order         Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  restaurant    Restaurant    @relation(fields: [restaurantId], references: [id])
+}
