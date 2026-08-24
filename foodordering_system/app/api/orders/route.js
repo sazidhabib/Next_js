@@ -3,7 +3,9 @@ import { getOrders, createOrder } from '@/lib/dataStore';
 
 export async function GET(request) {
   try {
-    const orders = await getOrders();
+    const { searchParams } = new URL(request.url);
+    const restaurantId = searchParams.get('restaurantId');
+    const orders = await getOrders(restaurantId);
     return NextResponse.json({ success: true, data: orders });
   } catch (error) {
     console.error('Error fetching orders:', error);

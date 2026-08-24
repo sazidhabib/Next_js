@@ -36,6 +36,7 @@ enum PaymentMethod {
   CASH_ON_PICKUP
   CARD_ONLINE
   CARD_ON_DELIVERY
+  CARD_ON_PICKUP
 }
 
 enum PaymentStatus {
@@ -75,6 +76,11 @@ model Restaurant {
   enableDelivery   Boolean              @default(true)
   enablePickup     Boolean              @default(true)
   enableDineIn     Boolean              @default(false)
+  enableCash       Boolean              @default(true)
+  enableCard       Boolean              @default(true)
+  enableOnline     Boolean              @default(false)
+  stripePublishableKey String?
+  stripeSecretKey      String?
   autoAcceptOrders Boolean              @default(false)
   estimatedPrepTime Int                 @default(25)
   isActive         Boolean              @default(true)

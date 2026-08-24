@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   X,
@@ -43,6 +43,25 @@ export default function CartDrawer({
   const [paymentMethod, setPaymentMethod] = useState('CASH_ON_DELIVERY');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+
+  // Handle dynamic payment and fulfillment toggles based on store configurations
+  useEffect(() => {
+    if (restaurant) {
+      if (restaurant.enableDelivery === false && serviceType === 'DELIVERY') {
+        setServiceType('PICKUP');
+      } else if (restaurant.enablePickup === false && serviceType === 'PICKUP') {
+        setServiceType('DELIVERY');
+      }
+
+      if (restaurant.enableCash !== false) {
+        setPaymentMethod(serviceType === 'DELIVERY' ? 'CASH_ON_DELIVERY' : 'CASH_ON_PICKUP');
+      } else if (restaurant.enableCard !== false) {
+        setPaymentMethod(serviceType === 'DELIVERY' ? 'CARD_ON_DELIVERY' : 'CARD_ON_PICKUP');
+      } else if (restaurant.enableOnline) {
+        setPaymentMethod('CARD_ONLINE');
+      }
+    }
+  }, [restaurant, serviceType]);
 
   if (!isOpen) return null;
 
@@ -146,7 +165,30 @@ export default function CartDrawer({
         playSuccessSound();
         onClearCart();
         onClose();
-        router.push(`/order/${data.data.id || data.data.orderNumber}`);
+        
+        // If payment method is CARD_ONLINE, redirect to Stripe Checkout
+        if (paymentMethod === 'CARD_ONLINE') {
+          try {
+            const stripeRes = await fetch('/api/checkout-session', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ orderId: data.data.id }),
+            });
+            const stripeData = await stripeRes.json();
+            if (stripeData.success && stripeData.url) {
+              window.location.href = stripeData.url;
+              return;
+            } else {
+              setErrorMessage('Order placed but online payment failed: ' + (stripeData.error || 'Unknown error'));
+              router.push(`/order/${data.data.id}`);
+            }
+          } catch (stripeErr) {
+            console.error('Online payment redirect error:', stripeErr);
+            router.push(`/order/${data.data.id}`);
+          }
+        } else {
+          router.push(`/order/${data.data.id || data.data.orderNumber}`);
+        }
       } else {
         setErrorMessage(data.error || 'Failed to place order.');
       }
@@ -185,30 +227,37 @@ export default function CartDrawer({
           </div>
 
           {/* Fulfillment Toggle inside cart */}
-          <div className="p-3 bg-slate-100 border-b border-slate-200 flex items-center justify-center gap-2 shrink-0">
-            <button
-              type="button"
-              onClick={() => setServiceType('DELIVERY')}
-              className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                serviceType === 'DELIVERY'
-                  ? 'bg-orange-600 text-white shadow-xs'
-                  : 'bg-white text-slate-700 hover:bg-slate-50'
-              }`}
-            >
-              🛵 Delivery
-            </button>
-            <button
-              type="button"
-              onClick={() => setServiceType('PICKUP')}
-              className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                serviceType === 'PICKUP'
-                  ? 'bg-orange-600 text-white shadow-xs'
-                  : 'bg-white text-slate-700 hover:bg-slate-50'
-              }`}
-            >
-              🛍️ Pickup
-            </button>
-          </div>
+          {/* Fulfillment Toggle inside cart */}
+          {(restaurant?.enableDelivery !== false || restaurant?.enablePickup !== false) && (
+            <div className="p-3 bg-slate-100 border-b border-slate-200 flex items-center justify-center gap-2 shrink-0">
+              {restaurant?.enableDelivery !== false && (
+                <button
+                  type="button"
+                  onClick={() => setServiceType('DELIVERY')}
+                  className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                    serviceType === 'DELIVERY'
+                      ? 'bg-orange-600 text-white shadow-xs'
+                      : 'bg-white text-slate-700 hover:bg-slate-50'
+                  }`}
+                >
+                  🛵 Delivery
+                </button>
+              )}
+              {restaurant?.enablePickup !== false && (
+                <button
+                  type="button"
+                  onClick={() => setServiceType('PICKUP')}
+                  className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                    serviceType === 'PICKUP'
+                      ? 'bg-orange-600 text-white shadow-xs'
+                      : 'bg-white text-slate-700 hover:bg-slate-50'
+                  }`}
+                >
+                  🛍️ Pickup
+                </button>
+              )}
+            </div>
+          )}
 
           {/* Scrollable Content Body */}
           <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-6 text-slate-800">
@@ -453,35 +502,59 @@ export default function CartDrawer({
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold text-slate-700">Payment Option</label>
                   <div className="space-y-1.5">
-                    <div
-                      onClick={() => setPaymentMethod('CASH_ON_DELIVERY')}
-                      className={`flex items-center justify-between p-2.5 rounded-xl border text-xs cursor-pointer transition-all ${
-                        paymentMethod === 'CASH_ON_DELIVERY'
-                          ? 'bg-orange-50 border-orange-500 text-orange-950 font-bold'
-                          : 'bg-white border-slate-200 text-slate-700'
-                      }`}
-                    >
-                      <div className="flex items-center gap-2">
-                        <Banknote className="w-4 h-4 text-emerald-600" />
-                        <span>Cash on {serviceType === 'DELIVERY' ? 'Delivery' : 'Pickup'}</span>
+                    {/* Cash Option */}
+                    {restaurant?.enableCash !== false && (
+                      <div
+                        onClick={() => setPaymentMethod(serviceType === 'DELIVERY' ? 'CASH_ON_DELIVERY' : 'CASH_ON_PICKUP')}
+                        className={`flex items-center justify-between p-2.5 rounded-xl border text-xs cursor-pointer transition-all ${
+                          (paymentMethod === 'CASH_ON_DELIVERY' || paymentMethod === 'CASH_ON_PICKUP')
+                            ? 'bg-orange-50 border-orange-500 text-orange-950 font-bold'
+                            : 'bg-white border-slate-200 text-slate-700'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2">
+                          <Banknote className="w-4 h-4 text-emerald-600" />
+                          <span>Cash on {serviceType === 'DELIVERY' ? 'Delivery' : 'Pickup'}</span>
+                        </div>
+                        <span className="text-[10px] text-slate-400">Pay upon receipt</span>
                       </div>
-                      <span className="text-[10px] text-slate-400">Pay upon receipt</span>
-                    </div>
+                    )}
 
-                    <div
-                      onClick={() => setPaymentMethod('CARD_ONLINE')}
-                      className={`flex items-center justify-between p-2.5 rounded-xl border text-xs cursor-pointer transition-all ${
-                        paymentMethod === 'CARD_ONLINE'
-                          ? 'bg-orange-50 border-orange-500 text-orange-950 font-bold'
-                          : 'bg-white border-slate-200 text-slate-700'
-                      }`}
-                    >
-                      <div className="flex items-center gap-2">
-                        <CreditCard className="w-4 h-4 text-indigo-600" />
-                        <span>Credit / Debit Card Online</span>
+                    {/* Card offline Option */}
+                    {restaurant?.enableCard !== false && (
+                      <div
+                        onClick={() => setPaymentMethod(serviceType === 'DELIVERY' ? 'CARD_ON_DELIVERY' : 'CARD_ON_PICKUP')}
+                        className={`flex items-center justify-between p-2.5 rounded-xl border text-xs cursor-pointer transition-all ${
+                          (paymentMethod === 'CARD_ON_DELIVERY' || paymentMethod === 'CARD_ON_PICKUP')
+                            ? 'bg-orange-50 border-orange-500 text-orange-950 font-bold'
+                            : 'bg-white border-slate-200 text-slate-700'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2">
+                          <CreditCard className="w-4 h-4 text-orange-500" />
+                          <span>Card on {serviceType === 'DELIVERY' ? 'Delivery' : 'Pickup'}</span>
+                        </div>
+                        <span className="text-[10px] text-slate-400">Card reader at receipt</span>
                       </div>
-                      <span className="text-[10px] text-emerald-600 font-bold">Instant Instant</span>
-                    </div>
+                    )}
+
+                    {/* Online Stripe Option */}
+                    {restaurant?.enableOnline && (
+                      <div
+                        onClick={() => setPaymentMethod('CARD_ONLINE')}
+                        className={`flex items-center justify-between p-2.5 rounded-xl border text-xs cursor-pointer transition-all ${
+                          paymentMethod === 'CARD_ONLINE'
+                            ? 'bg-orange-50 border-orange-500 text-orange-950 font-bold'
+                            : 'bg-white border-slate-200 text-slate-700'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2">
+                          <CreditCard className="w-4 h-4 text-indigo-600" />
+                          <span>Credit / Debit Card Online (Stripe)</span>
+                        </div>
+                        <span className="text-[10px] text-emerald-600 font-bold">Instant payment</span>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

@@ -92,7 +92,9 @@ export async function getOrders(restaurantId = null) {
   try {
     const connected = await isDbConnected();
     if (connected) {
+      const where = restaurantId ? { restaurantId } : {};
       const orders = await prisma.order.findMany({
+        where,
         orderBy: { createdAt: 'desc' },
         include: {
           items: {
