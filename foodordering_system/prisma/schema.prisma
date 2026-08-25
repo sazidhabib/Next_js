@@ -94,6 +94,9 @@ model Restaurant {
   operatingHours   OperatingHour[]
   orders           Order[]
   invoices         Invoice[]
+  invoiceTemplates InvoiceTemplate[]
+  activeCustomerTemplateId String?
+  activeKitchenTemplateId  String?
 }
 
 model UserRestaurantRole {
@@ -282,4 +285,17 @@ model Invoice {
 
   order         Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
   restaurant    Restaurant    @relation(fields: [restaurantId], references: [id])
+}
+
+model InvoiceTemplate {
+  id           String     @id @default(uuid())
+  restaurantId String
+  name         String
+  type         String     // "CUSTOMER" or "KITCHEN"
+  fontSize     Int        @default(12)
+  config       String     @db.Text
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
 }

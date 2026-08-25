@@ -109,6 +109,65 @@ async function main() {
 
   console.log('🍕 Restaurant created:', restaurant.name);
 
+  // Create Default Invoice Templates
+  const customerTemplate = await prisma.invoiceTemplate.create({
+    data: {
+      restaurantId: restaurant.id,
+      name: 'Default Client Receipt',
+      type: 'CUSTOMER',
+      fontSize: 12,
+      config: JSON.stringify({
+        paymentMethod: true,
+        time: true,
+        estimatedDriveTime: true,
+        direction: true,
+        onPremiseNumber: true,
+        orderDetails: true,
+        clientInfo: true,
+        clientComment: true,
+        items: true,
+        isPaid: true,
+        orderOnline: true,
+        contactDetails: true,
+        infoBox1: false,
+        infoBox2: false,
+        infoBox3: false,
+        clientConfirmation: false,
+      }),
+    },
+  });
+
+  const kitchenTemplate = await prisma.invoiceTemplate.create({
+    data: {
+      restaurantId: restaurant.id,
+      name: 'Default Kitchen Essentials',
+      type: 'KITCHEN',
+      fontSize: 12,
+      config: JSON.stringify({
+        header: true,
+        onPremiseNumber: true,
+        orderDetails: true,
+        clientComment: true,
+        items: true,
+        isPaid: true,
+        packagingStationQualityControl: false,
+        previewOptions: true,
+        ticketHolderSpace: true,
+      }),
+    },
+  });
+
+  // Update restaurant with active templates
+  await prisma.restaurant.update({
+    where: { id: restaurant.id },
+    data: {
+      activeCustomerTemplateId: customerTemplate.id,
+      activeKitchenTemplateId: kitchenTemplate.id,
+    },
+  });
+
+  console.log('📄 Default invoice templates created and assigned.');
+
   // 5. Operating Hours
   const days = [0, 1, 2, 3, 4, 5, 6];
   for (const day of days) {

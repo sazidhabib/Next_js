@@ -18,6 +18,8 @@ import {
   Building2,
   LogOut,
   ArrowLeft,
+  ChevronDown,
+  ChevronRight,
 } from 'lucide-react';
 import { AdminProvider, useAdmin } from '@/lib/adminContext';
 
@@ -63,7 +65,16 @@ function AdminLayoutContent({ children }) {
         { label: 'Live Order Receiver', href: '/admin/live-orders', icon: Bell, badge: 'LIVE' },
         { label: 'Menu & Modifiers', href: '/admin/menu', icon: UtensilsCrossed },
         { label: 'Delivery Zones & Fees', href: '/admin/zones', icon: MapPin },
-        { label: 'Invoices & Ledger', href: '/admin/invoices', icon: FileText },
+        {
+          label: 'Invoices & Ledger',
+          href: '/admin/invoices',
+          icon: FileText,
+          subItems: [
+            { label: 'All Invoices', href: '/admin/invoices' },
+            { label: 'Invoice Templates', href: '/admin/invoices/templates' },
+            { label: 'Printer Options', href: '/admin/invoices/printer-options' },
+          ],
+        },
         { label: 'Operating Settings', href: '/admin/settings', icon: Settings },
       ];
     }
@@ -74,7 +85,16 @@ function AdminLayoutContent({ children }) {
       { label: 'Live Order Receiver', href: '/admin/live-orders', icon: Bell, badge: 'LIVE' },
       { label: 'Menu & Modifiers', href: '/admin/menu', icon: UtensilsCrossed },
       { label: 'Delivery Zones & Fees', href: '/admin/zones', icon: MapPin },
-      { label: 'Invoices & Ledger', href: '/admin/invoices', icon: FileText },
+      {
+        label: 'Invoices & Ledger',
+        href: '/admin/invoices',
+        icon: FileText,
+        subItems: [
+          { label: 'All Invoices', href: '/admin/invoices' },
+          { label: 'Invoice Templates', href: '/admin/invoices/templates' },
+          { label: 'Printer Options', href: '/admin/invoices/printer-options' },
+        ],
+      },
       { label: 'Operating Settings', href: '/admin/settings', icon: Settings },
       { label: 'Staff & Permissions', href: '/admin/users', icon: Users },
     ];
@@ -145,31 +165,63 @@ function AdminLayoutContent({ children }) {
           <nav className="space-y-1">
             {navItems.map((item) => {
               const Icon = item.icon;
+              const isParentActive = pathname?.startsWith(item.href);
               const isActive =
                 item.href === '/admin'
                   ? pathname === '/admin'
-                  : pathname?.startsWith(item.href);
+                  : isParentActive;
 
               return (
-                <Link
-                  key={item.label}
-                  href={item.href}
-                  className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all ${
-                    isActive
-                      ? 'bg-orange-600 text-white shadow-md shadow-orange-600/20'
-                      : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
-                  }`}
-                >
-                  <div className="flex items-center gap-2.5">
-                    <Icon className="w-4 h-4" />
-                    <span>{item.label}</span>
-                  </div>
-                  {item.badge && (
-                    <span className="bg-amber-400 text-slate-950 text-[10px] font-black px-1.5 py-0.5 rounded-md animate-pulse">
-                      {item.badge}
-                    </span>
+                <div key={item.label} className="space-y-1">
+                  <Link
+                    href={item.href}
+                    className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all ${
+                      isActive
+                        ? 'bg-orange-600 text-white shadow-md shadow-orange-600/20'
+                        : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <Icon className="w-4 h-4" />
+                      <span>{item.label}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      {item.badge && (
+                        <span className="bg-amber-400 text-slate-950 text-[10px] font-black px-1.5 py-0.5 rounded-md animate-pulse">
+                          {item.badge}
+                        </span>
+                      )}
+                      {item.subItems && (
+                        isParentActive ? (
+                          <ChevronDown className="w-3.5 h-3.5 opacity-80" />
+                        ) : (
+                          <ChevronRight className="w-3.5 h-3.5 opacity-60" />
+                        )
+                      )}
+                    </div>
+                  </Link>
+                  
+                  {item.subItems && isParentActive && (
+                    <div className="pl-4 space-y-1 mt-1 border-l border-slate-800 ml-5 transition-all">
+                      {item.subItems.map((subItem) => {
+                        const isSubActive = pathname === subItem.href;
+                        return (
+                          <Link
+                            key={subItem.label}
+                            href={subItem.href}
+                            className={`block px-3.5 py-2 rounded-xl text-[11px] font-bold transition-all ${
+                              isSubActive
+                                ? 'bg-slate-800 text-orange-400 font-extrabold shadow-sm'
+                                : 'text-slate-400 hover:text-white hover:bg-slate-800/40'
+                            }`}
+                          >
+                            {subItem.label}
+                          </Link>
+                        );
+                      })}
+                    </div>
                   )}
-                </Link>
+                </div>
               );
             })}
           </nav>
