@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "jetro": {
+      "command": "C:\\Users\\80509\\.jetro\\runtime\\node-win32-x64.exe",
+      "args": [
+        "C:\\Users\\80509\\.jetro\\mcp-server\\index.js"
+      ],
+      "env": {
+        "JET_WORKSPACE": "d:\\Github\\foodordering_system",
+        "JET_API_URL": "https://api.jetro.ai",
+        "PATH": "C:\\Users\\80509\\.jetro\\runtime;C:\\WINDOWS\\system32;C:\\WINDOWS;C:\\WINDOWS\\System32\\Wbem;C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\;C:\\WINDOWS\\System32\\OpenSSH\\;C:\\Program Files\\nodejs;C:\\Program Files\\MongoDB\\Tools\\100\\bin;C:\\Program Files\\nodejs\\;C:\\xampp\\php;C:\\ProgramData\\ComposerSetup\\bin;C:\\Program Files\\PowerShell\\7\\;C:\\Users\\80509\\AppData\\Local\\Microsoft\\WindowsApps;C:\\Users\\80509\\AppData\\Local\\Programs\\Microsoft VS Code\\bin;C:\\Users\\80509\\AppData\\Local\\GitHubDesktop\\bin;C:\\Users\\80509\\AppData\\Local\\Programs\\Antigravity\\bin;C:\\Users\\80509\\AppData\\Roaming\\npm;C:\\Users\\80509\\AppData\\Local\\Programs\\Git\\cmd;C:\\Users\\80509\\AppData\\Local\\Programs\\Antigravity IDE\\bin"
+      }
+    }
+  }
+}

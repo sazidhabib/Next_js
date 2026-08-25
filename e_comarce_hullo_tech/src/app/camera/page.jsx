@@ -1,22 +1,37 @@
-import { products } from "../../data/mockData";
+import { Product } from "../../../models";
+import { products as mockProducts } from "../../data/mockData";
 import ProductGrid from "../../components/ProductGrid";
 import { SlidersHorizontal } from "lucide-react";
 import SubCategoryHeader from "../../components/SubCategoryHeader";
 
-export default function CamerasPage() {
-  const categoryProducts = products.filter((p) => p.category === "camera");
+export default async function CamerasPage() {
+  let categoryProducts = [];
+  try {
+    if (Product) {
+      const dbProducts = await Product.findAll({ where: { category: "camera" } });
+      categoryProducts = dbProducts.map(p => p.toJSON());
+    }
+  } catch (error) {
+    console.error("DB Fetch failed for cameras, using mock fallback:", error);
+  }
+
+  if (categoryProducts.length === 0) {
+    categoryProducts = mockProducts.filter((p) => p.category === "camera");
+  }
 
   return (
     <main className="min-h-screen bg-star-light-gray">
-      <div className="bg-white border-b border-star-gray">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {/* Category Header */}
+      <div className="bg-white border-b border-star-gray py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h1 className="text-3xl font-bold text-gray-800 mb-2">Cameras</h1>
           <p className="text-gray-600">
-            Professional cameras, mirrorless, and action cameras.
+            Professional DSLR, mirrorless, and action cameras.
           </p>
         </div>
       </div>
 
+      {/* Filters and Sort */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
         <SubCategoryHeader />
         <div className="bg-white rounded-lg border border-star-gray p-4 mb-6 flex flex-wrap items-center justify-between gap-4">
@@ -29,7 +44,7 @@ export default function CamerasPage() {
               <option>All Brands</option>
               <option>Canon</option>
               <option>Sony</option>
-              <option>Nikon</option>
+              <option>GoPro</option>
             </select>
           </div>
           <div className="flex items-center gap-2 text-sm">

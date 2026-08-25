@@ -1,22 +1,37 @@
-import { products } from "../../data/mockData";
+import { Product } from "../../../models";
+import { products as mockProducts } from "../../data/mockData";
 import ProductGrid from "../../components/ProductGrid";
 import { SlidersHorizontal } from "lucide-react";
 import SubCategoryHeader from "../../components/SubCategoryHeader";
 
-export default function ComponentsPage() {
-  const categoryProducts = products.filter((p) => p.category === "component");
+export default async function ComponentsPage() {
+  let categoryProducts = [];
+  try {
+    if (Product) {
+      const dbProducts = await Product.findAll({ where: { category: "component" } });
+      categoryProducts = dbProducts.map(p => p.toJSON());
+    }
+  } catch (error) {
+    console.error("DB Fetch failed for components, using mock fallback:", error);
+  }
+
+  if (categoryProducts.length === 0) {
+    categoryProducts = mockProducts.filter((p) => p.category === "component");
+  }
 
   return (
     <main className="min-h-screen bg-star-light-gray">
-      <div className="bg-white border-b border-star-gray">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {/* Category Header */}
+      <div className="bg-white border-b border-star-gray py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h1 className="text-3xl font-bold text-gray-800 mb-2">Components</h1>
           <p className="text-gray-600">
-            Build your PC with our wide range of processors, graphics cards, and more.
+            Build your PC with our high quality selection of CPUs, motherboards, GPUs, RAM and casing.
           </p>
         </div>
       </div>
 
+      {/* Filters and Sort */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
         <SubCategoryHeader />
         <div className="bg-white rounded-lg border border-star-gray p-4 mb-6 flex flex-wrap items-center justify-between gap-4">
@@ -28,9 +43,10 @@ export default function ComponentsPage() {
             <select className="px-4 py-2 border border-star-gray rounded text-sm focus:outline-none focus:border-star-blue">
               <option>All Brands</option>
               <option>Intel</option>
-              <option>NVIDIA</option>
               <option>AMD</option>
-              <option>Kingston</option>
+              <option>NVIDIA</option>
+              <option>ASUS</option>
+              <option>MSI</option>
             </select>
           </div>
           <div className="flex items-center gap-2 text-sm">

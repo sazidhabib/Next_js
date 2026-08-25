@@ -20,9 +20,15 @@ const getProducts = async (req, res) => {
   try {
     if (!Product) {
       let data = [...fallbackProducts];
-      const { category, featured } = req.query;
+      const { category, subcategory, subSubcategory, featured } = req.query;
       if (category) {
         data = data.filter(p => p.category === category);
+      }
+      if (subcategory) {
+        data = data.filter(p => p.subcategory === subcategory);
+      }
+      if (subSubcategory) {
+        data = data.filter(p => p.subSubcategory === subSubcategory);
       }
       if (featured !== undefined) {
         data = data.filter(p => p.featured === (featured === 'true'));
@@ -32,9 +38,11 @@ const getProducts = async (req, res) => {
     }
 
     try {
-      const { category, featured } = req.query;
+      const { category, subcategory, subSubcategory, featured } = req.query;
       const where = {};
       if (category) where.category = category;
+      if (subcategory) where.subcategory = subcategory;
+      if (subSubcategory) where.subSubcategory = subSubcategory;
       if (featured !== undefined) where.featured = featured === 'true';
 
       const products = await Product.findAll({ where, order: [['id', 'DESC']] });
@@ -42,9 +50,15 @@ const getProducts = async (req, res) => {
     } catch (dbError) {
       console.warn('⚠️ Database not reachable during getProducts, using fallback products:', dbError.message);
       let data = [...fallbackProducts];
-      const { category, featured } = req.query;
+      const { category, subcategory, subSubcategory, featured } = req.query;
       if (category) {
         data = data.filter(p => p.category === category);
+      }
+      if (subcategory) {
+        data = data.filter(p => p.subcategory === subcategory);
+      }
+      if (subSubcategory) {
+        data = data.filter(p => p.subSubcategory === subSubcategory);
       }
       if (featured !== undefined) {
         data = data.filter(p => p.featured === (featured === 'true'));
@@ -90,7 +104,7 @@ const getProductBySlug = async (req, res) => {
 
 const createProduct = async (req, res) => {
   try {
-    const { name, slug, price, regularPrice, category, image, images, specs, specifications, description, featured, brand, model, stock, warranty } = req.body;
+    const { name, slug, price, regularPrice, category, subcategory, subSubcategory, image, images, specs, specifications, description, featured, brand, model, stock, warranty } = req.body;
 
     const finalSlug = slug && slug.trim() !== '' ? slug : slugify(name || '');
 
@@ -102,6 +116,8 @@ const createProduct = async (req, res) => {
         price: parseFloat(price),
         regularPrice: regularPrice ? parseFloat(regularPrice) : null,
         category,
+        subcategory,
+        subSubcategory,
         image,
         images: Array.isArray(images) ? images : [image],
         specs: Array.isArray(specs) ? specs : (specs ? specs.split(',').map(s => s.trim()) : []),
@@ -119,7 +135,7 @@ const createProduct = async (req, res) => {
 
     try {
       const product = await Product.create({
-        name, slug: finalSlug, price, regularPrice, category, image, images, specs, specifications, description, featured, brand, model, stock, warranty
+        name, slug: finalSlug, price, regularPrice, category, subcategory, subSubcategory, image, images, specs, specifications, description, featured, brand, model, stock, warranty
       });
       return res.status(201).json({ success: true, data: product });
     } catch (dbError) {
@@ -131,6 +147,8 @@ const createProduct = async (req, res) => {
         price: parseFloat(price),
         regularPrice: regularPrice ? parseFloat(regularPrice) : null,
         category,
+        subcategory,
+        subSubcategory,
         image,
         images: Array.isArray(images) ? images : [image],
         specs: Array.isArray(specs) ? specs : (specs ? specs.split(',').map(s => s.trim()) : []),
@@ -153,7 +171,7 @@ const createProduct = async (req, res) => {
 const updateProduct = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, slug, price, regularPrice, category, image, images, specs, specifications, description, featured, brand, model, stock, warranty } = req.body;
+    const { name, slug, price, regularPrice, category, subcategory, subSubcategory, image, images, specs, specifications, description, featured, brand, model, stock, warranty } = req.body;
 
     // Determine slug: if slug is provided and not empty, use it; else if name is provided, generate from name; else keep existing
     let finalSlug;
@@ -176,6 +194,8 @@ const updateProduct = async (req, res) => {
         price: price !== undefined ? parseFloat(price) : fallbackProducts[productIdx].price,
         regularPrice: regularPrice !== undefined ? (regularPrice ? parseFloat(regularPrice) : null) : fallbackProducts[productIdx].regularPrice,
         category: category !== undefined ? category : fallbackProducts[productIdx].category,
+        subcategory: subcategory !== undefined ? subcategory : fallbackProducts[productIdx].subcategory,
+        subSubcategory: subSubcategory !== undefined ? subSubcategory : fallbackProducts[productIdx].subSubcategory,
         image: image !== undefined ? image : fallbackProducts[productIdx].image,
         images: images !== undefined ? (Array.isArray(images) ? images : [images]) : fallbackProducts[productIdx].images,
         specs: specs !== undefined ? (Array.isArray(specs) ? specs : specs.split(',').map(s => s.trim())) : fallbackProducts[productIdx].specs,
@@ -201,6 +221,8 @@ const updateProduct = async (req, res) => {
       product.price = price !== undefined ? price : product.price;
       product.regularPrice = regularPrice !== undefined ? (regularPrice ? parseFloat(regularPrice) : null) : product.regularPrice;
       product.category = category !== undefined ? category : product.category;
+      product.subcategory = subcategory !== undefined ? subcategory : product.subcategory;
+      product.subSubcategory = subSubcategory !== undefined ? subSubcategory : product.subSubcategory;
       product.image = image !== undefined ? image : product.image;
       product.images = images !== undefined ? images : product.images;
       product.specs = specs !== undefined ? specs : product.specs;
@@ -228,6 +250,8 @@ const updateProduct = async (req, res) => {
         price: price !== undefined ? parseFloat(price) : fallbackProducts[productIdx].price,
         regularPrice: regularPrice !== undefined ? (regularPrice ? parseFloat(regularPrice) : null) : fallbackProducts[productIdx].regularPrice,
         category: category !== undefined ? category : fallbackProducts[productIdx].category,
+        subcategory: subcategory !== undefined ? subcategory : fallbackProducts[productIdx].subcategory,
+        subSubcategory: subSubcategory !== undefined ? subSubcategory : fallbackProducts[productIdx].subSubcategory,
         image: image !== undefined ? image : fallbackProducts[productIdx].image,
         images: images !== undefined ? (Array.isArray(images) ? images : [images]) : fallbackProducts[productIdx].images,
         specs: specs !== undefined ? (Array.isArray(specs) ? specs : specs.split(',').map(s => s.trim())) : fallbackProducts[productIdx].specs,

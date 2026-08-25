@@ -1,8 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  experimental: {
-    serverComponentsExternalPackages: ['sequelize'],
-  },
+  serverExternalPackages: ['sequelize'],
   async rewrites() {
     return [
       {

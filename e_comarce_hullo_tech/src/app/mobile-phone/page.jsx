@@ -1,16 +1,29 @@
-import { products } from "../../data/mockData";
+import { Product } from "../../../models";
+import { products as mockProducts } from "../../data/mockData";
 import ProductGrid from "../../components/ProductGrid";
 import { SlidersHorizontal } from "lucide-react";
 import SubCategoryHeader from "../../components/SubCategoryHeader";
 
-export default function PhonesPage() {
-  const categoryProducts = products.filter((p) => p.category === "mobile-phone");
+export default async function PhonesPage() {
+  let categoryProducts = [];
+  try {
+    if (Product) {
+      const dbProducts = await Product.findAll({ where: { category: "mobile-phone" } });
+      categoryProducts = dbProducts.map(p => p.toJSON());
+    }
+  } catch (error) {
+    console.error("DB Fetch failed for phones, using mock fallback:", error);
+  }
+
+  if (categoryProducts.length === 0) {
+    categoryProducts = mockProducts.filter((p) => p.category === "mobile-phone");
+  }
 
   return (
     <main className="min-h-screen bg-star-light-gray">
       {/* Category Header */}
-      <div className="bg-white border-b border-star-gray">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="bg-white border-b border-star-gray py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h1 className="text-3xl font-bold text-gray-800 mb-2">Mobile Phones</h1>
           <p className="text-gray-600">
             Explore the latest smartphones from top brands.

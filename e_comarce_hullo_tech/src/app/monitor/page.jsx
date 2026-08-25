@@ -1,19 +1,32 @@
-import { products } from "../../data/mockData";
+import { Product } from "../../../models";
+import { products as mockProducts } from "../../data/mockData";
 import ProductGrid from "../../components/ProductGrid";
 import { SlidersHorizontal } from "lucide-react";
 import SubCategoryHeader from "../../components/SubCategoryHeader";
 
-export default function MonitorsPage() {
-  const categoryProducts = products.filter((p) => p.category === "monitor");
+export default async function MonitorsPage() {
+  let categoryProducts = [];
+  try {
+    if (Product) {
+      const dbProducts = await Product.findAll({ where: { category: "monitor" } });
+      categoryProducts = dbProducts.map(p => p.toJSON());
+    }
+  } catch (error) {
+    console.error("DB Fetch failed for monitors, using mock fallback:", error);
+  }
+
+  if (categoryProducts.length === 0) {
+    categoryProducts = mockProducts.filter((p) => p.category === "monitor");
+  }
 
   return (
     <main className="min-h-screen bg-star-light-gray">
       {/* Category Header */}
-      <div className="bg-white border-b border-star-gray">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="bg-white border-b border-star-gray py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h1 className="text-3xl font-bold text-gray-800 mb-2">Monitors</h1>
           <p className="text-gray-600">
-            Find the perfect monitor for work, gaming, or creative projects.
+            High refresh-rate gaming, curved, and professional 4K monitors.
           </p>
         </div>
       </div>
@@ -29,10 +42,10 @@ export default function MonitorsPage() {
             </button>
             <select className="px-4 py-2 border border-star-gray rounded text-sm focus:outline-none focus:border-star-blue">
               <option>All Brands</option>
-              <option>Samsung</option>
               <option>MSI</option>
-              <option>LG</option>
-              <option>Dell</option>
+              <option>ASUS</option>
+              <option>Gigabyte</option>
+              <option>Samsung</option>
             </select>
           </div>
           <div className="flex items-center gap-2 text-sm">

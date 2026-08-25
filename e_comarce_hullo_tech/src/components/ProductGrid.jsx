@@ -96,14 +96,29 @@ export default function ProductGrid({ products, title }) {
                   >
                     {product.name}
                   </motion.h3>
-                  <div className="space-y-1.5 mb-3">
-                    {product.specs?.slice(0, 2).map((spec) => (
-                      <div key={spec} className="text-xs text-gray-600 flex items-center gap-2">
-                        <span className="w-1.5 h-1.5 bg-star-blue rounded-full flex-shrink-0" />
-                        <span className="truncate">{spec}</span>
-                      </div>
-                    ))}
-                  </div>
+                    {(() => {
+                      let specsArray = [];
+                      if (Array.isArray(product.specs)) {
+                        specsArray = product.specs;
+                      } else if (typeof product.specs === 'string') {
+                        try {
+                          const parsed = JSON.parse(product.specs);
+                          if (Array.isArray(parsed)) {
+                            specsArray = parsed;
+                          } else {
+                            specsArray = product.specs.split(',').map(s => s.trim()).filter(Boolean);
+                          }
+                        } catch (e) {
+                          specsArray = product.specs.split(',').map(s => s.trim()).filter(Boolean);
+                        }
+                      }
+                      return specsArray.slice(0, 2).map((spec) => (
+                        <div key={spec} className="text-xs text-gray-600 flex items-center gap-2">
+                          <span className="w-1.5 h-1.5 bg-star-blue rounded-full flex-shrink-0" />
+                          <span className="truncate">{spec}</span>
+                        </div>
+                      ));
+                    })()}
                 </div>
                 <motion.p
                   className="text-star-blue font-bold text-lg mt-auto"

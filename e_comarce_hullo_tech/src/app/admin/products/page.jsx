@@ -42,6 +42,7 @@ export default function AdminProducts() {
 
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [menuItems, setMenuItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
   const [error, setError] = useState('');
@@ -59,6 +60,8 @@ export default function AdminProducts() {
     price: '',
     regularPrice: '',
     category: '',
+    subcategory: '',
+    subSubcategory: '',
     image: '',
     images: [],
     specs: '',
@@ -89,6 +92,23 @@ export default function AdminProducts() {
       const catRes = await fetch('/api/categories');
       const catData = await catRes.json();
       if (catData.success) setCategories(catData.data);
+
+      const settingsRes = await fetch('/api/settings');
+      const settingsData = await settingsRes.json();
+      if (settingsData.success && settingsData.data?.menuItems) {
+        const rawItems = settingsData.data.menuItems;
+        let parsedItems = [];
+        if (Array.isArray(rawItems)) {
+          parsedItems = rawItems;
+        } else if (typeof rawItems === 'string') {
+          try {
+            parsedItems = JSON.parse(rawItems);
+          } catch (e) {
+            console.error("Failed to parse menuItems string:", e);
+          }
+        }
+        setMenuItems(Array.isArray(parsedItems) ? parsedItems : []);
+      }
     } catch (err) {
       setError('Failed to fetch data from the server.');
     } finally {
@@ -239,6 +259,8 @@ export default function AdminProducts() {
       price: product.price,
       regularPrice: product.regularPrice || '',
       category: product.category,
+      subcategory: product.subcategory || '',
+      subSubcategory: product.subSubcategory || '',
       image: product.image,
       images: Array.isArray(parsedImagesArray) ? parsedImagesArray : (product.image ? [product.image] : []),
       specs: Array.isArray(parsedSpecsArray) ? parsedSpecsArray.join(', ') : '',
@@ -262,6 +284,8 @@ export default function AdminProducts() {
       price: '',
       regularPrice: '',
       category: categories[0]?.slug || '',
+      subcategory: '',
+      subSubcategory: '',
       image: '',
       images: [],
       specs: '',
@@ -585,7 +609,12 @@ export default function AdminProducts() {
                     <label className="block text-sm font-semibold text-slate-300 mb-1">Category</label>
                     <select
                       value={productForm.category}
-                      onChange={(e) => setProductForm({ ...productForm, category: e.target.value })}
+                      onChange={(e) => setProductForm({
+                        ...productForm,
+                        category: e.target.value,
+                        subcategory: '',
+                        subSubcategory: ''
+                      })}
                       className="w-full px-4 py-2 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 focus:outline-none focus:border-blue-500"
                     >
                       {categories.map(c => (
@@ -593,6 +622,63 @@ export default function AdminProducts() {
                       ))}
                     </select>
                   </div>
+                  {(() => {
+                    const selectedMenuCat = Array.isArray(menuItems) ? menuItems.find(item => {
+                      const normalizedHref = item.href ? item.href.replace(/^\//, '') : '';
+                      return normalizedHref === productForm.category;
+                    }) : null;
+                    const subCategories = selectedMenuCat?.subCategories || [];
+                    if (subCategories.length === 0) return null;
+
+                    const selectedSubCat = subCategories.find(sub => {
+                      const subSlug = sub.href ? sub.href.split('/').pop() : sub.name;
+                      return subSlug === productForm.subcategory;
+                    });
+                    const subSubCategories = selectedSubCat?.subCategories || [];
+
+                    return (
+                      <>
+                        <div>
+                          <label className="block text-sm font-semibold text-slate-300 mb-1">Subcategory</label>
+                          <select
+                            value={productForm.subcategory}
+                            onChange={(e) => setProductForm({
+                              ...productForm,
+                              subcategory: e.target.value,
+                              subSubcategory: ''
+                            })}
+                            className="w-full px-4 py-2 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 focus:outline-none focus:border-blue-500"
+                          >
+                            <option value="">Select Subcategory (Optional)</option>
+                            {subCategories.map(sub => {
+                              const subSlug = sub.href ? sub.href.split('/').pop() : sub.name;
+                              return (
+                                <option key={sub.name} value={subSlug}>{sub.name}</option>
+                              );
+                            })}
+                          </select>
+                        </div>
+                        {subSubCategories.length > 0 && (
+                          <div>
+                            <label className="block text-sm font-semibold text-slate-300 mb-1">Sub-subcategory</label>
+                            <select
+                              value={productForm.subSubcategory}
+                              onChange={(e) => setProductForm({ ...productForm, subSubcategory: e.target.value })}
+                              className="w-full px-4 py-2 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 focus:outline-none focus:border-blue-500"
+                            >
+                              <option value="">Select Sub-subcategory (Optional)</option>
+                              {subSubCategories.map(subSub => {
+                                const subSubSlug = subSub.href ? subSub.href.split('/').pop() : subSub.name;
+                                return (
+                                  <option key={subSub.name} value={subSubSlug}>{subSub.name}</option>
+                                );
+                              })}
+                            </select>
+                          </div>
+                        )}
+                      </>
+                    );
+                  })()}
                   <div>
                     <label className="block text-sm font-semibold text-slate-300 mb-1">Brand</label>
                     <input

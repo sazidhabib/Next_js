@@ -1,0 +1,18 @@
+# Enable Rewrite Engine
+RewriteEngine On
+
+# 1. Enforce HTTPS (Redirect HTTP to HTTPS)
+RewriteCond %{HTTPS} off
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# 2. Disable Directory Browsing
+Options -Indexes
+
+# 3. Prevent clickjacking (X-Frame-Options)
+<IfModule mod_headers.c>
+    Header always append X-Frame-Options SAMEORIGIN
+    Header set X-Content-Type-Options "nosniff"
+    Header set Referrer-Policy "no-referrer-when-downgrade"
+</IfModule>
+
+# NOTE: cPanel Node.js Selector will automatically append the Passenger configurations below this line when you activate the app.
