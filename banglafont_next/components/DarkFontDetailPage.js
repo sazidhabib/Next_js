@@ -18,6 +18,8 @@ import {
   IconWhatsApp
 } from "./Icons";
 
+import { resolveFontUrl } from "../lib/fontUtils";
+
 function FontDetailPageContent({ font, relatedFonts = [] }) {
   const searchParams = useSearchParams();
   const activeTab = searchParams ? (searchParams.get("tab") || "Overview") : "Overview";
@@ -118,7 +120,12 @@ function FontDetailPageContent({ font, relatedFonts = [] }) {
   );
 
   const fontFam = `font-detail-preview-${font.id}`;
-  const encodings = JSON.parse(font.encoding || "[]");
+  let encodings = [];
+  try {
+    encodings = typeof font.encoding === "string" ? JSON.parse(font.encoding || "[]") : (font.encoding || []);
+  } catch (e) {
+    encodings = [];
+  }
   const isPro = font.fontType === "PREMIUM";
   const priceDisplay = font.price ? `৳ ${font.price.toLocaleString("bn-BD")}` : "Free";
 
@@ -159,7 +166,7 @@ function FontDetailPageContent({ font, relatedFonts = [] }) {
     { code: "kern", label: "Kerning", desc: "Spacing adjustment between letters" },
   ];
 
-  const previewFontUrl = font.previewImageUrl || font.fontFileUrl;
+  const previewFontUrl = resolveFontUrl(font.previewImageUrl || font.fontFileUrl);
   const [copySuccess, setCopySuccess] = useState(false);
 
   const handleCopyLink = () => {
@@ -178,7 +185,7 @@ function FontDetailPageContent({ font, relatedFonts = [] }) {
           __html: font.variants.map((v) => `
           @font-face {
             font-family: '${fontFam}';
-            src: url('${v.fileUrl}');
+            src: url('${resolveFontUrl(v.fileUrl)}');
             font-weight: ${weightMap[v.weight] || 400};
             font-style: normal;
             font-display: swap;
@@ -578,7 +585,7 @@ function FontDetailPageContent({ font, relatedFonts = [] }) {
                 </Link>
               ) : (
                 <a
-                  href={font.fontFileUrl}
+                  href={resolveFontUrl(font.fontFileUrl)}
                   download
                   onClick={handleDownload}
                   className="w-full py-3 bg-[#00e599] text-gray-955 font-bold text-xs rounded-xl hover:bg-[#00c784] transition-colors shadow-lg shadow-[#00e599]/15 flex items-center justify-center gap-2"

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { IconDownload } from "./Icons";
+import { resolveFontUrl } from "../lib/fontUtils";
 
 export default function DarkFontCard({ font }) {
   const isPro = font.fontType === "PREMIUM";
@@ -14,7 +15,7 @@ export default function DarkFontCard({ font }) {
     { background: "var(--card-gradient-4)" },
   ];
   const bgStyle = gradientStyles[(font.id || 0) % gradientStyles.length];
-  const previewFontUrl = font.previewImageUrl || font.fontFileUrl;
+  const previewFontUrl = resolveFontUrl(font.previewImageUrl || font.fontFileUrl);
 
   return (
     <div className="group relative bg-surface-card border border-border hover:border-[#00e599]/50 rounded-xl sm:rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-[0_0_25px_rgba(0,229,153,0.15)] flex flex-col justify-between">

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { prisma } from "../../lib/prisma";
+import { Font, Designer } from "../../models/index.js";
 import FontGridWithLoadMore from "../../components/FontGridWithLoadMore";
 
 export const metadata = {
@@ -29,15 +29,14 @@ export default async function FreeFontsPage({ searchParams }) {
     where.style = style;
   }
 
-  const [fonts, total] = await Promise.all([
-    prisma.font.findMany({
-      where,
-      include: { designer: true },
-      orderBy: { downloadCount: "desc" },
-      take: limit,
-    }),
-    prisma.font.count({ where }),
-  ]);
+  const { rows: fontRows, count: total } = await Font.findAndCountAll({
+    where,
+    include: [{ model: Designer, as: "designer" }],
+    order: [["downloadCount", "DESC"]],
+    limit,
+  });
+
+  const fonts = fontRows.map((f) => f.toJSON());
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6">

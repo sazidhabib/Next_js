@@ -1,12 +1,10 @@
 import { NextResponse } from "next/server";
-import { prisma } from "../../../../../lib/prisma";
+import { Developer, Font, Op } from "../../../../../models/index.js";
 
 export async function GET(request, { params }) {
   try {
     const resolvedParams = await params;
-    const developer = await prisma.developer.findUnique({
-      where: { id: parseInt(resolvedParams.id) },
-    });
+    const developer = await Developer.findByPk(parseInt(resolvedParams.id));
     if (!developer) {
       return NextResponse.json({ error: "Developer not found" }, { status: 404 });
     }
@@ -22,12 +20,17 @@ export async function PUT(request, { params }) {
     const body = await request.json();
     const developerId = parseInt(resolvedParams.id);
 
+    const developer = await Developer.findByPk(developerId);
+    if (!developer) {
+      return NextResponse.json({ error: "Developer not found" }, { status: 404 });
+    }
+
     if (body.slug) {
-      const existing = await prisma.developer.findFirst({
+      const existing = await Developer.findOne({
         where: {
           slug: body.slug,
-          NOT: { id: developerId }
-        }
+          id: { [Op.ne]: developerId },
+        },
       });
       if (existing) {
         return NextResponse.json(
@@ -37,10 +40,7 @@ export async function PUT(request, { params }) {
       }
     }
 
-    const developer = await prisma.developer.update({
-      where: { id: developerId },
-      data: body,
-    });
+    await developer.update(body);
     return NextResponse.json({ developer });
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
@@ -52,15 +52,18 @@ export async function DELETE(request, { params }) {
     const resolvedParams = await params;
     const developerId = parseInt(resolvedParams.id);
 
-    // Dissociate from any fonts
-    await prisma.font.updateMany({
-      where: { developerId },
-      data: { developerId: null },
-    });
+    const developer = await Developer.findByPk(developerId);
+    if (!developer) {
+      return NextResponse.json({ error: "Developer not found" }, { status: 404 });
+    }
 
-    await prisma.developer.delete({
-      where: { id: developerId },
-    });
+    // Dissociate from any fonts
+    await Font.update(
+      { developerId: null },
+      { where: { developerId } }
+    );
+
+    await developer.destroy();
     return NextResponse.json({ success: true });
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });

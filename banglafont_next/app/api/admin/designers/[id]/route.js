@@ -1,12 +1,10 @@
 import { NextResponse } from "next/server";
-import { prisma } from "../../../../../lib/prisma";
+import { Designer, Font, Op } from "../../../../../models/index.js";
 
 export async function GET(request, { params }) {
   try {
     const resolvedParams = await params;
-    const designer = await prisma.designer.findUnique({
-      where: { id: parseInt(resolvedParams.id) },
-    });
+    const designer = await Designer.findByPk(parseInt(resolvedParams.id));
     if (!designer) {
       return NextResponse.json({ error: "Designer not found" }, { status: 404 });
     }
@@ -22,12 +20,17 @@ export async function PUT(request, { params }) {
     const body = await request.json();
     const designerId = parseInt(resolvedParams.id);
 
+    const designer = await Designer.findByPk(designerId);
+    if (!designer) {
+      return NextResponse.json({ error: "Designer not found" }, { status: 404 });
+    }
+
     if (body.slug) {
-      const existing = await prisma.designer.findFirst({
+      const existing = await Designer.findOne({
         where: {
           slug: body.slug,
-          NOT: { id: designerId }
-        }
+          id: { [Op.ne]: designerId },
+        },
       });
       if (existing) {
         return NextResponse.json(
@@ -37,10 +40,7 @@ export async function PUT(request, { params }) {
       }
     }
 
-    const designer = await prisma.designer.update({
-      where: { id: designerId },
-      data: body,
-    });
+    await designer.update(body);
     return NextResponse.json({ designer });
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
@@ -52,8 +52,13 @@ export async function DELETE(request, { params }) {
     const resolvedParams = await params;
     const designerId = parseInt(resolvedParams.id);
 
+    const designer = await Designer.findByPk(designerId);
+    if (!designer) {
+      return NextResponse.json({ error: "Designer not found" }, { status: 404 });
+    }
+
     // Check if designer has fonts associated with them
-    const count = await prisma.font.count({
+    const count = await Font.count({
       where: { designerId },
     });
     if (count > 0) {
@@ -63,9 +68,7 @@ export async function DELETE(request, { params }) {
       );
     }
 
-    await prisma.designer.delete({
-      where: { id: designerId },
-    });
+    await designer.destroy();
     return NextResponse.json({ success: true });
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });

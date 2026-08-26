@@ -1,5 +1,5 @@
 import { ImageResponse } from "next/og";
-import { prisma } from "../../../lib/prisma";
+import { Font, Designer } from "../../../models/index.js";
 
 export const alt = "NextType - বাংলা ফন্ট ডাউনলোড";
 export const size = {
@@ -11,9 +11,9 @@ export const runtime = "nodejs";
 
 export default async function Image({ params }) {
   const { slug } = await params;
-  const font = await prisma.font.findUnique({
+  const font = await Font.findOne({
     where: { slug },
-    include: { designer: true },
+    include: [{ model: Designer, as: "designer" }],
   });
 
   if (!font) {

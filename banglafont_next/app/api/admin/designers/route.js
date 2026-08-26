@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { prisma } from "../../../../lib/prisma";
+import { Designer } from "../../../../models/index.js";
 
 export async function POST(request) {
   try {
@@ -9,8 +9,8 @@ export async function POST(request) {
     }
 
     // Check if slug is already in use
-    const existing = await prisma.designer.findUnique({
-      where: { slug: body.slug }
+    const existing = await Designer.findOne({
+      where: { slug: body.slug },
     });
     if (existing) {
       return NextResponse.json(
@@ -19,7 +19,7 @@ export async function POST(request) {
       );
     }
 
-    const designer = await prisma.designer.create({ data: body });
+    const designer = await Designer.create(body);
     return NextResponse.json({ designer }, { status: 201 });
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });

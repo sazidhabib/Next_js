@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { IconDownload } from "./Icons";
+import { resolveFontUrl } from "../lib/fontUtils";
 
 export default function DownloadMarquee({ fonts }) {
   if (!fonts || fonts.length === 0) return null;
@@ -14,7 +15,7 @@ export default function DownloadMarquee({ fonts }) {
     <div className="relative w-full overflow-hidden bg-surface-card border-y border-border py-4 sm:py-5 my-2">
       {uniqueFonts.map((font) => {
         const fontFam = `font-marquee-${font.id}`;
-        const previewFontUrl = font.previewImageUrl || font.fontFileUrl;
+        const previewFontUrl = resolveFontUrl(font.previewImageUrl || font.fontFileUrl);
         if (!previewFontUrl) return null;
         return (
           <style key={font.id} dangerouslySetInnerHTML={{

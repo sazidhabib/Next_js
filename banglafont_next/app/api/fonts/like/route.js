@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { prisma } from "../../../../lib/prisma";
+import { Font } from "../../../../models/index.js";
 
 export async function POST(request) {
   try {
@@ -8,7 +8,7 @@ export async function POST(request) {
       return NextResponse.json({ error: "fontId is required" }, { status: 400 });
     }
 
-    const font = await prisma.font.findUnique({ where: { id: fontId } });
+    const font = await Font.findByPk(fontId);
     if (!font) {
       return NextResponse.json({ error: "Font not found" }, { status: 404 });
     }
@@ -23,12 +23,9 @@ export async function POST(request) {
     }
 
     // Clamp likeCount to 0 minimum
-    const newLikeCount = Math.max(0, font.likeCount + incrementValue);
+    const newLikeCount = Math.max(0, (font.likeCount || 0) + incrementValue);
 
-    await prisma.font.update({
-      where: { id: fontId },
-      data: { likeCount: newLikeCount },
-    });
+    await font.update({ likeCount: newLikeCount });
 
     return NextResponse.json({ success: true, likeCount: newLikeCount });
   } catch (error) {

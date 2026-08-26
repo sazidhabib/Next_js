@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { prisma } from "../../../../lib/prisma";
+import { AdminUser } from "../../../../models/index.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
@@ -13,7 +13,7 @@ export async function POST(request) {
       return NextResponse.json({ error: "Email and password required" }, { status: 400 });
     }
 
-    const admin = await prisma.adminUser.findUnique({ where: { email } });
+    const admin = await AdminUser.findOne({ where: { email } });
     if (!admin) {
       return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
     }

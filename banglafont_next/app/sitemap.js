@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/prisma";
+import { Font, Designer, Developer } from "@/models";
 
 export default async function sitemap() {
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://nexttype.com";
@@ -24,9 +24,9 @@ export default async function sitemap() {
   // 2. Dynamic Font Paths
   let fontUrls = [];
   try {
-    const fonts = await prisma.font.findMany({
+    const fonts = await Font.findAll({
       where: { published: true },
-      select: { slug: true, fontType: true, updatedAt: true },
+      attributes: ["slug", "fontType", "updatedAt"],
     });
 
     fontUrls = fonts.map((font) => {
@@ -45,8 +45,8 @@ export default async function sitemap() {
   // 3. Dynamic Designer Paths
   let designerUrls = [];
   try {
-    const designers = await prisma.designer.findMany({
-      select: { slug: true, updatedAt: true },
+    const designers = await Designer.findAll({
+      attributes: ["slug", "updatedAt"],
     });
 
     designerUrls = designers.map((designer) => ({
@@ -62,8 +62,8 @@ export default async function sitemap() {
   // 4. Dynamic Developer Paths
   let developerUrls = [];
   try {
-    const developers = await prisma.developer.findMany({
-      select: { slug: true, updatedAt: true },
+    const developers = await Developer.findAll({
+      attributes: ["slug", "updatedAt"],
     });
 
     developerUrls = developers.map((developer) => ({

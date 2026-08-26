@@ -17,27 +17,39 @@ export default function Hero() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [theme, setTheme] = useState("dark");
 
+  const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
+
   const darkSlides = [
-    "/slider/slider1.png",
-    "/slider/slider2.png",
-    "/slider/slider3.png",
-    "/slider/slider4.png",
-    "/slider/slider5.png",
+    `${basePath}/slider/slider1.png`,
+    `${basePath}/slider/slider2.png`,
+    `${basePath}/slider/slider3.png`,
+    `${basePath}/slider/slider4.png`,
+    `${basePath}/slider/slider5.png`,
   ];
 
   const lightSlides = [
-    "/slider/lightslide1.png",
-    "/slider/lightslide2.png",
-    "/slider/lightslide3.png",
-    "/slider/lightslide4.png",
-    "/slider/lightslide5.jpeg",
+    `${basePath}/slider/lightslide1.png`,
+    `${basePath}/slider/lightslide2.png`,
+    `${basePath}/slider/lightslide3.png`,
+    `${basePath}/slider/lightslide4.png`,
+    `${basePath}/slider/lightslide5.jpeg`,
   ];
 
   const slides = theme === "light" ? lightSlides : darkSlides;
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    setTheme(document.documentElement.classList.contains("light") ? "light" : "dark");
+
+    const detectTheme = () => {
+      const savedTheme = localStorage.getItem("theme");
+      if (savedTheme) {
+        setTheme(savedTheme);
+      } else {
+        setTheme(document.documentElement.classList.contains("light") ? "light" : "dark");
+      }
+    };
+
+    detectTheme();
 
     const observer = new MutationObserver(() => {
       setTheme(document.documentElement.classList.contains("light") ? "light" : "dark");

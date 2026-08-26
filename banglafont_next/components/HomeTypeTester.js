@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { IconEdit3, IconArrowRight } from "./Icons";
+import { resolveFontUrl } from "../lib/fontUtils";
 
 const CATEGORIES = [
   { value: "ALL", label: "সকল" },
@@ -50,7 +51,7 @@ export default function HomeTypeTester({ fonts = [] }) {
     <div className="bg-surface border border-border rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 shadow-2xl">
       {/* Dynamic @font-face rules for all fonts in type tester */}
       {fonts.map((f) => {
-        const previewFontUrl = f.previewImageUrl || f.fontFileUrl;
+        const previewFontUrl = resolveFontUrl(f.previewImageUrl || f.fontFileUrl);
         return previewFontUrl && (
           <style key={f.slug} dangerouslySetInnerHTML={{
             __html: `
@@ -180,7 +181,7 @@ export default function HomeTypeTester({ fonts = [] }) {
 
             {selectedFont ? (
               <a
-                href={selectedFont.fontFileUrl || `/free-font/${selectedFont.slug}`}
+                href={resolveFontUrl(selectedFont.fontFileUrl) || `/free-font/${selectedFont.slug}`}
                 download
                 className="px-4 sm:px-6 py-2 sm:py-2.5 bg-[#00e599] text-gray-950 font-bold text-xs sm:text-sm rounded-lg sm:rounded-xl hover:bg-[#00c784] transition-colors shadow-lg shadow-[#00e599]/10"
               >

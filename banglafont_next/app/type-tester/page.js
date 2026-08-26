@@ -1,4 +1,4 @@
-import { prisma } from "../../lib/prisma";
+import { Font } from "../../models/index.js";
 import TypeTesterPage from "../../components/TypeTesterPage";
 
 export const metadata = {
@@ -14,23 +14,23 @@ export const dynamic = "force-dynamic";
 
 async function getTypeTesterData() {
   const [fonts, totalFonts] = await Promise.all([
-    prisma.font.findMany({
+    Font.findAll({
       where: { published: true },
-      select: {
-        id: true,
-        name: true,
-        banglaName: true,
-        slug: true,
-        style: true,
-        fontFileUrl: true,
-        previewImageUrl: true,
-      },
-      orderBy: { name: "asc" },
+      attributes: [
+        "id",
+        "name",
+        "banglaName",
+        "slug",
+        "style",
+        "fontFileUrl",
+        "previewImageUrl",
+      ],
+      order: [["name", "ASC"]],
     }),
-    prisma.font.count({ where: { published: true } }),
+    Font.count({ where: { published: true } }),
   ]);
 
-  return { fonts, totalFonts };
+  return { fonts: fonts.map((f) => f.toJSON()), totalFonts };
 }
 
 export default async function TypeTesterRoute() {

@@ -1,21 +1,21 @@
 import { NextResponse } from "next/server";
-import { prisma } from "../../../lib/prisma";
+import { Font } from "../../../models/index.js";
 
 export async function GET() {
   const [totalFonts, totalDownloads, topFonts] = await Promise.all([
-    prisma.font.count({ where: { published: true } }),
-    prisma.font.aggregate({ _sum: { downloadCount: true } }),
-    prisma.font.findMany({
+    Font.count({ where: { published: true } }),
+    Font.sum("downloadCount", { where: { published: true } }),
+    Font.findAll({
       where: { published: true },
-      orderBy: { downloadCount: "desc" },
-      take: 5,
-      select: { name: true, slug: true, downloadCount: true },
+      order: [["downloadCount", "DESC"]],
+      limit: 5,
+      attributes: ["name", "slug", "downloadCount"],
     }),
   ]);
 
   return NextResponse.json({
     totalFonts,
-    totalDownloads: totalDownloads._sum.downloadCount || 0,
+    totalDownloads: totalDownloads || 0,
     topFonts,
   });
 }

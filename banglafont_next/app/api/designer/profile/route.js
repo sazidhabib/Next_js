@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { prisma } from "../../../../lib/prisma";
+import { Designer } from "../../../../models/index.js";
 import jwt from "jsonwebtoken";
 
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key-change-in-production";
@@ -21,18 +21,17 @@ export async function GET(request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const designer = await prisma.designer.findUnique({
-      where: { id: decoded.id },
-      select: {
-        id: true,
-        name: true,
-        banglaName: true,
-        slug: true,
-        email: true,
-        photo: true,
-        bio: true,
-        socialLinks: true,
-      },
+    const designer = await Designer.findByPk(decoded.id, {
+      attributes: [
+        "id",
+        "name",
+        "banglaName",
+        "slug",
+        "email",
+        "photo",
+        "bio",
+        "socialLinks",
+      ],
     });
 
     if (!designer) {
@@ -54,25 +53,30 @@ export async function PUT(request) {
 
     const { name, banglaName, bio, photo, socialLinks } = await request.json();
 
-    const updated = await prisma.designer.update({
-      where: { id: decoded.id },
-      data: {
-        name,
-        banglaName,
-        bio,
-        photo,
-        socialLinks,
-      },
-      select: {
-        id: true,
-        name: true,
-        banglaName: true,
-        slug: true,
-        email: true,
-        photo: true,
-        bio: true,
-        socialLinks: true,
-      },
+    const designer = await Designer.findByPk(decoded.id);
+    if (!designer) {
+      return NextResponse.json({ error: "Designer not found" }, { status: 404 });
+    }
+
+    await designer.update({
+      name,
+      banglaName,
+      bio,
+      photo,
+      socialLinks,
+    });
+
+    const updated = await Designer.findByPk(decoded.id, {
+      attributes: [
+        "id",
+        "name",
+        "banglaName",
+        "slug",
+        "email",
+        "photo",
+        "bio",
+        "socialLinks",
+      ],
     });
 
     return NextResponse.json({ success: true, designer: updated });

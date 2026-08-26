@@ -1,12 +1,12 @@
 import { notFound } from "next/navigation";
-import { prisma } from "../../../lib/prisma";
+import { Font, Designer, Developer, FontVariant, Op } from "../../../models/index.js";
 import DarkFontDetailPage from "../../../components/DarkFontDetailPage";
 
 export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }) {
   const { slug } = await params;
-  const font = await prisma.font.findUnique({
+  const font = await Font.findOne({
     where: { slug },
   });
 
@@ -33,39 +33,46 @@ export async function generateMetadata({ params }) {
 
 export default async function FontDetailPage({ params }) {
   const { slug } = await params;
-  const font = await prisma.font.findUnique({
+  const font = await Font.findOne({
     where: { slug, published: true },
-    include: { designer: true, developer: true, variants: true },
+    include: [
+      { model: Designer, as: "designer" },
+      { model: Developer, as: "developer" },
+      { model: FontVariant, as: "variants" },
+    ],
   });
 
   if (!font) notFound();
 
-  const relatedFonts = await prisma.font.findMany({
+  const relatedFonts = await Font.findAll({
     where: {
       style: font.style,
-      id: { not: font.id },
+      id: { [Op.ne]: font.id },
       published: true,
     },
-    include: { designer: true },
-    take: 5,
+    include: [{ model: Designer, as: "designer" }],
+    limit: 5,
   });
+
+  const plainFont = font.toJSON();
+  const plainRelated = relatedFonts.map((f) => f.toJSON());
 
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
-    "name": font.banglaName ? `${font.name} (${font.banglaName})` : font.name,
+    "name": plainFont.banglaName ? `${plainFont.name} (${plainFont.banglaName})` : plainFont.name,
     "applicationCategory": "DesignApplication",
     "operatingSystem": "Windows, macOS, Android, iOS, Linux",
-    "description": font.detailsDescription || font.description || "",
+    "description": plainFont.detailsDescription || plainFont.description || "",
     "offers": {
       "@type": "Offer",
-      "price": font.price ? font.price.toString() : "0",
+      "price": plainFont.price ? plainFont.price.toString() : "0",
       "priceCurrency": "BDT",
       "availability": "https://schema.org/InStock",
     },
     "author": {
       "@type": "Person",
-      "name": font.designer?.name || "NextType",
+      "name": plainFont.designer?.name || "NextType",
     },
   };
 
@@ -75,7 +82,7 @@ export default async function FontDetailPage({ params }) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <DarkFontDetailPage font={font} relatedFonts={relatedFonts} />
+      <DarkFontDetailPage font={plainFont} relatedFonts={plainRelated} />
     </>
   );
 }

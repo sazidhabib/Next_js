@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { prisma } from "../../../../lib/prisma";
+import { Font, FontVariant } from "../../../../models/index.js";
 import jwt from "jsonwebtoken";
 
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key-change-in-production";
@@ -22,10 +22,10 @@ export async function GET(request) {
     }
 
     // Get designer's fonts
-    const fonts = await prisma.font.findMany({
+    const fonts = await Font.findAll({
       where: { designerId: decoded.id },
-      include: { variants: true },
-      orderBy: { createdAt: "desc" },
+      include: [{ model: FontVariant, as: "variants" }],
+      order: [["createdAt", "DESC"]],
     });
 
     // Calculate aggregate metrics
@@ -86,7 +86,7 @@ export async function POST(request) {
     let slug = baseSlug;
     let counter = 1;
     while (true) {
-      const match = await prisma.font.findUnique({ where: { slug } });
+      const match = await Font.findOne({ where: { slug } });
       if (!match) break;
       slug = `${baseSlug}-${counter}`;
       counter++;
@@ -94,25 +94,23 @@ export async function POST(request) {
 
     const fontType = price && parseFloat(price) > 0 ? "PREMIUM" : "FREE";
 
-    const font = await prisma.font.create({
-      data: {
-        name,
-        banglaName: banglaName || null,
-        slug,
-        description: description || null,
-        detailsDescription: detailsDescription || null,
-        fontType,
-        price: price ? parseFloat(price) : null,
-        fontFileUrl,
-        previewImageUrl: previewImageUrl || null,
-        style: style || "GENERAL",
-        encoding: encoding || "[]",
-        foundry: foundry || null,
-        released: released || null,
-        version: version || "1.000",
-        formats: formats || "OTF, TTF, WOFF2",
-        designerId: decoded.id,
-      },
+    const font = await Font.create({
+      name,
+      banglaName: banglaName || null,
+      slug,
+      description: description || null,
+      detailsDescription: detailsDescription || null,
+      fontType,
+      price: price ? parseFloat(price) : null,
+      fontFileUrl,
+      previewImageUrl: previewImageUrl || null,
+      style: style || "GENERAL",
+      encoding: encoding || "[]",
+      foundry: foundry || null,
+      released: released || null,
+      version: version || "1.000",
+      formats: formats || "OTF, TTF, WOFF2",
+      designerId: decoded.id,
     });
 
     return NextResponse.json({ success: true, font });

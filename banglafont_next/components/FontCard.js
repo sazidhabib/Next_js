@@ -17,7 +17,12 @@ const styleColors = {
 };
 
 export default function FontCard({ font }) {
-  const encodings = JSON.parse(font.encoding || "[]");
+  let encodings = [];
+  try {
+    encodings = typeof font.encoding === "string" ? JSON.parse(font.encoding || "[]") : (font.encoding || []);
+  } catch (e) {
+    encodings = [];
+  }
   const styleLabel = styleLabels[font.style] || font.style;
   const styleColor = styleColors[font.style] || styleColors.GENERAL;
 

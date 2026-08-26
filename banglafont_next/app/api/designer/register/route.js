@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { prisma } from "../../../../lib/prisma";
+import { Designer } from "../../../../models/index.js";
 import bcrypt from "bcryptjs";
 
 export async function POST(request) {
@@ -11,7 +11,7 @@ export async function POST(request) {
     }
 
     // Check if designer already exists
-    const existing = await prisma.designer.findFirst({ where: { email } });
+    const existing = await Designer.findOne({ where: { email } });
     if (existing) {
       return NextResponse.json({ error: "ইমেইলটি ইতিমধ্যে নিবন্ধিত রয়েছে।" }, { status: 400 });
     }
@@ -28,7 +28,7 @@ export async function POST(request) {
     let slug = baseSlug;
     let counter = 1;
     while (true) {
-      const match = await prisma.designer.findUnique({ where: { slug } });
+      const match = await Designer.findOne({ where: { slug } });
       if (!match) break;
       slug = `${baseSlug}-${counter}`;
       counter++;
@@ -37,13 +37,11 @@ export async function POST(request) {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const designer = await prisma.designer.create({
-      data: {
-        name,
-        email,
-        password: hashedPassword,
-        slug,
-      },
+    const designer = await Designer.create({
+      name,
+      email,
+      password: hashedPassword,
+      slug,
     });
 
     return NextResponse.json({

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { prisma } from "../lib/prisma";
+import { Font, Designer } from "../models/index.js";
 import DarkFontCard from "../components/DarkFontCard";
 import HomeTypeTester from "../components/HomeTypeTester";
 import HomeUnicodeConverter from "../components/HomeUnicodeConverter";
@@ -10,46 +10,39 @@ export const dynamic = "force-dynamic";
 
 async function getHomeData() {
   const [totalFonts, totalDownloads, featuredFonts, topFonts, allFonts, newFonts] = await Promise.all([
-    prisma.font.count({ where: { published: true } }),
-    prisma.font.aggregate({ _sum: { downloadCount: true } }),
-    prisma.font.findMany({
+    Font.count({ where: { published: true } }),
+    Font.sum("downloadCount", { where: { published: true } }),
+    Font.findAll({
       where: { published: true, featured: true },
-      include: { designer: true },
-      orderBy: { downloadCount: "desc" },
-      take: 8,
+      include: [{ model: Designer, as: "designer" }],
+      order: [["downloadCount", "DESC"]],
+      limit: 8,
     }),
-    prisma.font.findMany({
+    Font.findAll({
       where: { published: true },
-      include: { designer: true },
-      orderBy: { downloadCount: "desc" },
-      take: 6,
+      include: [{ model: Designer, as: "designer" }],
+      order: [["downloadCount", "DESC"]],
+      limit: 6,
     }),
-    prisma.font.findMany({
+    Font.findAll({
       where: { published: true },
-      select: {
-        id: true,
-        name: true,
-        banglaName: true,
-        slug: true,
-        style: true,
-        fontFileUrl: true,
-      },
-      orderBy: { name: "asc" },
+      attributes: ["id", "name", "banglaName", "slug", "style", "fontFileUrl"],
+      order: [["name", "ASC"]],
     }),
-    prisma.font.findMany({
+    Font.findAll({
       where: { published: true },
-      include: { designer: true },
-      orderBy: { createdAt: "desc" },
-      take: 8,
+      include: [{ model: Designer, as: "designer" }],
+      order: [["createdAt", "DESC"]],
+      limit: 8,
     }),
   ]);
   return {
     totalFonts,
-    totalDownloads: totalDownloads._sum.downloadCount || 0,
-    featuredFonts,
-    topFonts,
-    allFonts,
-    newFonts,
+    totalDownloads: totalDownloads || 0,
+    featuredFonts: featuredFonts.map((f) => f.toJSON()),
+    topFonts: topFonts.map((f) => f.toJSON()),
+    allFonts: allFonts.map((f) => f.toJSON()),
+    newFonts: newFonts.map((f) => f.toJSON()),
   };
 }
 

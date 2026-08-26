@@ -1,12 +1,10 @@
 import { NextResponse } from "next/server";
-import { prisma } from "../../../../../lib/prisma";
+import { Font } from "../../../../../models/index.js";
 
 export async function GET(request, { params }) {
   try {
     const resolvedParams = await params;
-    const font = await prisma.font.findUnique({
-      where: { id: parseInt(resolvedParams.id) },
-    });
+    const font = await Font.findByPk(parseInt(resolvedParams.id));
     if (!font) {
       return NextResponse.json({ error: "Font not found" }, { status: 404 });
     }
@@ -20,10 +18,11 @@ export async function PUT(request, { params }) {
   try {
     const resolvedParams = await params;
     const body = await request.json();
-    const font = await prisma.font.update({
-      where: { id: parseInt(resolvedParams.id) },
-      data: body,
-    });
+    const font = await Font.findByPk(parseInt(resolvedParams.id));
+    if (!font) {
+      return NextResponse.json({ error: "Font not found" }, { status: 404 });
+    }
+    await font.update(body);
     return NextResponse.json({ font });
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
@@ -33,7 +32,11 @@ export async function PUT(request, { params }) {
 export async function DELETE(request, { params }) {
   try {
     const resolvedParams = await params;
-    await prisma.font.delete({ where: { id: parseInt(resolvedParams.id) } });
+    const font = await Font.findByPk(parseInt(resolvedParams.id));
+    if (!font) {
+      return NextResponse.json({ error: "Font not found" }, { status: 404 });
+    }
+    await font.destroy();
     return NextResponse.json({ success: true });
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });

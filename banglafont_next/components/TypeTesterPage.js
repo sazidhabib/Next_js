@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import { IconEdit3, IconArrowRight, IconDownload, IconType, IconZap, IconCrown } from "./Icons";
+import { resolveFontUrl } from "../lib/fontUtils";
 
 const CATEGORIES = [
   { value: "ALL", label: "সকল" },
@@ -99,7 +100,7 @@ export default function TypeTesterPage({ fonts = [], totalFonts = 0 }) {
     <div className="p-4 sm:p-6 lg:p-8 space-y-8 max-w-7xl mx-auto">
       {/* Dynamic @font-face rules */}
       {fonts.map((f) => {
-        const url = f.previewImageUrl || f.fontFileUrl;
+        const url = resolveFontUrl(f.previewImageUrl || f.fontFileUrl);
         return url ? (
           <style key={f.slug} dangerouslySetInnerHTML={{ __html: `
             @font-face {
@@ -387,7 +388,7 @@ export default function TypeTesterPage({ fonts = [], totalFonts = 0 }) {
               </Link>
               {selectedFont && (
                 <a
-                  href={selectedFont.fontFileUrl || `/free-font/${selectedFont.slug}`}
+                  href={resolveFontUrl(selectedFont.fontFileUrl) || `/free-font/${selectedFont.slug}`}
                   download
                   className="px-5 py-2 bg-[#00e599] text-gray-950 font-bold text-xs rounded-xl hover:bg-[#00c784] transition-colors shadow-lg shadow-[#00e599]/15 flex items-center gap-2"
                 >

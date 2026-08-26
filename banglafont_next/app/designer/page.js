@@ -1,12 +1,20 @@
 import Link from "next/link";
-import { prisma } from "../../lib/prisma";
+import { Designer, Font } from "../../models/index.js";
 
 export const dynamic = "force-dynamic";
 
 export default async function DesignersPage() {
-  const designers = await prisma.designer.findMany({
-    include: { _count: { select: { fonts: true } } },
-    orderBy: { name: "asc" },
+  const designerRows = await Designer.findAll({
+    include: [{ model: Font, as: "fonts", attributes: ["id"] }],
+    order: [["name", "ASC"]],
+  });
+
+  const designers = designerRows.map((d) => {
+    const plain = d.toJSON();
+    return {
+      ...plain,
+      _count: { fonts: plain.fonts ? plain.fonts.length : 0 },
+    };
   });
 
   return (

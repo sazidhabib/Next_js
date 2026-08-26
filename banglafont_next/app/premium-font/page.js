@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { prisma } from "../../lib/prisma";
+import { Font, Designer } from "../../models/index.js";
 import DarkFontCard from "../../components/DarkFontCard";
 
 export const metadata = {
@@ -11,11 +11,13 @@ export const metadata = {
 };
 
 export default async function PremiumFontPage() {
-  const fonts = await prisma.font.findMany({
+  const fontRows = await Font.findAll({
     where: { published: true, fontType: "PREMIUM" },
-    include: { designer: true },
-    orderBy: { downloadCount: "desc" },
+    include: [{ model: Designer, as: "designer" }],
+    order: [["downloadCount", "DESC"]],
   });
+
+  const fonts = fontRows.map((f) => f.toJSON());
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-8">

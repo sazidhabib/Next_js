@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { prisma } from "../../../../lib/prisma";
+import { Designer } from "../../../../models/index.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
@@ -13,7 +13,7 @@ export async function POST(request) {
       return NextResponse.json({ error: "Email and password are required" }, { status: 400 });
     }
 
-    const designer = await prisma.designer.findFirst({ where: { email } });
+    const designer = await Designer.findOne({ where: { email } });
     if (!designer || !designer.password) {
       return NextResponse.json({ error: "ভুল ইমেইল বা পাসওয়ার্ড।" }, { status: 401 });
     }

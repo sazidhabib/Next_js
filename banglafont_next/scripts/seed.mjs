@@ -1,126 +1,105 @@
 import "dotenv/config";
-import { PrismaClient } from "@prisma/client";
-import { PrismaMariaDb } from "@prisma/adapter-mariadb";
 import bcrypt from "bcryptjs";
-
-const factory = new PrismaMariaDb(process.env.DATABASE_URL);
-const prisma = new PrismaClient({ adapter: factory });
+import {
+  sequelize,
+  AdminUser,
+  Designer,
+  Developer,
+  Font,
+  FontVariant,
+} from "../models/index.js";
 
 async function main() {
-  console.log("🌱 Seeding database...");
+  console.log("🌱 Seeding database with Sequelize...");
+
+  await sequelize.authenticate();
+  await sequelize.sync();
 
   const adminPassword = await bcrypt.hash("admin123", 10);
 
-  await prisma.adminUser.upsert({
+  const [admin] = await AdminUser.findOrCreate({
     where: { email: "admin@fontbd.com" },
-    update: {},
-    create: {
+    defaults: {
       email: "admin@fontbd.com",
       name: "Admin",
       password: adminPassword,
       role: "SUPERADMIN",
     },
   });
-  console.log("✓ Admin user created");
+  if (admin) {
+    admin.password = adminPassword;
+    admin.name = "Admin";
+    admin.role = "SUPERADMIN";
+    await admin.save();
+  }
+  console.log("✓ Admin user created/updated");
 
-  const designers = await Promise.all([
-    prisma.designer.upsert({
-      where: { slug: "ahmad-tofayel" },
-      update: {
-        name: "Ahmad Tofayel",
-        banglaName: "আহমদ তোফায়েল",
-        bio: "বাংলা টাইপোগ্রাফি ডিজাইনার",
-        photo: "/uploads/images/placeholder-designer.jpg",
-      },
-      create: {
-        name: "Ahmad Tofayel",
-        banglaName: "আহমদ তোফায়েল",
-        slug: "ahmad-tofayel",
-        bio: "বাংলা টাইপোগ্রাফি ডিজাইনার",
-        photo: "/uploads/images/placeholder-designer.jpg",
-      },
-    }),
-    prisma.designer.upsert({
-      where: { slug: "jayed-ahsan-sad" },
-      update: {
-        name: "Jayed Ahsan Sad",
-        banglaName: "জায়েদ আহসান সাদ",
-        bio: "Founder of Codepotro",
-        photo: "/uploads/images/placeholder-designer.jpg",
-      },
-      create: {
-        name: "Jayed Ahsan Sad",
-        banglaName: "জায়েদ আহসান সাদ",
-        slug: "jayed-ahsan-sad",
-        bio: "Founder of Codepotro",
-        photo: "/uploads/images/placeholder-designer.jpg",
-      },
-    }),
-    prisma.designer.upsert({
-      where: { slug: "masuda-akter-lima" },
-      update: {
-        name: "Masuda Akter Lima",
-        banglaName: "মাসুদা আক্তার লিমা",
-        bio: "Typography Designer",
-        photo: "/uploads/images/placeholder-designer.jpg",
-      },
-      create: {
-        name: "Masuda Akter Lima",
-        banglaName: "মাসুদা আক্তার লিমা",
-        slug: "masuda-akter-lima",
-        bio: "Typography Designer",
-        photo: "/uploads/images/placeholder-designer.jpg",
-      },
-    }),
-    prisma.designer.upsert({
-      where: { slug: "codepotro-fonts" },
-      update: {
-        name: "Codepotro Fonts",
-        banglaName: "কোডপত্র ফন্টস",
-        bio: "বাংলা ফন্ট ডেভেলপমেন্ট টিম",
-      },
-      create: {
-        name: "Codepotro Fonts",
-        banglaName: "কোডপত্র ফন্টস",
-        slug: "codepotro-fonts",
-        bio: "বাংলা ফন্ট ডেভেলপমেন্ট টিম",
-      },
-    }),
-  ]);
+  const designerList = [
+    {
+      name: "Ahmad Tofayel",
+      banglaName: "আহমদ তোফায়েল",
+      slug: "ahmad-tofayel",
+      bio: "বাংলা টাইপোগ্রাফি ডিজাইনার",
+      photo: "/uploads/images/placeholder-designer.jpg",
+    },
+    {
+      name: "Jayed Ahsan Sad",
+      banglaName: "জায়েদ আহসান সাদ",
+      slug: "jayed-ahsan-sad",
+      bio: "Founder of Codepotro",
+      photo: "/uploads/images/placeholder-designer.jpg",
+    },
+    {
+      name: "Masuda Akter Lima",
+      banglaName: "মাসুদা আক্তার লিমা",
+      slug: "masuda-akter-lima",
+      bio: "Typography Designer",
+      photo: "/uploads/images/placeholder-designer.jpg",
+    },
+    {
+      name: "Codepotro Fonts",
+      banglaName: "কোডপত্র ফন্টস",
+      slug: "codepotro-fonts",
+      bio: "বাংলা ফন্ট ডেভেলপমেন্ট টিম",
+    },
+  ];
+
+  const designers = [];
+  for (const d of designerList) {
+    const [designer] = await Designer.findOrCreate({
+      where: { slug: d.slug },
+      defaults: d,
+    });
+    await designer.update(d);
+    designers.push(designer);
+  }
   console.log("✓ Designers created");
 
-  const developers = await Promise.all([
-    prisma.developer.upsert({
-      where: { slug: "ehsan-al-mahfuz" },
-      update: {
-        name: "Ehsan Al Mahfuz",
-        banglaName: "এহসান আল মাহফুজ",
-        bio: "Font Developer",
-        photo: "/uploads/images/placeholder-developer.jpg",
-      },
-      create: {
-        name: "Ehsan Al Mahfuz",
-        banglaName: "এহসান আল মাহফুজ",
-        slug: "ehsan-al-mahfuz",
-        bio: "Font Developer",
-        photo: "/uploads/images/placeholder-developer.jpg",
-      },
-    }),
-    prisma.developer.upsert({
-      where: { slug: "codepotro-dev" },
-      update: {
-        name: "Codepotro Dev",
-        banglaName: "কোডপত্র দেব",
-        bio: "Software Development Team",
-      },
-      create: {
-        name: "Codepotro Dev",
-        banglaName: "কোডপত্র দেব",
-        slug: "codepotro-dev",
-        bio: "Software Development Team",
-      },
-    }),
-  ]);
+  const developerList = [
+    {
+      name: "Ehsan Al Mahfuz",
+      banglaName: "এহসান আল মাহফুজ",
+      slug: "ehsan-al-mahfuz",
+      bio: "Font Developer",
+      photo: "/uploads/images/placeholder-developer.jpg",
+    },
+    {
+      name: "Codepotro Dev",
+      banglaName: "কোডপত্র দেব",
+      slug: "codepotro-dev",
+      bio: "Software Development Team",
+    },
+  ];
+
+  const developers = [];
+  for (const dev of developerList) {
+    const [developer] = await Developer.findOrCreate({
+      where: { slug: dev.slug },
+      defaults: dev,
+    });
+    await developer.update(dev);
+    developers.push(developer);
+  }
   console.log("✓ Developers created");
 
   const fontData = [
@@ -199,17 +178,9 @@ async function main() {
       continue;
     }
 
-    const font = await prisma.font.upsert({
+    const [font] = await Font.findOrCreate({
       where: { slug: f.slug },
-      update: {
-        name: f.name,
-        banglaName: f.banglaName,
-        description: f.description,
-        fontFileUrl: f.fontFileUrl,
-        designerId: designer.id,
-        developerId: developer?.id ?? null,
-      },
-      create: {
+      defaults: {
         name: f.name,
         banglaName: f.banglaName,
         slug: f.slug,
@@ -226,22 +197,29 @@ async function main() {
       },
     });
 
+    await font.update({
+      name: f.name,
+      banglaName: f.banglaName,
+      description: f.description,
+      fontFileUrl: f.fontFileUrl,
+      designerId: designer.id,
+      developerId: developer?.id ?? null,
+    });
+
     // Clear and seed FontVariants for idempotency
-    await prisma.fontVariant.deleteMany({ where: { fontId: font.id } });
+    await FontVariant.destroy({ where: { fontId: font.id } });
     const defaultWeights = ["Regular", "Medium", "Bold"];
     for (const weight of defaultWeights) {
-      await prisma.fontVariant.create({
-        data: {
-          weight,
-          fileUrl: f.fontFileUrl, // Use the default font file url for simplicity
-          fontId: font.id,
-        },
+      await FontVariant.create({
+        weight,
+        fileUrl: f.fontFileUrl,
+        fontId: font.id,
       });
     }
     console.log(`  ✓ Font: ${f.name} (with variants: ${defaultWeights.join(", ")})`);
   }
 
-  console.log("\n✅ Seed completed!");
+  console.log("\n✅ Seed completed successfully!");
 }
 
 main()
@@ -250,5 +228,5 @@ main()
     process.exit(1);
   })
   .finally(async () => {
-    await prisma.$disconnect();
+    await sequelize.close();
   });

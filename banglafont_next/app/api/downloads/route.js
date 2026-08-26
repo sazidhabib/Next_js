@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { prisma } from "../../../lib/prisma";
+import { Font, Download } from "../../../models/index.js";
 import { createHash } from "crypto";
 
 export async function POST(request) {
@@ -9,7 +9,7 @@ export async function POST(request) {
       return NextResponse.json({ error: "fontId is required" }, { status: 400 });
     }
 
-    const font = await prisma.font.findUnique({ where: { id: fontId } });
+    const font = await Font.findByPk(fontId);
     if (!font) {
       return NextResponse.json({ error: "Font not found" }, { status: 404 });
     }
@@ -18,17 +18,12 @@ export async function POST(request) {
     const ipHash = createHash("sha256").update(ip).digest("hex").substring(0, 16);
 
     await Promise.all([
-      prisma.download.create({
-        data: {
-          fontId,
-          ipHash,
-          userAgent: request.headers.get("user-agent") || "",
-        },
+      Download.create({
+        fontId,
+        ipHash,
+        userAgent: request.headers.get("user-agent") || "",
       }),
-      prisma.font.update({
-        where: { id: fontId },
-        data: { downloadCount: { increment: 1 } },
-      }),
+      font.increment("downloadCount", { by: 1 }),
     ]);
 
     return NextResponse.json({ success: true });
