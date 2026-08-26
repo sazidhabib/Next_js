@@ -1,0 +1,76 @@
+# ==============================================================================
+# Next.js cPanel Configuration for https://tools.nextdigit.dev/next-type
+# ==============================================================================
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /
+
+    # Force HTTPS (Optional, if not handled by Cloudflare or cPanel SSL)
+    RewriteCond %{HTTPS} off
+    RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+</IfModule>
+
+# ------------------------------------------------------------------------------
+# 1. OPTION A: If Using cPanel "Setup Node.js App" (Passenger)
+# (cPanel will automatically append Passenger directives below when you create the app)
+# ------------------------------------------------------------------------------
+# PassengerAppType node
+# PassengerStartupFile server.js
+# PassengerBaseURI /next-type
+
+# ------------------------------------------------------------------------------
+# 2. OPTION B: If Using Apache Reverse Proxy (mod_proxy) to Local Port
+# (Uncomment if your Next.js server runs on port 3000 via PM2 or node server.js)
+# ------------------------------------------------------------------------------
+# <IfModule mod_proxy.c>
+#     RewriteEngine On
+#     RewriteRule ^next-type$ /next-type/ [R=301,L]
+#     RewriteRule ^next-type/(.*)$ http://127.0.0.1:3000/next-type/$1 [P,L]
+#     ProxyPassReverse /next-type http://127.0.0.1:3000/next-type
+# </IfModule>
+
+# ------------------------------------------------------------------------------
+# 3. Performance & Caching for Next.js Static Chunks
+# ------------------------------------------------------------------------------
+<IfModule mod_expires.c>
+    ExpiresActive On
+    # Cache static immutable chunks for 1 year
+    ExpiresByType text/javascript "access plus 1 year"
+    ExpiresByType application/javascript "access plus 1 year"
+    ExpiresByType text/css "access plus 1 year"
+    ExpiresByType font/ttf "access plus 1 year"
+    ExpiresByType font/otf "access plus 1 year"
+    ExpiresByType font/woff2 "access plus 1 year"
+    ExpiresByType image/png "access plus 1 month"
+    ExpiresByType image/jpeg "access plus 1 month"
+    ExpiresByType image/webp "access plus 1 month"
+    ExpiresByType image/svg+xml "access plus 1 month"
+</IfModule>
+
+# ------------------------------------------------------------------------------
+# 4. Gzip / Brotli Compression
+# ------------------------------------------------------------------------------
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/plain
+    AddOutputFilterByType DEFLATE text/html
+    AddOutputFilterByType DEFLATE text/xml
+    AddOutputFilterByType DEFLATE text/css
+    AddOutputFilterByType DEFLATE application/xml
+    AddOutputFilterByType DEFLATE application/xhtml+xml
+    AddOutputFilterByType DEFLATE application/rss+xml
+    AddOutputFilterByType DEFLATE application/javascript
+    AddOutputFilterByType DEFLATE application/x-javascript
+    AddOutputFilterByType DEFLATE font/ttf
+    AddOutputFilterByType DEFLATE font/otf
+    AddOutputFilterByType DEFLATE font/woff2
+</IfModule>
+
+# ------------------------------------------------------------------------------
+# 5. Security Headers
+# ------------------------------------------------------------------------------
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set X-XSS-Protection "1; mode=block"
+</IfModule>

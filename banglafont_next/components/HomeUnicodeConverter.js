@@ -5,26 +5,14 @@ import { unicodeToAnsi, ansiToUnicode } from "../lib/banglaConverter";
 
 export default function HomeUnicodeConverter() {
   const [input, setInput] = useState("");
-  const [output, setOutput] = useState("");
   const [mode, setMode] = useState("unicode-to-ansi");
   const [copied, setCopied] = useState(false);
 
-  // Perform automatic real-time conversion as the user types
-  useEffect(() => {
-    if (!input) {
-      setOutput("");
-      return;
-    }
-    runConversion();
-  }, [input, mode]);
-
-  function runConversion() {
-    if (mode === "unicode-to-ansi") {
-      setOutput(unicodeToAnsi(input));
-    } else {
-      setOutput(ansiToUnicode(input));
-    }
-  }
+  const output = !input
+    ? ""
+    : mode === "unicode-to-ansi"
+    ? unicodeToAnsi(input)
+    : ansiToUnicode(input);
 
   async function copyOutput() {
     if (!output) return;
@@ -46,7 +34,6 @@ export default function HomeUnicodeConverter() {
 
   function clearAll() {
     setInput("");
-    setOutput("");
   }
 
   return (
@@ -63,7 +50,7 @@ export default function HomeUnicodeConverter() {
         </div>
         <div className="flex gap-2">
           <button
-            onClick={() => { setMode("unicode-to-ansi"); setOutput(""); }}
+            onClick={() => setMode("unicode-to-ansi")}
             className={`px-4 py-1.5 rounded-xl font-medium text-xs transition-colors cursor-pointer ${
               mode === "unicode-to-ansi"
                 ? "bg-[#00e599] text-gray-955 font-bold"
@@ -73,7 +60,7 @@ export default function HomeUnicodeConverter() {
             Unicode → ANSI
           </button>
           <button
-            onClick={() => { setMode("ansi-to-unicode"); setOutput(""); }}
+            onClick={() => setMode("ansi-to-unicode")}
             className={`px-4 py-1.5 rounded-xl font-medium text-xs transition-colors cursor-pointer ${
               mode === "ansi-to-unicode"
                 ? "bg-[#00e599] text-gray-955 font-bold"

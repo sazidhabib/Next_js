@@ -721,7 +721,7 @@ function FontDetailPageContent({ font, relatedFonts = [] }) {
               </div>
               <div className="space-y-0.5">
                 <h5 className="text-[11px] font-bold text-foreground">Need Help?</h5>
-                <p className="text-[9px] text-text-muted leading-normal">We're here to help you</p>
+                <p className="text-[9px] text-text-muted leading-normal">We&apos;re here to help you</p>
                 <Link href="/contact" className="text-[9px] text-[#00e599] hover:underline font-semibold block pt-0.5">
                   Contact Support
                 </Link>

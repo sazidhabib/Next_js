@@ -5,26 +5,14 @@ import { unicodeToAnsi, ansiToUnicode } from "../../lib/banglaConverter";
 
 export default function ConverterPage() {
   const [input, setInput] = useState("");
-  const [output, setOutput] = useState("");
   const [mode, setMode] = useState("unicode-to-ansi");
   const [copied, setCopied] = useState(false);
 
-  // Perform automatic real-time conversion as the user types
-  useEffect(() => {
-    if (!input) {
-      setOutput("");
-      return;
-    }
-    runConversion();
-  }, [input, mode]);
-
-  function runConversion() {
-    if (mode === "unicode-to-ansi") {
-      setOutput(unicodeToAnsi(input));
-    } else {
-      setOutput(ansiToUnicode(input));
-    }
-  }
+  const output = !input
+    ? ""
+    : mode === "unicode-to-ansi"
+    ? unicodeToAnsi(input)
+    : ansiToUnicode(input);
 
   async function copyOutput() {
     if (!output) return;
@@ -46,7 +34,6 @@ export default function ConverterPage() {
 
   function clearAll() {
     setInput("");
-    setOutput("");
   }
 
   return (
@@ -70,7 +57,7 @@ export default function ConverterPage() {
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 pb-4 border-b border-white/5">
           <div className="flex bg-[#161824] p-1 rounded-xl border border-white/10 self-start">
             <button
-              onClick={() => { setMode("unicode-to-ansi"); setOutput(""); }}
+              onClick={() => setMode("unicode-to-ansi")}
               className={`px-4 py-2 rounded-lg font-semibold text-xs sm:text-sm transition-all ${
                 mode === "unicode-to-ansi"
                   ? "bg-[#00e599] text-gray-950 shadow-lg shadow-[#00e599]/20"
@@ -80,7 +67,7 @@ export default function ConverterPage() {
               Unicode → ANSI
             </button>
             <button
-              onClick={() => { setMode("ansi-to-unicode"); setOutput(""); }}
+              onClick={() => setMode("ansi-to-unicode")}
               className={`px-4 py-2 rounded-lg font-semibold text-xs sm:text-sm transition-all ${
                 mode === "ansi-to-unicode"
                   ? "bg-[#00e599] text-gray-950 shadow-lg shadow-[#00e599]/20"

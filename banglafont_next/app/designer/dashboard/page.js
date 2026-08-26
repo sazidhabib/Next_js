@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { toast } from "react-toastify";
@@ -82,21 +82,7 @@ export default function DesignerDashboard() {
   const [savingFont, setSavingFont] = useState(false);
   const [savingProfile, setSavingProfile] = useState(false);
 
-  useEffect(() => {
-    fetchProfileAndFonts();
-  }, []);
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const params = new URLSearchParams(window.location.search);
-      const tab = params.get("tab") || "overview";
-      if (tab !== activeTab) {
-        setActiveTab(tab);
-      }
-    }
-  });
-
-  const fetchProfileAndFonts = async () => {
+  const fetchProfileAndFonts = useCallback(async () => {
     setLoading(true);
     try {
       const profileRes = await fetch("/api/designer/profile");
@@ -124,7 +110,19 @@ export default function DesignerDashboard() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchProfileAndFonts();
+  }, [fetchProfileAndFonts]);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const tab = params.get("tab") || "overview";
+      setActiveTab(tab);
+    }
+  }, []);
 
   const handleLogout = async () => {
     try {
