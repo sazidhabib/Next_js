@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import prisma from '@/lib/prisma';
+import { Restaurant, InvoiceTemplate } from '@/lib/sequelize';
 import { decryptSession } from '@/lib/session';
 
 async function verifyAuth(request) {
@@ -21,12 +21,9 @@ export async function GET(request) {
       return NextResponse.json({ success: false, error: 'Restaurant ID is required' }, { status: 400 });
     }
 
-    const restaurant = await prisma.restaurant.findUnique({
+    const restaurant = await Restaurant.findOne({
       where: { id: restaurantId },
-      select: {
-        activeCustomerTemplateId: true,
-        activeKitchenTemplateId: true,
-      },
+      attributes: ['activeCustomerTemplateId', 'activeKitchenTemplateId'],
     });
 
     if (!restaurant) {
@@ -56,7 +53,7 @@ export async function PUT(request) {
 
     // Verify templates exist and belong to the correct restaurant
     if (activeCustomerTemplateId) {
-      const custTemp = await prisma.invoiceTemplate.findFirst({
+      const custTemp = await InvoiceTemplate.findOne({
         where: { id: activeCustomerTemplateId, restaurantId },
       });
       if (!custTemp) {
@@ -65,7 +62,7 @@ export async function PUT(request) {
     }
 
     if (activeKitchenTemplateId) {
-      const kitTemp = await prisma.invoiceTemplate.findFirst({
+      const kitTemp = await InvoiceTemplate.findOne({
         where: { id: activeKitchenTemplateId, restaurantId },
       });
       if (!kitTemp) {
@@ -73,12 +70,16 @@ export async function PUT(request) {
       }
     }
 
-    const updated = await prisma.restaurant.update({
+    await Restaurant.update({
+      activeCustomerTemplateId: activeCustomerTemplateId || null,
+      activeKitchenTemplateId: activeKitchenTemplateId || null,
+    }, {
       where: { id: restaurantId },
-      data: {
-        activeCustomerTemplateId: activeCustomerTemplateId || null,
-        activeKitchenTemplateId: activeKitchenTemplateId || null,
-      },
+    });
+
+    const updated = await Restaurant.findOne({
+      where: { id: restaurantId },
+      attributes: ['activeCustomerTemplateId', 'activeKitchenTemplateId'],
     });
 
     return NextResponse.json({

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
-import prisma from '@/lib/prisma';
+import { Order, OrderItem, Restaurant, OrderStatusLog } from '@/lib/sequelize';
 
 export async function POST(request) {
   try {
@@ -10,11 +10,14 @@ export async function POST(request) {
       return NextResponse.json({ success: false, error: 'Order ID is required' }, { status: 400 });
     }
 
-    const order = await prisma.order.findUnique({
+    const order = await Order.findOne({
       where: { id: orderId },
-      include: {
-        items: true,
-      },
+      include: [
+        {
+          model: OrderItem,
+          as: 'items',
+        },
+      ],
     });
 
     if (!order) {
@@ -22,7 +25,7 @@ export async function POST(request) {
     }
 
     // Get the restaurant's Stripe Secret Key
-    const restaurant = await prisma.restaurant.findUnique({
+    const restaurant = await Restaurant.findOne({
       where: { id: order.restaurantId },
     });
 
@@ -46,7 +49,7 @@ export async function POST(request) {
           product_data: {
             name: item.itemName,
           },
-          unit_amount: Math.round(item.unitPrice * 100),
+          unit_amount: Math.round((item.itemPrice || item.unitPrice || 0) * 100),
         },
         quantity: item.quantity,
       })),
@@ -77,7 +80,7 @@ export async function GET(request) {
     }
 
     // Retrieve order and restaurant to get secret key
-    const order = await prisma.order.findUnique({
+    const order = await Order.findOne({
       where: { id: orderId },
     });
 
@@ -85,7 +88,7 @@ export async function GET(request) {
       return NextResponse.json({ error: 'Order not found' }, { status: 404 });
     }
 
-    const restaurant = await prisma.restaurant.findUnique({
+    const restaurant = await Restaurant.findOne({
       where: { id: order.restaurantId },
     });
 
@@ -99,21 +102,18 @@ export async function GET(request) {
 
     if (session.payment_status === 'paid') {
       // Update order payment status and status in DB
-      await prisma.order.update({
+      await Order.update({
+        paymentStatus: 'PAID',
+        status: 'ACCEPTED', // Auto-accept order on paid success
+      }, {
         where: { id: orderId },
-        data: {
-          paymentStatus: 'PAID',
-          status: 'ACCEPTED', // Auto-accept order on paid success
-        },
       });
 
       // Create a status log
-      await prisma.orderStatusLog.create({
-        data: {
-          orderId,
-          status: 'ACCEPTED',
-          notes: 'Payment verified successfully via Stripe Checkout.',
-        },
+      await OrderStatusLog.create({
+        orderId,
+        status: 'ACCEPTED',
+        note: 'Payment verified successfully via Stripe Checkout.',
       });
     }
 

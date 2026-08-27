@@ -44,13 +44,15 @@ Edit `.env` and provide your MySQL connection string:
 DATABASE_URL="mysql://root:password@localhost:3306/foodordering_db"
 ```
 
-### 2. Push Schema & Seed
+### 2. Sync Schema & Seed
+To synchronize the database tables and seed initial data, start the development server:
 ```bash
-# Push Prisma schema to MySQL
-npx prisma db push
-
+npm run dev
+```
+Then visit the seed endpoint in your browser or query it:
+```bash
 # Seed initial restaurant, menu, modifier groups, zones, and users
-node prisma/seed.js
+http://localhost:3000/api/admin/seed
 ```
 
 ### 3. Run Development Server
@@ -63,4 +65,4 @@ Visit:
 - **Customer Storefront**: `http://localhost:3000/menu/bellavista-pizza`
 - **Kitchen Order Receiver**: `http://localhost:3000/admin/live-orders`
 - **Admin Dashboard**: `http://localhost:3000/admin`
-- **Prisma Visual Studio**: `npx prisma studio`
+- **Database Seeding Tool**: `http://localhost:3000/api/admin/seed`

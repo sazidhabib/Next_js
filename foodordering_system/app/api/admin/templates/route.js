@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import prisma from '@/lib/prisma';
+import { InvoiceTemplate } from '@/lib/sequelize';
 import { decryptSession } from '@/lib/session';
 
 async function verifyAuth(request) {
@@ -21,9 +21,9 @@ export async function GET(request) {
       return NextResponse.json({ success: false, error: 'Restaurant ID is required' }, { status: 400 });
     }
 
-    const templates = await prisma.invoiceTemplate.findMany({
+    const templates = await InvoiceTemplate.findAll({
       where: { restaurantId },
-      orderBy: { createdAt: 'desc' },
+      order: [['createdAt', 'DESC']],
     });
 
     return NextResponse.json({ success: true, data: templates });
@@ -47,14 +47,12 @@ export async function POST(request) {
       return NextResponse.json({ success: false, error: 'Missing required fields' }, { status: 400 });
     }
 
-    const template = await prisma.invoiceTemplate.create({
-      data: {
-        restaurantId,
-        name,
-        type,
-        fontSize: fontSize || 12,
-        config: typeof config === 'string' ? config : JSON.stringify(config),
-      },
+    const template = await InvoiceTemplate.create({
+      restaurantId,
+      name,
+      type,
+      fontSize: fontSize || 12,
+      config: typeof config === 'string' ? config : JSON.stringify(config),
     });
 
     return NextResponse.json({ success: true, data: template }, { status: 201 });

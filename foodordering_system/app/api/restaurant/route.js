@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getRestaurantBySlug } from '@/lib/dataStore';
-import prisma from '@/lib/prisma';
+import { Restaurant } from '@/lib/sequelize';
 
 export async function GET(request) {
   try {
@@ -42,24 +42,25 @@ export async function PUT(request) {
       return NextResponse.json({ success: false, error: 'Restaurant ID is required' }, { status: 400 });
     }
 
-    const updated = await prisma.restaurant.update({
+    await Restaurant.update({
+      name,
+      phone,
+      email,
+      address,
+      taxRatePercent: parseFloat(taxRatePercent) || 0.0,
+      estimatedPrepTime: parseInt(estimatedPrepTime) || 25,
+      enableDelivery,
+      enablePickup,
+      enableCash,
+      enableCard,
+      enableOnline,
+      stripePublishableKey: stripePublishableKey || null,
+      stripeSecretKey: stripeSecretKey || null,
+    }, {
       where: { id },
-      data: {
-        name,
-        phone,
-        email,
-        address,
-        taxRatePercent: parseFloat(taxRatePercent) || 0.0,
-        estimatedPrepTime: parseInt(estimatedPrepTime) || 25,
-        enableDelivery,
-        enablePickup,
-        enableCash,
-        enableCard,
-        enableOnline,
-        stripePublishableKey: stripePublishableKey || null,
-        stripeSecretKey: stripeSecretKey || null,
-      },
     });
+
+    const updated = await Restaurant.findOne({ where: { id } });
 
     return NextResponse.json({ success: true, data: updated });
   } catch (error) {

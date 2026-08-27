@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import prisma from '@/lib/prisma';
+import { User, Restaurant } from '@/lib/sequelize';
 import { decryptSession } from '@/lib/session';
 
 export async function GET(request) {
@@ -15,15 +15,19 @@ export async function GET(request) {
     }
 
     // Load fresh user data from database to reflect changes instantly
-    const user = await prisma.user.findUnique({
+    const user = await User.findOne({
       where: { id: session.userId },
-      include: {
-        restaurantRoles: {
-          include: {
-            restaurant: true,
-          },
+      include: [
+        {
+          association: 'restaurantRoles',
+          include: [
+            {
+              model: Restaurant,
+              as: 'restaurant',
+            },
+          ],
         },
-      },
+      ],
     });
 
     if (!user) {
@@ -31,7 +35,7 @@ export async function GET(request) {
     }
 
     let associatedRestaurant = null;
-    if (user.role !== 'SUPER_ADMIN' && user.restaurantRoles.length > 0) {
+    if (user.role !== 'SUPER_ADMIN' && user.restaurantRoles && user.restaurantRoles.length > 0) {
       associatedRestaurant = user.restaurantRoles[0].restaurant;
     }
 

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
-import prisma from '@/lib/prisma';
+import { Op } from 'sequelize';
+import { User, UserRestaurantRole, Restaurant } from '@/lib/sequelize';
 import bcrypt from 'bcryptjs';
 import { decryptSession } from '@/lib/session';
 
@@ -19,15 +20,19 @@ export async function GET(request) {
       return NextResponse.json({ success: false, error: 'Access denied' }, { status: 403 });
     }
 
-    const users = await prisma.user.findMany({
-      orderBy: { name: 'asc' },
-      include: {
-        restaurantRoles: {
-          include: {
-            restaurant: true,
-          },
+    const users = await User.findAll({
+      order: [['name', 'ASC']],
+      include: [
+        {
+          association: 'restaurantRoles',
+          include: [
+            {
+              model: Restaurant,
+              as: 'restaurant',
+            },
+          ],
         },
-      },
+      ],
     });
 
     return NextResponse.json({ success: true, data: users });
@@ -53,31 +58,27 @@ export async function POST(request) {
     }
 
     // Check duplicate email
-    const existing = await prisma.user.findUnique({ where: { email } });
+    const existing = await User.findOne({ where: { email } });
     if (existing) {
       return NextResponse.json({ success: false, error: 'Email already registered' }, { status: 400 });
     }
 
     const passwordHash = await bcrypt.hash(password, 10);
 
-    const newUser = await prisma.user.create({
-      data: {
-        name,
-        email,
-        passwordHash,
-        role,
-        phone: phone || null,
-      },
+    const newUser = await User.create({
+      name,
+      email,
+      passwordHash,
+      role,
+      phone: phone || null,
     });
 
     // Create UserRestaurantRole link if applicable
     if ((role === 'RESTAURANT_ADMIN' || role === 'STAFF_OPERATOR') && restaurantId) {
-      await prisma.userRestaurantRole.create({
-        data: {
-          userId: newUser.id,
-          restaurantId,
-          role,
-        },
+      await UserRestaurantRole.create({
+        userId: newUser.id,
+        restaurantId,
+        role,
       });
     }
 
@@ -104,10 +105,10 @@ export async function PUT(request) {
     }
 
     // Check duplicate email for other user
-    const existing = await prisma.user.findFirst({
+    const existing = await User.findOne({
       where: {
         email,
-        NOT: { id },
+        id: { [Op.ne]: id },
       },
     });
     if (existing) {
@@ -125,24 +126,23 @@ export async function PUT(request) {
       updateData.passwordHash = await bcrypt.hash(password, 10);
     }
 
-    const updated = await prisma.user.update({
+    await User.update(updateData, {
       where: { id },
-      data: updateData,
     });
 
+    const updated = await User.findOne({ where: { id } });
+
     // Clean old restaurant assignments
-    await prisma.userRestaurantRole.deleteMany({
+    await UserRestaurantRole.destroy({
       where: { userId: id },
     });
 
     // Create new restaurant assignment if applicable
     if ((role === 'RESTAURANT_ADMIN' || role === 'STAFF_OPERATOR') && restaurantId) {
-      await prisma.userRestaurantRole.create({
-        data: {
-          userId: id,
-          restaurantId,
-          role,
-        },
+      await UserRestaurantRole.create({
+        userId: id,
+        restaurantId,
+        role,
       });
     }
 
@@ -173,7 +173,7 @@ export async function DELETE(request) {
       return NextResponse.json({ success: false, error: 'You cannot delete your own account' }, { status: 400 });
     }
 
-    await prisma.user.delete({
+    await User.destroy({
       where: { id },
     });
 

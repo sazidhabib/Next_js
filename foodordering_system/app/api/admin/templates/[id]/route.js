@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
-import prisma from '@/lib/prisma';
+import { Op } from 'sequelize';
+import { InvoiceTemplate, Restaurant } from '@/lib/sequelize';
 import { decryptSession } from '@/lib/session';
 
 async function verifyAuth(request) {
@@ -16,7 +17,7 @@ export async function GET(request, { params }) {
     }
 
     const { id } = params;
-    const template = await prisma.invoiceTemplate.findUnique({
+    const template = await InvoiceTemplate.findOne({
       where: { id },
     });
 
@@ -42,7 +43,7 @@ export async function PUT(request, { params }) {
     const body = await request.json();
     const { name, fontSize, config } = body;
 
-    const existing = await prisma.invoiceTemplate.findUnique({
+    const existing = await InvoiceTemplate.findOne({
       where: { id },
     });
 
@@ -50,14 +51,15 @@ export async function PUT(request, { params }) {
       return NextResponse.json({ success: false, error: 'Template not found' }, { status: 404 });
     }
 
-    const updated = await prisma.invoiceTemplate.update({
+    await InvoiceTemplate.update({
+      name: name !== undefined ? name : existing.name,
+      fontSize: fontSize !== undefined ? fontSize : existing.fontSize,
+      config: config !== undefined ? (typeof config === 'string' ? config : JSON.stringify(config)) : existing.config,
+    }, {
       where: { id },
-      data: {
-        name: name !== undefined ? name : existing.name,
-        fontSize: fontSize !== undefined ? fontSize : existing.fontSize,
-        config: config !== undefined ? (typeof config === 'string' ? config : JSON.stringify(config)) : existing.config,
-      },
     });
+
+    const updated = await InvoiceTemplate.findOne({ where: { id } });
 
     return NextResponse.json({ success: true, data: updated });
   } catch (error) {
@@ -76,13 +78,13 @@ export async function DELETE(request, { params }) {
     const { id } = params;
     
     // Check if the template is set as active on any restaurant to prevent broken references
-    const activeOnRestaurant = await prisma.restaurant.findFirst({
+    const activeOnRestaurant = await Restaurant.findOne({
       where: {
-        OR: [
+        [Op.or]: [
           { activeCustomerTemplateId: id },
-          { activeKitchenTemplateId: id }
-        ]
-      }
+          { activeKitchenTemplateId: id },
+        ],
+      },
     });
 
     if (activeOnRestaurant) {
@@ -92,7 +94,7 @@ export async function DELETE(request, { params }) {
       }, { status: 400 });
     }
 
-    await prisma.invoiceTemplate.delete({
+    await InvoiceTemplate.destroy({
       where: { id },
     });
 

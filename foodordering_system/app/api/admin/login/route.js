@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import prisma from '@/lib/prisma';
+import { User, UserRestaurantRole, Restaurant } from '@/lib/sequelize';
 import bcrypt from 'bcryptjs';
 import { encryptSession } from '@/lib/session';
 
@@ -14,7 +14,7 @@ export async function POST(request) {
       );
     }
 
-    const user = await prisma.user.findUnique({
+    const user = await User.findOne({
       where: { email },
     });
 
@@ -44,9 +44,9 @@ export async function POST(request) {
     // Fetch associated restaurant if not Super Admin
     let associatedRestaurant = null;
     if (user.role !== 'SUPER_ADMIN') {
-      const userRole = await prisma.userRestaurantRole.findFirst({
+      const userRole = await UserRestaurantRole.findOne({
         where: { userId: user.id },
-        include: { restaurant: true },
+        include: [{ model: Restaurant, as: 'restaurant' }],
       });
       if (userRole) {
         associatedRestaurant = userRole.restaurant;

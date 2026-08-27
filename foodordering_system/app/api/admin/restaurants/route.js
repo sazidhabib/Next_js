@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
-import prisma from '@/lib/prisma';
+import { Op } from 'sequelize';
+import { Restaurant } from '@/lib/sequelize';
 import { decryptSession } from '@/lib/session';
 
 async function checkSuperAdmin(request) {
@@ -18,8 +19,8 @@ export async function GET(request) {
       return NextResponse.json({ success: false, error: 'Access denied' }, { status: 403 });
     }
 
-    const restaurants = await prisma.restaurant.findMany({
-      orderBy: { name: 'asc' },
+    const restaurants = await Restaurant.findAll({
+      order: [['name', 'ASC']],
     });
 
     return NextResponse.json({ success: true, data: restaurants });
@@ -61,29 +62,27 @@ export async function POST(request) {
     }
 
     // Verify slug uniqueness
-    const existing = await prisma.restaurant.findUnique({ where: { slug } });
+    const existing = await Restaurant.findOne({ where: { slug } });
     if (existing) {
       return NextResponse.json({ success: false, error: 'Slug is already taken' }, { status: 400 });
     }
 
-    const newResto = await prisma.restaurant.create({
-      data: {
-        name,
-        slug,
-        description: description || null,
-        phone,
-        email,
-        address,
-        taxRatePercent: parseFloat(taxRatePercent) || 0.0,
-        estimatedPrepTime: parseInt(estimatedPrepTime) || 25,
-        enableDelivery: enableDelivery !== undefined ? enableDelivery : true,
-        enablePickup: enablePickup !== undefined ? enablePickup : true,
-        enableCash: enableCash !== undefined ? enableCash : true,
-        enableCard: enableCard !== undefined ? enableCard : true,
-        enableOnline: enableOnline !== undefined ? enableOnline : false,
-        stripePublishableKey: stripePublishableKey || null,
-        stripeSecretKey: stripeSecretKey || null,
-      },
+    const newResto = await Restaurant.create({
+      name,
+      slug,
+      description: description || null,
+      phone,
+      email,
+      address,
+      taxRatePercent: parseFloat(taxRatePercent) || 0.0,
+      estimatedPrepTime: parseInt(estimatedPrepTime) || 25,
+      enableDelivery: enableDelivery !== undefined ? enableDelivery : true,
+      enablePickup: enablePickup !== undefined ? enablePickup : true,
+      enableCash: enableCash !== undefined ? enableCash : true,
+      enableCard: enableCard !== undefined ? enableCard : true,
+      enableOnline: enableOnline !== undefined ? enableOnline : false,
+      stripePublishableKey: stripePublishableKey || null,
+      stripeSecretKey: stripeSecretKey || null,
     });
 
     return NextResponse.json({ success: true, data: newResto }, { status: 201 });
@@ -126,36 +125,37 @@ export async function PUT(request) {
     }
 
     // Verify slug uniqueness for other stores
-    const existing = await prisma.restaurant.findFirst({
+    const existing = await Restaurant.findOne({
       where: {
         slug,
-        NOT: { id },
+        id: { [Op.ne]: id },
       },
     });
     if (existing) {
       return NextResponse.json({ success: false, error: 'Slug is already in use by another restaurant' }, { status: 400 });
     }
 
-    const updated = await prisma.restaurant.update({
+    await Restaurant.update({
+      name,
+      slug,
+      description: description || null,
+      phone,
+      email,
+      address,
+      taxRatePercent: parseFloat(taxRatePercent) || 0.0,
+      estimatedPrepTime: parseInt(estimatedPrepTime) || 25,
+      enableDelivery: enableDelivery !== undefined ? enableDelivery : true,
+      enablePickup: enablePickup !== undefined ? enablePickup : true,
+      enableCash: enableCash !== undefined ? enableCash : true,
+      enableCard: enableCard !== undefined ? enableCard : true,
+      enableOnline: enableOnline !== undefined ? enableOnline : false,
+      stripePublishableKey: stripePublishableKey || null,
+      stripeSecretKey: stripeSecretKey || null,
+    }, {
       where: { id },
-      data: {
-        name,
-        slug,
-        description: description || null,
-        phone,
-        email,
-        address,
-        taxRatePercent: parseFloat(taxRatePercent) || 0.0,
-        estimatedPrepTime: parseInt(estimatedPrepTime) || 25,
-        enableDelivery: enableDelivery !== undefined ? enableDelivery : true,
-        enablePickup: enablePickup !== undefined ? enablePickup : true,
-        enableCash: enableCash !== undefined ? enableCash : true,
-        enableCard: enableCard !== undefined ? enableCard : true,
-        enableOnline: enableOnline !== undefined ? enableOnline : false,
-        stripePublishableKey: stripePublishableKey || null,
-        stripeSecretKey: stripeSecretKey || null,
-      },
     });
+
+    const updated = await Restaurant.findOne({ where: { id } });
 
     return NextResponse.json({ success: true, data: updated });
   } catch (error) {
@@ -179,7 +179,7 @@ export async function DELETE(request) {
       return NextResponse.json({ success: false, error: 'Restaurant ID is required' }, { status: 400 });
     }
 
-    await prisma.restaurant.delete({
+    await Restaurant.destroy({
       where: { id },
     });
 

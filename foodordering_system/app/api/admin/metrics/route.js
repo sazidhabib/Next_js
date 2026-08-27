@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import prisma from '@/lib/prisma';
+import { User, Restaurant } from '@/lib/sequelize';
 import { decryptSession } from '@/lib/session';
 
 export async function GET(request) {
@@ -15,10 +15,10 @@ export async function GET(request) {
     }
 
     const [userCount, restaurantCount, restaurants] = await Promise.all([
-      prisma.user.count(),
-      prisma.restaurant.count(),
-      prisma.restaurant.findMany({
-        orderBy: { name: 'asc' },
+      User.count(),
+      Restaurant.count(),
+      Restaurant.findAll({
+        order: [['name', 'ASC']],
       }),
     ]);
 

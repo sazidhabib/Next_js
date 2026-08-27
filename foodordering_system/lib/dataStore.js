@@ -1,5 +1,22 @@
+import { Op } from 'sequelize';
 import { defaultRestaurant, initialOrders } from './mockData';
-import prisma from './prisma';
+import {
+  sequelize,
+  User,
+  Restaurant,
+  Category,
+  MenuItem,
+  OptionGroup,
+  MenuItemOptionGroup,
+  OptionItem,
+  DeliveryZone,
+  OperatingHour,
+  Order,
+  OrderItem,
+  OrderItemOption,
+  OrderStatusLog,
+  Invoice
+} from './sequelize';
 
 // In-memory runtime cache for fallback and fast real-time synchronization
 const globalStore = globalThis;
@@ -13,7 +30,7 @@ if (!globalStore.__orders) {
 // Check if database is accessible
 export async function isDbConnected() {
   try {
-    await prisma.$queryRaw`SELECT 1`;
+    await sequelize.authenticate();
     return true;
   } catch (err) {
     return false;
@@ -25,62 +42,98 @@ export async function getRestaurantBySlug(slug = 'bellavista-pizza') {
   try {
     const connected = await isDbConnected();
     if (connected) {
-      const resto = await prisma.restaurant.findUnique({
+      const resto = await Restaurant.findOne({
         where: { slug },
-        include: {
-          categories: {
+        include: [
+          {
+            model: Category,
+            as: 'categories',
             where: { isActive: true },
-            orderBy: { displayOrder: 'asc' },
-            include: {
-              items: {
+            required: false,
+            include: [
+              {
+                model: MenuItem,
+                as: 'items',
                 where: { isAvailable: true },
-                orderBy: { displayOrder: 'asc' },
-                include: {
-                  optionGroups: {
-                    include: {
-                      optionGroup: {
-                        include: {
-                          items: {
-                            orderBy: { displayOrder: 'asc' },
+                required: false,
+                include: [
+                  {
+                    model: MenuItemOptionGroup,
+                    as: 'optionGroups',
+                    include: [
+                      {
+                        model: OptionGroup,
+                        as: 'optionGroup',
+                        include: [
+                          {
+                            model: OptionItem,
+                            as: 'items',
+                            required: false,
                           },
-                        },
+                        ],
                       },
-                    },
+                    ],
                   },
-                },
+                ],
               },
-            },
+            ],
           },
-          deliveryZones: {
+          {
+            model: DeliveryZone,
+            as: 'deliveryZones',
             where: { isActive: true },
+            required: false,
           },
-          operatingHours: true,
-        },
+          {
+            model: OperatingHour,
+            as: 'operatingHours',
+            required: false,
+          },
+        ],
       });
 
       if (resto) {
-        // Format to normalized structure
-        return {
-          ...resto,
-          categories: resto.categories.map((cat) => ({
-            ...cat,
-            items: cat.items.map((item) => ({
-              ...item,
-              dietaryTags: item.dietaryTags ? item.dietaryTags.split(',') : [],
-              optionGroups: item.optionGroups.map((og) => ({
-                id: og.optionGroup.id,
-                name: og.optionGroup.name,
-                minSelections: og.optionGroup.minSelections,
-                maxSelections: og.optionGroup.maxSelections,
-                items: og.optionGroup.items,
-              })),
-            })),
-          })),
-        };
+        const restoJson = resto.get({ plain: true });
+
+        // Sort relations manually in memory to ensure correct order
+        if (restoJson.categories) {
+          restoJson.categories.sort((a, b) => a.displayOrder - b.displayOrder);
+          restoJson.categories.forEach((cat) => {
+            if (cat.items) {
+              cat.items.sort((a, b) => a.displayOrder - b.displayOrder);
+              cat.items.forEach((item) => {
+                // Parse dietary tags
+                item.dietaryTags = item.dietaryTags ? item.dietaryTags.split(',') : [];
+
+                if (item.optionGroups) {
+                  item.optionGroups.sort((a, b) => a.displayOrder - b.displayOrder);
+                  // Format option groups to fit expected data structure
+                  item.optionGroups = item.optionGroups.map((og) => {
+                    const group = og.optionGroup || {};
+                    const groupItems = group.items ? [...group.items] : [];
+                    groupItems.sort((a, b) => a.displayOrder - b.displayOrder);
+
+                    return {
+                      id: group.id,
+                      name: group.name,
+                      minSelections: group.minSelections,
+                      maxSelections: group.maxSelections,
+                      items: groupItems,
+                    };
+                  });
+                } else {
+                  item.optionGroups = [];
+                }
+              });
+            }
+          });
+        }
+
+        return restoJson;
       }
     }
   } catch (err) {
-    console.warn('Prisma DB query fallback to memory store:', err.message);
+    console.warn('Sequelize DB query fallback to memory store:', err.message);
   }
 
   // Fallback to runtime store
@@ -93,22 +146,32 @@ export async function getOrders(restaurantId = null) {
     const connected = await isDbConnected();
     if (connected) {
       const where = restaurantId ? { restaurantId } : {};
-      const orders = await prisma.order.findMany({
+      const orders = await Order.findAll({
         where,
-        orderBy: { createdAt: 'desc' },
-        include: {
-          items: {
-            include: {
-              selectedOptions: true,
-            },
+        order: [['createdAt', 'DESC']],
+        include: [
+          {
+            model: OrderItem,
+            as: 'items',
+            include: [
+              {
+                model: OrderItemOption,
+                as: 'selectedOptions',
+              },
+            ],
           },
-          invoice: true,
-        },
+          {
+            model: Invoice,
+            as: 'invoice',
+          },
+        ],
       });
-      if (orders && orders.length > 0) return orders;
+      if (orders && orders.length > 0) {
+        return orders.map((o) => o.get({ plain: true }));
+      }
     }
   } catch (err) {
-    console.warn('Prisma getOrders fallback:', err.message);
+    console.warn('Sequelize getOrders fallback:', err.message);
   }
 
   return globalStore.__orders;
@@ -119,26 +182,43 @@ export async function getOrderById(idOrOrderNum) {
   try {
     const connected = await isDbConnected();
     if (connected) {
-      const order = await prisma.order.findFirst({
+      const order = await Order.findOne({
         where: {
-          OR: [{ id: idOrOrderNum }, { orderNumber: idOrOrderNum }],
+          [Op.or]: [{ id: idOrOrderNum }, { orderNumber: idOrOrderNum }],
         },
-        include: {
-          items: {
-            include: {
-              selectedOptions: true,
-            },
+        include: [
+          {
+            model: OrderItem,
+            as: 'items',
+            include: [
+              {
+                model: OrderItemOption,
+                as: 'selectedOptions',
+              },
+            ],
           },
-          invoice: true,
-          statusLogs: {
-            orderBy: { timestamp: 'asc' },
+          {
+            model: Invoice,
+            as: 'invoice',
           },
-        },
+          {
+            model: OrderStatusLog,
+            as: 'statusLogs',
+          },
+        ],
       });
-      if (order) return order;
+      if (order) {
+        const orderJson = order.get({ plain: true });
+        if (orderJson.statusLogs) {
+          orderJson.statusLogs.sort(
+            (a, b) => new Date(a.timestamp) - new Date(b.timestamp)
+          );
+        }
+        return orderJson;
+      }
     }
   } catch (err) {
-    console.warn('Prisma getOrderById fallback:', err.message);
+    console.warn('Sequelize getOrderById fallback:', err.message);
   }
 
   return (
@@ -193,8 +273,8 @@ export async function createOrder(orderPayload) {
   try {
     const connected = await isDbConnected();
     if (connected) {
-      const dbOrder = await prisma.order.create({
-        data: {
+      const dbOrder = await Order.create(
+        {
           orderNumber: newOrder.orderNumber,
           restaurantId: newOrder.restaurantId,
           customerName: newOrder.customerName,
@@ -211,37 +291,48 @@ export async function createOrder(orderPayload) {
           totalAmount: newOrder.totalAmount,
           paymentMethod: newOrder.paymentMethod,
           paymentStatus: newOrder.paymentStatus,
-          items: {
-            create: newOrder.items.map((it) => ({
-              itemName: it.itemName,
-              itemPrice: it.itemPrice,
-              quantity: it.quantity,
-              itemTotal: it.itemTotal,
-              specialNotes: it.specialNotes,
-              selectedOptions: {
-                create: it.selectedOptions.map((opt) => ({
-                  groupName: opt.groupName,
-                  optionName: opt.optionName,
-                  optionPrice: opt.optionPrice,
-                })),
-              },
+          items: newOrder.items.map((it) => ({
+            itemName: it.itemName,
+            itemPrice: it.itemPrice,
+            quantity: it.quantity,
+            itemTotal: it.itemTotal,
+            specialNotes: it.specialNotes,
+            selectedOptions: it.selectedOptions.map((opt) => ({
+              groupName: opt.groupName,
+              optionName: opt.optionName,
+              optionPrice: opt.optionPrice,
             })),
-          },
-          statusLogs: {
-            create: [{ status: 'PENDING', note: 'Customer submitted new order' }],
-          },
+          })),
+          statusLogs: [
+            { status: 'PENDING', note: 'Customer submitted new order' },
+          ],
         },
-        include: {
-          items: { include: { selectedOptions: true } },
-        },
-      });
+        {
+          include: [
+            {
+              model: OrderItem,
+              as: 'items',
+              include: [
+                {
+                  model: OrderItemOption,
+                  as: 'selectedOptions',
+                },
+              ],
+            },
+            {
+              model: OrderStatusLog,
+              as: 'statusLogs',
+            },
+          ],
+        }
+      );
 
       // Update runtime store as well
       globalStore.__orders.unshift(newOrder);
-      return dbOrder;
+      return dbOrder.get({ plain: true });
     }
   } catch (err) {
-    console.warn('Prisma createOrder DB insert fallback:', err.message);
+    console.warn('Sequelize createOrder DB insert fallback:', err.message);
   }
 
   // Prepend to runtime store
@@ -286,29 +377,34 @@ export async function updateOrderStatus(orderId, { status, prepMinutes, rejectio
   try {
     const connected = await isDbConnected();
     if (connected) {
-      await prisma.order.update({
+      const updateData = { status };
+      if (status === 'ACCEPTED') {
+        updateData.acceptedAt = now;
+        if (estimatedReadyAt) {
+          updateData.estimatedReadyAt = new Date(estimatedReadyAt);
+        }
+      }
+      if (rejectionReason) {
+        updateData.rejectionReason = rejectionReason;
+      }
+
+      await Order.update(updateData, {
         where: { id: orderId },
-        data: {
-          status,
-          acceptedAt: status === 'ACCEPTED' ? now : undefined,
-          estimatedReadyAt: estimatedReadyAt ? new Date(estimatedReadyAt) : undefined,
-          rejectionReason: rejectionReason || undefined,
-          statusLogs: {
-            create: {
-              status,
-              note:
-                status === 'ACCEPTED'
-                  ? `Accepted with ${prepMinutes || 25} min prep time`
-                  : status === 'REJECTED'
-                  ? `Rejected: ${rejectionReason}`
-                  : `Order updated to ${status}`,
-            },
-          },
-        },
+      });
+
+      await OrderStatusLog.create({
+        orderId,
+        status,
+        note:
+          status === 'ACCEPTED'
+            ? `Accepted with ${prepMinutes || 25} min prep time`
+            : status === 'REJECTED'
+            ? `Rejected: ${rejectionReason}`
+            : `Order updated to ${status}`,
       });
     }
   } catch (err) {
-    console.warn('Prisma updateOrderStatus fallback:', err.message);
+    console.warn('Sequelize updateOrderStatus fallback:', err.message);
   }
 
   return globalStore.__orders[orderIndex] || null;
