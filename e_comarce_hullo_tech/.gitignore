@@ -55,3 +55,18 @@ CLAUDE.md
 
 # jetro (legacy?)
 .jetro/
+
+# Gemini IDE configurations
+.gemini/
+
+# Adobe Illustrator (AI) files
+*.ai
+
+# Archive / Zip files
+*.zip
+*.rar
+*.7z
+*.tar
+*.tar.gz
+*.gz
+
