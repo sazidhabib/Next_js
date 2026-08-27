@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Designer, Font } from "../../models/index.js";
+import { resolveFontUrl } from "../../lib/fontUtils";
 
 export const dynamic = "force-dynamic";
 
@@ -36,7 +37,7 @@ export default async function DesignersPage() {
             >
               {designer.photo && designer.photo.trim() !== "" ? (
                 <img
-                  src={designer.photo}
+                  src={resolveFontUrl(designer.photo)}
                   alt={designer.name}
                   className="w-20 h-20 rounded-full object-cover border border-white/10 mx-auto mb-4 group-hover:scale-105 transition-transform shadow-lg shadow-[#00e599]/10"
                 />

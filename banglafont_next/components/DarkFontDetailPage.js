@@ -653,7 +653,7 @@ function FontDetailPageContent({ font, relatedFonts = [] }) {
                 <div className="flex items-center gap-3">
                   {font.designer.photo && font.designer.photo.trim() !== "" ? (
                     <img
-                      src={font.designer.photo}
+                      src={resolveFontUrl(font.designer.photo)}
                       alt={font.designer.name}
                       className="w-10 h-10 rounded-full object-cover border border-border shrink-0"
                     />

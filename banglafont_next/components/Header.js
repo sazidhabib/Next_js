@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { IconSearch, IconShoppingCart, IconUser } from "./Icons";
+import { resolveFontUrl } from "../lib/fontUtils";
 
 export default function Header({ onMenuClick, theme, toggleTheme }) {
   const [search, setSearch] = useState("");
@@ -43,8 +44,8 @@ export default function Header({ onMenuClick, theme, toggleTheme }) {
 
         {/* Brand Logo */}
         <Link href="/" className="flex items-center gap-1.5 sm:gap-2.5 group shrink-0">
-          <div className="w-10 sm:w-30 sm:h-12 rounded-lg sm:rounded-xl flex items-center bg-black justify-center text-gray-955 font-black text-base sm:text-lg ">
-            <img src="/nexttype.png" alt="logo" className="w-full h-full object-cover rounded-lg sm:rounded-xl" />
+          <div className="w-10 h-10 sm:w-30 sm:h-12 rounded-lg sm:rounded-xl flex items-center bg-black justify-center text-gray-955 font-black text-base sm:text-lg ">
+            <img src="/next-type/nexttype.png" alt="logo" className="w-full h-full object-cover rounded-lg sm:rounded-xl" />
           </div>
           <span className="text-sm sm:text-lg font-bold tracking-tight text-foreground group-hover:text-[#00e599] transition-colors">
             Next<span className="text-[#00e599]">Type</span>
@@ -132,7 +133,7 @@ export default function Header({ onMenuClick, theme, toggleTheme }) {
               title="Dashboard"
             >
               {designer.photo ? (
-                <img src={designer.photo} alt={designer.name} className="w-full h-full object-cover" />
+                <img src={resolveFontUrl(designer.photo)} alt={designer.name} className="w-full h-full object-cover" />
               ) : (
                 <div className="w-full h-full bg-gradient-to-tr from-[#00e599] to-emerald-400 flex items-center justify-center text-gray-955 font-bold text-xs">
                   {designer.name.charAt(0)}

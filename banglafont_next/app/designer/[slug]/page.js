@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Designer, Font } from "../../../models/index.js";
 import FontCard from "../../../components/FontCard";
+import { resolveFontUrl } from "../../../lib/fontUtils";
 
 export const dynamic = "force-dynamic";
 
@@ -45,7 +46,7 @@ export default async function DesignerDetailPage({ params }) {
       <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6 mb-8 sm:mb-10">
         {plainDesigner.photo && plainDesigner.photo.trim() !== "" ? (
           <img
-            src={plainDesigner.photo}
+            src={resolveFontUrl(plainDesigner.photo)}
             alt={plainDesigner.name}
             className="w-16 h-16 sm:w-20 sm:h-20 rounded-full object-cover border border-white/10 shrink-0 shadow-lg shadow-[#00e599]/10"
           />

@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { toast } from "react-toastify";
+import { resolveFontUrl } from "../../../lib/fontUtils";
 
 // Helper components for icons to keep it completely self-contained
 function IconDashboard() {
@@ -268,7 +269,7 @@ export default function DesignerDashboard() {
         <div className="absolute top-0 right-0 w-64 h-64 bg-[#00e599]/5 blur-3xl rounded-full pointer-events-none" />
         <div className="flex items-center gap-4">
           {designer?.photo ? (
-            <img src={designer.photo} alt={designer.name} className="w-14 h-14 sm:w-16 sm:h-16 rounded-full object-cover border border-[#00e599]/30" />
+            <img src={resolveFontUrl(designer.photo)} alt={designer.name} className="w-14 h-14 sm:w-16 sm:h-16 rounded-full object-cover border border-[#00e599]/30" />
           ) : (
             <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gradient-to-br from-[#00e599] to-teal-500 flex items-center justify-center text-gray-955 font-black text-xl shadow-lg shadow-[#00e599]/20">
               {designer?.name.charAt(0)}

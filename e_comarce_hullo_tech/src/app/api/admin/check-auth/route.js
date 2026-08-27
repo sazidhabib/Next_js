@@ -13,15 +13,50 @@ export async function GET(req) {
 
         const token = authHeader.split(' ')[1];
 
-        // Forward the request to the Express backend
-        const backendUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000';
-        const response = await fetch(`${backendUrl}/api/auth/profile`, {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json',
-            },
-        });
+        const url = new URL(req.url);
+        const origin = url.origin;
+        
+        let response;
+        let fetchError;
+        
+        // 1. Try process.env.NEXT_PUBLIC_API_BASE_URL first if it's set
+        if (process.env.NEXT_PUBLIC_API_BASE_URL) {
+            try {
+                response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth/profile`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                    },
+                });
+            } catch (err) {
+                console.warn(`⚠️ Fetching profile using NEXT_PUBLIC_API_BASE_URL (${process.env.NEXT_PUBLIC_API_BASE_URL}) failed:`, err.message);
+                fetchError = err;
+            }
+        }
+        
+        // 2. If the first try didn't happen or failed to connect/respond ok, try using the request's own origin
+        if (!response || !response.ok) {
+            try {
+                console.log(`🔄 Attempting fallback profile fetch using request origin: ${origin}`);
+                const fallbackResponse = await fetch(`${origin}/api/auth/profile`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                    },
+                });
+                
+                if (fallbackResponse.ok || !response) {
+                    response = fallbackResponse;
+                }
+            } catch (err) {
+                console.error(`❌ Fallback profile fetch to ${origin} also failed:`, err.message);
+                if (!response) {
+                    throw fetchError || err;
+                }
+            }
+        }
 
         if (!response.ok) {
             return NextResponse.json(
