@@ -73,9 +73,7 @@ export default function AdminLogin() {
             </div>
             <h1 className="text-2xl font-bold text-slate-100 tracking-tight">HulloTech Admin</h1>
             <p className="text-sm text-slate-400 mt-1">Sign in to manage your e-commerce platform</p>
-            <p className="text-xs text-slate-500 mt-3 bg-slate-950/50 rounded-lg p-2 border border-slate-800">
-              Demo: <strong>admin@hullotech.com</strong> / <strong>admin123</strong>
-            </p>
+
           </div>
 
           {error && (

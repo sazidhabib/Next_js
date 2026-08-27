@@ -79,6 +79,8 @@ export default function Home() {
   const { addToCart } = useCart();
   const [newArrivals, setNewArrivals] = useState([]);
   const [loadingNewArrivals, setLoadingNewArrivals] = useState(true);
+  const [newArrivalsIndex, setNewArrivalsIndex] = useState(0);
+  const [visibleCount, setVisibleCount] = useState(5);
 
   useEffect(() => {
     const fetchNewArrivals = async () => {
@@ -88,21 +90,64 @@ export default function Home() {
         if (data.success && data.data && data.data.length > 0) {
           // Sort by id DESC to get last uploaded products first
           const sorted = [...data.data].sort((a, b) => b.id - a.id);
-          setNewArrivals(sorted.slice(0, 5));
+          setNewArrivals(sorted.slice(0, 10));
         } else {
           const sorted = [...mockProducts].sort((a, b) => b.id - a.id);
-          setNewArrivals(sorted.slice(0, 5));
+          setNewArrivals(sorted.slice(0, 10));
         }
       } catch (err) {
         console.error("Failed to fetch new arrivals:", err);
         const sorted = [...mockProducts].sort((a, b) => b.id - a.id);
-        setNewArrivals(sorted.slice(0, 5));
+        setNewArrivals(sorted.slice(0, 10));
       } finally {
         setLoadingNewArrivals(false);
       }
     };
     fetchNewArrivals();
   }, []);
+
+  useEffect(() => {
+    const updateVisibleCount = () => {
+      if (window.innerWidth < 768) {
+        setVisibleCount(2); // mobile
+      } else if (window.innerWidth < 1024) {
+        setVisibleCount(3); // tablet
+      } else {
+        setVisibleCount(5); // desktop
+      }
+    };
+    updateVisibleCount();
+    window.addEventListener("resize", updateVisibleCount);
+    return () => window.removeEventListener("resize", updateVisibleCount);
+  }, []);
+
+  useEffect(() => {
+    if (newArrivals.length === 0) return;
+    const interval = setInterval(() => {
+      setNewArrivalsIndex((prev) => {
+        const maxIndex = newArrivals.length - visibleCount;
+        if (maxIndex <= 0) return 0;
+        return prev >= maxIndex ? 0 : prev + 1;
+      });
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [newArrivals, visibleCount, newArrivalsIndex]);
+
+  const handleNewArrivalsNext = () => {
+    setNewArrivalsIndex((prev) => {
+      const maxIndex = newArrivals.length - visibleCount;
+      if (maxIndex <= 0) return 0;
+      return prev >= maxIndex ? 0 : prev + 1;
+    });
+  };
+
+  const handleNewArrivalsPrev = () => {
+    setNewArrivalsIndex((prev) => {
+      const maxIndex = newArrivals.length - visibleCount;
+      if (maxIndex <= 0) return 0;
+      return prev <= 0 ? maxIndex : prev - 1;
+    });
+  };
 
   useEffect(() => {
     const fetchSliderSettings = async () => {
@@ -413,70 +458,94 @@ export default function Home() {
               New Arrivals
             </h2>
           </div>
-          <Link
-            href="/new-arrivals"
-            className="hidden sm:inline-flex items-center gap-1 text-sm font-medium text-gray-400 hover:text-blue-600 transition-colors"
-          >
-            View All
-            <ChevronRight className="w-4 h-4" />
-          </Link>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleNewArrivalsPrev}
+              disabled={newArrivals.length <= visibleCount}
+              className="bg-gray-100 hover:bg-gray-200 disabled:opacity-50 disabled:hover:bg-gray-100 p-2.5 rounded-full text-gray-700 hover:text-blue-600 transition-all border border-gray-200 cursor-pointer"
+              aria-label="Previous Arrivals"
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </button>
+            <button
+              onClick={handleNewArrivalsNext}
+              disabled={newArrivals.length <= visibleCount}
+              className="bg-gray-100 hover:bg-gray-200 disabled:opacity-50 disabled:hover:bg-gray-100 p-2.5 rounded-full text-gray-700 hover:text-blue-600 transition-all border border-gray-200 cursor-pointer"
+              aria-label="Next Arrivals"
+            >
+              <ChevronRight className="w-5 h-5" />
+            </button>
+          </div>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6">
-          {loadingNewArrivals ? (
-            [1, 2, 3, 4, 5].map((item) => (
-              <div
-                key={item}
-                className="aspect-square bg-gradient-to-br from-slate-100 to-slate-200 rounded-xl animate-pulse"
-              />
-            ))
-          ) : (
-            newArrivals.map((product) => (
-              <Link
-                key={product.id}
-                href={`/${product.category}/${product.slug}`}
-                className="group block bg-white rounded-xl border border-gray-100 overflow-hidden hover:shadow-xl hover:border-gray-200 transition-all duration-500"
-              >
-                <div className="relative aspect-square bg-[#f8fafc] overflow-hidden">
-                  {product.image ? (
-                    <Image
-                      src={product.image}
-                      alt={product.name}
-                      fill
-                      className="object-cover group-hover:scale-105 transition-transform duration-700"
-                      sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 20vw"
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
-                      <span className="text-gray-300 font-medium">No Image</span>
+        <div className="overflow-hidden -mx-2 md:-mx-3">
+          <div
+            className="flex transition-transform duration-500 ease-in-out"
+            style={{
+              transform: `translateX(-${newArrivalsIndex * (100 / visibleCount)}%)`,
+            }}
+          >
+            {loadingNewArrivals ? (
+              [1, 2, 3, 4, 5].map((item) => (
+                <div
+                  key={item}
+                  className="flex-shrink-0 w-1/2 md:w-1/3 lg:w-1/5 px-2 md:px-3"
+                >
+                  <div className="aspect-square bg-gradient-to-br from-slate-100 to-slate-200 rounded-xl animate-pulse" />
+                </div>
+              ))
+            ) : (
+              newArrivals.map((product) => (
+                <div
+                  key={product.id}
+                  className="flex-shrink-0 w-1/2 md:w-1/3 lg:w-1/5 px-2 md:px-3"
+                >
+                  <Link
+                    href={`/${product.category}/${product.slug}`}
+                    className="group block bg-white rounded-xl border border-gray-100 overflow-hidden hover:shadow-xl hover:border-gray-200 transition-all duration-500 h-full"
+                  >
+                    <div className="relative aspect-square bg-[#f8fafc] overflow-hidden">
+                      {product.image ? (
+                        <Image
+                          src={product.image}
+                          alt={product.name}
+                          fill
+                          className="object-cover group-hover:scale-105 transition-transform duration-700"
+                          sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 20vw"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
+                          <span className="text-gray-300 font-medium">No Image</span>
+                        </div>
+                      )}
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/[0.02] transition-colors duration-500" />
+                      <span className="absolute top-3 left-3 bg-blue-600 text-white text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">
+                        New
+                      </span>
+                      <div className="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0">
+                        <button
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            addToCart(product, 1);
+                          }}
+                          className="flex items-center gap-1.5 bg-white/90 backdrop-blur-sm text-gray-900 text-xs font-semibold px-3 py-2 rounded-full shadow-lg hover:bg-blue-600 hover:text-white transition-all cursor-pointer active:scale-95 border-0"
+                        >
+                          <ShoppingCart className="w-3.5 h-3.5" />
+                          Add to Cart
+                        </button>
+                      </div>
                     </div>
-                  )}
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/[0.02] transition-colors duration-500" />
-                  <span className="absolute top-3 left-3 bg-blue-600 text-white text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">
-                    New
-                  </span>
-                  <div className="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0">
-                    <button
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        addToCart(product, 1);
-                      }}
-                      className="flex items-center gap-1.5 bg-white/90 backdrop-blur-sm text-gray-900 text-xs font-semibold px-3 py-2 rounded-full shadow-lg hover:bg-blue-600 hover:text-white transition-all cursor-pointer active:scale-95 border-0"
-                    >
-                      <ShoppingCart className="w-3.5 h-3.5" />
-                      Add to Cart
-                    </button>
-                  </div>
+                    <div className="p-4">
+                      <h3 className="text-sm font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors leading-snug">
+                        {product.name}
+                      </h3>
+                      <p className="text-lg font-bold text-gray-900">৳{product.price}</p>
+                    </div>
+                  </Link>
                 </div>
-                <div className="p-4">
-                  <h3 className="text-sm font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors leading-snug">
-                    {product.name}
-                  </h3>
-                  <p className="text-lg font-bold text-gray-900">৳{product.price}</p>
-                </div>
-              </Link>
-            ))
-          )}
+              ))
+            )}
+          </div>
         </div>
       </section>
 
