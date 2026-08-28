@@ -1,0 +1,43 @@
+{
+  "name": "hullo-tech",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently \"npm run dev:next\" \"npm run dev:server\"",
+    "dev:next": "next dev",
+    "dev:server": "cross-env DISABLE_NEXT=true nodemon server.js",
+    "build": "next build",
+    "start": "cross-env NODE_ENV=production node server.js",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "clsx": "^2.1.1",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "framer-motion": "^11.0.0",
+    "lucide-react": "^0.395.0",
+    "mysql2": "^3.22.3",
+    "next": "^15.3.3",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "sequelize": "^6.37.8",
+    "tailwind-merge": "^2.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "autoprefixer": "^10.4.0",
+    "concurrently": "^10.0.3",
+    "cross-env": "^10.1.0",
+    "eslint": "^8.57.0",
+    "eslint-config-next": "^15.3.3",
+    "nodemon": "^3.1.0",
+    "postcss": "^8.5.4",
+    "tailwindcss": "^3.4.0"
+  },
+  "overrides": {
+    "postcss": "^8.5.4"
+  }
+}

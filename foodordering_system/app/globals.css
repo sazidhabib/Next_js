@@ -55,13 +55,33 @@ body {
   animation: ring-pulse 1.8s infinite cubic-bezier(0.4, 0, 0.6, 1);
 }
 
-@keyframes urgent-pulse {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.85; transform: scale(1.03); }
+@keyframes urgent-bg-blink {
+  0%, 100% {
+    background-color: #ea580c; /* Orange 600 */
+  }
+  50% {
+    background-color: #d97706; /* Amber 600 */
+  }
 }
 
-.animate-urgent {
-  animation: urgent-pulse 1s infinite ease-in-out;
+.animate-urgent-bg {
+  animation: urgent-bg-blink 1.5s infinite ease-in-out;
+}
+
+@keyframes urgent-content-zoom {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.06);
+  }
+}
+
+.animate-urgent-content {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  animation: urgent-content-zoom 1.5s infinite ease-in-out;
 }
 
 /* Thermal Receipt 80mm Print Media Styles */

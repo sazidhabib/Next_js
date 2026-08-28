@@ -1,6 +1,12 @@
 import { Sequelize, DataTypes } from 'sequelize';
 
-const connectionString = process.env.DATABASE_URL || 'mysql://root:@localhost:3306/foodordering_db';
+const dbHost = process.env.DB_HOST || 'localhost';
+const dbUser = process.env.DB_USER || 'root';
+const dbPassword = process.env.DB_PASSWORD || '';
+const dbName = process.env.DB_NAME || 'foodordering_db';
+const dbPort = process.env.DB_PORT || process.env.Db_port || '3306';
+
+const connectionString = process.env.DATABASE_URL || `mysql://${dbUser}:${dbPassword}@${dbHost}:${dbPort}/${dbName}`;
 
 const globalForSequelize = globalThis;
 
@@ -831,6 +837,43 @@ Invoice.belongsTo(Restaurant, { foreignKey: 'restaurantId', as: 'restaurant' });
 Restaurant.hasMany(InvoiceTemplate, { foreignKey: 'restaurantId', onDelete: 'CASCADE' });
 InvoiceTemplate.belongsTo(Restaurant, { foreignKey: 'restaurantId', as: 'restaurant' });
 
+let dbInitPromise = null;
+
+export async function ensureDatabaseReady() {
+  if (dbInitPromise) return dbInitPromise;
+
+  dbInitPromise = (async () => {
+    try {
+      console.log('🔄 [DB Init] Checking database tables...');
+      // Syncs missing tables, does not drop existing tables
+      await sequelize.sync({ force: false });
+      console.log('✅ [DB Init] Database tables checked/created.');
+
+      // Check if we need to seed default data (e.g. if the users table has 0 users)
+      const userCount = await User.count();
+      if (userCount === 0) {
+        console.log('🌱 [DB Init] Users table is empty. Seeding default data...');
+        const { seedDatabaseWithoutForce } = await import('./sequelizeSeed.js');
+        await seedDatabaseWithoutForce();
+        console.log('✅ [DB Init] Seeding completed.');
+      } else {
+        console.log('ℹ️ [DB Init] Database already has data. Skipping seeding.');
+      }
+    } catch (error) {
+      console.error('❌ [DB Init] Database initialization failed:', error);
+      dbInitPromise = null; // Reset promise to allow retry on next access if it failed
+      throw error;
+    }
+  })();
+
+  return dbInitPromise;
+}
+
+// Automatically trigger on import in a non-blocking floating promise
+ensureDatabaseReady().catch((err) => {
+  console.error('⚠️ [DB Init] Auto database initialization failed:', err);
+});
+
 export default {
   sequelize,
   User,
@@ -849,4 +892,5 @@ export default {
   OrderStatusLog,
   Invoice,
   InvoiceTemplate,
+  ensureDatabaseReady,
 };

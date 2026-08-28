@@ -1,5 +1,11 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { ensureDatabaseReady } from "@/lib/sequelize";
+
+// Trigger database check and seeding on server load
+ensureDatabaseReady().catch((err) => {
+  console.error("⚠️ [Startup] Auto-initialization of DB failed:", err);
+});
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

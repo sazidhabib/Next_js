@@ -208,11 +208,13 @@ export default function LiveOrdersReceiver() {
 
       {/* Urgent Incoming Orders Banner */}
       {pendingOrders.length > 0 && (
-        <div className="bg-linear-to-r from-orange-600 via-amber-600 to-orange-600 text-white px-4 py-2.5 text-center font-bold text-xs sm:text-sm flex items-center justify-center gap-2 animate-urgent shadow-lg">
-          <Bell className="w-4 h-4 animate-bounce" />
-          <span>
-            {pendingOrders.length} New Incoming Order(s) waiting for acceptance!
-          </span>
+        <div className="animate-urgent-bg text-white px-4 py-2.5 text-center font-bold text-xs sm:text-sm flex items-center justify-center shadow-lg">
+          <div className="animate-urgent-content">
+            <Bell className="w-4 h-4 animate-bounce" />
+            <span>
+              {pendingOrders.length} New Incoming Order(s) waiting for acceptance!
+            </span>
+          </div>
         </div>
       )}
 

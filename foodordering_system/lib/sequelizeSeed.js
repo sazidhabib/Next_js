@@ -18,19 +18,7 @@ import {
   Invoice,
   InvoiceTemplate,
 } from './sequelize.js';
-
-export async function seedDatabase() {
-  console.log('🌱 Starting database seed via Sequelize...');
-
-  // 1. Clean existing records in reverse dependency order
-  try {
-    // Drop / Sync tables to ensure clean slate
-    await sequelize.sync({ force: true });
-    console.log('🧹 Cleaned and synchronized tables.');
-  } catch (err) {
-    console.log('Note: DB clean/sync skipped:', err.message);
-  }
-
+export async function seedDatabaseWithoutForce() {
   // 2. Hash default password
   const passwordHash = await bcrypt.hash('password123', 10);
 
@@ -636,3 +624,19 @@ export async function seedDatabase() {
   console.log('📦 Sample orders & invoices created.');
   console.log('🎉 Seed complete!');
 }
+
+export async function seedDatabase() {
+  console.log('🌱 Starting database seed via Sequelize...');
+
+  // 1. Clean existing records in reverse dependency order
+  try {
+    // Drop / Sync tables to ensure clean slate
+    await sequelize.sync({ force: true });
+    console.log('🧹 Cleaned and synchronized tables.');
+  } catch (err) {
+    console.log('Note: DB clean/sync skipped:', err.message);
+  }
+
+  await seedDatabaseWithoutForce();
+}
+
