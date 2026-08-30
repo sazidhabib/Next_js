@@ -1,4 +1,4 @@
-// File: G:\Github\Next_js\e_comarce_hullo_tech\src\app\admin\dashboard\page.jsx
+// File: D:\Github\e_comarce_hullo_tech\src\app\admin\dashboard\page.jsx
 import * as entry from '../../../../../src/app/admin/dashboard/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 

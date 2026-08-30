@@ -1,4 +1,4 @@
-// File: G:\Github\Next_js\e_comarce_hullo_tech\src\app\api\admin\check-auth\route.js
+// File: D:\Github\e_comarce_hullo_tech\src\app\api\admin\check-auth\route.js
 import * as entry from '../../../../../../src/app/api/admin/check-auth/route.js'
 import type { NextRequest } from 'next/server.js'
 

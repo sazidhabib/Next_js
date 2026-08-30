@@ -1,5 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  images: {
+    unoptimized: true,
+  },
   serverExternalPackages: ['mysql2', 'sequelize'],
   async rewrites() {
     if (process.env.NODE_ENV === 'production') {

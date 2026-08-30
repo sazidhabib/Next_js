@@ -10,9 +10,24 @@ const categoryRouter = require('./category-router');
 const productRouter = require('./product-router');
 const orderRouter = require('./order-router');
 
+const sequelize = require('../db/database');
+
 // Health Check Route
-router.get('/health', (req, res) => {
-    res.status(200).json({ success: true, message: 'API is running successfully' });
+router.get('/health', async (req, res) => {
+    let dbStatus = 'Disconnected';
+    if (sequelize) {
+        try {
+            await sequelize.authenticate();
+            dbStatus = 'Connected';
+        } catch (err) {
+            dbStatus = `Failed: ${err.message}`;
+        }
+    }
+    res.status(200).json({ 
+        success: true, 
+        message: 'API is running successfully',
+        database: dbStatus
+    });
 });
 
 // Raw Multipart Image Upload Endpoint

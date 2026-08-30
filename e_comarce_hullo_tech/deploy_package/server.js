@@ -70,7 +70,11 @@ const setupExpress = () => {
 
   // API Routes
   const apiRouter = require("./router");
-  app.use("/api", apiRouter);
+  app.use("/api", (req, res, next) => {
+    res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+    next();
+  }, apiRouter);
+
 
   // Error Handling Middleware (Keep before Next.js handler)
   app.use(errorMiddleware);
