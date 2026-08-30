@@ -2,6 +2,7 @@
 
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import { Home } from "lucide-react";
 import { useState, useEffect, use } from "react";
 import { products as mockProducts, categories as mockCategories } from "../../../data/mockData";
 import SubCategoryHeader from "../../../components/SubCategoryHeader";
@@ -77,15 +78,30 @@ export default function CategoryPage({ params }) {
   }
 
   return (
-    <main className="min-h-screen bg-star-light-gray text-star-text pt-24 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-      <div className="mb-8">
+    <main className="min-h-screen bg-star-light-gray text-star-text pt-20 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+      {/* Breadcrumb */}
+      <section className="mb-6">
+        <ul className="flex items-center gap-2 text-sm text-gray-500">
+          <li>
+            <Link href="/" className="hover:text-blue-600 flex items-center gap-1 transition-colors">
+              <Home className="w-3.5 h-3.5" />
+            </Link>
+          </li>
+          <li className="flex items-center gap-2">
+            <span className="text-gray-300">/</span>
+            <span className="text-gray-900 font-semibold">{category.name}</span>
+          </li>
+        </ul>
+      </section>
+
+      <div className="mb-6">
         <h1 className="text-3xl font-semibold mb-2">{category.name}</h1>
         <p className="text-gray-600">
           Explore our collection of premium {category.name.toLowerCase()} technology.
         </p>
       </div>
 
-      <SubCategoryHeader />
+      <SubCategoryHeader customCategory={slug} />
 
       <div className="grid md:grid-cols-3 lg:grid-cols-4 gap-4">
         {categoryProducts.map((product) => (

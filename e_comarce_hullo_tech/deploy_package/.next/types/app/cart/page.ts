@@ -1,4 +1,4 @@
-// File: D:\Github\e_comarce_hullo_tech\src\app\cart\page.jsx
+// File: G:\Github\Next_js\e_comarce_hullo_tech\src\app\cart\page.jsx
 import * as entry from '../../../../src/app/cart/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 

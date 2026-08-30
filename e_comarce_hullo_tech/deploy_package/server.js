@@ -90,18 +90,24 @@ const setupExpress = () => {
         // Ensure the database exists before connecting
         try {
           const mysql2 = require("mysql2/promise");
+          const dbHost = process.env.MYSQL_HOST || process.env.DB_HOST || "localhost";
+          const dbUser = process.env.MYSQL_USER || process.env.DB_USER || "root";
+          const dbPassword = process.env.MYSQL_PASSWORD !== undefined ? process.env.MYSQL_PASSWORD : (process.env.DB_PASSWORD !== undefined ? process.env.DB_PASSWORD : "");
+          const dbDatabase = process.env.MYSQL_DATABASE || process.env.DB_NAME || "hullotech";
+          const dbPort = process.env.MYSQL_PORT || process.env.Db_port || 3306;
+
           const connection = await mysql2.createConnection({
-            host: process.env.DB_HOST || "localhost",
-            port: process.env.Db_port || 3306,
-            user: process.env.DB_USER,
-            password: process.env.DB_PASSWORD || "",
+            host: dbHost,
+            port: dbPort,
+            user: dbUser,
+            password: dbPassword,
           });
           await connection.query(
-            `CREATE DATABASE IF NOT EXISTS \`${process.env.DB_NAME || "hullotech"}\`;`,
+            `CREATE DATABASE IF NOT EXISTS \`${dbDatabase}\`;`,
           );
           await connection.end();
           console.log(
-            `✅ Database "${process.env.DB_NAME || "hullotech"}" ensured.`,
+            `✅ Database "${dbDatabase}" ensured.`,
           );
         } catch (dbCreateError) {
           console.warn(

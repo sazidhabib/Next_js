@@ -98,7 +98,7 @@
         "transform": "lodash/{{member}}"
       }
     },
-    "outputFileTracingRoot": "D:\\Github\\e_comarce_hullo_tech",
+    "outputFileTracingRoot": "G:\\Github\\Next_js\\e_comarce_hullo_tech",
     "experimental": {
       "useSkewCookie": false,
       "cacheLife": {
@@ -157,7 +157,7 @@
       "middlewarePrefetch": "flexible",
       "optimisticClientCache": true,
       "manualClientBasePath": false,
-      "cpus": 7,
+      "cpus": 15,
       "memoryBasedWorkersCount": false,
       "imgOptConcurrency": null,
       "imgOptTimeoutInSeconds": 7,
@@ -292,7 +292,7 @@
       "sequelize"
     ],
     "turbopack": {
-      "root": "D:\\Github\\e_comarce_hullo_tech"
+      "root": "G:\\Github\\Next_js\\e_comarce_hullo_tech"
     },
     "_originalRewrites": {
       "beforeFiles": [],
@@ -300,7 +300,7 @@
       "fallback": []
     }
   },
-  "appDir": "D:\\Github\\e_comarce_hullo_tech",
+  "appDir": "G:\\Github\\Next_js\\e_comarce_hullo_tech",
   "relativeAppDir": "",
   "files": [
     ".next\\routes-manifest.json",
