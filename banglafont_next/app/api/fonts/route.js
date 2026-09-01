@@ -20,26 +20,38 @@ export async function GET(request) {
     ];
   }
 
-  const { rows: fonts, count: total } = await Font.findAndCountAll({
-    where,
-    include: [
-      { model: Designer, as: "designer" },
-      { model: Developer, as: "developer" },
-    ],
-    order: [["downloadCount", "DESC"]],
-    offset,
-    limit,
-  });
-
-  return NextResponse.json({
-    fonts: fonts.map((f) => formatFont(f.toJSON())),
-    pagination: {
-      page,
+  try {
+    const { rows: fonts, count: total } = await Font.findAndCountAll({
+      where,
+      include: [
+        { model: Designer, as: "designer" },
+        { model: Developer, as: "developer" },
+      ],
+      order: [["downloadCount", "DESC"]],
+      offset,
       limit,
-      total,
-      totalPages: Math.ceil(total / limit),
-    },
-  });
+    });
+
+    return NextResponse.json({
+      fonts: fonts.map((f) => formatFont(f.toJSON())),
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    });
+  } catch (error) {
+    console.error("API /api/fonts error:", error.message);
+    return NextResponse.json(
+      {
+        fonts: [],
+        pagination: { page, limit, total: 0, totalPages: 0 },
+        error: error.message,
+      },
+      { status: 500 }
+    );
+  }
 }
 
 function formatFont(font) {

@@ -9,41 +9,54 @@ import DownloadMarquee from "../components/DownloadMarquee";
 export const dynamic = "force-dynamic";
 
 async function getHomeData() {
-  const [totalFonts, totalDownloads, featuredFonts, topFonts, allFonts, newFonts] = await Promise.all([
-    Font.count({ where: { published: true } }),
-    Font.sum("downloadCount", { where: { published: true } }),
-    Font.findAll({
-      where: { published: true, featured: true },
-      include: [{ model: Designer, as: "designer" }],
-      order: [["downloadCount", "DESC"]],
-      limit: 8,
-    }),
-    Font.findAll({
-      where: { published: true },
-      include: [{ model: Designer, as: "designer" }],
-      order: [["downloadCount", "DESC"]],
-      limit: 6,
-    }),
-    Font.findAll({
-      where: { published: true },
-      attributes: ["id", "name", "banglaName", "slug", "style", "fontFileUrl"],
-      order: [["name", "ASC"]],
-    }),
-    Font.findAll({
-      where: { published: true },
-      include: [{ model: Designer, as: "designer" }],
-      order: [["createdAt", "DESC"]],
-      limit: 8,
-    }),
-  ]);
-  return {
-    totalFonts,
-    totalDownloads: totalDownloads || 0,
-    featuredFonts: featuredFonts.map((f) => f.toJSON()),
-    topFonts: topFonts.map((f) => f.toJSON()),
-    allFonts: allFonts.map((f) => f.toJSON()),
-    newFonts: newFonts.map((f) => f.toJSON()),
-  };
+  try {
+    const [totalFonts, totalDownloads, featuredFonts, topFonts, allFonts, newFonts] = await Promise.all([
+      Font.count({ where: { published: true } }),
+      Font.sum("downloadCount", { where: { published: true } }),
+      Font.findAll({
+        where: { published: true, featured: true },
+        include: [{ model: Designer, as: "designer" }],
+        order: [["downloadCount", "DESC"]],
+        limit: 8,
+      }),
+      Font.findAll({
+        where: { published: true },
+        include: [{ model: Designer, as: "designer" }],
+        order: [["downloadCount", "DESC"]],
+        limit: 6,
+      }),
+      Font.findAll({
+        where: { published: true },
+        attributes: ["id", "name", "banglaName", "slug", "style", "fontFileUrl"],
+        order: [["name", "ASC"]],
+      }),
+      Font.findAll({
+        where: { published: true },
+        include: [{ model: Designer, as: "designer" }],
+        order: [["createdAt", "DESC"]],
+        limit: 8,
+      }),
+    ]);
+    return {
+      totalFonts: totalFonts || 0,
+      totalDownloads: totalDownloads || 0,
+      featuredFonts: (featuredFonts || []).map((f) => f.toJSON()),
+      topFonts: (topFonts || []).map((f) => f.toJSON()),
+      allFonts: (allFonts || []).map((f) => f.toJSON()),
+      newFonts: (newFonts || []).map((f) => f.toJSON()),
+    };
+  } catch (error) {
+    console.error("Database connection/query error in HomePage:", error.message);
+    return {
+      totalFonts: 0,
+      totalDownloads: 0,
+      featuredFonts: [],
+      topFonts: [],
+      allFonts: [],
+      newFonts: [],
+      dbError: error.message,
+    };
+  }
 }
 
 export default async function HomePage() {

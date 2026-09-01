@@ -29,14 +29,20 @@ export default async function FreeFontsPage({ searchParams }) {
     where.style = style;
   }
 
-  const { rows: fontRows, count: total } = await Font.findAndCountAll({
-    where,
-    include: [{ model: Designer, as: "designer" }],
-    order: [["downloadCount", "DESC"]],
-    limit,
-  });
-
-  const fonts = fontRows.map((f) => f.toJSON());
+  let fonts = [];
+  let total = 0;
+  try {
+    const { rows: fontRows, count: totalCount } = await Font.findAndCountAll({
+      where,
+      include: [{ model: Designer, as: "designer" }],
+      order: [["downloadCount", "DESC"]],
+      limit,
+    });
+    fonts = fontRows.map((f) => f.toJSON());
+    total = totalCount;
+  } catch (error) {
+    console.error("FreeFonts DB Error:", error.message);
+  }
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6">

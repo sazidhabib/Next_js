@@ -45,7 +45,7 @@ export default function Header({ onMenuClick, theme, toggleTheme }) {
         {/* Brand Logo */}
         <Link href="/" className="flex items-center gap-1.5 sm:gap-2.5 group shrink-0">
           <div className="w-10 h-10 sm:w-30 sm:h-12 rounded-lg sm:rounded-xl flex items-center bg-black justify-center text-gray-955 font-black text-base sm:text-lg ">
-            <img src="/next-type/nexttype.png" alt="logo" className="w-full h-full object-cover rounded-lg sm:rounded-xl" />
+            <img src={resolveFontUrl("/nexttype.png")} alt="logo" className="w-full h-full object-cover rounded-lg sm:rounded-xl" />
           </div>
           <span className="text-sm sm:text-lg font-bold tracking-tight text-foreground group-hover:text-[#00e599] transition-colors">
             Next<span className="text-[#00e599]">Type</span>

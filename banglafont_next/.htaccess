@@ -1,5 +1,5 @@
 # ==============================================================================
-# Next.js cPanel Configuration for https://tools.nextdigit.dev/next-type
+# Next.js cPanel Configuration for https://fonts.nextdigit.dev
 # ==============================================================================
 
 <IfModule mod_rewrite.c>
@@ -17,7 +17,7 @@
 # ------------------------------------------------------------------------------
 # PassengerAppType node
 # PassengerStartupFile server.js
-# PassengerBaseURI /next-type
+# PassengerBaseURI /
 
 # ------------------------------------------------------------------------------
 # 2. OPTION B: If Using Apache Reverse Proxy (mod_proxy) to Local Port
@@ -25,9 +25,9 @@
 # ------------------------------------------------------------------------------
 # <IfModule mod_proxy.c>
 #     RewriteEngine On
-#     RewriteRule ^next-type$ /next-type/ [R=301,L]
-#     RewriteRule ^next-type/(.*)$ http://127.0.0.1:3000/next-type/$1 [P,L]
-#     ProxyPassReverse /next-type http://127.0.0.1:3000/next-type
+#     RewriteCond %{REQUEST_URI} !^/\.well-known/
+#     RewriteRule ^(.*)$ http://127.0.0.1:3000/$1 [P,L]
+#     ProxyPassReverse / http://127.0.0.1:3000/
 # </IfModule>
 
 # ------------------------------------------------------------------------------

@@ -1,5 +1,8 @@
 # 🚀 NextType — Google Ranking & SEO Master Plan
 
+admin@fontbd.com
+admin123
+
 > **লক্ষ্য:** গুগল সার্চে "Bangla Font", "বাংলা ফন্ট ডাউনলোড", নির্দিষ্ট ফন্টের নাম এবং টাইপোগ্রাফি সম্পর্কিত সকল সার্চে **NextType**-কে প্রথম পেজে র‍্যাংক করানো।
 
 ---
