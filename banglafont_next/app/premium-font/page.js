@@ -10,14 +10,20 @@ export const metadata = {
   },
 };
 
-export default async function PremiumFontPage() {
-  const fontRows = await Font.findAll({
-    where: { published: true, fontType: "PREMIUM" },
-    include: [{ model: Designer, as: "designer" }],
-    order: [["downloadCount", "DESC"]],
-  });
+export const dynamic = "force-dynamic";
 
-  const fonts = fontRows.map((f) => f.toJSON());
+export default async function PremiumFontPage() {
+  let fonts = [];
+  try {
+    const fontRows = await Font.findAll({
+      where: { published: true, fontType: "PREMIUM" },
+      include: [{ model: Designer, as: "designer" }],
+      order: [["downloadCount", "DESC"]],
+    });
+    fonts = fontRows.map((f) => f.toJSON());
+  } catch (error) {
+    console.error("PremiumFont DB Error:", error.message);
+  }
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-8">
