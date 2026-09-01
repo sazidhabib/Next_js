@@ -17,7 +17,8 @@ import {
   LogOut,
   X,
   FileImage,
-  ClipboardList
+  ClipboardList,
+  Image as ImageIcon
 } from 'lucide-react';
 import Link from 'next/link';
 import RichTextEditor from '../../../components/RichTextEditor';

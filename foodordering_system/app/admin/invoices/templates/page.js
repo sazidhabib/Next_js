@@ -102,7 +102,7 @@ export default function InvoiceTemplatesPage() {
               isPaid: true,
               orderOnline: true,
               contactDetails: true,
-              infoBox1: false,
+              infoBox1: true,
               infoBox2: false,
               infoBox3: false,
               clientConfirmation: false,
@@ -211,7 +211,7 @@ export default function InvoiceTemplatesPage() {
             isPaid: true,
             orderOnline: true,
             contactDetails: true,
-            infoBox1: false,
+            infoBox1: true,
             infoBox2: false,
             infoBox3: false,
             clientConfirmation: false,
@@ -278,21 +278,21 @@ export default function InvoiceTemplatesPage() {
       editingTemplate.type === 'CUSTOMER'
         ? [
             { key: 'paymentMethod', label: 'Payment method' },
-            { key: 'time', label: 'Time & Fulfillment' },
+            { key: 'time', label: 'Time' },
             { key: 'estimatedDriveTime', label: 'Estimated drive time (delivery only)' },
-            { key: 'direction', label: 'Direction & QR code (delivery only)' },
-            { key: 'onPremiseNumber', label: 'On premise order number' },
-            { key: 'orderDetails', label: 'Order details meta' },
-            { key: 'clientInfo', label: 'Client info details' },
-            { key: 'clientComment', label: 'Client comment/notes' },
-            { key: 'items', label: 'Order items listing' },
-            { key: 'isPaid', label: 'Is Paid/Unpaid footer checkbox' },
-            { key: 'orderOnline', label: 'Order online banner' },
-            { key: 'contactDetails', label: 'Store contact details' },
-            { key: 'infoBox1', label: 'Custom Info box 1' },
-            { key: 'infoBox2', label: 'Custom Info box 2' },
-            { key: 'infoBox3', label: 'Custom Info box 3' },
-            { key: 'clientConfirmation', label: 'Client confirmation signature space' },
+            { key: 'direction', label: 'Direction (delivery only)' },
+            { key: 'onPremiseNumber', label: 'On premise number' },
+            { key: 'orderDetails', label: 'Order details' },
+            { key: 'clientInfo', label: 'Client info' },
+            { key: 'clientComment', label: 'Client comment' },
+            { key: 'items', label: 'Items' },
+            { key: 'isPaid', label: 'Is Paid' },
+            { key: 'orderOnline', label: 'Order online' },
+            { key: 'contactDetails', label: 'Contact details' },
+            { key: 'infoBox1', label: 'Your info box 1' },
+            { key: 'infoBox2', label: 'Your info box 2' },
+            { key: 'infoBox3', label: 'Your info box 3' },
+            { key: 'clientConfirmation', label: 'Client confirmation' },
           ]
         : [
             { key: 'header', label: 'Top Header banner (ASAP/Delivery details)' },
@@ -398,30 +398,29 @@ export default function InvoiceTemplatesPage() {
       return (
         <div
           style={{ fontSize: fs }}
-          className="bg-white text-slate-900 p-6 shadow-2xl rounded-sm border-t-8 border-orange-500 font-sans max-w-[360px] mx-auto space-y-4 text-left transition-all"
+          className="bg-white text-slate-900 px-5 pb-6 pt-3 shadow-2xl rounded-b-sm font-sans max-w-[340px] mx-auto space-y-4 text-left relative transition-all"
         >
-          {/* Header Store Profile */}
-          <div className="text-center border-b border-dashed border-slate-300 pb-3 space-y-1">
-            <h3 className="font-extrabold text-sm uppercase tracking-wider">
-              {selectedRestaurant?.name || 'Bella Vista Gourmet'}
-            </h3>
-            <p className="text-[10px] text-slate-500">
-              742 Evergreen Terrace, San Francisco, CA
-            </p>
-          </div>
+          {/* Serrated top edge */}
+          <div
+            className="absolute top-[-6px] left-0 w-full h-[6px] bg-repeat-x"
+            style={{
+              backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpolygon points='0,6 5,0 10,6' fill='%23ffffff'/%3E%3C/svg%3E")`,
+              backgroundSize: '10px 6px',
+            }}
+          />
 
           {/* Payment Method Option */}
           {getSectionVal('paymentMethod', 'visible', true) && (
             <div
               style={{ fontSize: `${getSectionVal('paymentMethod', 'fontSize', 11)}px` }}
-              className="bg-slate-100 p-2.5 rounded border border-slate-200 space-y-0.5"
+              className="space-y-0"
             >
-              <span className="block font-bold text-[9px] uppercase tracking-wider text-slate-500">
-                Payment Method
-              </span>
-              <div className="flex justify-between font-extrabold">
-                <span>CARD ONLINE</span>
-                <span>EXP 2026-12 ending in 5452</span>
+              <div className="bg-black text-white px-2 py-1 font-bold uppercase text-left tracking-wide">
+                Cash
+              </div>
+              <div className="border border-black p-2 font-bold flex justify-between">
+                <span>EXP 2020-12</span>
+                <span>ending in 5452</span>
               </div>
             </div>
           )}
@@ -430,10 +429,10 @@ export default function InvoiceTemplatesPage() {
           {getSectionVal('time', 'visible', true) && (
             <div
               style={{ fontSize: `${getSectionVal('time', 'fontSize', 11)}px` }}
-              className="bg-slate-100 p-2.5 rounded border border-slate-200 flex justify-between items-center font-extrabold"
+              className="bg-black text-white px-2 py-1 font-bold text-[11px] uppercase flex justify-between items-center tracking-wide"
             >
-              <span>ASAP Delivery</span>
-              <span className="bg-slate-900 text-white text-[9px] px-2 py-0.5 rounded">60 MIN</span>
+              <span>ASAP</span>
+              <span>60 min</span>
             </div>
           )}
 
@@ -441,10 +440,15 @@ export default function InvoiceTemplatesPage() {
           {getSectionVal('estimatedDriveTime', 'visible', true) && (
             <div
               style={{ fontSize: `${getSectionVal('estimatedDriveTime', 'fontSize', 11)}px` }}
-              className="border border-slate-200 p-2.5 rounded space-y-1"
+              className="space-y-0"
             >
-              <span className="block font-bold text-[9px] text-slate-500 uppercase">Estimated Drive Time</span>
-              <p className="font-bold">~10 mins (Calculated at 20:45)</p>
+              <div className="bg-black text-white px-2 py-1 font-bold uppercase flex justify-between items-center tracking-wide">
+                <span>Estimated drive time</span>
+                <span>~ 10min</span>
+              </div>
+              <div className="border border-black p-2 leading-tight text-slate-800">
+                Traffic situation on 25 August at 02:41 was taken into consideration.
+              </div>
             </div>
           )}
 
@@ -452,23 +456,35 @@ export default function InvoiceTemplatesPage() {
           {getSectionVal('direction', 'visible', true) && (
             <div
               style={{ fontSize: `${getSectionVal('direction', 'fontSize', 11)}px` }}
-              className="border border-slate-200 p-2.5 rounded flex items-center gap-3"
+              className="space-y-0"
             >
-              <div className="flex-1 space-y-0.5">
-                <span className="block font-bold text-[9px] text-slate-500 uppercase">Delivery Address</span>
-                <p className="font-bold leading-tight">14th Test Street, Longbridge, Apt 5B</p>
+              <div className="bg-black text-white px-2 py-1 font-bold uppercase flex justify-between items-center tracking-wide">
+                <span>Delivery</span>
+                <span>North 1km</span>
               </div>
-              <div className="w-12 h-12 bg-slate-100 border border-slate-300 rounded flex items-center justify-center text-[8px] font-bold">
-                [QR CODE]
+              <div className="border border-black p-3 space-y-3">
+                <div className="font-bold leading-tight text-slate-800">
+                  <p>14th Test Street, Longbridge</p>
+                  <p>1st Floor, Apartment 5B</p>
+                </div>
+                <div className="flex justify-center pt-1">
+                  <img
+                    src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(
+                      "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent("14th Test Street, Longbridge, 1st Floor, Apartment 5B")
+                    )}`}
+                    alt="Google Maps Navigation QR Code"
+                    className="w-16 h-16"
+                  />
+                </div>
               </div>
             </div>
           )}
 
           {/* On premise order number */}
-          {getSectionVal('onPremiseNumber', 'visible', true) && (
+          {getSectionVal('onPremiseNumber', 'visible', false) && (
             <div
               style={{ fontSize: `${getSectionVal('onPremiseNumber', 'fontSize', 20)}px` }}
-              className="border-b border-dashed border-slate-200 pb-2 text-center"
+              className="border-b border-dashed border-slate-300 pb-2 text-center"
             >
               <span className="text-[10px] text-slate-500 uppercase font-bold">On Premise Order Number</span>
               <h4 className="font-black">#{getSectionVal('onPremiseNumber', 'value', '472')}</h4>
@@ -479,16 +495,26 @@ export default function InvoiceTemplatesPage() {
           {getSectionVal('orderDetails', 'visible', true) && (
             <div
               style={{ fontSize: `${getSectionVal('orderDetails', 'fontSize', 10)}px` }}
-              className="grid grid-cols-2 gap-2 text-[10px] border-b border-dashed border-slate-200 pb-2"
+              className="space-y-1 text-[10px]"
             >
-              <div>
-                <span className="block font-bold text-slate-500 uppercase">Order Ref</span>
-                <span className="font-bold">ORD-9284920</span>
+              <h5 className="font-extrabold text-slate-900">Order details:</h5>
+              <div className="flex justify-between">
+                <span className="text-slate-500">Number:</span>
+                <span className="font-bold">1</span>
               </div>
-              <div>
-                <span className="block font-bold text-slate-500 uppercase">Placed At</span>
-                <span className="font-bold">25 August at 20:04</span>
+              <div className="flex justify-between">
+                <span className="text-slate-500">Placed at:</span>
+                <span className="font-bold">25 August at 01:40</span>
               </div>
+              <div className="flex justify-between">
+                <span className="text-slate-500">Accepted at:</span>
+                <span className="font-bold">25 August at 01:41</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-500">Fulfillment at:</span>
+                <span className="font-bold">25 August at 02:41</span>
+              </div>
+              <div className="border-t border-dashed border-slate-300 my-2" />
             </div>
           )}
 
@@ -496,12 +522,26 @@ export default function InvoiceTemplatesPage() {
           {getSectionVal('clientInfo', 'visible', true) && (
             <div
               style={{ fontSize: `${getSectionVal('clientInfo', 'fontSize', 10)}px` }}
-              className="space-y-0.5 text-[10px] border-b border-dashed border-slate-200 pb-2"
+              className="space-y-1 text-[10px]"
             >
-              <span className="block font-bold text-slate-500 uppercase">Client Info</span>
-              <p className="font-extrabold text-slate-800">Emma Watson</p>
-              <p className="text-slate-600">+1 (555) 019-8765</p>
-              <p className="text-slate-600">customer@example.com</p>
+              <h5 className="font-extrabold text-slate-900">Client info:</h5>
+              <div className="flex justify-between">
+                <span className="text-slate-500">First name:</span>
+                <span className="font-bold">Abdul</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-500">Last name:</span>
+                <span className="font-bold">Noman</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-500">Email:</span>
+                <span className="font-bold">admin@paprikalongbridge.co.uk</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-500">Phone:</span>
+                <span className="font-bold">+44 121 453 1122</span>
+              </div>
+              <div className="border-t border-dashed border-slate-300 my-2" />
             </div>
           )}
 
@@ -509,9 +549,13 @@ export default function InvoiceTemplatesPage() {
           {getSectionVal('clientComment', 'visible', true) && (
             <div
               style={{ fontSize: `${getSectionVal('clientComment', 'fontSize', 10)}px` }}
-              className="bg-yellow-50 border border-yellow-200 p-2 rounded text-[10px] font-medium text-yellow-800"
+              className="space-y-2 text-[10px] text-slate-900"
             >
-              💡 <span className="font-bold">Client comment:</span> "Please call 123 at the intercom system. No mushrooms, please!"
+              <div className="border-t border-black" />
+              <p className="font-bold flex items-center gap-1.5 py-0.5">
+                <span className="text-xs">💬</span> Please call 123 at the intercom system.
+              </p>
+              <div className="border-b border-black" />
             </div>
           )}
 
@@ -519,42 +563,70 @@ export default function InvoiceTemplatesPage() {
           {getSectionVal('items', 'visible', true) && (
             <div
               style={{ fontSize: `${getSectionVal('items', 'fontSize', 12)}px` }}
-              className="space-y-2 border-b border-dashed border-slate-200 pb-3"
+              className="space-y-3"
             >
-              <span className="block font-bold text-slate-500 uppercase text-[9px] tracking-wider">Items Ordered</span>
-              <div className="space-y-2">
+              <h5 className="font-extrabold text-slate-900 text-[10px]">Items:</h5>
+              <div className="space-y-3">
                 <div>
                   <div className="flex justify-between font-bold">
                     <span>2x Pizza Prosciutto</span>
-                    <span>$23.20</span>
+                    <span>11.60</span>
                   </div>
-                  <div className="pl-3 text-[9.5px] text-slate-500">
-                    <p>Size: Small, Crust: Fluffy</p>
-                    <p>Toppings: Extra mozzarella (+ $1.50)</p>
+                  <div className="pl-3 text-[10px] text-slate-650 space-y-0.5 mt-0.5">
+                    <p>Size: Small</p>
+                    <p>Crust: Fluffy</p>
+                    <p>Toppings: Extra mozzarella (+1.50)</p>
+                  </div>
+                  {getSectionVal('clientComment', 'visible', true) && (
+                    <p className="pl-3 text-[10px] font-bold text-slate-900 flex items-center gap-1 mt-1">
+                      <span>💬</span> No mushrooms, please!
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Custom Info box 1 styled as the Promo/Combo Block from screenshot */}
+          {getSectionVal('infoBox1', 'visible', false) && (
+            <div
+              style={{ fontSize: `${getSectionVal('infoBox1', 'fontSize', 10)}px` }}
+              className="border border-black p-3.5 space-y-2 text-[10px]"
+            >
+              <p className="font-extrabold text-black leading-snug">Two medium pizzas for the 9.00 price of one</p>
+              <div>
+                <span className="inline-block bg-black text-white text-[9px] px-2 py-0.5 rounded-sm font-bold uppercase">
+                  You saved: £8.00
+                </span>
+              </div>
+              <div className="border-t border-dotted border-black/40 my-2" />
+              <div className="space-y-2">
+                <div>
+                  <div className="flex justify-between items-center font-bold">
+                    <span>Pizza Prosciutto</span>
+                    <span className="w-3.5 h-3.5 border border-black rounded-full flex items-center justify-center text-[9px] font-bold">✓</span>
+                  </div>
+                  <div className="pl-3 text-[9px] text-slate-500">
+                    <p>Size: Medium (+3.00)</p>
+                    <p>Crust: Fluffy</p>
+                    <p>💬 No mushrooms, please!</p>
                   </div>
                 </div>
                 <div>
-                  <div className="flex justify-between font-bold">
-                    <span>1x Pizza Pepperoni</span>
-                    <span>$11.99</span>
+                  <div className="flex justify-between items-center font-bold">
+                    <span>Pizza Pepperoni</span>
+                    <span className="w-3.5 h-3.5 border border-black rounded-full flex items-center justify-center text-[9px] font-bold">✓</span>
                   </div>
-                  <div className="pl-3 text-[9.5px] text-slate-500">
-                    <p>Size: Medium, Crust: Crispy</p>
+                  <div className="pl-3 text-[9px] text-slate-500">
+                    <p>Size: Medium (+3.00)</p>
+                    <p>Crust: Crispy</p>
                   </div>
                 </div>
               </div>
             </div>
           )}
 
-          {/* Custom Info boxes */}
-          {getSectionVal('infoBox1', 'visible', false) && (
-            <div
-              style={{ fontSize: `${getSectionVal('infoBox1', 'fontSize', 10)}px` }}
-              className="border border-slate-300 p-2 rounded text-[10px] text-center font-bold"
-            >
-              ℹ️ Custom Information Box 1 Details
-            </div>
-          )}
+          {/* Custom Info boxes 2 & 3 */}
           {getSectionVal('infoBox2', 'visible', false) && (
             <div
               style={{ fontSize: `${getSectionVal('infoBox2', 'fontSize', 10)}px` }}
@@ -584,18 +656,14 @@ export default function InvoiceTemplatesPage() {
           )}
 
           {/* Financial Summary */}
-          <div className="space-y-1.5 text-[10px] text-slate-600 pt-1.5">
-            <div className="flex justify-between">
+          <div className="space-y-1.5 text-[11px] text-slate-800 border-t border-dashed border-slate-300 pt-3">
+            <div className="flex justify-between font-bold">
               <span>Sub-total:</span>
-              <span>$35.19</span>
+              <span>£20.60</span>
             </div>
-            <div className="flex justify-between">
-              <span>Tax (8.5%):</span>
-              <span>$2.99</span>
-            </div>
-            <div className="flex justify-between font-extrabold text-slate-900 border-t border-slate-100 pt-1">
-              <span>Total Amount:</span>
-              <span>$38.18</span>
+            <div className="flex justify-between font-black text-slate-900 text-xs">
+              <span>Total:</span>
+              <span>£20.60</span>
             </div>
           </div>
 
@@ -603,15 +671,15 @@ export default function InvoiceTemplatesPage() {
           {getSectionVal('isPaid', 'visible', true) && (
             <div
               style={{ fontSize: `${getSectionVal('isPaid', 'fontSize', 10)}px` }}
-              className="flex items-center justify-center gap-6 border border-slate-300 p-2 rounded-lg text-[10px] font-bold"
+              className="flex items-center justify-center gap-8 border border-black p-3 text-[10px] font-bold"
             >
               <div className="flex items-center gap-1.5">
-                <input type="checkbox" id="mockPaid" defaultChecked />
-                <label htmlFor="mockPaid">Paid</label>
+                <span className="w-3.5 h-3.5 border border-black inline-block" />
+                <span>Paid</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <input type="checkbox" id="mockNotPaid" />
-                <label htmlFor="mockNotPaid">Not Paid</label>
+                <span className="w-3.5 h-3.5 border border-black inline-flex items-center justify-center text-[9px] font-bold">✓</span>
+                <span>Not Paid</span>
               </div>
             </div>
           )}
@@ -619,10 +687,11 @@ export default function InvoiceTemplatesPage() {
           {/* Order Online Banner */}
           {getSectionVal('orderOnline', 'visible', true) && (
             <div
-              style={{ fontSize: `${getSectionVal('orderOnline', 'fontSize', 10)}px` }}
-              className="bg-slate-900 text-white text-center p-2 rounded text-[10px] font-bold"
+              style={{ fontSize: `${getSectionVal('orderOnline', 'fontSize', 11)}px` }}
+              className="border border-black p-3 text-center text-[10px] font-bold uppercase tracking-wider"
             >
-              Order Online: paprikalongbridge.co.uk
+              <p className="text-[9px] text-slate-500 font-bold lowercase normal-case mb-0.5">Order online:</p>
+              <p className="font-extrabold text-black tracking-normal">paprikalongbridge.co.uk</p>
             </div>
           )}
 
@@ -632,8 +701,8 @@ export default function InvoiceTemplatesPage() {
               style={{ fontSize: `${getSectionVal('contactDetails', 'fontSize', 9)}px` }}
               className="text-center text-[9px] text-slate-400 border-t border-slate-100 pt-2"
             >
-              <p>Email: info@bellavistapizzeria.com</p>
-              <p>Phone: +1 (555) 345-6789</p>
+              <p>Email: admin@paprikalongbridge.co.uk</p>
+              <p>Phone: +44 121 453 1122</p>
             </div>
           )}
         </div>
@@ -670,14 +739,14 @@ export default function InvoiceTemplatesPage() {
           {/* Header Banner - Black Blocks with White Text */}
           {headerVisible && (
             <div style={{ fontSize: headerFs }} className="space-y-1">
-              <div className="bg-black text-white px-3 py-1 font-bold text-xs uppercase text-left">
+              <div className="bg-black text-white px-3 py-1 font-bold uppercase text-left">
                 Delivery
               </div>
-              <div className="bg-black text-white px-3 py-1 font-bold text-xs uppercase flex justify-between">
+              <div className="bg-black text-white px-3 py-1 font-bold uppercase flex justify-between">
                 <span>ASAP</span>
                 <span>60 min</span>
               </div>
-              <div className="bg-black text-white px-3 py-1 font-bold text-xs uppercase text-left">
+              <div className="bg-black text-white px-3 py-1 font-bold uppercase text-left">
                 25 August at 02:43
               </div>
             </div>

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
-import { getOrders, createOrder } from '@/lib/dataStore';
+import { getOrders, createOrder, getOrderById } from '@/lib/dataStore';
+import { autoPrintKitchenReceipt } from '@/lib/printerService';
 
 export async function GET(request) {
   try {
@@ -35,6 +36,18 @@ export async function POST(request) {
     }
 
     const order = await createOrder(body);
+
+    // Asynchronously trigger ESC/POS kitchen print
+    getOrderById(order.id).then((fullOrder) => {
+      if (fullOrder) {
+        autoPrintKitchenReceipt(fullOrder).catch(err => {
+          console.error('Failed to auto print kitchen receipt:', err);
+        });
+      }
+    }).catch(err => {
+      console.error('Failed to get full order details for print:', err);
+    });
+
     return NextResponse.json({ success: true, data: order }, { status: 201 });
   } catch (error) {
     console.error('Error creating order:', error);

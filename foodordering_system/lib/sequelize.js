@@ -167,6 +167,14 @@ export const Restaurant = sequelize.define('Restaurant', {
     type: DataTypes.STRING,
     allowNull: true,
   },
+  kitchenPrinterIp: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  kitchenPrinterPort: {
+    type: DataTypes.INTEGER,
+    defaultValue: 9100,
+  },
 }, {
   tableName: 'restaurants',
 });
@@ -848,6 +856,19 @@ export async function ensureDatabaseReady() {
       // Syncs missing tables, does not drop existing tables
       await sequelize.sync({ force: false });
       console.log('✅ [DB Init] Database tables checked/created.');
+
+      // Ensure new printer fields exist on restaurants table
+      try {
+        const [results] = await sequelize.query("SHOW COLUMNS FROM restaurants LIKE 'kitchenPrinterIp'");
+        if (results.length === 0) {
+          console.log('➕ [DB Init] Adding kitchenPrinterIp and kitchenPrinterPort columns to restaurants table...');
+          await sequelize.query("ALTER TABLE restaurants ADD COLUMN kitchenPrinterIp VARCHAR(255) NULL");
+          await sequelize.query("ALTER TABLE restaurants ADD COLUMN kitchenPrinterPort INT DEFAULT 9100");
+          console.log('✅ [DB Init] Columns added.');
+        }
+      } catch (err) {
+        console.warn('⚠️ [DB Init] Warning checking/adding printer columns:', err.message);
+      }
 
       // Check if we need to seed default data (e.g. if the users table has 0 users)
       const userCount = await User.count();

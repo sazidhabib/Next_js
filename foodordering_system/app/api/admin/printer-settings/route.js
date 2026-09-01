@@ -23,7 +23,7 @@ export async function GET(request) {
 
     const restaurant = await Restaurant.findOne({
       where: { id: restaurantId },
-      attributes: ['activeCustomerTemplateId', 'activeKitchenTemplateId'],
+      attributes: ['activeCustomerTemplateId', 'activeKitchenTemplateId', 'kitchenPrinterIp', 'kitchenPrinterPort'],
     });
 
     if (!restaurant) {
@@ -45,7 +45,7 @@ export async function PUT(request) {
     }
 
     const body = await request.json();
-    const { restaurantId, activeCustomerTemplateId, activeKitchenTemplateId } = body;
+    const { restaurantId, activeCustomerTemplateId, activeKitchenTemplateId, kitchenPrinterIp, kitchenPrinterPort } = body;
 
     if (!restaurantId) {
       return NextResponse.json({ success: false, error: 'Restaurant ID is required' }, { status: 400 });
@@ -73,13 +73,15 @@ export async function PUT(request) {
     await Restaurant.update({
       activeCustomerTemplateId: activeCustomerTemplateId || null,
       activeKitchenTemplateId: activeKitchenTemplateId || null,
+      kitchenPrinterIp: kitchenPrinterIp || null,
+      kitchenPrinterPort: kitchenPrinterPort ? parseInt(kitchenPrinterPort) : 9100,
     }, {
       where: { id: restaurantId },
     });
 
     const updated = await Restaurant.findOne({
       where: { id: restaurantId },
-      attributes: ['activeCustomerTemplateId', 'activeKitchenTemplateId'],
+      attributes: ['activeCustomerTemplateId', 'activeKitchenTemplateId', 'kitchenPrinterIp', 'kitchenPrinterPort'],
     });
 
     return NextResponse.json({
@@ -87,6 +89,8 @@ export async function PUT(request) {
       data: {
         activeCustomerTemplateId: updated.activeCustomerTemplateId,
         activeKitchenTemplateId: updated.activeKitchenTemplateId,
+        kitchenPrinterIp: updated.kitchenPrinterIp,
+        kitchenPrinterPort: updated.kitchenPrinterPort,
       },
     });
   } catch (error) {
