@@ -1,6 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from "react";
+import { toast } from "react-toastify";
 
 const CartContext = createContext(undefined);
 
@@ -32,7 +33,7 @@ export function CartProvider({ children }) {
     }
   }, [cart, isLoaded]);
 
-  const addToCart = (product, qty = 1) => {
+  const addToCart = (product, qty = 1, showToast = true) => {
     setCart((prevCart) => {
       const existingItemIndex = prevCart.findIndex(
         (item) => item.product.id === product.id
@@ -49,10 +50,18 @@ export function CartProvider({ children }) {
 
       return [...prevCart, { product, quantity: qty }];
     });
+
+    if (showToast) {
+      toast.success(`Added "${product?.name || "Product"}" to cart!`);
+    }
   };
 
-  const removeFromCart = (productId) => {
+  const removeFromCart = (productId, showToast = true) => {
+    const itemToRemove = cart.find((item) => item.product.id === productId);
     setCart((prevCart) => prevCart.filter((item) => item.product.id !== productId));
+    if (showToast && itemToRemove) {
+      toast.info(`Removed "${itemToRemove.product?.name || "Item"}" from cart`);
+    }
   };
 
   const updateQuantity = (productId, qty) => {
@@ -67,8 +76,11 @@ export function CartProvider({ children }) {
     );
   };
 
-  const clearCart = () => {
+  const clearCart = (showToast = false) => {
     setCart([]);
+    if (showToast) {
+      toast.info("Cart cleared");
+    }
   };
 
   const cartCount = cart.reduce((total, item) => total + item.quantity, 0);

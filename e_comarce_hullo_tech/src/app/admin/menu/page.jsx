@@ -18,6 +18,7 @@ import {
   Link as LinkIcon
 } from 'lucide-react';
 import AdminSidebar from '../../../components/AdminSidebar';
+import { toast } from 'react-toastify';
 
 export default function AdminMenu() {
   const { isAuthorized, user, token, isLoading: authLoading } = useAdminAuth();
@@ -79,9 +80,11 @@ export default function AdminMenu() {
   const showNotification = (msg, isSuccess = true) => {
     if (isSuccess) {
       setSuccess(msg);
+      toast.success(msg);
       setTimeout(() => setSuccess(''), 4000);
     } else {
       setError(msg);
+      toast.error(msg);
       setTimeout(() => setError(''), 4000);
     }
   };

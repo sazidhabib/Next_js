@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { toast } from 'react-toastify';
 import {
   Settings,
   Clock,
@@ -101,16 +102,20 @@ export default function AdminSettingsPage() {
 
       if (data.success && data.data) {
         setSavedSuccess(true);
+        toast.success('Restaurant settings saved successfully!');
         setRestaurant(data.data);
         if (selectedRestaurant?.id === restaurant?.id) {
           selectRestaurant(data.data);
         }
         setTimeout(() => setSavedSuccess(false), 3000);
       } else {
-        setSaveError(data.error || 'Failed to save configuration');
+        const errorMsg = data.error || 'Failed to save configuration';
+        setSaveError(errorMsg);
+        toast.error(errorMsg);
       }
     } catch (err) {
       setSaveError('Network error saving settings');
+      toast.error('Network error saving settings');
     }
   };
 

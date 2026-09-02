@@ -6,6 +6,7 @@ import Image from "next/image";
 import { useCart } from "../../lib/CartContext";
 import { CreditCard, Truck, CheckCircle, ArrowLeft, Loader2, DollarSign } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { toast } from "react-toastify";
 
 export default function CheckoutPage() {
   const { cart, cartSubtotal, clearCart, isLoaded } = useCart();
@@ -59,6 +60,7 @@ export default function CheckoutPage() {
     e.preventDefault();
     if (cart.length === 0) {
       setError("Your cart is empty");
+      toast.error("Your cart is empty");
       return;
     }
 
@@ -101,12 +103,17 @@ export default function CheckoutPage() {
           ...data.data,
           items: enrichedItems
         });
-        clearCart();
+        clearCart(false);
+        toast.success("Order placed successfully!");
       } else {
-        setError(data.message || "Failed to place order. Please try again.");
+        const errMsg = data.message || "Failed to place order. Please try again.";
+        setError(errMsg);
+        toast.error(errMsg);
       }
     } catch (err) {
-      setError("An error occurred. Please check your internet connection and try again.");
+      const errMsg = "An error occurred. Please check your internet connection and try again.";
+      setError(errMsg);
+      toast.error(errMsg);
       console.error(err);
     } finally {
       setLoading(false);

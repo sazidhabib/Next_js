@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Lock, Mail, AlertCircle, Eye, EyeOff } from 'lucide-react';
+import { toast } from 'react-toastify';
 
 export default function AdminLogin() {
   const [email, setEmail] = useState('');
@@ -45,14 +46,20 @@ export default function AdminLogin() {
           role: data.data.role
         })}; path=/; max-age=${4 * 60 * 60}; SameSite=Strict`;
 
+        toast.success("Welcome back! Logging in...");
+
         // Redirect to dashboard
         router.push('/admin');
       } else {
-        setError(data.message || 'Invalid credentials');
+        const msg = data.message || 'Invalid credentials';
+        setError(msg);
+        toast.error(msg);
       }
     } catch (err) {
       console.error('Login error:', err);
-      setError('Something went wrong. Please check your connection.');
+      const msg = 'Something went wrong. Please check your connection.';
+      setError(msg);
+      toast.error(msg);
     } finally {
       setLoading(false);
     }

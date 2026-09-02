@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Mail, Phone, User, MessageSquare } from "lucide-react";
+import { toast } from "react-toastify";
 
 export default function ServiceContactForm() {
   const [formData, setFormData] = useState({
@@ -24,6 +25,7 @@ export default function ServiceContactForm() {
     // TODO: Connect to backend API
     console.log("Form submitted:", formData);
     setSubmitted(true);
+    toast.success("Service request submitted! Our technician will reach out shortly.");
     setTimeout(() => {
       setSubmitted(false);
       setFormData({ name: "", email: "", phone: "", device: "", issue: "" });

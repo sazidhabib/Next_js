@@ -16,7 +16,7 @@ export async function GET(request, { params }) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { id } = params;
+    const { id } = await params;
     const template = await InvoiceTemplate.findOne({
       where: { id },
     });
@@ -39,7 +39,7 @@ export async function PUT(request, { params }) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { id } = params;
+    const { id } = await params;
     const body = await request.json();
     const { name, fontSize, config } = body;
 
@@ -75,7 +75,7 @@ export async function DELETE(request, { params }) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { id } = params;
+    const { id } = await params;
     
     // Check if the template is set as active on any restaurant to prevent broken references
     const activeOnRestaurant = await Restaurant.findOne({

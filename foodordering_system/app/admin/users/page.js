@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { toast } from 'react-toastify';
 import {
   Users,
   ShieldCheck,
@@ -78,9 +79,11 @@ export default function AdminUsersPage() {
   const showToast = (type, msg) => {
     if (type === 'success') {
       setSuccess(msg);
+      toast.success(msg);
       setTimeout(() => setSuccess(''), 4000);
     } else {
       setError(msg);
+      toast.error(msg);
       setTimeout(() => setError(''), 4000);
     }
   };

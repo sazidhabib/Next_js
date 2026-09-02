@@ -7,6 +7,7 @@ import {
   AlignCenter, AlignRight, RefreshCw
 } from 'lucide-react';
 import MediaLibraryModal from './MediaLibraryModal';
+import { toast } from 'react-toastify';
 
 export default function RichTextEditor({ value, onChange, placeholder = "Enter product description..." }) {
   const editorRef = useRef(null);
@@ -94,7 +95,7 @@ export default function RichTextEditor({ value, onChange, placeholder = "Enter p
         videoId = match[2];
         embedHtml = `<div class="rich-video-container my-4 relative aspect-[16/9] w-full max-w-2xl mx-auto rounded-xl overflow-hidden shadow-lg"><iframe src="https://www.youtube.com/embed/${videoId}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen class="absolute inset-0 w-full h-full"></iframe></div>`;
       } else {
-        alert("Invalid YouTube URL. Please use watch link or embed code.");
+        toast.error("Invalid YouTube URL. Please use watch link or embed code.");
         return;
       }
     }

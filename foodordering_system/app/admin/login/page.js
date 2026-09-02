@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { toast } from 'react-toastify';
 import { ChefHat, Lock, Mail, ArrowRight, ShieldCheck, AlertCircle } from 'lucide-react';
 
 export default function AdminLoginPage() {
@@ -25,14 +26,18 @@ export default function AdminLoginPage() {
 
       const data = await res.json();
       if (!res.ok || !data.success) {
-        setError(data.error || 'Invalid credentials');
+        const errMsg = data.error || 'Invalid credentials';
+        setError(errMsg);
+        toast.error(errMsg);
       } else {
+        toast.success('Signed in successfully!');
         // Redirect to admin overview page
         router.push('/admin');
         router.refresh();
       }
     } catch (err) {
       setError('An error occurred. Please try again.');
+      toast.error('An error occurred. Please try again.');
     } finally {
       setLoading(false);
     }

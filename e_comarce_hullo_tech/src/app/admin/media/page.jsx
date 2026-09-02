@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import AdminSidebar from '../../../components/AdminSidebar';
+import { toast } from 'react-toastify';
 
 export default function AdminMedia() {
   const { isAuthorized, user, token, isLoading: authLoading } = useAdminAuth();
@@ -50,9 +51,11 @@ export default function AdminMedia() {
   const showNotification = (message, isSuccess = true) => {
     if (isSuccess) {
       setSuccess(message);
+      toast.success(message);
       setTimeout(() => setSuccess(''), 4000);
     } else {
       setError(message);
+      toast.error(message);
       setTimeout(() => setError(''), 4000);
     }
   };

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { toast } from 'react-toastify';
 import {
   X,
   Trash2,
@@ -112,23 +113,26 @@ export default function CartDrawer({
 
     if (cartItems.length === 0) {
       setErrorMessage('Your cart is empty.');
+      toast.warning('Your cart is empty.');
       return;
     }
 
     if (isBelowMinimum) {
-      setErrorMessage(
-        `Minimum order for this delivery zone is $${minOrderAmount.toFixed(2)}. Please add $${amountNeededForMin.toFixed(2)} more.`
-      );
+      const msg = `Minimum order for this delivery zone is $${minOrderAmount.toFixed(2)}. Please add $${amountNeededForMin.toFixed(2)} more.`;
+      setErrorMessage(msg);
+      toast.warning(msg);
       return;
     }
 
     if (!customerName.trim() || !customerPhone.trim()) {
       setErrorMessage('Please enter your name and phone number.');
+      toast.warning('Please enter your name and phone number.');
       return;
     }
 
     if (serviceType === 'DELIVERY' && !deliveryAddress.trim()) {
       setErrorMessage('Please enter your delivery address.');
+      toast.warning('Please enter your delivery address.');
       return;
     }
 
@@ -163,6 +167,7 @@ export default function CartDrawer({
 
       if (data.success && data.data) {
         playSuccessSound();
+        toast.success('Order placed successfully!');
         onClearCart();
         onClose();
         
@@ -180,21 +185,26 @@ export default function CartDrawer({
               return;
             } else {
               setErrorMessage('Order placed but online payment failed: ' + (stripeData.error || 'Unknown error'));
+              toast.error(stripeData.error || 'Online payment initialization failed');
               router.push(`/order/${data.data.id}`);
             }
           } catch (stripeErr) {
             console.error('Online payment redirect error:', stripeErr);
+            toast.error('Could not redirect to payment provider');
             router.push(`/order/${data.data.id}`);
           }
         } else {
           router.push(`/order/${data.data.id || data.data.orderNumber}`);
         }
       } else {
-        setErrorMessage(data.error || 'Failed to place order.');
+        const errorMsg = data.error || 'Failed to place order.';
+        setErrorMessage(errorMsg);
+        toast.error(errorMsg);
       }
     } catch (err) {
       console.error('Checkout error:', err);
       setErrorMessage('Network error during checkout. Please try again.');
+      toast.error('Network error during checkout. Please try again.');
     } finally {
       setIsSubmitting(false);
     }

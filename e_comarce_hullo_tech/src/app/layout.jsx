@@ -1,5 +1,6 @@
 import { Inter } from "next/font/google";
 import "./globals.css";
+import "react-toastify/dist/ReactToastify.css";
 import PageLayout from "../components/PageLayout";
 import { Providers } from "../components/Providers";
 

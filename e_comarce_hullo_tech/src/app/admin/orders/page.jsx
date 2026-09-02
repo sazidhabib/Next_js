@@ -28,6 +28,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import AdminSidebar from '../../../components/AdminSidebar';
+import { toast } from 'react-toastify';
 
 export default function AdminOrders() {
   const { isAuthorized, user, token, isLoading: authLoading } = useAdminAuth();
@@ -126,6 +127,7 @@ export default function AdminOrders() {
       const data = await res.json();
       if (data.success) {
         setSuccess(`Order #${orderId} updated to ${newStatus}`);
+        toast.success(`Order #${orderId} updated to ${newStatus}`);
         // Update local state
         setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status: newStatus } : o));
         if (selectedOrder && selectedOrder.id === orderId) {
@@ -133,11 +135,15 @@ export default function AdminOrders() {
         }
         setTimeout(() => setSuccess(''), 4000);
       } else {
-        setError(data.message || 'Failed to update order status.');
+        const msg = data.message || 'Failed to update order status.';
+        setError(msg);
+        toast.error(msg);
         setTimeout(() => setError(''), 4000);
       }
     } catch (err) {
-      setError('Network error occurred.');
+      const msg = 'Network error occurred.';
+      setError(msg);
+      toast.error(msg);
       setTimeout(() => setError(''), 4000);
     } finally {
       setActionLoading(false);

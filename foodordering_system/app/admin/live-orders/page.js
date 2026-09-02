@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { toast } from 'react-toastify';
 import Link from 'next/link';
 import {
   Bell,
@@ -71,11 +72,15 @@ export default function LiveOrdersReceiver() {
       });
       const json = await res.json();
       if (json.success) {
+        toast.success(`Order accepted (${prepMinutes} min prep time)!`);
         setSelectedOrder(null);
         fetchLiveOrders();
+      } else {
+        toast.error(json.error || 'Failed to accept order');
       }
     } catch (err) {
       console.error('Error accepting order:', err);
+      toast.error('Network error accepting order');
     }
   };
 
@@ -88,11 +93,15 @@ export default function LiveOrdersReceiver() {
       });
       const json = await res.json();
       if (json.success) {
+        toast.info(`Order status updated to ${status}`);
         setSelectedOrder(null);
         fetchLiveOrders();
+      } else {
+        toast.error(json.error || 'Failed to update order status');
       }
     } catch (err) {
       console.error('Error updating order:', err);
+      toast.error('Network error updating order status');
     }
   };
 
@@ -109,12 +118,16 @@ export default function LiveOrdersReceiver() {
       });
       const json = await res.json();
       if (json.success) {
+        toast.warning('Order rejected');
         setRejectModalOpen(false);
         setSelectedOrder(null);
         fetchLiveOrders();
+      } else {
+        toast.error(json.error || 'Failed to reject order');
       }
     } catch (err) {
       console.error('Error rejecting order:', err);
+      toast.error('Network error rejecting order');
     }
   };
 

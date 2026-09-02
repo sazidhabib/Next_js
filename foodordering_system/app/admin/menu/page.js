@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { toast } from 'react-toastify';
 import {
   UtensilsCrossed,
   Plus,
@@ -74,14 +75,18 @@ export default function AdminMenuPage() {
             for (const it of cat.items) {
               if (it.id === itemId) {
                 it.isAvailable = !it.isAvailable;
+                toast.info(`"${it.name}" is now ${it.isAvailable ? 'in stock' : 'out of stock'}`);
               }
             }
           }
           return next;
         });
+      } else {
+        toast.error(json.error || 'Failed to update item availability');
       }
     } catch (err) {
       console.error('Error toggling availability:', err);
+      toast.error('Network error updating item');
     }
   };
 
@@ -114,15 +119,19 @@ export default function AdminMenuPage() {
 
       const json = await res.json();
       if (json.success) {
+        toast.success(`"${newItemName}" added to menu!`);
         setIsAddModalOpen(false);
         setNewItemName('');
         setNewItemDesc('');
         setNewItemPrice('');
         setNewItemImage('');
         loadMenu();
+      } else {
+        toast.error(json.error || 'Failed to add item');
       }
     } catch (err) {
       console.error('Error adding item:', err);
+      toast.error('Network error adding menu item');
     }
   };
 

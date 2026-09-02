@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, use } from 'react';
+import { toast } from 'react-toastify';
 import Navbar from '@/components/Navbar';
 import ItemModal from '@/components/ItemModal';
 import CartDrawer from '@/components/CartDrawer';
@@ -64,7 +65,7 @@ export default function MenuPage({ params }) {
   // Cart Handlers
   const handleAddToCart = (customizedItem) => {
     setCartItems((prev) => [...prev, customizedItem]);
-    setIsCartOpen(true);
+    toast.success(`Added "${customizedItem.name || 'item'}" to cart!`);
   };
 
   const handleUpdateQuantity = (index, newQty) => {
@@ -80,11 +81,16 @@ export default function MenuPage({ params }) {
   };
 
   const handleRemoveItem = (index) => {
+    const item = cartItems[index];
     setCartItems((prev) => prev.filter((_, i) => i !== index));
+    if (item?.name) {
+      toast.info(`Removed "${item.name}" from cart`);
+    }
   };
 
   const handleClearCart = () => {
     setCartItems([]);
+    toast.info('Cart cleared');
   };
 
   const cartCount = cartItems.reduce((sum, it) => sum + it.quantity, 0);

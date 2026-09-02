@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { toast } from 'react-toastify';
 import { useAdmin } from '@/lib/adminContext';
 import {
   Plus,
@@ -69,13 +70,18 @@ export default function InvoiceTemplatesPage() {
         setTemplates((prev) =>
           prev.map((t) => (t.id === editingTemplate.id ? json.data : t))
         );
-        alert('Template saved successfully!');
+        setEditingTemplate((prev) => ({
+          ...prev,
+          ...json.data,
+          config: typeof json.data.config === 'string' ? JSON.parse(json.data.config) : json.data.config,
+        }));
+        toast.success('Template saved successfully!');
       } else {
-        alert(json.error || 'Failed to save template');
+        toast.error(json.error || 'Failed to save template');
       }
     } catch (err) {
       console.error('Error saving template:', err);
-      alert('Network error while saving template');
+      toast.error('Network error while saving template');
     } finally {
       setSaving(false);
     }
@@ -138,13 +144,15 @@ export default function InvoiceTemplatesPage() {
         // Open immediately in edit mode
         setEditingTemplate({
           ...json.data,
-          config: JSON.parse(json.data.config),
+          config: typeof json.data.config === 'string' ? JSON.parse(json.data.config) : json.data.config,
         });
+        toast.success('Template created successfully!');
       } else {
-        alert(json.error || 'Failed to create template');
+        toast.error(json.error || 'Failed to create template');
       }
     } catch (err) {
       console.error('Error creating template:', err);
+      toast.error('Network error while creating template');
     } finally {
       setSaving(false);
     }
@@ -161,17 +169,19 @@ export default function InvoiceTemplatesPage() {
           name: `${template.name} (Copy)`,
           type: template.type,
           fontSize: template.fontSize,
-          config: JSON.parse(template.config),
+          config: typeof template.config === 'string' ? JSON.parse(template.config) : template.config,
         }),
       });
       const json = await res.json();
       if (json.success) {
         setTemplates((prev) => [json.data, ...prev]);
+        toast.success('Template duplicated successfully!');
       } else {
-        alert(json.error || 'Failed to duplicate template');
+        toast.error(json.error || 'Failed to duplicate template');
       }
     } catch (err) {
       console.error('Error duplicating template:', err);
+      toast.error('Error duplicating template');
     }
   };
 
@@ -185,11 +195,13 @@ export default function InvoiceTemplatesPage() {
       const json = await res.json();
       if (json.success) {
         setTemplates((prev) => prev.filter((t) => t.id !== id));
+        toast.success('Template deleted successfully!');
       } else {
-        alert(json.error || 'Failed to delete template');
+        toast.error(json.error || 'Failed to delete template');
       }
     } catch (err) {
       console.error('Error deleting template:', err);
+      toast.error('Error deleting template');
     }
   };
 
@@ -232,6 +244,7 @@ export default function InvoiceTemplatesPage() {
       fontSize: 12,
       config: defaultConfig,
     }));
+    toast.info('Template reset to default settings');
   };
 
   const getSectionVal = (key, field, defaultValue) => {
@@ -296,6 +309,7 @@ export default function InvoiceTemplatesPage() {
           ]
         : [
             { key: 'header', label: 'Top Header banner (ASAP/Delivery details)' },
+            { key: 'ticketHolderSpace', label: 'Ticket holder clamping margin' },
             { key: 'onPremiseNumber', label: 'On premise order number' },
             { key: 'orderDetails', label: 'Order details meta' },
             { key: 'clientComment', label: 'Client comment/notes' },
@@ -753,7 +767,7 @@ export default function InvoiceTemplatesPage() {
           )}
 
           {/* Ticket holder space option */}
-          {config.ticketHolderSpace && (
+          {getSectionVal('ticketHolderSpace', 'visible', true) && (
             <div className="border border-dashed border-black py-4 text-center text-[9px] font-bold text-slate-500 rounded">
               [TICKET HOLDER CLAMPING MARGIN]
             </div>
@@ -1074,7 +1088,7 @@ export default function InvoiceTemplatesPage() {
                         onClick={() =>
                           setEditingTemplate({
                             ...template,
-                            config: JSON.parse(template.config),
+                            config: typeof template.config === 'string' ? JSON.parse(template.config) : template.config,
                           })
                         }
                         className="bg-slate-800 hover:bg-slate-700 text-slate-200 p-2 rounded-lg font-medium inline-flex items-center gap-1 cursor-pointer transition-colors"

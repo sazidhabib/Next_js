@@ -37,6 +37,13 @@ export async function autoPrintKitchenReceipt(order) {
     const testPort = kitchenPrinterPort || 9100;
 
     // Fetch active template configuration
+    const isSectionEnabled = (section) => {
+      if (section === undefined || section === null) return false;
+      if (typeof section === 'boolean') return section;
+      if (typeof section === 'object' && section.visible !== undefined) return !!section.visible;
+      return !!section;
+    };
+
     let templateConfig = {
       header: true,
       onPremiseNumber: true,
@@ -53,7 +60,8 @@ export async function autoPrintKitchenReceipt(order) {
         where: { id: activeKitchenTemplateId },
       });
       if (template && template.config) {
-        templateConfig = { ...templateConfig, ...JSON.parse(template.config) };
+        const parsed = typeof template.config === 'string' ? JSON.parse(template.config) : template.config;
+        templateConfig = { ...templateConfig, ...parsed };
       }
     }
 
@@ -61,12 +69,12 @@ export async function autoPrintKitchenReceipt(order) {
     let data = CLEAN;
 
     // 1. Ticket Holder Space
-    if (templateConfig.ticketHolderSpace) {
+    if (isSectionEnabled(templateConfig.ticketHolderSpace)) {
       data += '\n\n\n';
     }
 
     // 2. Header Banner
-    if (templateConfig.header) {
+    if (isSectionEnabled(templateConfig.header)) {
       data += ALIGN_CENTER + BOLD_ON + DOUBLE_SIZE_ON;
       data += `${order.orderType || 'ORDER'}\n`;
       data += DOUBLE_SIZE_OFF;
@@ -77,7 +85,7 @@ export async function autoPrintKitchenReceipt(order) {
     }
 
     // 3. On-Premise Order Number
-    if (templateConfig.onPremiseNumber) {
+    if (isSectionEnabled(templateConfig.onPremiseNumber)) {
       data += ALIGN_CENTER + BOLD_ON + DOUBLE_SIZE_ON;
       data += `${order.orderNumber || '#1'}\n`;
       data += DOUBLE_SIZE_OFF + BOLD_OFF + ALIGN_LEFT;
@@ -85,7 +93,7 @@ export async function autoPrintKitchenReceipt(order) {
     }
 
     // 4. Order Details Meta
-    if (templateConfig.orderDetails) {
+    if (isSectionEnabled(templateConfig.orderDetails)) {
       data += BOLD_ON + 'Order details:\n' + BOLD_OFF;
       data += `Customer: ${order.customerName}\n`;
       data += `Phone: ${order.customerPhone}\n`;
@@ -96,13 +104,13 @@ export async function autoPrintKitchenReceipt(order) {
     }
 
     // 5. Client Comment
-    if (templateConfig.clientComment && order.specialNotes) {
+    if (isSectionEnabled(templateConfig.clientComment) && order.specialNotes) {
       data += BOLD_ON + '💬 Note: ' + order.specialNotes + '\n' + BOLD_OFF;
       data += '------------------------------------------------\n';
     }
 
     // 6. Order Items Listing with Checkboxes
-    if (templateConfig.items && order.items && order.items.length > 0) {
+    if (isSectionEnabled(templateConfig.items) && order.items && order.items.length > 0) {
       data += BOLD_ON + 'Items:\n' + BOLD_OFF;
       for (const item of order.items) {
         const qty = item.quantity || 1;
@@ -121,7 +129,7 @@ export async function autoPrintKitchenReceipt(order) {
     }
 
     // 7. Is Paid
-    if (templateConfig.isPaid) {
+    if (isSectionEnabled(templateConfig.isPaid)) {
       data += ALIGN_CENTER + BOLD_ON;
       data += `[ ] PAID    [X] NOT PAID\n`;
       data += BOLD_OFF + ALIGN_LEFT;
@@ -129,7 +137,7 @@ export async function autoPrintKitchenReceipt(order) {
     }
 
     // 8. Packaging Station QC Box
-    if (templateConfig.packagingStationQualityControl) {
+    if (isSectionEnabled(templateConfig.packagingStationQualityControl)) {
       data += BOLD_ON + 'Packaging Station Check:\n' + BOLD_OFF;
       data += `[ ] Boxes     [ ] Sauces     [ ] Utensils\n`;
       data += '------------------------------------------------\n';

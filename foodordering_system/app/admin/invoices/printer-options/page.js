@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { toast } from 'react-toastify';
 import { useAdmin } from '@/lib/adminContext';
 import { Printer, Save, CheckCircle2, AlertTriangle, RefreshCw } from 'lucide-react';
 
@@ -71,13 +72,16 @@ export default function PrinterOptionsPage() {
         setScannedPrinters(json.printers || []);
         if (json.printers && json.printers.length === 0) {
           setTestMessage({ success: false, text: 'No active printers found on port 9100. You can enter the IP manually.' });
+          toast.info('No active printers detected on subnet. Enter IP manually.');
+        } else {
+          toast.success(`Found ${json.printers.length} active printer(s) on network!`);
         }
       } else {
-        alert(json.error || 'Failed to scan local subnet');
+        toast.error(json.error || 'Failed to scan local subnet');
       }
     } catch (err) {
       console.error('Subnet scan error:', err);
-      alert('Network error while scanning subnet');
+      toast.error('Network error while scanning subnet');
     } finally {
       setScanning(false);
     }
@@ -97,12 +101,15 @@ export default function PrinterOptionsPage() {
       const json = await res.json();
       if (json.success) {
         setTestMessage({ success: true, text: '✅ Printer connected successfully!' });
+        toast.success('Printer connection verified successfully!');
       } else {
         setTestMessage({ success: false, text: `❌ ${json.error || 'Connection failed'}` });
+        toast.error(json.error || 'Printer connection failed');
       }
     } catch (err) {
       console.error('Test connection error:', err);
       setTestMessage({ success: false, text: '❌ Network timeout or invalid IP address' });
+      toast.error('Network timeout or invalid IP address');
     } finally {
       setTesting(false);
     }
@@ -130,14 +137,16 @@ export default function PrinterOptionsPage() {
       const json = await res.json();
       if (json.success) {
         setSaveStatus('success');
+        toast.success('Printer options updated successfully!');
         setTimeout(() => setSaveStatus(null), 3000);
       } else {
         setSaveStatus('error');
-        alert(json.error || 'Failed to update printer options');
+        toast.error(json.error || 'Failed to update printer options');
       }
     } catch (err) {
       console.error('Error updating printer options:', err);
       setSaveStatus('error');
+      toast.error('Network error updating printer options');
     } finally {
       setSaving(false);
     }

@@ -5,6 +5,7 @@ import {
   X, Search, Upload, Trash2, Check, Loader2, Image as ImageIcon, 
   CheckSquare, Square, FileImage
 } from 'lucide-react';
+import { toast } from 'react-toastify';
 
 export default function MediaLibraryModal({ 
   isOpen, 
@@ -112,9 +113,14 @@ export default function MediaLibraryModal({
       const successfulUploads = results.filter(Boolean);
       if (successfulUploads.length > 0) {
         fetchImages();
+        toast.success(`Successfully uploaded ${successfulUploads.length} file${successfulUploads.length > 1 ? 's' : ''}`);
+      }
+      if (successfulUploads.length < results.length) {
+        toast.error("Some files failed to upload");
       }
     } catch (err) {
       console.error("Upload error:", err);
+      toast.error("Upload failed");
     } finally {
       setUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
@@ -133,12 +139,13 @@ export default function MediaLibraryModal({
       if (data.success) {
         setImages(images.filter(img => img.name !== filename));
         setSelectedUrls(selectedUrls.filter(url => !url.endsWith(filename)));
+        toast.success("Image deleted successfully");
       } else {
-        alert(data.message || "Failed to delete image.");
+        toast.error(data.message || "Failed to delete image.");
       }
     } catch (err) {
       console.error("Delete failed:", err);
-      alert("Error deleting image.");
+      toast.error("Error deleting image.");
     }
   };
 

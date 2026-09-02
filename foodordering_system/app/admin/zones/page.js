@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { toast } from 'react-toastify';
 import {
   MapPin,
   Plus,
@@ -63,6 +64,7 @@ export default function AdminZonesPage() {
       return next;
     });
     setEditingZoneId(null);
+    toast.success('Delivery zone updated successfully!');
   };
 
   return (

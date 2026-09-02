@@ -22,6 +22,7 @@ import {
 import Link from 'next/link';
 import MediaLibraryModal from '../../../components/MediaLibraryModal';
 import AdminSidebar from '../../../components/AdminSidebar';
+import { toast } from 'react-toastify';
 
 export default function AdminSettings() {
   const { isAuthorized, user, token, isLoading: authLoading } = useAdminAuth();
@@ -121,9 +122,11 @@ export default function AdminSettings() {
   const showNotification = (message, isSuccess = true) => {
     if (isSuccess) {
       setSuccess(message);
+      toast.success(message);
       setTimeout(() => setSuccess(''), 4000);
     } else {
       setError(message);
+      toast.error(message);
       setTimeout(() => setError(''), 4000);
     }
   };
