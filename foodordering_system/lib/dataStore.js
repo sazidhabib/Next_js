@@ -167,14 +167,29 @@ export async function getOrders(restaurantId = null) {
         ],
       });
       if (orders && orders.length > 0) {
-        return orders.map((o) => o.get({ plain: true }));
+        return orders.map((o) => {
+          const plain = o.get({ plain: true });
+          if (!plain.prepMinutes && plain.estimatedReadyAt && plain.acceptedAt) {
+            plain.prepMinutes = Math.round(
+              (new Date(plain.estimatedReadyAt).getTime() - new Date(plain.acceptedAt).getTime()) / 60000
+            );
+          }
+          return plain;
+        });
       }
     }
   } catch (err) {
     console.warn('Sequelize getOrders fallback:', err.message);
   }
 
-  return globalStore.__orders;
+  return globalStore.__orders.map((plain) => {
+    if (!plain.prepMinutes && plain.estimatedReadyAt && plain.acceptedAt) {
+      plain.prepMinutes = Math.round(
+        (new Date(plain.estimatedReadyAt).getTime() - new Date(plain.acceptedAt).getTime()) / 60000
+      );
+    }
+    return plain;
+  });
 }
 
 // 3. Get Single Order by ID or Order Number
@@ -209,6 +224,11 @@ export async function getOrderById(idOrOrderNum) {
       });
       if (order) {
         const orderJson = order.get({ plain: true });
+        if (!orderJson.prepMinutes && orderJson.estimatedReadyAt && orderJson.acceptedAt) {
+          orderJson.prepMinutes = Math.round(
+            (new Date(orderJson.estimatedReadyAt).getTime() - new Date(orderJson.acceptedAt).getTime()) / 60000
+          );
+        }
         if (orderJson.statusLogs) {
           orderJson.statusLogs.sort(
             (a, b) => new Date(a.timestamp) - new Date(b.timestamp)
@@ -221,11 +241,15 @@ export async function getOrderById(idOrOrderNum) {
     console.warn('Sequelize getOrderById fallback:', err.message);
   }
 
-  return (
-    globalStore.__orders.find(
-      (o) => o.id === idOrOrderNum || o.orderNumber === idOrOrderNum
-    ) || null
-  );
+  const memOrder = globalStore.__orders.find(
+    (o) => o.id === idOrOrderNum || o.orderNumber === idOrOrderNum
+  ) || null;
+  if (memOrder && !memOrder.prepMinutes && memOrder.estimatedReadyAt && memOrder.acceptedAt) {
+    memOrder.prepMinutes = Math.round(
+      (new Date(memOrder.estimatedReadyAt).getTime() - new Date(memOrder.acceptedAt).getTime()) / 60000
+    );
+  }
+  return memOrder;
 }
 
 // 4. Create New Customer Order
@@ -328,8 +352,10 @@ export async function createOrder(orderPayload) {
       );
 
       // Update runtime store as well
+      const plainDbOrder = dbOrder.get({ plain: true });
+      newOrder.id = plainDbOrder.id;
       globalStore.__orders.unshift(newOrder);
-      return dbOrder.get({ plain: true });
+      return plainDbOrder;
     }
   } catch (err) {
     console.warn('Sequelize createOrder DB insert fallback:', err.message);
@@ -344,9 +370,10 @@ export async function createOrder(orderPayload) {
 export async function updateOrderStatus(orderId, { status, prepMinutes, rejectionReason }) {
   const now = new Date();
   let estimatedReadyAt = null;
+  const numericPrepMinutes = prepMinutes !== undefined && prepMinutes !== null && prepMinutes !== '' ? Number(prepMinutes) : undefined;
 
-  if (prepMinutes) {
-    estimatedReadyAt = new Date(now.getTime() + prepMinutes * 60 * 1000).toISOString();
+  if (numericPrepMinutes) {
+    estimatedReadyAt = new Date(now.getTime() + numericPrepMinutes * 60 * 1000).toISOString();
   }
 
   // Check runtime memory
@@ -356,12 +383,22 @@ export async function updateOrderStatus(orderId, { status, prepMinutes, rejectio
 
   if (orderIndex !== -1) {
     const existing = globalStore.__orders[orderIndex];
-    existing.status = status;
+    if (status) {
+      existing.status = status;
+    }
     if (status === 'ACCEPTED') {
-      existing.acceptedAt = now.toISOString();
+      if (!existing.acceptedAt) {
+        existing.acceptedAt = now.toISOString();
+      }
+    }
+    if (numericPrepMinutes) {
+      existing.prepMinutes = numericPrepMinutes;
       existing.estimatedReadyAt = estimatedReadyAt;
-      existing.prepMinutes = prepMinutes;
-    } else if (status === 'REJECTED') {
+      if (!existing.acceptedAt) {
+        existing.acceptedAt = now.toISOString();
+      }
+    }
+    if (status === 'REJECTED') {
       existing.rejectionReason = rejectionReason || 'Kitchen currently unavailable';
     }
 
@@ -374,14 +411,23 @@ export async function updateOrderStatus(orderId, { status, prepMinutes, rejectio
   }
 
   // Also update MySQL if connected
+  let updatedOrderResult = orderIndex !== -1 ? globalStore.__orders[orderIndex] : null;
+
   try {
     const connected = await isDbConnected();
     if (connected) {
-      const updateData = { status };
+      const updateData = {};
+      if (status) updateData.status = status;
       if (status === 'ACCEPTED') {
         updateData.acceptedAt = now;
+      }
+      if (numericPrepMinutes) {
+        updateData.prepMinutes = numericPrepMinutes;
         if (estimatedReadyAt) {
           updateData.estimatedReadyAt = new Date(estimatedReadyAt);
+        }
+        if (!updateData.acceptedAt && orderIndex !== -1 && !globalStore.__orders[orderIndex].acceptedAt) {
+          updateData.acceptedAt = now;
         }
       }
       if (rejectionReason) {
@@ -389,15 +435,30 @@ export async function updateOrderStatus(orderId, { status, prepMinutes, rejectio
       }
 
       await Order.update(updateData, {
-        where: { id: orderId },
+        where: {
+          [Op.or]: [{ id: orderId }, { orderNumber: orderId }],
+        },
       });
 
+      // Fetch the updated order from the database
+      const dbOrder = await getOrderById(orderId);
+      if (dbOrder) {
+        updatedOrderResult = dbOrder;
+        if (orderIndex !== -1) {
+          globalStore.__orders[orderIndex] = { ...globalStore.__orders[orderIndex], ...dbOrder };
+        } else {
+          globalStore.__orders.unshift(dbOrder);
+        }
+      }
+
       await OrderStatusLog.create({
-        orderId,
-        status,
+        orderId: dbOrder?.id || orderId,
+        status: status || (updatedOrderResult?.status || 'UPDATED'),
         note:
           status === 'ACCEPTED'
-            ? `Accepted with ${prepMinutes || 25} min prep time`
+            ? `Accepted with ${numericPrepMinutes || 25} min prep time`
+            : numericPrepMinutes
+            ? `Prep time adjusted to ${numericPrepMinutes} min`
             : status === 'REJECTED'
             ? `Rejected: ${rejectionReason}`
             : `Order updated to ${status}`,
@@ -407,7 +468,7 @@ export async function updateOrderStatus(orderId, { status, prepMinutes, rejectio
     console.warn('Sequelize updateOrderStatus fallback:', err.message);
   }
 
-  return globalStore.__orders[orderIndex] || null;
+  return updatedOrderResult || (orderIndex !== -1 ? globalStore.__orders[orderIndex] : null);
 }
 
 // 6. Menu Management: Update Item Availability & Add New Item

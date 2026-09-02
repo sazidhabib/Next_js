@@ -399,6 +399,7 @@ export const initialOrders = [
     customerPhone: '+1 (555) 432-8765',
     orderType: 'PICKUP',
     status: 'ACCEPTED',
+    prepMinutes: 25,
     acceptedAt: new Date(Date.now() - 15 * 60 * 1000).toISOString(),
     estimatedReadyAt: new Date(Date.now() + 10 * 60 * 1000).toISOString(),
     specialNotes: 'No cutlery needed.',

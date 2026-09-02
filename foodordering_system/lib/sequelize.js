@@ -579,6 +579,10 @@ export const Order = sequelize.define('Order', {
     type: DataTypes.DATE,
     allowNull: true,
   },
+  prepMinutes: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+  },
   rejectionReason: {
     type: DataTypes.STRING,
     allowNull: true,
@@ -868,6 +872,18 @@ export async function ensureDatabaseReady() {
         }
       } catch (err) {
         console.warn('⚠️ [DB Init] Warning checking/adding printer columns:', err.message);
+      }
+
+      // Ensure prepMinutes exists on orders table
+      try {
+        const [orderColResults] = await sequelize.query("SHOW COLUMNS FROM orders LIKE 'prepMinutes'");
+        if (orderColResults.length === 0) {
+          console.log('➕ [DB Init] Adding prepMinutes column to orders table...');
+          await sequelize.query("ALTER TABLE orders ADD COLUMN prepMinutes INT NULL AFTER estimatedReadyAt");
+          console.log('✅ [DB Init] prepMinutes column added to orders table.');
+        }
+      } catch (err) {
+        console.warn('⚠️ [DB Init] Warning checking/adding prepMinutes column:', err.message);
       }
 
       // Check if we need to seed default data (e.g. if the users table has 0 users)

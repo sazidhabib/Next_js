@@ -29,16 +29,16 @@ export async function PATCH(request, { params }) {
     const body = await request.json();
     const { status, prepMinutes, rejectionReason } = body;
 
-    if (!status) {
+    if (!status && prepMinutes === undefined) {
       return NextResponse.json(
-        { success: false, error: 'Status is required' },
+        { success: false, error: 'Status or prepMinutes is required' },
         { status: 400 }
       );
     }
 
     const updatedOrder = await updateOrderStatus(id, {
       status,
-      prepMinutes: prepMinutes ? Number(prepMinutes) : undefined,
+      prepMinutes: prepMinutes !== undefined && prepMinutes !== null && prepMinutes !== '' ? Number(prepMinutes) : undefined,
       rejectionReason,
     });
 

@@ -26,6 +26,13 @@ export default function OrderTrackingPage({ params }) {
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
   const [lastStatus, setLastStatus] = useState(null);
+  const [now, setNow] = useState(Date.now());
+
+  // 1-second live countdown ticker
+  useEffect(() => {
+    const timer = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   // Poll for live status updates
   const fetchOrder = async () => {
@@ -48,7 +55,7 @@ export default function OrderTrackingPage({ params }) {
 
   useEffect(() => {
     fetchOrder();
-    const interval = setInterval(fetchOrder, 3000); // live polling every 3s
+    const interval = setInterval(fetchOrder, 2500); // live polling every 2.5s
     return () => clearInterval(interval);
   }, [orderId, lastStatus]);
 
@@ -107,9 +114,56 @@ export default function OrderTrackingPage({ params }) {
   const currentStep = getStepIndex(order.status);
   const isRejected = order.status === 'REJECTED' || order.status === 'CANCELLED';
 
+  // Live Prep & Ready Time Calculations
+  const prepMinutes =
+    order.prepMinutes ||
+    (order.estimatedReadyAt && order.acceptedAt
+      ? Math.round(
+          (new Date(order.estimatedReadyAt).getTime() -
+            new Date(order.acceptedAt).getTime()) /
+            60000
+        )
+      : null);
+
+  const estimatedReadyDate = order.estimatedReadyAt
+    ? new Date(order.estimatedReadyAt)
+    : null;
+  const acceptedDate = order.acceptedAt ? new Date(order.acceptedAt) : null;
+
+  const readyTimeFormatted = estimatedReadyDate
+    ? estimatedReadyDate.toLocaleTimeString([], {
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true,
+      })
+    : null;
+
+  const isCooking = order.status === 'ACCEPTED' || order.status === 'PREPARING';
+  const msLeft = estimatedReadyDate ? estimatedReadyDate.getTime() - now : null;
+  const totalSecondsLeft = msLeft !== null ? Math.max(0, Math.floor(msLeft / 1000)) : null;
+  const remainingMinutes = totalSecondsLeft !== null ? Math.floor(totalSecondsLeft / 60) : null;
+  const remainingSeconds = totalSecondsLeft !== null ? totalSecondsLeft % 60 : null;
+
+  let progressPercent = 0;
+  if (isCooking && acceptedDate && estimatedReadyDate) {
+    const totalDuration = estimatedReadyDate.getTime() - acceptedDate.getTime();
+    const elapsed = now - acceptedDate.getTime();
+    if (totalDuration > 0) {
+      progressPercent = Math.min(100, Math.max(8, Math.round((elapsed / totalDuration) * 100)));
+    }
+  } else if (order.status === 'OUT_FOR_DELIVERY' || order.status === 'READY_FOR_PICKUP') {
+    progressPercent = 90;
+  } else if (order.status === 'COMPLETED') {
+    progressPercent = 100;
+  }
+
   const steps = [
     { label: 'Order Sent', desc: 'Received by kitchen', icon: Clock },
-    { label: 'Preparing', desc: 'Cooking in stone oven', icon: ChefHat },
+    {
+      label: 'Preparing',
+      desc: prepMinutes ? `Confirmed ${prepMinutes}m prep` : 'Cooking in kitchen',
+      icon: ChefHat,
+    },
     {
       label: order.orderType === 'DELIVERY' ? 'Out for Delivery' : 'Ready for Pickup',
       desc: order.orderType === 'DELIVERY' ? 'Driver on the way' : 'Waiting on counter',
@@ -186,31 +240,86 @@ export default function OrderTrackingPage({ params }) {
           </div>
 
           {/* Status Title & Real-time message */}
-          <div className="space-y-1 max-w-lg mx-auto">
+          <div className="space-y-3 max-w-lg mx-auto">
             {order.status === 'PENDING' && (
-              <>
+              <div className="space-y-1">
                 <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900">
                   Waiting for Kitchen Confirmation...
                 </h1>
                 <p className="text-xs sm:text-sm text-slate-500">
-                  The restaurant order console is currently ringing. You will receive an immediate confirmation with preparation time once accepted.
+                  The restaurant order console is currently ringing. You will receive an immediate confirmation with the exact preparation time once accepted.
                 </p>
-              </>
+              </div>
             )}
 
-            {(order.status === 'ACCEPTED' || order.status === 'PREPARING') && (
-              <>
-                <h1 className="text-xl sm:text-2xl font-extrabold text-emerald-700">
-                  Order Accepted & Cooking!
-                </h1>
-                <p className="text-xs sm:text-sm text-slate-600">
-                  Estimated prep time is approx. <span className="font-bold text-slate-900">25-30 minutes</span>.
-                </p>
-              </>
+            {isCooking && (
+              <div className="space-y-4 text-center">
+                <div className="space-y-1">
+                  <div className="inline-flex items-center gap-1.5 bg-emerald-50 border border-emerald-200/80 text-emerald-800 text-xs font-bold px-3 py-1 rounded-full mb-1">
+                    <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
+                    <span>Kitchen Confirmed: {prepMinutes || 25} Minutes Prep Time</span>
+                  </div>
+                  <h1 className="text-xl sm:text-2xl font-black text-slate-900">
+                    Order Accepted & Cooking!
+                  </h1>
+                  <p className="text-xs sm:text-sm text-slate-600">
+                    The restaurant selected <strong className="text-slate-900 font-extrabold">{prepMinutes || 25} minutes</strong> preparation time for your order.
+                  </p>
+                </div>
+
+                {/* Real-time Countdown Box */}
+                <div className="bg-gradient-to-b from-orange-50/80 to-amber-50/40 border border-orange-200/80 rounded-2xl p-4 shadow-sm space-y-3 text-left">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-10 h-10 rounded-xl bg-orange-600 text-white flex items-center justify-center shadow-md shadow-orange-600/20">
+                        <Clock className="w-5 h-5 animate-spin" />
+                      </div>
+                      <div>
+                        <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">
+                          Estimated Ready Time
+                        </span>
+                        <span className="text-base sm:text-lg font-black text-slate-900">
+                          {readyTimeFormatted || `~${prepMinutes || 25} mins`}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="text-right">
+                      <span className="text-[10px] font-bold text-orange-600 uppercase tracking-wider block">
+                        Live Countdown
+                      </span>
+                      <span className="text-base sm:text-lg font-mono font-black text-orange-600">
+                        {msLeft !== null && msLeft > 0
+                          ? `${remainingMinutes}m ${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}s`
+                          : 'Almost Ready!'}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Progress Bar */}
+                  <div className="space-y-1.5 pt-1">
+                    <div className="w-full bg-slate-200/80 h-2.5 rounded-full overflow-hidden">
+                      <div
+                        className="bg-gradient-to-r from-orange-500 via-amber-500 to-emerald-500 h-full rounded-full transition-all duration-1000 ease-out"
+                        style={{ width: `${progressPercent}%` }}
+                      />
+                    </div>
+                    <div className="flex justify-between text-[10px] text-slate-500 font-semibold">
+                      <span>Kitchen Accepted</span>
+                      <span className="text-orange-600 font-bold">{progressPercent}% Progress</span>
+                      <span>Target: {readyTimeFormatted || `${prepMinutes || 25}m`}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
             )}
 
             {(order.status === 'OUT_FOR_DELIVERY' || order.status === 'READY_FOR_PICKUP') && (
-              <>
+              <div className="space-y-2">
+                <div className="inline-flex items-center gap-1.5 bg-indigo-50 border border-indigo-200 text-indigo-800 text-xs font-bold px-3 py-1 rounded-full mb-1">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-indigo-600" />
+                  <span>Freshly cooked in {prepMinutes || 25} minutes</span>
+                </div>
                 <h1 className="text-xl sm:text-2xl font-extrabold text-indigo-700">
                   {order.orderType === 'DELIVERY'
                     ? 'Driver Out For Delivery'
@@ -219,31 +328,31 @@ export default function OrderTrackingPage({ params }) {
                 <p className="text-xs sm:text-sm text-slate-600">
                   {order.orderType === 'DELIVERY'
                     ? 'Your meal is packaged in thermal bags and headed your way.'
-                    : 'Your fresh order is waiting at the counter. Please present order #.'}
+                    : `Your fresh order is waiting at the counter. Please present order ${order.orderNumber}.`}
                 </p>
-              </>
+              </div>
             )}
 
             {order.status === 'COMPLETED' && (
-              <>
+              <div className="space-y-1">
                 <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900">
                   Order Completed
                 </h1>
                 <p className="text-xs sm:text-sm text-emerald-600 font-semibold">
                   Thank you for ordering with Bella Vista Gourmet!
                 </p>
-              </>
+              </div>
             )}
 
             {isRejected && (
-              <>
+              <div className="space-y-1">
                 <h1 className="text-xl sm:text-2xl font-extrabold text-red-600">
                   Order Could Not Be Accepted
                 </h1>
                 <p className="text-xs sm:text-sm text-slate-600">
                   Reason: {order.rejectionReason || 'Kitchen is currently unavailable.'}
                 </p>
-              </>
+              </div>
             )}
           </div>
 
@@ -399,6 +508,31 @@ export default function OrderTrackingPage({ params }) {
                   </p>
                 </div>
               )}
+
+              {/* Kitchen Prep Confirmation Details */}
+              <div className="space-y-1.5 pt-2 border-t border-slate-100">
+                <span className="text-slate-400 font-medium block">Kitchen Timing</span>
+                <div className="bg-slate-50 p-3 rounded-2xl border border-slate-100 space-y-1.5 text-xs">
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-500">Chosen Prep Time:</span>
+                    <span className="font-extrabold text-slate-900">
+                      {prepMinutes ? `${prepMinutes} minutes` : 'Pending acceptance'}
+                    </span>
+                  </div>
+                  {readyTimeFormatted && (
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-500">Target Time:</span>
+                      <span className="font-bold text-orange-600">{readyTimeFormatted}</span>
+                    </div>
+                  )}
+                  {order.acceptedAt && (
+                    <div className="flex justify-between items-center text-[11px] text-slate-400">
+                      <span>Accepted At:</span>
+                      <span>{new Date(order.acceptedAt).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true })}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
         </div>
