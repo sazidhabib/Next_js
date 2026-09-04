@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trattoria Bella Vista - Authentic Italian Restaurant (Demo Test Site)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,800;1,600&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: #0b0f19;
+      color: #f8fafc;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* Top Testing Control Bar */
+    .tester-banner {
+      background: linear-gradient(90deg, #1e1b4b 0%, #311042 50%, #1e1b4b 100%);
+      border-bottom: 2px solid #ea580c;
+      padding: 12px 20px;
+      position: sticky;
+      top: 0;
+      z-index: 99999;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    }
+
+    .tester-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .tester-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(234, 88, 12, 0.2);
+      border: 1px solid rgba(234, 88, 12, 0.5);
+      color: #fb923c;
+      font-size: 11px;
+      font-weight: 800;
+      padding: 4px 10px;
+      border-radius: 9999px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .tester-input-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: 1;
+      min-width: 280px;
+      max-width: 600px;
+    }
+
+    .tester-input-group label {
+      font-size: 12px;
+      font-weight: 700;
+      color: #cbd5e1;
+      white-space: nowrap;
+    }
+
+    .tester-input {
+      flex: 1;
+      background: #0f172a;
+      border: 1px solid #475569;
+      color: #f8fafc;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-family: monospace;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .tester-input:focus {
+      border-color: #ea580c;
+    }
+
+    .tester-btn {
+      background: #ea580c;
+      color: #fff;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s;
+      white-space: nowrap;
+    }
+
+    .tester-btn:hover {
+      background: #f97316;
+    }
+
+    /* Navigation */
+    .navbar {
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      position: sticky;
+      top: 57px;
+      z-index: 1000;
+    }
+
+    .nav-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: 'Playfair Display', serif;
+      font-size: 22px;
+      font-weight: 800;
+      color: #fff;
+      text-decoration: none;
+    }
+
+    .logo-icon {
+      width: 38px;
+      height: 38px;
+      background: linear-gradient(135deg, #ea580c, #f97316);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 28px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: #94a3b8;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 600;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover {
+      color: #fff;
+    }
+
+    /* Buttons */
+    .btn-primary {
+      background: linear-gradient(135deg, #ea580c 0%, #f97316 100%);
+      color: #ffffff;
+      padding: 12px 24px;
+      border-radius: 9999px;
+      font-weight: 700;
+      font-size: 14px;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      box-shadow: 0 10px 25px -5px rgba(234, 88, 12, 0.4);
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px) scale(1.02);
+      box-shadow: 0 15px 30px -5px rgba(234, 88, 12, 0.6);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.08);
+      color: #f8fafc;
+      padding: 12px 24px;
+      border-radius: 9999px;
+      font-weight: 700;
+      font-size: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    /* Hero Section */
+    .hero {
+      position: relative;
+      padding: 100px 24px 120px;
+      background: radial-gradient(circle at 50% 20%, rgba(234, 88, 12, 0.15) 0%, rgba(11, 15, 25, 0) 70%);
+      text-align: center;
+      overflow: hidden;
+    }
+
+    .hero-container {
+      max-width: 860px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 2;
+    }
+
+    .hero-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      padding: 6px 16px;
+      border-radius: 9999px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #fb923c;
+      margin-bottom: 24px;
+    }
+
+    .hero h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(38px, 6vw, 64px);
+      font-weight: 800;
+      line-height: 1.15;
+      margin-bottom: 20px;
+      color: #ffffff;
+    }
+
+    .hero h1 span {
+      background: linear-gradient(135deg, #ea580c 0%, #fbbf24 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero p {
+      font-size: 18px;
+      color: #94a3b8;
+      max-width: 640px;
+      margin: 0 auto 36px;
+      line-height: 1.7;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      margin-bottom: 40px;
+    }
+
+    .hero-card {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 20px;
+      padding: 20px 24px;
+      max-width: 680px;
+      margin: 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-around;
+      gap: 20px;
+      backdrop-filter: blur(8px);
+    }
+
+    .hero-stat {
+      text-align: center;
+    }
+
+    .hero-stat-value {
+      font-size: 20px;
+      font-weight: 800;
+      color: #fff;
+    }
+
+    .hero-stat-label {
+      font-size: 12px;
+      color: #64748b;
+      font-weight: 600;
+    }
+
+    /* Section: Live Testing Playground */
+    .section {
+      padding: 80px 24px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .section-title {
+      text-align: center;
+      margin-bottom: 50px;
+    }
+
+    .section-title h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 36px;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 12px;
+    }
+
+    .section-title p {
+      color: #94a3b8;
+      font-size: 15px;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    /* Test Cards Grid */
+    .test-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 24px;
+    }
+
+    .test-card {
+      background: #0f172a;
+      border: 1px solid #1e293b;
+      border-radius: 20px;
+      padding: 30px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: all 0.3s ease;
+    }
+
+    .test-card:hover {
+      border-color: rgba(234, 88, 12, 0.4);
+      transform: translateY(-4px);
+      box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5);
+    }
+
+    .test-card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .test-card-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: rgba(234, 88, 12, 0.15);
+      color: #ea580c;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    .test-card h3 {
+      font-size: 18px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .test-card p {
+      font-size: 13px;
+      color: #94a3b8;
+      margin-bottom: 24px;
+      line-height: 1.6;
+    }
+
+    .code-preview {
+      background: #090d16;
+      border: 1px solid #1e293b;
+      border-radius: 12px;
+      padding: 12px;
+      font-family: monospace;
+      font-size: 11px;
+      color: #cbd5e1;
+      margin-bottom: 20px;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    /* Menu Showcase */
+    .menu-showcase {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 24px;
+      margin-top: 40px;
+    }
+
+    .menu-item-card {
+      background: #0f172a;
+      border: 1px solid #1e293b;
+      border-radius: 16px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .menu-item-img {
+      height: 180px;
+      background-size: cover;
+      background-position: center;
+      position: relative;
+    }
+
+    .menu-item-price {
+      position: absolute;
+      bottom: 12px;
+      left: 12px;
+      background: rgba(15, 23, 42, 0.9);
+      backdrop-filter: blur(6px);
+      padding: 4px 10px;
+      border-radius: 8px;
+      font-weight: 800;
+      color: #fb923c;
+      font-size: 14px;
+    }
+
+    .menu-item-body {
+      padding: 20px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .menu-item-body h4 {
+      font-size: 16px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 6px;
+    }
+
+    .menu-item-body p {
+      font-size: 12px;
+      color: #94a3b8;
+      margin-bottom: 16px;
+    }
+
+    /* Footer */
+    .footer {
+      background: #070a12;
+      border-top: 1px solid #1e293b;
+      padding: 40px 24px;
+      text-align: center;
+      font-size: 13px;
+      color: #64748b;
+    }
+
+    .footer a {
+      color: #ea580c;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    @media (max-width: 768px) {
+      .nav-links {
+        display: none;
+      }
+      .navbar {
+        top: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Tester & URL Configurator -->
+  <div class="tester-banner">
+    <div class="tester-inner">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <span class="tester-badge">🧪 Live URL Tester</span>
+        <span style="font-size: 12px; color: #94a3b8; display: none; @media(min-width: 600px){display:inline;}">
+          Test any generated ordering URL on this mock website
+        </span>
+      </div>
+
+      <div class="tester-input-group">
+        <label for="customUrlInput">Target URL / Slug:</label>
+        <input 
+          type="text" 
+          id="customUrlInput" 
+          class="tester-input" 
+          value="/menu/bellavista-pizza" 
+          placeholder="e.g. /menu/bellavista-pizza or http://localhost:3000/embed/bellavista-pizza"
+        />
+        <button type="button" id="applyUrlBtn" class="tester-btn">
+          Update Buttons
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="#" class="logo">
+        <div class="logo-icon">🍕</div>
+        <span>Bella Vista</span>
+      </a>
+
+      <ul class="nav-links">
+        <li><a href="#about">Story</a></li>
+        <li><a href="#menu">Specialties</a></li>
+        <li><a href="#test-buttons">Embed Options</a></li>
+        <li><a href="/admin/widget">Admin Studio</a></li>
+      </ul>
+
+      <!-- Nav Order Button (Method 1: Button with data-restaurant) -->
+      <button 
+        type="button" 
+        id="navOrderBtn" 
+        data-restaurant="bellavista-pizza" 
+        class="btn-primary gl-order-btn"
+      >
+        <span>🍕 Order Online</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <header class="hero">
+    <div class="hero-container">
+      <div class="hero-tag">✨ Wood-Fired & Artisanal Italian Kitchen</div>
+      <h1>Taste The Passion of <span>Authentic Pizza</span></h1>
+      <p>
+        Hand-stretched sourdough pizza, fresh imported mozzarella, and slow-simmered San Marzano tomato sauces. Click below to test the instant online ordering modal!
+      </p>
+
+      <div class="hero-actions">
+        <!-- Hero Primary Button (Method 2: Anchor link with data-order-modal) -->
+        <a 
+          href="/menu/bellavista-pizza" 
+          id="heroOrderLink" 
+          data-order-modal="bellavista-pizza" 
+          class="btn-primary"
+          style="font-size: 16px; padding: 14px 32px;"
+        >
+          <span>🛍️ Order Now (Modal Popup)</span>
+          <span style="font-size: 18px;">&rarr;</span>
+        </a>
+
+        <a href="#test-buttons" class="btn-secondary">
+          <span>View Embed Test Variations</span>
+        </a>
+      </div>
+
+      <div class="hero-card">
+        <div class="hero-stat">
+          <div class="hero-stat-value">25-35 min</div>
+          <div class="hero-stat-label">Fast Delivery</div>
+        </div>
+        <div style="width: 1px; height: 30px; background: rgba(255,255,255,0.1);"></div>
+        <div class="hero-stat">
+          <div class="hero-stat-value">⭐ 4.9 / 5.0</div>
+          <div class="hero-stat-label">500+ Local Reviews</div>
+        </div>
+        <div style="width: 1px; height: 30px; background: rgba(255,255,255,0.1);"></div>
+        <div class="hero-stat">
+          <div class="hero-stat-value">0% Fees</div>
+          <div class="hero-stat-label">Direct Store Pricing</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Test Buttons Section -->
+  <section id="test-buttons" class="section">
+    <div class="section-title">
+      <h2>Test Different Button Implementations</h2>
+      <p>
+        Try clicking each test button below. Our <code>widget.js</code> automatically detects all variations and opens your ordering modal seamlessly!
+      </p>
+    </div>
+
+    <div class="test-grid">
+      <!-- Card 1 -->
+      <div class="test-card">
+        <div>
+          <div class="test-card-header">
+            <div class="test-card-icon">1</div>
+            <div>
+              <h3>Standard Button</h3>
+              <span style="font-size: 11px; color: #fb923c; font-weight: 700;">data-restaurant="slug"</span>
+            </div>
+          </div>
+          <p>
+            The recommended way for custom HTML blocks, Elementor, and Divi buttons.
+          </p>
+          <div class="code-preview" id="code1">
+&lt;button data-restaurant="bellavista-pizza" class="gl-order-btn"&gt;
+  Order Online
+&lt;/button&gt;
+          </div>
+        </div>
+        <button 
+          type="button" 
+          id="testBtn1" 
+          data-restaurant="bellavista-pizza" 
+          class="btn-primary gl-order-btn" 
+          style="width: 100%; justify-content: center;"
+        >
+          <span>🍕 Test Button 1 (data-restaurant)</span>
+        </button>
+      </div>
+
+      <!-- Card 2 -->
+      <div class="test-card">
+        <div>
+          <div class="test-card-header">
+            <div class="test-card-icon">2</div>
+            <div>
+              <h3>Link with data-order-modal</h3>
+              <span style="font-size: 11px; color: #10b981; font-weight: 700;">href + data-order-modal</span>
+            </div>
+          </div>
+          <p>
+            Best for connecting existing CMS buttons (Wix, Squarespace, Shopify) while providing a fallback link.
+          </p>
+          <div class="code-preview" id="code2">
+&lt;a href="/menu/bellavista-pizza" data-order-modal="bellavista-pizza"&gt;
+  See Menu &amp; Order
+&lt;/a&gt;
+          </div>
+        </div>
+        <a 
+          href="/menu/bellavista-pizza" 
+          id="testBtn2" 
+          data-order-modal="bellavista-pizza" 
+          class="btn-primary" 
+          style="width: 100%; justify-content: center; background: linear-gradient(135deg, #059669 0%, #10b981 100%); box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.4);"
+        >
+          <span>🥗 Test Button 2 (data-order-modal)</span>
+        </a>
+      </div>
+
+      <!-- Card 3 -->
+      <div class="test-card">
+        <div>
+          <div class="test-card-header">
+            <div class="test-card-icon">3</div>
+            <div>
+              <h3>Direct URL Detection</h3>
+              <span style="font-size: 11px; color: #6366f1; font-weight: 700;">Any &lt;a href="/menu/..."&gt;</span>
+            </div>
+          </div>
+          <p>
+            Works even if you don't add special attributes! Any link pointing to <code>/menu/slug</code> or <code>/embed/slug</code> opens in a modal.
+          </p>
+          <div class="code-preview" id="code3">
+&lt;a href="/embed/bellavista-pizza" class="my-btn"&gt;
+  Order Food Now
+&lt;/a&gt;
+          </div>
+        </div>
+        <a 
+          href="/embed/bellavista-pizza" 
+          id="testBtn3" 
+          class="btn-primary" 
+          style="width: 100%; justify-content: center; background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%); box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.4);"
+        >
+          <span>🍝 Test Button 3 (Direct /embed/ URL)</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Featured Menu Showcase -->
+  <section id="menu" class="section" style="border-top: 1px solid #1e293b;">
+    <div class="section-title">
+      <h2>Artisanal Specialties</h2>
+      <p>Every item on our menu is freshly prepared with high-grade organic ingredients.</p>
+    </div>
+
+    <div class="menu-showcase">
+      <!-- Item 1 -->
+      <div class="menu-item-card">
+        <div class="menu-item-img" style="background-image: url('https://images.unsplash.com/photo-1513104890138-7c749659a591?w=800&auto=format&fit=crop&q=80');">
+          <span class="menu-item-price">$18.99</span>
+        </div>
+        <div class="menu-item-body">
+          <div>
+            <h4>Margherita D.O.P.</h4>
+            <p>San Marzano tomato sauce, fresh buffalo mozzarella, fresh basil, and extra virgin olive oil.</p>
+          </div>
+          <button type="button" data-restaurant="bellavista-pizza" class="btn-primary gl-order-btn" style="width: 100%; justify-content: center; padding: 10px 16px; font-size: 13px;">
+            Order This Item
+          </button>
+        </div>
+      </div>
+
+      <!-- Item 2 -->
+      <div class="menu-item-card">
+        <div class="menu-item-img" style="background-image: url('https://images.unsplash.com/photo-1534308983496-4fabb1a015ee?w=800&auto=format&fit=crop&q=80');">
+          <span class="menu-item-price">$21.50</span>
+        </div>
+        <div class="menu-item-body">
+          <div>
+            <h4>Diavola Spicy Salami</h4>
+            <p>Spicy Calabrian salami, smoked provolone, fresh chili flakes, and hot honey drizzle.</p>
+          </div>
+          <button type="button" data-restaurant="bellavista-pizza" class="btn-primary gl-order-btn" style="width: 100%; justify-content: center; padding: 10px 16px; font-size: 13px;">
+            Order This Item
+          </button>
+        </div>
+      </div>
+
+      <!-- Item 3 -->
+      <div class="menu-item-card">
+        <div class="menu-item-img" style="background-image: url('https://images.unsplash.com/photo-1579684947550-22e945225d9a?w=800&auto=format&fit=crop&q=80');">
+          <span class="menu-item-price">$24.00</span>
+        </div>
+        <div class="menu-item-body">
+          <div>
+            <h4>Tartufo & Wild Mushroom</h4>
+            <p>Black truffle cream, sautéed porcini mushrooms, Fior di Latte mozzarella, and fresh thyme.</p>
+          </div>
+          <button type="button" data-restaurant="bellavista-pizza" class="btn-primary gl-order-btn" style="width: 100%; justify-content: center; padding: 10px 16px; font-size: 13px;">
+            Order This Item
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <p>
+      &copy; 2026 Trattoria Bella Vista. Powered by our GloriaFood Multi-Tenant Food Ordering Engine.
+    </p>
+    <p style="margin-top: 8px;">
+      <a href="/admin/widget">Open Admin Widget Studio</a> &bull;
+      <a href="/admin/restaurants">Manage Restaurants</a> &bull;
+      <a href="/menu/bellavista-pizza" target="_blank">Direct Customer Storefront</a>
+    </p>
+  </footer>
+
+  <!-- DYNAMIC TEST SCRIPT TO UPDATE BUTTONS ON THE FLY -->
+  <script>
+    function extractSlug(input) {
+      if (!input) return 'bellavista-pizza';
+      var trimmed = input.trim();
+      // If full url or path like /menu/slug or /embed/slug
+      var match = trimmed.match(/\/(menu|embed)\/([a-zA-Z0-9_-]+)/);
+      if (match && match[2]) {
+        return match[2];
+      }
+      // If just slug
+      return trimmed.replace(/[^a-zA-Z0-9_-]/g, '');
+    }
+
+    var inputEl = document.getElementById('customUrlInput');
+    var applyBtn = document.getElementById('applyUrlBtn');
+
+    function applyNewSlug() {
+      var rawVal = inputEl.value;
+      var slug = extractSlug(rawVal);
+      if (!slug) slug = 'bellavista-pizza';
+
+      // Update Nav button
+      var navBtn = document.getElementById('navOrderBtn');
+      if (navBtn) navBtn.setAttribute('data-restaurant', slug);
+
+      // Update Hero link
+      var heroLink = document.getElementById('heroOrderLink');
+      if (heroLink) {
+        heroLink.setAttribute('href', '/menu/' + slug);
+        heroLink.setAttribute('data-order-modal', slug);
+      }
+
+      // Update Test Button 1
+      var btn1 = document.getElementById('testBtn1');
+      if (btn1) btn1.setAttribute('data-restaurant', slug);
+
+      // Update Test Button 2
+      var btn2 = document.getElementById('testBtn2');
+      if (btn2) {
+        btn2.setAttribute('href', '/menu/' + slug);
+        btn2.setAttribute('data-order-modal', slug);
+      }
+
+      // Update Test Button 3
+      var btn3 = document.getElementById('testBtn3');
+      if (btn3) btn3.setAttribute('href', '/embed/' + slug);
+
+      // Update All menu item buttons
+      var itemBtns = document.querySelectorAll('.menu-item-body .gl-order-btn');
+      itemBtns.forEach(function(btn) {
+        btn.setAttribute('data-restaurant', slug);
+      });
+
+      // Update code previews
+      document.getElementById('code1').innerText = '<button data-restaurant="' + slug + '" class="gl-order-btn">\n  Order Online\n</button>';
+      document.getElementById('code2').innerText = '<a href="/menu/' + slug + '" data-order-modal="' + slug + '">\n  See Menu & Order\n</a>';
+      document.getElementById('code3').innerText = '<a href="/embed/' + slug + '" class="my-btn">\n  Order Food Now\n</a>';
+
+      // Toast / visual feedback
+      applyBtn.innerText = 'Updated! ✅';
+      setTimeout(function() {
+        applyBtn.innerText = 'Update Buttons';
+      }, 2000);
+    }
+
+    applyBtn.addEventListener('click', applyNewSlug);
+    inputEl.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        applyNewSlug();
+      }
+    });
+  </script>
+
+  <!-- UNIVERSAL MODAL WIDGET SCRIPT -->
+  <script src="/widget.js?v=3" async></script>
+</body>
+</html>
