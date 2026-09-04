@@ -62,7 +62,17 @@ function isOriginAllowed(origin, reqHost) {
   return false;
 }
 
-app.prepare().then(() => {
+async function startServer() {
+  try {
+    // Automatically check and sync database tables, columns, and initial data
+    const { ensureDatabaseReady } = await import("./lib/initDb.mjs");
+    await ensureDatabaseReady({ verbose: true, autoSeedIfEmpty: true });
+  } catch (dbErr) {
+    console.warn("⚠️ [Database Init Notice]:", dbErr.message);
+  }
+
+  await app.prepare();
+
   const server = createServer(async (req, res) => {
     try {
       const parsedUrl = parse(req.url, true);
@@ -121,4 +131,9 @@ app.prepare().then(() => {
       console.log(`> Next.js App ready on http://${hostname}:${port}`);
     });
   }
+}
+
+startServer().catch((err) => {
+  console.error("Failed to start server:", err);
+  process.exit(1);
 });

@@ -23,7 +23,7 @@ const FontVariant = sequelize.define(
     },
   },
   {
-    tableName: "FontVariant",
+    tableName: "fontvariant",
     timestamps: false,
     indexes: [{ fields: ["fontId"] }],
   }

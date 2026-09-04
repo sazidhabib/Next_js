@@ -40,7 +40,7 @@ const Developer = sequelize.define(
     },
   },
   {
-    tableName: "Developer",
+    tableName: "developer",
     timestamps: true,
   }
 );

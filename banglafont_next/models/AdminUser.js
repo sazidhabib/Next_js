@@ -28,7 +28,7 @@ const AdminUser = sequelize.define(
     },
   },
   {
-    tableName: "AdminUser",
+    tableName: "adminuser",
     timestamps: true,
   }
 );

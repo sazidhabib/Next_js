@@ -3,9 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --webpack",
-    "build": "next build --webpack",
+    "dev": "node scripts/sync.mjs && next dev --webpack",
+    "build": "node scripts/sync.mjs && next build --webpack",
     "start": "next start",
+    "postinstall": "node scripts/sync.mjs || true",
     "lint": "eslint",
     "seed": "node scripts/seed.mjs",
     "db:sync": "node scripts/sync.mjs"

@@ -53,7 +53,7 @@ const Order = sequelize.define(
     },
   },
   {
-    tableName: "Order",
+    tableName: "order",
     timestamps: true,
     indexes: [
       { fields: ["fontId"] },

@@ -110,7 +110,7 @@ const Font = sequelize.define(
     },
   },
   {
-    tableName: "Font",
+    tableName: "font",
     timestamps: true,
     indexes: [
       { fields: ["fontType"] },

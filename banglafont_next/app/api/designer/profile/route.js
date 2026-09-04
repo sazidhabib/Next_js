@@ -18,7 +18,7 @@ export async function GET(request) {
   try {
     const decoded = getDesignerFromRequest(request);
     if (!decoded) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ success: false, designer: null }, { status: 200 });
     }
 
     const designer = await Designer.findByPk(decoded.id, {

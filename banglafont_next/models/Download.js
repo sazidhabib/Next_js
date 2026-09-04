@@ -23,7 +23,7 @@ const Download = sequelize.define(
     },
   },
   {
-    tableName: "Download",
+    tableName: "download",
     timestamps: true,
     updatedAt: false,
     indexes: [{ fields: ["fontId"] }, { fields: ["createdAt"] }],

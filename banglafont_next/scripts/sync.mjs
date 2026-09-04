@@ -1,21 +1,13 @@
 import "dotenv/config";
-import { sequelize } from "../models/index.js";
+import { ensureDatabaseReady } from "../lib/initDb.mjs";
 
-async function syncDatabase() {
-  try {
-    console.log("🔄 Connecting and syncing MySQL database with Sequelize...");
-    await sequelize.authenticate();
-    console.log("✓ Database connection authenticated successfully.");
-
-    // Sync all models to create/alter tables
-    await sequelize.sync({ alter: true });
-    console.log("✅ All MySQL tables synchronized successfully!");
-  } catch (error) {
-    console.error("❌ Error syncing database:", error);
+async function run() {
+  const result = await ensureDatabaseReady({ verbose: true, autoSeedIfEmpty: true });
+  if (!result.success) {
+    console.error("Database initialization failed.");
     process.exit(1);
-  } finally {
-    await sequelize.close();
   }
+  process.exit(0);
 }
 
-syncDatabase();
+run();

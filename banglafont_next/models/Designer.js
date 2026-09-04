@@ -44,7 +44,7 @@ const Designer = sequelize.define(
     },
   },
   {
-    tableName: "Designer",
+    tableName: "designer",
     timestamps: true,
   }
 );
