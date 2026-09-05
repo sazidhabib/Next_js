@@ -815,10 +815,31 @@
         applyNewSlug();
       }
     });
+
+    // Fix internal navigation links if opened directly from local filesystem (file:///)
+    if (window.location.protocol === 'file:') {
+      document.querySelectorAll('a[href^="/"]').forEach(function (link) {
+        var href = link.getAttribute('href');
+        // Keep menu/embed links for modal handler but fix admin links
+        if (href && (href.indexOf('/admin') === 0 || href.indexOf('/api') === 0)) {
+          link.href = 'http://localhost:3000' + href;
+          link.target = '_blank';
+        }
+      });
+    }
   </script>
 
-  <!-- UNIVERSAL MODAL WIDGET SCRIPT -->
-  <script src="/widget.js?v=4" async></script>
+  <!-- UNIVERSAL MODAL WIDGET SCRIPT (Smart Local & Remote Auto-detection) -->
+  <script>
+    (function () {
+      var script = document.createElement('script');
+      var isFile = window.location.protocol === 'file:';
+      // If opened directly from file manager (file:///), load from active localhost dev server
+      script.src = isFile ? 'http://localhost:3000/widget.js?v=' + Date.now() : '/widget.js?v=' + Date.now();
+      script.async = true;
+      document.body.appendChild(script);
+    })();
+  </script>
 </body>
 
 </html>

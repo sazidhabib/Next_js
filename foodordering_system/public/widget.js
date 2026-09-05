@@ -23,12 +23,15 @@
     })();
 
   var baseUrl = '';
-  if (currentScript && currentScript.src) {
+  if (currentScript && currentScript.src && currentScript.src.indexOf('http') === 0) {
     var a = document.createElement('a');
     a.href = currentScript.src;
     baseUrl = a.protocol + '//' + a.host;
-  } else {
+  } else if (window.location.origin && window.location.origin.indexOf('http') === 0) {
     baseUrl = window.location.origin;
+  } else {
+    // Graceful fallback for local file:// testing
+    baseUrl = 'http://localhost:3000';
   }
 
   // Configuration options from script data attributes
