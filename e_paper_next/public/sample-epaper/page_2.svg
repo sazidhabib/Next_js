@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1700" width="100%" height="100%" style="background:#fcfbf7; font-family: 'Times New Roman', serif, sans-serif;">
+  <defs>
+    <style>
+      .masthead { font-family: 'Times New Roman', serif; font-weight: 900; font-size: 40px; fill: #111; letter-spacing: 2px; }
+      .sub-masthead { font-family: sans-serif; font-size: 13px; font-weight: 600; fill: #444; text-transform: uppercase; }
+      .lead-headline { font-weight: 900; font-size: 32px; fill: #0f172a; line-height: 1.2; }
+      .box-title { font-weight: 800; font-size: 22px; fill: #1e293b; }
+      .body-text { font-size: 13px; fill: #222; line-height: 1.45; }
+      .border-line { stroke: #111; stroke-width: 1.5; }
+      .thin-line { stroke: #888; stroke-width: 0.75; }
+    </style>
+  </defs>
+
+  <!-- Page Background & Border -->
+  <rect x="0" y="0" width="1200" height="1700" fill="#fbfaf5" />
+  <rect x="25" y="25" width="1150" height="1650" fill="none" stroke="#222" stroke-width="2" />
+
+  <!-- Page Header -->
+  <text x="45" y="55" class="sub-masthead">PAGE 2 • BUSINESS &amp; GLOBAL FINANCE</text>
+  <text x="600" y="55" class="sub-masthead" text-anchor="middle">THE DAILY CHRONICLE</text>
+  <text x="1155" y="55" class="sub-masthead" text-anchor="end">SEPTEMBER 6, 2026</text>
+  <line x1="30" y1="65" x2="1170" y2="65" class="border-line" />
+
+  <!-- Section Banner -->
+  <rect x="35" y="80" width="1130" height="42" fill="#047857" rx="3" />
+  <text x="600" y="108" fill="#ffffff" font-family="sans-serif" font-weight="900" font-size="20px" text-anchor="middle" letter-spacing="3px">INTERNATIONAL COMMERCE &amp; TECHNOLOGY BRIEFING</text>
+
+  <!-- Article 1: Global Trade Agreement -->
+  <g transform="translate(45, 150)">
+    <text x="0" y="30" class="lead-headline">
+      <tspan x="0" dy="0">Cross-Border Digital Payments Pact</tspan>
+      <tspan x="0" dy="36">Ratified by Regional Banking Consortium</tspan>
+    </text>
+    <text x="0" y="95" font-family="sans-serif" font-size="14px" fill="#475569" font-style="italic">Special Correspondent • Singapore Financial Forum</text>
+    <line x1="0" y1="110" x2="680" y2="110" class="thin-line" />
+
+    <!-- Article Body Columns -->
+    <g transform="translate(0, 130)">
+      <text x="0" y="20" class="body-text">
+        <tspan x="0" dy="0">SINGAPORE — A multilateral framework</tspan>
+        <tspan x="0" dy="18">enabling instant cross-border settlement in</tspan>
+        <tspan x="0" dy="18">local sovereign currencies was signed today</tspan>
+        <tspan x="0" dy="18">by central banking governors representing</tspan>
+        <tspan x="0" dy="18">eleven Asian economies. The initiative</tspan>
+        <tspan x="0" dy="18">reduces transactional remittance friction</tspan>
+        <tspan x="0" dy="18">by over 65% for small exporters.</tspan>
+      </text>
+
+      <text x="280" y="20" class="body-text">
+        <tspan x="280" dy="0">Under the new protocol, commercial payments</tspan>
+        <tspan x="280" dy="18">and worker remittances will settle in seconds</tspan>
+        <tspan x="280" dy="18">using ISO 20022 compliant messaging layers</tspan>
+        <tspan x="280" dy="18">directly through linked national clearing houses,</tspan>
+        <tspan x="280" dy="18">bypassing intermediate currency conversion</tspan>
+        <tspan x="280" dy="18">spreads.</tspan>
+      </text>
+    </g>
+  </g>
+
+  <!-- Graphic on Right -->
+  <rect x="760" y="150" width="395" height="320" fill="#0f172a" rx="4" />
+  <circle cx="957" cy="280" r="70" fill="#10b981" opacity="0.3" />
+  <circle cx="957" cy="280" r="40" fill="#34d399" opacity="0.6" />
+  <text x="957" y="380" fill="#ffffff" font-family="sans-serif" font-weight="bold" font-size="16px" text-anchor="middle">Instant QR &amp; FX Settlement</text>
+  <text x="957" y="405" fill="#a7f3d0" font-family="sans-serif" font-size="12px" text-anchor="middle">Connecting 140M Digital Wallets</text>
+
+  <line x1="30" y1="520" x2="1170" y2="520" class="border-line" />
+
+  <!-- Article 2: Green Bonds & Sustainability -->
+  <g transform="translate(45, 560)">
+    <text x="0" y="0" class="box-title" font-size="26px">Sovereign Green Sukuk Over-Subscribed Threefold on Debut</text>
+    <text x="0" y="30" class="body-text">
+      <tspan x="0" dy="0">Institutional demand for sovereign environmental bonds reached unprecedented heights as the BDT 5,000 Crore issuance closed with bids exceeding BDT 16,200 Crore.</tspan>
+      <tspan x="0" dy="20">Proceeds are earmarked exclusively for mega solar parks, electric mass transit lines, and coastal mangrove reforestation barriers.</tspan>
+    </text>
+  </g>
+
+  <line x1="30" y1="1630" x2="1170" y2="1630" class="thin-line" />
+  <text x="45" y="1655" class="sub-masthead">PAGE 2 • THE DAILY CHRONICLE</text>
+  <text x="1155" y="1655" class="sub-masthead" text-anchor="end">BUSINESS SECTION</text>
+</svg>

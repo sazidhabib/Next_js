@@ -519,3 +519,16 @@ export function updateDeliveryZone(zoneId, zoneData) {
   }
   return null;
 }
+
+export function saveDeliveryZones(zones) {
+  if (Array.isArray(zones)) {
+    globalStore.__restaurantData.deliveryZones = zones;
+    return globalStore.__restaurantData.deliveryZones;
+  }
+  return globalStore.__restaurantData.deliveryZones;
+}
+
+export function updateDeliveryStatus(enableDelivery) {
+  globalStore.__restaurantData.enableDelivery = !!enableDelivery;
+  return globalStore.__restaurantData.enableDelivery;
+}

@@ -1,0 +1,214 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1450" width="100%" height="100%" style="background:#ffffff; font-family: 'Hind Siliguri', 'Noto Serif Bengali', 'SolaimanLipi', sans-serif;">
+  <defs>
+    <style>
+      .masthead { font-family: 'Noto Serif Bengali', serif; font-weight: 900; font-size: 64px; fill: #008374; }
+      .kicker { font-family: 'Hind Siliguri', sans-serif; font-size: 16px; font-weight: 700; fill: #ea580c; }
+      .lead-head { font-family: 'Noto Serif Bengali', serif; font-weight: 900; font-size: 32px; fill: #dc2626; line-height: 1.15; }
+      .sub-head { font-family: 'Hind Siliguri', sans-serif; font-weight: 700; font-size: 18px; fill: #0f172a; }
+      .body-txt { font-family: 'Hind Siliguri', sans-serif; font-size: 11px; fill: #334155; line-height: 1.35; }
+      .byline { font-family: 'Hind Siliguri', sans-serif; font-size: 10px; font-weight: 600; fill: #64748b; }
+      .line-dark { stroke: #cbd5e1; stroke-width: 1; }
+      .line-heavy { stroke: #0f172a; stroke-width: 2; }
+    </style>
+  </defs>
+
+  <!-- Page Background -->
+  <rect x="0" y="0" width="1000" height="1450" fill="#ffffff" />
+  <rect x="15" y="15" width="970" height="1420" fill="none" stroke="#e2e8f0" stroke-width="1.5" />
+
+  <!-- Top Info Bar -->
+  <g transform="translate(30, 40)">
+    <rect x="0" y="0" width="80" height="26" fill="#dc2626" rx="2" />
+    <text x="40" y="18" fill="#fff" font-size="13px" font-weight="bold" text-anchor="middle">রোববার</text>
+    <text x="95" y="17" font-size="11px" fill="#475569">৫ সেপ্টেম্বর ২০২৪ | ২১ ভাদ্র ১৪৩১ | ২৩ সফর ১৪৪৬ | পৃষ্ঠা ১২ | মূল্য ১০ টাকা</text>
+    <text x="800" y="17" font-size="11px" fill="#475569" text-anchor="end">www.ajkerpatrika.com</text>
+  </g>
+
+  <!-- Newspaper Main Masthead -->
+  <text x="500" y="115" class="masthead" text-anchor="middle">আজকের পত্রিকা</text>
+  <line x1="30" y1="135" x2="970" y2="135" stroke="#008374" stroke-width="2.5" />
+
+  <!-- Top 4 Mini Teaser Cards -->
+  <g transform="translate(30, 145)">
+    <!-- Card 1 -->
+    <rect x="0" y="0" width="220" height="75" fill="#0891b2" rx="3" />
+    <circle cx="40" cy="37" r="26" fill="#bae6fd" />
+    <text x="40" y="42" font-size="18px" text-anchor="middle">👤</text>
+    <text x="75" y="32" font-size="11px" font-weight="bold" fill="#ffffff">ড. মোশাররফ</text>
+    <text x="75" y="48" font-size="10px" fill="#e0f2fe">হাসপাতাল থেকে</text>
+    <text x="75" y="62" font-size="9px" fill="#bae6fd">ছাড়া পেলেন ▶ পৃষ্ঠা ২</text>
+
+    <!-- Card 2 -->
+    <rect x="235" y="0" width="220" height="75" fill="#ea580c" rx="3" />
+    <circle cx="275" cy="37" r="26" fill="#ffedd5" />
+    <text x="275" y="42" font-size="18px" text-anchor="middle">👤</text>
+    <text x="310" y="32" font-size="11px" font-weight="bold" fill="#ffffff">ফিলিস্তিনের গাজা</text>
+    <text x="310" y="48" font-size="10px" fill="#ffedd5">থেকে উদ্বেগ প্রকাশ</text>
+    <text x="310" y="62" font-size="9px" fill="#fed7aa">হবে না ▶ পৃষ্ঠা ৯</text>
+
+    <!-- Card 3 -->
+    <rect x="470" y="0" width="220" height="75" fill="#475569" rx="3" />
+    <circle cx="510" cy="37" r="26" fill="#cbd5e1" />
+    <text x="510" y="42" font-size="18px" text-anchor="middle">👤</text>
+    <text x="545" y="32" font-size="11px" font-weight="bold" fill="#ffffff">ফারুকী হাসপাতালে</text>
+    <text x="545" y="48" font-size="10px" fill="#f1f5f9">অবস্থার উন্নতি হয়েছে</text>
+    <text x="545" y="62" font-size="9px" fill="#cbd5e1">ভিজিট চান ▶ পৃষ্ঠা ১০</text>
+
+    <!-- Card 4 -->
+    <rect x="705" y="0" width="235" height="75" fill="#16a34a" rx="3" />
+    <circle cx="745" cy="37" r="26" fill="#dcfce7" />
+    <text x="745" y="42" font-size="18px" text-anchor="middle">👤</text>
+    <text x="780" y="32" font-size="11px" font-weight="bold" fill="#ffffff">সালাহ উদ্দিন ও</text>
+    <text x="780" y="48" font-size="10px" fill="#dcfce7">শিমুলের দুই মিশন</text>
+    <text x="780" y="62" font-size="9px" fill="#bbf7d0">পৃষ্ঠা ১১</text>
+  </g>
+
+  <line x1="30" y1="230" x2="970" y2="230" class="line-dark" />
+
+  <!-- ================= MAIN SECTION: LEAD STORY (Left side) ================= -->
+  <g transform="translate(30, 245)">
+    <!-- Orange Category Badge -->
+    <rect x="0" y="0" width="130" height="24" fill="#ea580c" rx="2" />
+    <text x="65" y="17" fill="#ffffff" font-size="13px" font-weight="bold" text-anchor="middle">মেট্রোরেল</text>
+
+    <!-- Lead Headline in Bold Crimson Red -->
+    <text x="0" y="60" class="lead-head">
+      <tspan x="0" dy="0">নিয়ন্ত্রণ নিয়ে</tspan>
+      <tspan x="0" dy="38">দুই সংস্থার</tspan>
+      <tspan x="0" dy="38">রশি-টানাটানি</tspan>
+    </text>
+
+    <!-- Byline -->
+    <text x="0" y="190" class="byline">তৌফিকুল ইসলাম, ঢাকা</text>
+
+    <!-- Two small text columns for Lead Story -->
+    <g transform="translate(0, 205)">
+      <text x="0" y="15" class="body-txt">
+        <tspan x="0" dy="0">মেট্রোরেলের নিয়ন্ত্রণ নিয়ে ঢাকা</tspan>
+        <tspan x="0" dy="16">পরিবহন সমন্বয় কর্তৃপক্ষ (ডিটিসিএ)</tspan>
+        <tspan x="0" dy="16">এবং ঢাকা ম্যাস ট্রানজিট কোম্পানি</tspan>
+        <tspan x="0" dy="16">লিমিটেডের (ডিএমটিসিএল) মধ্যে</tspan>
+        <tspan x="0" dy="16">আবার রশি টানাটানি চলছে। মেট্রোরেল</tspan>
+        <tspan x="0" dy="16">পরিষেবাকে 'অত্যাবশ্যক পরিষেবা'</tspan>
+        <tspan x="0" dy="16">ঘোষণার জন্য মেট্রোরেল আইন,</tspan>
+        <tspan x="0" dy="16">২০১৫ সংশোধনে সড়ক পরিবহন ও</tspan>
+        <tspan x="0" dy="16">মহাসড়ক বিভাগ প্রস্তাব করেছে।</tspan>
+      </text>
+
+      <!-- Highlights Bullet Box on Lead Story -->
+      <rect x="0" y="170" width="220" height="120" fill="#fef3c7" stroke="#fde68a" rx="3" />
+      <text x="10" y="190" font-size="11px" font-weight="bold" fill="#92400e">» মেট্রোরেল আইন সংশোধন</text>
+      <text x="10" y="206" font-size="10px" fill="#78350f">সড়ক পরিবহন ও মহাসড়ক বিভাগে</text>
+      <text x="10" y="220" font-size="10px" fill="#78350f">প্রস্তাব ডিএমটিসিএলের।</text>
+      <text x="10" y="245" font-size="11px" font-weight="bold" fill="#92400e">» মতামত চেয়ে সড়ক বিভাগ</text>
+      <text x="10" y="260" font-size="10px" fill="#78350f">কয়েক দফা চিঠি পাঠিয়েছে।</text>
+    </g>
+  </g>
+
+  <!-- Vertical Divider Line 1 -->
+  <line x1="265" y1="240" x2="265" y2="760" class="line-dark" />
+
+  <!-- ================= CENTER PHOTO & SECONDARY STORIES ================= -->
+  <g transform="translate(280, 245)">
+    <!-- Photo 1 (Crowd Rally / Event) -->
+    <rect x="0" y="0" width="420" height="230" fill="#334155" rx="3" />
+    <!-- Graphic elements inside photo frame -->
+    <circle cx="210" cy="115" r="70" fill="#0284c7" opacity="0.4" />
+    <text x="210" y="115" fill="#ffffff" font-size="18px" font-weight="bold" text-anchor="middle">জনসভায় বিশাল জনস্রোত</text>
+    <text x="210" y="140" fill="#bae6fd" font-size="11px" text-anchor="middle">সমাবেশে প্রধান অতিথির ভাষণ — আজকের পত্রিকা</text>
+
+    <!-- Headline below Photo: সীমানা লঙ্ঘন না করার হুঁশিয়ারি -->
+    <g transform="translate(0, 245)">
+      <text x="0" y="20" class="sub-head">সীমা লঙ্ঘন না করার হুঁশিয়ারি প্রধানমন্ত্রীর</text>
+      <text x="0" y="38" class="byline">বিশেষ প্রতিবেদক, ঢাকা</text>
+      <text x="0" y="55" class="body-txt">
+        <tspan x="0" dy="0">শান্তি ও শৃঙ্খলা বজায় রাখতে সরকার বদ্ধপরিকর।</tspan>
+        <tspan x="0" dy="16">যেকোনো ধরনের সহিংসতা কঠোর হস্তে দমন করা</tspan>
+        <tspan x="0" dy="16">হবে বলে হুঁশিয়ারি উচ্চারণ করেছেন প্রধানমন্ত্রী।</tspan>
+      </text>
+    </g>
+
+    <!-- Secondary Story next to it -->
+    <g transform="translate(220, 245)">
+      <text x="0" y="20" class="sub-head" fill="#b91c1c">আন্দোলন শুরু, সফল করেই ঘরে ফিরব</text>
+      <text x="0" y="38" class="byline">নিজস্ব প্রতিবেদক</text>
+      <text x="0" y="55" class="body-txt">
+        <tspan x="0" dy="0">দাবি আদায় না হওয়া পর্যন্ত আন্দোলন</tspan>
+        <tspan x="0" dy="16">চলমান রাখার ঘোষণা দিয়েছে বিরোধী</tspan>
+        <tspan x="0" dy="16">ঐক্যজোট। আজ থেকে বিভাগীয় সমাবেশ।</tspan>
+      </text>
+    </g>
+  </g>
+
+  <!-- Vertical Divider Line 2 -->
+  <line x1="715" y1="240" x2="715" y2="760" class="line-dark" />
+
+  <!-- ================= RIGHT COLUMN STORIES ================= -->
+  <g transform="translate(730, 245)">
+    <!-- Story 1 Right -->
+    <text x="0" y="18" class="sub-head" font-size="16px">লম্বাটে তেল না পুড়িয়ে সংসদে আসুন</text>
+    <text x="0" y="35" class="byline">সংসদ সচিবালয়</text>
+    <text x="0" y="52" class="body-txt">
+      <tspan x="0" dy="0">জাতীয় সংসদে গঠনমূলক আলোচনায়</tspan>
+      <tspan x="0" dy="16">অংশ নিতে সকল সংসদ সদস্যের প্রতি</tspan>
+      <tspan x="0" dy="16">আহ্বান জানিয়েছেন স্পিকার।</tspan>
+    </text>
+
+    <line x1="0" y1="120" x2="230" y2="120" class="line-dark" />
+
+    <!-- Story 2 Right with mini avatar -->
+    <g transform="translate(0, 135)">
+      <rect x="0" y="0" width="80" height="90" fill="#e2e8f0" rx="3" />
+      <text x="40" y="50" font-size="24px" text-anchor="middle">📸</text>
+      <g transform="translate(90, 0)">
+        <text x="0" y="18" font-size="13px" font-weight="bold" fill="#0f172a">এবার কাদায় ডোবা বৃদ্ধ</text>
+        <text x="0" y="34" font-size="13px" font-weight="bold" fill="#0f172a">ও টানেলের কর্মী উদ্ধার</text>
+        <text x="0" y="50" class="byline">সিলেট ব্যুরো</text>
+        <text x="0" y="66" class="body-txt">দুর্যোগ মোকাবিলায় ফায়ার সার্ভিস।</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- Horizontal Divider Line -->
+  <line x1="30" y1="580" x2="970" y2="580" class="line-dark" />
+
+  <!-- ================= LOWER HALF STORIES ================= -->
+  <g transform="translate(30, 600)">
+    <!-- Lower Left Story -->
+    <text x="0" y="20" class="lead-head" font-size="24px" fill="#0f172a">ফুলবাড়ীর কয়লা তোলার ঘোষণায় উদ্বেগ, ক্ষোভ</text>
+    <text x="0" y="40" class="byline">দিনাজপুর প্রতিনিধি</text>
+    
+    <g transform="translate(0, 55)">
+      <!-- Street photo -->
+      <rect x="0" y="0" width="180" height="150" fill="#64748b" rx="2" />
+      <text x="90" y="80" fill="#fff" font-size="14px" font-weight="bold" text-anchor="middle">বিক্ষোভ সমাবেশ</text>
+
+      <g transform="translate(195, 0)">
+        <text x="0" y="15" class="body-txt">
+          <tspan x="0" dy="0">দিনাজপুরের ফুলবাড়ীতে উন্মুক্ত পদ্ধতিতে</tspan>
+          <tspan x="0" dy="16">কয়লা উত্তোলনের সিদ্ধান্তের তীব্র প্রতিবাদ</tspan>
+          <tspan x="0" dy="16">জানিয়েছে স্থানীয় সর্বস্তরের মানুষ। আজ</tspan>
+          <tspan x="0" dy="16">সকালে অনুষ্ঠিত বিক্ষোভ সমাবেশে বক্তারা</tspan>
+          <tspan x="0" dy="16">বলেন, ফসলি জমি নষ্ট করে কোনো প্রকল্প</tspan>
+          <tspan x="0" dy="16">বাস্তবায়ন করতে দেওয়া হবে না।</tspan>
+        </text>
+      </g>
+    </g>
+  </g>
+
+  <!-- ================= BOTTOM ADVERTISEMENT BANNER ================= -->
+  <g transform="translate(30, 880)">
+    <rect x="0" y="0" width="940" height="180" fill="#4c1d95" rx="6" />
+    <circle cx="100" cy="90" r="60" fill="#7c3aed" opacity="0.6" />
+    <rect x="50" y="40" width="100" height="100" fill="#ffffff" rx="8" />
+    <text x="100" y="98" fill="#4c1d95" font-size="28px" font-weight="bold" text-anchor="middle">QR</text>
+    
+    <text x="200" y="80" fill="#ffffff" font-size="34px" font-weight="bold">দেশজুড়ে রকেট গতিতে হবে লেনদেন</text>
+    <text x="200" y="120" fill="#e9d5ff" font-size="18px">Bangla QR-এ পেমেন্ট করুন আরও সহজে ও নিরাপদে</text>
+  </g>
+
+  <!-- Page Footer -->
+  <line x1="30" y1="1400" x2="970" y2="1400" class="line-dark" />
+  <text x="30" y="1420" font-size="10px" fill="#94a3b8">আজকের পত্রিকা • ঢাকা সংস্করণ</text>
+  <text x="970" y="1420" font-size="10px" fill="#94a3b8" text-anchor="end">পৃষ্ঠা ১</text>
+</svg>

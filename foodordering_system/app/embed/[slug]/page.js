@@ -139,18 +139,18 @@ export default function EmbedMenuPage({ params }) {
 
   const deliveryZones =
     restaurant?.deliveryZones && restaurant.deliveryZones.length > 0
-      ? restaurant.deliveryZones.map((z, idx) => ({
-          ...z,
-          color: defaultZoneColors[idx % defaultZoneColors.length].bg,
-          minOrder: z.minOrderAmount || 0,
-          fee: z.deliveryFee || 0,
-        }))
+      ? restaurant.deliveryZones
+          .filter((z) => !z.isHidden && z.isActive !== false)
+          .map((z, idx) => ({
+            ...z,
+            color: z.color || defaultZoneColors[idx % defaultZoneColors.length].bg,
+            minOrder: z.minOrderAmount || 0,
+            fee: z.deliveryFee || 0,
+          }))
       : [
           { name: 'Zone 1: Local Center (0-3 km)', minOrder: 0.0, fee: 1.99, color: '#ea580c', radiusKm: 3 },
           { name: 'Zone 2: Inner Ring (3-5 km)', minOrder: 15.0, fee: 2.5, color: '#f59e0b', radiusKm: 5 },
           { name: 'Zone 3: Metro Area (5-8 km)', minOrder: 15.0, fee: 2.5, color: '#06b6d4', radiusKm: 8 },
-          { name: 'Zone 4: Outer Ring (8-12 km)', minOrder: 15.0, fee: 3.99, color: '#3b82f6', radiusKm: 12 },
-          { name: 'Zone 5: Extended District (12-16 km)', minOrder: 15.0, fee: 3.99, color: '#a855f7', radiusKm: 16 },
         ];
 
   // Operating Hours

@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>🍕 Bella Vista · Order Modal</title>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* ----- reset & base ----- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            background-color: #0f172a;
+        }
+
+        /* ----- FULLSCREEN BACKGROUND SLIDESHOW (layer 0) ----- */
+        #bg-slideshow {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 0;
+            overflow: hidden;
+            background: #0b1120;
+        }
+
+        #bg-slideshow .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            opacity: 0;
+            transition: opacity 1.5s ease-in-out;
+            filter: brightness(0.55) saturate(1.1);
+            will-change: opacity;
+        }
+
+        #bg-slideshow .slide.active {
+            opacity: 1;
+        }
+
+        /* ----- glassmorphism card (layer 1) ----- */
+        .card {
+            position: relative;
+            z-index: 10;
+            background: rgba(30, 41, 59, 0.75);
+            backdrop-filter: blur(12px) saturate(180%);
+            -webkit-backdrop-filter: blur(12px) saturate(180%);
+            padding: 48px 40px;
+            border-radius: 32px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 30px 40px -15px rgba(0, 0, 0, 0.7);
+            max-width: 560px;
+            width: 100%;
+            text-align: center;
+            transition: transform 0.3s ease;
+            color: #f8fafc;
+        }
+
+        .card:hover {
+            transform: scale(1.01);
+        }
+
+        .card h1 {
+            font-size: 2.6rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            margin-bottom: 0.2rem;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .card h1 i {
+            font-size: 2.2rem;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+        }
+
+        .card .sub {
+            font-size: 1.1rem;
+            opacity: 0.85;
+            margin-bottom: 28px;
+            border-bottom: 1px dashed rgba(255, 255, 255, 0.2);
+            padding-bottom: 16px;
+            font-weight: 300;
+            letter-spacing: 0.3px;
+        }
+
+        /* ----- editable fields (config) ----- */
+        .config-panel {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            border-radius: 20px;
+            padding: 18px 20px 20px;
+            margin: 16px 0 22px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            text-align: left;
+        }
+
+        .config-panel label {
+            display: block;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+            color: #94a3b8;
+            margin-top: 10px;
+            margin-bottom: 4px;
+        }
+
+        .config-panel label:first-of-type {
+            margin-top: 0;
+        }
+
+        .config-panel input {
+            width: 100%;
+            padding: 10px 14px;
+            border-radius: 40px;
+            border: 1px solid #334155;
+            background: rgba(255, 255, 255, 0.06);
+            color: #f1f5f9;
+            font-size: 0.95rem;
+            transition: 0.2s;
+            backdrop-filter: blur(2px);
+        }
+
+        .config-panel input:focus {
+            outline: 2px solid #ea580c;
+            outline-offset: 2px;
+            background: rgba(255, 255, 255, 0.08);
+            border-color: #ea580c;
+        }
+
+        .config-panel input::placeholder {
+            color: #64748b;
+            font-weight: 300;
+        }
+
+        /* ----- SAVE button (new) ----- */
+        .save-btn {
+            background: #2d3748;
+            color: #e2e8f0;
+            border: 1px solid #4a5568;
+            padding: 10px 20px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 4px;
+            width: 100%;
+            justify-content: center;
+            letter-spacing: 0.3px;
+        }
+
+        .save-btn:hover {
+            background: #4a5568;
+            border-color: #ea580c;
+            color: #fff;
+            transform: translateY(-1px);
+            box-shadow: 0 8px 15px -5px rgba(0, 0, 0, 0.4);
+        }
+
+        .save-btn i {
+            font-size: 0.9rem;
+        }
+
+        .save-feedback {
+            font-size: 0.8rem;
+            margin-top: 8px;
+            color: #86efac;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            height: 20px;
+        }
+
+        .save-feedback.show {
+            opacity: 1;
+        }
+
+        /* ----- order button (dynamic) ----- */
+        .order-btn {
+            background: #ea580c;
+            color: #ffffff;
+            padding: 16px 36px;
+            font-size: 1.25rem;
+            font-weight: 700;
+            border: none;
+            border-radius: 9999px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 10px 20px -5px rgba(234, 88, 12, 0.5);
+            margin-top: 12px;
+            width: 100%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            letter-spacing: 0.3px;
+        }
+
+        .order-btn:hover {
+            background: #c2410c;
+            transform: translateY(-3px);
+            box-shadow: 0 18px 25px -8px rgba(234, 88, 12, 0.6);
+        }
+
+        .order-btn i {
+            font-size: 1.3rem;
+        }
+
+        /* link wrapper for button */
+        #orderLink {
+            text-decoration: none;
+            display: block;
+        }
+
+        /* footnote */
+        .footnote {
+            margin-top: 24px;
+            font-size: 0.75rem;
+            opacity: 0.5;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding-top: 16px;
+            letter-spacing: 0.5px;
+            color: #cbd5e1;
+        }
+
+        .footnote i {
+            margin-right: 4px;
+        }
+
+        /* responsive */
+        @media (max-width: 480px) {
+            .card {
+                padding: 28px 18px;
+            }
+
+            .card h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- FULLSCREEN BACKGROUND SLIDESHOW (multiple food images) -->
+    <div id="bg-slideshow" aria-hidden="true"></div>
+
+    <!-- MAIN CARD -->
+    <div class="card">
+
+        <h1>
+            <i class="fas fa-pizza-slice"></i>
+            Bella Vista
+        </h1>
+        <div class="sub">
+            <i class="fas fa-map-pin" style="opacity:0.6;"></i>
+            Order · Eat · Enjoy
+        </div>
+
+        <!-- CONFIGURABLE FIELDS (editable by user) -->
+        <div class="config-panel">
+            <label for="btnUrl"><i class="fas fa-link"></i> Button URL (href)</label>
+            <input type="url" id="btnUrl" value="https://example.com/order/bellavista"
+                placeholder="https://your-order-link.com" />
+
+            <label for="widgetSrc"><i class="fas fa-code"></i> Widget script src</label>
+            <input type="url" id="widgetSrc" value="http://localhost:3000/widget.js"
+                placeholder="http://localhost:3000/widget.js" />
+
+            <!-- SAVE button + feedback -->
+            <button type="button" class="save-btn" id="saveConfigBtn">
+                <i class="fas fa-save"></i> Save Changes
+            </button>
+            <div id="saveFeedback" class="save-feedback">
+                <i class="fas fa-check-circle"></i> Settings saved successfully!
+            </div>
+        </div>
+
+        <!-- ORDER BUTTON (dynamic href) -->
+        <a id="orderLink" href="https://example.com/order/bellavista" target="_blank" rel="noopener noreferrer">
+            <button type="button" class="order-btn" id="orderButton">
+                <i class="fas fa-shopping-bag"></i> Order Online
+            </button>
+        </a>
+
+        <!-- widget script will be injected dynamically (async) -->
+        <div id="widgetScriptContainer"></div>
+
+        <div class="footnote">
+            <i class="fas fa-pen-fancy"></i> Edit fields above · click Save · modal loads from widget
+        </div>
+    </div>
+
+    <script>
+        (function () {
+            // ----- 1. BACKGROUND SLIDESHOW (full screen, multiple food images) -----
+            const foodImages = [
+                'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=1200&q=80',  // pizza
+                'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=1200&q=80',  // pizza 2
+                'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=1200&q=80',  // burger
+                'https://images.unsplash.com/photo-1476224203421-9ac39bcb3327?w=1200&q=80',  // pasta
+                'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=1200&q=80',    // salad bowl
+                'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=1200&q=80',    // steak
+                'https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=1200&q=80', // pancakes
+                'https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=1200&q=80'  // sushi
+            ];
+
+            const slideshow = document.getElementById('bg-slideshow');
+            let slideIndex = 0;
+            let intervalId = null;
+
+            slideshow.innerHTML = '';
+
+            foodImages.forEach((url, idx) => {
+                const slide = document.createElement('div');
+                slide.className = 'slide' + (idx === 0 ? ' active' : '');
+                slide.style.backgroundImage = `url(${url})`;
+                slideshow.appendChild(slide);
+            });
+
+            if (foodImages.length > 1) {
+                intervalId = setInterval(() => {
+                    const slides = slideshow.querySelectorAll('.slide');
+                    if (!slides.length) return;
+                    slides[slideIndex].classList.remove('active');
+                    slideIndex = (slideIndex + 1) % slides.length;
+                    slides[slideIndex].classList.add('active');
+                }, 4500);
+            }
+
+            // ----- 2. DOM refs -----
+            const btnUrlInput = document.getElementById('btnUrl');
+            const widgetSrcInput = document.getElementById('widgetSrc');
+            const orderLink = document.getElementById('orderLink');
+            const widgetContainer = document.getElementById('widgetScriptContainer');
+            const saveBtn = document.getElementById('saveConfigBtn');
+            const feedback = document.getElementById('saveFeedback');
+
+            // ----- 3. Core update functions (used by save) -----
+            function applyButtonUrl() {
+                let val = btnUrlInput.value.trim();
+                if (!val) val = '#';
+                if (val !== '#' && !/^https?:\/\//i.test(val) && !val.startsWith('mailto:')) {
+                    val = 'https://' + val;
+                }
+                orderLink.href = val;
+                // update the button text to reflect? we keep it simple
+            }
+
+            function applyWidgetScript() {
+                let src = widgetSrcInput.value.trim();
+                // remove existing script
+                const oldScript = widgetContainer.querySelector('script');
+                if (oldScript) oldScript.remove();
+
+                if (!src) {
+                    // if empty, just remove it
+                    return;
+                }
+
+                const script = document.createElement('script');
+                script.src = src;
+                script.async = true;
+                script.onload = () => {
+                    console.log('✅ Widget script loaded from:', src);
+                };
+                script.onerror = () => {
+                    console.warn('⚠️ Failed to load widget script from:', src);
+                };
+                widgetContainer.appendChild(script);
+            }
+
+            // ----- 4. Save action: apply both + show feedback -----
+            function handleSave() {
+                applyButtonUrl();
+                applyWidgetScript();
+
+                // show feedback
+                feedback.classList.add('show');
+                setTimeout(() => {
+                    feedback.classList.remove('show');
+                }, 2800);
+
+                // optional: log
+                console.log('✅ Settings saved. Button URL:', orderLink.href, 'Widget src:', widgetSrcInput.value);
+            }
+
+            // ----- 5. Attach save button -----
+            saveBtn.addEventListener('click', handleSave);
+
+            // also allow Enter key on inputs to trigger save? we use save button only for clarity
+            // but we also keep the old auto-update? we disable auto-update to rely on save.
+            // But we want the initial values to be applied on load.
+            // So we call handleSave once to sync initially.
+            // However, we want to avoid double-feedback on load.
+            // We'll just apply the settings silently on load.
+            function silentApply() {
+                applyButtonUrl();
+                applyWidgetScript();
+            }
+            silentApply();
+
+            // Also, if user types and presses Enter inside input, we can trigger save for convenience.
+            document.querySelectorAll('.config-panel input').forEach(inp => {
+                inp.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        handleSave();
+                    }
+                });
+            });
+
+            // Cleanup interval on page unload
+            window.addEventListener('beforeunload', function () {
+                if (intervalId) clearInterval(intervalId);
+            });
+
+            console.log('🍕 Bella Vista ready — edit URL and widget src, then click Save.');
+        })();
+    </script>
+
+</body>
+
+</html>

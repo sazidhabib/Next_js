@@ -39,3 +39,10 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# archives and design files
+*.zip
+*.ai
+
+# markdown files
+*.md
