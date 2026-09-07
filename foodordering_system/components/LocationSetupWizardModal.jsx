@@ -19,14 +19,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'react-toastify';
 
-const COUNTRIES = [
-  { code: 'US', name: 'United States', defaultCity: 'New York', defaultState: 'New York', timezone: 'America/New_York', lat: 40.7128, lng: -74.006 },
-  { code: 'GB', name: 'United Kingdom', defaultCity: 'London', defaultState: 'Greater London', timezone: 'Europe/London', lat: 51.5074, lng: -0.1278 },
-  { code: 'CA', name: 'Canada', defaultCity: 'Toronto', defaultState: 'Ontario', timezone: 'America/Toronto', lat: 43.6532, lng: -79.3832 },
-  { code: 'AU', name: 'Australia', defaultCity: 'Sydney', defaultState: 'New South Wales', timezone: 'Australia/Sydney', lat: -33.8688, lng: 151.2093 },
-  { code: 'DE', name: 'Germany', defaultCity: 'Berlin', defaultState: 'Berlin', timezone: 'Europe/Berlin', lat: 52.52, lng: 13.405 },
-  { code: 'FR', name: 'France', defaultCity: 'Paris', defaultState: 'Île-de-France', timezone: 'Europe/Paris', lat: 48.8566, lng: 2.3522 },
-];
+import { COUNTRIES_DATA, GLOBAL_TIMEZONES } from '@/lib/locationData';
 
 export default function LocationSetupWizardModal({
   isOpen,
@@ -47,6 +40,9 @@ export default function LocationSetupWizardModal({
   const [zipCode, setZipCode] = useState('10001');
   const [streetAddress, setStreetAddress] = useState('');
   const [timezone, setTimezone] = useState('America/New_York');
+
+  // Selected country details helper
+  const selectedCountryData = COUNTRIES_DATA.find((c) => c.name === country) || COUNTRIES_DATA[0];
 
   // Coordinates & Map Pin State
   const [latitude, setLatitude] = useState(40.7128);
@@ -143,13 +139,14 @@ export default function LocationSetupWizardModal({
   // Country Change handler to update default state/timezones
   const handleCountryChange = (cName) => {
     setCountry(cName);
-    const found = COUNTRIES.find((c) => c.name === cName);
+    const found = COUNTRIES_DATA.find((c) => c.name === cName);
     if (found) {
-      setState(found.defaultState);
-      setCity(found.defaultCity);
-      setTimezone(found.timezone);
-      setLatitude(found.lat);
-      setLongitude(found.lng);
+      setState(found.defaultState || '');
+      setCity(found.defaultCity || '');
+      if (found.defaultZip) setZipCode(found.defaultZip);
+      setTimezone(found.timezone || 'America/New_York');
+      setLatitude(found.lat || 40.7128);
+      setLongitude(found.lng || -74.006);
       if (miniMapInstanceRef.current) {
         miniMapInstanceRef.current.setView([found.lat, found.lng], 13);
         if (miniPinMarkerRef.current) {
@@ -464,38 +461,74 @@ export default function LocationSetupWizardModal({
                       <select
                         value={country}
                         onChange={(e) => handleCountryChange(e.target.value)}
-                        className="w-full bg-slate-950 border border-slate-700 text-white rounded-xl py-2.5 px-3 text-xs focus:outline-none focus:border-orange-500"
+                        className="w-full bg-slate-950 border border-slate-700 text-white rounded-xl py-2.5 px-3 text-xs focus:outline-none focus:border-orange-500 font-medium cursor-pointer"
                       >
-                        {COUNTRIES.map((c) => (
+                        {COUNTRIES_DATA.map((c) => (
                           <option key={c.code} value={c.name}>
-                            {c.name}
+                            {c.name} ({c.code})
                           </option>
                         ))}
                       </select>
                     </div>
                   </div>
 
+                  {/* State/Region & Timezone Selectors with rich lists */}
                   <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-1">
-                      <label className="text-xs font-bold text-slate-300">State / Region</label>
-                      <input
-                        type="text"
-                        value={state}
-                        onChange={(e) => setState(e.target.value)}
-                        placeholder="e.g. New York"
-                        className="w-full bg-slate-950 border border-slate-700 text-white rounded-xl py-2.5 px-3 text-xs focus:outline-none focus:border-orange-500"
-                      />
+                      <div className="flex items-center justify-between">
+                        <label className="text-xs font-bold text-slate-300">
+                          State / Region <span className="text-orange-500">*</span>
+                        </label>
+                        {selectedCountryData?.states?.length > 0 && (
+                          <span className="text-[10px] text-orange-400 font-bold">
+                            {selectedCountryData.states.length} available
+                          </span>
+                        )}
+                      </div>
+                      <div className="relative">
+                        <input
+                          type="text"
+                          list="states-list"
+                          value={state}
+                          onChange={(e) => setState(e.target.value)}
+                          placeholder="Select or type state/region..."
+                          required
+                          className="w-full bg-slate-950 border border-slate-700 text-white rounded-xl py-2.5 px-3 text-xs focus:outline-none focus:border-orange-500 font-medium"
+                        />
+                        <datalist id="states-list">
+                          {selectedCountryData?.states?.map((st) => (
+                            <option key={st} value={st} />
+                          ))}
+                        </datalist>
+                      </div>
                     </div>
 
                     <div className="space-y-1">
-                      <label className="text-xs font-bold text-slate-300">Timezone</label>
-                      <input
-                        type="text"
+                      <label className="text-xs font-bold text-slate-300">
+                        Timezone <span className="text-orange-500">*</span>
+                      </label>
+                      <select
                         value={timezone}
                         onChange={(e) => setTimezone(e.target.value)}
-                        placeholder="America/New_York"
-                        className="w-full bg-slate-950 border border-slate-700 text-white rounded-xl py-2.5 px-3 text-xs focus:outline-none focus:border-orange-500"
-                      />
+                        className="w-full bg-slate-950 border border-slate-700 text-white rounded-xl py-2.5 px-3 text-xs focus:outline-none focus:border-orange-500 font-medium cursor-pointer"
+                      >
+                        {selectedCountryData?.timezones && selectedCountryData.timezones.length > 0 && (
+                          <optgroup label={`Recommended for ${country}`}>
+                            {selectedCountryData.timezones.map((tz) => (
+                              <option key={tz.value} value={tz.value}>
+                                {tz.label}
+                              </option>
+                            ))}
+                          </optgroup>
+                        )}
+                        <optgroup label="All Global Timezones">
+                          {GLOBAL_TIMEZONES.map((tz) => (
+                            <option key={tz.value} value={tz.value}>
+                              {tz.label}
+                            </option>
+                          ))}
+                        </optgroup>
+                      </select>
                     </div>
                   </div>
 

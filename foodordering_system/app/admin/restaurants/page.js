@@ -77,17 +77,17 @@ export default function AdminRestaurantsPage() {
   // Fetch all restaurants
   async function fetchRestaurants() {
     setLoading(true);
+    setError('');
     try {
       const res = await fetch('/api/admin/restaurants');
-      if (res.ok) {
-        const json = await res.json();
-        if (json.success) {
-          setRestaurants(json.data);
-        } else {
-          setError(json.error || 'Failed to fetch restaurants');
-        }
+      const json = await res.json().catch(() => null);
+      if (res.ok && json?.success) {
+        setRestaurants(json.data || []);
       } else {
-        setError('Unauthorized access to restaurants administration');
+        const errorMsg = json?.error || (res.status === 401 || res.status === 403 
+          ? 'Unauthorized access to restaurants administration. Please check your admin session.' 
+          : 'Failed to fetch restaurants');
+        setError(errorMsg);
       }
     } catch (err) {
       setError('Connection error fetching restaurants');

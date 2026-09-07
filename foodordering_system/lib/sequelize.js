@@ -897,17 +897,32 @@ export async function ensureDatabaseReady() {
       await sequelize.sync({ force: false });
       console.log('✅ [DB Init] Database tables checked/created.');
 
-      // Ensure new printer fields exist on restaurants table
-      try {
-        const [results] = await sequelize.query("SHOW COLUMNS FROM restaurants LIKE 'kitchenPrinterIp'");
-        if (results.length === 0) {
-          console.log('➕ [DB Init] Adding kitchenPrinterIp and kitchenPrinterPort columns to restaurants table...');
-          await sequelize.query("ALTER TABLE restaurants ADD COLUMN kitchenPrinterIp VARCHAR(255) NULL");
-          await sequelize.query("ALTER TABLE restaurants ADD COLUMN kitchenPrinterPort INT DEFAULT 9100");
-          console.log('✅ [DB Init] Columns added.');
+      // Ensure location & manager columns exist on restaurants table
+      const restaurantCols = [
+        { name: 'city', def: 'VARCHAR(255) NULL' },
+        { name: 'state', def: 'VARCHAR(255) NULL' },
+        { name: 'zipCode', def: 'VARCHAR(255) NULL' },
+        { name: 'country', def: 'VARCHAR(255) NULL' },
+        { name: 'timezone', def: 'VARCHAR(255) NULL' },
+        { name: 'managerFirstName', def: 'VARCHAR(255) NULL' },
+        { name: 'managerLastName', def: 'VARCHAR(255) NULL' },
+        { name: 'managerEmail', def: 'VARCHAR(255) NULL' },
+        { name: 'managerPhone', def: 'VARCHAR(255) NULL' },
+        { name: 'kitchenPrinterIp', def: 'VARCHAR(255) NULL' },
+        { name: 'kitchenPrinterPort', def: 'INT DEFAULT 9100' },
+      ];
+
+      for (const col of restaurantCols) {
+        try {
+          const [results] = await sequelize.query(`SHOW COLUMNS FROM restaurants LIKE '${col.name}'`);
+          if (results.length === 0) {
+            console.log(`➕ [DB Init] Adding ${col.name} column to restaurants table...`);
+            await sequelize.query(`ALTER TABLE restaurants ADD COLUMN ${col.name} ${col.def}`);
+            console.log(`✅ [DB Init] ${col.name} column added.`);
+          }
+        } catch (err) {
+          console.warn(`⚠️ [DB Init] Warning checking/adding ${col.name} column:`, err.message);
         }
-      } catch (err) {
-        console.warn('⚠️ [DB Init] Warning checking/adding printer columns:', err.message);
       }
 
       // Ensure prepMinutes exists on orders table

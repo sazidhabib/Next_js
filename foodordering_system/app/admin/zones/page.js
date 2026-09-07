@@ -92,7 +92,7 @@ export default function AdminZonesPage() {
           zoneType: z.zoneType || 'CIRCLE',
           color: z.color || PRESET_COLORS[idx % PRESET_COLORS.length],
           isHidden: !!z.isHidden,
-          radiusKm: z.radiusKm || 2.5,
+          radiusKm: z.radiusKm || 1.0,
           minOrderAmount: z.minOrderAmount ?? 15.0,
           deliveryFee: z.deliveryFee ?? 2.5,
         }));
@@ -133,10 +133,10 @@ export default function AdminZonesPage() {
       prev.map((zone) => {
         if (zone.id === zoneId) {
           if (newType === 'SHAPE' && (!zone.polygon || zone.polygon.length < 3)) {
-            // Create default polygon box around current center/restaurant
+            // Create default polygon box around current center/restaurant with 1km scale
             const cLat = zone.center?.lat || restaurantLocation.lat || 51.5133;
             const cLng = zone.center?.lng || restaurantLocation.lng || -0.1362;
-            const offset = (zone.radiusKm || 2) * 0.008;
+            const offset = (zone.radiusKm || 1.0) * 0.007;
 
             return {
               ...zone,
@@ -191,22 +191,22 @@ export default function AdminZonesPage() {
     toast.info('Zone removed from draft.');
   };
 
-  // Add Another Zone
+  // Add Another Zone - Initial radius starts at 1.0 km
   const handleAddZone = () => {
     const nextIdx = zones.length + 1;
     const newColor = PRESET_COLORS[(nextIdx - 1) % PRESET_COLORS.length];
     const prevMaxRadius = zones.reduce((max, z) => Math.max(max, z.radiusKm || 0), 0);
-    const newRadius = prevMaxRadius > 0 ? parseFloat((prevMaxRadius + 1.8).toFixed(1)) : 3.0;
+    const newRadius = prevMaxRadius > 0 ? parseFloat((prevMaxRadius + 1.0).toFixed(1)) : 1.0;
 
     const newZone = {
       id: `zone-${Date.now()}`,
       name: `Zone ${nextIdx}`,
       zoneType: 'CIRCLE',
       radiusKm: newRadius,
-      minOrderAmount: 20.0 + nextIdx * 5,
-      deliveryFee: 2.5 + nextIdx * 1.5,
-      freeDeliveryThreshold: 50.0 + nextIdx * 10,
-      estimatedTimeMin: 25 + nextIdx * 10,
+      minOrderAmount: 15.0 + (nextIdx - 1) * 5,
+      deliveryFee: 2.0 + (nextIdx - 1) * 1.5,
+      freeDeliveryThreshold: 40.0 + (nextIdx - 1) * 10,
+      estimatedTimeMin: 20 + (nextIdx - 1) * 10,
       color: newColor,
       isHidden: false,
       isActive: true,
@@ -511,15 +511,15 @@ export default function AdminZonesPage() {
                           <div className="flex items-center justify-between text-xs">
                             <span className="text-slate-400">Coverage Radius:</span>
                             <span className="font-bold text-white">
-                              {zone.radiusKm || 1} km / {((zone.radiusKm || 1) * 0.621371).toFixed(2)} miles
+                              {zone.radiusKm || 1.0} km / {((zone.radiusKm || 1.0) * 0.621371).toFixed(2)} miles
                             </span>
                           </div>
                           <input
                             type="range"
-                            min="0.3"
+                            min="0.2"
                             max="20"
                             step="0.1"
-                            value={zone.radiusKm || 1}
+                            value={zone.radiusKm || 1.0}
                             onChange={(e) =>
                               handleUpdateZone(zone.id, {
                                 radiusKm: parseFloat(e.target.value),
@@ -527,6 +527,21 @@ export default function AdminZonesPage() {
                             }
                             className="w-full accent-orange-500 cursor-pointer"
                           />
+                        </div>
+                      )}
+
+                      {/* Custom Shape Status & Pen Tool helper (if Shape mode) */}
+                      {zone.zoneType === 'SHAPE' && (
+                        <div className="bg-slate-950 p-3 rounded-xl border border-slate-800/60 space-y-2">
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="text-slate-400">Custom Boundary:</span>
+                            <span className="text-emerald-400 font-bold">
+                              {zone.polygon?.length || 0} vertices
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-slate-400 leading-relaxed font-medium">
+                            💡 Use the <strong>Pen Tool</strong> button on the map to draw or click/drag corner nodes to adjust this delivery zone.
+                          </p>
                         </div>
                       )}
 

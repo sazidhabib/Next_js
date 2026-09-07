@@ -1,32 +1,50 @@
 import { NextResponse } from 'next/server';
 import { Op } from 'sequelize';
-import { Restaurant } from '@/lib/sequelize';
+import { Restaurant, ensureDatabaseReady } from '@/lib/sequelize';
 import { decryptSession } from '@/lib/session';
+import { getAllRestaurants } from '@/lib/dataStore';
 
-async function checkSuperAdmin(request) {
+async function getAdminSession(request) {
   const sessionCookie = request.cookies.get('admin_session');
   if (!sessionCookie) return null;
   const session = decryptSession(sessionCookie.value);
+  if (!session) return null;
+  return session;
+}
+
+async function checkSuperAdmin(request) {
+  const session = await getAdminSession(request);
   if (!session || session.role !== 'SUPER_ADMIN') return null;
   return session;
 }
 
-// GET: List all restaurants
+// GET: List all restaurants (accessible by all authenticated admins with fallback)
 export async function GET(request) {
   try {
-    const isSuper = await checkSuperAdmin(request);
-    if (!isSuper) {
-      return NextResponse.json({ success: false, error: 'Access denied' }, { status: 403 });
+    const session = await getAdminSession(request);
+    if (!session) {
+      return NextResponse.json({ success: false, error: 'Access denied: Please sign in to access restaurant list' }, { status: 401 });
     }
 
-    const restaurants = await Restaurant.findAll({
-      order: [['name', 'ASC']],
-    });
+    try {
+      await ensureDatabaseReady();
+      const restaurants = await Restaurant.findAll({
+        order: [['name', 'ASC']],
+      });
 
-    return NextResponse.json({ success: true, data: restaurants });
+      if (restaurants && restaurants.length > 0) {
+        return NextResponse.json({ success: true, data: restaurants });
+      }
+    } catch (dbErr) {
+      console.warn('Sequelize query failed in GET /api/admin/restaurants, falling back to dataStore:', dbErr.message);
+    }
+
+    // Fallback to dataStore if table is empty or connection temporary hiccup
+    const fallbackList = await getAllRestaurants();
+    return NextResponse.json({ success: true, data: fallbackList });
   } catch (error) {
     console.error('Fetch restaurants error:', error);
-    return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json({ success: false, error: error.message || 'Internal server error' }, { status: 500 });
   }
 }
 
@@ -38,6 +56,7 @@ export async function POST(request) {
       return NextResponse.json({ success: false, error: 'Access denied' }, { status: 403 });
     }
 
+    await ensureDatabaseReady();
     const body = await request.json();
     const {
       name,
@@ -110,7 +129,7 @@ export async function POST(request) {
     return NextResponse.json({ success: true, data: newResto }, { status: 201 });
   } catch (error) {
     console.error('Create restaurant error:', error);
-    return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json({ success: false, error: error.message || 'Internal server error' }, { status: 500 });
   }
 }
 
@@ -122,6 +141,7 @@ export async function PUT(request) {
       return NextResponse.json({ success: false, error: 'Access denied' }, { status: 403 });
     }
 
+    await ensureDatabaseReady();
     const body = await request.json();
     const {
       id,
@@ -204,7 +224,7 @@ export async function PUT(request) {
     return NextResponse.json({ success: true, data: updated });
   } catch (error) {
     console.error('Update restaurant error:', error);
-    return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json({ success: false, error: error.message || 'Internal server error' }, { status: 500 });
   }
 }
 

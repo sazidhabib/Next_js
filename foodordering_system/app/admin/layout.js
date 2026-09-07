@@ -57,7 +57,7 @@ function AdminLayoutContent({ children }) {
       navItems = [
         { label: 'Overview & Metrics', href: '/admin', icon: LayoutDashboard },
         { label: 'Manage Users', href: '/admin/users', icon: Users },
-        { label: 'Restaurant Locations', href: '/admin/restaurants', icon: Building2 },
+        { label: 'Restaurants', href: '/admin/restaurants', icon: Building2 },
         { label: 'Website Widget & Embed', href: '/admin/widget', icon: Code, badge: 'NEW' },
       ];
     } else {
