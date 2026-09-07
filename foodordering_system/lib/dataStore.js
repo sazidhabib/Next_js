@@ -136,8 +136,25 @@ export async function getRestaurantBySlug(slug = 'bellavista-pizza') {
     console.warn('Sequelize DB query fallback to memory store:', err.message);
   }
 
-  // Fallback to runtime store
+// Fallback to runtime store
   return globalStore.__restaurantData;
+}
+
+// 1.1 Get All Restaurants / Locations
+export async function getAllRestaurants() {
+  try {
+    const connected = await isDbConnected();
+    if (connected) {
+      const list = await Restaurant.findAll({
+        where: { isActive: true },
+        order: [['name', 'ASC']],
+      });
+      return list.map((r) => r.get({ plain: true }));
+    }
+  } catch (err) {
+    console.warn('Sequelize getAllRestaurants fallback:', err.message);
+  }
+  return [globalStore.__restaurantData];
 }
 
 // 2. Get All Orders

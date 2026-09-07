@@ -5,6 +5,8 @@ import * as turf from '@turf/turf';
 
 export default function DeliveryZoneMap({
   restaurantLocation = { lat: 51.5133, lng: -0.1362, name: 'Bella Vista Gourmet' },
+  allLocations = [],
+  onSelectLocation = null,
   zones = [],
   selectedZoneId = null,
   onSelectZone = () => {},
@@ -15,6 +17,7 @@ export default function DeliveryZoneMap({
   const layersRef = useRef({
     tileLayer: null,
     restaurantMarker: null,
+    otherLocationMarkers: [],
     zoneLayers: {},
     editHandles: [],
   });
@@ -53,28 +56,29 @@ export default function DeliveryZoneMap({
         attributionControl: false,
       });
 
-      // Default Tile Layer (Standard Clean Streets)
+      // Default Tile Layer (OpenStreetMap - Free & No API Key Required)
       const streetLayer = L.tileLayer(
-        'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+        'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
         {
           maxZoom: 19,
-          subdomains: 'abcd',
+          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
         }
       ).addTo(map);
 
       layersRef.current.tileLayer = streetLayer;
 
-      // Custom Restaurant Pin Marker
+      // Custom Active Restaurant Pin Marker with Glow Ring
       const storePinHtml = `
-        <div style="position: relative; display: flex; flex-direction: column; align-items: center; transform: translate(-50%, -100%);">
-          <div style="background: #ea580c; width: 34px; height: 34px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.35); border: 2px solid #ffffff;">
-            <svg style="transform: rotate(45deg); width: 18px; height: 18px; color: white;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div style="position: relative; display: flex; flex-direction: column; align-items: center; transform: translate(-50%, -100%); cursor: pointer;">
+          <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; border-radius: 50%; background: rgba(234, 88, 12, 0.4); animation: ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;"></div>
+          <div style="background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); width: 36px; height: 36px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 16px rgba(234,88,12,0.4); border: 2.5px solid #ffffff; z-index: 10;">
+            <svg style="transform: rotate(45deg); width: 19px; height: 19px; color: white;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
           </div>
-          <div style="background: rgba(15, 23, 42, 0.85); color: #fff; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 12px; margin-top: 4px; white-space: nowrap; box-shadow: 0 2px 6px rgba(0,0,0,0.2);">
-            ${restaurantLocation.name || 'Store'}
+          <div style="background: rgba(15, 23, 42, 0.92); color: #fff; font-size: 11px; font-weight: 800; padding: 3px 9px; border-radius: 12px; margin-top: 5px; white-space: nowrap; box-shadow: 0 4px 10px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.15); z-index: 10;">
+            ${restaurantLocation.name || 'Active Store'} (HQ)
           </div>
         </div>
       `;
@@ -87,10 +91,63 @@ export default function DeliveryZoneMap({
 
       const restMarker = L.marker(initialCenter, {
         icon: storeIcon,
-        zIndexOffset: 1000,
+        zIndexOffset: 1500,
       }).addTo(map);
 
       layersRef.current.restaurantMarker = restMarker;
+
+      // Render Other Restaurant Branches (if any)
+      layersRef.current.otherLocationMarkers.forEach((m) => {
+        if (map.hasLayer(m)) map.removeLayer(m);
+      });
+      layersRef.current.otherLocationMarkers = [];
+
+      if (Array.isArray(allLocations) && allLocations.length > 0) {
+        allLocations.forEach((loc) => {
+          // Skip if this is the active restaurant location
+          if (
+            (loc.slug && loc.slug === restaurantLocation.slug) ||
+            (loc.lat === restaurantLocation.lat && loc.lng === restaurantLocation.lng)
+          ) {
+            return;
+          }
+
+          if (!loc.lat || !loc.lng) return;
+
+          const branchPinHtml = `
+            <div style="position: relative; display: flex; flex-direction: column; align-items: center; transform: translate(-50%, -100%); cursor: pointer;">
+              <div style="background: #334155; width: 30px; height: 30px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.3); border: 2px solid #ffffff;">
+                <svg style="transform: rotate(45deg); width: 15px; height: 15px; color: #f8fafc;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                </svg>
+              </div>
+              <div style="background: rgba(30, 41, 59, 0.9); color: #cbd5e1; font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 10px; margin-top: 4px; white-space: nowrap; box-shadow: 0 2px 6px rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1);">
+                ${loc.name || 'Branch'}
+              </div>
+            </div>
+          `;
+
+          const branchIcon = L.divIcon({
+            className: 'custom-branch-pin',
+            html: branchPinHtml,
+            iconSize: [0, 0],
+          });
+
+          const branchMarker = L.marker([loc.lat, loc.lng], {
+            icon: branchIcon,
+            zIndexOffset: 1000,
+          }).addTo(map);
+
+          if (onSelectLocation) {
+            branchMarker.on('click', () => {
+              onSelectLocation(loc);
+            });
+          }
+
+          layersRef.current.otherLocationMarkers.push(branchMarker);
+        });
+      }
+
       mapInstanceRef.current = map;
       setLeafletLoaded(true);
     }
@@ -104,7 +161,7 @@ export default function DeliveryZoneMap({
         mapInstanceRef.current = null;
       }
     };
-  }, [restaurantLocation.lat, restaurantLocation.lng]);
+  }, [restaurantLocation.lat, restaurantLocation.lng, restaurantLocation.slug, allLocations]);
 
   // Handle Switch Map Type (Roadmap / Satellite)
   useEffect(() => {
@@ -124,8 +181,11 @@ export default function DeliveryZoneMap({
         ).addTo(map);
       } else {
         layersRef.current.tileLayer = L.tileLayer(
-          'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
-          { maxZoom: 19, subdomains: 'abcd' }
+          'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+          {
+            maxZoom: 19,
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+          }
         ).addTo(map);
       }
     });

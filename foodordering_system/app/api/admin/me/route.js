@@ -14,27 +14,35 @@ export async function GET(request) {
       return NextResponse.json({ success: false, error: 'Invalid session' }, { status: 401 });
     }
 
-    // Load fresh user data from database to reflect changes instantly
-    const user = await User.findOne({
-      where: { id: session.userId },
-      include: [
-        {
-          association: 'restaurantRoles',
-          include: [
-            {
-              model: Restaurant,
-              as: 'restaurant',
-            },
-          ],
-        },
-      ],
-    });
+    let user = null;
+    let associatedRestaurant = null;
+
+    try {
+      user = await User.findOne({
+        where: { id: session.userId },
+        include: [
+          {
+            association: 'restaurantRoles',
+            required: false,
+            include: [
+              {
+                model: Restaurant,
+                as: 'restaurant',
+                required: false,
+              },
+            ],
+          },
+        ],
+      });
+    } catch (queryErr) {
+      console.warn('Eager loading restaurantRoles failed, fallback to basic user query:', queryErr.message);
+      user = await User.findOne({ where: { id: session.userId } });
+    }
 
     if (!user) {
       return NextResponse.json({ success: false, error: 'User no longer exists' }, { status: 401 });
     }
 
-    let associatedRestaurant = null;
     if (user.role !== 'SUPER_ADMIN' && user.restaurantRoles && user.restaurantRoles.length > 0) {
       associatedRestaurant = user.restaurantRoles[0].restaurant;
     }
@@ -51,6 +59,6 @@ export async function GET(request) {
     });
   } catch (error) {
     console.error('Session check error:', error);
-    return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json({ success: false, error: error.message || 'Internal server error' }, { status: 500 });
   }
 }

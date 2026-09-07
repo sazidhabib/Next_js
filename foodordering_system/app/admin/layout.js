@@ -57,13 +57,14 @@ function AdminLayoutContent({ children }) {
       navItems = [
         { label: 'Overview & Metrics', href: '/admin', icon: LayoutDashboard },
         { label: 'Manage Users', href: '/admin/users', icon: Users },
-        { label: 'Manage Restaurants', href: '/admin/restaurants', icon: Building2 },
+        { label: 'Restaurant Locations', href: '/admin/restaurants', icon: Building2 },
         { label: 'Website Widget & Embed', href: '/admin/widget', icon: Code, badge: 'NEW' },
       ];
     } else {
       // Impersonation Mode (Viewing a specific store's operations)
       navItems = [
         { label: 'Store Overview', href: '/admin', icon: LayoutDashboard },
+        { label: 'Restaurant Locations', href: '/admin/restaurants', icon: Building2 },
         { label: 'Live Order Receiver', href: '/admin/live-orders', icon: Bell, badge: 'LIVE' },
         { label: 'Menu & Modifiers', href: '/admin/menu', icon: UtensilsCrossed },
         { label: 'Delivery Zones & Fees', href: '/admin/zones', icon: MapPin },

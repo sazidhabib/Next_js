@@ -23,8 +23,10 @@ import {
   Globe,
   Sparkles,
   Share2,
+  UserCheck,
 } from 'lucide-react';
 import { useAdmin } from '@/lib/adminContext';
+import LocationSetupWizardModal from '@/components/LocationSetupWizardModal';
 
 export default function AdminRestaurantsPage() {
   const router = useRouter();
@@ -35,9 +37,8 @@ export default function AdminRestaurantsPage() {
   const [success, setSuccess] = useState('');
 
   // Modals state
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [currentRestaurant, setCurrentRestaurant] = useState(null);
+  const [isWizardOpen, setIsWizardOpen] = useState(false);
+  const [wizardEditData, setWizardEditData] = useState(null);
   const [embedModalResto, setEmbedModalResto] = useState(null);
   const [copiedKey, setCopiedKey] = useState('');
   const [isTestModalOpen, setIsTestModalOpen] = useState(false);
@@ -111,155 +112,27 @@ export default function AdminRestaurantsPage() {
     }
   };
 
-  const handleNameChange = (val, isEdit = false) => {
-    setName(val);
-    if (!isEdit) {
-      const generatedSlug = val
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/(^-|-$)+/g, '');
-      setSlug(generatedSlug);
-    }
+  const handleOpenAddLocation = () => {
+    setWizardEditData(null);
+    setIsWizardOpen(true);
   };
 
-  const handleOpenAddModal = () => {
-    setName('');
-    setSlug('');
-    setDescription('');
-    setPhone('');
-    setEmail('');
-    setAddress('');
-    setTaxRatePercent('8.5');
-    setEstimatedPrepTime('25');
-    setEnableDelivery(true);
-    setEnablePickup(true);
-    setEnableCash(true);
-    setEnableCard(true);
-    setEnableOnline(false);
-    setStripePublishableKey('');
-    setStripeSecretKey('');
-    setIsAddModalOpen(true);
-  };
-
-  const handleOpenEditModal = (resto) => {
-    setCurrentRestaurant(resto);
-    setName(resto.name);
-    setSlug(resto.slug);
-    setDescription(resto.description || '');
-    setPhone(resto.phone);
-    setEmail(resto.email);
-    setAddress(resto.address);
-    setTaxRatePercent(String(resto.taxRatePercent));
-    setEstimatedPrepTime(String(resto.estimatedPrepTime));
-    setEnableDelivery(resto.enableDelivery !== false);
-    setEnablePickup(resto.enablePickup !== false);
-    setEnableCash(resto.enableCash !== false);
-    setEnableCard(resto.enableCard !== false);
-    setEnableOnline(resto.enableOnline || false);
-    setStripePublishableKey(resto.stripePublishableKey || '');
-    setStripeSecretKey(resto.stripeSecretKey || '');
-    setIsEditModalOpen(true);
-  };
-
-  // Add Restaurant
-  const handleAddRestaurant = async (e) => {
-    e.preventDefault();
-    if (!name || !slug || !phone || !email || !address) return;
-
-    try {
-      const res = await fetch('/api/admin/restaurants', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name,
-          slug,
-          description,
-          phone,
-          email,
-          address,
-          taxRatePercent: parseFloat(taxRatePercent),
-          estimatedPrepTime: parseInt(estimatedPrepTime),
-          enableDelivery,
-          enablePickup,
-          enableCash,
-          enableCard,
-          enableOnline,
-          stripePublishableKey: enableOnline ? stripePublishableKey : '',
-          stripeSecretKey: enableOnline ? stripeSecretKey : '',
-        }),
-      });
-      const json = await res.json();
-
-      if (json.success) {
-        setIsAddModalOpen(false);
-        showToast('success', `Restaurant "${name}" created successfully.`);
-        fetchRestaurants();
-        setEmbedModalResto(json.data);
-      } else {
-        showToast('error', json.error || 'Failed to create restaurant');
-      }
-    } catch (err) {
-      showToast('error', 'Error creating restaurant');
-    }
-  };
-
-  // Edit Restaurant
-  const handleEditRestaurant = async (e) => {
-    e.preventDefault();
-    if (!name || !slug || !phone || !email || !address || !currentRestaurant) return;
-
-    try {
-      const res = await fetch('/api/admin/restaurants', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          id: currentRestaurant.id,
-          name,
-          slug,
-          description,
-          phone,
-          email,
-          address,
-          taxRatePercent: parseFloat(taxRatePercent),
-          estimatedPrepTime: parseInt(estimatedPrepTime),
-          enableDelivery,
-          enablePickup,
-          enableCash,
-          enableCard,
-          enableOnline,
-          stripePublishableKey: enableOnline ? stripePublishableKey : '',
-          stripeSecretKey: enableOnline ? stripeSecretKey : '',
-        }),
-      });
-      const json = await res.json();
-
-      if (json.success) {
-        setIsEditModalOpen(false);
-        showToast('success', `Restaurant "${name}" updated successfully.`);
-        fetchRestaurants();
-        if (selectedRestaurant?.id === currentRestaurant.id) {
-          selectRestaurant(json.data);
-        }
-      } else {
-        showToast('error', json.error || 'Failed to update restaurant');
-      }
-    } catch (err) {
-      showToast('error', 'Error updating restaurant');
-    }
+  const handleOpenEditLocation = (resto) => {
+    setWizardEditData(resto);
+    setIsWizardOpen(true);
   };
 
   // Delete Restaurant
   const handleDeleteRestaurant = async (id, name) => {
-    if (!confirm(`Are you sure you want to delete restaurant "${name}"? All associated categories, menus, operating hours, delivery zones, and orders will be deleted.`)) return;
+    if (!confirm(`Are you sure you want to permanently delete location "${name}"?`)) return;
 
     try {
       const res = await fetch(`/api/admin/restaurants?id=${id}`, {
         method: 'DELETE',
       });
       const json = await res.json();
-
       if (json.success) {
-        showToast('success', `Restaurant "${name}" deleted successfully.`);
+        showToast('success', `Location "${name}" removed.`);
         fetchRestaurants();
         if (selectedRestaurant?.id === id) {
           selectRestaurant(null);
@@ -274,68 +147,83 @@ export default function AdminRestaurantsPage() {
 
   return (
     <div className="p-4 sm:p-8 space-y-6 max-w-7xl w-full mx-auto text-slate-100">
-      {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-5">
-        <div>
-          <h1 className="text-xl sm:text-2xl font-black text-white">
-            Restaurants Administration
-          </h1>
-          <p className="text-xs text-slate-400 mt-1">
-            Register, configure, update and delete restaurant tenants in the database.
+      {/* Header Section */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-900 border border-slate-800 p-6 rounded-3xl shadow-xl">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2">
+            <span className="bg-orange-600/20 text-orange-400 text-xs font-black px-2.5 py-1 rounded-full uppercase tracking-wider">
+              Locations & Setup
+            </span>
+            <span className="text-xs text-slate-400">Multi-Branch Management</span>
+          </div>
+          <h1 className="text-2xl font-black text-white">Restaurant Locations</h1>
+          <p className="text-xs text-slate-400 font-medium">
+            Setup new branches, pinpoint storefront entrances on the map, assign managers, and manage delivery zones.
           </p>
         </div>
 
         <button
-          onClick={handleOpenAddModal}
-          className="flex items-center gap-2 bg-orange-600 hover:bg-orange-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-lg shadow-orange-600/30 transition-all cursor-pointer"
+          onClick={handleOpenAddLocation}
+          className="bg-orange-600 hover:bg-orange-500 active:bg-orange-700 text-white font-black text-xs px-5 py-3 rounded-2xl shadow-lg shadow-orange-600/30 transition-all flex items-center gap-2 cursor-pointer"
         >
           <Plus className="w-4 h-4" />
-          <span>Add Restaurant</span>
+          <span>Add New Location</span>
         </button>
       </div>
 
-      {/* Messages */}
+      {/* Notifications */}
       {error && (
-        <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-3 flex gap-2.5 text-xs font-bold text-red-400">
-          <AlertCircle className="w-4 h-4" />
+        <div className="p-4 bg-red-950/80 border border-red-800 text-red-300 rounded-2xl text-xs flex items-center gap-2">
+          <AlertCircle className="w-4 h-4 shrink-0" />
           <span>{error}</span>
         </div>
       )}
       {success && (
-        <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-3 flex gap-2.5 text-xs font-bold text-emerald-400">
-          <ShieldCheck className="w-4 h-4" />
+        <div className="p-4 bg-emerald-950/80 border border-emerald-800 text-emerald-300 rounded-2xl text-xs flex items-center gap-2">
+          <ShieldCheck className="w-4 h-4 shrink-0" />
           <span>{success}</span>
         </div>
       )}
 
-      {/* Restaurants Table */}
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
+      {/* Locations Table */}
+      <div className="bg-slate-900 border border-slate-800 rounded-3xl shadow-xl overflow-hidden">
+        <div className="p-5 border-b border-slate-800 flex justify-between items-center bg-slate-950/40">
+          <div className="flex items-center gap-2">
+            <Building2 className="w-4 h-4 text-orange-500" />
+            <h2 className="text-sm font-black text-white">
+              Registered Branches ({restaurants.length})
+            </h2>
+          </div>
+        </div>
+
         {loading ? (
-          <div className="p-12 text-center text-slate-500 font-semibold">
-            <div className="w-6 h-6 border-2 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
-            Loading database restaurants...
+          <div className="p-12 text-center text-slate-500 text-xs space-y-3">
+            <div className="w-8 h-8 border-3 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto" />
+            <p>Loading restaurant locations...</p>
           </div>
         ) : restaurants.length === 0 ? (
-          <div className="p-12 text-center text-slate-500 font-semibold border-t border-slate-850">
-            No restaurants registered yet. Click "Add Restaurant" to begin.
+          <div className="p-12 text-center text-slate-500 text-xs">
+            No locations registered yet. Click "Add New Location" to begin.
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs text-slate-300">
               <thead className="bg-slate-950 text-slate-400 font-bold uppercase text-[10px] tracking-wider border-b border-slate-800">
                 <tr>
-                  <th className="p-3.5">Restaurant</th>
-                  <th className="p-3.5">URL Slug</th>
-                  <th className="p-3.5">Contact Detail</th>
-                  <th className="p-3.5">Location Address</th>
-                  <th className="p-3.5">Estimated Prep</th>
-                  <th className="p-3.5">Tax Rate</th>
+                  <th className="p-3.5">Branch / Restaurant</th>
+                  <th className="p-3.5">Location & Map Coordinates</th>
+                  <th className="p-3.5">Manager / Contact</th>
+                  <th className="p-3.5">Fulfillment</th>
+                  <th className="p-3.5">Prep / Tax</th>
                   <th className="p-3.5 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800">
                 {restaurants.map((resto) => {
                   const isSelected = selectedRestaurant?.id === resto.id;
+                  const managerName = resto.managerFirstName
+                    ? `${resto.managerFirstName} ${resto.managerLastName || ''}`.trim()
+                    : null;
                   return (
                     <tr key={resto.id} className={`hover:bg-slate-850 transition-colors ${isSelected ? 'bg-orange-500/5' : ''}`}>
                       <td className="p-3.5 font-bold text-white">
@@ -343,16 +231,16 @@ export default function AdminRestaurantsPage() {
                           <button
                             onClick={() => {
                               selectRestaurant(resto);
-                              router.push('/admin');
+                              router.push('/admin/zones');
                             }}
-                            className="text-orange-400 hover:text-orange-355 font-black hover:underline text-left text-sm flex items-center gap-1.5 cursor-pointer focus:outline-none"
+                            className="text-orange-400 hover:text-orange-300 font-black hover:underline text-left text-sm flex items-center gap-1.5 cursor-pointer focus:outline-none"
                           >
-                            <Building2 className="w-4 h-4 text-orange-550 shrink-0 animate-pulse" />
+                            <Building2 className="w-4 h-4 text-orange-500 shrink-0" />
                             <span>{resto.name}</span>
                           </button>
                           {isSelected && (
                             <span className="bg-orange-500/15 text-orange-400 font-black text-[9px] px-1.5 py-0.5 rounded-md uppercase tracking-wider">
-                              Active
+                              Active Context
                             </span>
                           )}
                         </div>
@@ -360,55 +248,96 @@ export default function AdminRestaurantsPage() {
                           {resto.description || 'No description provided.'}
                         </p>
                       </td>
-                      <td className="p-3.5 font-mono text-slate-400">/{resto.slug}</td>
+
+                      <td className="p-3.5 text-slate-300 max-w-xs">
+                        <span className="flex items-start gap-1">
+                          <MapPin className="w-3.5 h-3.5 text-orange-500 shrink-0 mt-0.5" />
+                          <div>
+                            <div className="truncate font-medium">{resto.address}</div>
+                            {resto.latitude && resto.longitude ? (
+                              <div className="text-[10px] font-mono text-slate-400 mt-0.5">
+                                📍 {Number(resto.latitude).toFixed(4)}, {Number(resto.longitude).toFixed(4)}
+                              </div>
+                            ) : null}
+                          </div>
+                        </span>
+                      </td>
+
                       <td className="p-3.5 space-y-1">
-                        <div className="flex items-center gap-1.5 text-slate-300">
+                        {managerName && (
+                          <div className="flex items-center gap-1.5 text-slate-200 font-bold">
+                            <UserCheck className="w-3.5 h-3.5 text-emerald-400" />
+                            <span>{managerName}</span>
+                          </div>
+                        )}
+                        <div className="flex items-center gap-1.5 text-slate-400">
                           <Mail className="w-3.5 h-3.5 text-slate-500" />
                           <span>{resto.email}</span>
                         </div>
                         <div className="flex items-center gap-1.5 text-slate-400">
-                          <Phone className="w-3.5 h-3.5 text-slate-550" />
+                          <Phone className="w-3.5 h-3.5 text-slate-500" />
                           <span>{resto.phone}</span>
                         </div>
                       </td>
-                      <td className="p-3.5 text-slate-300 max-w-xs truncate">
-                        <span className="flex items-center gap-1">
-                          <MapPin className="w-3.5 h-3.5 text-slate-500 shrink-0" />
-                          <span className="truncate">{resto.address}</span>
-                        </span>
+
+                      <td className="p-3.5">
+                        <div className="flex flex-wrap gap-1">
+                          {resto.enableDelivery !== false && (
+                            <span className="bg-orange-500/10 text-orange-400 text-[10px] font-bold px-1.5 py-0.5 rounded">
+                              Delivery
+                            </span>
+                          )}
+                          {resto.enablePickup !== false && (
+                            <span className="bg-blue-500/10 text-blue-400 text-[10px] font-bold px-1.5 py-0.5 rounded">
+                              Pickup
+                            </span>
+                          )}
+                        </div>
                       </td>
-                      <td className="p-3.5 text-slate-300 font-bold">
-                        <span className="flex items-center gap-1">
-                          <Clock className="w-3.5 h-3.5 text-slate-550" />
-                          <span>{resto.estimatedPrepTime} mins</span>
-                        </span>
+
+                      <td className="p-3.5 space-y-1 text-slate-300 font-medium">
+                        <div className="flex items-center gap-1 text-[11px]">
+                          <Clock className="w-3 h-3 text-slate-500" />
+                          <span>{resto.estimatedPrepTime || 25} mins</span>
+                        </div>
+                        <div className="flex items-center gap-1 text-[11px]">
+                          <Percent className="w-3 h-3 text-slate-500" />
+                          <span>{resto.taxRatePercent || 0}% tax</span>
+                        </div>
                       </td>
-                      <td className="p-3.5 text-slate-300 font-bold">
-                        <span className="flex items-center gap-0.5">
-                          <Percent className="w-3.5 h-3.5 text-slate-550" />
-                          <span>{resto.taxRatePercent}%</span>
-                        </span>
-                      </td>
+
                       <td className="p-3.5 text-right space-x-1.5">
                         <button
+                          onClick={() => {
+                            selectRestaurant(resto);
+                            router.push('/admin/zones');
+                          }}
+                          className="p-1.5 bg-slate-800 hover:bg-orange-600 text-slate-300 hover:text-white rounded-lg transition-colors cursor-pointer inline-flex items-center gap-1 text-xs font-bold"
+                          title="Open Interactive Delivery Map"
+                        >
+                          <MapPin className="w-3.5 h-3.5 text-orange-400" />
+                          <span className="hidden xl:inline">Map & Zones</span>
+                        </button>
+
+                        <button
                           onClick={() => setEmbedModalResto(resto)}
-                          className="p-1.5 bg-orange-600/15 hover:bg-orange-600 text-orange-400 hover:text-white rounded-lg transition-all cursor-pointer inline-flex items-center gap-1.5 text-xs font-bold"
+                          className="p-1.5 bg-orange-600/15 hover:bg-orange-600 text-orange-400 hover:text-white rounded-lg transition-all cursor-pointer inline-flex items-center gap-1 text-xs font-bold"
                           title="Get Website Ordering Link & Modal Widget"
                         >
                           <Code className="w-3.5 h-3.5" />
-                          <span className="hidden xl:inline">Embed & Link</span>
+                          <span className="hidden xl:inline">Embed</span>
                         </button>
                         <button
-                          onClick={() => handleOpenEditModal(resto)}
+                          onClick={() => handleOpenEditLocation(resto)}
                           className="p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-lg transition-colors cursor-pointer inline-flex items-center"
-                          title="Edit Restaurant"
+                          title="Edit Location"
                         >
                           <Edit2 className="w-3.5 h-3.5" />
                         </button>
                         <button
                           onClick={() => handleDeleteRestaurant(resto.id, resto.name)}
                           className="p-1.5 bg-slate-800/80 hover:bg-red-900/30 text-slate-400 hover:text-red-400 rounded-lg transition-colors cursor-pointer inline-flex items-center"
-                          title="Delete Restaurant"
+                          title="Delete Location"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
@@ -422,357 +351,18 @@ export default function AdminRestaurantsPage() {
         )}
       </div>
 
-      {/* Add Restaurant Modal */}
-      {isAddModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xs">
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 max-w-md w-full space-y-4 shadow-2xl overflow-y-auto max-h-[90vh]">
-            <div className="flex justify-between items-center border-b border-slate-800 pb-3">
-              <h3 className="font-extrabold text-base text-white">Add New Restaurant Tenant</h3>
-              <button onClick={() => setIsAddModalOpen(false)} className="text-slate-400 hover:text-white">
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <form onSubmit={handleAddRestaurant} className="space-y-3 text-xs">
-              <div className="space-y-1">
-                <label className="font-bold text-slate-300">Restaurant Name</label>
-                <input
-                  type="text"
-                  value={name}
-                  onChange={(e) => handleNameChange(e.target.value, false)}
-                  placeholder="e.g. Sabor Latino Bistro"
-                  required
-                  className="w-full bg-slate-950 border border-slate-700 text-white rounded-xl p-2.5 focus:outline-none focus:border-orange-500"
-                />
-              </div>
-
-              <div className="space-y-1">
-                <label className="font-bold text-slate-300">URL Slug (Unique path name)</label>
-                <input
-                  type="text"
-                  value={slug}
-                  onChange={(e) => setSlug(e.target.value)}
-                  placeholder="e.g. sabor-latino"
-                  required
-                  className="w-full bg-slate-950 border border-slate-700 text-white rounded-xl p-2.5 focus:outline-none focus:border-orange-500"
-                />
-              </div>
-
-              <div className="space-y-1">
-                <label className="font-bold text-slate-300">Description</label>
-                <textarea
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Tell clients about your restaurant's unique dishes..."
-                  rows={2}
-                  className="w-full bg-slate-950 border border-slate-700 text-white rounded-xl p-2.5 focus:outline-none focus:border-orange-500 resize-none"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <label className="font-bold text-slate-300">Email Address</label>
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="contact@bistro.com"
-                    required
-                    className="w-full bg-slate-950 border border-slate-700 text-white rounded-xl p-2.5 focus:outline-none"
-                  />
-                </div>
-                <div className="space-y-1">
-                  <label className="font-bold text-slate-300">Phone Number</label>
-                  <input
-                    type="tel"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    placeholder="+1 (555) 012-3344"
-                    required
-                    className="w-full bg-slate-950 border border-slate-700 text-white rounded-xl p-2.5 focus:outline-none"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-1">
-                <label className="font-bold text-slate-300">Physical Address</label>
-                <input
-                  type="text"
-                  value={address}
-                  onChange={(e) => setAddress(e.target.value)}
-                  placeholder="123 Food Street, San Francisco, CA"
-                  required
-                  className="w-full bg-slate-950 border border-slate-700 text-white rounded-xl p-2.5 focus:outline-none"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <label className="font-bold text-slate-300">Tax Rate (%)</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={taxRatePercent}
-                    onChange={(e) => setTaxRatePercent(e.target.value)}
-                    placeholder="8.5"
-                    className="w-full bg-slate-950 border border-slate-700 text-white rounded-xl p-2.5 focus:outline-none"
-                  />
-                </div>
-                <div className="space-y-1">
-                  <label className="font-bold text-slate-300">Estimated Prep Time (mins)</label>
-                  <input
-                    type="number"
-                    value={estimatedPrepTime}
-                    onChange={(e) => setEstimatedPrepTime(e.target.value)}
-                    placeholder="25"
-                    className="w-full bg-slate-950 border border-slate-700 text-white rounded-xl p-2.5 focus:outline-none"
-                  />
-                </div>
-              </div>
-
-              {/* Service & Payment options */}
-              <div className="bg-slate-950 p-3.5 rounded-2xl border border-slate-800 space-y-3 text-xs">
-                <h4 className="font-bold text-orange-400 text-xs uppercase tracking-wider">Service & Payment Settings</h4>
-                
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-1.5 flex flex-col">
-                    <span className="font-bold text-slate-400">Fulfillment Options</span>
-                    <label className="flex items-center gap-2 cursor-pointer font-medium text-slate-300">
-                      <input type="checkbox" checked={enableDelivery} onChange={(e) => setEnableDelivery(e.target.checked)} className="rounded text-orange-500 focus:ring-0" />
-                      <span>Enable Delivery</span>
-                    </label>
-                    <label className="flex items-center gap-2 cursor-pointer font-medium text-slate-300">
-                      <input type="checkbox" checked={enablePickup} onChange={(e) => setEnablePickup(e.target.checked)} className="rounded text-orange-500 focus:ring-0" />
-                      <span>Enable Pickup</span>
-                    </label>
-                  </div>
-
-                  <div className="space-y-1.5 flex flex-col">
-                    <span className="font-bold text-slate-400">Accepted Payments</span>
-                    <label className="flex items-center gap-2 cursor-pointer font-medium text-slate-300">
-                      <input type="checkbox" checked={enableCash} onChange={(e) => setEnableCash(e.target.checked)} className="rounded text-orange-500 focus:ring-0" />
-                      <span>Enable Cash</span>
-                    </label>
-                    <label className="flex items-center gap-2 cursor-pointer font-medium text-slate-300">
-                      <input type="checkbox" checked={enableCard} onChange={(e) => setEnableCard(e.target.checked)} className="rounded text-orange-500 focus:ring-0" />
-                      <span>Enable Card Offline</span>
-                    </label>
-                    <label className="flex items-center gap-2 cursor-pointer font-medium text-slate-300">
-                      <input type="checkbox" checked={enableOnline} onChange={(e) => setEnableOnline(e.target.checked)} className="rounded text-orange-500 focus:ring-0" />
-                      <span>Enable Stripe Online</span>
-                    </label>
-                  </div>
-                </div>
-
-                {enableOnline && (
-                  <div className="space-y-2 pt-2 border-t border-slate-800 animate-fadeIn">
-                    <div className="space-y-1">
-                      <label className="font-bold text-slate-450">Stripe Publishable Key</label>
-                      <input type="text" value={stripePublishableKey} onChange={(e) => setStripePublishableKey(e.target.value)} placeholder="pk_test_..." required className="w-full bg-slate-900 border border-slate-700 text-white rounded-xl p-2 focus:outline-none" />
-                    </div>
-                    <div className="space-y-1">
-                      <label className="font-bold text-slate-450">Stripe Secret Key</label>
-                      <input type="password" value={stripeSecretKey} onChange={(e) => setStripeSecretKey(e.target.value)} placeholder="sk_test_..." required className="w-full bg-slate-900 border border-slate-700 text-white rounded-xl p-2 focus:outline-none" />
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              <div className="flex items-center gap-2 pt-3 border-t border-slate-800">
-                <button
-                  type="button"
-                  onClick={() => setIsAddModalOpen(false)}
-                  className="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 py-2.5 rounded-xl font-bold"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="flex-1 bg-orange-600 hover:bg-orange-500 text-white py-2.5 rounded-xl font-bold shadow-md"
-                >
-                  Create Store
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Edit Restaurant Modal */}
-      {isEditModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xs">
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 max-w-md w-full space-y-4 shadow-2xl overflow-y-auto max-h-[90vh]">
-            <div className="flex justify-between items-center border-b border-slate-800 pb-3">
-              <h3 className="font-extrabold text-base text-white">Modify Restaurant Settings</h3>
-              <button onClick={() => setIsEditModalOpen(false)} className="text-slate-400 hover:text-white">
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <form onSubmit={handleEditRestaurant} className="space-y-3 text-xs">
-              <div className="space-y-1">
-                <label className="font-bold text-slate-300">Restaurant Name</label>
-                <input
-                  type="text"
-                  value={name}
-                  onChange={(e) => handleNameChange(e.target.value, true)}
-                  placeholder="e.g. Sabor Latino Bistro"
-                  required
-                  className="w-full bg-slate-950 border border-slate-700 text-white rounded-xl p-2.5 focus:outline-none focus:border-orange-500"
-                />
-              </div>
-
-              <div className="space-y-1">
-                <label className="font-bold text-slate-300">URL Slug (Unique path name)</label>
-                <input
-                  type="text"
-                  value={slug}
-                  onChange={(e) => setSlug(e.target.value)}
-                  placeholder="e.g. sabor-latino"
-                  required
-                  className="w-full bg-slate-950 border border-slate-700 text-white rounded-xl p-2.5 focus:outline-none focus:border-orange-500"
-                />
-              </div>
-
-              <div className="space-y-1">
-                <label className="font-bold text-slate-300">Description</label>
-                <textarea
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Tell clients about your restaurant's unique dishes..."
-                  rows={2}
-                  className="w-full bg-slate-950 border border-slate-700 text-white rounded-xl p-2.5 focus:outline-none focus:border-orange-500 resize-none"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <label className="font-bold text-slate-300">Email Address</label>
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="contact@bistro.com"
-                    required
-                    className="w-full bg-slate-950 border border-slate-700 text-white rounded-xl p-2.5 focus:outline-none"
-                  />
-                </div>
-                <div className="space-y-1">
-                  <label className="font-bold text-slate-300">Phone Number</label>
-                  <input
-                    type="tel"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    placeholder="+1 (555) 012-3344"
-                    required
-                    className="w-full bg-slate-950 border border-slate-700 text-white rounded-xl p-2.5 focus:outline-none"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-1">
-                <label className="font-bold text-slate-300">Physical Address</label>
-                <input
-                  type="text"
-                  value={address}
-                  onChange={(e) => setAddress(e.target.value)}
-                  placeholder="123 Food Street, San Francisco, CA"
-                  required
-                  className="w-full bg-slate-950 border border-slate-700 text-white rounded-xl p-2.5 focus:outline-none"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <label className="font-bold text-slate-300">Tax Rate (%)</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={taxRatePercent}
-                    onChange={(e) => setTaxRatePercent(e.target.value)}
-                    placeholder="8.5"
-                    className="w-full bg-slate-950 border border-slate-700 text-white rounded-xl p-2.5 focus:outline-none"
-                  />
-                </div>
-                <div className="space-y-1">
-                  <label className="font-bold text-slate-300">Estimated Prep Time (mins)</label>
-                  <input
-                    type="number"
-                    value={estimatedPrepTime}
-                    onChange={(e) => setEstimatedPrepTime(e.target.value)}
-                    placeholder="25"
-                    className="w-full bg-slate-950 border border-slate-700 text-white rounded-xl p-2.5 focus:outline-none"
-                  />
-                </div>
-              </div>
-
-              {/* Service & Payment options */}
-              <div className="bg-slate-950 p-3.5 rounded-2xl border border-slate-800 space-y-3 text-xs">
-                <h4 className="font-bold text-orange-400 text-xs uppercase tracking-wider">Service & Payment Settings</h4>
-                
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-1.5 flex flex-col">
-                    <span className="font-bold text-slate-400">Fulfillment Options</span>
-                    <label className="flex items-center gap-2 cursor-pointer font-medium text-slate-300">
-                      <input type="checkbox" checked={enableDelivery} onChange={(e) => setEnableDelivery(e.target.checked)} className="rounded text-orange-500 focus:ring-0" />
-                      <span>Enable Delivery</span>
-                    </label>
-                    <label className="flex items-center gap-2 cursor-pointer font-medium text-slate-300">
-                      <input type="checkbox" checked={enablePickup} onChange={(e) => setEnablePickup(e.target.checked)} className="rounded text-orange-500 focus:ring-0" />
-                      <span>Enable Pickup</span>
-                    </label>
-                  </div>
-
-                  <div className="space-y-1.5 flex flex-col">
-                    <span className="font-bold text-slate-400">Accepted Payments</span>
-                    <label className="flex items-center gap-2 cursor-pointer font-medium text-slate-300">
-                      <input type="checkbox" checked={enableCash} onChange={(e) => setEnableCash(e.target.checked)} className="rounded text-orange-500 focus:ring-0" />
-                      <span>Enable Cash</span>
-                    </label>
-                    <label className="flex items-center gap-2 cursor-pointer font-medium text-slate-300">
-                      <input type="checkbox" checked={enableCard} onChange={(e) => setEnableCard(e.target.checked)} className="rounded text-orange-500 focus:ring-0" />
-                      <span>Enable Card Offline</span>
-                    </label>
-                    <label className="flex items-center gap-2 cursor-pointer font-medium text-slate-300">
-                      <input type="checkbox" checked={enableOnline} onChange={(e) => setEnableOnline(e.target.checked)} className="rounded text-orange-500 focus:ring-0" />
-                      <span>Enable Stripe Online</span>
-                    </label>
-                  </div>
-                </div>
-
-                {enableOnline && (
-                  <div className="space-y-2 pt-2 border-t border-slate-800 animate-fadeIn">
-                    <div className="space-y-1">
-                      <label className="font-bold text-slate-450">Stripe Publishable Key</label>
-                      <input type="text" value={stripePublishableKey} onChange={(e) => setStripePublishableKey(e.target.value)} placeholder="pk_test_..." required className="w-full bg-slate-900 border border-slate-700 text-white rounded-xl p-2 focus:outline-none" />
-                    </div>
-                    <div className="space-y-1">
-                      <label className="font-bold text-slate-450">Stripe Secret Key</label>
-                      <input type="password" value={stripeSecretKey} onChange={(e) => setStripeSecretKey(e.target.value)} placeholder="sk_test_..." required className="w-full bg-slate-900 border border-slate-700 text-white rounded-xl p-2 focus:outline-none" />
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              <div className="flex items-center gap-2 pt-3 border-t border-slate-800">
-                <button
-                  type="button"
-                  onClick={() => setIsEditModalOpen(false)}
-                  className="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 py-2.5 rounded-xl font-bold"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="flex-1 bg-orange-600 hover:bg-orange-500 text-white py-2.5 rounded-xl font-bold shadow-md"
-                >
-                  Save Changes
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      {/* GloriaFood Style Location Setup Wizard Modal */}
+      <LocationSetupWizardModal
+        isOpen={isWizardOpen}
+        onClose={() => setIsWizardOpen(false)}
+        editData={wizardEditData}
+        onSuccess={(savedResto) => {
+          fetchRestaurants();
+          if (wizardEditData && selectedRestaurant?.id === wizardEditData.id) {
+            selectRestaurant(savedResto);
+          }
+        }}
+      />
 
       {/* Restaurant Setup / Embed Link & Widget Modal */}
       {embedModalResto && (

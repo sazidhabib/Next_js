@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getRestaurantBySlug, saveDeliveryZones, updateDeliveryStatus } from '@/lib/dataStore';
+import { getRestaurantBySlug, getAllRestaurants, saveDeliveryZones, updateDeliveryStatus } from '@/lib/dataStore';
 
 export async function GET(request) {
   try {
@@ -11,6 +11,19 @@ export async function GET(request) {
       return NextResponse.json({ success: false, error: 'Restaurant not found' }, { status: 404 });
     }
 
+    const allStores = await getAllRestaurants();
+    const allLocations = (allStores || []).map((s) => ({
+      id: s.id,
+      name: s.name,
+      slug: s.slug,
+      address: s.address,
+      city: s.city,
+      state: s.state,
+      country: s.country,
+      lat: s.latitude || 51.5133,
+      lng: s.longitude || -0.1362,
+    }));
+
     return NextResponse.json({
       success: true,
       data: {
@@ -21,7 +34,10 @@ export async function GET(request) {
           lng: restaurant.longitude || -0.1362,
           address: restaurant.address || '42 Dean Street, Soho, London W1D 4PG, UK',
           name: restaurant.name || 'Bella Vista Gourmet Kitchen & Pizzeria',
+          slug: restaurant.slug,
+          city: restaurant.city,
         },
+        allLocations,
         currency: restaurant.currency || 'GBP',
         currencySymbol: restaurant.currencySymbol || '£',
       },

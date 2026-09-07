@@ -47,7 +47,10 @@ const PRESET_COLORS = [
   '#14b8a6', // Teal
 ];
 
+import { useAdmin } from '@/lib/adminContext';
+
 export default function AdminZonesPage() {
+  const { selectedRestaurant, selectRestaurant } = useAdmin();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [enableDelivery, setEnableDelivery] = useState(true);
@@ -56,23 +59,30 @@ export default function AdminZonesPage() {
     lng: -0.1362,
     address: '42 Dean Street, Soho, London W1D 4PG, UK',
     name: 'Bella Vista Gourmet Kitchen & Pizzeria',
+    slug: 'bellavista-pizza',
   });
+  const [allLocations, setAllLocations] = useState([]);
   const [currency, setCurrency] = useState('GBP');
   const [currencySymbol, setCurrencySymbol] = useState('£');
   const [zones, setZones] = useState([]);
   const [selectedZoneId, setSelectedZoneId] = useState(null);
   const [expandedZoneId, setExpandedZoneId] = useState(null);
 
+  const activeSlug = selectedRestaurant?.slug || 'bellavista-pizza';
+
   // Load zones data
-  const loadData = async () => {
+  const loadData = async (slugToLoad = activeSlug) => {
     try {
       setLoading(true);
-      const res = await fetch('/api/admin/zones?slug=bellavista-pizza');
+      const res = await fetch(`/api/admin/zones?slug=${slugToLoad}`);
       const json = await res.json();
       if (json.success && json.data) {
         setEnableDelivery(json.data.enableDelivery ?? true);
         if (json.data.restaurantLocation) {
           setRestaurantLocation(json.data.restaurantLocation);
+        }
+        if (Array.isArray(json.data.allLocations)) {
+          setAllLocations(json.data.allLocations);
         }
         if (json.data.currency) setCurrency(json.data.currency);
         if (json.data.currencySymbol) setCurrencySymbol(json.data.currencySymbol);
@@ -102,8 +112,8 @@ export default function AdminZonesPage() {
   };
 
   useEffect(() => {
-    loadData();
-  }, []);
+    loadData(activeSlug);
+  }, [activeSlug]);
 
   // Update specific zone properties in state
   const handleUpdateZone = (zoneId, updates) => {
@@ -258,17 +268,42 @@ export default function AdminZonesPage() {
             <span className="text-xs font-bold uppercase tracking-wider text-orange-500 bg-orange-500/10 px-2.5 py-1 rounded-md">
               SETUP &bull; SERVICES
             </span>
-            <span className="text-xs text-slate-400">London, UK</span>
+            <span className="text-xs text-slate-400">
+              {restaurantLocation.city || 'Store Location'}
+            </span>
           </div>
           <h1 className="text-2xl font-black text-white mt-1">
-            Where do you deliver?
+            Delivery Zones & Multi-Location Map
           </h1>
           <p className="text-xs text-slate-400 mt-0.5">
-            Draw circular or freeform polygon boundaries on the map, configure delivery pricing and minimum order amounts.
+            Configuring zones for <strong className="text-orange-400 font-bold">{restaurantLocation.name}</strong>. Switch branches or click on map pins to edit.
           </p>
         </div>
 
         <div className="flex items-center gap-3">
+          {/* Branch Switcher Dropdown */}
+          {allLocations.length > 1 && (
+            <div className="flex items-center gap-2 bg-slate-900 border border-slate-700 px-3 py-1.5 rounded-xl text-xs">
+              <MapPin className="w-3.5 h-3.5 text-orange-400 shrink-0" />
+              <select
+                value={activeSlug}
+                onChange={(e) => {
+                  const found = allLocations.find((l) => l.slug === e.target.value);
+                  if (found) {
+                    selectRestaurant(found);
+                  }
+                }}
+                className="bg-transparent text-white font-bold focus:outline-none cursor-pointer"
+              >
+                {allLocations.map((loc) => (
+                  <option key={loc.id || loc.slug} value={loc.slug} className="bg-slate-900 text-white">
+                    {loc.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
           <button
             type="button"
             onClick={handleSaveAll}
@@ -298,6 +333,11 @@ export default function AdminZonesPage() {
             <div className="h-[550px] lg:h-[720px] w-full">
               <DeliveryZoneMap
                 restaurantLocation={restaurantLocation}
+                allLocations={allLocations}
+                onSelectLocation={(loc) => {
+                  selectRestaurant(loc);
+                  toast.info(`Switched active context to ${loc.name}`);
+                }}
                 zones={zones}
                 selectedZoneId={selectedZoneId}
                 onSelectZone={(id) => {

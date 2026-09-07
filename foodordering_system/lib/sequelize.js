@@ -95,6 +95,42 @@ export const Restaurant = sequelize.define('Restaurant', {
     type: DataTypes.STRING,
     allowNull: false,
   },
+  city: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  state: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  zipCode: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  country: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  timezone: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  managerFirstName: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  managerLastName: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  managerEmail: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  managerPhone: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
   latitude: {
     type: DataTypes.DOUBLE,
     allowNull: true,
