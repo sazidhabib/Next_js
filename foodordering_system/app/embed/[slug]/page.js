@@ -4,6 +4,7 @@ import React, { useState, useEffect, use } from 'react';
 import { toast } from 'react-toastify';
 import ItemModal from '@/components/ItemModal';
 import CartDrawer from '@/components/CartDrawer';
+import RestaurantZoneInfoMap from '@/components/RestaurantZoneInfoMap';
 import {
   ShoppingBag,
   Info,
@@ -268,94 +269,17 @@ export default function EmbedMenuPage({ params }) {
          ========================================================= */}
       {activeTab === 'info' ? (
         <div className="max-w-5xl w-full mx-auto px-4 py-6 space-y-6 animate-in fade-in duration-200">
-          {/* 1. Visualized Delivery Map Canvas with Zone Rings */}
-          <div className="relative w-full h-80 sm:h-96 rounded-2xl overflow-hidden border border-slate-200 shadow-md bg-slate-100">
-            {/* Map Tile Background (OpenStreetMap / Google Map realistic styled tiles) */}
-            <div
-              className="absolute inset-0 bg-cover bg-center"
-              style={{
-                backgroundImage:
-                  "url('https://images.unsplash.com/photo-1524661135-423995f22d0b?w=1200&auto=format&fit=crop&q=80')",
-                filter: 'saturate(0.85) contrast(1.05)',
-              }}
-            ></div>
-            <div className="absolute inset-0 bg-slate-900/10 backdrop-brightness-95"></div>
-
-            {/* Interactive SVG Concentric Delivery Zone Rings */}
-            <svg
-              className="absolute inset-0 w-full h-full pointer-events-none"
-              viewBox="0 0 800 400"
-              preserveAspectRatio="xMidYMid meet"
-            >
-              {/* Zone 5 Ring (Purple) */}
-              <circle
-                cx="400"
-                cy="190"
-                r="165"
-                fill="rgba(168, 85, 247, 0.12)"
-                stroke="#a855f7"
-                strokeWidth={hoveredZoneIndex === 4 ? '3' : '1.8'}
-                strokeDasharray="4 2"
-              />
-              {/* Zone 4 Ring (Blue) */}
-              <circle
-                cx="400"
-                cy="190"
-                r="130"
-                fill="rgba(59, 130, 246, 0.14)"
-                stroke="#3b82f6"
-                strokeWidth={hoveredZoneIndex === 3 ? '3' : '1.8'}
-              />
-              {/* Zone 3 Ring (Cyan) */}
-              <circle
-                cx="400"
-                cy="190"
-                r="95"
-                fill="rgba(6, 182, 212, 0.16)"
-                stroke="#06b6d4"
-                strokeWidth={hoveredZoneIndex === 2 ? '3.5' : '2'}
-              />
-              {/* Zone 2 Ring (Yellow) */}
-              <circle
-                cx="400"
-                cy="190"
-                r="65"
-                fill="rgba(245, 158, 11, 0.20)"
-                stroke="#f59e0b"
-                strokeWidth={hoveredZoneIndex === 1 ? '3.5' : '2'}
-              />
-              {/* Zone 1 Ring (Orange Inner) */}
-              <circle
-                cx="400"
-                cy="190"
-                r="38"
-                fill="rgba(234, 88, 12, 0.25)"
-                stroke="#ea580c"
-                strokeWidth={hoveredZoneIndex === 0 ? '4' : '2.5'}
-              />
-
-              {/* Center Map Pin (Red Marker) */}
-              <g transform="translate(388, 160)">
-                <path
-                  d="M12 0C5.373 0 0 5.373 0 12c0 9 12 24 12 24s12-15 12-24c0-6.627-5.373-12-12-12z"
-                  fill="#ef4444"
-                  stroke="#991b1b"
-                  strokeWidth="1"
-                />
-                <circle cx="12" cy="11" r="4.5" fill="#ffffff" />
-              </g>
-            </svg>
-
-            {/* Map UI Badges & Attribution (Google Maps style) */}
-            <div className="absolute bottom-3 left-4 bg-white/95 backdrop-blur-md px-2.5 py-1 rounded-md shadow-xs border border-slate-200 text-[11px] font-bold text-slate-800 flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-red-600"></span>
-              <span>{restaurant?.name || 'Restaurant Location'}</span>
-            </div>
-
-            <div className="absolute bottom-3 right-4 bg-white/90 backdrop-blur-md px-2 py-0.5 rounded text-[10px] text-slate-600 shadow-xs">
-              Delivery Zone Radius Engine
-            </div>
-          </div>
+          {/* 1. Visualized Leaflet Delivery Map with Interactive Zone Highlights */}
+          <RestaurantZoneInfoMap
+            restaurantLocation={{
+              lat: restaurant?.latitude || 51.5133,
+              lng: restaurant?.longitude || -0.1362,
+              name: restaurant?.name || 'Restaurant Location',
+            }}
+            zones={deliveryZones}
+            hoveredZoneIndex={hoveredZoneIndex}
+            onHoverZone={setHoveredZoneIndex}
+          />
 
           {/* Cookie & real-time order notice */}
           <p className="text-[11px] text-slate-500 leading-relaxed">

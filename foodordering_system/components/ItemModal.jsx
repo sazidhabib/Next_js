@@ -1,115 +1,26 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { X, Plus, Minus, Check, AlertCircle, Sparkles } from 'lucide-react';
+import { X, Plus, Minus } from 'lucide-react';
 
 export default function ItemModal({ item, isOpen, onClose, onAddToCart }) {
   const [quantity, setQuantity] = useState(1);
-  const [selectedOptions, setSelectedOptions] = useState({});
   const [specialNotes, setSpecialNotes] = useState('');
-  const [validationError, setValidationError] = useState('');
 
-  // Pre-select defaults when modal opens or item changes
+  // Reset fields when modal opens or item changes
   useEffect(() => {
     if (!item) return;
-
     setQuantity(1);
     setSpecialNotes('');
-    setValidationError('');
-
-    const initialSelections = {};
-    if (item.optionGroups && item.optionGroups.length > 0) {
-      item.optionGroups.forEach((group) => {
-        if (group.minSelections === 1 && group.maxSelections === 1) {
-          // Single select default
-          const defaultItem =
-            group.items.find((opt) => opt.isDefault) || group.items[0];
-          if (defaultItem) {
-            initialSelections[group.id] = [defaultItem];
-          }
-        } else {
-          // Optional multi-select defaults
-          const defaultItems = group.items.filter((opt) => opt.isDefault);
-          initialSelections[group.id] = defaultItems;
-        }
-      });
-    }
-    setSelectedOptions(initialSelections);
-  }, [item]);
+  }, [item, isOpen]);
 
   if (!isOpen || !item) return null;
 
-  // Option selection handlers
-  const handleSingleSelect = (group, optionItem) => {
-    setSelectedOptions((prev) => ({
-      ...prev,
-      [group.id]: [optionItem],
-    }));
-    setValidationError('');
-  };
-
-  const handleMultiSelect = (group, optionItem) => {
-    const current = selectedOptions[group.id] || [];
-    const exists = current.some((opt) => opt.id === optionItem.id);
-
-    if (exists) {
-      // Remove option
-      setSelectedOptions((prev) => ({
-        ...prev,
-        [group.id]: current.filter((opt) => opt.id !== optionItem.id),
-      }));
-    } else {
-      // Check max selections
-      if (group.maxSelections && current.length >= group.maxSelections) {
-        setValidationError(
-          `You can select a maximum of ${group.maxSelections} option(s) for "${group.name}".`
-        );
-        return;
-      }
-      setSelectedOptions((prev) => ({
-        ...prev,
-        [group.id]: [...current, optionItem],
-      }));
-      setValidationError('');
-    }
-  };
-
-  // Calculate dynamic item total
-  const optionsExtraTotal = Object.values(selectedOptions)
-    .flat()
-    .reduce((sum, opt) => sum + (opt?.price || 0), 0);
-
-  const unitPrice = item.basePrice + optionsExtraTotal;
+  const unitPrice = item.basePrice || 0;
   const totalPrice = unitPrice * quantity;
 
-  // Validate and submit
+  // Submit handler
   const handleAddToCartSubmit = () => {
-    // Check required option groups
-    if (item.optionGroups) {
-      for (const group of item.optionGroups) {
-        const selections = selectedOptions[group.id] || [];
-        if (group.minSelections > 0 && selections.length < group.minSelections) {
-          setValidationError(
-            `Please make a selection for required option: "${group.name}".`
-          );
-          return;
-        }
-      }
-    }
-
-    const flatSelectedOptions = Object.entries(selectedOptions).flatMap(
-      ([groupId, opts]) => {
-        const group = item.optionGroups.find((g) => g.id === groupId);
-        return opts.map((opt) => ({
-          groupId,
-          groupName: group?.name || 'Options',
-          optionId: opt.id,
-          optionName: opt.name,
-          optionPrice: opt.price,
-        }));
-      }
-    );
-
     onAddToCart({
       id: item.id,
       name: item.name,
@@ -118,8 +29,8 @@ export default function ItemModal({ item, isOpen, onClose, onAddToCart }) {
       quantity,
       unitPrice,
       itemTotal: unitPrice,
-      selectedOptions: flatSelectedOptions,
-      specialNotes,
+      selectedOptions: [],
+      specialNotes: specialNotes.trim(),
     });
 
     onClose();
@@ -140,6 +51,7 @@ export default function ItemModal({ item, isOpen, onClose, onAddToCart }) {
           {/* Close button */}
           <button
             onClick={onClose}
+            aria-label="Close modal"
             className="absolute top-3 right-3 w-9 h-9 rounded-full bg-black/50 text-white hover:bg-black/80 flex items-center justify-center backdrop-blur-md transition-all cursor-pointer"
           >
             <X className="w-5 h-5" />
@@ -149,107 +61,18 @@ export default function ItemModal({ item, isOpen, onClose, onAddToCart }) {
           <div className="absolute bottom-4 left-4 right-4 text-white">
             <h2 className="text-xl sm:text-2xl font-bold tracking-tight">{item.name}</h2>
             <p className="text-orange-300 font-bold text-lg mt-0.5">
-              £{item.basePrice.toFixed(2)}
+              £{unitPrice.toFixed(2)}
             </p>
           </div>
         </div>
 
-        {/* Scrollable Options Body */}
+        {/* Scrollable Body */}
         <div className="p-5 sm:p-6 overflow-y-auto space-y-6 flex-1 text-slate-800">
           {/* Description */}
           {item.description && (
             <p className="text-xs sm:text-sm text-slate-600 leading-relaxed border-b border-slate-100 pb-4">
               {item.description}
             </p>
-          )}
-
-          {/* Validation Warning Alert */}
-          {validationError && (
-            <div className="flex items-center gap-2 p-3 bg-red-50 text-red-700 border border-red-200 rounded-xl text-xs font-medium">
-              <AlertCircle className="w-4 h-4 shrink-0 text-red-500" />
-              <span>{validationError}</span>
-            </div>
-          )}
-
-          {/* Option Groups */}
-          {item.optionGroups && item.optionGroups.length > 0 ? (
-            item.optionGroups.map((group) => {
-              const isSingleSelect =
-                group.minSelections === 1 && group.maxSelections === 1;
-              const currentSelections = selectedOptions[group.id] || [];
-
-              return (
-                <div key={group.id} className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="text-sm font-bold text-slate-900 flex items-center gap-1.5">
-                        <span>{group.name}</span>
-                        {group.minSelections > 0 && (
-                          <span className="text-[10px] uppercase font-bold bg-orange-100 text-orange-700 px-1.5 py-0.5 rounded">
-                            Required
-                          </span>
-                        )}
-                      </h3>
-                      <p className="text-[11px] text-slate-500">
-                        {isSingleSelect
-                          ? 'Select 1 option'
-                          : `Select up to ${group.maxSelections} option(s)`}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Options List */}
-                  <div className="space-y-2">
-                    {group.items.map((opt) => {
-                      const isSelected = currentSelections.some(
-                        (s) => s.id === opt.id
-                      );
-
-                      return (
-                        <div
-                          key={opt.id}
-                          onClick={() =>
-                            isSingleSelect
-                              ? handleSingleSelect(group, opt)
-                              : handleMultiSelect(group, opt)
-                          }
-                          className={`flex items-center justify-between p-3 rounded-xl border transition-all cursor-pointer ${
-                            isSelected
-                              ? 'bg-orange-50/70 border-orange-400 text-orange-950 font-medium'
-                              : 'bg-slate-50/60 border-slate-200 hover:border-slate-300 text-slate-700'
-                          }`}
-                        >
-                          <div className="flex items-center gap-3">
-                            <div
-                              className={`w-4 h-4 rounded-${
-                                isSingleSelect ? 'full' : 'md'
-                              } border flex items-center justify-center transition-all ${
-                                isSelected
-                                  ? 'bg-orange-600 border-orange-600 text-white'
-                                  : 'border-slate-300 bg-white'
-                              }`}
-                            >
-                              {isSelected && <Check className="w-3 h-3 stroke-[3]" />}
-                            </div>
-                            <span className="text-xs sm:text-sm">{opt.name}</span>
-                          </div>
-
-                          {opt.price > 0 && (
-                            <span className="text-xs font-semibold text-slate-900">
-                              +£{opt.price.toFixed(2)}
-                            </span>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              );
-            })
-          ) : (
-            <div className="text-xs text-slate-400 italic">
-              No special options available for this dish. Prepared fresh with standard recipe.
-            </div>
           )}
 
           {/* Special Instructions */}
@@ -261,7 +84,7 @@ export default function ItemModal({ item, isOpen, onClose, onAddToCart }) {
               value={specialNotes}
               onChange={(e) => setSpecialNotes(e.target.value)}
               placeholder="e.g. Extra crispy crust, dressing on the side, no onions..."
-              rows={2}
+              rows={3}
               className="w-full p-3 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 text-slate-800 transition-all placeholder:text-slate-400 resize-none"
             />
           </div>

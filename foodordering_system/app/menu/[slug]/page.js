@@ -5,6 +5,7 @@ import { toast } from 'react-toastify';
 import Navbar from '@/components/Navbar';
 import ItemModal from '@/components/ItemModal';
 import CartDrawer from '@/components/CartDrawer';
+import RestaurantZoneInfoMap from '@/components/RestaurantZoneInfoMap';
 import {
   UtensilsCrossed,
   Clock,
@@ -19,6 +20,8 @@ import {
   ShieldCheck,
   Phone,
   Flame,
+  X,
+  Truck,
 } from 'lucide-react';
 
 export default function MenuPage({ params }) {
@@ -31,6 +34,10 @@ export default function MenuPage({ params }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTag, setSelectedTag] = useState('ALL');
   const [serviceType, setServiceType] = useState('DELIVERY');
+
+  // Zone info modal state
+  const [isZoneModalOpen, setIsZoneModalOpen] = useState(false);
+  const [hoveredZoneIdx, setHoveredZoneIdx] = useState(null);
 
   // Item customization modal
   const [selectedItem, setSelectedItem] = useState(null);
@@ -204,8 +211,15 @@ export default function MenuPage({ params }) {
                 </span>
               </div>
               <div className="border-t border-white/10 pt-2 flex items-center justify-between text-xs">
-                <span className="text-slate-300">Min. Delivery</span>
-                <span className="font-bold text-white">£15.00</span>
+                <span className="text-slate-300">Delivery Zones</span>
+                <button
+                  type="button"
+                  onClick={() => setIsZoneModalOpen(true)}
+                  className="text-orange-300 hover:text-orange-200 font-bold underline cursor-pointer text-xs flex items-center gap-1"
+                >
+                  <span>View Map & Fees</span>
+                  <ChevronRight className="w-3.5 h-3.5" />
+                </button>
               </div>
             </div>
           </div>
@@ -366,6 +380,100 @@ export default function MenuPage({ params }) {
         serviceType={serviceType}
         setServiceType={setServiceType}
       />
+
+      {/* Delivery Zones & Pricing Info Modal */}
+      {isZoneModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-6 animate-fadeIn">
+          <div className="relative w-full max-w-3xl bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[90vh]">
+            {/* Modal Header */}
+            <div className="p-4 sm:p-5 border-b border-slate-200 flex items-center justify-between bg-slate-50 shrink-0">
+              <div className="flex items-center gap-2">
+                <Truck className="w-5 h-5 text-orange-600" />
+                <h3 className="font-extrabold text-sm sm:text-base text-slate-900">
+                  Delivery Zones & Fees Map
+                </h3>
+              </div>
+              <button
+                onClick={() => setIsZoneModalOpen(false)}
+                className="w-8 h-8 rounded-full bg-slate-200/80 hover:bg-slate-300 text-slate-700 flex items-center justify-center transition-colors cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-4 sm:p-6 overflow-y-auto space-y-5 flex-1">
+              {/* Interactive Zone Map */}
+              <RestaurantZoneInfoMap
+                restaurantLocation={{
+                  lat: restaurant?.latitude || 51.5133,
+                  lng: restaurant?.longitude || -0.1362,
+                  name: restaurant?.name || 'Restaurant Location',
+                }}
+                zones={restaurant?.deliveryZones || []}
+                hoveredZoneIndex={hoveredZoneIdx}
+                onHoverZone={setHoveredZoneIdx}
+              />
+
+              {/* Delivery Zone Rates List */}
+              <div className="space-y-3">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                  Configured Delivery Zones & Minimums
+                </h4>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  {(restaurant?.deliveryZones || []).map((zone, idx) => (
+                    <div
+                      key={zone.id || idx}
+                      onMouseEnter={() => setHoveredZoneIdx(idx)}
+                      onMouseLeave={() => setHoveredZoneIdx(null)}
+                      className={`p-3 rounded-xl border transition-all cursor-pointer ${
+                        hoveredZoneIdx === idx
+                          ? 'bg-orange-50/70 border-orange-400 shadow-xs'
+                          : 'bg-slate-50 border-slate-200 hover:border-slate-300'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span
+                            className="w-3.5 h-3.5 rounded-full shrink-0 shadow-2xs"
+                            style={{ backgroundColor: zone.color || '#ea580c' }}
+                          />
+                          <span className="text-xs font-bold text-slate-800">
+                            {zone.name}
+                          </span>
+                        </div>
+                        <span className="text-xs font-bold text-orange-600">
+                          Fee: £{(zone.deliveryFee || 0).toFixed(2)}
+                        </span>
+                      </div>
+                      <div className="mt-1 flex items-center justify-between text-[11px] text-slate-500">
+                        <span>Min Order: £{(zone.minOrderAmount || 0).toFixed(2)}</span>
+                        {zone.freeDeliveryThreshold > 0 && (
+                          <span className="text-emerald-600 font-medium">
+                            Free over £{zone.freeDeliveryThreshold.toFixed(2)}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="p-4 bg-slate-50 border-t border-slate-200 flex justify-end shrink-0">
+              <button
+                type="button"
+                onClick={() => setIsZoneModalOpen(false)}
+                className="px-5 py-2.5 bg-orange-600 hover:bg-orange-700 text-white font-bold text-xs rounded-xl shadow-xs transition-all cursor-pointer"
+              >
+                Close Map
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

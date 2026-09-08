@@ -166,10 +166,17 @@ export default function LocationSetupWizardModal({
       if (typeof window === 'undefined') return;
       const L = (await import('leaflet')).default;
 
+      // Monkey-patch DomUtil.getPosition to safely handle undefined/null elements.
+      const _origGetPosition = L.DomUtil.getPosition;
+      L.DomUtil.getPosition = function (el) {
+        if (!el) return new L.Point(0, 0);
+        return _origGetPosition.call(this, el);
+      };
+
       if (!isMounted || !miniMapContainerRef.current) return;
 
       if (miniMapInstanceRef.current) {
-        miniMapInstanceRef.current.remove();
+        try { miniMapInstanceRef.current.remove(); } catch (_e) { /* ignore */ }
         miniMapInstanceRef.current = null;
       }
 
@@ -180,6 +187,7 @@ export default function LocationSetupWizardModal({
         zoom: 14,
         zoomControl: true,
         attributionControl: false,
+        zoomAnimation: false,
       });
 
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
