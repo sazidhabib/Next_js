@@ -141,11 +141,11 @@ export const Restaurant = sequelize.define('Restaurant', {
   },
   currency: {
     type: DataTypes.STRING,
-    defaultValue: 'USD',
+    defaultValue: 'GBP',
   },
   currencySymbol: {
     type: DataTypes.STRING,
-    defaultValue: '$',
+    defaultValue: '£',
   },
   taxRatePercent: {
     type: DataTypes.FLOAT,

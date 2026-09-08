@@ -118,7 +118,7 @@ export default function CartDrawer({
     }
 
     if (isBelowMinimum) {
-      const msg = `Minimum order for this delivery zone is $${minOrderAmount.toFixed(2)}. Please add $${amountNeededForMin.toFixed(2)} more.`;
+      const msg = `Minimum order for this delivery zone is £${minOrderAmount.toFixed(2)}. Please add £${amountNeededForMin.toFixed(2)} more.`;
       setErrorMessage(msg);
       toast.warning(msg);
       return;
@@ -277,8 +277,8 @@ export default function CartDrawer({
                 {freeDeliveryRemaining > 0 ? (
                   <div>
                     <div className="flex items-center justify-between text-xs font-bold text-amber-900 mb-1">
-                      <span>Add ${freeDeliveryRemaining.toFixed(2)} for FREE Delivery</span>
-                      <span>${subtotal.toFixed(2)} / ${freeThreshold.toFixed(2)}</span>
+                      <span>Add £{freeDeliveryRemaining.toFixed(2)} for FREE Delivery</span>
+                      <span>£{subtotal.toFixed(2)} / £{freeThreshold.toFixed(2)}</span>
                     </div>
                     <div className="w-full h-1.5 bg-amber-200 rounded-full overflow-hidden">
                       <div
@@ -336,7 +336,7 @@ export default function CartDrawer({
                             {item.name}
                           </h4>
                           <span className="text-xs font-semibold text-orange-600">
-                            ${(item.unitPrice * item.quantity).toFixed(2)}
+                            £{(item.unitPrice * item.quantity).toFixed(2)}
                           </span>
                         </div>
 
@@ -378,7 +378,7 @@ export default function CartDrawer({
                               <span>• {opt.optionName}</span>
                               {opt.optionPrice > 0 && (
                                 <span className="text-slate-700 font-medium">
-                                  +${opt.optionPrice.toFixed(2)}
+                                  +£{opt.optionPrice.toFixed(2)}
                                 </span>
                               )}
                             </div>
@@ -418,7 +418,7 @@ export default function CartDrawer({
                     >
                       {restaurant.deliveryZones.map((z) => (
                         <option key={z.id} value={z.id}>
-                          {z.name} (Fee: ${z.deliveryFee?.toFixed(2)} | Min: ${z.minOrderAmount?.toFixed(2)})
+                          {z.name} (Fee: £{z.deliveryFee?.toFixed(2)} | Min: £{z.minOrderAmount?.toFixed(2)})
                         </option>
                       ))}
                     </select>
@@ -577,23 +577,23 @@ export default function CartDrawer({
               <div className="space-y-1.5 text-xs text-slate-600">
                 <div className="flex justify-between">
                   <span>Subtotal</span>
-                  <span className="font-semibold text-slate-900">${subtotal.toFixed(2)}</span>
+                  <span className="font-semibold text-slate-900">£{subtotal.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Estimated Tax (8.5%)</span>
-                  <span>${taxAmount.toFixed(2)}</span>
+                  <span>£{taxAmount.toFixed(2)}</span>
                 </div>
                 {serviceType === 'DELIVERY' && (
                   <div className="flex justify-between">
                     <span>Delivery Fee</span>
                     <span className={deliveryFee === 0 ? 'text-emerald-600 font-bold' : ''}>
-                      {deliveryFee === 0 ? 'FREE' : `$${deliveryFee.toFixed(2)}`}
+                      {deliveryFee === 0 ? 'FREE' : `£${deliveryFee.toFixed(2)}`}
                     </span>
                   </div>
                 )}
                 <div className="flex justify-between text-sm font-bold text-slate-900 pt-2 border-t border-slate-200">
                   <span>Total Amount</span>
-                  <span className="text-orange-600 text-base">${totalAmount.toFixed(2)}</span>
+                  <span className="text-orange-600 text-base">£{totalAmount.toFixed(2)}</span>
                 </div>
               </div>
 
@@ -607,7 +607,7 @@ export default function CartDrawer({
                 {isSubmitting ? (
                   <span>Transmitting Order...</span>
                 ) : isBelowMinimum ? (
-                  <span>Min. Order ${minOrderAmount.toFixed(2)} (Need +${amountNeededForMin.toFixed(2)})</span>
+                  <span>Min. Order £{minOrderAmount.toFixed(2)} (Need +£{amountNeededForMin.toFixed(2)})</span>
                 ) : (
                   <>
                     <span>Confirm & Place Order</span>

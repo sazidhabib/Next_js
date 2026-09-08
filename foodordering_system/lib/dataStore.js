@@ -102,8 +102,7 @@ export async function getRestaurantBySlug(slug = 'bellavista-pizza') {
             if (cat.items) {
               cat.items.sort((a, b) => a.displayOrder - b.displayOrder);
               cat.items.forEach((item) => {
-                // Parse dietary tags
-                item.dietaryTags = item.dietaryTags ? item.dietaryTags.split(',') : [];
+                item.dietaryTags = [];
 
                 if (item.optionGroups) {
                   item.optionGroups.sort((a, b) => a.displayOrder - b.displayOrder);
@@ -488,8 +487,20 @@ export async function updateOrderStatus(orderId, { status, prepMinutes, rejectio
   return updatedOrderResult || (orderIndex !== -1 ? globalStore.__orders[orderIndex] : null);
 }
 
-// 6. Menu Management: Update Item Availability & Add New Item
-export function toggleItemAvailability(itemId) {
+// 6. Menu Management: Categories & Dishes CRUD
+export async function toggleItemAvailability(itemId) {
+  try {
+    const connected = await isDbConnected();
+    if (connected) {
+      const item = await MenuItem.findByPk(itemId);
+      if (item) {
+        await item.update({ isAvailable: !item.isAvailable });
+      }
+    }
+  } catch (err) {
+    console.warn('DB toggleItemAvailability fallback:', err.message);
+  }
+
   for (const cat of globalStore.__restaurantData.categories) {
     for (const item of cat.items) {
       if (item.id === itemId) {
@@ -501,26 +512,242 @@ export function toggleItemAvailability(itemId) {
   return null;
 }
 
-export function addMenuItem(categoryId, itemData) {
-  const cat = globalStore.__restaurantData.categories.find((c) => c.id === categoryId);
-  if (!cat) return null;
+export async function addCategory(restaurantId, categoryData) {
+  let createdCategory = null;
+  const newCatId = `cat-${Date.now()}`;
+  const name = categoryData.name?.trim();
+  const description = categoryData.description || '';
+  const imageUrl = categoryData.imageUrl || null;
 
-  const newItem = {
-    id: `item-${Date.now()}`,
-    name: itemData.name,
-    description: itemData.description || '',
-    imageUrl:
-      itemData.imageUrl ||
-      'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80',
-    basePrice: Number(itemData.basePrice),
-    dietaryTags: itemData.dietaryTags || [],
-    isFeatured: itemData.isFeatured || false,
-    isAvailable: true,
-    optionGroups: itemData.optionGroups || [],
-  };
+  try {
+    const connected = await isDbConnected();
+    if (connected) {
+      // Find default restaurant if not provided
+      let targetRestaurantId = restaurantId;
+      if (!targetRestaurantId) {
+        const defaultResto = await Restaurant.findOne();
+        targetRestaurantId = defaultResto?.id;
+      }
 
-  cat.items.push(newItem);
+      const count = await Category.count({ where: { restaurantId: targetRestaurantId } });
+      const dbCat = await Category.create({
+        restaurantId: targetRestaurantId,
+        name,
+        description,
+        imageUrl,
+        displayOrder: count + 1,
+        isActive: true,
+      });
+
+      if (dbCat) {
+        createdCategory = {
+          ...dbCat.get({ plain: true }),
+          items: [],
+        };
+      }
+    }
+  } catch (err) {
+    console.warn('DB addCategory fallback:', err.message);
+  }
+
+  if (!createdCategory) {
+    createdCategory = {
+      id: newCatId,
+      name,
+      description,
+      imageUrl,
+      displayOrder: (globalStore.__restaurantData.categories?.length || 0) + 1,
+      isActive: true,
+      items: [],
+    };
+  }
+
+  if (!globalStore.__restaurantData.categories) {
+    globalStore.__restaurantData.categories = [];
+  }
+  globalStore.__restaurantData.categories.push(createdCategory);
+  return createdCategory;
+}
+
+export async function updateCategory(categoryId, categoryData) {
+  let updatedCategory = null;
+  try {
+    const connected = await isDbConnected();
+    if (connected) {
+      const dbCat = await Category.findByPk(categoryId);
+      if (dbCat) {
+        await dbCat.update({
+          name: categoryData.name ?? dbCat.name,
+          description: categoryData.description !== undefined ? categoryData.description : dbCat.description,
+          imageUrl: categoryData.imageUrl !== undefined ? categoryData.imageUrl : dbCat.imageUrl,
+          isActive: categoryData.isActive !== undefined ? categoryData.isActive : dbCat.isActive,
+        });
+        updatedCategory = dbCat.get({ plain: true });
+      }
+    }
+  } catch (err) {
+    console.warn('DB updateCategory fallback:', err.message);
+  }
+
+  const cat = globalStore.__restaurantData.categories?.find((c) => c.id === categoryId);
+  if (cat) {
+    if (categoryData.name !== undefined) cat.name = categoryData.name;
+    if (categoryData.description !== undefined) cat.description = categoryData.description;
+    if (categoryData.imageUrl !== undefined) cat.imageUrl = categoryData.imageUrl;
+    if (categoryData.isActive !== undefined) cat.isActive = categoryData.isActive;
+    return cat;
+  }
+  return updatedCategory;
+}
+
+export async function deleteCategory(categoryId) {
+  try {
+    const connected = await isDbConnected();
+    if (connected) {
+      await MenuItem.destroy({ where: { categoryId } });
+      await Category.destroy({ where: { id: categoryId } });
+    }
+  } catch (err) {
+    console.warn('DB deleteCategory fallback:', err.message);
+  }
+
+  if (globalStore.__restaurantData.categories) {
+    globalStore.__restaurantData.categories = globalStore.__restaurantData.categories.filter(
+      (c) => c.id !== categoryId
+    );
+  }
+  return true;
+}
+
+export async function addMenuItem(categoryId, itemData) {
+  let newItem = null;
+  const newId = `item-${Date.now()}`;
+  const basePrice = parseFloat(itemData.basePrice) || 0;
+  const name = itemData.name?.trim();
+  const description = itemData.description || '';
+  const imageUrl =
+    itemData.imageUrl ||
+    'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80';
+  const isAvailable = itemData.isAvailable !== false;
+  const isFeatured = !!itemData.isFeatured;
+
+  try {
+    const connected = await isDbConnected();
+    if (connected) {
+      const dbItem = await MenuItem.create({
+        categoryId,
+        name,
+        description,
+        imageUrl,
+        basePrice,
+        isAvailable,
+        isFeatured,
+      });
+
+      if (dbItem) {
+        newItem = {
+          ...dbItem.get({ plain: true }),
+          optionGroups: itemData.optionGroups || [],
+        };
+      }
+    }
+  } catch (err) {
+    console.warn('DB addMenuItem fallback:', err.message);
+  }
+
+  if (!newItem) {
+    newItem = {
+      id: newId,
+      categoryId,
+      name,
+      description,
+      imageUrl,
+      basePrice,
+      isFeatured,
+      isAvailable,
+      optionGroups: itemData.optionGroups || [],
+    };
+  }
+
+  const cat = globalStore.__restaurantData.categories?.find((c) => c.id === categoryId);
+  if (cat) {
+    if (!cat.items) cat.items = [];
+    cat.items.push(newItem);
+  }
   return newItem;
+}
+
+export async function updateMenuItem(itemId, itemData) {
+  let updatedItem = null;
+  try {
+    const connected = await isDbConnected();
+    if (connected) {
+      const dbItem = await MenuItem.findByPk(itemId);
+      if (dbItem) {
+        await dbItem.update({
+          name: itemData.name ?? dbItem.name,
+          description: itemData.description !== undefined ? itemData.description : dbItem.description,
+          basePrice: itemData.basePrice !== undefined ? parseFloat(itemData.basePrice) : dbItem.basePrice,
+          imageUrl: itemData.imageUrl !== undefined ? itemData.imageUrl : dbItem.imageUrl,
+          categoryId: itemData.categoryId ?? dbItem.categoryId,
+          isAvailable: itemData.isAvailable !== undefined ? itemData.isAvailable : dbItem.isAvailable,
+          isFeatured: itemData.isFeatured !== undefined ? itemData.isFeatured : dbItem.isFeatured,
+        });
+        updatedItem = dbItem.get({ plain: true });
+      }
+    }
+  } catch (err) {
+    console.warn('DB updateMenuItem fallback:', err.message);
+  }
+
+  // Update in memory store
+  let found = null;
+  if (globalStore.__restaurantData.categories) {
+    for (const cat of globalStore.__restaurantData.categories) {
+      const it = cat.items?.find((i) => i.id === itemId);
+      if (it) {
+        if (itemData.name !== undefined) it.name = itemData.name;
+        if (itemData.description !== undefined) it.description = itemData.description;
+        if (itemData.basePrice !== undefined) it.basePrice = parseFloat(itemData.basePrice);
+        if (itemData.imageUrl !== undefined) it.imageUrl = itemData.imageUrl;
+        if (itemData.isAvailable !== undefined) it.isAvailable = itemData.isAvailable;
+        if (itemData.isFeatured !== undefined) it.isFeatured = itemData.isFeatured;
+
+        // If category changed, move item
+        if (itemData.categoryId && itemData.categoryId !== cat.id) {
+          cat.items = cat.items.filter((i) => i.id !== itemId);
+          const targetCat = globalStore.__restaurantData.categories.find((c) => c.id === itemData.categoryId);
+          if (targetCat) {
+            if (!targetCat.items) targetCat.items = [];
+            targetCat.items.push(it);
+          }
+        }
+        found = it;
+        break;
+      }
+    }
+  }
+  return found || updatedItem;
+}
+
+export async function deleteMenuItem(itemId) {
+  try {
+    const connected = await isDbConnected();
+    if (connected) {
+      await MenuItem.destroy({ where: { id: itemId } });
+    }
+  } catch (err) {
+    console.warn('DB deleteMenuItem fallback:', err.message);
+  }
+
+  if (globalStore.__restaurantData.categories) {
+    for (const cat of globalStore.__restaurantData.categories) {
+      if (cat.items) {
+        cat.items = cat.items.filter((i) => i.id !== itemId);
+      }
+    }
+  }
+  return true;
 }
 
 export function updateDeliveryZone(zoneId, zoneData) {

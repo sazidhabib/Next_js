@@ -68,79 +68,126 @@ export async function autoPrintKitchenReceipt(order) {
     // Build the raw ESC/POS payload
     let data = CLEAN;
 
-    // 1. Ticket Holder Space
-    if (isSectionEnabled(templateConfig.ticketHolderSpace)) {
-      data += '\n\n\n';
-    }
+    // Check if Anupam Course-Grouped KOT layout is used
+    if (templateConfig.layoutStyle === 'anupam_course_grouped') {
+      const headerTitle = templateConfig.headerTitle || 'Kitchen Copy';
+      const ticketNum = templateConfig.ticketNumber || order.orderNumber?.replace(/[^0-9]/g, '') || '73';
+      const tableNum = order.tableNumber || templateConfig.tableNumber || '24/2';
 
-    // 2. Header Banner
-    if (isSectionEnabled(templateConfig.header)) {
-      data += ALIGN_CENTER + BOLD_ON + DOUBLE_SIZE_ON;
-      data += `${order.orderType || 'ORDER'}\n`;
-      data += DOUBLE_SIZE_OFF;
-      data += `ASAP (Prep time: ${order.prepMinutes || 25} min)\n`;
-      data += `Time: ${new Date(order.createdAt || Date.now()).toLocaleTimeString()}\n`;
-      data += BOLD_OFF + '\n' + ALIGN_LEFT;
-      data += '------------------------------------------------\n';
-    }
-
-    // 3. On-Premise Order Number
-    if (isSectionEnabled(templateConfig.onPremiseNumber)) {
-      data += ALIGN_CENTER + BOLD_ON + DOUBLE_SIZE_ON;
-      data += `${order.orderNumber || '#1'}\n`;
-      data += DOUBLE_SIZE_OFF + BOLD_OFF + ALIGN_LEFT;
-      data += '------------------------------------------------\n';
-    }
-
-    // 4. Order Details Meta
-    if (isSectionEnabled(templateConfig.orderDetails)) {
-      data += BOLD_ON + 'Order details:\n' + BOLD_OFF;
-      data += `Customer: ${order.customerName}\n`;
-      data += `Phone: ${order.customerPhone}\n`;
-      if (order.deliveryAddress) {
-        data += `Address: ${order.deliveryAddress}\n`;
-      }
-      data += '------------------------------------------------\n';
-    }
-
-    // 5. Client Comment
-    if (isSectionEnabled(templateConfig.clientComment) && order.specialNotes) {
-      data += BOLD_ON + '💬 Note: ' + order.specialNotes + '\n' + BOLD_OFF;
-      data += '------------------------------------------------\n';
-    }
-
-    // 6. Order Items Listing with Checkboxes
-    if (isSectionEnabled(templateConfig.items) && order.items && order.items.length > 0) {
-      data += BOLD_ON + 'Items:\n' + BOLD_OFF;
-      for (const item of order.items) {
-        const qty = item.quantity || 1;
-        const name = item.name || 'Item';
-        data += `[ ] ${qty}x ${name}\n`;
-        
-        // Options
-        if (item.selectedOptions && item.selectedOptions.length > 0) {
-          for (const opt of item.selectedOptions) {
-            data += `    - ${opt.optionName || opt.OptionItem?.name || 'Option'}\n`;
-          }
-        }
-        data += '\n';
-      }
-      data += '------------------------------------------------\n';
-    }
-
-    // 7. Is Paid
-    if (isSectionEnabled(templateConfig.isPaid)) {
       data += ALIGN_CENTER + BOLD_ON;
-      data += `[ ] PAID    [X] NOT PAID\n`;
-      data += BOLD_OFF + ALIGN_LEFT;
-      data += '------------------------------------------------\n';
-    }
+      data += `${headerTitle}\n\n`;
+      data += DOUBLE_SIZE_ON;
+      data += `( ${ticketNum} )\n\n`;
+      data += DOUBLE_SIZE_OFF + BOLD_OFF;
 
-    // 8. Packaging Station QC Box
-    if (isSectionEnabled(templateConfig.packagingStationQualityControl)) {
-      data += BOLD_ON + 'Packaging Station Check:\n' + BOLD_OFF;
-      data += `[ ] Boxes     [ ] Sauces     [ ] Utensils\n`;
-      data += '------------------------------------------------\n';
+      if (order.items && order.items.length > 0) {
+        // Group items by category if available
+        const categoryMap = {};
+        for (const item of order.items) {
+          const cat = item.categoryName || item.category || 'Dishes';
+          if (!categoryMap[cat]) categoryMap[cat] = [];
+          categoryMap[cat].push(item);
+        }
+
+        for (const [catName, catItems] of Object.entries(categoryMap)) {
+          data += ALIGN_CENTER + BOLD_ON + `${catName}\n` + BOLD_OFF + ALIGN_LEFT;
+          for (const item of catItems) {
+            const qty = item.quantity || 1;
+            const name = item.name || item.itemName || 'Item';
+            data += `${qty}  ${name}\n`;
+            if (item.selectedOptions && item.selectedOptions.length > 0) {
+              for (const opt of item.selectedOptions) {
+                data += `    - ${opt.optionName || opt.OptionItem?.name || 'Option'}\n`;
+              }
+            }
+          }
+          data += '\n';
+        }
+      }
+
+      data += ALIGN_CENTER;
+      data += '================================================\n';
+      data += BOLD_ON + DOUBLE_SIZE_ON;
+      data += `Table:( ${tableNum} )\n`;
+      data += DOUBLE_SIZE_OFF + BOLD_OFF;
+      data += `${new Date(order.createdAt || Date.now()).toLocaleString()}\n`;
+      data += ALIGN_LEFT;
+    } else {
+      // Standard ESC/POS Kitchen Ticket Layout
+      // 1. Ticket Holder Space
+      if (isSectionEnabled(templateConfig.ticketHolderSpace)) {
+        data += '\n\n\n';
+      }
+
+      // 2. Header Banner
+      if (isSectionEnabled(templateConfig.header)) {
+        data += ALIGN_CENTER + BOLD_ON + DOUBLE_SIZE_ON;
+        data += `${order.orderType || 'ORDER'}\n`;
+        data += DOUBLE_SIZE_OFF;
+        data += `ASAP (Prep time: ${order.prepMinutes || 25} min)\n`;
+        data += `Time: ${new Date(order.createdAt || Date.now()).toLocaleTimeString()}\n`;
+        data += BOLD_OFF + '\n' + ALIGN_LEFT;
+        data += '------------------------------------------------\n';
+      }
+
+      // 3. On-Premise Order Number
+      if (isSectionEnabled(templateConfig.onPremiseNumber)) {
+        data += ALIGN_CENTER + BOLD_ON + DOUBLE_SIZE_ON;
+        data += `${order.orderNumber || '#1'}\n`;
+        data += DOUBLE_SIZE_OFF + BOLD_OFF + ALIGN_LEFT;
+        data += '------------------------------------------------\n';
+      }
+
+      // 4. Order Details Meta
+      if (isSectionEnabled(templateConfig.orderDetails)) {
+        data += BOLD_ON + 'Order details:\n' + BOLD_OFF;
+        data += `Customer: ${order.customerName}\n`;
+        data += `Phone: ${order.customerPhone}\n`;
+        if (order.deliveryAddress) {
+          data += `Address: ${order.deliveryAddress}\n`;
+        }
+        data += '------------------------------------------------\n';
+      }
+
+      // 5. Client Comment
+      if (isSectionEnabled(templateConfig.clientComment) && order.specialNotes) {
+        data += BOLD_ON + '💬 Note: ' + order.specialNotes + '\n' + BOLD_OFF;
+        data += '------------------------------------------------\n';
+      }
+
+      // 6. Order Items Listing with Checkboxes
+      if (isSectionEnabled(templateConfig.items) && order.items && order.items.length > 0) {
+        data += BOLD_ON + 'Items:\n' + BOLD_OFF;
+        for (const item of order.items) {
+          const qty = item.quantity || 1;
+          const name = item.name || 'Item';
+          data += `[ ] ${qty}x ${name}\n`;
+          
+          // Options
+          if (item.selectedOptions && item.selectedOptions.length > 0) {
+            for (const opt of item.selectedOptions) {
+              data += `    - ${opt.optionName || opt.OptionItem?.name || 'Option'}\n`;
+            }
+          }
+          data += '\n';
+        }
+        data += '------------------------------------------------\n';
+      }
+
+      // 7. Is Paid
+      if (isSectionEnabled(templateConfig.isPaid)) {
+        data += ALIGN_CENTER + BOLD_ON;
+        data += `[ ] PAID    [X] NOT PAID\n`;
+        data += BOLD_OFF + ALIGN_LEFT;
+        data += '------------------------------------------------\n';
+      }
+
+      // 8. Packaging Station QC Box
+      if (isSectionEnabled(templateConfig.packagingStationQualityControl)) {
+        data += BOLD_ON + 'Packaging Station Check:\n' + BOLD_OFF;
+        data += `[ ] Boxes     [ ] Sauces     [ ] Utensils\n`;
+        data += '------------------------------------------------\n';
+      }
     }
 
     // Final feed lines and partial cut command

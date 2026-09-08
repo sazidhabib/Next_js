@@ -142,7 +142,7 @@ export default function Navbar({
               </div>
               <span className="hidden sm:inline">Cart</span>
               <span className="bg-orange-700/80 px-2 py-0.5 rounded-md text-xs font-bold">
-                ${cartTotal.toFixed(2)}
+                £{cartTotal.toFixed(2)}
               </span>
             </button>
           </div>

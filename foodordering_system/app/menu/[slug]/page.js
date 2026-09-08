@@ -105,22 +105,14 @@ export default function MenuPage({ params }) {
     setIsItemModalOpen(true);
   };
 
-  // Filter items by category, search query, and dietary tag
+  // Filter items by search query
   const filterItem = (item) => {
-    const matchesSearch =
-      !searchQuery ||
-      item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (item.description &&
-        item.description.toLowerCase().includes(searchQuery.toLowerCase()));
-
-    const matchesTag =
-      selectedTag === 'ALL' ||
-      (item.dietaryTags &&
-        item.dietaryTags.some(
-          (t) => t.toLowerCase() === selectedTag.toLowerCase()
-        ));
-
-    return matchesSearch && matchesTag;
+    if (!searchQuery) return true;
+    const q = searchQuery.toLowerCase();
+    return (
+      item.name.toLowerCase().includes(q) ||
+      (item.description && item.description.toLowerCase().includes(q))
+    );
   };
 
   if (loading) {
@@ -133,8 +125,6 @@ export default function MenuPage({ params }) {
       </div>
     );
   }
-
-  const allDietaryTags = ['ALL', 'Vegetarian', 'Spicy', 'Popular', 'Gourmet', 'Vegan'];
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col">
@@ -215,16 +205,16 @@ export default function MenuPage({ params }) {
               </div>
               <div className="border-t border-white/10 pt-2 flex items-center justify-between text-xs">
                 <span className="text-slate-300">Min. Delivery</span>
-                <span className="font-bold text-white">$15.00</span>
+                <span className="font-bold text-white">£15.00</span>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Sticky Category & Filter Bar */}
+      {/* Sticky Category Bar */}
       <div className="sticky top-16 sm:top-20 z-30 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-xs">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 space-y-2.5">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
           {/* Categories Horizontal Scroll */}
           <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
             {restaurant?.categories?.map((cat) => (
@@ -247,36 +237,6 @@ export default function MenuPage({ params }) {
               </button>
             ))}
           </div>
-
-          {/* Dietary Filter Pills */}
-          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
-            <span className="text-[11px] font-bold uppercase text-slate-400 mr-1 hidden sm:inline">
-              Filter:
-            </span>
-            {allDietaryTags.map((tag) => (
-              <button
-                key={tag}
-                onClick={() => setSelectedTag(tag)}
-                className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-                  selectedTag === tag
-                    ? 'bg-slate-900 text-white'
-                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                }`}
-              >
-                {tag === 'ALL'
-                  ? 'All Items'
-                  : tag === 'Vegetarian'
-                  ? '🌱 Vegetarian'
-                  : tag === 'Spicy'
-                  ? '🌶️ Spicy'
-                  : tag === 'Popular'
-                  ? '⭐ Popular'
-                  : tag === 'Vegan'
-                  ? '🌿 Vegan'
-                  : `✨ ${tag}`}
-              </button>
-            ))}
-          </div>
         </div>
       </div>
 
@@ -284,7 +244,7 @@ export default function MenuPage({ params }) {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 space-y-12">
         {restaurant?.categories?.map((cat) => {
           const visibleItems = cat.items?.filter(filterItem) || [];
-          if (visibleItems.length === 0 && (searchQuery || selectedTag !== 'ALL')) {
+          if (visibleItems.length === 0 && searchQuery) {
             return null;
           }
 
@@ -323,21 +283,9 @@ export default function MenuPage({ params }) {
                       />
                       <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent"></div>
 
-                      {/* Dietary Badges */}
-                      <div className="absolute top-3 left-3 flex flex-wrap gap-1">
-                        {item.dietaryTags?.map((tag) => (
-                          <span
-                            key={tag}
-                            className="bg-slate-900/80 backdrop-blur-xs text-white text-[10px] font-bold px-2 py-0.5 rounded-md"
-                          >
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-
                       {/* Price Badge */}
                       <div className="absolute bottom-3 left-3 bg-white/95 backdrop-blur-md px-2.5 py-1 rounded-lg text-slate-900 font-extrabold text-sm shadow-md">
-                        ${item.basePrice.toFixed(2)}
+                        £{item.basePrice.toFixed(2)}
                       </div>
                     </div>
 
@@ -390,7 +338,7 @@ export default function MenuPage({ params }) {
               </span>
               <span>View Your Cart</span>
             </div>
-            <span>${cartTotal.toFixed(2)}</span>
+            <span>£{cartTotal.toFixed(2)}</span>
           </button>
         </div>
       )}

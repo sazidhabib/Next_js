@@ -18,6 +18,11 @@ import {
   Settings,
   Printer,
   ChevronUp,
+  Layout,
+  Utensils,
+  Receipt,
+  CheckCircle2,
+  Type,
 } from 'lucide-react';
 
 export default function InvoiceTemplatesPage() {
@@ -27,6 +32,7 @@ export default function InvoiceTemplatesPage() {
   const [editingTemplate, setEditingTemplate] = useState(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [newTemplateType, setNewTemplateType] = useState('CUSTOMER');
+  const [newTemplateLayout, setNewTemplateLayout] = useState('anupam_classic');
   const [newTemplateName, setNewTemplateName] = useState('');
   const [saving, setSaving] = useState(false);
   const [expandedSection, setExpandedSection] = useState(null);
@@ -93,37 +99,99 @@ export default function InvoiceTemplatesPage() {
     if (!newTemplateName.trim()) return;
     setSaving(true);
     try {
-      const defaultConfig =
-        newTemplateType === 'CUSTOMER'
-          ? {
-              paymentMethod: true,
-              time: true,
-              estimatedDriveTime: true,
-              direction: true,
-              onPremiseNumber: true,
-              orderDetails: true,
-              clientInfo: true,
-              clientComment: true,
-              items: true,
-              isPaid: true,
-              orderOnline: true,
-              contactDetails: true,
-              infoBox1: true,
-              infoBox2: false,
-              infoBox3: false,
-              clientConfirmation: false,
-            }
-          : {
-              header: true,
-              onPremiseNumber: true,
-              orderDetails: true,
-              clientComment: true,
-              items: true,
-              isPaid: true,
-              packagingStationQualityControl: false,
-              previewOptions: true,
-              ticketHolderSpace: true,
-            };
+      let defaultConfig = {};
+
+      if (newTemplateType === 'CUSTOMER') {
+        if (newTemplateLayout === 'anupam_classic') {
+          defaultConfig = {
+            layoutStyle: 'anupam_classic',
+            restaurantBrand: 'anupam',
+            brandFontSize: 24,
+            legalName: 'Sweet Paan Ltd',
+            address: '85 Church Street\nGreat Malvern WR14 2AE',
+            phone: '01684 573814',
+            vatNumber: '240 6873 06',
+            businessInfoFontSize: 11,
+            tableNumber: '24/2',
+            tableFontSize: 16,
+            dateFontSize: 11,
+            dateTime: true,
+            items: true,
+            itemsFontSize: 12,
+            miscAmount: '0.00',
+            subTotal: true,
+            total: true,
+            totalsFontSize: 12,
+            splitBill: true,
+            splitWays: 2,
+            splitBillFontSize: 12,
+            serviceChargeNote: true,
+            serviceChargeText: 'Service Charge Not Included',
+            serviceChargeFontSize: 12,
+            thankYouNote: true,
+            thankYouText: 'Thank You For Your Custom\nPlease Call Again',
+            thankYouFontSize: 11,
+            website: 'www.anupam.co.uk',
+            websiteFontSize: 13,
+          };
+        } else {
+          defaultConfig = {
+            layoutStyle: 'standard',
+            paymentMethod: true,
+            time: true,
+            estimatedDriveTime: true,
+            direction: true,
+            onPremiseNumber: true,
+            orderDetails: true,
+            clientInfo: true,
+            clientComment: true,
+            items: true,
+            isPaid: true,
+            orderOnline: true,
+            contactDetails: true,
+            infoBox1: true,
+            infoBox2: false,
+            infoBox3: false,
+            clientConfirmation: false,
+          };
+        }
+      } else {
+        // KITCHEN
+        if (newTemplateLayout === 'anupam_course_grouped') {
+          defaultConfig = {
+            layoutStyle: 'anupam_course_grouped',
+            headerTitle: 'Kitchen Copy',
+            headerFontSize: 13,
+            ticketNumber: '73',
+            ticketNumberFontSize: 30,
+            groupByCategory: true,
+            categoryFontSize: 14,
+            subCategoryTitle: 'Bread',
+            subCategoryFontSize: 13,
+            items: true,
+            itemsFontSize: 12,
+            specialSection: '** Tandoori Items **',
+            specialSectionFontSize: 13,
+            tableNumber: '24/2',
+            tableFooterFontSize: 24,
+            dateFooterFontSize: 11,
+            dateTime: true,
+          };
+        } else {
+          defaultConfig = {
+            layoutStyle: 'standard',
+            header: true,
+            onPremiseNumber: true,
+            orderDetails: true,
+            clientComment: true,
+            items: true,
+            isPaid: true,
+            packagingStationQualityControl: false,
+            previewOptions: true,
+            ticketHolderSpace: true,
+          };
+        }
+      }
 
       const res = await fetch('/api/admin/templates', {
         method: 'POST',
@@ -208,37 +276,100 @@ export default function InvoiceTemplatesPage() {
   // Reset to default settings
   const handleResetToDefault = () => {
     if (!editingTemplate) return;
-    const defaultConfig =
-      editingTemplate.type === 'CUSTOMER'
-        ? {
-            paymentMethod: true,
-            time: true,
-            estimatedDriveTime: true,
-            direction: true,
-            onPremiseNumber: true,
-            orderDetails: true,
-            clientInfo: true,
-            clientComment: true,
-            items: true,
-            isPaid: true,
-            orderOnline: true,
-            contactDetails: true,
-            infoBox1: true,
-            infoBox2: false,
-            infoBox3: false,
-            clientConfirmation: false,
-          }
-        : {
-            header: true,
-            onPremiseNumber: true,
-            orderDetails: true,
-            clientComment: true,
-            items: true,
-            isPaid: true,
-            packagingStationQualityControl: false,
-            previewOptions: true,
-            ticketHolderSpace: true,
-          };
+    const layout = editingTemplate.config?.layoutStyle || 'standard';
+
+    let defaultConfig = {};
+    if (editingTemplate.type === 'CUSTOMER') {
+      if (layout === 'anupam_classic') {
+        defaultConfig = {
+          layoutStyle: 'anupam_classic',
+          restaurantBrand: 'anupam',
+          brandFontSize: 24,
+          legalName: 'Sweet Paan Ltd',
+          address: '85 Church Street\nGreat Malvern WR14 2AE',
+          phone: '01684 573814',
+          vatNumber: '240 6873 06',
+          businessInfoFontSize: 11,
+          tableNumber: '24/2',
+          tableFontSize: 16,
+          dateFontSize: 11,
+          dateTime: true,
+          items: true,
+          itemsFontSize: 12,
+          miscAmount: '0.00',
+          subTotal: true,
+          total: true,
+          totalsFontSize: 12,
+          splitBill: true,
+          splitWays: 2,
+          splitBillFontSize: 12,
+          serviceChargeNote: true,
+          serviceChargeText: 'Service Charge Not Included',
+          serviceChargeFontSize: 12,
+          thankYouNote: true,
+          thankYouText: 'Thank You For Your Custom\nPlease Call Again',
+          thankYouFontSize: 11,
+          website: 'www.anupam.co.uk',
+          websiteFontSize: 13,
+        };
+      } else {
+        defaultConfig = {
+          layoutStyle: 'standard',
+          paymentMethod: true,
+          time: true,
+          estimatedDriveTime: true,
+          direction: true,
+          onPremiseNumber: true,
+          orderDetails: true,
+          clientInfo: true,
+          clientComment: true,
+          items: true,
+          isPaid: true,
+          orderOnline: true,
+          contactDetails: true,
+          infoBox1: true,
+          infoBox2: false,
+          infoBox3: false,
+          clientConfirmation: false,
+        };
+      }
+    } else {
+      if (layout === 'anupam_course_grouped') {
+        defaultConfig = {
+          layoutStyle: 'anupam_course_grouped',
+          headerTitle: 'Kitchen Copy',
+          headerFontSize: 13,
+          ticketNumber: '73',
+          ticketNumberFontSize: 30,
+          groupByCategory: true,
+          categoryFontSize: 14,
+          subCategoryTitle: 'Bread',
+          subCategoryFontSize: 13,
+          items: true,
+          itemsFontSize: 12,
+          specialSection: '** Tandoori Items **',
+          specialSectionFontSize: 13,
+          tableNumber: '24/2',
+          tableFooterFontSize: 24,
+          dateFooterFontSize: 11,
+          dateTime: true,
+        };
+      } else {
+        defaultConfig = {
+          layoutStyle: 'standard',
+          header: true,
+          onPremiseNumber: true,
+          orderDetails: true,
+          clientComment: true,
+          items: true,
+          isPaid: true,
+          packagingStationQualityControl: false,
+          previewOptions: true,
+          ticketHolderSpace: true,
+        };
+      }
+    }
+
     setEditingTemplate((prev) => ({
       ...prev,
       fontSize: 12,
@@ -254,22 +385,43 @@ export default function InvoiceTemplatesPage() {
       if (field === 'visible') return item;
       return defaultValue;
     }
-    if (item[field] !== undefined) return item[field];
+    if (typeof item === 'object' && item !== null) {
+      if (item[field] !== undefined) return item[field];
+      return defaultValue;
+    }
+    // String or number value directly stored
+    if (field === 'value') return item;
     return defaultValue;
+  };
+
+  const updateConfigVal = (key, value) => {
+    setEditingTemplate((prev) => ({
+      ...prev,
+      config: {
+        ...prev.config,
+        [key]: value,
+      },
+    }));
   };
 
   const updateSectionVal = (key, field, value) => {
     setEditingTemplate((prev) => {
-      const current = prev.config[key];
+      const current = prev.config?.[key];
       let updatedItem = {};
       if (typeof current === 'boolean') {
         updatedItem = {
           visible: current,
           fontSize: 12,
-          value: key === 'onPremiseNumber' ? '1' : '',
+          value: key === 'onPremiseNumber' || key === 'tableNumber' ? '24/2' : '',
         };
-      } else {
+      } else if (typeof current === 'object' && current !== null) {
         updatedItem = { ...current };
+      } else {
+        updatedItem = {
+          visible: true,
+          fontSize: 12,
+          value: current || '',
+        };
       }
       updatedItem[field] = value;
       return {
@@ -282,11 +434,396 @@ export default function InvoiceTemplatesPage() {
     });
   };
 
+  // Helper to get layout style
+  const getLayoutStyle = (template) => {
+    if (!template) return 'standard';
+    try {
+      const cfg = typeof template.config === 'string' ? JSON.parse(template.config) : template.config;
+      return cfg?.layoutStyle || 'standard';
+    } catch {
+      return 'standard';
+    }
+  };
+
+  // Helper renderer for section font-size control row
+  const renderFontSizeRow = (label, configKey, defaultValue = 12, min = 8, max = 40) => {
+    const config = editingTemplate?.config || {};
+    const currentVal = config[configKey] !== undefined ? config[configKey] : defaultValue;
+
+    return (
+      <div className="flex items-center justify-between text-xs py-1.5 border-t border-slate-800/40">
+        <span className="text-slate-400 font-medium">{label}</span>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => updateConfigVal(configKey, Math.max(min, Number(currentVal) - 1))}
+            className="w-6 h-6 bg-slate-800 hover:bg-slate-700 text-white rounded font-bold cursor-pointer transition-colors flex items-center justify-center text-xs"
+          >
+            -
+          </button>
+          <span className="font-mono font-bold text-orange-400 w-10 text-center">{currentVal}px</span>
+          <button
+            type="button"
+            onClick={() => updateConfigVal(configKey, Math.min(max, Number(currentVal) + 1))}
+            className="w-6 h-6 bg-slate-800 hover:bg-slate-700 text-white rounded font-bold cursor-pointer transition-colors flex items-center justify-center text-xs"
+          >
+            +
+          </button>
+        </div>
+      </div>
+    );
+  };
+
   // Render component settings toggles list
   const renderToggles = () => {
     if (!editingTemplate) return null;
-    const config = editingTemplate.config;
+    const config = editingTemplate.config || {};
+    const layout = config.layoutStyle || 'standard';
 
+    // -------------------------------------------------------------
+    // 1. ANUPAM CLASSIC CLIENT BILL CONTROLS (With Section Font Sizes)
+    // -------------------------------------------------------------
+    if (editingTemplate.type === 'CUSTOMER' && layout === 'anupam_classic') {
+      return (
+        <div className="space-y-4">
+          {/* Section 1: Branding & Header */}
+          <div className="bg-slate-950/60 p-4 rounded-2xl border border-slate-800 space-y-3">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-orange-400 flex items-center gap-1.5">
+              <Type className="w-3.5 h-3.5" />
+              <span>Restaurant Brand & Business Details</span>
+            </h4>
+            
+            <div className="space-y-3 pt-1">
+              <div>
+                <label className="text-[11px] text-slate-400 font-bold block mb-1">Header Brand Title (Lowercase/Clean)</label>
+                <input
+                  type="text"
+                  value={config.restaurantBrand || 'anupam'}
+                  onChange={(e) => updateConfigVal('restaurantBrand', e.target.value)}
+                  className="w-full bg-slate-900 border border-slate-800 rounded-lg p-2.5 text-xs text-white placeholder:text-slate-600 focus:outline-none focus:border-orange-500"
+                />
+              </div>
+
+              {renderFontSizeRow('Brand Title Font Size', 'brandFontSize', 24, 14, 40)}
+
+              <div>
+                <label className="text-[11px] text-slate-400 font-bold block mb-1">Legal / Company Name</label>
+                <input
+                  type="text"
+                  value={config.legalName || 'Sweet Paan Ltd'}
+                  onChange={(e) => updateConfigVal('legalName', e.target.value)}
+                  className="w-full bg-slate-900 border border-slate-800 rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-orange-500"
+                />
+              </div>
+
+              <div>
+                <label className="text-[11px] text-slate-400 font-bold block mb-1">Store Address</label>
+                <textarea
+                  rows={2}
+                  value={config.address || '85 Church Street\nGreat Malvern WR14 2AE'}
+                  onChange={(e) => updateConfigVal('address', e.target.value)}
+                  className="w-full bg-slate-900 border border-slate-800 rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-orange-500"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-[11px] text-slate-400 font-bold block mb-1">Telephone Number</label>
+                  <input
+                    type="text"
+                    value={config.phone || '01684 573814'}
+                    onChange={(e) => updateConfigVal('phone', e.target.value)}
+                    className="w-full bg-slate-900 border border-slate-800 rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-orange-500"
+                  />
+                </div>
+                <div>
+                  <label className="text-[11px] text-slate-400 font-bold block mb-1">VAT Reg Number</label>
+                  <input
+                    type="text"
+                    value={config.vatNumber || '240 6873 06'}
+                    onChange={(e) => updateConfigVal('vatNumber', e.target.value)}
+                    className="w-full bg-slate-900 border border-slate-800 rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-orange-500"
+                  />
+                </div>
+              </div>
+
+              {renderFontSizeRow('Business Info (Address, VAT, Tel) Font Size', 'businessInfoFontSize', 11, 8, 18)}
+            </div>
+          </div>
+
+          {/* Section 2: Table & Date/Time */}
+          <div className="bg-slate-950/60 p-4 rounded-2xl border border-slate-800 space-y-3">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-orange-400">
+              Table & Timestamp Section
+            </h4>
+
+            <div className="space-y-3 pt-1">
+              <div>
+                <label className="text-[11px] text-slate-400 font-bold block mb-1">Table Number Identifier</label>
+                <input
+                  type="text"
+                  value={config.tableNumber || '24/2'}
+                  onChange={(e) => updateConfigVal('tableNumber', e.target.value)}
+                  placeholder="e.g. 24/2"
+                  className="w-full bg-slate-900 border border-slate-800 rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-orange-500"
+                />
+              </div>
+
+              {renderFontSizeRow('Table Header Font Size', 'tableFontSize', 16, 10, 28)}
+              {renderFontSizeRow('Date & Time Font Size', 'dateFontSize', 11, 8, 18)}
+            </div>
+          </div>
+
+          {/* Section 3: Itemized List */}
+          <div className="bg-slate-950/60 p-4 rounded-2xl border border-slate-800 space-y-3">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-orange-400">
+              Itemized Listing & Prices
+            </h4>
+            <div className="pt-1">
+              {renderFontSizeRow('Items & Price Text Size', 'itemsFontSize', 12, 9, 22)}
+            </div>
+          </div>
+
+          {/* Section 4: Totals & Financials */}
+          <div className="bg-slate-950/60 p-4 rounded-2xl border border-slate-800 space-y-3">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-orange-400">
+              Totals & Financial Summary
+            </h4>
+
+            <div className="space-y-3 pt-1">
+              <div>
+                <label className="text-[11px] text-slate-400 font-bold block mb-1">Misc Line Surcharge / Discount</label>
+                <input
+                  type="text"
+                  value={config.miscAmount || '0.00'}
+                  onChange={(e) => updateConfigVal('miscAmount', e.target.value)}
+                  placeholder="0.00"
+                  className="w-full bg-slate-900 border border-slate-800 rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-orange-500 font-mono"
+                />
+              </div>
+
+              {renderFontSizeRow('Sub Total & Total Font Size', 'totalsFontSize', 12, 9, 22)}
+            </div>
+          </div>
+
+          {/* Section 5: Split Bill */}
+          <div className="bg-slate-950/60 p-4 rounded-2xl border border-slate-800 space-y-3">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-orange-400">
+              Split Bill Breakdown
+            </h4>
+
+            <div className="space-y-3 pt-1">
+              <div className="flex items-center justify-between p-2 rounded-lg bg-slate-900/50">
+                <span className="text-xs text-slate-300 font-medium">Enable Split Bill Calculator</span>
+                <button
+                  onClick={() => updateConfigVal('splitBill', !config.splitBill)}
+                  className={`w-11 h-6 rounded-full p-0.5 transition-colors duration-200 focus:outline-none ${
+                    config.splitBill !== false ? 'bg-orange-500' : 'bg-slate-700'
+                  }`}
+                >
+                  <div
+                    className={`w-5 h-5 rounded-full bg-white shadow-md transform duration-200 ${
+                      config.splitBill !== false ? 'translate-x-5' : 'translate-x-0'
+                    }`}
+                  />
+                </button>
+              </div>
+
+              {config.splitBill !== false && (
+                <div className="flex items-center justify-between gap-4">
+                  <label className="text-[11px] text-slate-400 font-bold">Split Ways Count:</label>
+                  <input
+                    type="number"
+                    min="2"
+                    max="10"
+                    value={config.splitWays || 2}
+                    onChange={(e) => updateConfigVal('splitWays', parseInt(e.target.value) || 2)}
+                    className="w-20 bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-white focus:outline-none focus:border-orange-500 font-bold text-center"
+                  />
+                </div>
+              )}
+
+              {renderFontSizeRow('Split Bill Text Size', 'splitBillFontSize', 12, 8, 20)}
+            </div>
+          </div>
+
+          {/* Section 6: Service Charge & Footer Message */}
+          <div className="bg-slate-950/60 p-4 rounded-2xl border border-slate-800 space-y-3">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-orange-400">
+              Service Charge & Closing Footer
+            </h4>
+
+            <div className="space-y-3 pt-1">
+              <div className="flex items-center justify-between p-2 rounded-lg bg-slate-900/50">
+                <span className="text-xs text-slate-300 font-medium">Service Charge Notice Banner</span>
+                <button
+                  onClick={() => updateConfigVal('serviceChargeNote', !config.serviceChargeNote)}
+                  className={`w-11 h-6 rounded-full p-0.5 transition-colors duration-200 focus:outline-none ${
+                    config.serviceChargeNote !== false ? 'bg-orange-500' : 'bg-slate-700'
+                  }`}
+                >
+                  <div
+                    className={`w-5 h-5 rounded-full bg-white shadow-md transform duration-200 ${
+                      config.serviceChargeNote !== false ? 'translate-x-5' : 'translate-x-0'
+                    }`}
+                  />
+                </button>
+              </div>
+
+              <div>
+                <label className="text-[11px] text-slate-400 font-bold block mb-1">Service Charge Text</label>
+                <input
+                  type="text"
+                  value={config.serviceChargeText || 'Service Charge Not Included'}
+                  onChange={(e) => updateConfigVal('serviceChargeText', e.target.value)}
+                  className="w-full bg-slate-900 border border-slate-800 rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-orange-500"
+                />
+              </div>
+
+              {renderFontSizeRow('Service Charge Font Size', 'serviceChargeFontSize', 12, 8, 22)}
+
+              <div>
+                <label className="text-[11px] text-slate-400 font-bold block mb-1">Thank You Closing Message</label>
+                <textarea
+                  rows={2}
+                  value={config.thankYouText || 'Thank You For Your Custom\nPlease Call Again'}
+                  onChange={(e) => updateConfigVal('thankYouText', e.target.value)}
+                  className="w-full bg-slate-900 border border-slate-800 rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-orange-500"
+                />
+              </div>
+
+              {renderFontSizeRow('Thank You Notes Font Size', 'thankYouFontSize', 11, 8, 18)}
+
+              <div>
+                <label className="text-[11px] text-slate-400 font-bold block mb-1">Website URL Footer</label>
+                <input
+                  type="text"
+                  value={config.website || 'www.anupam.co.uk'}
+                  onChange={(e) => updateConfigVal('website', e.target.value)}
+                  className="w-full bg-slate-900 border border-slate-800 rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-orange-500"
+                />
+              </div>
+
+              {renderFontSizeRow('Website URL Font Size', 'websiteFontSize', 13, 9, 24)}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // -------------------------------------------------------------
+    // 2. ANUPAM COURSE GROUPED KITCHEN TICKET CONTROLS (With Category Font Sizes)
+    // -------------------------------------------------------------
+    if (editingTemplate.type === 'KITCHEN' && layout === 'anupam_course_grouped') {
+      return (
+        <div className="space-y-4">
+          {/* Header & Ticket Callout */}
+          <div className="bg-slate-950/60 p-4 rounded-2xl border border-slate-800 space-y-3">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-orange-400 flex items-center gap-1.5">
+              <Type className="w-3.5 h-3.5" />
+              <span>Ticket Header & Order Number</span>
+            </h4>
+
+            <div className="space-y-3 pt-1">
+              <div>
+                <label className="text-[11px] text-slate-400 font-bold block mb-1">Header Title Text</label>
+                <input
+                  type="text"
+                  value={config.headerTitle || 'Kitchen Copy'}
+                  onChange={(e) => updateConfigVal('headerTitle', e.target.value)}
+                  className="w-full bg-slate-900 border border-slate-800 rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-orange-500 font-bold"
+                />
+              </div>
+
+              {renderFontSizeRow('Header Title Font Size', 'headerFontSize', 13, 9, 24)}
+
+              <div>
+                <label className="text-[11px] text-slate-400 font-bold block mb-1">Ticket / Order Number Callout</label>
+                <input
+                  type="text"
+                  value={config.ticketNumber || '73'}
+                  onChange={(e) => updateConfigVal('ticketNumber', e.target.value)}
+                  placeholder="e.g. 73"
+                  className="w-full bg-slate-900 border border-slate-800 rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-orange-500 font-bold"
+                />
+              </div>
+
+              {renderFontSizeRow('Ticket Number ( 73 ) Font Size', 'ticketNumberFontSize', 30, 16, 50)}
+            </div>
+          </div>
+
+          {/* Categories & Sub-Categories */}
+          <div className="bg-slate-950/60 p-4 rounded-2xl border border-slate-800 space-y-3">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-orange-400 flex items-center gap-1.5">
+              <Utensils className="w-3.5 h-3.5" />
+              <span>Category & Sub-Category Typography</span>
+            </h4>
+
+            <div className="space-y-3 pt-1">
+              <p className="text-[11px] text-slate-400">
+                Adjust font sizes for main course headers (Starter, Main Dishes, Side Dishes, Rice) and sub-categories.
+              </p>
+
+              {renderFontSizeRow('Main Category Headers Font Size (Starter, Main, Side...)', 'categoryFontSize', 14, 9, 28)}
+              {renderFontSizeRow('Order Item Listing Text Size', 'itemsFontSize', 12, 9, 24)}
+
+              <div className="pt-2 border-t border-slate-800">
+                <label className="text-[11px] text-slate-400 font-bold block mb-1">Special / Tandoori Section Header</label>
+                <input
+                  type="text"
+                  value={config.specialSection || '** Tandoori Items **'}
+                  onChange={(e) => updateConfigVal('specialSection', e.target.value)}
+                  placeholder="e.g. ** Tandoori Items **"
+                  className="w-full bg-slate-900 border border-slate-800 rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-orange-500"
+                />
+              </div>
+
+              {renderFontSizeRow('Special Section Header (** Tandoori Items **) Size', 'specialSectionFontSize', 13, 9, 26)}
+
+              <div>
+                <label className="text-[11px] text-slate-400 font-bold block mb-1">Sub-Category Title</label>
+                <input
+                  type="text"
+                  value={config.subCategoryTitle || 'Bread'}
+                  onChange={(e) => updateConfigVal('subCategoryTitle', e.target.value)}
+                  placeholder="e.g. Bread"
+                  className="w-full bg-slate-900 border border-slate-800 rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-orange-500"
+                />
+              </div>
+
+              {renderFontSizeRow('Sub-Category Title (Bread) Font Size', 'subCategoryFontSize', 13, 9, 26)}
+            </div>
+          </div>
+
+          {/* Table & Timestamp Footer */}
+          <div className="bg-slate-950/60 p-4 rounded-2xl border border-slate-800 space-y-3">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-orange-400">
+              Bottom Table Identifier & Timestamp
+            </h4>
+
+            <div className="space-y-3 pt-1">
+              <div>
+                <label className="text-[11px] text-slate-400 font-bold block mb-1">Bottom Table Number Identifier</label>
+                <input
+                  type="text"
+                  value={config.tableNumber || '24/2'}
+                  onChange={(e) => updateConfigVal('tableNumber', e.target.value)}
+                  placeholder="e.g. 24/2"
+                  className="w-full bg-slate-900 border border-slate-800 rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-orange-500 font-bold"
+                />
+              </div>
+
+              {renderFontSizeRow('Bottom Table Identifier (Table: 24/2) Font Size', 'tableFooterFontSize', 24, 12, 40)}
+              {renderFontSizeRow('Bottom Timestamp (Date/Time) Font Size', 'dateFooterFontSize', 11, 8, 20)}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // -------------------------------------------------------------
+    // 3. STANDARD TEMPLATES CONTROLS
+    // -------------------------------------------------------------
     const labels =
       editingTemplate.type === 'CUSTOMER'
         ? [
@@ -340,7 +877,7 @@ export default function InvoiceTemplatesPage() {
                   {isExpanded ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
                   <span className="text-xs text-slate-200 font-semibold">{item.label}</span>
                 </div>
-                
+
                 <button
                   onClick={() => updateSectionVal(item.key, 'visible', !isVisible)}
                   className={`w-11 h-6 rounded-full p-0.5 transition-colors duration-200 focus:outline-none shrink-0 ${
@@ -405,9 +942,275 @@ export default function InvoiceTemplatesPage() {
   // Render receipt mockup dynamic HTML
   const renderReceiptMockup = () => {
     if (!editingTemplate) return null;
-    const config = editingTemplate.config;
-    const fs = `${editingTemplate.fontSize}px`;
+    const config = editingTemplate.config || {};
+    const layout = config.layoutStyle || 'standard';
+    const fs = `${editingTemplate.fontSize || 12}px`;
 
+    // -------------------------------------------------------------
+    // TEMPLATE 1: ANUPAM CLASSIC CLIENT BILL (Matches Image 1)
+    // -------------------------------------------------------------
+    if (editingTemplate.type === 'CUSTOMER' && layout === 'anupam_classic') {
+      const brand = config.restaurantBrand || 'anupam';
+      const brandFs = `${config.brandFontSize || 24}px`;
+      const legalName = config.legalName || 'Sweet Paan Ltd';
+      const address = config.address || '85 Church Street\nGreat Malvern WR14 2AE';
+      const phone = config.phone || '01684 573814';
+      const vatNumber = config.vatNumber || '240 6873 06';
+      const businessInfoFs = `${config.businessInfoFontSize || 11}px`;
+      const tableNumber = config.tableNumber || '24/2';
+      const tableFs = `${config.tableFontSize || 16}px`;
+      const dateFs = `${config.dateFontSize || 11}px`;
+      const itemsFs = `${config.itemsFontSize || 12}px`;
+      const totalsFs = `${config.totalsFontSize || 12}px`;
+      const splitWays = config.splitWays || 2;
+      const splitEach = (77.2 / splitWays).toFixed(2);
+      const splitBillFs = `${config.splitBillFontSize || 12}px`;
+      const serviceChargeText = config.serviceChargeText || 'Service Charge Not Included';
+      const serviceChargeFs = `${config.serviceChargeFontSize || 12}px`;
+      const thankYouText = config.thankYouText || 'Thank You For Your Custom\nPlease Call Again';
+      const thankYouFs = `${config.thankYouFontSize || 11}px`;
+      const website = config.website || 'www.anupam.co.uk';
+      const websiteFs = `${config.websiteFontSize || 13}px`;
+
+      return (
+        <div
+          style={{ fontSize: fs }}
+          className="bg-white text-black px-6 py-6 shadow-2xl rounded-sm font-sans max-w-[320px] w-full mx-auto space-y-3 text-left relative transition-all border border-slate-200 font-mono tracking-tight"
+        >
+          {/* Header Brand */}
+          <div className="text-center space-y-1">
+            <h2 style={{ fontSize: brandFs }} className="font-light tracking-wide lowercase font-sans">{brand}</h2>
+            <div style={{ fontSize: businessInfoFs }} className="text-black font-normal space-y-0.5 leading-snug pt-1">
+              <p>{legalName}</p>
+              {address.split('\n').map((line, idx) => (
+                <p key={idx}>{line}</p>
+              ))}
+              <p className="pt-0.5">
+                <span>TelNo:{phone}</span> <span className="ml-1">VATNo:{vatNumber}</span>
+              </p>
+            </div>
+          </div>
+
+          {/* Table & Date */}
+          <div className="text-center pt-2">
+            <h3 style={{ fontSize: tableFs }} className="font-black tracking-tight">Table:( {tableNumber})</h3>
+            <p style={{ fontSize: dateFs }} className="text-black">04/09/2026, 05:02 PM</p>
+          </div>
+
+          {/* Divider */}
+          <div className="border-t border-dashed border-black/70 my-1"></div>
+
+          {/* Itemized List */}
+          <div style={{ fontSize: itemsFs }} className="space-y-1 font-normal">
+            <div className="flex justify-between items-baseline">
+              <span>1 King Pr On Puree</span>
+              <span>11.00</span>
+            </div>
+            <div className="flex justify-between items-baseline">
+              <span>1 Mali M Tikka</span>
+              <span>9.00</span>
+            </div>
+            <div className="flex justify-between items-baseline">
+              <span>1 Chamak Chicken</span>
+              <span>18.00</span>
+            </div>
+            <div className="flex justify-between items-baseline">
+              <span>1 Chicken Biryani</span>
+              <span>16.50</span>
+            </div>
+            <div className="flex justify-between items-baseline">
+              <span>1 Asparagus</span>
+              <span>7.00</span>
+            </div>
+            <div className="flex justify-between items-baseline">
+              <span>1 Bhindi Bhaji</span>
+              <span>6.00</span>
+            </div>
+            <div className="flex justify-between items-baseline">
+              <span>1 Mush P Rice</span>
+              <span>5.50</span>
+            </div>
+            <div className="flex justify-between items-baseline">
+              <span>1 Nan</span>
+              <span>4.20</span>
+            </div>
+          </div>
+
+          {/* Misc & Subtotal */}
+          <div style={{ fontSize: totalsFs }} className="pt-2 space-y-1">
+            <div className="flex justify-between items-baseline">
+              <span>Misc:</span>
+              <span>£{config.miscAmount || '0.00'}</span>
+            </div>
+            <div className="border-t border-dashed border-black/70 my-1"></div>
+            <div className="flex justify-between items-baseline">
+              <span>Sub Total:</span>
+              <span>£77.20</span>
+            </div>
+            <div className="border-t border-dashed border-black/70 my-1"></div>
+            <div className="flex justify-between items-baseline font-black pt-0.5" style={{ fontSize: `calc(${totalsFs} + 3px)` }}>
+              <span>Total:</span>
+              <span>£77.20</span>
+            </div>
+          </div>
+
+          {/* Split Bill & Footer */}
+          {config.splitBill !== false && (
+            <div style={{ fontSize: splitBillFs }} className="flex justify-between pt-1">
+              <span>Split Bill {splitWays} way</span>
+              <span>each £{splitEach}</span>
+            </div>
+          )}
+
+          {config.serviceChargeNote !== false && (
+            <div className="text-center pt-2">
+              <p style={{ fontSize: serviceChargeFs }} className="font-extrabold tracking-tight">{serviceChargeText}</p>
+            </div>
+          )}
+
+          {config.thankYouNote !== false && (
+            <div style={{ fontSize: thankYouFs }} className="text-center space-y-0.5 pt-1">
+              {thankYouText.split('\n').map((line, idx) => (
+                <p key={idx}>{line}</p>
+              ))}
+            </div>
+          )}
+
+          {website && (
+            <div className="text-center pt-2 pb-1">
+              <p style={{ fontSize: websiteFs }} className="font-sans font-light">{website}</p>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    // -------------------------------------------------------------
+    // TEMPLATE 2: ANUPAM KITCHEN ORDER TICKET (Matches Image 2)
+    // -------------------------------------------------------------
+    if (editingTemplate.type === 'KITCHEN' && layout === 'anupam_course_grouped') {
+      const headerTitle = config.headerTitle || 'Kitchen Copy';
+      const headerFs = `${config.headerFontSize || 13}px`;
+      const ticketNumber = config.ticketNumber || '73';
+      const ticketNumberFs = `${config.ticketNumberFontSize || 30}px`;
+      const categoryFs = `${config.categoryFontSize || 14}px`;
+      const subCategoryTitle = config.subCategoryTitle || 'Bread';
+      const subCategoryFs = `${config.subCategoryFontSize || 13}px`;
+      const itemsFs = `${config.itemsFontSize || 12}px`;
+      const specialSection = config.specialSection || '** Tandoori Items **';
+      const specialSectionFs = `${config.specialSectionFontSize || 13}px`;
+      const tableNumber = config.tableNumber || '24/2';
+      const tableFooterFs = `${config.tableFooterFontSize || 24}px`;
+      const dateFooterFs = `${config.dateFooterFontSize || 11}px`;
+
+      return (
+        <div
+          style={{ fontSize: fs }}
+          className="bg-white text-black px-6 py-6 shadow-2xl rounded-sm font-sans max-w-[320px] w-full mx-auto space-y-4 text-left relative transition-all border border-slate-200 font-mono"
+        >
+          {/* Top Title */}
+          <div className="text-center">
+            <span style={{ fontSize: headerFs }} className="underline font-bold tracking-wide">{headerTitle}</span>
+          </div>
+
+          {/* Large Ticket Number */}
+          <div className="text-center py-1">
+            <h2 style={{ fontSize: ticketNumberFs }} className="font-black tracking-widest leading-none">( {ticketNumber} )</h2>
+          </div>
+
+          {/* Course Group: Starter(s) */}
+          <div className="space-y-1.5">
+            <div className="text-center">
+              <span style={{ fontSize: categoryFs }} className="underline font-bold">Starter(s)</span>
+            </div>
+            <div style={{ fontSize: itemsFs }} className="space-y-1">
+              <div className="flex gap-3">
+                <span className="font-bold">1</span>
+                <span>King Pr On Puree</span>
+              </div>
+              <div className="flex gap-3">
+                <span className="font-bold">1</span>
+                <span>Mali M Tikka</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Course Group: Main Dishes */}
+          <div className="space-y-1.5">
+            <div className="text-center">
+              <span style={{ fontSize: categoryFs }} className="underline font-bold">Main Dishes</span>
+            </div>
+            <div style={{ fontSize: itemsFs }} className="space-y-1">
+              <div className="flex gap-3">
+                <span className="font-bold">1</span>
+                <span>Chamak Chicken</span>
+              </div>
+              <div className="flex gap-3">
+                <span className="font-bold">1</span>
+                <span>Chicken Biryani</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Course Group: Side Dishes */}
+          <div className="space-y-1.5">
+            <div className="text-center">
+              <span style={{ fontSize: categoryFs }} className="underline font-bold">Side Dishes</span>
+            </div>
+            <div style={{ fontSize: itemsFs }} className="space-y-1">
+              <div className="flex gap-3">
+                <span className="font-bold">1</span>
+                <span>Asparagus</span>
+              </div>
+              <div className="flex gap-3">
+                <span className="font-bold">1</span>
+                <span>Bhindi Bhaji</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Course Group: Rice/Bread */}
+          <div className="space-y-1.5">
+            <div className="text-center">
+              <span style={{ fontSize: categoryFs }} className="underline font-bold">Rice/Bread</span>
+            </div>
+            <div style={{ fontSize: itemsFs }} className="space-y-1">
+              <div className="flex gap-3">
+                <span className="font-bold">1</span>
+                <span>Mush P Rice</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Special Section: Tandoori / Bread */}
+          <div className="space-y-1 pt-1">
+            <div className="text-center font-bold">
+              <p style={{ fontSize: specialSectionFs }}>{specialSection}</p>
+              <p style={{ fontSize: subCategoryFs }} className="underline mt-1">{subCategoryTitle}</p>
+            </div>
+            <div style={{ fontSize: itemsFs }} className="space-y-1 pt-1">
+              <div className="flex gap-3">
+                <span className="font-bold">1</span>
+                <span>Nan</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Divider */}
+          <div className="border-t border-dashed border-black/70 my-2"></div>
+
+          {/* Table & Timestamp Footer */}
+          <div className="text-center space-y-1">
+            <h3 style={{ fontSize: tableFooterFs }} className="font-black tracking-tight leading-tight">Table:( {tableNumber} )</h3>
+            <p style={{ fontSize: dateFooterFs }} className="italic font-sans text-black">04/09/2026. 05:00 PM</p>
+          </div>
+        </div>
+      );
+    }
+
+    // -------------------------------------------------------------
+    // TEMPLATE 3: STANDARD CUSTOMER RECEIPT (Boxed European Style)
+    // -------------------------------------------------------------
     if (editingTemplate.type === 'CUSTOMER') {
       return (
         <div
@@ -484,7 +1287,8 @@ export default function InvoiceTemplatesPage() {
                 <div className="flex justify-center pt-1">
                   <img
                     src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(
-                      "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent("14th Test Street, Longbridge, 1st Floor, Apartment 5B")
+                      'https://www.google.com/maps/search/?api=1&query=' +
+                        encodeURIComponent('14th Test Street, Longbridge, 1st Floor, Apartment 5B')
                     )}`}
                     alt="Google Maps Navigation QR Code"
                     className="w-16 h-16"
@@ -591,81 +1395,8 @@ export default function InvoiceTemplatesPage() {
                     <p>Crust: Fluffy</p>
                     <p>Toppings: Extra mozzarella (+1.50)</p>
                   </div>
-                  {getSectionVal('clientComment', 'visible', true) && (
-                    <p className="pl-3 text-[10px] font-bold text-slate-900 flex items-center gap-1 mt-1">
-                      <span>💬</span> No mushrooms, please!
-                    </p>
-                  )}
                 </div>
               </div>
-            </div>
-          )}
-
-          {/* Custom Info box 1 styled as the Promo/Combo Block from screenshot */}
-          {getSectionVal('infoBox1', 'visible', false) && (
-            <div
-              style={{ fontSize: `${getSectionVal('infoBox1', 'fontSize', 10)}px` }}
-              className="border border-black p-3.5 space-y-2 text-[10px]"
-            >
-              <p className="font-extrabold text-black leading-snug">Two medium pizzas for the 9.00 price of one</p>
-              <div>
-                <span className="inline-block bg-black text-white text-[9px] px-2 py-0.5 rounded-sm font-bold uppercase">
-                  You saved: £8.00
-                </span>
-              </div>
-              <div className="border-t border-dotted border-black/40 my-2" />
-              <div className="space-y-2">
-                <div>
-                  <div className="flex justify-between items-center font-bold">
-                    <span>Pizza Prosciutto</span>
-                    <span className="w-3.5 h-3.5 border border-black rounded-full flex items-center justify-center text-[9px] font-bold">✓</span>
-                  </div>
-                  <div className="pl-3 text-[9px] text-slate-500">
-                    <p>Size: Medium (+3.00)</p>
-                    <p>Crust: Fluffy</p>
-                    <p>💬 No mushrooms, please!</p>
-                  </div>
-                </div>
-                <div>
-                  <div className="flex justify-between items-center font-bold">
-                    <span>Pizza Pepperoni</span>
-                    <span className="w-3.5 h-3.5 border border-black rounded-full flex items-center justify-center text-[9px] font-bold">✓</span>
-                  </div>
-                  <div className="pl-3 text-[9px] text-slate-500">
-                    <p>Size: Medium (+3.00)</p>
-                    <p>Crust: Crispy</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Custom Info boxes 2 & 3 */}
-          {getSectionVal('infoBox2', 'visible', false) && (
-            <div
-              style={{ fontSize: `${getSectionVal('infoBox2', 'fontSize', 10)}px` }}
-              className="border border-slate-300 p-2 rounded text-[10px] text-center font-bold"
-            >
-              ℹ️ Custom Information Box 2 Details
-            </div>
-          )}
-          {getSectionVal('infoBox3', 'visible', false) && (
-            <div
-              style={{ fontSize: `${getSectionVal('infoBox3', 'fontSize', 10)}px` }}
-              className="border border-slate-300 p-2 rounded text-[10px] text-center font-bold"
-            >
-              ℹ️ Custom Information Box 3 Details
-            </div>
-          )}
-
-          {/* Client Confirmation Signature */}
-          {getSectionVal('clientConfirmation', 'visible', false) && (
-            <div
-              style={{ fontSize: `${getSectionVal('clientConfirmation', 'fontSize', 10)}px` }}
-              className="pt-6 border-t border-dashed border-slate-200 text-center space-y-8"
-            >
-              <span className="text-[9px] uppercase font-bold text-slate-400">Client Signature Confirmation</span>
-              <div className="w-48 mx-auto border-b border-slate-400"></div>
             </div>
           )}
 
@@ -697,32 +1428,12 @@ export default function InvoiceTemplatesPage() {
               </div>
             </div>
           )}
-
-          {/* Order Online Banner */}
-          {getSectionVal('orderOnline', 'visible', true) && (
-            <div
-              style={{ fontSize: `${getSectionVal('orderOnline', 'fontSize', 11)}px` }}
-              className="border border-black p-3 text-center text-[10px] font-bold uppercase tracking-wider"
-            >
-              <p className="text-[9px] text-slate-500 font-bold lowercase normal-case mb-0.5">Order online:</p>
-              <p className="font-extrabold text-black tracking-normal">paprikalongbridge.co.uk</p>
-            </div>
-          )}
-
-          {/* Store contact details */}
-          {getSectionVal('contactDetails', 'visible', true) && (
-            <div
-              style={{ fontSize: `${getSectionVal('contactDetails', 'fontSize', 9)}px` }}
-              className="text-center text-[9px] text-slate-400 border-t border-slate-100 pt-2"
-            >
-              <p>Email: admin@paprikalongbridge.co.uk</p>
-              <p>Phone: +44 121 453 1122</p>
-            </div>
-          )}
         </div>
       );
     } else {
-      // KITCHEN TICKET MOCKUP - Redesigned to be strictly black & white
+      // -------------------------------------------------------------
+      // TEMPLATE 4: STANDARD KITCHEN TICKET
+      // -------------------------------------------------------------
       const headerVisible = getSectionVal('header', 'visible', true);
       const headerFs = `${getSectionVal('header', 'fontSize', 12)}px`;
 
@@ -742,15 +1453,11 @@ export default function InvoiceTemplatesPage() {
       const isPaidVisible = getSectionVal('isPaid', 'visible', true);
       const isPaidFs = `${getSectionVal('isPaid', 'fontSize', 12)}px`;
 
-      const packagingStationVisible = getSectionVal('packagingStationQualityControl', 'visible', false);
-      const packagingStationFs = `${getSectionVal('packagingStationQualityControl', 'fontSize', 9)}px`;
-
       return (
         <div
           style={{ fontSize: fs }}
           className="bg-white text-black p-6 shadow-2xl rounded-sm border-t-8 border-black font-sans max-w-[360px] mx-auto space-y-4 text-left transition-all"
         >
-          {/* Header Banner - Black Blocks with White Text */}
           {headerVisible && (
             <div style={{ fontSize: headerFs }} className="space-y-1">
               <div className="bg-black text-white px-3 py-1 font-bold uppercase text-left">
@@ -766,14 +1473,6 @@ export default function InvoiceTemplatesPage() {
             </div>
           )}
 
-          {/* Ticket holder space option */}
-          {getSectionVal('ticketHolderSpace', 'visible', true) && (
-            <div className="border border-dashed border-black py-4 text-center text-[9px] font-bold text-slate-500 rounded">
-              [TICKET HOLDER CLAMPING MARGIN]
-            </div>
-          )}
-
-          {/* On premise order number */}
           {onPremiseNumberVisible && (
             <div style={{ fontSize: onPremiseNumberFs }} className="flex justify-between items-center border-b border-black pb-2">
               <span className="font-bold uppercase text-xs">Order Number</span>
@@ -781,7 +1480,6 @@ export default function InvoiceTemplatesPage() {
             </div>
           )}
 
-          {/* Order Details Meta */}
           {orderDetailsVisible && (
             <div style={{ fontSize: orderDetailsFs }} className="space-y-1 border-b border-black pb-2 text-black">
               <p className="font-bold text-xs">Order details:</p>
@@ -794,17 +1492,12 @@ export default function InvoiceTemplatesPage() {
                 <span className="font-bold">25 August at 01:43</span>
               </div>
               <div className="flex justify-between">
-                <span>First name:</span>
-                <span className="font-bold">Abdul</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Last name:</span>
-                <span className="font-bold">Noman</span>
+                <span>Customer:</span>
+                <span className="font-bold">Abdul Noman</span>
               </div>
             </div>
           )}
 
-          {/* Client Comment / Note - Positioned right above items list */}
           {clientCommentVisible && (
             <div style={{ fontSize: clientCommentFs }} className="flex items-start gap-1.5 text-black font-semibold pt-1">
               <span>💬</span>
@@ -812,54 +1505,21 @@ export default function InvoiceTemplatesPage() {
             </div>
           )}
 
-          {/* Order Items Listing with Checkboxes */}
           {itemsVisible && (
             <div style={{ fontSize: itemsFs }} className="space-y-3 border-t border-b border-black py-3">
               <p className="font-bold text-xs">Items</p>
-              
               <div className="flex items-start gap-2 justify-between">
                 <div className="flex-1 space-y-0.5">
                   <p className="font-black text-black">
                     <span className="font-black mr-1">2x</span> Pizza Prosciutto
                   </p>
                   <p className="text-[10px] text-slate-650 pl-4">Size: Small</p>
-                  <p className="text-[10px] text-slate-650 pl-4">Crust: Fluffy</p>
-                  <p className="text-[10px] text-slate-650 pl-4">Toppings: Extra mozzarella</p>
-                  <p className="text-[10px] text-black font-bold pl-4 flex items-center gap-1">
-                    <span>💬</span> No mushrooms, please!
-                  </p>
-                </div>
-                <div className="w-4 h-4 border border-black shrink-0 mt-0.5"></div>
-              </div>
-
-              <div className="flex items-start gap-2 justify-between">
-                <div className="flex-1 space-y-0.5">
-                  <p className="font-black text-black">
-                    <span className="font-black mr-1">1x</span> Pizza Prosciutto
-                  </p>
-                  <p className="text-[10px] text-slate-650 pl-4">Size: Medium</p>
-                  <p className="text-[10px] text-slate-650 pl-4">Crust: Fluffy</p>
-                  <p className="text-[10px] text-black font-bold pl-4 flex items-center gap-1">
-                    <span>💬</span> No mushrooms, please!
-                  </p>
-                </div>
-                <div className="w-4 h-4 border border-black shrink-0 mt-0.5"></div>
-              </div>
-
-              <div className="flex items-start gap-2 justify-between">
-                <div className="flex-1 space-y-0.5">
-                  <p className="font-black text-black">
-                    <span className="font-black mr-1">1x</span> Pizza Pepperoni
-                  </p>
-                  <p className="text-[10px] text-slate-650 pl-4">Size: Medium</p>
-                  <p className="text-[10px] text-slate-650 pl-4">Crust: Crispy</p>
                 </div>
                 <div className="w-4 h-4 border border-black shrink-0 mt-0.5"></div>
               </div>
             </div>
           )}
 
-          {/* Is Paid Indicator - Black Border Box */}
           {isPaidVisible && (
             <div style={{ fontSize: isPaidFs }} className="border border-black p-3 flex justify-center gap-8 font-bold">
               <label className="flex items-center gap-1.5 cursor-pointer">
@@ -870,18 +1530,6 @@ export default function InvoiceTemplatesPage() {
                 <span className="w-4 h-4 border border-black flex items-center justify-center text-[10px] font-black">✓</span>
                 <span>Not Paid</span>
               </label>
-            </div>
-          )}
-
-          {/* Packaging station quality control box */}
-          {packagingStationVisible && (
-            <div style={{ fontSize: packagingStationFs }} className="border border-black p-2 text-center space-y-1.5">
-              <span className="block font-bold text-[8.5px] uppercase tracking-wider">Packaging Station Check</span>
-              <div className="flex justify-around text-[9px] font-bold">
-                <span>[ ] Boxes</span>
-                <span>[ ] Sauces</span>
-                <span>[ ] Utensils</span>
-              </div>
             </div>
           )}
         </div>
@@ -903,6 +1551,8 @@ export default function InvoiceTemplatesPage() {
 
   // --- EDITOR VIEW MODE ---
   if (editingTemplate) {
+    const layout = getLayoutStyle(editingTemplate);
+
     return (
       <div className="p-4 sm:p-8 space-y-6 w-full max-w-7xl mx-auto text-slate-100">
         {/* Editor Top Navigation Header */}
@@ -920,11 +1570,18 @@ export default function InvoiceTemplatesPage() {
                   Edit: {editingTemplate.name}
                 </h1>
                 <span className="bg-orange-500/20 text-orange-400 text-[10px] px-2 py-0.5 rounded font-black uppercase">
-                  {editingTemplate.type === 'CUSTOMER' ? 'Customer end' : 'Kitchen end'}
+                  {editingTemplate.type === 'CUSTOMER' ? 'Client receipt' : 'Kitchen ticket'}
+                </span>
+                <span className="bg-indigo-500/20 text-indigo-300 text-[10px] px-2 py-0.5 rounded font-black uppercase">
+                  {layout === 'anupam_classic'
+                    ? 'Anupam Classic Bill'
+                    : layout === 'anupam_course_grouped'
+                    ? 'Course-Grouped KOT'
+                    : 'Standard Layout'}
                 </span>
               </div>
               <p className="text-xs text-slate-400 mt-1">
-                Customize active fields, font-sizes, and print components for this template.
+                Customize active fields, section font-sizes, and print components for this template.
               </p>
             </div>
           </div>
@@ -968,7 +1625,7 @@ export default function InvoiceTemplatesPage() {
           <div className="lg:col-span-7 space-y-6">
             <div className="bg-slate-900 border border-slate-800 p-6 rounded-3xl space-y-6">
               <h3 className="font-extrabold text-sm text-white">General Parameters</h3>
-              
+
               {/* Name Editor */}
               <div className="space-y-2">
                 <label className="text-xs text-slate-400 font-bold uppercase tracking-wider">Template Name</label>
@@ -985,7 +1642,7 @@ export default function InvoiceTemplatesPage() {
               {/* Font Size Adjuster */}
               <div className="space-y-3">
                 <div className="flex justify-between items-center text-xs font-bold uppercase tracking-wider text-slate-400">
-                  <span>Base Font Size</span>
+                  <span>Base Global Font Size</span>
                   <span className="text-orange-400 font-black font-mono">{editingTemplate.fontSize}px</span>
                 </div>
                 <div className="flex items-center gap-4">
@@ -1010,7 +1667,7 @@ export default function InvoiceTemplatesPage() {
             </div>
 
             <div className="bg-slate-900 border border-slate-800 p-6 rounded-3xl space-y-4">
-              <h3 className="font-extrabold text-sm text-white border-b border-slate-800 pb-3">Component Visibility Toggles</h3>
+              <h3 className="font-extrabold text-sm text-white border-b border-slate-800 pb-3">Section Typography & Content Customization</h3>
               {renderToggles()}
             </div>
           </div>
@@ -1027,12 +1684,17 @@ export default function InvoiceTemplatesPage() {
         <div>
           <h1 className="text-xl sm:text-2xl font-black text-white">Invoice Templates</h1>
           <p className="text-xs text-slate-400 mt-1">
-            Build and edit custom printable invoice templates for customers and the kitchen station.
+            Build, preview, and switch between custom printable templates for client bills and kitchen preparation slips.
           </p>
         </div>
 
         <button
-          onClick={() => setIsAddModalOpen(true)}
+          onClick={() => {
+            setNewTemplateType('CUSTOMER');
+            setNewTemplateLayout('anupam_classic');
+            setNewTemplateName('');
+            setIsAddModalOpen(true);
+          }}
           className="bg-orange-600 hover:bg-orange-700 text-white text-xs px-5 py-2.5 rounded-xl font-bold inline-flex items-center gap-1.5 cursor-pointer transition-colors shadow-md shadow-orange-600/10"
         >
           <Plus className="w-4 h-4" />
@@ -1055,64 +1717,78 @@ export default function InvoiceTemplatesPage() {
                 <tr>
                   <th className="p-4">Template Name</th>
                   <th className="p-4">Type</th>
+                  <th className="p-4">Design Preset</th>
                   <th className="p-4">Base Font</th>
                   <th className="p-4">Created Date</th>
                   <th className="p-4 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800">
-                {templates.map((template) => (
-                  <tr key={template.id} className="hover:bg-slate-800/40 transition-colors">
-                    <td className="p-4 font-bold text-white text-sm">{template.name}</td>
-                    <td className="p-4">
-                      <span
-                        className={`px-2 py-0.5 rounded text-[10px] font-black uppercase ${
-                          template.type === 'CUSTOMER'
-                            ? 'bg-emerald-500/25 text-emerald-300'
-                            : 'bg-indigo-500/25 text-indigo-300'
-                        }`}
-                      >
-                        {template.type === 'CUSTOMER' ? 'Client receipt' : 'Kitchen ticket'}
-                      </span>
-                    </td>
-                    <td className="p-4 font-mono text-slate-400">{template.fontSize}px</td>
-                    <td className="p-4 text-slate-400">
-                      {new Date(template.createdAt).toLocaleDateString(undefined, {
-                        year: 'numeric',
-                        month: 'short',
-                        day: 'numeric',
-                      })}
-                    </td>
-                    <td className="p-4 text-right space-x-1.5">
-                      <button
-                        onClick={() =>
-                          setEditingTemplate({
-                            ...template,
-                            config: typeof template.config === 'string' ? JSON.parse(template.config) : template.config,
-                          })
-                        }
-                        className="bg-slate-800 hover:bg-slate-700 text-slate-200 p-2 rounded-lg font-medium inline-flex items-center gap-1 cursor-pointer transition-colors"
-                        title="Edit template fields & style"
-                      >
-                        <Edit2 className="w-3.5 h-3.5" />
-                      </button>
-                      <button
-                        onClick={() => handleDuplicateTemplate(template)}
-                        className="bg-slate-850 hover:bg-slate-750 text-slate-400 hover:text-white p-2 rounded-lg font-medium inline-flex items-center gap-1 cursor-pointer transition-colors"
-                        title="Duplicate template"
-                      >
-                        <Copy className="w-3.5 h-3.5" />
-                      </button>
-                      <button
-                        onClick={() => handleDeleteTemplate(template.id)}
-                        className="bg-slate-950 hover:bg-red-950/40 text-slate-500 hover:text-red-400 p-2 rounded-lg font-medium inline-flex items-center gap-1 cursor-pointer transition-colors"
-                        title="Delete template"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
+                {templates.map((template) => {
+                  const layout = getLayoutStyle(template);
+
+                  return (
+                    <tr key={template.id} className="hover:bg-slate-800/40 transition-colors">
+                      <td className="p-4 font-bold text-white text-sm">{template.name}</td>
+                      <td className="p-4">
+                        <span
+                          className={`px-2 py-0.5 rounded text-[10px] font-black uppercase ${
+                            template.type === 'CUSTOMER'
+                              ? 'bg-emerald-500/25 text-emerald-300'
+                              : 'bg-indigo-500/25 text-indigo-300'
+                          }`}
+                        >
+                          {template.type === 'CUSTOMER' ? 'Client receipt' : 'Kitchen ticket'}
+                        </span>
+                      </td>
+                      <td className="p-4">
+                        <span className="bg-slate-800 text-slate-300 border border-slate-700 px-2 py-0.5 rounded text-[10px] font-bold">
+                          {layout === 'anupam_classic'
+                            ? 'Anupam Classic Bill'
+                            : layout === 'anupam_course_grouped'
+                            ? 'Course-Grouped KOT'
+                            : 'Standard Ticket'}
+                        </span>
+                      </td>
+                      <td className="p-4 font-mono text-slate-400">{template.fontSize}px</td>
+                      <td className="p-4 text-slate-400">
+                        {new Date(template.createdAt).toLocaleDateString(undefined, {
+                          year: 'numeric',
+                          month: 'short',
+                          day: 'numeric',
+                        })}
+                      </td>
+                      <td className="p-4 text-right space-x-1.5">
+                        <button
+                          onClick={() =>
+                            setEditingTemplate({
+                              ...template,
+                              config: typeof template.config === 'string' ? JSON.parse(template.config) : template.config,
+                            })
+                          }
+                          className="bg-slate-800 hover:bg-slate-700 text-slate-200 p-2 rounded-lg font-medium inline-flex items-center gap-1 cursor-pointer transition-colors"
+                          title="Edit template fields & style"
+                        >
+                          <Edit2 className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          onClick={() => handleDuplicateTemplate(template)}
+                          className="bg-slate-850 hover:bg-slate-750 text-slate-400 hover:text-white p-2 rounded-lg font-medium inline-flex items-center gap-1 cursor-pointer transition-colors"
+                          title="Duplicate template"
+                        >
+                          <Copy className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteTemplate(template.id)}
+                          className="bg-slate-950 hover:bg-red-950/40 text-slate-500 hover:text-red-400 p-2 rounded-lg font-medium inline-flex items-center gap-1 cursor-pointer transition-colors"
+                          title="Delete template"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -1140,14 +1816,40 @@ export default function InvoiceTemplatesPage() {
             <div className="space-y-4">
               {/* Type Selector dropdown */}
               <div className="space-y-2">
-                <label className="text-xs text-slate-400 font-bold uppercase tracking-wider">Template type</label>
+                <label className="text-xs text-slate-400 font-bold uppercase tracking-wider">Template Type</label>
                 <select
                   value={newTemplateType}
-                  onChange={(e) => setNewTemplateType(e.target.value)}
+                  onChange={(e) => {
+                    const nextType = e.target.value;
+                    setNewTemplateType(nextType);
+                    setNewTemplateLayout(nextType === 'CUSTOMER' ? 'anupam_classic' : 'anupam_course_grouped');
+                  }}
                   className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-orange-500 font-bold"
                 >
-                  <option value="CUSTOMER">Client receipt</option>
-                  <option value="KITCHEN">Kitchen essentials</option>
+                  <option value="CUSTOMER">Client receipt (Front of house)</option>
+                  <option value="KITCHEN">Kitchen essentials (Prep station)</option>
+                </select>
+              </div>
+
+              {/* Design Preset Selector */}
+              <div className="space-y-2">
+                <label className="text-xs text-slate-400 font-bold uppercase tracking-wider">Design Layout Preset</label>
+                <select
+                  value={newTemplateLayout}
+                  onChange={(e) => setNewTemplateLayout(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-orange-500 font-bold text-orange-400"
+                >
+                  {newTemplateType === 'CUSTOMER' ? (
+                    <>
+                      <option value="anupam_classic">✨ Anupam Classic Client Bill (Table & VAT)</option>
+                      <option value="standard">Standard Boxed Client Receipt</option>
+                    </>
+                  ) : (
+                    <>
+                      <option value="anupam_course_grouped">✨ Anupam Course-Grouped KOT (Starter/Main/Side/Rice)</option>
+                      <option value="standard">Standard Kitchen Prep Ticket</option>
+                    </>
+                  )}
                 </select>
               </div>
 
@@ -1157,7 +1859,7 @@ export default function InvoiceTemplatesPage() {
                 <input
                   type="text"
                   required
-                  placeholder="e.g. Standard Customer Receipt, Kitchen Prep Slip"
+                  placeholder="e.g. My Restaurant Client Bill, Chef Order Ticket"
                   value={newTemplateName}
                   onChange={(e) => setNewTemplateName(e.target.value)}
                   className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-white placeholder:text-slate-650 focus:outline-none focus:border-orange-500"

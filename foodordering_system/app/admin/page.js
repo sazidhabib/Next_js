@@ -307,7 +307,7 @@ export default function AdminOverviewPage() {
           </div>
           <div>
             <h3 className="text-2xl font-black text-white">
-              ${totalRevenue.toFixed(2)}
+              £{totalRevenue.toFixed(2)}
             </h3>
             <p className="text-[11px] text-emerald-400 font-semibold flex items-center gap-1 mt-1">
               <TrendingUp className="w-3.5 h-3.5" />
@@ -346,7 +346,7 @@ export default function AdminOverviewPage() {
           </div>
           <div>
             <h3 className="text-2xl font-black text-white">
-              ${avgOrderValue.toFixed(2)}
+              £{avgOrderValue.toFixed(2)}
             </h3>
             <p className="text-[11px] text-slate-400 mt-1">
               Across all delivery & pickup
@@ -523,7 +523,7 @@ export default function AdminOverviewPage() {
                       {order.items?.map((i) => `${i.quantity}x ${i.itemName}`).join(', ')}
                     </td>
                     <td className="p-3 font-bold text-white">
-                      ${order.totalAmount?.toFixed(2)}
+                      £{order.totalAmount?.toFixed(2)}
                     </td>
                     <td className="p-3">
                       <span

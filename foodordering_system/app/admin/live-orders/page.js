@@ -442,7 +442,7 @@ export default function LiveOrdersReceiver() {
 
                     <div className="text-right">
                       <span className="text-sm font-black text-white">
-                        $${order.totalAmount?.toFixed(2)}
+                        £{order.totalAmount?.toFixed(2)}
                       </span>
                       <p className="text-[10px] text-slate-400 mt-0.5">
                         {order.paymentMethod === 'CARD_ONLINE' ? '💳 Paid Online' : '💵 Cash'}
@@ -474,7 +474,7 @@ export default function LiveOrdersReceiver() {
                               {item.quantity}x {item.itemName}
                             </span>
                             <span className="text-slate-400 font-mono">
-                              $${item.itemTotal?.toFixed(2)}
+                              £{item.itemTotal?.toFixed(2)}
                             </span>
                           </div>
 
@@ -789,12 +789,12 @@ export default function LiveOrdersReceiver() {
                         </p>
                       )}
                     </div>
-                    <span className="font-mono text-slate-300 font-bold">$${it.itemTotal?.toFixed(2)}</span>
+                    <span className="font-mono text-slate-300 font-bold">£{it.itemTotal?.toFixed(2)}</span>
                   </div>
                 ))}
                 <div className="flex justify-between pt-1 font-bold text-sm text-white">
                   <span>Total Amount</span>
-                  <span className="text-orange-400">$${reviewOrderModal.totalAmount?.toFixed(2)}</span>
+                  <span className="text-orange-400">£{reviewOrderModal.totalAmount?.toFixed(2)}</span>
                 </div>
               </div>
             </div>
@@ -1054,7 +1054,7 @@ export default function LiveOrdersReceiver() {
                   <div key={idx} className="space-y-0.5">
                     <div className="flex justify-between font-bold">
                       <span>{it.quantity}x {it.itemName}</span>
-                      <span>$${it.itemTotal?.toFixed(2)}</span>
+                      <span>£{it.itemTotal?.toFixed(2)}</span>
                     </div>
                     {it.selectedOptions?.map((o, oIdx) => (
                       <p key={oIdx} className="text-[10px] pl-2">
@@ -1071,19 +1071,19 @@ export default function LiveOrdersReceiver() {
               <div className="space-y-1 text-[11px] pt-1">
                 <div className="flex justify-between">
                   <span>Subtotal:</span>
-                  <span>$${thermalReceiptOrder.subtotal?.toFixed(2)}</span>
+                  <span>£{thermalReceiptOrder.subtotal?.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Tax:</span>
-                  <span>$${thermalReceiptOrder.taxAmount?.toFixed(2)}</span>
+                  <span>£{thermalReceiptOrder.taxAmount?.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Delivery Fee:</span>
-                  <span>$${thermalReceiptOrder.deliveryFee?.toFixed(2)}</span>
+                  <span>£{thermalReceiptOrder.deliveryFee?.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between font-bold text-xs pt-1 border-t border-dashed border-black">
                   <span>TOTAL:</span>
-                  <span>$${thermalReceiptOrder.totalAmount?.toFixed(2)}</span>
+                  <span>£{thermalReceiptOrder.totalAmount?.toFixed(2)}</span>
                 </div>
               </div>
 

@@ -190,11 +190,19 @@ export default function PrinterOptionsPage() {
               className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3.5 text-xs text-white focus:outline-none focus:border-orange-500 font-semibold"
             >
               <option value="">-- Select Customer Template --</option>
-              {customerTemplates.map((t) => (
-                <option key={t.id} value={t.id}>
-                  {t.name} (Font: {t.fontSize}px)
-                </option>
-              ))}
+              {customerTemplates.map((t) => {
+                let layout = 'Standard';
+                try {
+                  const cfg = typeof t.config === 'string' ? JSON.parse(t.config) : t.config;
+                  if (cfg?.layoutStyle === 'anupam_classic') layout = 'Anupam Classic Bill';
+                } catch (e) {}
+
+                return (
+                  <option key={t.id} value={t.id}>
+                    {t.name} [{layout}] (Font: {t.fontSize}px)
+                  </option>
+                );
+              })}
             </select>
             <p className="text-[10px] text-slate-550">
               Used when printing receipts for customer checkouts, invoices, and delivery bags.
@@ -212,11 +220,19 @@ export default function PrinterOptionsPage() {
               className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3.5 text-xs text-white focus:outline-none focus:border-orange-500 font-semibold"
             >
               <option value="">-- Select Kitchen Template --</option>
-              {kitchenTemplates.map((t) => (
-                <option key={t.id} value={t.id}>
-                  {t.name} (Font: {t.fontSize}px)
-                </option>
-              ))}
+              {kitchenTemplates.map((t) => {
+                let layout = 'Standard';
+                try {
+                  const cfg = typeof t.config === 'string' ? JSON.parse(t.config) : t.config;
+                  if (cfg?.layoutStyle === 'anupam_course_grouped') layout = 'Anupam Course-Grouped KOT';
+                } catch (e) {}
+
+                return (
+                  <option key={t.id} value={t.id}>
+                    {t.name} [{layout}] (Font: {t.fontSize}px)
+                  </option>
+                );
+              })}
             </select>
             <p className="text-[10px] text-slate-550">
               Used when printing preparation tickets for chef stations and packing tables.

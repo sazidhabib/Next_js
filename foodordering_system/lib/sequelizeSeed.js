@@ -69,8 +69,8 @@ export async function seedDatabaseWithoutForce() {
     address: '742 Evergreen Terrace, Downtown Gourmet Plaza, San Francisco, CA 94103',
     latitude: 37.7749,
     longitude: -122.4194,
-    currency: 'USD',
-    currencySymbol: '$',
+    currency: 'GBP',
+    currencySymbol: '£',
     taxRatePercent: 8.5,
     enableDelivery: true,
     enablePickup: true,
@@ -95,6 +95,7 @@ export async function seedDatabaseWithoutForce() {
     type: 'CUSTOMER',
     fontSize: 12,
     config: JSON.stringify({
+      layoutStyle: 'standard',
       paymentMethod: true,
       time: true,
       estimatedDriveTime: true,
@@ -120,6 +121,7 @@ export async function seedDatabaseWithoutForce() {
     type: 'KITCHEN',
     fontSize: 12,
     config: JSON.stringify({
+      layoutStyle: 'standard',
       header: true,
       onPremiseNumber: true,
       orderDetails: true,
@@ -132,13 +134,77 @@ export async function seedDatabaseWithoutForce() {
     }),
   });
 
+  const anupamCustomerTemplate = await InvoiceTemplate.create({
+    restaurantId: restaurant.id,
+    name: 'Anupam Classic Client Bill',
+    type: 'CUSTOMER',
+    fontSize: 12,
+    config: JSON.stringify({
+      layoutStyle: 'anupam_classic',
+      restaurantBrand: 'anupam',
+      brandFontSize: 24,
+      legalName: 'Sweet Paan Ltd',
+      address: '85 Church Street\nGreat Malvern WR14 2AE',
+      phone: '01684 573814',
+      vatNumber: '240 6873 06',
+      businessInfoFontSize: 11,
+      tableNumber: '24/2',
+      tableFontSize: 16,
+      dateFontSize: 11,
+      dateTime: true,
+      items: true,
+      itemsFontSize: 12,
+      miscAmount: '0.00',
+      subTotal: true,
+      total: true,
+      totalsFontSize: 12,
+      splitBill: true,
+      splitWays: 2,
+      splitBillFontSize: 12,
+      serviceChargeNote: true,
+      serviceChargeText: 'Service Charge Not Included',
+      serviceChargeFontSize: 12,
+      thankYouNote: true,
+      thankYouText: 'Thank You For Your Custom\nPlease Call Again',
+      thankYouFontSize: 11,
+      website: 'www.anupam.co.uk',
+      websiteFontSize: 13,
+    }),
+  });
+
+  const anupamKitchenTemplate = await InvoiceTemplate.create({
+    restaurantId: restaurant.id,
+    name: 'Anupam Kitchen Order Ticket',
+    type: 'KITCHEN',
+    fontSize: 12,
+    config: JSON.stringify({
+      layoutStyle: 'anupam_course_grouped',
+      headerTitle: 'Kitchen Copy',
+      headerFontSize: 13,
+      ticketNumber: '73',
+      ticketNumberFontSize: 30,
+      groupByCategory: true,
+      categoryFontSize: 14,
+      subCategoryTitle: 'Bread',
+      subCategoryFontSize: 13,
+      items: true,
+      itemsFontSize: 12,
+      specialSection: '** Tandoori Items **',
+      specialSectionFontSize: 13,
+      tableNumber: '24/2',
+      tableFooterFontSize: 24,
+      dateFooterFontSize: 11,
+      dateTime: true,
+    }),
+  });
+
   // Update restaurant with active templates
   await restaurant.update({
     activeCustomerTemplateId: customerTemplate.id,
     activeKitchenTemplateId: kitchenTemplate.id,
   });
 
-  console.log('📄 Default invoice templates created and assigned.');
+  console.log('📄 4 Invoice templates created (2 standard + 2 Anupam presets) and assigned.');
 
   // 5. Operating Hours
   const days = [0, 1, 2, 3, 4, 5, 6];

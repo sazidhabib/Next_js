@@ -147,19 +147,9 @@ export default function ItemModal({ item, isOpen, onClose, onAddToCart }) {
 
           {/* Title and price in hero */}
           <div className="absolute bottom-4 left-4 right-4 text-white">
-            <div className="flex items-center gap-2 mb-1">
-              {item.dietaryTags?.map((tag) => (
-                <span
-                  key={tag}
-                  className="bg-orange-500/90 text-white text-[11px] font-bold px-2 py-0.5 rounded-md backdrop-blur-xs"
-                >
-                  {tag}
-                </span>
-              ))}
-            </div>
             <h2 className="text-xl sm:text-2xl font-bold tracking-tight">{item.name}</h2>
             <p className="text-orange-300 font-bold text-lg mt-0.5">
-              ${item.basePrice.toFixed(2)}
+              £{item.basePrice.toFixed(2)}
             </p>
           </div>
         </div>
@@ -246,7 +236,7 @@ export default function ItemModal({ item, isOpen, onClose, onAddToCart }) {
 
                           {opt.price > 0 && (
                             <span className="text-xs font-semibold text-slate-900">
-                              +${opt.price.toFixed(2)}
+                              +£{opt.price.toFixed(2)}
                             </span>
                           )}
                         </div>
@@ -305,7 +295,7 @@ export default function ItemModal({ item, isOpen, onClose, onAddToCart }) {
             className="flex-1 flex items-center justify-between bg-orange-600 hover:bg-orange-700 active:scale-98 text-white px-5 py-3 rounded-xl font-bold text-xs sm:text-sm shadow-md shadow-orange-600/30 transition-all cursor-pointer"
           >
             <span>Add to Order</span>
-            <span>${totalPrice.toFixed(2)}</span>
+            <span>£{totalPrice.toFixed(2)}</span>
           </button>
         </div>
       </div>

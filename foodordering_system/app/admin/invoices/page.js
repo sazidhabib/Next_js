@@ -66,7 +66,7 @@ export default function AdminInvoicesPage() {
         <div className="bg-slate-900 border border-slate-800 px-4 py-2 rounded-xl flex items-center gap-3">
           <span className="text-xs text-slate-400 font-bold">Total Invoiced:</span>
           <span className="text-lg font-black text-emerald-400">
-            ${totalInvoiced.toFixed(2)}
+            £{totalInvoiced.toFixed(2)}
           </span>
         </div>
       </div>
@@ -125,13 +125,13 @@ export default function AdminInvoicesPage() {
                       {new Date(order.createdAt).toLocaleDateString()}
                     </td>
                     <td className="p-3.5 text-slate-300">
-                      ${order.subtotal?.toFixed(2)}
+                      £{order.subtotal?.toFixed(2)}
                     </td>
                     <td className="p-3.5 text-slate-400">
-                      ${order.taxAmount?.toFixed(2)}
+                      £{order.taxAmount?.toFixed(2)}
                     </td>
                     <td className="p-3.5 font-bold text-white">
-                      ${order.totalAmount?.toFixed(2)}
+                      £{order.totalAmount?.toFixed(2)}
                     </td>
                     <td className="p-3.5">
                       <span
@@ -237,7 +237,7 @@ export default function AdminInvoicesPage() {
                         {it.quantity}
                       </td>
                       <td className="p-2.5 text-right font-bold text-slate-900">
-                        ${it.itemTotal?.toFixed(2)}
+                        £{it.itemTotal?.toFixed(2)}
                       </td>
                     </tr>
                   ))}
@@ -249,24 +249,24 @@ export default function AdminInvoicesPage() {
             <div className="space-y-1.5 text-xs text-slate-600 pt-2 border-t border-slate-200">
               <div className="flex justify-between">
                 <span>Subtotal</span>
-                <span>${viewInvoiceOrder.subtotal?.toFixed(2)}</span>
+                <span>£{viewInvoiceOrder.subtotal?.toFixed(2)}</span>
               </div>
               <div className="flex justify-between">
                 <span>Tax (8.5% VAT)</span>
-                <span>${viewInvoiceOrder.taxAmount?.toFixed(2)}</span>
+                <span>£{viewInvoiceOrder.taxAmount?.toFixed(2)}</span>
               </div>
               <div className="flex justify-between">
                 <span>Delivery Fee</span>
                 <span>
                   {viewInvoiceOrder.deliveryFee === 0
                     ? 'FREE'
-                    : `$${viewInvoiceOrder.deliveryFee?.toFixed(2)}`}
+                    : `£${viewInvoiceOrder.deliveryFee?.toFixed(2)}`}
                 </span>
               </div>
               <div className="flex justify-between font-black text-sm text-slate-900 pt-2 border-t border-slate-200">
                 <span>Total Paid</span>
                 <span className="text-orange-600">
-                  ${viewInvoiceOrder.totalAmount?.toFixed(2)}
+                  £{viewInvoiceOrder.totalAmount?.toFixed(2)}
                 </span>
               </div>
             </div>

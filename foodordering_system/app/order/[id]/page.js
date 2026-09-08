@@ -417,7 +417,7 @@ export default function OrderTrackingPage({ params }) {
                       </h4>
                     </div>
                     <span className="font-bold text-slate-900 text-sm">
-                      ${item.itemTotal?.toFixed(2)}
+                      £{item.itemTotal?.toFixed(2)}
                     </span>
                   </div>
 
@@ -427,7 +427,7 @@ export default function OrderTrackingPage({ params }) {
                         <div key={oIdx} className="flex justify-between">
                           <span>• {opt.optionName}</span>
                           {opt.optionPrice > 0 && (
-                            <span>+${opt.optionPrice.toFixed(2)}</span>
+                            <span>+£{opt.optionPrice.toFixed(2)}</span>
                           )}
                         </div>
                       ))}
@@ -447,21 +447,21 @@ export default function OrderTrackingPage({ params }) {
             <div className="pt-3 space-y-1.5 text-xs text-slate-600">
               <div className="flex justify-between">
                 <span>Subtotal</span>
-                <span className="font-bold text-slate-800">${order.subtotal?.toFixed(2)}</span>
+                <span className="font-bold text-slate-800">£{order.subtotal?.toFixed(2)}</span>
               </div>
               <div className="flex justify-between">
                 <span>Taxes</span>
-                <span>${order.taxAmount?.toFixed(2)}</span>
+                <span>£{order.taxAmount?.toFixed(2)}</span>
               </div>
               {order.orderType === 'DELIVERY' && (
                 <div className="flex justify-between">
                   <span>Delivery Fee</span>
-                  <span>{order.deliveryFee === 0 ? 'FREE' : `$${order.deliveryFee?.toFixed(2)}`}</span>
+                  <span>{order.deliveryFee === 0 ? 'FREE' : `£${order.deliveryFee?.toFixed(2)}`}</span>
                 </div>
               )}
               <div className="flex justify-between text-base font-extrabold text-slate-900 pt-2 border-t border-slate-200">
                 <span>Total</span>
-                <span className="text-orange-600">${order.totalAmount?.toFixed(2)}</span>
+                <span className="text-orange-600">£{order.totalAmount?.toFixed(2)}</span>
               </div>
             </div>
           </div>

@@ -389,7 +389,7 @@ export default function EmbedMenuPage({ params }) {
                         style={{ backgroundColor: zone.color }}
                       ></span>
                       <span className="text-slate-800">
-                        Min - ${zone.minOrder.toFixed(2)}, Fee - ${zone.fee.toFixed(2)}
+                        Min - £{zone.minOrder.toFixed(2)}, Fee - £{zone.fee.toFixed(2)}
                       </span>
                       {zone.name && (
                         <span className="text-[10px] text-slate-400 font-normal ml-auto truncate max-w-[150px]">
@@ -665,7 +665,7 @@ export default function EmbedMenuPage({ params }) {
                               {featuredItemWithImg.name}
                             </span>
                             <span className="font-black text-xs sm:text-sm bg-orange-600 px-2 py-0.5 rounded-md shrink-0 shadow-md">
-                              ${featuredItemWithImg.basePrice.toFixed(2)}
+                              £{featuredItemWithImg.basePrice.toFixed(2)}
                             </span>
                           </div>
                         </div>
@@ -716,7 +716,7 @@ export default function EmbedMenuPage({ params }) {
               </span>
               <span>View Your Order</span>
             </div>
-            <span>${cartTotal.toFixed(2)}</span>
+            <span>£{cartTotal.toFixed(2)}</span>
           </button>
         </div>
       )}
