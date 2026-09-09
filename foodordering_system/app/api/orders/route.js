@@ -37,16 +37,19 @@ export async function POST(request) {
 
     const order = await createOrder(body);
 
-    // Asynchronously trigger ESC/POS kitchen print
-    getOrderById(order.id).then((fullOrder) => {
-      if (fullOrder) {
-        autoPrintKitchenReceipt(fullOrder).catch(err => {
-          console.error('Failed to auto print kitchen receipt:', err);
-        });
-      }
-    }).catch(err => {
-      console.error('Failed to get full order details for print:', err);
-    });
+    // If Cash or Pay on fulfillment, immediately trigger ESC/POS kitchen print.
+    // For CARD_ONLINE, print is triggered after Stripe verifies payment.
+    if (order.paymentMethod !== 'CARD_ONLINE') {
+      getOrderById(order.id).then((fullOrder) => {
+        if (fullOrder) {
+          autoPrintKitchenReceipt(fullOrder).catch(err => {
+            console.error('Failed to auto print kitchen receipt:', err);
+          });
+        }
+      }).catch(err => {
+        console.error('Failed to get full order details for print:', err);
+      });
+    }
 
     return NextResponse.json({ success: true, data: order }, { status: 201 });
   } catch (error) {

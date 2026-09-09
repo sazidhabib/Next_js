@@ -23,6 +23,9 @@ import {
   Lock,
 } from 'lucide-react';
 import * as turf from '@turf/turf';
+import { loadStripe } from '@stripe/stripe-js';
+import { Elements } from '@stripe/react-stripe-js';
+import StripeModalCardForm from './StripeModalCardForm';
 import { playSuccessSound } from './AudioAlert';
 
 export default function CheckoutWizardModal({
@@ -79,6 +82,10 @@ export default function CheckoutWizardModal({
   const [showCoupon, setShowCoupon] = useState(false);
   const [couponCode, setCouponCode] = useState('');
   const [discountAmount, setDiscountAmount] = useState(0);
+
+  // 7. In-Modal Stripe Payment State
+  const [stripeModalData, setStripeModalData] = useState(null); // { clientSecret, publishableKey, orderId, orderNumber, amount, currency }
+  const [stripePromise, setStripePromise] = useState(null);
 
   // General & Leaflet Map References
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -529,27 +536,57 @@ export default function CheckoutWizardModal({
         playSuccessSound();
         toast.success('Order placed successfully!');
         onClearCart();
-        onClose();
+
+        const orderTargetUrl = `/order/${data.data.id || data.data.orderNumber}`;
 
         if (paymentMethod === 'ONLINE') {
           try {
-            const stripeRes = await fetch('/api/checkout-session', {
+            const piRes = await fetch('/api/create-payment-intent', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ orderId: data.data.id }),
             });
-            const stripeData = await stripeRes.json();
-            if (stripeData.success && stripeData.url) {
-              window.location.href = stripeData.url;
+            const piData = await piRes.json();
+            if (piData.success && piData.clientSecret) {
+              const pubKey = piData.publishableKey || process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
+              if (pubKey) {
+                setStripePromise(loadStripe(pubKey));
+              }
+              setStripeModalData({
+                clientSecret: piData.clientSecret,
+                orderId: data.data.id,
+                orderNumber: data.data.orderNumber,
+                amount: piData.amount || totalAmount,
+                currency: piData.currency || 'GBP',
+              });
               return;
             } else {
-              router.push(`/order/${data.data.id}`);
+              toast.error(piData.error || 'Online payment initialization failed. Navigating to order summary.');
+              if (window.top) {
+                window.top.location.href = orderTargetUrl;
+              } else {
+                window.location.href = orderTargetUrl;
+              }
+              return;
             }
-          } catch (stripeErr) {
-            router.push(`/order/${data.data.id}`);
+          } catch (piErr) {
+            console.error('PaymentIntent creation error:', piErr);
+            toast.error('Network error reaching payment service. Navigating to order summary.');
+            if (window.top) {
+              window.top.location.href = orderTargetUrl;
+            } else {
+              window.location.href = orderTargetUrl;
+            }
+            return;
           }
         } else {
-          router.push(`/order/${data.data.id || data.data.orderNumber}`);
+          // Immediately navigate to the Waiting for Kitchen Confirmation page
+          if (window.top) {
+            window.top.location.href = orderTargetUrl;
+          } else {
+            window.location.href = orderTargetUrl;
+          }
+          return;
         }
       } else {
         const err = data.error || 'Failed to place order.';
@@ -569,7 +606,77 @@ export default function CheckoutWizardModal({
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4 md:p-6 animate-fadeIn">
+      {/* Submitting Loading Overlay */}
+      {isSubmitting && (
+        <div className="absolute inset-0 z-60 bg-slate-950/80 backdrop-blur-sm flex flex-col items-center justify-center gap-4 text-white">
+          <div className="w-12 h-12 border-4 border-orange-500 border-t-transparent rounded-full animate-spin" />
+          <div className="text-center space-y-1">
+            <p className="font-extrabold text-base">Placing Your Order...</p>
+            <p className="text-xs text-slate-400">Connecting directly to restaurant kitchen</p>
+          </div>
+        </div>
+      )}
+
+      {/* In-Modal Stripe Payment Elements Step */}
+      {stripeModalData && stripePromise && (
+        <div className="relative w-full max-w-lg bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col my-auto max-h-[95vh] z-70 animate-scaleUp">
+          <div className="px-5 py-3.5 bg-slate-50 dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between shrink-0">
+            <div className="flex items-center gap-2">
+              <Lock className="w-4 h-4 text-orange-600" />
+              <h2 className="text-sm font-extrabold text-slate-800 dark:text-white uppercase tracking-wide">
+                Secure Card Checkout
+              </h2>
+            </div>
+            <button
+              onClick={() => {
+                const target = `/order/${stripeModalData.orderId}`;
+                if (window.top) window.top.location.href = target;
+                else window.location.href = target;
+              }}
+              className="w-7 h-7 rounded-full bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 flex items-center justify-center transition-colors cursor-pointer"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          </div>
+
+          <div className="p-4 sm:p-6 overflow-y-auto">
+            <Elements
+              stripe={stripePromise}
+              options={{
+                clientSecret: stripeModalData.clientSecret,
+                appearance: {
+                  theme: 'stripe',
+                  variables: {
+                    colorPrimary: '#ea580c',
+                    colorBackground: '#ffffff',
+                    colorText: '#1e293b',
+                    borderRadius: '12px',
+                  },
+                },
+              }}
+            >
+              <StripeModalCardForm
+                orderId={stripeModalData.orderId}
+                orderNumber={stripeModalData.orderNumber}
+                amount={stripeModalData.amount}
+                currency={stripeModalData.currency}
+                onPaymentSuccess={(_pi) => {
+                  const target = `/order/${stripeModalData.orderId}`;
+                  if (window.top) window.top.location.href = target;
+                  else window.location.href = target;
+                }}
+                onCancel={() => {
+                  setStripeModalData(null);
+                  setActiveSection('payment');
+                }}
+              />
+            </Elements>
+          </div>
+        </div>
+      )}
+
       {/* Main Container */}
+      {!stripeModalData && (
       <div className="relative w-full max-w-4xl bg-[#fdfdfd] rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col my-auto max-h-[95vh]">
         {/* Top Mini Header */}
         <div className="px-5 py-3.5 bg-slate-50 border-b border-slate-200 flex items-center justify-between shrink-0">
@@ -1469,6 +1576,7 @@ export default function CheckoutWizardModal({
           </button>
         </div>
       </div>
+      )}
 
       {/* =========================================================
           DELIVERY FEE ADJUSTMENT MODAL

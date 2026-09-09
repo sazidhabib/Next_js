@@ -27,8 +27,10 @@ import {
   ExternalLink,
   Eye,
   Check,
+  X,
 } from 'lucide-react';
 import { playOrderIncomingSound } from '@/components/AudioAlert';
+import PrintableInvoice from '@/components/PrintableInvoice';
 
 export default function LiveOrdersReceiver() {
   const [orders, setOrders] = useState([]);
@@ -39,12 +41,44 @@ export default function LiveOrdersReceiver() {
   const [rejectionReason, setRejectionReason] = useState('Kitchen is at maximum capacity');
   const [thermalReceiptOrder, setThermalReceiptOrder] = useState(null);
   const [activeTab, setActiveTab] = useState('PENDING'); // 'PENDING' | 'PREPARING' | 'READY' | 'COMPLETED'
+  const [kitchenTemplate, setKitchenTemplate] = useState(null);
+  const [restaurantData, setRestaurantData] = useState(null);
   
   // Custom preparation timer state per order
   const [cardPrepTimes, setCardPrepTimes] = useState({});
   const [reviewOrderModal, setReviewOrderModal] = useState(null);
   const [extendTimeOrder, setExtendTimeOrder] = useState(null);
   const [extendMinutes, setExtendMinutes] = useState(10);
+
+  // Load active printer templates and restaurant metadata
+  const loadPrinterConfig = async () => {
+    try {
+      const [restRes, settingsRes] = await Promise.all([
+        fetch('/api/restaurant?slug=bellavista-pizza'),
+        fetch('/api/admin/printer-settings?restaurantId=resto-bella-vista-001'),
+      ]);
+      const restJson = await restRes.json();
+      const settingsJson = await settingsRes.json();
+
+      if (restJson.success && restJson.data) {
+        setRestaurantData(restJson.data);
+      }
+
+      if (settingsJson.success && settingsJson.data?.activeKitchenTemplateId) {
+        const tRes = await fetch(`/api/admin/templates/${settingsJson.data.activeKitchenTemplateId}`);
+        const tJson = await tRes.json();
+        if (tJson.success && tJson.data) {
+          setKitchenTemplate(tJson.data);
+        }
+      }
+    } catch (err) {
+      console.warn('Printer config fetch fallback:', err);
+    }
+  };
+
+  useEffect(() => {
+    loadPrinterConfig();
+  }, []);
 
   // Fetch orders regularly
   const fetchLiveOrders = async () => {
@@ -53,9 +87,11 @@ export default function LiveOrdersReceiver() {
       const json = await res.json();
       if (json.success && json.data) {
         const fetched = json.data;
-        const pendingCount = fetched.filter((o) => o.status === 'PENDING').length;
+        const pendingCount = fetched.filter(
+          (o) => o.status === 'PENDING' && (o.paymentMethod !== 'CARD_ONLINE' || o.paymentStatus === 'PAID')
+        ).length;
 
-        // Trigger sound if there are pending orders
+        // Trigger sound only if there are verified incoming pending orders
         if (pendingCount > 0 && soundEnabled) {
           playOrderIncomingSound();
         }
@@ -203,7 +239,10 @@ export default function LiveOrdersReceiver() {
     }
   };
 
-  const pendingOrders = orders.filter((o) => o.status === 'PENDING');
+  // Only show pending orders if they are either cash orders or verified online payments
+  const pendingOrders = orders.filter(
+    (o) => o.status === 'PENDING' && (o.paymentMethod !== 'CARD_ONLINE' || o.paymentStatus === 'PAID')
+  );
   const preparingOrders = orders.filter(
     (o) => o.status === 'ACCEPTED' || o.status === 'PREPARING'
   );
@@ -1023,90 +1062,47 @@ export default function LiveOrdersReceiver() {
       {/* 80mm Thermal Receipt Preview Modal */}
       {thermalReceiptOrder && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xs">
-          <div className="bg-white text-black p-6 rounded-2xl max-w-sm w-full space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto">
-            {/* Printable 80mm Container */}
-            <div id="thermal-receipt" className="space-y-3 font-mono text-xs">
-              <div className="text-center space-y-1 border-b border-black pb-2">
-                <h2 className="font-bold text-sm uppercase">BELLA VISTA PIZZERIA</h2>
-                <p className="text-[10px]">742 Evergreen Terrace, Downtown Plaza</p>
-                <p className="text-[10px]">Tel: +1 (555) 345-6789</p>
+          <div className="bg-slate-900 border border-slate-700 text-white rounded-3xl max-w-md w-full p-5 space-y-4 shadow-2xl max-h-[95vh] overflow-y-auto">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3 no-print">
+              <div className="flex items-center gap-2">
+                <Printer className="w-5 h-5 text-orange-500" />
+                <h3 className="font-bold text-sm text-white">
+                  Kitchen Ticket ({thermalReceiptOrder.orderNumber})
+                </h3>
               </div>
+              <button
+                onClick={() => setThermalReceiptOrder(null)}
+                className="text-slate-400 hover:text-white p-1 rounded-lg cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
 
-              <div className="flex justify-between font-bold text-xs py-1 border-b border-dashed border-black">
-                <span>ORDER {thermalReceiptOrder.orderNumber}</span>
-                <span>{thermalReceiptOrder.orderType}</span>
-              </div>
-
-              <div className="space-y-0.5 text-[11px]">
-                <p>Customer: {thermalReceiptOrder.customerName}</p>
-                <p>Phone: {thermalReceiptOrder.customerPhone}</p>
-                {thermalReceiptOrder.deliveryAddress && (
-                  <p>Address: {thermalReceiptOrder.deliveryAddress}</p>
-                )}
-                <p>Time: {new Date(thermalReceiptOrder.createdAt).toLocaleTimeString()}</p>
-                {thermalReceiptOrder.prepMinutes && (
-                  <p className="font-bold text-black">Prep Time: {thermalReceiptOrder.prepMinutes} mins</p>
-                )}
-              </div>
-
-              <div className="border-t border-b border-black py-2 space-y-2">
-                {thermalReceiptOrder.items?.map((it, idx) => (
-                  <div key={idx} className="space-y-0.5">
-                    <div className="flex justify-between font-bold">
-                      <span>{it.quantity}x {it.itemName}</span>
-                      <span>£{it.itemTotal?.toFixed(2)}</span>
-                    </div>
-                    {it.selectedOptions?.map((o, oIdx) => (
-                      <p key={oIdx} className="text-[10px] pl-2">
-                        + {o.optionName}
-                      </p>
-                    ))}
-                    {it.specialNotes && (
-                      <p className="text-[10px] italic pl-2">** {it.specialNotes}</p>
-                    )}
-                  </div>
-                ))}
-              </div>
-
-              <div className="space-y-1 text-[11px] pt-1">
-                <div className="flex justify-between">
-                  <span>Subtotal:</span>
-                  <span>£{thermalReceiptOrder.subtotal?.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Tax:</span>
-                  <span>£{thermalReceiptOrder.taxAmount?.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Delivery Fee:</span>
-                  <span>£{thermalReceiptOrder.deliveryFee?.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between font-bold text-xs pt-1 border-t border-dashed border-black">
-                  <span>TOTAL:</span>
-                  <span>£{thermalReceiptOrder.totalAmount?.toFixed(2)}</span>
-                </div>
-              </div>
-
-              <div className="text-center pt-2 text-[10px]">
-                <p>Payment: {thermalReceiptOrder.paymentMethod}</p>
-                <p className="pt-1">*** KITCHEN COPY ***</p>
-              </div>
+            {/* Printable Invoice Container */}
+            <div className="bg-slate-950 p-3 rounded-2xl border border-slate-800 flex justify-center">
+              <PrintableInvoice
+                order={thermalReceiptOrder}
+                template={kitchenTemplate}
+                type="KITCHEN"
+                restaurant={restaurantData}
+              />
             </div>
 
             {/* Modal Actions */}
-            <div className="flex items-center gap-2 pt-2 no-print">
+            <div className="flex items-center gap-2 pt-1 no-print">
               <button
                 onClick={() => setThermalReceiptOrder(null)}
-                className="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-800 py-2 rounded-xl text-xs font-bold"
+                className="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer"
               >
                 Close
               </button>
               <button
                 onClick={() => window.print()}
-                className="flex-1 bg-orange-600 hover:bg-orange-700 text-white py-2 rounded-xl text-xs font-bold shadow-md flex items-center justify-center gap-1"
+                className="flex-1 bg-orange-600 hover:bg-orange-500 active:scale-98 text-white py-2.5 rounded-xl text-xs font-black shadow-lg shadow-orange-600/30 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
               >
-                <Printer className="w-3.5 h-3.5" />
-                <span>Print Ticket</span>
+                <Printer className="w-4 h-4" />
+                <span>Print Kitchen Ticket</span>
               </button>
             </div>
           </div>

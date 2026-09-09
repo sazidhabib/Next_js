@@ -163,7 +163,13 @@ export async function getOrders(restaurantId = null) {
     if (connected) {
       const where = restaurantId ? { restaurantId } : {};
       const orders = await Order.findAll({
-        where,
+        where: {
+          ...where,
+          [Op.or]: [
+            { paymentMethod: { [Op.ne]: 'CARD_ONLINE' } },
+            { paymentStatus: 'PAID' },
+          ],
+        },
         order: [['createdAt', 'DESC']],
         include: [
           {
@@ -291,7 +297,7 @@ export async function createOrder(orderPayload) {
     discountAmount: Number((orderPayload.discountAmount || 0).toFixed(2)),
     totalAmount: Number(orderPayload.totalAmount.toFixed(2)),
     paymentMethod: orderPayload.paymentMethod || 'CASH_ON_DELIVERY',
-    paymentStatus: orderPayload.paymentMethod === 'CARD_ONLINE' ? 'PAID' : 'UNPAID',
+    paymentStatus: 'UNPAID',
     scheduledFor: orderPayload.scheduledFor || null,
     createdAt: new Date().toISOString(),
     items: orderPayload.items.map((item, idx) => ({

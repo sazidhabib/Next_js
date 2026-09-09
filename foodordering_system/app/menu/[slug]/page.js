@@ -241,13 +241,29 @@ export default function MenuPage({ params }) {
                     el.scrollIntoView({ behavior: 'smooth', block: 'start' });
                   }
                 }}
-                className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap transition-all cursor-pointer ${
+                className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap transition-all cursor-pointer flex items-center gap-2 ${
                   activeCategory === cat.id
                     ? 'bg-orange-600 text-white shadow-sm shadow-orange-600/30'
                     : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                 }`}
               >
-                {cat.name} ({cat.items?.length || 0})
+                {cat.imageUrl && (
+                  <img
+                    src={cat.imageUrl}
+                    alt={cat.name}
+                    className="w-4 h-4 rounded-full object-cover shrink-0"
+                  />
+                )}
+                <span>{cat.name}</span>
+                <span
+                  className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
+                    activeCategory === cat.id
+                      ? 'bg-orange-700 text-white'
+                      : 'bg-slate-200 text-slate-600'
+                  }`}
+                >
+                  {cat.items?.length || 0}
+                </span>
               </button>
             ))}
           </div>
@@ -255,68 +271,79 @@ export default function MenuPage({ params }) {
       </div>
 
       {/* Main Menu Feed */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 space-y-12">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
         {restaurant?.categories?.map((cat) => {
           const visibleItems = cat.items?.filter(filterItem) || [];
-          if (visibleItems.length === 0 && searchQuery) {
-            return null;
-          }
+          if (visibleItems.length === 0 && searchQuery) return null;
 
           return (
             <section
               key={cat.id}
               id={`section-${cat.id}`}
-              className="scroll-mt-40 space-y-5"
+              className="space-y-6 scroll-mt-36"
             >
               {/* Category Header */}
-              <div className="border-b border-slate-200 pb-3">
-                <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900">
-                  {cat.name}
-                </h2>
-                {cat.description && (
-                  <p className="text-xs sm:text-sm text-slate-500 mt-1 max-w-3xl">
-                    {cat.description}
-                  </p>
+              <div className="flex flex-col sm:flex-row sm:items-center gap-4 border-b border-slate-200 pb-4">
+                {cat.imageUrl && (
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl overflow-hidden bg-slate-100 border border-slate-200 shrink-0 shadow-sm">
+                    <img
+                      src={cat.imageUrl}
+                      alt={cat.name}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
                 )}
+                <div className="flex-1">
+                  <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900">
+                    {cat.name}
+                  </h2>
+                  {cat.description && (
+                    <p className="text-xs sm:text-sm text-slate-500 mt-1 max-w-3xl">
+                      {cat.description}
+                    </p>
+                  )}
+                </div>
               </div>
 
-              {/* Items Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+              {/* Items Grid - 2 columns on desktop, 1 on mobile */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5">
                 {visibleItems.map((item) => (
                   <div
                     key={item.id}
                     onClick={() => handleOpenItem(item)}
-                    className="group bg-white rounded-2xl border border-slate-200/80 hover:border-orange-300 hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col justify-between cursor-pointer"
+                    className="group bg-white rounded-2xl border border-slate-200/80 hover:border-orange-400 hover:shadow-lg transition-all duration-300 overflow-hidden flex items-stretch p-3.5 sm:p-4 gap-3.5 sm:gap-4 cursor-pointer"
                   >
-                    {/* Item Image */}
-                    <div className="relative h-44 sm:h-48 bg-slate-100 overflow-hidden">
-                      <img
-                        src={item.imageUrl}
-                        alt={item.name}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      />
-                      <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent"></div>
-
-                      {/* Price Badge */}
-                      <div className="absolute bottom-3 left-3 bg-white/95 backdrop-blur-md px-2.5 py-1 rounded-lg text-slate-900 font-extrabold text-sm shadow-md">
-                        £{item.basePrice.toFixed(2)}
+                    {/* Left: Dish Image (if available) */}
+                    {item.imageUrl && (
+                      <div className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-xl overflow-hidden bg-slate-100 shrink-0 self-center">
+                        <img
+                          src={item.imageUrl}
+                          alt={item.name}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
                       </div>
-                    </div>
+                    )}
 
-                    {/* Item Body */}
-                    <div className="p-4 space-y-2 flex-1 flex flex-col justify-between">
-                      <div>
-                        <h3 className="font-bold text-slate-900 text-sm sm:text-base group-hover:text-orange-600 transition-colors">
-                          {item.name}
-                        </h3>
+                    {/* Right: Dish Info & Actions */}
+                    <div className="flex-1 flex flex-col justify-between min-w-0">
+                      <div className="space-y-1">
+                        <div className="flex items-start justify-between gap-2">
+                          <h3 className="font-bold text-slate-900 text-sm sm:text-base group-hover:text-orange-600 transition-colors line-clamp-1">
+                            {item.name}
+                          </h3>
+                          <span className="font-extrabold text-slate-900 text-sm sm:text-base shrink-0">
+                            £{item.basePrice.toFixed(2)}
+                          </span>
+                        </div>
+
                         {item.description && (
-                          <p className="text-xs text-slate-500 mt-1 line-clamp-2 leading-relaxed">
+                          <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed">
                             {item.description}
                           </p>
                         )}
                       </div>
 
-                      <div className="pt-3 flex items-center justify-between border-t border-slate-100 mt-2">
+                      <div className="pt-2 flex items-center justify-between border-t border-slate-100 mt-2">
                         <span className="text-[11px] text-slate-400 font-medium">
                           {item.optionGroups && item.optionGroups.length > 0
                             ? 'Customizable'

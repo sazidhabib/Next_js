@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getOrderById, updateOrderStatus } from '@/lib/dataStore';
+import { Restaurant, InvoiceTemplate } from '@/lib/sequelize';
 
 export async function GET(request, { params }) {
   try {
@@ -13,7 +14,33 @@ export async function GET(request, { params }) {
       );
     }
 
-    return NextResponse.json({ success: true, data: order });
+    // Attempt to load restaurant & active customer template
+    let restaurant = null;
+    let customerTemplate = null;
+
+    try {
+      if (order.restaurantId) {
+        restaurant = await Restaurant.findOne({
+          where: { id: order.restaurantId },
+          attributes: ['id', 'name', 'phone', 'email', 'address', 'vatNumber', 'legalName', 'website', 'activeCustomerTemplateId'],
+        });
+
+        if (restaurant?.activeCustomerTemplateId) {
+          customerTemplate = await InvoiceTemplate.findOne({
+            where: { id: restaurant.activeCustomerTemplateId },
+          });
+        }
+      }
+    } catch (dbErr) {
+      console.warn('Could not fetch template/restaurant relation:', dbErr.message);
+    }
+
+    return NextResponse.json({
+      success: true,
+      data: order,
+      restaurant: restaurant ? restaurant.get({ plain: true }) : null,
+      customerTemplate: customerTemplate ? customerTemplate.get({ plain: true }) : null,
+    });
   } catch (error) {
     console.error('Error fetching order by ID:', error);
     return NextResponse.json(

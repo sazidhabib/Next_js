@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import {
   UtensilsCrossed,
@@ -19,6 +19,7 @@ import {
   MoreVertical,
 } from 'lucide-react';
 import { useAdmin } from '@/lib/adminContext';
+import MediaPickerModal from '@/components/MediaPickerModal';
 
 export default function AdminMenuPage() {
   const { selectedRestaurant } = useAdmin();
@@ -32,6 +33,7 @@ export default function AdminMenuPage() {
   const [editingCategory, setEditingCategory] = useState(null);
   const [catName, setCatName] = useState('');
   const [catDesc, setCatDesc] = useState('');
+  const [catImage, setCatImage] = useState('');
   const [catSaving, setCatSaving] = useState(false);
 
   // Dish Modal State (Add & Edit)
@@ -42,11 +44,12 @@ export default function AdminMenuPage() {
   const [dishDesc, setDishDesc] = useState('');
   const [dishPrice, setDishPrice] = useState('');
   const [dishImage, setDishImage] = useState('');
-  const [isUploading, setIsUploading] = useState(false);
   const [dishSaving, setDishSaving] = useState(false);
 
-  // File input ref for image upload
-  const fileInputRef = useRef(null);
+  // Media Picker State
+  const [isMediaPickerOpen, setIsMediaPickerOpen] = useState(false);
+  const [mediaPickerTarget, setMediaPickerTarget] = useState(null); // 'category' | 'dish'
+  const [mediaPickerTitle, setMediaPickerTitle] = useState('Media Library');
 
   const activeSlug = selectedRestaurant?.slug || 'bellavista-pizza';
 
@@ -85,40 +88,25 @@ export default function AdminMenuPage() {
   }, [activeSlug]);
 
   // ==========================================
-  // IMAGE UPLOAD HANDLER
+  // MEDIA PICKER HANDLERS
   // ==========================================
-  const handleImageFileChange = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const openCategoryMediaPicker = () => {
+    setMediaPickerTarget('category');
+    setMediaPickerTitle('Select Category Image');
+    setIsMediaPickerOpen(true);
+  };
 
-    // Validate size (< 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error('Image size must be less than 5MB');
-      return;
-    }
+  const openDishMediaPicker = () => {
+    setMediaPickerTarget('dish');
+    setMediaPickerTitle('Select Dish Image');
+    setIsMediaPickerOpen(true);
+  };
 
-    try {
-      setIsUploading(true);
-      const formData = new FormData();
-      formData.append('file', file);
-
-      const res = await fetch('/api/admin/upload', {
-        method: 'POST',
-        body: formData,
-      });
-
-      const json = await res.json();
-      if (json.success && json.url) {
-        setDishImage(json.url);
-        toast.success('Dish image uploaded successfully!');
-      } else {
-        toast.error(json.error || 'Failed to upload image');
-      }
-    } catch (err) {
-      console.error('Upload error:', err);
-      toast.error('Network error uploading image');
-    } finally {
-      setIsUploading(false);
+  const handleMediaSelected = (imageUrl) => {
+    if (mediaPickerTarget === 'category') {
+      setCatImage(imageUrl);
+    } else if (mediaPickerTarget === 'dish') {
+      setDishImage(imageUrl);
     }
   };
 
@@ -129,6 +117,7 @@ export default function AdminMenuPage() {
     setEditingCategory(null);
     setCatName('');
     setCatDesc('');
+    setCatImage('');
     setIsCatModalOpen(true);
   };
 
@@ -136,6 +125,7 @@ export default function AdminMenuPage() {
     setEditingCategory(cat);
     setCatName(cat.name || '');
     setCatDesc(cat.description || '');
+    setCatImage(cat.imageUrl || '');
     setIsCatModalOpen(true);
   };
 
@@ -159,6 +149,7 @@ export default function AdminMenuPage() {
             categoryData: {
               name: catName.trim(),
               description: catDesc.trim(),
+              imageUrl: catImage.trim() || null,
             },
           }),
         });
@@ -181,6 +172,7 @@ export default function AdminMenuPage() {
             categoryData: {
               name: catName.trim(),
               description: catDesc.trim(),
+              imageUrl: catImage.trim() || null,
             },
           }),
         });
@@ -473,12 +465,21 @@ export default function AdminMenuPage() {
             <button
               key={cat.id}
               onClick={() => setActiveCategoryId(cat.id)}
-              className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-2 cursor-pointer ${
+              className={`px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-2.5 cursor-pointer ${
                 activeCategoryId === cat.id
                   ? 'bg-orange-600 text-white shadow-md shadow-orange-600/30'
                   : 'bg-slate-950 border border-slate-800 text-slate-400 hover:text-white hover:border-slate-700'
               }`}
             >
+              {cat.imageUrl ? (
+                <img
+                  src={cat.imageUrl}
+                  alt={cat.name}
+                  className="w-5 h-5 rounded-md object-cover border border-white/20"
+                />
+              ) : (
+                <span className="w-2 h-2 rounded-full bg-orange-400/60" />
+              )}
               <span>{cat.name}</span>
               <span
                 className={`text-[10px] px-1.5 py-0.5 rounded-full font-extrabold ${
@@ -725,6 +726,60 @@ export default function AdminMenuPage() {
                 />
               </div>
 
+              {/* Category Image Picker */}
+              <div className="space-y-2">
+                <label className="font-bold text-slate-300 flex items-center justify-between">
+                  <span>Category Image</span>
+                  <span className="text-[11px] text-emerald-400 font-semibold flex items-center gap-1">
+                    <Sparkles className="w-3 h-3" /> Auto WebP Optimized
+                  </span>
+                </label>
+
+                {catImage ? (
+                  <div className="relative h-32 rounded-2xl overflow-hidden border border-slate-700 bg-slate-950 group">
+                    <img
+                      src={catImage}
+                      alt="Category preview"
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-black/50 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button
+                        type="button"
+                        onClick={openCategoryMediaPicker}
+                        className="bg-slate-900/95 hover:bg-slate-800 text-white px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-lg border border-slate-700 cursor-pointer"
+                      >
+                        <Upload className="w-3.5 h-3.5 text-orange-400" />
+                        <span>Change Image</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setCatImage('')}
+                        className="bg-rose-600 hover:bg-rose-500 text-white px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-lg cursor-pointer"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                        <span>Remove</span>
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={openCategoryMediaPicker}
+                    className="w-full border-2 border-dashed border-slate-700 hover:border-orange-500/60 rounded-2xl p-4 text-center cursor-pointer bg-slate-950/60 transition-colors flex flex-col items-center justify-center gap-1.5"
+                  >
+                    <div className="w-9 h-9 rounded-xl bg-orange-500/10 border border-orange-500/20 text-orange-400 flex items-center justify-center">
+                      <ImageIcon className="w-4 h-4" />
+                    </div>
+                    <p className="text-xs font-bold text-white">
+                      Choose / Upload Category Image
+                    </p>
+                    <p className="text-[10px] text-slate-400">
+                      Pick from Media Library or upload a new photo
+                    </p>
+                  </button>
+                )}
+              </div>
+
               <div className="flex items-center gap-2 pt-2 border-t border-slate-800">
                 <button
                   type="button"
@@ -747,7 +802,7 @@ export default function AdminMenuPage() {
       )}
 
       {/* =========================================================
-          DISH MODAL (ADD & EDIT WITH IMAGE UPLOAD)
+          DISH MODAL (ADD & EDIT WITH MEDIA PICKER)
          ========================================================= */}
       {isDishModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xs overflow-y-auto">
@@ -826,77 +881,58 @@ export default function AdminMenuPage() {
                 />
               </div>
 
-              {/* Dish Image Upload / URL */}
+              {/* Dish Image Picker */}
               <div className="space-y-2">
                 <label className="font-bold text-slate-300 flex items-center justify-between">
                   <span>Dish Image</span>
-                  <span className="text-[11px] text-slate-400 font-normal">PNG, JPG, WEBP (&lt;5MB)</span>
+                  <span className="text-[11px] text-emerald-400 font-semibold flex items-center gap-1">
+                    <Sparkles className="w-3 h-3" /> Auto WebP Optimized
+                  </span>
                 </label>
 
-                {/* Image Preview Box */}
                 {dishImage ? (
-                  <div className="relative h-36 rounded-2xl overflow-hidden border border-slate-700 bg-slate-950">
+                  <div className="relative h-36 rounded-2xl overflow-hidden border border-slate-700 bg-slate-950 group">
                     <img
                       src={dishImage}
-                      alt="Preview"
+                      alt="Dish Preview"
                       className="w-full h-full object-cover"
                     />
-                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center gap-2 opacity-0 hover:opacity-100 transition-opacity">
+                    <div className="absolute inset-0 bg-black/50 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                       <button
                         type="button"
-                        onClick={() => fileInputRef.current?.click()}
-                        className="bg-slate-900/90 hover:bg-slate-800 text-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 shadow cursor-pointer"
+                        onClick={openDishMediaPicker}
+                        className="bg-slate-900/95 hover:bg-slate-800 text-white px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-lg border border-slate-700 cursor-pointer"
                       >
-                        <Upload className="w-3 h-3" />
-                        <span>Replace</span>
+                        <Upload className="w-3.5 h-3.5 text-orange-400" />
+                        <span>Change Image</span>
                       </button>
                       <button
                         type="button"
                         onClick={() => setDishImage('')}
-                        className="bg-red-600 hover:bg-red-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 shadow cursor-pointer"
+                        className="bg-rose-600 hover:bg-rose-500 text-white px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-lg cursor-pointer"
                       >
-                        <Trash2 className="w-3 h-3" />
+                        <Trash2 className="w-3.5 h-3.5" />
                         <span>Remove</span>
                       </button>
                     </div>
                   </div>
                 ) : (
-                  <div
-                    onClick={() => fileInputRef.current?.click()}
-                    className="border-2 border-dashed border-slate-700 hover:border-orange-500/60 rounded-2xl p-4 text-center cursor-pointer bg-slate-950/60 transition-colors flex flex-col items-center justify-center gap-2"
+                  <button
+                    type="button"
+                    onClick={openDishMediaPicker}
+                    className="w-full border-2 border-dashed border-slate-700 hover:border-orange-500/60 rounded-2xl p-4 text-center cursor-pointer bg-slate-950/60 transition-colors flex flex-col items-center justify-center gap-1.5"
                   >
                     <div className="w-10 h-10 rounded-xl bg-slate-800 text-slate-300 flex items-center justify-center">
                       <ImageIcon className="w-5 h-5 text-orange-400" />
                     </div>
-                    <div>
-                      <p className="text-xs font-bold text-white">
-                        {isUploading ? 'Uploading image...' : 'Click to browse & upload image'}
-                      </p>
-                      <p className="text-[10px] text-slate-400">Directly from your computer</p>
-                    </div>
-                  </div>
+                    <p className="text-xs font-bold text-white">
+                      Choose / Upload Dish Image
+                    </p>
+                    <p className="text-[10px] text-slate-400">
+                      Pick from Media Library or upload a new photo
+                    </p>
+                  </button>
                 )}
-
-                {/* Hidden File Input */}
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageFileChange}
-                  className="hidden"
-                />
-
-                {/* Fallback Image URL input */}
-                <div className="space-y-1 pt-1">
-                  <span className="text-[10px] text-slate-400 font-semibold">Or enter image URL manually:</span>
-                  <input
-                    type="url"
-                    value={dishImage}
-                    onChange={(e) => setDishImage(e.target.value)}
-                    placeholder="https://images.unsplash.com/..."
-                    className="w-full bg-slate-950 border border-slate-700 text-white rounded-xl p-2 text-xs focus:outline-none focus:border-orange-500 font-mono text-[11px]"
-                  />
-                </div>
               </div>
 
               {/* Modal Action Buttons */}
@@ -910,7 +946,7 @@ export default function AdminMenuPage() {
                 </button>
                 <button
                   type="submit"
-                  disabled={dishSaving || isUploading}
+                  disabled={dishSaving}
                   className="flex-1 bg-orange-600 hover:bg-orange-500 text-white py-2.5 rounded-xl font-bold shadow-md transition-all cursor-pointer disabled:opacity-50"
                 >
                   {dishSaving ? 'Saving...' : editingDish ? 'Save Changes' : 'Save Dish'}
@@ -920,6 +956,17 @@ export default function AdminMenuPage() {
           </div>
         </div>
       )}
+
+      {/* =========================================================
+          CENTRALIZED REUSABLE MEDIA PICKER MODAL
+         ========================================================= */}
+      <MediaPickerModal
+        isOpen={isMediaPickerOpen}
+        onClose={() => setIsMediaPickerOpen(false)}
+        onSelectImage={handleMediaSelected}
+        currentImage={mediaPickerTarget === 'category' ? catImage : dishImage}
+        title={mediaPickerTitle}
+      />
     </div>
   );
 }

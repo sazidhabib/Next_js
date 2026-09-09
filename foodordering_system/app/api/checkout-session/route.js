@@ -39,20 +39,44 @@ export async function POST(request) {
     }
 
     const stripe = new Stripe(stripeSecretKey);
+    const currency = (restaurant?.currency || 'gbp').toLowerCase();
+
+    // Build line items for Stripe Checkout
+    const lineItems = (order.items || []).map((item) => {
+      const itemUnitPrice = (item.itemTotal && item.quantity > 0)
+        ? Math.round((item.itemTotal / item.quantity) * 100)
+        : Math.round((item.itemPrice || item.unitPrice || 0) * 100);
+
+      return {
+        price_data: {
+          currency,
+          product_data: {
+            name: `${item.itemName}`,
+          },
+          unit_amount: Math.max(0, itemUnitPrice),
+        },
+        quantity: item.quantity || 1,
+      };
+    });
+
+    // If there is a delivery fee, add it as a separate line item
+    if (order.orderType === 'DELIVERY' && order.deliveryFee > 0) {
+      lineItems.push({
+        price_data: {
+          currency,
+          product_data: {
+            name: 'Delivery Fee',
+          },
+          unit_amount: Math.round(order.deliveryFee * 100),
+        },
+        quantity: 1,
+      });
+    }
 
     // Create Stripe Checkout Session
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
-      line_items: order.items.map((item) => ({
-        price_data: {
-          currency: restaurant?.currency?.toLowerCase() || 'usd',
-          product_data: {
-            name: item.itemName,
-          },
-          unit_amount: Math.round((item.itemPrice || item.unitPrice || 0) * 100),
-        },
-        quantity: item.quantity,
-      })),
+      line_items: lineItems,
       mode: 'payment',
       success_url: `${request.nextUrl.origin}/api/checkout-session?session_id={CHECKOUT_SESSION_ID}&order_id=${order.id}`,
       cancel_url: `${request.nextUrl.origin}/order/${order.id}?payment_cancelled=true`,
@@ -115,6 +139,20 @@ export async function GET(request) {
         status: 'ACCEPTED',
         note: 'Payment verified successfully via Stripe Checkout.',
       });
+
+      // Trigger automatic ESC/POS kitchen print now that payment is verified
+      try {
+        const { getOrderById } = await import('@/lib/dataStore');
+        const { autoPrintKitchenReceipt } = await import('@/lib/printerService');
+        const fullOrder = await getOrderById(orderId);
+        if (fullOrder) {
+          autoPrintKitchenReceipt(fullOrder).catch(err => {
+            console.error('Failed to auto print kitchen receipt on payment success:', err);
+          });
+        }
+      } catch (printErr) {
+        console.warn('Auto print trigger error:', printErr);
+      }
     }
 
     // Redirect user to the order tracking page

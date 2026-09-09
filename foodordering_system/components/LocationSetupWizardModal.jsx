@@ -64,6 +64,8 @@ export default function LocationSetupWizardModal({
   const [enableCash, setEnableCash] = useState(true);
   const [enableCard, setEnableCard] = useState(true);
   const [enableOnline, setEnableOnline] = useState(false);
+  const [stripePublishableKey, setStripePublishableKey] = useState('');
+  const [stripeSecretKey, setStripeSecretKey] = useState('');
 
   // Mini Map Leaflet references
   const miniMapContainerRef = useRef(null);
@@ -96,6 +98,8 @@ export default function LocationSetupWizardModal({
       setEnableCash(editData.enableCash !== false);
       setEnableCard(editData.enableCard !== false);
       setEnableOnline(!!editData.enableOnline);
+      setStripePublishableKey(editData.stripePublishableKey || '');
+      setStripeSecretKey(editData.stripeSecretKey || '');
     } else {
       setName('');
       setSlug('');
@@ -120,6 +124,8 @@ export default function LocationSetupWizardModal({
       setEnableCash(true);
       setEnableCard(true);
       setEnableOnline(false);
+      setStripePublishableKey('');
+      setStripeSecretKey('');
     }
     setStep(1);
   }, [editData, isOpen]);
@@ -350,6 +356,8 @@ export default function LocationSetupWizardModal({
         enableCash,
         enableCard,
         enableOnline,
+        stripePublishableKey: enableOnline ? stripePublishableKey : null,
+        stripeSecretKey: enableOnline ? stripeSecretKey : null,
       };
 
       const url = '/api/admin/restaurants';
@@ -824,8 +832,47 @@ export default function LocationSetupWizardModal({
                       />
                       <span>Card POS on Arrival</span>
                     </label>
+                    <label className="flex items-center gap-2 cursor-pointer font-medium text-slate-300">
+                      <input
+                        type="checkbox"
+                        checked={enableOnline}
+                        onChange={(e) => setEnableOnline(e.target.checked)}
+                        className="rounded text-orange-500 focus:ring-0"
+                      />
+                      <span>Online Card (Stripe Gateway)</span>
+                    </label>
                   </div>
                 </div>
+
+                {/* Stripe Credentials Fields */}
+                {enableOnline && (
+                  <div className="bg-slate-900/90 border border-slate-700/80 rounded-xl p-3.5 space-y-3 animate-fadeIn">
+                    <div className="flex items-center gap-1.5 text-orange-400 font-bold text-[11px]">
+                      <Sparkles className="w-3.5 h-3.5" />
+                      <span>Stripe Sandbox / Live API Keys</span>
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[11px] font-bold text-slate-300">Stripe Publishable Key</label>
+                      <input
+                        type="text"
+                        value={stripePublishableKey}
+                        onChange={(e) => setStripePublishableKey(e.target.value)}
+                        placeholder="pk_test_..."
+                        className="w-full bg-slate-950 border border-slate-700 text-white rounded-lg p-2 text-xs focus:outline-none focus:border-orange-500 font-mono"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[11px] font-bold text-slate-300">Stripe Secret Key</label>
+                      <input
+                        type="password"
+                        value={stripeSecretKey}
+                        onChange={(e) => setStripeSecretKey(e.target.value)}
+                        placeholder="sk_test_..."
+                        className="w-full bg-slate-950 border border-slate-700 text-white rounded-lg p-2 text-xs focus:outline-none focus:border-orange-500 font-mono"
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Step 3 Actions */}

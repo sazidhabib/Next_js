@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { writeFile, mkdir } from 'fs/promises';
 import path from 'path';
+import sharp from 'sharp';
 
 export async function POST(request) {
   try {
@@ -12,23 +13,31 @@ export async function POST(request) {
     }
 
     const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
+    const inputBuffer = Buffer.from(bytes);
 
     // Ensure uploads directory exists
     const uploadsDir = path.join(process.cwd(), 'public', 'uploads');
     await mkdir(uploadsDir, { recursive: true });
 
-    // Sanitize extension and generate unique filename
-    const originalName = file.name || 'image.jpg';
-    const ext = path.extname(originalName).toLowerCase() || '.jpg';
     const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e6)}`;
-    const filename = `dish-${uniqueSuffix}${ext}`;
+    const filename = `img-${uniqueSuffix}.webp`;
     const filePath = path.join(uploadsDir, filename);
 
-    await writeFile(filePath, buffer);
+    let outputBuffer;
+    try {
+      outputBuffer = await sharp(inputBuffer)
+        .rotate()
+        .resize({ width: 1600, withoutEnlargement: true, fit: 'inside' })
+        .webp({ quality: 82, effort: 4 })
+        .toBuffer();
+    } catch {
+      outputBuffer = inputBuffer;
+    }
+
+    await writeFile(filePath, outputBuffer);
 
     const publicUrl = `/uploads/${filename}`;
-    return NextResponse.json({ success: true, url: publicUrl, filename });
+    return NextResponse.json({ success: true, url: publicUrl, filename, format: 'webp' });
   } catch (error) {
     console.error('Image upload failed:', error);
     return NextResponse.json(

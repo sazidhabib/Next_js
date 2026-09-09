@@ -517,7 +517,7 @@ export default function EmbedMenuPage({ params }) {
             </div>
           </div>
 
-          {/* 4. Main Menu Feed - Two Column GloriaFood Style */}
+          {/* 4. Main Menu Feed - Two Column GloriaFood Style with Category Image & Left-aligned Dish Images */}
           <main className="max-w-5xl w-full mx-auto px-4 py-4 flex-1 space-y-12">
             {restaurant?.categories?.map((cat) => {
               const items = cat.items || [];
@@ -528,16 +528,13 @@ export default function EmbedMenuPage({ params }) {
               const leftItems = items.slice(0, midpoint);
               const rightItems = items.slice(midpoint);
 
-              const featuredItemWithImg =
-                items.find((it) => it.imageUrl) || items[0];
-
               return (
                 <section
                   key={cat.id}
                   id={`cat-${cat.id}`}
                   className="scroll-mt-20 space-y-4"
                 >
-                  {/* Category Header */}
+                  {/* Category Header (Name Only) */}
                   <div className="border-b-2 border-slate-900/10 pb-1.5 flex items-baseline justify-between">
                     <h2 className="text-xl sm:text-2xl font-black text-slate-800 uppercase tracking-tight font-sans">
                       {cat.name}
@@ -545,76 +542,102 @@ export default function EmbedMenuPage({ params }) {
                   </div>
 
                   {/* Two Column Menu Layout */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-2">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-3">
                     {/* Left Column Items */}
-                    <div className="space-y-1 divide-y divide-slate-100">
+                    <div className="space-y-2 divide-y divide-slate-100">
                       {leftItems.map((item) => (
                         <div
                           key={item.id}
                           onClick={() => handleOpenItem(item)}
-                          className="group py-2.5 px-2 -mx-2 rounded-lg hover:bg-slate-50 transition-colors cursor-pointer"
+                          className="group py-2.5 px-2.5 -mx-2.5 rounded-xl hover:bg-slate-50 transition-all cursor-pointer flex items-center gap-3.5"
                         >
-                          <div className="flex items-start justify-between gap-4">
-                            <h3 className="font-bold text-slate-900 text-sm sm:text-[15px] group-hover:text-orange-600 transition-colors leading-snug">
-                              {item.name}
-                            </h3>
-                            <span className="font-extrabold text-slate-900 text-sm sm:text-[15px] shrink-0">
-                              {item.basePrice.toFixed(2)}
-                            </span>
-                          </div>
-                          {item.description && (
-                            <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">
-                              {item.description}
-                            </p>
+                          {/* Left-aligned Dish Image */}
+                          {item.imageUrl && (
+                            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden bg-slate-100 border border-slate-200 shrink-0">
+                              <img
+                                src={item.imageUrl}
+                                alt={item.name}
+                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                              />
+                            </div>
                           )}
+
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-start justify-between gap-2">
+                              <h3 className="font-bold text-slate-900 text-sm sm:text-[15px] group-hover:text-orange-600 transition-colors leading-snug truncate">
+                                {item.name}
+                              </h3>
+                              <span className="font-extrabold text-slate-900 text-sm sm:text-[15px] shrink-0">
+                                £{item.basePrice.toFixed(2)}
+                              </span>
+                            </div>
+                            {item.description && (
+                              <p className="text-xs text-slate-500 mt-0.5 line-clamp-2 leading-relaxed">
+                                {item.description}
+                              </p>
+                            )}
+                          </div>
                         </div>
                       ))}
                     </div>
 
-                    {/* Right Column (Featured Image Top + Remaining Items) */}
+                    {/* Right Column Items with Category Banner Image on Top */}
                     <div className="space-y-3">
-                      {featuredItemWithImg?.imageUrl && (
-                        <div
-                          onClick={() => handleOpenItem(featuredItemWithImg)}
-                          className="w-full h-36 sm:h-44 rounded-xl overflow-hidden shadow-xs cursor-pointer group relative border border-slate-200"
-                        >
+                      {/* Show Category/Menu Image in the featured card slot */}
+                      {cat.imageUrl && (
+                        <div className="w-full h-36 sm:h-44 rounded-2xl overflow-hidden shadow-xs relative border border-slate-200 bg-slate-900 group">
                           <img
-                            src={featuredItemWithImg.imageUrl}
-                            alt={featuredItemWithImg.name}
+                            src={cat.imageUrl}
+                            alt={cat.name}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                           />
-                          <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent"></div>
-                          <div className="absolute bottom-2.5 left-3 right-3 flex items-center justify-between text-white">
-                            <span className="font-extrabold text-xs sm:text-sm drop-shadow-md truncate">
-                              {featuredItemWithImg.name}
+                          <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/20 to-transparent"></div>
+                          <div className="absolute bottom-3 left-3 right-3 text-white">
+                            <span className="font-black text-xs uppercase tracking-wider bg-orange-600 px-2 py-0.5 rounded-md shadow-xs">
+                              {cat.name}
                             </span>
-                            <span className="font-black text-xs sm:text-sm bg-orange-600 px-2 py-0.5 rounded-md shrink-0 shadow-md">
-                              £{featuredItemWithImg.basePrice.toFixed(2)}
-                            </span>
+                            {cat.description && (
+                              <p className="text-[11px] text-slate-200 mt-1 line-clamp-1 drop-shadow-sm">
+                                {cat.description}
+                              </p>
+                            )}
                           </div>
                         </div>
                       )}
 
-                      <div className="space-y-1 divide-y divide-slate-100">
+                      <div className="space-y-2 divide-y divide-slate-100">
                         {rightItems.map((item) => (
                           <div
                             key={item.id}
                             onClick={() => handleOpenItem(item)}
-                            className="group py-2.5 px-2 -mx-2 rounded-lg hover:bg-slate-50 transition-colors cursor-pointer"
+                            className="group py-2.5 px-2.5 -mx-2.5 rounded-xl hover:bg-slate-50 transition-all cursor-pointer flex items-center gap-3.5"
                           >
-                            <div className="flex items-start justify-between gap-4">
-                              <h3 className="font-bold text-slate-900 text-sm sm:text-[15px] group-hover:text-orange-600 transition-colors leading-snug">
-                                {item.name}
-                              </h3>
-                              <span className="font-extrabold text-slate-900 text-sm sm:text-[15px] shrink-0">
-                                {item.basePrice.toFixed(2)}
-                              </span>
-                            </div>
-                            {item.description && (
-                              <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">
-                                {item.description}
-                              </p>
+                            {/* Left-aligned Dish Image */}
+                            {item.imageUrl && (
+                              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden bg-slate-100 border border-slate-200 shrink-0">
+                                <img
+                                  src={item.imageUrl}
+                                  alt={item.name}
+                                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                />
+                              </div>
                             )}
+
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-start justify-between gap-2">
+                                <h3 className="font-bold text-slate-900 text-sm sm:text-[15px] group-hover:text-orange-600 transition-colors leading-snug truncate">
+                                  {item.name}
+                                </h3>
+                                <span className="font-extrabold text-slate-900 text-sm sm:text-[15px] shrink-0">
+                                  £{item.basePrice.toFixed(2)}
+                                </span>
+                              </div>
+                              {item.description && (
+                                <p className="text-xs text-slate-500 mt-0.5 line-clamp-2 leading-relaxed">
+                                  {item.description}
+                                </p>
+                              )}
+                            </div>
                           </div>
                         ))}
                       </div>

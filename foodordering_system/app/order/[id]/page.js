@@ -16,17 +16,22 @@ import {
   Printer,
   Sparkles,
   RefreshCw,
+  X,
 } from 'lucide-react';
 import { playOrderIncomingSound } from '@/components/AudioAlert';
+import PrintableInvoice from '@/components/PrintableInvoice';
 
 export default function OrderTrackingPage({ params }) {
   const unwrappedParams = use(params);
   const orderId = unwrappedParams?.id;
 
   const [order, setOrder] = useState(null);
+  const [restaurant, setRestaurant] = useState(null);
+  const [customerTemplate, setCustomerTemplate] = useState(null);
   const [loading, setLoading] = useState(true);
   const [lastStatus, setLastStatus] = useState(null);
   const [now, setNow] = useState(Date.now());
+  const [printReceiptModalOpen, setPrintReceiptModalOpen] = useState(false);
 
   // 1-second live countdown ticker
   useEffect(() => {
@@ -45,6 +50,8 @@ export default function OrderTrackingPage({ params }) {
         }
         setLastStatus(json.data.status);
         setOrder(json.data);
+        if (json.restaurant) setRestaurant(json.restaurant);
+        if (json.customerTemplate) setCustomerTemplate(json.customerTemplate);
       }
     } catch (err) {
       console.error('Polling error:', err);
@@ -189,10 +196,10 @@ export default function OrderTrackingPage({ params }) {
               Order {order.orderNumber}
             </span>
             <button
-              onClick={() => window.print()}
-              className="flex items-center gap-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs px-2.5 py-1 rounded-lg font-medium transition-colors cursor-pointer"
+              onClick={() => setPrintReceiptModalOpen(true)}
+              className="flex items-center gap-1.5 bg-orange-50 hover:bg-orange-100 text-orange-700 border border-orange-200 text-xs px-3 py-1.5 rounded-xl font-bold transition-all shadow-xs cursor-pointer active:scale-95"
             >
-              <Printer className="w-3.5 h-3.5" />
+              <Printer className="w-3.5 h-3.5 text-orange-600" />
               <span>Print Receipt</span>
             </button>
           </div>
@@ -537,6 +544,53 @@ export default function OrderTrackingPage({ params }) {
           </div>
         </div>
       </main>
+
+      {/* Customer Receipt Preview & Print Modal */}
+      {printReceiptModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xs">
+          <div className="bg-slate-900 border border-slate-700 text-white rounded-3xl max-w-md w-full p-5 space-y-4 shadow-2xl max-h-[95vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3 no-print">
+              <div className="flex items-center gap-2">
+                <Printer className="w-5 h-5 text-orange-500" />
+                <h3 className="font-bold text-sm text-white">Client Receipt ({order.orderNumber})</h3>
+              </div>
+              <button
+                onClick={() => setPrintReceiptModalOpen(false)}
+                className="text-slate-400 hover:text-white p-1 rounded-lg cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Receipt Content */}
+            <div className="bg-slate-950 p-3 rounded-2xl border border-slate-800 flex justify-center">
+              <PrintableInvoice
+                order={order}
+                template={customerTemplate}
+                type="CUSTOMER"
+                restaurant={restaurant}
+              />
+            </div>
+
+            {/* Print Modal Footer Actions */}
+            <div className="flex items-center gap-2 pt-1 no-print">
+              <button
+                onClick={() => setPrintReceiptModalOpen(false)}
+                className="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer"
+              >
+                Close
+              </button>
+              <button
+                onClick={() => window.print()}
+                className="flex-1 bg-orange-600 hover:bg-orange-500 active:scale-98 text-white py-2.5 rounded-xl text-xs font-black shadow-lg shadow-orange-600/30 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+              >
+                <Printer className="w-4 h-4" />
+                <span>Print Invoice</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
