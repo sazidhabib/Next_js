@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { Font, Designer } from "../models/index.js";
+import Banner728 from "@/components/Banner728";
+
 import DarkFontCard from "../components/DarkFontCard";
 import HomeTypeTester from "../components/HomeTypeTester";
 import HomeUnicodeConverter from "../components/HomeUnicodeConverter";
@@ -66,6 +68,9 @@ export default async function HomePage() {
     <div className="p-4 sm:p-6 lg:p-8 space-y-10 max-w-7xl mx-auto">
       {/* Hero Banner Slider Component */}
       <Hero />
+
+      {/* 728x90 Leaderboard Banner */}
+      <Banner728 />
 
       {/* Highest Downloads Marquee */}
       <DownloadMarquee fonts={data.topFonts} />

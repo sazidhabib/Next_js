@@ -19,6 +19,9 @@ import {
 } from "./Icons";
 
 import { resolveFontUrl } from "../lib/fontUtils";
+import Banner300 from "@/components/Banner300";
+import Banner728 from "@/components/Banner728";
+
 
 function FontDetailPageContent({ font, relatedFonts = [] }) {
   const searchParams = useSearchParams();
@@ -31,11 +34,13 @@ function FontDetailPageContent({ font, relatedFonts = [] }) {
   const [localDownloadCount, setLocalDownloadCount] = useState(font.downloadCount || 0);
   const [localLikeCount, setLocalLikeCount] = useState(font.likeCount || 0);
   const [isLiked, setIsLiked] = useState(false);
+  const [currentUrl, setCurrentUrl] = useState("");
 
   useEffect(() => {
     if (typeof window !== "undefined") {
       const likedFonts = JSON.parse(localStorage.getItem("liked_fonts") || "[]");
       setIsLiked(likedFonts.includes(font.id));
+      setCurrentUrl(window.location.href);
     }
   }, [font.id]);
 
@@ -223,7 +228,7 @@ function FontDetailPageContent({ font, relatedFonts = [] }) {
                   </span>
                 </div>
 
-                <h1 
+                <h1
                   className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-foreground tracking-tight leading-tight break-words"
                   style={{ fontFamily: previewFontUrl ? `'${fontFam}', sans-serif` : 'inherit', fontWeight: weightMap[selectedWeight] || 400 }}
                 >
@@ -256,11 +261,10 @@ function FontDetailPageContent({ font, relatedFonts = [] }) {
                 <button
                   type="button"
                   onClick={handleToggleLike}
-                  className={`px-3 py-1.5 rounded-full border transition-colors ml-auto flex items-center gap-1.5 ${
-                    isLiked
-                      ? "bg-rose-500/20 border-rose-500 text-rose-500 hover:bg-rose-500/30"
-                      : "bg-surface border-border text-text-muted hover:text-foreground"
-                  }`}
+                  className={`px-3 py-1.5 rounded-full border transition-colors ml-auto flex items-center gap-1.5 ${isLiked
+                    ? "bg-rose-500/20 border-rose-500 text-rose-500 hover:bg-rose-500/30"
+                    : "bg-surface border-border text-text-muted hover:text-foreground"
+                    }`}
                   title={isLiked ? "Remove from wishlist" : "Add to wishlist"}
                 >
                   <IconHeart className="text-xs" fill={isLiked ? "currentColor" : "none"} />
@@ -290,6 +294,11 @@ function FontDetailPageContent({ font, relatedFonts = [] }) {
               </div>
             </div>
           </div>
+
+          {/* Banner 728 */}
+
+          <Banner728 />
+
 
           {/* Interactive Weight Preview & Type Tester (Shown on Overview or active weight selector) */}
           {(activeTab === "Overview" || activeTab === "Details") && (
@@ -646,7 +655,7 @@ function FontDetailPageContent({ font, relatedFonts = [] }) {
               </div>
             </div>
 
-                {/* About The Designer Section */}
+            {/* About The Designer Section */}
             {font.designer && (
               <div className="border-t border-border/50 pt-4 space-y-3">
                 <h4 className="text-[10px] font-bold text-text-muted uppercase tracking-wider">About The Designer</h4>
@@ -691,7 +700,7 @@ function FontDetailPageContent({ font, relatedFonts = [] }) {
                 </button>
                 <div className="flex items-center gap-1.5">
                   <a
-                    href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(typeof window !== "undefined" ? window.location.href : "")}`}
+                    href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(currentUrl)}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="w-8 h-8 rounded-lg bg-surface hover:bg-surface-card text-text-muted hover:text-foreground flex items-center justify-center transition-colors border border-border"
@@ -700,7 +709,7 @@ function FontDetailPageContent({ font, relatedFonts = [] }) {
                     <IconFacebook className="text-sm" />
                   </a>
                   <a
-                    href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(typeof window !== "undefined" ? window.location.href : "")}&text=${encodeURIComponent(`Check out this beautiful Bangla font: ${font.name}`)}`}
+                    href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(currentUrl)}&text=${encodeURIComponent(`Check out this beautiful Bangla font: ${font.name}`)}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="w-8 h-8 rounded-lg bg-surface hover:bg-surface-card text-text-muted hover:text-foreground flex items-center justify-center transition-colors border border-border"
@@ -709,7 +718,7 @@ function FontDetailPageContent({ font, relatedFonts = [] }) {
                     <IconTwitter className="text-sm" />
                   </a>
                   <a
-                    href={`https://api.whatsapp.com/send?text=${encodeURIComponent(`Check out this beautiful Bangla font: ${font.name} - ${typeof window !== "undefined" ? window.location.href : ""}`)}`}
+                    href={`https://api.whatsapp.com/send?text=${encodeURIComponent(`Check out this beautiful Bangla font: ${font.name} - ${currentUrl}`)}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="w-8 h-8 rounded-lg bg-surface hover:bg-surface-card text-text-muted hover:text-foreground flex items-center justify-center transition-colors border border-border"
@@ -735,8 +744,15 @@ function FontDetailPageContent({ font, relatedFonts = [] }) {
               </div>
             </div>
 
+            {/* Banner 300 Ad */}
+            <div className="border-t border-border/50 pt-4 flex justify-center items-center overflow-hidden">
+              <Banner300 />
+            </div>
+
           </div>
         </div>
+
+
 
       </div>
     </div>

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Font, Designer } from "../../models/index.js";
 import FontGridWithLoadMore from "../../components/FontGridWithLoadMore";
+import Banner728 from "@/components/Banner728";
 
 export const metadata = {
   title: "ফ্রি বাংলা ফন্ট ডাউনলোড — NextType",
@@ -66,17 +67,19 @@ export default async function FreeFontsPage({ searchParams }) {
             <Link
               key={s.value}
               href={s.value === "ALL" ? "/free-fonts" : `?style=${s.value}`}
-              className={`px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-medium shrink-0 border transition-all ${
-                style === s.value
+              className={`px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-medium shrink-0 border transition-all ${style === s.value
                   ? "bg-[#00e599] text-gray-955 border-[#00e599] font-bold"
                   : "bg-surface text-text-muted border-border hover:text-foreground hover:bg-surface-card"
-              }`}
+                }`}
             >
               {s.label}
             </Link>
           ))}
         </div>
       </div>
+
+      {/* 728x90 Leaderboard Banner */}
+      <Banner728 />
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         {/* Right Fonts Grid - Now spans full width */}
