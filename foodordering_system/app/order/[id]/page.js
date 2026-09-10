@@ -28,6 +28,8 @@ export default function OrderTrackingPage({ params }) {
   const [order, setOrder] = useState(null);
   const [restaurant, setRestaurant] = useState(null);
   const [customerTemplate, setCustomerTemplate] = useState(null);
+  const [kitchenTemplate, setKitchenTemplate] = useState(null);
+  const [receiptType, setReceiptType] = useState('CUSTOMER'); // 'CUSTOMER' | 'KITCHEN'
   const [loading, setLoading] = useState(true);
   const [lastStatus, setLastStatus] = useState(null);
   const [now, setNow] = useState(Date.now());
@@ -52,6 +54,7 @@ export default function OrderTrackingPage({ params }) {
         setOrder(json.data);
         if (json.restaurant) setRestaurant(json.restaurant);
         if (json.customerTemplate) setCustomerTemplate(json.customerTemplate);
+        if (json.kitchenTemplate) setKitchenTemplate(json.kitchenTemplate);
       }
     } catch (err) {
       console.error('Polling error:', err);
@@ -552,7 +555,7 @@ export default function OrderTrackingPage({ params }) {
             <div className="flex items-center justify-between border-b border-slate-800 pb-3 no-print">
               <div className="flex items-center gap-2">
                 <Printer className="w-5 h-5 text-orange-500" />
-                <h3 className="font-bold text-sm text-white">Client Receipt ({order.orderNumber})</h3>
+                <h3 className="font-bold text-sm text-white">Receipt ({order.orderNumber})</h3>
               </div>
               <button
                 onClick={() => setPrintReceiptModalOpen(false)}
@@ -562,12 +565,38 @@ export default function OrderTrackingPage({ params }) {
               </button>
             </div>
 
+            {/* Receipt Type Toggle (Client Copy vs Kitchen Copy) */}
+            <div className="flex bg-slate-800 p-1 rounded-xl gap-1 no-print">
+              <button
+                type="button"
+                onClick={() => setReceiptType('CUSTOMER')}
+                className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                  receiptType === 'CUSTOMER'
+                    ? 'bg-orange-600 text-white shadow-xs'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                Client Copy
+              </button>
+              <button
+                type="button"
+                onClick={() => setReceiptType('KITCHEN')}
+                className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                  receiptType === 'KITCHEN'
+                    ? 'bg-orange-600 text-white shadow-xs'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                Kitchen Copy
+              </button>
+            </div>
+
             {/* Receipt Content */}
             <div className="bg-slate-950 p-3 rounded-2xl border border-slate-800 flex justify-center">
               <PrintableInvoice
                 order={order}
-                template={customerTemplate}
-                type="CUSTOMER"
+                template={receiptType === 'CUSTOMER' ? customerTemplate : kitchenTemplate}
+                type={receiptType}
                 restaurant={restaurant}
               />
             </div>

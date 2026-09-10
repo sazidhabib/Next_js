@@ -556,12 +556,23 @@ export default function CheckoutWizardModal({
             });
             const piData = await piRes.json();
             if (piData.success && piData.clientSecret) {
-              const pubKey = piData.publishableKey || process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
-              if (pubKey) {
-                setStripePromise(loadStripe(pubKey));
+              const pubKey =
+                piData.publishableKey ||
+                restaurant?.stripePublishableKey ||
+                process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
+
+              if (!pubKey) {
+                toast.error('Stripe publishable key is missing for this restaurant. Please check Admin Settings.');
+                setCompletedOrderId(data.data.id || data.data.orderNumber);
+                setCompletedOrderData(data.data);
+                return;
               }
+
+              const sp = loadStripe(pubKey);
+              setStripePromise(sp);
               setStripeModalData({
                 clientSecret: piData.clientSecret,
+                publishableKey: pubKey,
                 orderId: data.data.id,
                 orderNumber: data.data.orderNumber,
                 amount: piData.amount || totalAmount,
@@ -627,7 +638,7 @@ export default function CheckoutWizardModal({
             onClose={handleCloseModal}
           />
         </div>
-      ) : stripeModalData && stripePromise ? (
+      ) : stripeModalData ? (
         /* In-Modal Stripe Payment Step (Pure Light Mode & Wide 2-Column Split Layout) */
         <div className="relative w-full max-w-4xl bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col my-auto max-h-[95vh] z-70 animate-scaleUp">
           <div className="px-5 py-3.5 bg-slate-50 border-b border-slate-200 flex items-center justify-between shrink-0">
@@ -708,7 +719,16 @@ export default function CheckoutWizardModal({
             {/* Right Column: Stripe Elements Form */}
             <div className="md:col-span-7">
               <Elements
-                stripe={stripePromise}
+                stripe={
+                  stripePromise ||
+                  (stripeModalData.publishableKey || restaurant?.stripePublishableKey || process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+                    ? loadStripe(
+                        stripeModalData.publishableKey ||
+                          restaurant?.stripePublishableKey ||
+                          process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+                      )
+                    : null)
+                }
                 options={{
                   clientSecret: stripeModalData.clientSecret,
                   appearance: {

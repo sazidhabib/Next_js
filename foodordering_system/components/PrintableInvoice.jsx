@@ -143,7 +143,7 @@ export default function PrintableInvoice({
   // -------------------------------------------------------------
   // 1. CUSTOMER TEMPLATE: ANUPAM CLASSIC CLIENT BILL
   // -------------------------------------------------------------
-  if (type === 'CUSTOMER' && layout === 'anupam_classic') {
+  if (type === 'CUSTOMER') {
     const brand = config.restaurantBrand || restaurant?.name || 'BELLA VISTA GOURMET';
     const brandFs = `${config.brandFontSize || 24}px`;
     const legalName = config.legalName || restaurant?.legalName || restaurant?.name || '';
@@ -328,7 +328,7 @@ export default function PrintableInvoice({
   // -------------------------------------------------------------
   // 2. KITCHEN TEMPLATE: ANUPAM COURSE-GROUPED KOT
   // -------------------------------------------------------------
-  if (type === 'KITCHEN' && layout === 'anupam_course_grouped') {
+  if (type === 'KITCHEN') {
     const headerTitle = config.headerTitle || 'Kitchen Copy';
     const headerFs = `${config.headerFontSize || 13}px`;
     const ticketNumber = order.orderNumber?.replace(/[^0-9]/g, '') || config.ticketNumber || '73';

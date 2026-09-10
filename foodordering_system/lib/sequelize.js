@@ -913,8 +913,11 @@ export async function ensureDatabaseReady() {
       await sequelize.sync({ force: false });
       console.log('✅ [DB Init] Database tables checked/created.');
 
-      // Ensure location & manager columns exist on restaurants table
+      // Ensure location, business info & manager columns exist on restaurants table
       const restaurantCols = [
+        { name: 'website', def: 'VARCHAR(255) NULL' },
+        { name: 'vatNumber', def: 'VARCHAR(255) NULL' },
+        { name: 'legalName', def: 'VARCHAR(255) NULL' },
         { name: 'city', def: 'VARCHAR(255) NULL' },
         { name: 'state', def: 'VARCHAR(255) NULL' },
         { name: 'zipCode', def: 'VARCHAR(255) NULL' },
@@ -924,6 +927,8 @@ export async function ensureDatabaseReady() {
         { name: 'managerLastName', def: 'VARCHAR(255) NULL' },
         { name: 'managerEmail', def: 'VARCHAR(255) NULL' },
         { name: 'managerPhone', def: 'VARCHAR(255) NULL' },
+        { name: 'activeCustomerTemplateId', def: 'VARCHAR(255) NULL' },
+        { name: 'activeKitchenTemplateId', def: 'VARCHAR(255) NULL' },
         { name: 'kitchenPrinterIp', def: 'VARCHAR(255) NULL' },
         { name: 'kitchenPrinterPort', def: 'INT DEFAULT 9100' },
       ];
@@ -941,16 +946,43 @@ export async function ensureDatabaseReady() {
         }
       }
 
-      // Ensure prepMinutes exists on orders table
-      try {
-        const [orderColResults] = await sequelize.query("SHOW COLUMNS FROM orders LIKE 'prepMinutes'");
-        if (orderColResults.length === 0) {
-          console.log('➕ [DB Init] Adding prepMinutes column to orders table...');
-          await sequelize.query("ALTER TABLE orders ADD COLUMN prepMinutes INT NULL AFTER estimatedReadyAt");
-          console.log('✅ [DB Init] prepMinutes column added to orders table.');
+      // Ensure columns exist on orders table
+      const orderCols = [
+        { name: 'prepMinutes', def: 'INT NULL' },
+        { name: 'rejectionReason', def: 'VARCHAR(255) NULL' },
+      ];
+      for (const col of orderCols) {
+        try {
+          const [results] = await sequelize.query(`SHOW COLUMNS FROM orders LIKE '${col.name}'`);
+          if (results.length === 0) {
+            console.log(`➕ [DB Init] Adding ${col.name} column to orders table...`);
+            await sequelize.query(`ALTER TABLE orders ADD COLUMN ${col.name} ${col.def}`);
+            console.log(`✅ [DB Init] ${col.name} column added to orders table.`);
+          }
+        } catch (err) {
+          console.warn(`⚠️ [DB Init] Warning checking/adding ${col.name} column to orders table:`, err.message);
         }
-      } catch (err) {
-        console.warn('⚠️ [DB Init] Warning checking/adding prepMinutes column:', err.message);
+      }
+
+      // Ensure columns exist on delivery_zones table
+      const dzCols = [
+        { name: 'polygonGeoJson', def: 'LONGTEXT NULL' },
+        { name: 'postalCodes', def: 'TEXT NULL' },
+        { name: 'freeDeliveryThreshold', def: 'DOUBLE NULL' },
+        { name: 'estimatedTimeMin', def: 'INT DEFAULT 35' },
+        { name: 'isActive', def: 'TINYINT(1) DEFAULT 1' },
+      ];
+      for (const col of dzCols) {
+        try {
+          const [results] = await sequelize.query(`SHOW COLUMNS FROM delivery_zones LIKE '${col.name}'`);
+          if (results.length === 0) {
+            console.log(`➕ [DB Init] Adding ${col.name} column to delivery_zones table...`);
+            await sequelize.query(`ALTER TABLE delivery_zones ADD COLUMN ${col.name} ${col.def}`);
+            console.log(`✅ [DB Init] ${col.name} column added to delivery_zones table.`);
+          }
+        } catch (err) {
+          console.warn(`⚠️ [DB Init] Warning checking/adding ${col.name} column to delivery_zones table:`, err.message);
+        }
       }
 
       // Check if we need to seed default data (e.g. if the users table has 0 users)

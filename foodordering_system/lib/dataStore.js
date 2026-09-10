@@ -523,6 +523,67 @@ export async function updateOrderStatus(orderId, { status, prepMinutes, rejectio
   return updatedOrderResult || (orderIndex !== -1 ? globalStore.__orders[orderIndex] : null);
 }
 
+// 5.5 Mark Order Paid (Online Payment Verification)
+export async function markOrderPaid(orderId, paymentIntentId = '') {
+  let updatedOrder = null;
+
+  // 1. Update runtime memory store if present
+  if (globalStore.__orders) {
+    const memIdx = globalStore.__orders.findIndex(
+      (o) => o.id === orderId || o.orderNumber === orderId
+    );
+    if (memIdx !== -1) {
+      globalStore.__orders[memIdx].paymentStatus = 'PAID';
+      globalStore.__orders[memIdx].status = 'PENDING';
+      const existingNotes = globalStore.__orders[memIdx].notes || globalStore.__orders[memIdx].specialNotes || '';
+      globalStore.__orders[memIdx].notes = [
+        existingNotes,
+        `Paid online via Stripe (Intent: ${paymentIntentId || 'Verified'})`,
+      ].filter(Boolean).join(' | ');
+      updatedOrder = globalStore.__orders[memIdx];
+    }
+  }
+
+  // 2. Update MySQL Database if connected
+  try {
+    const connected = await isDbConnected();
+    if (connected) {
+      const dbOrder = await Order.findOne({
+        where: {
+          [Op.or]: [{ id: orderId }, { orderNumber: orderId }],
+        },
+      });
+
+      if (dbOrder) {
+        dbOrder.paymentStatus = 'PAID';
+        dbOrder.status = 'PENDING';
+        const existingNotes = dbOrder.notes || dbOrder.specialNotes || '';
+        dbOrder.notes = [
+          existingNotes,
+          `Paid online via Stripe (Intent: ${paymentIntentId || 'Verified'})`,
+        ].filter(Boolean).join(' | ');
+        await dbOrder.save();
+
+        try {
+          await OrderStatusLog.create({
+            orderId: dbOrder.id,
+            status: 'PENDING',
+            note: `Online payment verified via Stripe. Payment Intent ID: ${paymentIntentId}`,
+          });
+        } catch (_logErr) {
+          // ignore
+        }
+
+        updatedOrder = dbOrder.get({ plain: true });
+      }
+    }
+  } catch (err) {
+    console.error('Sequelize markOrderPaid error:', err.message);
+  }
+
+  return updatedOrder || (globalStore.__orders ? globalStore.__orders.find((o) => o.id === orderId || o.orderNumber === orderId) : null);
+}
+
 // 6. Menu Management: Categories & Dishes CRUD
 export async function toggleItemAvailability(itemId) {
   try {

@@ -1,6 +1,8 @@
 import { notFound } from "next/navigation";
 import { Font, Designer, Developer, FontVariant, Op } from "../../../models/index.js";
 import DarkFontDetailPage from "../../../components/DarkFontDetailPage";
+import Banner300 from "@/components/Banner300";
+import Banner728 from "@/components/Banner728";
 
 export const dynamic = "force-dynamic";
 

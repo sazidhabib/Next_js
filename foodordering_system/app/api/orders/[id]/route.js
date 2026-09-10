@@ -14,28 +14,51 @@ export async function GET(request, { params }) {
       );
     }
 
-    // Attempt to load restaurant & active customer template
+    // Attempt to load restaurant & active templates (both Customer & Kitchen)
     let restaurant = null;
     let customerTemplate = null;
+    let kitchenTemplate = null;
 
     try {
       if (order.restaurantId) {
         restaurant = await Restaurant.findOne({
           where: { id: order.restaurantId },
         });
+      }
+      if (!restaurant) {
+        restaurant = await Restaurant.findOne();
+      }
 
-        if (restaurant?.activeCustomerTemplateId) {
+      if (restaurant) {
+        // Customer Template lookup
+        if (restaurant.activeCustomerTemplateId) {
           customerTemplate = await InvoiceTemplate.findOne({
             where: { id: restaurant.activeCustomerTemplateId },
           });
         }
-
         if (!customerTemplate) {
           customerTemplate = await InvoiceTemplate.findOne({
             where: {
-              restaurantId: order.restaurantId,
+              restaurantId: restaurant.id,
               type: 'CUSTOMER',
             },
+            order: [['createdAt', 'DESC']],
+          });
+        }
+
+        // Kitchen Template lookup
+        if (restaurant.activeKitchenTemplateId) {
+          kitchenTemplate = await InvoiceTemplate.findOne({
+            where: { id: restaurant.activeKitchenTemplateId },
+          });
+        }
+        if (!kitchenTemplate) {
+          kitchenTemplate = await InvoiceTemplate.findOne({
+            where: {
+              restaurantId: restaurant.id,
+              type: 'KITCHEN',
+            },
+            order: [['createdAt', 'DESC']],
           });
         }
       }
@@ -48,6 +71,7 @@ export async function GET(request, { params }) {
       data: order,
       restaurant: restaurant ? restaurant.get({ plain: true }) : null,
       customerTemplate: customerTemplate ? customerTemplate.get({ plain: true }) : null,
+      kitchenTemplate: kitchenTemplate ? kitchenTemplate.get({ plain: true }) : null,
     });
   } catch (error) {
     console.error('Error fetching order by ID:', error);

@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
-import { Order, Restaurant, OrderStatusLog } from '@/lib/sequelize';
-import { getOrderById } from '@/lib/dataStore';
+import { Op } from 'sequelize';
+import { Order, Restaurant } from '@/lib/sequelize';
+import { getOrderById, markOrderPaid } from '@/lib/dataStore';
 import { autoPrintKitchenReceipt } from '@/lib/printerService';
 
 // POST: Create Stripe PaymentIntent for in-modal Checkout
@@ -13,17 +14,23 @@ export async function POST(request) {
       return NextResponse.json({ success: false, error: 'Order ID is required' }, { status: 400 });
     }
 
-    const order = await Order.findOne({
-      where: { id: orderId },
-    });
+    const order = await getOrderById(orderId);
 
     if (!order) {
       return NextResponse.json({ success: false, error: 'Order not found' }, { status: 404 });
     }
 
-    const restaurant = await Restaurant.findOne({
-      where: { id: order.restaurantId },
-    });
+    let restaurant = null;
+    if (order.restaurantId) {
+      restaurant = await Restaurant.findOne({
+        where: {
+          [Op.or]: [{ id: order.restaurantId }, { slug: order.restaurantId }],
+        },
+      });
+    }
+    if (!restaurant) {
+      restaurant = await Restaurant.findOne();
+    }
 
     const stripeSecretKey = restaurant?.stripeSecretKey || process.env.STRIPE_SECRET_KEY;
     const stripePublishableKey = restaurant?.stripePublishableKey || process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
@@ -88,46 +95,14 @@ export async function PUT(request) {
       return NextResponse.json({ success: false, error: 'Order ID is required' }, { status: 400 });
     }
 
-    const order = await Order.findOne({ where: { id: orderId } });
-    if (!order) {
+    const updatedOrder = await markOrderPaid(orderId, paymentIntentId);
+
+    if (!updatedOrder) {
       return NextResponse.json({ success: false, error: 'Order not found' }, { status: 404 });
     }
 
-    // Update order status to PENDING (for kitchen review) and paymentStatus to PAID
-    order.paymentStatus = 'PAID';
-    order.status = 'PENDING';
-    order.notes = [order.notes, `Paid online via Stripe (Intent: ${paymentIntentId || 'Verified'})`].filter(Boolean).join(' | ');
-    await order.save();
-
-    // Also update runtime globalStore in case memory fallback is used
-    try {
-      const gStore = global.__foodOrderingStore;
-      if (gStore && gStore.__orders) {
-        const memIdx = gStore.__orders.findIndex(
-          (o) => o.id === order.id || o.orderNumber === order.orderNumber
-        );
-        if (memIdx !== -1) {
-          gStore.__orders[memIdx].paymentStatus = 'PAID';
-          gStore.__orders[memIdx].status = 'PENDING';
-        }
-      }
-    } catch (_memErr) {
-      // ignore
-    }
-
-    // Log status transition
-    try {
-      await OrderStatusLog.create({
-        orderId: order.id,
-        status: 'PENDING',
-        note: `Online payment verified via Stripe. Payment Intent ID: ${paymentIntentId}`,
-      });
-    } catch (_logErr) {
-      console.warn('Non-blocking OrderStatusLog creation error:', _logErr.message);
-    }
-
     // Trigger auto thermal print to kitchen
-    getOrderById(order.id).then((fullOrder) => {
+    getOrderById(updatedOrder.id || orderId).then((fullOrder) => {
       if (fullOrder) {
         autoPrintKitchenReceipt(fullOrder).catch((err) => {
           console.error('Failed auto kitchen print after in-modal stripe payment:', err);
@@ -137,7 +112,7 @@ export async function PUT(request) {
 
     return NextResponse.json({
       success: true,
-      data: order,
+      data: updatedOrder,
     });
   } catch (error) {
     console.error('Confirm in-modal payment error:', error);

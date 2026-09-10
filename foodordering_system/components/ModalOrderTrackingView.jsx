@@ -28,6 +28,8 @@ export default function ModalOrderTrackingView({
   const [order, setOrder] = useState(initialOrder);
   const [restaurant, setRestaurant] = useState(initialRestaurant);
   const [customerTemplate, setCustomerTemplate] = useState(null);
+  const [kitchenTemplate, setKitchenTemplate] = useState(null);
+  const [receiptType, setReceiptType] = useState('CUSTOMER'); // 'CUSTOMER' | 'KITCHEN'
   const [loading, setLoading] = useState(!initialOrder);
   const [lastStatus, setLastStatus] = useState(initialOrder?.status || null);
   const [now, setNow] = useState(Date.now());
@@ -53,6 +55,7 @@ export default function ModalOrderTrackingView({
         setOrder(json.data);
         if (json.restaurant) setRestaurant(json.restaurant);
         if (json.customerTemplate) setCustomerTemplate(json.customerTemplate);
+        if (json.kitchenTemplate) setKitchenTemplate(json.kitchenTemplate);
       }
     } catch (err) {
       console.error('Modal tracking polling error:', err);
@@ -563,12 +566,38 @@ export default function ModalOrderTrackingView({
               </button>
             </div>
 
+            {/* Receipt Type Toggle (Client Copy vs Kitchen Copy) */}
+            <div className="flex bg-slate-100 p-1 rounded-xl gap-1 no-print">
+              <button
+                type="button"
+                onClick={() => setReceiptType('CUSTOMER')}
+                className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                  receiptType === 'CUSTOMER'
+                    ? 'bg-white text-orange-600 shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                Client Copy
+              </button>
+              <button
+                type="button"
+                onClick={() => setReceiptType('KITCHEN')}
+                className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                  receiptType === 'KITCHEN'
+                    ? 'bg-white text-orange-600 shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                Kitchen Copy
+              </button>
+            </div>
+
             {/* Receipt Content */}
             <div className="bg-slate-50 p-3 rounded-2xl border border-slate-200 flex justify-center">
               <PrintableInvoice
                 order={order}
-                template={customerTemplate}
-                type="CUSTOMER"
+                template={receiptType === 'CUSTOMER' ? customerTemplate : kitchenTemplate}
+                type={receiptType}
                 restaurant={restaurant}
               />
             </div>
