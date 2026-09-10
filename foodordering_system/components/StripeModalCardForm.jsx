@@ -80,29 +80,29 @@ export default function StripeModalCardForm({
   };
 
   return (
-    <div className="w-full max-w-md mx-auto bg-white dark:bg-slate-900 rounded-2xl p-4 sm:p-6 shadow-2xl border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 animate-fadeIn">
+    <div className="w-full bg-white rounded-2xl p-4 sm:p-6 shadow-sm border border-slate-200 text-slate-800 animate-fadeIn">
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3.5 mb-4">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-orange-100 dark:bg-orange-950/60 text-orange-600 flex items-center justify-center">
+      <div className="flex items-center justify-between border-b border-slate-200 pb-3.5 mb-4">
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-lg bg-orange-100 text-orange-600 flex items-center justify-center">
             <Lock className="w-4 h-4" />
           </div>
           <div>
-            <h3 className="text-sm font-bold leading-tight">Complete Payment</h3>
-            <p className="text-[11px] text-slate-500 dark:text-slate-400">
-              Order #{orderNumber || orderId} • <span className="font-bold text-slate-900 dark:text-white">{currencySymbol}{Number(amount).toFixed(2)}</span>
+            <h3 className="text-sm font-bold text-slate-900 leading-tight">Complete Payment</h3>
+            <p className="text-[11px] text-slate-500">
+              Order #{orderNumber || orderId} • <span className="font-bold text-slate-900">{currencySymbol}{Number(amount).toFixed(2)}</span>
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-1 text-[10px] text-emerald-600 dark:text-emerald-400 font-bold bg-emerald-50 dark:bg-emerald-950/40 px-2 py-1 rounded-md border border-emerald-200/60 dark:border-emerald-800/40">
-          <ShieldCheck className="w-3.5 h-3.5" />
+        <div className="flex items-center gap-1 text-[10px] text-emerald-700 font-bold bg-emerald-50 px-2 py-1 rounded-md border border-emerald-200">
+          <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
           <span>256-bit SSL</span>
         </div>
       </div>
 
       {/* Stripe Embedded Payment Form */}
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="p-3 bg-slate-50 dark:bg-slate-950 rounded-xl border border-slate-200 dark:border-slate-800">
+        <div className="p-3 bg-slate-50/80 rounded-xl border border-slate-200">
           <PaymentElement
             options={{
               layout: {
@@ -114,7 +114,7 @@ export default function StripeModalCardForm({
         </div>
 
         {errorMessage && (
-          <div className="p-3 rounded-xl bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/50 flex items-start gap-2 text-red-600 dark:text-red-400 text-xs">
+          <div className="p-3 rounded-xl bg-red-50 border border-red-200 flex items-start gap-2 text-red-600 text-xs">
             <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
             <p>{errorMessage}</p>
           </div>
@@ -125,7 +125,7 @@ export default function StripeModalCardForm({
           <button
             type="submit"
             disabled={!stripe || isProcessing}
-            className="w-full py-3 px-4 rounded-xl bg-orange-600 hover:bg-orange-500 active:bg-orange-700 text-white font-bold text-xs shadow-lg shadow-orange-600/25 flex items-center justify-center gap-2 transition-all disabled:opacity-50 cursor-pointer"
+            className="w-full py-3 px-4 rounded-xl bg-orange-600 hover:bg-orange-500 active:bg-orange-700 text-white font-bold text-xs shadow-md shadow-orange-600/25 flex items-center justify-center gap-2 transition-all disabled:opacity-50 cursor-pointer"
           >
             {isProcessing ? (
               <>
@@ -144,7 +144,7 @@ export default function StripeModalCardForm({
             <button
               type="button"
               onClick={onCancel}
-              className="w-full py-2 text-xs font-semibold text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 transition-colors"
+              className="w-full py-2 text-xs font-semibold text-slate-500 hover:text-slate-800 transition-colors cursor-pointer"
             >
               Cancel & Change Payment Method
             </button>

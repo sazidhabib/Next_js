@@ -95,6 +95,18 @@ export const Restaurant = sequelize.define('Restaurant', {
     type: DataTypes.STRING,
     allowNull: false,
   },
+  website: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  vatNumber: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  legalName: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
   city: {
     type: DataTypes.STRING,
     allowNull: true,
@@ -645,6 +657,10 @@ export const OrderItem = sequelize.define('OrderItem', {
   itemName: {
     type: DataTypes.STRING,
     allowNull: false,
+  },
+  categoryName: {
+    type: DataTypes.STRING,
+    allowNull: true,
   },
   itemPrice: {
     type: DataTypes.DOUBLE,

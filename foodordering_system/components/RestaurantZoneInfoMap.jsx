@@ -110,15 +110,32 @@ export default function RestaurantZoneInfoMap({
         const color = zone.color || '#ea580c';
         let layer = null;
 
-        if (zone.zoneType === 'SHAPE' && zone.polygon && zone.polygon.length >= 3) {
-          layer = L.polygon(zone.polygon, {
+        let polygonCoords = zone.polygon;
+        if (typeof polygonCoords === 'string') {
+          try {
+            polygonCoords = JSON.parse(polygonCoords);
+          } catch (e) {
+            polygonCoords = null;
+          }
+        }
+        if (polygonCoords && polygonCoords.coordinates && Array.isArray(polygonCoords.coordinates[0])) {
+          polygonCoords = polygonCoords.coordinates[0].map(([lng, lat]) => [lat, lng]);
+        }
+
+        const isShape =
+          zone.zoneType === 'SHAPE' ||
+          zone.zoneType === 'POLYGON' ||
+          (Array.isArray(polygonCoords) && polygonCoords.length >= 3);
+
+        if (isShape && Array.isArray(polygonCoords) && polygonCoords.length >= 3) {
+          layer = L.polygon(polygonCoords, {
             color: color,
             weight: 2.5,
             fillColor: color,
             fillOpacity: 0.22,
           }).addTo(map);
 
-          zone.polygon.forEach((pt) => bounds.extend([pt[0], pt[1]]));
+          polygonCoords.forEach((pt) => bounds.extend([pt[0], pt[1]]));
         } else if (zone.radiusKm) {
           layer = L.circle([centerLat, centerLng], {
             radius: zone.radiusKm * 1000,

@@ -26,6 +26,7 @@ import * as turf from '@turf/turf';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements } from '@stripe/react-stripe-js';
 import StripeModalCardForm from './StripeModalCardForm';
+import ModalOrderTrackingView from './ModalOrderTrackingView';
 import { playSuccessSound } from './AudioAlert';
 
 export default function CheckoutWizardModal({
@@ -83,9 +84,18 @@ export default function CheckoutWizardModal({
   const [couponCode, setCouponCode] = useState('');
   const [discountAmount, setDiscountAmount] = useState(0);
 
-  // 7. In-Modal Stripe Payment State
-  const [stripeModalData, setStripeModalData] = useState(null); // { clientSecret, publishableKey, orderId, orderNumber, amount, currency }
+  // 7. In-Modal Stripe Payment & Live Order Status State
+  const [stripeModalData, setStripeModalData] = useState(null); // { clientSecret, publishableKey, orderId, orderNumber, amount, currency, orderData }
   const [stripePromise, setStripePromise] = useState(null);
+  const [completedOrderId, setCompletedOrderId] = useState(null);
+  const [completedOrderData, setCompletedOrderData] = useState(null);
+
+  const handleCloseModal = () => {
+    setCompletedOrderId(null);
+    setCompletedOrderData(null);
+    setStripeModalData(null);
+    onClose();
+  };
 
   // General & Leaflet Map References
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -537,8 +547,6 @@ export default function CheckoutWizardModal({
         toast.success('Order placed successfully!');
         onClearCart();
 
-        const orderTargetUrl = `/order/${data.data.id || data.data.orderNumber}`;
-
         if (paymentMethod === 'ONLINE') {
           try {
             const piRes = await fetch('/api/create-payment-intent', {
@@ -558,34 +566,26 @@ export default function CheckoutWizardModal({
                 orderNumber: data.data.orderNumber,
                 amount: piData.amount || totalAmount,
                 currency: piData.currency || 'GBP',
+                orderData: data.data,
               });
               return;
             } else {
-              toast.error(piData.error || 'Online payment initialization failed. Navigating to order summary.');
-              if (window.top) {
-                window.top.location.href = orderTargetUrl;
-              } else {
-                window.location.href = orderTargetUrl;
-              }
+              toast.error(piData.error || 'Online payment initialization failed. Showing order status.');
+              setCompletedOrderId(data.data.id || data.data.orderNumber);
+              setCompletedOrderData(data.data);
               return;
             }
           } catch (piErr) {
             console.error('PaymentIntent creation error:', piErr);
-            toast.error('Network error reaching payment service. Navigating to order summary.');
-            if (window.top) {
-              window.top.location.href = orderTargetUrl;
-            } else {
-              window.location.href = orderTargetUrl;
-            }
+            toast.error('Network error reaching payment service. Showing order status.');
+            setCompletedOrderId(data.data.id || data.data.orderNumber);
+            setCompletedOrderData(data.data);
             return;
           }
         } else {
-          // Immediately navigate to the Waiting for Kitchen Confirmation page
-          if (window.top) {
-            window.top.location.href = orderTargetUrl;
-          } else {
-            window.location.href = orderTargetUrl;
-          }
+          // Immediately show In-Modal Waiting for Kitchen Confirmation view
+          setCompletedOrderId(data.data.id || data.data.orderNumber);
+          setCompletedOrderData(data.data);
           return;
         }
       } else {
@@ -617,83 +617,148 @@ export default function CheckoutWizardModal({
         </div>
       )}
 
-      {/* In-Modal Stripe Payment Elements Step */}
-      {stripeModalData && stripePromise && (
-        <div className="relative w-full max-w-lg bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col my-auto max-h-[95vh] z-70 animate-scaleUp">
-          <div className="px-5 py-3.5 bg-slate-50 dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between shrink-0">
+      {/* In-Modal Live Order Tracking & Waiting Step */}
+      {completedOrderId ? (
+        <div className="relative w-full max-w-5xl bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col my-auto max-h-[95vh] z-70 animate-scaleUp">
+          <ModalOrderTrackingView
+            orderId={completedOrderId}
+            initialOrder={completedOrderData}
+            initialRestaurant={restaurant}
+            onClose={handleCloseModal}
+          />
+        </div>
+      ) : stripeModalData && stripePromise ? (
+        /* In-Modal Stripe Payment Step (Pure Light Mode & Wide 2-Column Split Layout) */
+        <div className="relative w-full max-w-4xl bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col my-auto max-h-[95vh] z-70 animate-scaleUp">
+          <div className="px-5 py-3.5 bg-slate-50 border-b border-slate-200 flex items-center justify-between shrink-0">
             <div className="flex items-center gap-2">
               <Lock className="w-4 h-4 text-orange-600" />
-              <h2 className="text-sm font-extrabold text-slate-800 dark:text-white uppercase tracking-wide">
+              <h2 className="text-sm font-extrabold text-slate-800 uppercase tracking-wide">
                 Secure Card Checkout
               </h2>
             </div>
             <button
               onClick={() => {
-                const target = `/order/${stripeModalData.orderId}`;
-                if (window.top) window.top.location.href = target;
-                else window.location.href = target;
+                setCompletedOrderId(stripeModalData.orderId);
+                setStripeModalData(null);
               }}
-              className="w-7 h-7 rounded-full bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 flex items-center justify-center transition-colors cursor-pointer"
+              title="View Order Status"
+              className="w-7 h-7 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition-colors cursor-pointer"
             >
               <X className="w-3.5 h-3.5" />
             </button>
           </div>
 
-          <div className="p-4 sm:p-6 overflow-y-auto">
-            <Elements
-              stripe={stripePromise}
-              options={{
-                clientSecret: stripeModalData.clientSecret,
-                appearance: {
-                  theme: 'stripe',
-                  variables: {
-                    colorPrimary: '#ea580c',
-                    colorBackground: '#ffffff',
-                    colorText: '#1e293b',
-                    borderRadius: '12px',
-                  },
-                },
-              }}
-            >
-              <StripeModalCardForm
-                orderId={stripeModalData.orderId}
-                orderNumber={stripeModalData.orderNumber}
-                amount={stripeModalData.amount}
-                currency={stripeModalData.currency}
-                onPaymentSuccess={(_pi) => {
-                  const target = `/order/${stripeModalData.orderId}`;
-                  if (window.top) window.top.location.href = target;
-                  else window.location.href = target;
-                }}
-                onCancel={() => {
-                  setStripeModalData(null);
-                  setActiveSection('payment');
-                }}
-              />
-            </Elements>
-          </div>
-        </div>
-      )}
+          <div className="p-4 sm:p-6 overflow-y-auto grid grid-cols-1 md:grid-cols-12 gap-6 bg-[#f8f9fa]">
+            {/* Left Column: Order Summary Breakdown */}
+            <div className="md:col-span-5 bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-4">
+              <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+                <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                  Order Summary
+                </span>
+                <span className="text-xs font-mono font-bold text-orange-600 bg-orange-50 px-2 py-0.5 rounded border border-orange-200">
+                  #{stripeModalData.orderNumber || stripeModalData.orderId}
+                </span>
+              </div>
 
-      {/* Main Container */}
-      {!stripeModalData && (
-      <div className="relative w-full max-w-4xl bg-[#fdfdfd] rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col my-auto max-h-[95vh]">
-        {/* Top Mini Header */}
-        <div className="px-5 py-3.5 bg-slate-50 border-b border-slate-200 flex items-center justify-between shrink-0">
-          <div className="flex items-center gap-2">
-            <ShoppingCart className="w-5 h-5 text-orange-600" />
-            <h1 className="text-sm sm:text-base font-extrabold text-slate-800 uppercase tracking-wide">
-              {restaurant?.name || 'Checkout'}
-            </h1>
+              <div className="space-y-2 text-xs">
+                <div className="flex justify-between text-slate-600">
+                  <span>Fulfillment</span>
+                  <span className="font-bold text-slate-900">
+                    {serviceType === 'DELIVERY' ? 'Delivery' : 'Pickup'}
+                  </span>
+                </div>
+                {deliveryAddress && (
+                  <div className="text-[11px] text-slate-500 bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+                    <span className="font-semibold block text-slate-700">Delivery Address:</span>
+                    <span>{deliveryAddress}</span>
+                  </div>
+                )}
+                <div className="flex justify-between text-slate-600 pt-2 border-t border-slate-100">
+                  <span>Subtotal</span>
+                  <span className="font-bold text-slate-800">£{subtotal.toFixed(2)}</span>
+                </div>
+                {deliveryFee > 0 && (
+                  <div className="flex justify-between text-slate-600">
+                    <span>Delivery Fee</span>
+                    <span>£{deliveryFee.toFixed(2)}</span>
+                  </div>
+                )}
+                {discountAmount > 0 && (
+                  <div className="flex justify-between text-emerald-600 font-bold">
+                    <span>Discount</span>
+                    <span>-£{discountAmount.toFixed(2)}</span>
+                  </div>
+                )}
+                <div className="flex justify-between text-base font-extrabold text-slate-900 pt-2 border-t border-slate-200">
+                  <span>Total to Pay</span>
+                  <span className="text-orange-600 font-black">
+                    {stripeModalData.currency?.toUpperCase() === 'USD' ? '$' : stripeModalData.currency?.toUpperCase() === 'EUR' ? '€' : '£'}
+                    {Number(stripeModalData.amount).toFixed(2)}
+                  </span>
+                </div>
+              </div>
+
+              <div className="pt-2 text-[10px] text-slate-400 flex items-center gap-1.5 justify-center">
+                <Lock className="w-3 h-3 text-slate-400" />
+                <span>Encrypted with 256-bit SSL Security</span>
+              </div>
+            </div>
+
+            {/* Right Column: Stripe Elements Form */}
+            <div className="md:col-span-7">
+              <Elements
+                stripe={stripePromise}
+                options={{
+                  clientSecret: stripeModalData.clientSecret,
+                  appearance: {
+                    theme: 'stripe',
+                    variables: {
+                      colorPrimary: '#ea580c',
+                      colorBackground: '#ffffff',
+                      colorText: '#0f172a',
+                      borderRadius: '12px',
+                    },
+                  },
+                }}
+              >
+                <StripeModalCardForm
+                  orderId={stripeModalData.orderId}
+                  orderNumber={stripeModalData.orderNumber}
+                  amount={stripeModalData.amount}
+                  currency={stripeModalData.currency}
+                  onPaymentSuccess={(_pi) => {
+                    setCompletedOrderId(stripeModalData.orderId);
+                    setStripeModalData(null);
+                  }}
+                  onCancel={() => {
+                    setStripeModalData(null);
+                    setActiveSection('payment');
+                  }}
+                />
+              </Elements>
+            </div>
           </div>
-          <button
-            onClick={onClose}
-            aria-label="Close checkout"
-            className="w-8 h-8 rounded-full bg-slate-200/80 hover:bg-slate-300 text-slate-700 flex items-center justify-center transition-colors cursor-pointer"
-          >
-            <X className="w-4 h-4" />
-          </button>
         </div>
+      ) : (
+        /* Main Container */
+        <div className="relative w-full max-w-5xl bg-[#fdfdfd] rounded-3xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col my-auto max-h-[95vh] animate-scaleUp">
+          {/* Top Mini Header */}
+          <div className="px-5 py-3.5 bg-slate-50 border-b border-slate-200 flex items-center justify-between shrink-0">
+            <div className="flex items-center gap-2">
+              <ShoppingCart className="w-5 h-5 text-orange-600" />
+              <h1 className="text-sm sm:text-base font-extrabold text-slate-800 uppercase tracking-wide">
+                {restaurant?.name || 'Checkout'}
+              </h1>
+            </div>
+            <button
+              onClick={handleCloseModal}
+              aria-label="Close checkout"
+              className="w-8 h-8 rounded-full bg-slate-200/80 hover:bg-slate-300 text-slate-700 flex items-center justify-center transition-colors cursor-pointer"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
 
         {/* Scrollable Checkout Content (2-Columns Layout) */}
         <div className="flex-1 overflow-y-auto p-4 sm:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6 bg-[#f8f9fa]">

@@ -548,7 +548,7 @@ export default function EmbedMenuPage({ params }) {
                       {leftItems.map((item) => (
                         <div
                           key={item.id}
-                          onClick={() => handleOpenItem(item)}
+                          onClick={() => handleOpenItem({ ...item, categoryName: cat.name, categoryId: cat.id })}
                           className="group py-2.5 px-2.5 -mx-2.5 rounded-xl hover:bg-slate-50 transition-all cursor-pointer flex items-center gap-3.5"
                         >
                           {/* Left-aligned Dish Image */}
@@ -609,7 +609,7 @@ export default function EmbedMenuPage({ params }) {
                         {rightItems.map((item) => (
                           <div
                             key={item.id}
-                            onClick={() => handleOpenItem(item)}
+                            onClick={() => handleOpenItem({ ...item, categoryName: cat.name, categoryId: cat.id })}
                             className="group py-2.5 px-2.5 -mx-2.5 rounded-xl hover:bg-slate-50 transition-all cursor-pointer flex items-center gap-3.5"
                           >
                             {/* Left-aligned Dish Image */}

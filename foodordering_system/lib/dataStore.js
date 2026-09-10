@@ -127,6 +127,32 @@ export async function getRestaurantBySlug(slug = 'bellavista-pizza') {
             }
           });
         }
+        if (Array.isArray(restoJson.deliveryZones)) {
+          const PRESET_COLORS = ['#ea580c', '#10b981', '#f59e0b', '#06b6d4', '#8b5cf6', '#ec4899', '#3b82f6'];
+          restoJson.deliveryZones = restoJson.deliveryZones.map((z, idx) => {
+            let polygon = null;
+            if (z.polygonGeoJson) {
+              try {
+                const parsed = typeof z.polygonGeoJson === 'string' ? JSON.parse(z.polygonGeoJson) : z.polygonGeoJson;
+                if (Array.isArray(parsed)) {
+                  polygon = parsed;
+                } else if (parsed && parsed.coordinates && Array.isArray(parsed.coordinates[0])) {
+                  polygon = parsed.coordinates[0].map(([lng, lat]) => [lat, lng]);
+                }
+              } catch (e) {
+                polygon = null;
+              }
+            }
+            const isShape = z.zoneType === 'SHAPE' || z.zoneType === 'POLYGON';
+
+            return {
+              ...z,
+              zoneType: isShape ? 'SHAPE' : 'CIRCLE',
+              polygon: isShape ? polygon : null,
+              color: z.color || PRESET_COLORS[idx % PRESET_COLORS.length],
+            };
+          });
+        }
 
         return restoJson;
       }
@@ -302,10 +328,12 @@ export async function createOrder(orderPayload) {
     createdAt: new Date().toISOString(),
     items: orderPayload.items.map((item, idx) => ({
       id: `oi-${Date.now()}-${idx}`,
-      itemName: item.name,
-      itemPrice: item.basePrice,
+      menuItemId: item.id || item.menuItemId || null,
+      itemName: item.name || item.itemName,
+      categoryName: item.categoryName || item.category || '',
+      itemPrice: item.basePrice !== undefined ? item.basePrice : (item.unitPrice !== undefined ? item.unitPrice : item.itemPrice),
       quantity: item.quantity,
-      itemTotal: Number((item.itemTotal * item.quantity).toFixed(2)),
+      itemTotal: Number(((item.unitPrice || item.basePrice || item.itemPrice || 0) * item.quantity).toFixed(2)),
       specialNotes: item.specialNotes || '',
       selectedOptions: (item.selectedOptions || []).map((opt) => ({
         groupName: opt.groupName,
@@ -338,7 +366,9 @@ export async function createOrder(orderPayload) {
           paymentMethod: newOrder.paymentMethod,
           paymentStatus: newOrder.paymentStatus,
           items: newOrder.items.map((it) => ({
+            menuItemId: it.menuItemId,
             itemName: it.itemName,
+            categoryName: it.categoryName || '',
             itemPrice: it.itemPrice,
             quantity: it.quantity,
             itemTotal: it.itemTotal,

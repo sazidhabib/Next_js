@@ -3,52 +3,89 @@
 import React from 'react';
 
 /**
- * Categorize ordered items into classic Indian/Restaurant courses
+ * Categorize ordered items dynamically with rich dish-type heuristics
  */
 function categorizeOrderItem(item) {
-  const name = (item?.itemName || '').toLowerCase();
-  const category = (item?.categoryName || '').toLowerCase();
+  if (item?.categoryName && item.categoryName.trim()) {
+    return item.categoryName.trim();
+  }
+  if (item?.category) {
+    const cat = typeof item.category === 'string' ? item.category : item.category.name;
+    if (cat && cat.trim()) return cat.trim();
+  }
+
+  const name = (item?.itemName || item?.name || '').toLowerCase();
 
   if (
-    category.includes('starter') ||
-    category.includes('appetizer') ||
     name.includes('puree') ||
     name.includes('tikka') ||
     name.includes('samosa') ||
     name.includes('pakora') ||
     name.includes('soup') ||
-    name.includes('wings')
+    name.includes('wings') ||
+    name.includes('starter') ||
+    name.includes('appetizer')
   ) {
-    return 'Starter(s)';
+    return 'Starters';
   }
 
   if (
-    category.includes('bread') ||
-    category.includes('nan') ||
-    category.includes('naan') ||
-    category.includes('roti') ||
+    name.includes('coke') ||
+    name.includes('cola') ||
+    name.includes('pepsi') ||
+    name.includes('sprite') ||
+    name.includes('fanta') ||
+    name.includes('limonata') ||
+    name.includes('water') ||
+    name.includes('drink') ||
+    name.includes('beverage') ||
+    name.includes('juice') ||
+    name.includes('san pellegrino') ||
+    name.includes('pellegrino') ||
+    name.includes('beer') ||
+    name.includes('wine') ||
+    name.includes('lassi')
+  ) {
+    return 'Drinks & Beverages';
+  }
+
+  if (name.includes('burger') || name.includes('sandwich')) {
+    return 'Burgers';
+  }
+
+  if (name.includes('pizza') || name.includes('calzone')) {
+    return 'Pizzas';
+  }
+
+  if (name.includes('pasta') || name.includes('spaghetti') || name.includes('lasagna') || name.includes('penne')) {
+    return 'Pasta';
+  }
+
+  if (name.includes('cake') || name.includes('ice cream') || name.includes('dessert') || name.includes('pudding') || name.includes('sweet')) {
+    return 'Desserts';
+  }
+
+  if (
     name.includes('nan') ||
     name.includes('naan') ||
     name.includes('roti') ||
     name.includes('paratha') ||
-    name.includes('chapati')
+    name.includes('chapati') ||
+    name.includes('bread')
   ) {
-    return 'Bread';
+    return 'Breads';
   }
 
   if (
-    category.includes('rice') ||
-    category.includes('biryani') ||
     name.includes('rice') ||
     name.includes('pilau') ||
-    name.includes('pulao')
+    name.includes('pulao') ||
+    name.includes('biryani')
   ) {
-    return 'Rice/Bread';
+    return 'Rice & Biryani';
   }
 
   if (
-    category.includes('side') ||
-    category.includes('vegetable') ||
     name.includes('bhaji') ||
     name.includes('saag') ||
     name.includes('aloo') ||
@@ -57,21 +94,16 @@ function categorizeOrderItem(item) {
     name.includes('salad') ||
     name.includes('asparagus') ||
     name.includes('fries') ||
-    name.includes('chips')
+    name.includes('chips') ||
+    name.includes('side')
   ) {
     return 'Side Dishes';
   }
 
-  if (
-    category.includes('tandoori') ||
-    category.includes('grill') ||
-    name.includes('tandoori') ||
-    name.includes('shashlik')
-  ) {
+  if (name.includes('tandoori') || name.includes('shashlik') || name.includes('grill')) {
     return 'Tandoori';
   }
 
-  // Default to Main Dishes
   return 'Main Dishes';
 }
 
@@ -112,12 +144,12 @@ export default function PrintableInvoice({
   // 1. CUSTOMER TEMPLATE: ANUPAM CLASSIC CLIENT BILL
   // -------------------------------------------------------------
   if (type === 'CUSTOMER' && layout === 'anupam_classic') {
-    const brand = config.restaurantBrand || restaurant?.name || 'anupam';
+    const brand = config.restaurantBrand || restaurant?.name || 'BELLA VISTA GOURMET';
     const brandFs = `${config.brandFontSize || 24}px`;
-    const legalName = config.legalName || restaurant?.legalName || restaurant?.name || 'Sweet Paan Ltd';
+    const legalName = config.legalName || restaurant?.legalName || restaurant?.name || '';
     const address = config.address || restaurant?.address || '85 Church Street\nGreat Malvern WR14 2AE';
     const phone = config.phone || restaurant?.phone || '01684 573814';
-    const vatNumber = config.vatNumber || restaurant?.vatNumber || '240 6873 06';
+    const vatNumber = config.vatNumber || restaurant?.vatNumber || '';
     const businessInfoFs = `${config.businessInfoFontSize || 11}px`;
     const tableNumber = order.tableNumber || config.tableNumber || order.orderNumber || '24/2';
     const tableFs = `${config.tableFontSize || 16}px`;
@@ -131,7 +163,7 @@ export default function PrintableInvoice({
     const serviceChargeFs = `${config.serviceChargeFontSize || 12}px`;
     const thankYouText = config.thankYouText || 'Thank You For Your Custom\nPlease Call Again';
     const thankYouFs = `${config.thankYouFontSize || 11}px`;
-    const website = config.website || restaurant?.website || 'www.anupam.co.uk';
+    const website = config.website || restaurant?.website || (typeof window !== 'undefined' ? window.location.host : 'www.bellavistagourmet.co.uk');
     const websiteFs = `${config.websiteFontSize || 13}px`;
 
     return (
@@ -142,16 +174,19 @@ export default function PrintableInvoice({
       >
         {/* Header Brand */}
         <div className="text-center space-y-1">
-          <h2 style={{ fontSize: brandFs }} className="font-light tracking-wide lowercase font-sans">
+          <h2 style={{ fontSize: brandFs }} className="font-bold tracking-wide uppercase font-sans text-black">
             {brand}
           </h2>
           <div style={{ fontSize: businessInfoFs }} className="text-black font-normal space-y-0.5 leading-snug pt-1">
-            <p className="font-bold">{legalName}</p>
-            {address.split('\n').map((line, idx) => (
+            {legalName && legalName.toLowerCase() !== brand.toLowerCase() && (
+              <p className="font-bold">{legalName}</p>
+            )}
+            {address && address.split('\n').map((line, idx) => (
               <p key={idx}>{line}</p>
             ))}
             <p className="pt-0.5">
-              <span>TelNo:{phone}</span> <span className="ml-1">VATNo:{vatNumber}</span>
+              {phone && <span>Tel:{phone}</span>}
+              {vatNumber && <span className="ml-2">VAT:{vatNumber}</span>}
             </p>
           </div>
         </div>
@@ -196,9 +231,9 @@ export default function PrintableInvoice({
             <div key={idx} className="space-y-0.5">
               <div className="flex justify-between items-baseline">
                 <span>
-                  {item.quantity} {item.itemName}
+                  {item.quantity} {item.itemName || item.name}
                 </span>
-                <span>£{(item.itemTotal || (item.itemPrice || 0) * item.quantity).toFixed(2)}</span>
+                <span>£{(item.itemTotal || (item.itemPrice || item.unitPrice || 0) * item.quantity).toFixed(2)}</span>
               </div>
               {item.selectedOptions && item.selectedOptions.length > 0 && (
                 <div className="text-[10px] text-slate-600 pl-3">
@@ -280,8 +315,8 @@ export default function PrintableInvoice({
 
         {/* Website Footer */}
         {website && (
-          <div className="text-center pt-2 pb-1">
-            <p style={{ fontSize: websiteFs }} className="font-sans font-light">
+          <div className="text-center pt-2 pb-1 border-t border-dashed border-black/40">
+            <p style={{ fontSize: websiteFs }} className="font-sans font-bold text-black tracking-wide">
               {website}
             </p>
           </div>
@@ -299,31 +334,19 @@ export default function PrintableInvoice({
     const ticketNumber = order.orderNumber?.replace(/[^0-9]/g, '') || config.ticketNumber || '73';
     const ticketNumberFs = `${config.ticketNumberFontSize || 30}px`;
     const categoryFs = `${config.categoryFontSize || 14}px`;
-    const subCategoryTitle = config.subCategoryTitle || 'Bread';
-    const subCategoryFs = `${config.subCategoryFontSize || 13}px`;
     const itemsFs = `${config.itemsFontSize || 12}px`;
-    const specialSection = config.specialSection || '** Tandoori Items **';
-    const specialSectionFs = `${config.specialSectionFontSize || 13}px`;
     const tableNumber = order.tableNumber || config.tableNumber || order.orderNumber || '24/2';
     const tableFooterFs = `${config.tableFooterFontSize || 24}px`;
     const dateFooterFs = `${config.dateFooterFontSize || 11}px`;
 
-    // Group items by course
-    const starters = [];
-    const mainDishes = [];
-    const sideDishes = [];
-    const riceBread = [];
-    const breads = [];
-    const tandooriItems = [];
-
+    // Group items dynamically by their respective categories
+    const categoryMap = {};
     (order.items || []).forEach((item) => {
       const course = categorizeOrderItem(item);
-      if (course === 'Starter(s)') starters.push(item);
-      else if (course === 'Side Dishes') sideDishes.push(item);
-      else if (course === 'Bread') breads.push(item);
-      else if (course === 'Rice/Bread') riceBread.push(item);
-      else if (course === 'Tandoori') tandooriItems.push(item);
-      else mainDishes.push(item);
+      if (!categoryMap[course]) {
+        categoryMap[course] = [];
+      }
+      categoryMap[course].push(item);
     });
 
     return (
@@ -355,20 +378,20 @@ export default function PrintableInvoice({
           <span>{order.orderNumber}</span>
         </div>
 
-        {/* Course Group: Starter(s) */}
-        {starters.length > 0 && (
-          <div className="space-y-1.5">
+        {/* Dynamic Category Groupings */}
+        {Object.entries(categoryMap).map(([catName, items], catIdx) => (
+          <div key={catIdx} className="space-y-1.5">
             <div className="text-center">
               <span style={{ fontSize: categoryFs }} className="underline font-bold">
-                Starter(s)
+                {catName}
               </span>
             </div>
             <div style={{ fontSize: itemsFs }} className="space-y-1">
-              {starters.map((it, idx) => (
+              {items.map((it, idx) => (
                 <div key={idx} className="space-y-0.5">
                   <div className="flex gap-3">
                     <span className="font-bold">{it.quantity}</span>
-                    <span className="font-semibold">{it.itemName}</span>
+                    <span className="font-semibold">{it.itemName || it.name}</span>
                   </div>
                   {it.selectedOptions?.map((o, oIdx) => (
                     <p key={oIdx} className="text-[10px] pl-6 text-slate-600">+ {o.optionName}</p>
@@ -378,121 +401,7 @@ export default function PrintableInvoice({
               ))}
             </div>
           </div>
-        )}
-
-        {/* Course Group: Main Dishes */}
-        {mainDishes.length > 0 && (
-          <div className="space-y-1.5">
-            <div className="text-center">
-              <span style={{ fontSize: categoryFs }} className="underline font-bold">
-                Main Dishes
-              </span>
-            </div>
-            <div style={{ fontSize: itemsFs }} className="space-y-1">
-              {mainDishes.map((it, idx) => (
-                <div key={idx} className="space-y-0.5">
-                  <div className="flex gap-3">
-                    <span className="font-bold">{it.quantity}</span>
-                    <span className="font-semibold">{it.itemName}</span>
-                  </div>
-                  {it.selectedOptions?.map((o, oIdx) => (
-                    <p key={oIdx} className="text-[10px] pl-6 text-slate-600">+ {o.optionName}</p>
-                  ))}
-                  {it.specialNotes && <p className="text-[10px] italic pl-6 text-slate-800">** {it.specialNotes}</p>}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Course Group: Side Dishes */}
-        {sideDishes.length > 0 && (
-          <div className="space-y-1.5">
-            <div className="text-center">
-              <span style={{ fontSize: categoryFs }} className="underline font-bold">
-                Side Dishes
-              </span>
-            </div>
-            <div style={{ fontSize: itemsFs }} className="space-y-1">
-              {sideDishes.map((it, idx) => (
-                <div key={idx} className="space-y-0.5">
-                  <div className="flex gap-3">
-                    <span className="font-bold">{it.quantity}</span>
-                    <span className="font-semibold">{it.itemName}</span>
-                  </div>
-                  {it.selectedOptions?.map((o, oIdx) => (
-                    <p key={oIdx} className="text-[10px] pl-6 text-slate-600">+ {o.optionName}</p>
-                  ))}
-                  {it.specialNotes && <p className="text-[10px] italic pl-6 text-slate-800">** {it.specialNotes}</p>}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Course Group: Rice / Bread */}
-        {riceBread.length > 0 && (
-          <div className="space-y-1.5">
-            <div className="text-center">
-              <span style={{ fontSize: categoryFs }} className="underline font-bold">
-                Rice/Bread
-              </span>
-            </div>
-            <div style={{ fontSize: itemsFs }} className="space-y-1">
-              {riceBread.map((it, idx) => (
-                <div key={idx} className="space-y-0.5">
-                  <div className="flex gap-3">
-                    <span className="font-bold">{it.quantity}</span>
-                    <span className="font-semibold">{it.itemName}</span>
-                  </div>
-                  {it.selectedOptions?.map((o, oIdx) => (
-                    <p key={oIdx} className="text-[10px] pl-6 text-slate-600">+ {o.optionName}</p>
-                  ))}
-                  {it.specialNotes && <p className="text-[10px] italic pl-6 text-slate-800">** {it.specialNotes}</p>}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Special Section: Tandoori / Bread */}
-        {(tandooriItems.length > 0 || breads.length > 0) && (
-          <div className="space-y-1 pt-1 border-t border-dashed border-black/40">
-            {tandooriItems.length > 0 && (
-              <div>
-                <div className="text-center font-bold">
-                  <p style={{ fontSize: specialSectionFs }}>{specialSection}</p>
-                </div>
-                <div style={{ fontSize: itemsFs }} className="space-y-1 pt-1">
-                  {tandooriItems.map((it, idx) => (
-                    <div key={idx} className="flex gap-3">
-                      <span className="font-bold">{it.quantity}</span>
-                      <span>{it.itemName}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {breads.length > 0 && (
-              <div className="pt-1">
-                <div className="text-center font-bold">
-                  <p style={{ fontSize: subCategoryFs }} className="underline">
-                    {subCategoryTitle}
-                  </p>
-                </div>
-                <div style={{ fontSize: itemsFs }} className="space-y-1 pt-1">
-                  {breads.map((it, idx) => (
-                    <div key={idx} className="flex gap-3">
-                      <span className="font-bold">{it.quantity}</span>
-                      <span>{it.itemName}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        )}
+        ))}
 
         {/* General Order Special Note */}
         {order.specialNotes && (

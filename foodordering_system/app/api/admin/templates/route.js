@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
-import { InvoiceTemplate } from '@/lib/sequelize';
+import { Op } from 'sequelize';
+import { InvoiceTemplate, Restaurant } from '@/lib/sequelize';
 import { decryptSession } from '@/lib/session';
 
 async function verifyAuth(request) {
@@ -16,17 +17,33 @@ export async function GET(request) {
     }
 
     const { searchParams } = new URL(request.url);
-    const restaurantId = searchParams.get('restaurantId');
-    if (!restaurantId) {
-      return NextResponse.json({ success: false, error: 'Restaurant ID is required' }, { status: 400 });
+    let restaurantIdParam = searchParams.get('restaurantId');
+    
+    // Find matching restaurant by ID or slug, or fallback to first restaurant in database
+    let targetRestaurant = null;
+    if (restaurantIdParam && restaurantIdParam !== 'undefined' && restaurantIdParam !== 'null') {
+      targetRestaurant = await Restaurant.findOne({
+        where: {
+          [Op.or]: [{ id: restaurantIdParam }, { slug: restaurantIdParam }],
+        },
+      });
     }
+
+    if (!targetRestaurant) {
+      targetRestaurant = await Restaurant.findOne();
+    }
+
+    if (!targetRestaurant) {
+      return NextResponse.json({ success: true, data: [] });
+    }
+
+    const restaurantId = targetRestaurant.id;
 
     let templates = await InvoiceTemplate.findAll({
       where: { restaurantId },
       order: [['createdAt', 'DESC']],
     });
 
-    // Auto-seed missing default templates if restaurant has fewer than 4 templates
     const hasAnupamCustomer = templates.some((t) => {
       try {
         const c = typeof t.config === 'string' ? JSON.parse(t.config) : t.config;
@@ -36,10 +53,28 @@ export async function GET(request) {
       }
     });
 
+    const hasStandardCustomer = templates.some((t) => {
+      try {
+        const c = typeof t.config === 'string' ? JSON.parse(t.config) : t.config;
+        return (c?.layoutStyle === 'standard' || !c?.layoutStyle) && t.type === 'CUSTOMER';
+      } catch (e) {
+        return false;
+      }
+    });
+
     const hasAnupamKitchen = templates.some((t) => {
       try {
         const c = typeof t.config === 'string' ? JSON.parse(t.config) : t.config;
         return c?.layoutStyle === 'anupam_course_grouped' || t.name.includes('Anupam Kitchen');
+      } catch (e) {
+        return false;
+      }
+    });
+
+    const hasStandardKitchen = templates.some((t) => {
+      try {
+        const c = typeof t.config === 'string' ? JSON.parse(t.config) : t.config;
+        return (c?.layoutStyle === 'standard' || !c?.layoutStyle) && t.type === 'KITCHEN';
       } catch (e) {
         return false;
       }
@@ -88,6 +123,35 @@ export async function GET(request) {
       newTemplatesCreated = true;
     }
 
+    if (!hasStandardCustomer) {
+      await InvoiceTemplate.create({
+        restaurantId,
+        name: 'Standard Boxed Client Receipt',
+        type: 'CUSTOMER',
+        fontSize: 12,
+        config: JSON.stringify({
+          layoutStyle: 'standard',
+          paymentMethod: true,
+          time: true,
+          estimatedDriveTime: true,
+          direction: true,
+          onPremiseNumber: true,
+          orderDetails: true,
+          clientInfo: true,
+          clientComment: true,
+          items: true,
+          isPaid: true,
+          orderOnline: true,
+          contactDetails: true,
+          infoBox1: true,
+          infoBox2: false,
+          infoBox3: false,
+          clientConfirmation: false,
+        }),
+      });
+      newTemplatesCreated = true;
+    }
+
     if (!hasAnupamKitchen) {
       await InvoiceTemplate.create({
         restaurantId,
@@ -117,7 +181,29 @@ export async function GET(request) {
       newTemplatesCreated = true;
     }
 
-    if (newTemplatesCreated) {
+    if (!hasStandardKitchen) {
+      await InvoiceTemplate.create({
+        restaurantId,
+        name: 'Standard Kitchen Prep Ticket',
+        type: 'KITCHEN',
+        fontSize: 12,
+        config: JSON.stringify({
+          layoutStyle: 'standard',
+          header: true,
+          onPremiseNumber: true,
+          orderDetails: true,
+          clientComment: true,
+          items: true,
+          isPaid: true,
+          packagingStationQualityControl: false,
+          previewOptions: true,
+          ticketHolderSpace: true,
+        }),
+      });
+      newTemplatesCreated = true;
+    }
+
+    if (newTemplatesCreated || templates.length === 0) {
       templates = await InvoiceTemplate.findAll({
         where: { restaurantId },
         order: [['createdAt', 'DESC']],
@@ -139,14 +225,31 @@ export async function POST(request) {
     }
 
     const body = await request.json();
-    const { restaurantId, name, type, fontSize, config } = body;
+    const { restaurantId: rawRestoId, name, type, fontSize, config } = body;
 
-    if (!restaurantId || !name || !type) {
+    if (!name || !type) {
       return NextResponse.json({ success: false, error: 'Missing required fields' }, { status: 400 });
     }
 
+    let targetRestaurant = null;
+    if (rawRestoId) {
+      targetRestaurant = await Restaurant.findOne({
+        where: {
+          [Op.or]: [{ id: rawRestoId }, { slug: rawRestoId }],
+        },
+      });
+    }
+
+    if (!targetRestaurant) {
+      targetRestaurant = await Restaurant.findOne();
+    }
+
+    if (!targetRestaurant) {
+      return NextResponse.json({ success: false, error: 'Restaurant not found' }, { status: 404 });
+    }
+
     const template = await InvoiceTemplate.create({
-      restaurantId,
+      restaurantId: targetRestaurant.id,
       name,
       type,
       fontSize: fontSize || 12,

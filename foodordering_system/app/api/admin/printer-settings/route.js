@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { Op } from 'sequelize';
 import { Restaurant, InvoiceTemplate } from '@/lib/sequelize';
 import { decryptSession } from '@/lib/session';
 
@@ -16,15 +17,23 @@ export async function GET(request) {
     }
 
     const { searchParams } = new URL(request.url);
-    const restaurantId = searchParams.get('restaurantId');
-    if (!restaurantId) {
-      return NextResponse.json({ success: false, error: 'Restaurant ID is required' }, { status: 400 });
+    const restaurantIdParam = searchParams.get('restaurantId');
+    
+    let restaurant = null;
+    if (restaurantIdParam && restaurantIdParam !== 'undefined' && restaurantIdParam !== 'null') {
+      restaurant = await Restaurant.findOne({
+        where: {
+          [Op.or]: [{ id: restaurantIdParam }, { slug: restaurantIdParam }],
+        },
+        attributes: ['id', 'activeCustomerTemplateId', 'activeKitchenTemplateId', 'kitchenPrinterIp', 'kitchenPrinterPort'],
+      });
     }
 
-    const restaurant = await Restaurant.findOne({
-      where: { id: restaurantId },
-      attributes: ['activeCustomerTemplateId', 'activeKitchenTemplateId', 'kitchenPrinterIp', 'kitchenPrinterPort'],
-    });
+    if (!restaurant) {
+      restaurant = await Restaurant.findOne({
+        attributes: ['id', 'activeCustomerTemplateId', 'activeKitchenTemplateId', 'kitchenPrinterIp', 'kitchenPrinterPort'],
+      });
+    }
 
     if (!restaurant) {
       return NextResponse.json({ success: false, error: 'Restaurant not found' }, { status: 404 });
@@ -45,16 +54,31 @@ export async function PUT(request) {
     }
 
     const body = await request.json();
-    const { restaurantId, activeCustomerTemplateId, activeKitchenTemplateId, kitchenPrinterIp, kitchenPrinterPort } = body;
+    const { restaurantId: rawRestoId, activeCustomerTemplateId, activeKitchenTemplateId, kitchenPrinterIp, kitchenPrinterPort } = body;
 
-    if (!restaurantId) {
-      return NextResponse.json({ success: false, error: 'Restaurant ID is required' }, { status: 400 });
+    let targetRestaurant = null;
+    if (rawRestoId) {
+      targetRestaurant = await Restaurant.findOne({
+        where: {
+          [Op.or]: [{ id: rawRestoId }, { slug: rawRestoId }],
+        },
+      });
     }
 
-    // Verify templates exist and belong to the correct restaurant
+    if (!targetRestaurant) {
+      targetRestaurant = await Restaurant.findOne();
+    }
+
+    if (!targetRestaurant) {
+      return NextResponse.json({ success: false, error: 'Restaurant not found' }, { status: 404 });
+    }
+
+    const restaurantId = targetRestaurant.id;
+
+    // Verify templates exist
     if (activeCustomerTemplateId) {
       const custTemp = await InvoiceTemplate.findOne({
-        where: { id: activeCustomerTemplateId, restaurantId },
+        where: { id: activeCustomerTemplateId },
       });
       if (!custTemp) {
         return NextResponse.json({ success: false, error: 'Selected customer template not found' }, { status: 400 });
@@ -63,7 +87,7 @@ export async function PUT(request) {
 
     if (activeKitchenTemplateId) {
       const kitTemp = await InvoiceTemplate.findOne({
-        where: { id: activeKitchenTemplateId, restaurantId },
+        where: { id: activeKitchenTemplateId },
       });
       if (!kitTemp) {
         return NextResponse.json({ success: false, error: 'Selected kitchen template not found' }, { status: 400 });

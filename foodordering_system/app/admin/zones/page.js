@@ -87,15 +87,32 @@ export default function AdminZonesPage() {
         if (json.data.currency) setCurrency(json.data.currency);
         if (json.data.currencySymbol) setCurrencySymbol(json.data.currencySymbol);
 
-        const loadedZones = (json.data.deliveryZones || []).map((z, idx) => ({
-          ...z,
-          zoneType: z.zoneType || 'CIRCLE',
-          color: z.color || PRESET_COLORS[idx % PRESET_COLORS.length],
-          isHidden: !!z.isHidden,
-          radiusKm: z.radiusKm || 1.0,
-          minOrderAmount: z.minOrderAmount ?? 15.0,
-          deliveryFee: z.deliveryFee ?? 2.5,
-        }));
+        const loadedZones = (json.data.deliveryZones || []).map((z, idx) => {
+          let polygon = z.polygon;
+          if (typeof polygon === 'string') {
+            try {
+              polygon = JSON.parse(polygon);
+            } catch (e) {
+              polygon = null;
+            }
+          }
+          if (polygon && polygon.coordinates && Array.isArray(polygon.coordinates[0])) {
+            polygon = polygon.coordinates[0].map(([lng, lat]) => [lat, lng]);
+          }
+
+          const isShape = z.zoneType === 'SHAPE' || z.zoneType === 'POLYGON';
+
+          return {
+            ...z,
+            zoneType: isShape ? 'SHAPE' : 'CIRCLE',
+            polygon: isShape ? polygon : null,
+            color: z.color || PRESET_COLORS[idx % PRESET_COLORS.length],
+            isHidden: !!z.isHidden,
+            radiusKm: z.radiusKm || 1.0,
+            minOrderAmount: z.minOrderAmount ?? 15.0,
+            deliveryFee: z.deliveryFee ?? 2.5,
+          };
+        });
 
         setZones(loadedZones);
         if (loadedZones.length > 0) {
@@ -132,6 +149,14 @@ export default function AdminZonesPage() {
     setZones((prev) =>
       prev.map((zone) => {
         if (zone.id === zoneId) {
+          if (newType === 'CIRCLE') {
+            return {
+              ...zone,
+              zoneType: 'CIRCLE',
+              polygon: null,
+              radiusKm: zone.radiusKm || 1.5,
+            };
+          }
           if (newType === 'SHAPE' && (!zone.polygon || zone.polygon.length < 3)) {
             // Create default polygon box around current center/restaurant with 1km scale
             const cLat = zone.center?.lat || restaurantLocation.lat || 51.5133;
@@ -230,12 +255,43 @@ export default function AdminZonesPage() {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          restaurantId: selectedRestaurant?.id || null,
+          slug: activeSlug,
           enableDelivery,
           deliveryZones: zones,
         }),
       });
       const json = await res.json();
       if (json.success) {
+        if (json.data && json.data.deliveryZones) {
+          const reloaded = json.data.deliveryZones.map((z, idx) => {
+            let polygon = z.polygon;
+            if (typeof polygon === 'string') {
+              try {
+                polygon = JSON.parse(polygon);
+              } catch (e) {
+                polygon = null;
+              }
+            }
+            if (polygon && polygon.coordinates && Array.isArray(polygon.coordinates[0])) {
+              polygon = polygon.coordinates[0].map(([lng, lat]) => [lat, lng]);
+            }
+
+            const isShape = z.zoneType === 'SHAPE' || z.zoneType === 'POLYGON';
+
+            return {
+              ...z,
+              zoneType: isShape ? 'SHAPE' : 'CIRCLE',
+              polygon: isShape ? polygon : null,
+              color: z.color || PRESET_COLORS[idx % PRESET_COLORS.length],
+              isHidden: !!z.isHidden,
+              radiusKm: z.radiusKm || 1.0,
+              minOrderAmount: z.minOrderAmount ?? 15.0,
+              deliveryFee: z.deliveryFee ?? 2.5,
+            };
+          });
+          setZones(reloaded);
+        }
         toast.success('All delivery zones and settings saved successfully!');
       } else {
         toast.error(json.error || 'Failed to save delivery zones');

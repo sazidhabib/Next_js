@@ -22,12 +22,20 @@ export async function GET(request, { params }) {
       if (order.restaurantId) {
         restaurant = await Restaurant.findOne({
           where: { id: order.restaurantId },
-          attributes: ['id', 'name', 'phone', 'email', 'address', 'vatNumber', 'legalName', 'website', 'activeCustomerTemplateId'],
         });
 
         if (restaurant?.activeCustomerTemplateId) {
           customerTemplate = await InvoiceTemplate.findOne({
             where: { id: restaurant.activeCustomerTemplateId },
+          });
+        }
+
+        if (!customerTemplate) {
+          customerTemplate = await InvoiceTemplate.findOne({
+            where: {
+              restaurantId: order.restaurantId,
+              type: 'CUSTOMER',
+            },
           });
         }
       }

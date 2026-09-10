@@ -310,7 +310,7 @@ export default function MenuPage({ params }) {
                 {visibleItems.map((item) => (
                   <div
                     key={item.id}
-                    onClick={() => handleOpenItem(item)}
+                    onClick={() => handleOpenItem({ ...item, categoryName: cat.name, categoryId: cat.id })}
                     className="group bg-white rounded-2xl border border-slate-200/80 hover:border-orange-400 hover:shadow-lg transition-all duration-300 overflow-hidden flex items-stretch p-3.5 sm:p-4 gap-3.5 sm:gap-4 cursor-pointer"
                   >
                     {/* Left: Dish Image (if available) */}

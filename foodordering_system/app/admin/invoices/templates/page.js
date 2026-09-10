@@ -39,11 +39,13 @@ export default function InvoiceTemplatesPage() {
 
   // Load templates
   useEffect(() => {
-    if (!selectedRestaurant) return;
     async function loadTemplates() {
       try {
         setLoading(true);
-        const res = await fetch(`/api/admin/templates?restaurantId=${selectedRestaurant.id}`);
+        const url = selectedRestaurant?.id
+          ? `/api/admin/templates?restaurantId=${selectedRestaurant.id}`
+          : '/api/admin/templates';
+        const res = await fetch(url);
         const json = await res.json();
         if (json.success) {
           setTemplates(json.data);
@@ -197,7 +199,7 @@ export default function InvoiceTemplatesPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          restaurantId: selectedRestaurant.id,
+          restaurantId: selectedRestaurant?.id || null,
           name: newTemplateName,
           type: newTemplateType,
           fontSize: 12,
@@ -233,7 +235,7 @@ export default function InvoiceTemplatesPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          restaurantId: selectedRestaurant.id,
+          restaurantId: selectedRestaurant?.id || template.restaurantId || null,
           name: `${template.name} (Copy)`,
           type: template.type,
           fontSize: template.fontSize,

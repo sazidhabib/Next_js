@@ -24,6 +24,8 @@ export default function ItemModal({ item, isOpen, onClose, onAddToCart }) {
     onAddToCart({
       id: item.id,
       name: item.name,
+      categoryName: item.categoryName || item.category?.name || item.category || '',
+      categoryId: item.categoryId || item.category?.id || '',
       basePrice: item.basePrice,
       imageUrl: item.imageUrl,
       quantity,

@@ -552,7 +552,7 @@ export default function LiveOrdersReceiver() {
                             <Timer className="w-3.5 h-3.5 text-orange-400" />
                             <span>Select Prep Time:</span>
                           </span>
-                          <span className="text-orange-400 font-mono text-[11px] font-bold bg-orange-950/40 border border-orange-800/50 px-2 py-0.5 rounded-md">
+                          <span className="text-orange-900 font-mono text-xs font-black bg-orange-100 border border-orange-300 px-2.5 py-1 rounded-lg shadow-2xs">
                             Ready ~{previewReadyTime}
                           </span>
                         </div>
@@ -660,7 +660,7 @@ export default function LiveOrdersReceiver() {
                             <span>Confirmed: {order.prepMinutes || 25}m Prep</span>
                           </span>
                           {order.estimatedReadyAt && (
-                            <span className="text-slate-400 font-mono text-[11px]">
+                            <span className="text-amber-900 font-mono text-[11px] font-extrabold bg-amber-100 border border-amber-300 px-2 py-0.5 rounded-md shadow-2xs">
                               Ready ~{new Date(order.estimatedReadyAt).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}
                             </span>
                           )}
@@ -845,7 +845,7 @@ export default function LiveOrdersReceiver() {
                   <Sparkles className="w-4 h-4 text-orange-400" />
                   <span>Custom Preparation Time</span>
                 </span>
-                <span className="text-xs font-mono font-black text-orange-400">
+                <span className="text-xs font-mono font-black text-orange-900 bg-orange-100 border border-orange-300 px-2.5 py-1 rounded-lg shadow-2xs">
                   Target: ~{calculateReadyTimePreview(getOrderPrepMinutes(reviewOrderModal.id, 25))}
                 </span>
               </div>

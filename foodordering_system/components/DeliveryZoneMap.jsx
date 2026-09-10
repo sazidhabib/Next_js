@@ -38,7 +38,7 @@ export default function DeliveryZoneMap({
 
   const selectedZone = zones.find((z) => z.id === selectedZoneId);
 
-  // Initialize Leaflet Map on client mount
+  // Initialize Leaflet Map on client mount (runs ONCE)
   useEffect(() => {
     let isMounted = true;
 
@@ -77,8 +77,39 @@ export default function DeliveryZoneMap({
       ).addTo(map);
 
       layersRef.current.tileLayer = streetLayer;
+      mapInstanceRef.current = map;
+      setLeafletLoaded(true);
+    }
 
-      // Custom Active Restaurant Pin Marker with Glow Ring
+    initMap();
+
+    return () => {
+      isMounted = false;
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.remove();
+        mapInstanceRef.current = null;
+      }
+    };
+  }, []);
+
+  // Update Active Restaurant Pin Marker when restaurantLocation changes
+  useEffect(() => {
+    if (!mapInstanceRef.current || !leafletLoaded) return;
+
+    import('leaflet').then((module) => {
+      const L = module.default;
+      const map = mapInstanceRef.current;
+
+      const center = [
+        restaurantLocation?.lat || 51.5133,
+        restaurantLocation?.lng || -0.1362,
+      ];
+
+      // Remove existing restaurant marker
+      if (layersRef.current.restaurantMarker && map.hasLayer(layersRef.current.restaurantMarker)) {
+        map.removeLayer(layersRef.current.restaurantMarker);
+      }
+
       const storePinHtml = `
         <div style="position: relative; display: flex; flex-direction: column; align-items: center; transform: translate(-50%, -100%); cursor: pointer;">
           <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; border-radius: 50%; background: rgba(234, 88, 12, 0.4); animation: ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;"></div>
@@ -100,14 +131,23 @@ export default function DeliveryZoneMap({
         iconSize: [0, 0],
       });
 
-      const restMarker = L.marker(initialCenter, {
+      const restMarker = L.marker(center, {
         icon: storeIcon,
         zIndexOffset: 1500,
       }).addTo(map);
 
       layersRef.current.restaurantMarker = restMarker;
+    });
+  }, [restaurantLocation.lat, restaurantLocation.lng, restaurantLocation.name, leafletLoaded]);
 
-      // Render Other Restaurant Branches (if any)
+  // Update Branch Pin Markers when allLocations changes
+  useEffect(() => {
+    if (!mapInstanceRef.current || !leafletLoaded) return;
+
+    import('leaflet').then((module) => {
+      const L = module.default;
+      const map = mapInstanceRef.current;
+
       layersRef.current.otherLocationMarkers.forEach((m) => {
         if (map.hasLayer(m)) map.removeLayer(m);
       });
@@ -115,7 +155,6 @@ export default function DeliveryZoneMap({
 
       if (Array.isArray(allLocations) && allLocations.length > 0) {
         allLocations.forEach((loc) => {
-          // Skip if this is the active restaurant location
           if (
             (loc.slug && loc.slug === restaurantLocation.slug) ||
             (loc.lat === restaurantLocation.lat && loc.lng === restaurantLocation.lng)
@@ -158,21 +197,8 @@ export default function DeliveryZoneMap({
           layersRef.current.otherLocationMarkers.push(branchMarker);
         });
       }
-
-      mapInstanceRef.current = map;
-      setLeafletLoaded(true);
-    }
-
-    initMap();
-
-    return () => {
-      isMounted = false;
-      if (mapInstanceRef.current) {
-        mapInstanceRef.current.remove();
-        mapInstanceRef.current = null;
-      }
-    };
-  }, [restaurantLocation.lat, restaurantLocation.lng, restaurantLocation.slug, allLocations]);
+    });
+  }, [allLocations, restaurantLocation.slug, restaurantLocation.lat, restaurantLocation.lng, leafletLoaded, onSelectLocation]);
 
   // Handle Switch Map Type (Roadmap / Satellite)
   useEffect(() => {
@@ -497,9 +523,27 @@ export default function DeliveryZoneMap({
 
             layersRef.current.editHandles.push(radiusHandleMarker);
           }
-        } else if (zone.zoneType === 'SHAPE' && zone.polygon && zone.polygon.length >= 3) {
-          // Polygon Shape Layer
-          const polygonLayer = L.polygon(zone.polygon, baseStyle).addTo(map);
+        } else {
+          let polygonCoords = zone.polygon;
+          if (typeof polygonCoords === 'string') {
+            try {
+              polygonCoords = JSON.parse(polygonCoords);
+            } catch (e) {
+              polygonCoords = null;
+            }
+          }
+          if (polygonCoords && polygonCoords.coordinates && Array.isArray(polygonCoords.coordinates[0])) {
+            polygonCoords = polygonCoords.coordinates[0].map(([lng, lat]) => [lat, lng]);
+          }
+
+          const isShape =
+            zone.zoneType === 'SHAPE' ||
+            zone.zoneType === 'POLYGON' ||
+            (Array.isArray(polygonCoords) && polygonCoords.length >= 3);
+
+          if (isShape && Array.isArray(polygonCoords) && polygonCoords.length >= 3) {
+            // Polygon Shape Layer
+            const polygonLayer = L.polygon(polygonCoords, baseStyle).addTo(map);
 
           polygonLayer.on('click', () => {
             if (!isDrawing) onSelectZone(zone.id);
@@ -509,7 +553,7 @@ export default function DeliveryZoneMap({
 
           // If selected, add draggable vertex nodes
           if (isSelected && !isDrawing) {
-            const currentPoints = [...zone.polygon];
+            const currentPoints = polygonCoords.map((pt) => [pt[0], pt[1]]);
 
             currentPoints.forEach((point, pointIdx) => {
               const nodeHtml = `
@@ -551,9 +595,10 @@ export default function DeliveryZoneMap({
             });
           }
         }
-      });
+      }
     });
-  }, [zones, selectedZoneId, leafletLoaded, restaurantLocation, isDrawing]);
+  });
+}, [zones, selectedZoneId, leafletLoaded, restaurantLocation, isDrawing]);
 
   // Zoom Helpers
   const handleZoomIn = () => {
@@ -689,10 +734,10 @@ export default function DeliveryZoneMap({
           {/* Search */}
           <form
             onSubmit={handleSearchAddress}
-            className="pointer-events-auto flex items-center bg-white/95 dark:bg-slate-900/90 backdrop-blur-md rounded-xl shadow-lg border border-slate-200 dark:border-slate-800 p-1.5 w-full sm:w-80"
+            className="pointer-events-auto flex items-center bg-white/95 backdrop-blur-md rounded-xl shadow-lg border border-slate-300 p-1.5 w-full sm:w-80 map-search-form"
           >
             <svg
-              className="w-4 h-4 text-slate-400 ml-2 mr-2 shrink-0"
+              className="w-4 h-4 text-slate-500 ml-2 mr-2 shrink-0"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -709,7 +754,7 @@ export default function DeliveryZoneMap({
               placeholder="Search address or postcode..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="bg-transparent text-xs text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none w-full font-medium"
+              className="bg-transparent text-xs text-slate-900 placeholder:text-slate-500 focus:outline-none w-full font-medium"
             />
             {searching && (
               <div className="w-3.5 h-3.5 border-2 border-orange-500 border-t-transparent rounded-full animate-spin mr-2" />
@@ -728,14 +773,14 @@ export default function DeliveryZoneMap({
               </button>
             )}
 
-            <div className="flex items-center bg-white dark:bg-slate-900 rounded-xl shadow-lg border border-slate-200 dark:border-slate-800 p-1">
+            <div className="flex items-center bg-white rounded-xl shadow-lg border border-slate-300 p-1 map-type-switcher">
               <button
                 type="button"
                 onClick={() => setMapType('roadmap')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                   mapType === 'roadmap'
                     ? 'bg-orange-500 text-white shadow-sm'
-                    : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
+                    : 'text-slate-700 hover:bg-slate-100'
                 }`}
               >
                 Map
@@ -743,10 +788,10 @@ export default function DeliveryZoneMap({
               <button
                 type="button"
                 onClick={() => setMapType('satellite')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                   mapType === 'satellite'
                     ? 'bg-orange-500 text-white shadow-sm'
-                    : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
+                    : 'text-slate-700 hover:bg-slate-100'
                 }`}
               >
                 Satellite
@@ -758,12 +803,12 @@ export default function DeliveryZoneMap({
 
       {/* Floating Left Controls: Zoom & Center */}
       <div className="absolute top-18 left-3.5 flex flex-col gap-2 pointer-events-auto z-10">
-        <div className="flex flex-col bg-white dark:bg-slate-900 rounded-xl shadow-lg border border-slate-200 dark:border-slate-800 overflow-hidden">
+        <div className="flex flex-col bg-white rounded-xl shadow-lg border border-slate-300 overflow-hidden map-zoom-controls">
           <button
             type="button"
             onClick={handleZoomIn}
             aria-label="Zoom in"
-            className="w-8 h-8 flex items-center justify-center text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 text-base font-bold border-b border-slate-200 dark:border-slate-800 transition-colors"
+            className="w-8 h-8 flex items-center justify-center text-slate-800 hover:bg-slate-100 text-base font-bold border-b border-slate-200 transition-colors cursor-pointer"
           >
             +
           </button>
@@ -771,7 +816,7 @@ export default function DeliveryZoneMap({
             type="button"
             onClick={handleZoomOut}
             aria-label="Zoom out"
-            className="w-8 h-8 flex items-center justify-center text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 text-base font-bold transition-colors"
+            className="w-8 h-8 flex items-center justify-center text-slate-800 hover:bg-slate-100 text-base font-bold transition-colors cursor-pointer"
           >
             -
           </button>
@@ -781,7 +826,7 @@ export default function DeliveryZoneMap({
           type="button"
           onClick={handleCenterRestaurant}
           title="Center on Restaurant"
-          className="w-8 h-8 flex items-center justify-center bg-white dark:bg-slate-900 rounded-xl shadow-lg border border-slate-200 dark:border-slate-800 text-orange-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+          className="w-8 h-8 flex items-center justify-center bg-white rounded-xl shadow-lg border border-slate-300 text-orange-500 hover:bg-slate-100 transition-colors cursor-pointer"
         >
           <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
             <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />

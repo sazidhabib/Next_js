@@ -23,6 +23,8 @@ import {
   Code,
 } from 'lucide-react';
 import { AdminProvider, useAdmin } from '@/lib/adminContext';
+import { AdminThemeProvider } from '@/lib/adminThemeContext';
+import AdminThemeToggler from '@/components/AdminThemeToggler';
 
 function AdminLayoutContent({ children }) {
   const pathname = usePathname();
@@ -131,7 +133,7 @@ function AdminLayoutContent({ children }) {
 
             {/* Role Switcher Pill */}
             {user && (
-              <div className="bg-slate-950 p-2 rounded-xl border border-slate-800 space-y-1">
+              <div className="bg-slate-950 p-2 rounded-xl border border-slate-800 space-y-2">
                 <div className="flex items-center justify-between text-[10px] text-slate-400 font-bold uppercase">
                   <span>Logged in as: {user.name.split(' ')[0]}</span>
                   <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
@@ -151,6 +153,12 @@ function AdminLayoutContent({ children }) {
                     {user.role === 'RESTAURANT_ADMIN' ? '👨‍🍳 Restaurant Admin' : '🔔 Kitchen Operator'}
                   </div>
                 )}
+
+                {/* Theme Mode Switcher */}
+                <div className="pt-1 border-t border-slate-800/80 flex items-center justify-between">
+                  <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Theme Mode</span>
+                  <AdminThemeToggler />
+                </div>
               </div>
             )}
           </div>
@@ -270,8 +278,10 @@ function AdminLayoutContent({ children }) {
 
 export default function AdminLayout({ children }) {
   return (
-    <AdminProvider>
-      <AdminLayoutContent>{children}</AdminLayoutContent>
-    </AdminProvider>
+    <AdminThemeProvider>
+      <AdminProvider>
+        <AdminLayoutContent>{children}</AdminLayoutContent>
+      </AdminProvider>
+    </AdminThemeProvider>
   );
 }
