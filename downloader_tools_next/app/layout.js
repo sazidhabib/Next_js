@@ -12,11 +12,13 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "Save Social Videos - Download Video HD Free from Facebook YouTube Instagram TikTok",
+  title: "MediaDrop - Download Media From Anywhere | Fast, Free & No Watermark",
   description:
-    "Download videos from Facebook, YouTube, Instagram, TikTok in HD, 2K, 4K quality for free. Fast video downloader for Android, iOS, PC.",
+    "Save videos, audio, and images from Facebook, YouTube, Instagram, TikTok, Twitter/X, and more in high quality without watermarks.",
   keywords: [
+    "MediaDrop",
     "video downloader",
+    "download media from anywhere",
     "download facebook videos",
     "download youtube videos",
     "download instagram reels",
@@ -24,21 +26,19 @@ export const metadata = {
     "HD video download",
     "4K video downloader",
     "free video downloader",
-    "save social videos",
-    "download twitter videos",
   ],
-  authors: [{ name: "SaveSocialVideos" }],
+  authors: [{ name: "MediaDrop" }],
   openGraph: {
-    title: "Download Video HD Free | SaveSocialVideos",
+    title: "MediaDrop - Download Media From Anywhere",
     description:
-      "Free video downloader. Facebook, YouTube, Instagram, TikTok. HD, 2K, 4K quality.",
+      "Save videos, audio, and images from your favorite platforms in high quality.",
     type: "website",
-    siteName: "SaveSocialVideos",
+    siteName: "MediaDrop",
   },
   twitter: {
     card: "summary_large_image",
   },
-  metadataBase: new URL("https://savesocialvideos.com"),
+  metadataBase: new URL("https://mediadrop.app"),
   alternates: {
     canonical: "/",
   },

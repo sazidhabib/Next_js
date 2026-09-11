@@ -24,46 +24,147 @@ function detectPlatform(url) {
 
 function normalizeYouTubeData(data) {
   const downloads = [];
-  if (data?.length > 0) {
+  if (!data) return downloads;
+
+  // Direct properties on response object (btch-downloader youtube format)
+  if (data.mp4) {
+    downloads.push({
+      quality: "HD Video (MP4)",
+      url: data.mp4,
+      format: "mp4",
+      type: "video",
+    });
+  }
+  if (data.mp3) {
+    downloads.push({
+      quality: "Audio (MP3)",
+      url: data.mp3,
+      format: "mp3",
+      type: "audio",
+    });
+  }
+
+  // Handle case if data.video or data.audio is array or string
+  if (Array.isArray(data.video)) {
+    data.video.forEach((v, i) => {
+      downloads.push({
+        quality: v.quality || (i === 0 ? "HD Video (MP4)" : "SD Video (MP4)"),
+        url: typeof v === "string" ? v : v.url,
+        format: "mp4",
+        type: "video",
+      });
+    });
+  } else if (typeof data.video === "string") {
+    downloads.push({
+      quality: "HD Video (MP4)",
+      url: data.video,
+      format: "mp4",
+      type: "video",
+    });
+  }
+
+  if (Array.isArray(data.audio)) {
+    data.audio.forEach((a) => {
+      downloads.push({
+        quality: a.quality || "Audio (MP3)",
+        url: typeof a === "string" ? a : a.url,
+        format: "mp3",
+        type: "audio",
+      });
+    });
+  } else if (typeof data.audio === "string") {
+    downloads.push({
+      quality: "Audio (MP3)",
+      url: data.audio,
+      format: "mp3",
+      type: "audio",
+    });
+  }
+
+  // Handle case if data is array: [ { video, audio, mp4, mp3, ... } ]
+  if (Array.isArray(data) && data.length > 0) {
     const video = data[0];
-    if (video?.video) {
-      video.video.forEach((v) => {
+    if (video?.video && Array.isArray(video.video)) {
+      video.video.forEach((v, i) => {
         downloads.push({
-          quality: v.quality || "HD",
-          url: v.url,
+          quality: v.quality || (i === 0 ? "HD Video (MP4)" : "SD Video (MP4)"),
+          url: typeof v === "string" ? v : v.url,
           format: "mp4",
           type: "video",
         });
       });
     }
-    if (video?.audio) {
+    if (video?.audio && Array.isArray(video.audio)) {
       video.audio.forEach((a) => {
         downloads.push({
-          quality: a.quality || "128kbps",
-          url: a.url,
+          quality: a.quality || "Audio (MP3)",
+          url: typeof a === "string" ? a : a.url,
           format: "mp3",
           type: "audio",
         });
       });
     }
+    if (video?.mp4) {
+      downloads.push({
+        quality: "HD Video (MP4)",
+        url: video.mp4,
+        format: "mp4",
+        type: "video",
+      });
+    }
+    if (video?.mp3) {
+      downloads.push({
+        quality: "Audio (MP3)",
+        url: video.mp3,
+        format: "mp3",
+        type: "audio",
+      });
+    }
   }
+
+  // Handle case if data.result exists
+  if (data.result) {
+    const res = data.result;
+    if (res.mp4) {
+      downloads.push({
+        quality: "HD Video (MP4)",
+        url: res.mp4,
+        format: "mp4",
+        type: "video",
+      });
+    }
+    if (res.mp3) {
+      downloads.push({
+        quality: "Audio (MP3)",
+        url: res.mp3,
+        format: "mp3",
+        type: "audio",
+      });
+    }
+  }
+
   return downloads;
 }
 
 function normalizeFacebookData(data) {
   const downloads = [];
-  if (data?.Normal_video) {
+  if (!data) return downloads;
+
+  const normalVideo = data.Normal_video || data.result?.Normal_video || data.normal;
+  const hdVideo = data.HD || data.result?.HD || data.hd;
+
+  if (hdVideo) {
     downloads.push({
-      quality: "SD",
-      url: data.Normal_video,
+      quality: "HD Video (MP4)",
+      url: typeof hdVideo === "string" ? hdVideo : hdVideo.url,
       format: "mp4",
       type: "video",
     });
   }
-  if (data?.HD) {
+  if (normalVideo) {
     downloads.push({
-      quality: "HD",
-      url: data.HD,
+      quality: "SD Video (MP4)",
+      url: typeof normalVideo === "string" ? normalVideo : normalVideo.url,
       format: "mp4",
       type: "video",
     });
@@ -73,38 +174,55 @@ function normalizeFacebookData(data) {
 
 function normalizeTikTokData(data) {
   const downloads = [];
-  if (data?.video) {
-    data.video.forEach((v, i) => {
+  if (!data) return downloads;
+
+  const videoData = data.video || data.result?.video;
+  if (videoData) {
+    const videos = Array.isArray(videoData) ? videoData : [videoData];
+    videos.forEach((v, i) => {
       downloads.push({
-        quality: i === 0 ? "HD" : "SD",
+        quality: i === 0 ? "HD Video (No Watermark)" : "SD Video",
         url: typeof v === "string" ? v : v.url,
         format: "mp4",
         type: "video",
       });
     });
   }
-  if (data?.audio) {
-    const audioUrl = typeof data.audio === "string" ? data.audio : data.audio?.url;
-    if (audioUrl) {
-      downloads.push({
-        quality: "Audio",
-        url: audioUrl,
-        format: "mp3",
-        type: "audio",
-      });
-    }
+  const audioData = data.audio || data.result?.audio;
+  if (audioData) {
+    const audios = Array.isArray(audioData) ? audioData : [audioData];
+    audios.forEach((a) => {
+      const audioUrl = typeof a === "string" ? a : a?.url;
+      if (audioUrl) {
+        downloads.push({
+          quality: "Audio (MP3)",
+          url: audioUrl,
+          format: "mp3",
+          type: "audio",
+        });
+      }
+    });
   }
   return downloads;
 }
 
 function normalizeInstagramData(data) {
   const downloads = [];
-  const items = Array.isArray(data) ? data : data?.url ? [data] : [];
+  if (!data) return downloads;
+
+  const items = Array.isArray(data)
+    ? data
+    : Array.isArray(data?.result)
+    ? data.result
+    : data?.url
+    ? [data]
+    : [];
+
   items.forEach((item) => {
     const videoUrl = typeof item === "string" ? item : item?.url;
     if (videoUrl) {
       downloads.push({
-        quality: "HD",
+        quality: "HD Video (MP4)",
         url: videoUrl,
         format: "mp4",
         type: "video",
@@ -116,11 +234,14 @@ function normalizeInstagramData(data) {
 
 function normalizeTwitterData(data) {
   const downloads = [];
-  if (data?.url) {
-    const urls = Array.isArray(data.url) ? data.url : [data.url];
+  if (!data) return downloads;
+
+  const urlField = data.url || data.result?.url;
+  if (urlField) {
+    const urls = Array.isArray(urlField) ? urlField : [urlField];
     urls.forEach((u) => {
       downloads.push({
-        quality: "HD",
+        quality: "HD Video (MP4)",
         url: typeof u === "string" ? u : u.url,
         format: "mp4",
         type: "video",
@@ -336,22 +457,31 @@ async function extractTencentVideo(url) {
 const EXTRACTORS = {
   youtube: async (url) => {
     const data = await youtube(url);
+    if (!data || data.status === false) {
+      throw new Error(data?.message || "Could not extract YouTube video");
+    }
     return {
-      title: data?.[0]?.title || "YouTube Video",
-      thumbnail: data?.[0]?.thumbnail || null,
+      title: data.title || (Array.isArray(data) ? data[0]?.title : null) || "YouTube Video",
+      thumbnail: data.thumbnail || (Array.isArray(data) ? data[0]?.thumbnail : null) || null,
       downloads: normalizeYouTubeData(data),
     };
   },
   facebook: async (url) => {
     const data = await fbdown(url);
+    if (!data || data.status === false) {
+      throw new Error(data?.message || "Could not extract Facebook video");
+    }
     return {
-      title: "Facebook Video",
-      thumbnail: null,
+      title: data?.title || "Facebook Video",
+      thumbnail: data?.thumbnail || null,
       downloads: normalizeFacebookData(data),
     };
   },
   tiktok: async (url) => {
     const data = await ttdl(url);
+    if (!data || data.status === false) {
+      throw new Error(data?.message || "Could not extract TikTok video");
+    }
     return {
       title: data?.title || "TikTok Video",
       thumbnail: data?.thumbnail || null,
@@ -360,14 +490,21 @@ const EXTRACTORS = {
   },
   instagram: async (url) => {
     const data = await igdl(url);
+    if (!data || data.status === false) {
+      throw new Error(data?.message || "Could not extract Instagram video");
+    }
+    const thumbnail = Array.isArray(data?.result) && data.result[0]?.thumbnail ? data.result[0].thumbnail : null;
     return {
       title: "Instagram Video",
-      thumbnail: null,
+      thumbnail,
       downloads: normalizeInstagramData(data),
     };
   },
   twitter: async (url) => {
     const data = await twitter(url);
+    if (!data || data.status === false) {
+      throw new Error(data?.message || "Could not extract Twitter/X video");
+    }
     return {
       title: data?.title || "Twitter/X Video",
       thumbnail: data?.thumbnail || null,
@@ -376,24 +513,33 @@ const EXTRACTORS = {
   },
   douyin: async (url) => {
     const data = await douyin(url);
+    if (!data || data.status === false) {
+      throw new Error(data?.message || "Could not extract Douyin video");
+    }
     return {
-      title: data?.result?.title || "Douyin Video",
-      thumbnail: data?.result?.thumbnail || null,
+      title: data?.result?.title || data?.title || "Douyin Video",
+      thumbnail: data?.result?.thumbnail || data?.thumbnail || null,
       downloads: normalizeDouyinData(data),
     };
   },
   pinterest: async (url) => {
     const data = await pinterest(url);
+    if (!data || data.status === false) {
+      throw new Error(data?.message || "Could not extract Pinterest media");
+    }
     return {
-      title: data?.result?.title || "Pinterest Media",
-      thumbnail: data?.result?.image || null,
+      title: data?.result?.title || data?.title || "Pinterest Media",
+      thumbnail: data?.result?.image || data?.thumbnail || null,
       downloads: normalizePinterestData(data),
     };
   },
   kuaishou: async (url) => {
     const data = await kuaishou(url);
+    if (!data || data.status === false) {
+      throw new Error(data?.message || "Could not extract Kuaishou video");
+    }
     return {
-      title: data?.result?.title || "Kuaishou Video",
+      title: data?.result?.title || data?.title || "Kuaishou Video",
       thumbnail: null,
       downloads: normalizeKuaishouData(data),
     };
@@ -427,6 +573,71 @@ const EXTRACTORS = {
     return await extractTencentVideo(url);
   },
 };
+
+async function fetchFileSize(url) {
+  if (!url || typeof url !== "string") return null;
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 6000);
+
+    let res = await fetch(url, {
+      method: "HEAD",
+      redirect: "follow",
+      signal: controller.signal,
+      headers: {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+      },
+    });
+
+    clearTimeout(timeoutId);
+
+    let bytes = res.headers.get("content-length");
+    const contentRange = res.headers.get("content-range");
+    if (contentRange) {
+      const parts = contentRange.split("/");
+      if (parts.length > 1 && parts[1] && !isNaN(parts[1])) {
+        bytes = parts[1];
+      }
+    }
+
+    // If HEAD didn't return content-length, try Range GET
+    if (!bytes && res.status !== 404) {
+      const getController = new AbortController();
+      const getTimeoutId = setTimeout(() => getController.abort(), 5000);
+      res = await fetch(url, {
+        method: "GET",
+        redirect: "follow",
+        signal: getController.signal,
+        headers: {
+          Range: "bytes=0-0",
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        },
+      });
+      clearTimeout(getTimeoutId);
+
+      const rangeH = res.headers.get("content-range");
+      if (rangeH) {
+        const total = rangeH.split("/")[1];
+        if (total && !isNaN(total)) bytes = total;
+      } else {
+        bytes = res.headers.get("content-length");
+      }
+    }
+
+    if (bytes) {
+      const num = parseInt(bytes, 10);
+      if (num >= 10240) { // Only format genuine media payloads (at least 10 KB)
+        if (num >= 1024 * 1024) {
+          return `${(num / (1024 * 1024)).toFixed(2)} MB`;
+        }
+        return `${(num / 1024).toFixed(2)} KB`;
+      }
+    }
+  } catch {
+    // Timeout or network error - skip gracefully
+  }
+  return null;
+}
 
 export async function POST(request) {
   try {
@@ -463,6 +674,15 @@ export async function POST(request) {
       );
     }
 
+    // Fetch real file sizes in parallel using fast HEAD requests
+    await Promise.allSettled(
+      result.downloads.map(async (item) => {
+        if (!item.size && item.url) {
+          item.size = await fetchFileSize(item.url);
+        }
+      })
+    );
+
     return Response.json({
       success: true,
       platform,
@@ -473,9 +693,10 @@ export async function POST(request) {
   } catch (error) {
     console.error("Download error:", error);
     return Response.json(
-      { error: "Failed to process the URL. Please try again." },
+      { error: error?.message || "Failed to process the URL. Please try again." },
       { status: 500 }
     );
   }
 }
+
 
