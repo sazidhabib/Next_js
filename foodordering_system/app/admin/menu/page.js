@@ -297,9 +297,7 @@ export default function AdminMenuPage() {
               name: dishName.trim(),
               description: dishDesc.trim(),
               basePrice: parseFloat(dishPrice) || 0,
-              imageUrl:
-                dishImage.trim() ||
-                'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80',
+              imageUrl: dishImage.trim() || null,
               isFeatured: true,
               isAvailable: true,
             },
@@ -588,11 +586,22 @@ export default function AdminMenuPage() {
                 >
                   {/* Image & Price */}
                   <div className="relative h-44 bg-slate-950 overflow-hidden">
-                    <img
-                      src={item.imageUrl}
-                      alt={item.name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
+                    {item.imageUrl ? (
+                      <img
+                        src={item.imageUrl}
+                        alt={item.name}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900 flex flex-col items-center justify-center gap-2 p-4 text-center border-b border-slate-800/80 select-none">
+                        <div className="w-12 h-12 rounded-2xl bg-orange-500/10 border border-orange-500/20 text-orange-400 flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform">
+                          <UtensilsCrossed className="w-6 h-6" />
+                        </div>
+                        <span className="text-[11px] font-semibold text-slate-400">
+                          No image uploaded
+                        </span>
+                      </div>
+                    )}
                     <div className="absolute top-3 right-3 bg-slate-950/85 backdrop-blur-md px-2.5 py-1 rounded-lg text-white font-extrabold text-xs shadow-md border border-white/10">
                       £{item.basePrice?.toFixed(2)}
                     </div>
@@ -742,22 +751,24 @@ export default function AdminMenuPage() {
                       alt="Category preview"
                       className="w-full h-full object-cover"
                     />
-                    <div className="absolute inset-0 bg-black/50 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="absolute inset-0 bg-black/60 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                       <button
                         type="button"
                         onClick={openCategoryMediaPicker}
-                        className="bg-slate-900/95 hover:bg-slate-800 text-white px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-lg border border-slate-700 cursor-pointer"
+                        className="image-overlay-btn bg-slate-900/95 hover:bg-slate-800 text-white! px-3.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-lg border border-slate-700 cursor-pointer"
+                        style={{ color: '#ffffff' }}
                       >
                         <Upload className="w-3.5 h-3.5 text-orange-400" />
-                        <span>Change Image</span>
+                        <span className="text-white!" style={{ color: '#ffffff' }}>Change Image</span>
                       </button>
                       <button
                         type="button"
                         onClick={() => setCatImage('')}
-                        className="bg-rose-600 hover:bg-rose-500 text-white px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-lg cursor-pointer"
+                        className="bg-rose-600 hover:bg-rose-500 text-white! px-3.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-lg cursor-pointer"
+                        style={{ color: '#ffffff' }}
                       >
-                        <Trash2 className="w-3.5 h-3.5" />
-                        <span>Remove</span>
+                        <Trash2 className="w-3.5 h-3.5 text-white!" />
+                        <span className="text-white!" style={{ color: '#ffffff' }}>Remove</span>
                       </button>
                     </div>
                   </div>
@@ -897,22 +908,24 @@ export default function AdminMenuPage() {
                       alt="Dish Preview"
                       className="w-full h-full object-cover"
                     />
-                    <div className="absolute inset-0 bg-black/50 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="absolute inset-0 bg-black/60 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                       <button
                         type="button"
                         onClick={openDishMediaPicker}
-                        className="bg-slate-900/95 hover:bg-slate-800 text-white px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-lg border border-slate-700 cursor-pointer"
+                        className="image-overlay-btn bg-slate-900/95 hover:bg-slate-800 text-white! px-3.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-lg border border-slate-700 cursor-pointer"
+                        style={{ color: '#ffffff' }}
                       >
                         <Upload className="w-3.5 h-3.5 text-orange-400" />
-                        <span>Change Image</span>
+                        <span className="text-white!" style={{ color: '#ffffff' }}>Change Image</span>
                       </button>
                       <button
                         type="button"
                         onClick={() => setDishImage('')}
-                        className="bg-rose-600 hover:bg-rose-500 text-white px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-lg cursor-pointer"
+                        className="bg-rose-600 hover:bg-rose-500 text-white! px-3.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-lg cursor-pointer"
+                        style={{ color: '#ffffff' }}
                       >
-                        <Trash2 className="w-3.5 h-3.5" />
-                        <span>Remove</span>
+                        <Trash2 className="w-3.5 h-3.5 text-white!" />
+                        <span className="text-white!" style={{ color: '#ffffff' }}>Remove</span>
                       </button>
                     </div>
                   </div>

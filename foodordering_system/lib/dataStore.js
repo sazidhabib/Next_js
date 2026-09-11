@@ -722,9 +722,7 @@ export async function addMenuItem(categoryId, itemData) {
   const basePrice = parseFloat(itemData.basePrice) || 0;
   const name = itemData.name?.trim();
   const description = itemData.description || '';
-  const imageUrl =
-    itemData.imageUrl ||
-    'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80';
+  const imageUrl = itemData.imageUrl ? itemData.imageUrl.trim() : null;
   const isAvailable = itemData.isAvailable !== false;
   const isFeatured = !!itemData.isFeatured;
 

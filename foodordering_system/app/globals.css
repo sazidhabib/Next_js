@@ -233,6 +233,7 @@ body {
 .theme-light .bg-red-600,
 .theme-light .bg-indigo-600,
 .theme-light .bg-blue-600,
+.theme-light .bg-rose-600,
 .theme-light .bg-black {
   color: #ffffff !important;
 }
@@ -244,6 +245,7 @@ body {
 .theme-light .bg-emerald-700 *,
 .theme-light .bg-emerald-500 *,
 .theme-light .bg-red-600 *,
+.theme-light .bg-rose-600 *,
 .theme-light .bg-indigo-600 *,
 .theme-light .bg-blue-600 * {
   color: #ffffff !important;
@@ -252,18 +254,24 @@ body {
 /* Keep floating photo tags & image price badges dark with crisp white text */
 .theme-light .relative .bg-slate-950\/85,
 .theme-light .relative .bg-slate-950\/90,
+.theme-light .relative .bg-slate-900\/95,
+.theme-light .relative .bg-black\/50,
 .theme-light .relative .bg-black\/60,
 .theme-light .relative .bg-black\/70,
-.theme-light .relative .bg-black\/80 {
-  background-color: rgba(15, 23, 42, 0.85) !important;
+.theme-light .relative .bg-black\/80,
+.theme-light .image-overlay-btn {
+  background-color: rgba(15, 23, 42, 0.9) !important;
   color: #ffffff !important;
 }
 
 .theme-light .relative .bg-slate-950\/85 *,
 .theme-light .relative .bg-slate-950\/90 *,
+.theme-light .relative .bg-slate-900\/95 *,
+.theme-light .relative .bg-black\/50 *,
 .theme-light .relative .bg-black\/60 *,
 .theme-light .relative .bg-black\/70 *,
-.theme-light .relative .bg-black\/80 * {
+.theme-light .relative .bg-black\/80 *,
+.theme-light .image-overlay-btn * {
   color: #ffffff !important;
 }
 

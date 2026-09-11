@@ -14,6 +14,17 @@ export default function ItemModal({ item, isOpen, onClose, onAddToCart }) {
     setSpecialNotes('');
   }, [item, isOpen]);
 
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      const originalOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = originalOverflow;
+      };
+    }
+  }, [isOpen]);
+
   if (!isOpen || !item) return null;
 
   const unitPrice = item.basePrice || 0;
@@ -41,32 +52,52 @@ export default function ItemModal({ item, isOpen, onClose, onAddToCart }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-slate-950/70 backdrop-blur-xs overflow-y-auto animate-fadeIn">
       <div className="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl overflow-hidden my-8 border border-slate-100 flex flex-col max-h-[90vh]">
-        {/* Modal Header & Hero Image */}
-        <div className="relative h-48 sm:h-56 bg-slate-900 shrink-0">
-          <img
-            src={item.imageUrl}
-            alt={item.name}
-            className="w-full h-full object-cover"
-          />
-          <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent"></div>
+        {/* Modal Header: Hero Image (if available) OR Clean Header */}
+        {item.imageUrl ? (
+          <div className="relative h-48 sm:h-56 bg-slate-900 shrink-0">
+            <img
+              src={item.imageUrl}
+              alt={item.name}
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent"></div>
 
-          {/* Close button */}
-          <button
-            onClick={onClose}
-            aria-label="Close modal"
-            className="absolute top-3 right-3 w-9 h-9 rounded-full bg-black/50 text-white hover:bg-black/80 flex items-center justify-center backdrop-blur-md transition-all cursor-pointer"
-          >
-            <X className="w-5 h-5" />
-          </button>
+            {/* Close button */}
+            <button
+              onClick={onClose}
+              aria-label="Close modal"
+              className="absolute top-3 right-3 w-9 h-9 rounded-full bg-black/50 text-white hover:bg-black/80 flex items-center justify-center backdrop-blur-md transition-all cursor-pointer"
+            >
+              <X className="w-5 h-5" />
+            </button>
 
-          {/* Title and price in hero */}
-          <div className="absolute bottom-4 left-4 right-4 text-white">
-            <h2 className="text-xl sm:text-2xl font-bold tracking-tight">{item.name}</h2>
-            <p className="text-orange-300 font-bold text-lg mt-0.5">
-              £{unitPrice.toFixed(2)}
-            </p>
+            {/* Title and price in hero */}
+            <div className="absolute bottom-4 left-4 right-4 text-white">
+              <h2 className="text-xl sm:text-2xl font-bold tracking-tight">{item.name}</h2>
+              <p className="text-orange-300 font-bold text-lg mt-0.5">
+                £{unitPrice.toFixed(2)}
+              </p>
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className="p-5 sm:p-6 pb-4 border-b border-slate-100 flex items-start justify-between gap-4 shrink-0 bg-slate-50/70">
+            <div className="space-y-1">
+              <h2 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight leading-snug">
+                {item.name}
+              </h2>
+              <p className="text-orange-600 font-extrabold text-base sm:text-lg">
+                £{unitPrice.toFixed(2)}
+              </p>
+            </div>
+            <button
+              onClick={onClose}
+              aria-label="Close modal"
+              className="w-9 h-9 rounded-full bg-slate-200/70 hover:bg-slate-300/80 text-slate-700 hover:text-slate-900 flex items-center justify-center transition-all cursor-pointer shrink-0"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+        )}
 
         {/* Scrollable Body */}
         <div className="p-5 sm:p-6 overflow-y-auto space-y-6 flex-1 text-slate-800">

@@ -109,6 +109,17 @@ export default function CheckoutWizardModal({
   const restLat = restaurant?.latitude || 51.5133;
   const restLng = restaurant?.longitude || -0.1362;
 
+  // Lock background body scroll when checkout modal is open
+  useEffect(() => {
+    if (isOpen) {
+      const originalOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = originalOverflow;
+      };
+    }
+  }, [isOpen]);
+
   // Initialize restaurant defaults
   useEffect(() => {
     if (restaurant) {
@@ -660,64 +671,9 @@ export default function CheckoutWizardModal({
             </button>
           </div>
 
-          <div className="p-4 sm:p-6 overflow-y-auto grid grid-cols-1 md:grid-cols-12 gap-6 bg-[#f8f9fa]">
-            {/* Left Column: Order Summary Breakdown */}
-            <div className="md:col-span-5 bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-4">
-              <div className="flex items-center justify-between pb-2 border-b border-slate-100">
-                <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
-                  Order Summary
-                </span>
-                <span className="text-xs font-mono font-bold text-orange-600 bg-orange-50 px-2 py-0.5 rounded border border-orange-200">
-                  #{stripeModalData.orderNumber || stripeModalData.orderId}
-                </span>
-              </div>
-
-              <div className="space-y-2 text-xs">
-                <div className="flex justify-between text-slate-600">
-                  <span>Fulfillment</span>
-                  <span className="font-bold text-slate-900">
-                    {serviceType === 'DELIVERY' ? 'Delivery' : 'Pickup'}
-                  </span>
-                </div>
-                {deliveryAddress && (
-                  <div className="text-[11px] text-slate-500 bg-slate-50 p-2.5 rounded-xl border border-slate-100">
-                    <span className="font-semibold block text-slate-700">Delivery Address:</span>
-                    <span>{deliveryAddress}</span>
-                  </div>
-                )}
-                <div className="flex justify-between text-slate-600 pt-2 border-t border-slate-100">
-                  <span>Subtotal</span>
-                  <span className="font-bold text-slate-800">£{subtotal.toFixed(2)}</span>
-                </div>
-                {deliveryFee > 0 && (
-                  <div className="flex justify-between text-slate-600">
-                    <span>Delivery Fee</span>
-                    <span>£{deliveryFee.toFixed(2)}</span>
-                  </div>
-                )}
-                {discountAmount > 0 && (
-                  <div className="flex justify-between text-emerald-600 font-bold">
-                    <span>Discount</span>
-                    <span>-£{discountAmount.toFixed(2)}</span>
-                  </div>
-                )}
-                <div className="flex justify-between text-base font-extrabold text-slate-900 pt-2 border-t border-slate-200">
-                  <span>Total to Pay</span>
-                  <span className="text-orange-600 font-black">
-                    {stripeModalData.currency?.toUpperCase() === 'USD' ? '$' : stripeModalData.currency?.toUpperCase() === 'EUR' ? '€' : '£'}
-                    {Number(stripeModalData.amount).toFixed(2)}
-                  </span>
-                </div>
-              </div>
-
-              <div className="pt-2 text-[10px] text-slate-400 flex items-center gap-1.5 justify-center">
-                <Lock className="w-3 h-3 text-slate-400" />
-                <span>Encrypted with 256-bit SSL Security</span>
-              </div>
-            </div>
-
-            {/* Right Column: Stripe Elements Form */}
-            <div className="md:col-span-7">
+          <div className="p-4 sm:p-8 overflow-y-auto flex-1 bg-[#f8f9fa] flex flex-col items-center">
+            {/* Centered Stripe Elements Form */}
+            <div className="w-full max-w-xl mx-auto my-auto py-2">
               <Elements
                 stripe={
                   stripePromise ||

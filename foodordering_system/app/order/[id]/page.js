@@ -35,6 +35,17 @@ export default function OrderTrackingPage({ params }) {
   const [now, setNow] = useState(Date.now());
   const [printReceiptModalOpen, setPrintReceiptModalOpen] = useState(false);
 
+  // Lock body scroll when print receipt modal is open
+  useEffect(() => {
+    if (printReceiptModalOpen) {
+      const original = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = original;
+      };
+    }
+  }, [printReceiptModalOpen]);
+
   // 1-second live countdown ticker
   useEffect(() => {
     const timer = setInterval(() => setNow(Date.now()), 1000);
@@ -565,38 +576,12 @@ export default function OrderTrackingPage({ params }) {
               </button>
             </div>
 
-            {/* Receipt Type Toggle (Client Copy vs Kitchen Copy) */}
-            <div className="flex bg-slate-800 p-1 rounded-xl gap-1 no-print">
-              <button
-                type="button"
-                onClick={() => setReceiptType('CUSTOMER')}
-                className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                  receiptType === 'CUSTOMER'
-                    ? 'bg-orange-600 text-white shadow-xs'
-                    : 'text-slate-400 hover:text-white'
-                }`}
-              >
-                Client Copy
-              </button>
-              <button
-                type="button"
-                onClick={() => setReceiptType('KITCHEN')}
-                className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                  receiptType === 'KITCHEN'
-                    ? 'bg-orange-600 text-white shadow-xs'
-                    : 'text-slate-400 hover:text-white'
-                }`}
-              >
-                Kitchen Copy
-              </button>
-            </div>
-
-            {/* Receipt Content */}
+            {/* Receipt Content (Customer Client Copy Only) */}
             <div className="bg-slate-950 p-3 rounded-2xl border border-slate-800 flex justify-center">
               <PrintableInvoice
                 order={order}
-                template={receiptType === 'CUSTOMER' ? customerTemplate : kitchenTemplate}
-                type={receiptType}
+                template={customerTemplate}
+                type="CUSTOMER"
                 restaurant={restaurant}
               />
             </div>
