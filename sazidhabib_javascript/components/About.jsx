@@ -22,13 +22,13 @@ const ServiceCard = ({ index, title, icon }) => (
       transitionSpeed={1500}
       className="green-pink-gradient rounded-2xl p-[2px] shadow-card h-full"
     >
-      <div className="bg-surface rounded-2xl py-8 px-8 min-h-[150px] md:min-h-[240px] h-full flex flex-col items-center justify-center gap-5">
+      <div className="bg-[var(--color-surface)] rounded-2xl py-8 px-8 min-h-[150px] md:min-h-[240px] h-full flex flex-col items-center justify-center gap-5 transition-colors duration-400">
         <img
           src={icon}
           alt={title}
           className="w-14 h-14 md:w-16 md:h-16 object-contain"
         />
-        <h3 className="text-white text-[15px] md:text-[18px] font-semibold text-center tracking-tight">
+        <h3 className="text-[var(--color-text)] text-[15px] md:text-[18px] font-semibold text-center tracking-tight">
           {title}
         </h3>
       </div>
@@ -46,7 +46,7 @@ const About = () => {
 
       <motion.p
         variants={fadeIn("", "", 0.1, 1)}
-        className="mt-4 text-slate-400 text-[15px] leading-relaxed max-w-3xl"
+        className="mt-4 text-[var(--color-text-muted)] text-[15px] leading-relaxed max-w-3xl"
       >
         I&apos;m a skilled software developer with experience in TypeScript and
         JavaScript, and expertise in frameworks like React, Next.js, Node.js, Express, MySQL with Sequelize ORM, and

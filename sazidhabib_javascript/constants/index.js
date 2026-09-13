@@ -50,7 +50,7 @@ export const technologies = [
   { name: "Tailwind CSS", icon: "/src/assets/tech/tailwind.png" },
   { name: "Node JS", icon: "/src/assets/tech/nodejs.png" },
   { name: "MongoDB", icon: "/src/assets/tech/mongodb.png" },
-  { name: "Three JS", icon: "/src/assets/tech/threejs.svg" },
+  { name: "Three JS", icon: "/src/assets/tech/threejs.png" },
   { name: "git", icon: "/src/assets/tech/git.png" },
   { name: "figma", icon: "/src/assets/tech/figma.png" },
   { name: "docker", icon: "/src/assets/tech/docker.png" },

@@ -42,11 +42,11 @@ const Navbar = () => {
           }}
         >
           <span
-            className={`text-white font-bold cursor-pointer tracking-tight transition-all duration-500 ${
+            className={`text-[var(--color-text)] font-bold cursor-pointer tracking-tight transition-all duration-500 ${
               scrolled ? "text-base" : "text-2xl"
             }`}
           >
-            Sazid<span className="text-sky-400">.</span>Habib
+            Sazid<span className="text-[var(--color-accent)]">.</span>Habib
           </span>
         </Link>
 
@@ -54,11 +54,13 @@ const Navbar = () => {
           {navLinks.map((nav) => (
             <li
               key={nav.id}
-              className={`transition-all duration-500 ease-in-out ${
-                scrolled ? "text-[13px]" : "text-lg"
+              className={`transition-all duration-300 ease-in-out ${
+                scrolled ? "text-[13px]" : "text-base"
               } ${
-                active === nav.title ? "text-white" : "text-slate-400"
-              } hover:text-white font-medium cursor-pointer`}
+                active === nav.title
+                  ? "text-[var(--color-text)] font-semibold"
+                  : "text-[var(--color-text-muted)]"
+              } hover:text-[var(--color-text)] font-medium cursor-pointer`}
               onClick={() => setActive(nav.title)}
             >
               <a href={`#${nav.id}`} className="inline-block">
@@ -66,22 +68,26 @@ const Navbar = () => {
               </a>
             </li>
           ))}
+
+          {/* Day / Night Theme Toggle Button */}
           <button
             type="button"
             onClick={toggleTheme}
-            className="text-slate-400 hover:text-white transition-colors p-1.5"
+            className="p-2 rounded-full bg-[var(--color-pill-bg)] hover:bg-[var(--color-pill-hover)] border border-[var(--color-border)] text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-all duration-300 flex items-center justify-center cursor-pointer active:scale-95 shadow-xs"
             aria-label="Toggle theme"
+            title={theme === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode"}
           >
             {theme === "dark" ? (
-              <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 text-amber-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
               </svg>
             ) : (
-              <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
               </svg>
             )}
           </button>
+
           <a
             href="https://github.com/sazidhabib"
             target="_blank"
@@ -89,32 +95,50 @@ const Navbar = () => {
           >
             <button
               type="button"
-              className="text-white bg-sky-400/10 hover:bg-sky-400/20 border border-sky-400/20 focus:ring-0 font-medium rounded-lg text-sm px-4 py-1.5 transition-all duration-300"
+              className="text-[var(--color-text)] bg-sky-500/10 hover:bg-sky-500/20 border border-sky-500/20 focus:ring-0 font-medium rounded-lg text-sm px-4 py-1.5 transition-all duration-300 cursor-pointer"
             >
               GitHub
             </button>
           </a>
         </ul>
 
-        <div className="md:hidden flex flex-1 justify-end items-center">
+        {/* Mobile menu and toggle */}
+        <div className="md:hidden flex items-center gap-3">
+          <button
+            type="button"
+            onClick={toggleTheme}
+            className="p-2 rounded-full bg-[var(--color-pill-bg)] border border-[var(--color-border)] text-[var(--color-text)] cursor-pointer"
+            aria-label="Toggle theme"
+          >
+            {theme === "dark" ? (
+              <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 text-amber-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+              </svg>
+            ) : (
+              <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+              </svg>
+            )}
+          </button>
+
           <img
             src={toggle ? "/src/assets/close.svg" : "/src/assets/menu.svg"}
             alt="menu"
-            className="w-[24px] h-[24px] object-contain cursor-pointer opacity-70 hover:opacity-100 transition-opacity"
+            className="w-[24px] h-[24px] object-contain cursor-pointer opacity-70 hover:opacity-100 transition-opacity filter dark:invert-0 invert"
             onClick={() => setToggle(!toggle)}
           />
 
           <div
             className={`${
               !toggle ? "hidden" : "flex"
-            } p-6 glass absolute top-16 right-0 mx-4 my-2 min-w-[160px] z-10 rounded-xl`}
+            } p-6 glass absolute top-16 right-0 mx-4 my-2 min-w-[180px] z-10 rounded-2xl shadow-xl flex-col gap-4 border border-[var(--color-border)]`}
           >
             <ul className="list-none flex justify-end items-start flex-1 flex-col gap-4">
               {navLinks.map((nav) => (
                 <li
                   key={nav.id}
                   className={`font-medium cursor-pointer text-[15px] ${
-                    active === nav.title ? "text-white" : "text-slate-400"
+                    active === nav.title ? "text-[var(--color-text)] font-semibold" : "text-[var(--color-text-muted)]"
                   }`}
                   onClick={() => {
                     setToggle(!toggle);

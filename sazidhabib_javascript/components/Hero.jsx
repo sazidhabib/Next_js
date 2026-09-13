@@ -17,7 +17,7 @@ const Hero = () => {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2, duration: 0.5 }}
-              className="text-sky-400 text-[13px] font-mono tracking-[0.25em] uppercase"
+              className="text-[var(--color-accent)] text-[13px] font-mono tracking-[0.25em] uppercase font-semibold"
             >
               Full-Stack Developer
             </motion.span>
@@ -30,10 +30,10 @@ const Hero = () => {
                 duration: 0.6,
                 ease: [0.16, 1, 0.3, 1],
               }}
-              className="text-white font-bold text-[clamp(32px,5vw,56px)] leading-[1.15] tracking-tight mt-4"
+              className="text-[var(--color-text)] font-bold text-[clamp(32px,5vw,56px)] leading-[1.15] tracking-tight mt-4"
             >
               Hi, I&apos;m{" "}
-              <span className="inline-block text-transparent italic bg-clip-text bg-gradient-to-r from-sky-400 to-blue-600 pr-3 box-decoration-clone">
+              <span className="inline-block text-transparent italic bg-clip-text bg-gradient-to-r from-sky-400 via-blue-500 to-indigo-600 pr-3 box-decoration-clone">
                 Mahbub Sazid Habib
               </span>
             </motion.h1>
@@ -46,7 +46,7 @@ const Hero = () => {
                 duration: 0.6,
                 ease: [0.16, 1, 0.3, 1],
               }}
-              className="text-slate-400 text-[15px] sm:text-[16px] leading-relaxed mt-4 max-w-[520px]"
+              className="text-[var(--color-text-muted)] text-[15px] sm:text-[16px] leading-relaxed mt-4 max-w-[520px]"
             >
               Crafting responsive, user-friendly web applications with modern
               tools. Passionate about building impactful projects.
@@ -68,7 +68,7 @@ const Hero = () => {
               >
                 <button
                   type="button"
-                  className="text-white bg-sky-500 hover:bg-sky-600 px-6 py-3 rounded-lg font-medium text-sm transition-all duration-300 active:scale-[0.97]"
+                  className="text-white bg-sky-500 hover:bg-sky-600 px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-300 active:scale-[0.97] cursor-pointer shadow-md shadow-sky-500/20"
                 >
                   Download Resume
                 </button>
@@ -76,7 +76,7 @@ const Hero = () => {
               <a href="#about">
                 <button
                   type="button"
-                  className="text-slate-300 border border-white/10 hover:border-white/20 bg-white/5 hover:bg-white/10 px-6 py-3 rounded-lg font-medium text-sm transition-all duration-300 active:scale-[0.97]"
+                  className="text-[var(--color-text)] border border-[var(--color-border)] bg-[var(--color-pill-bg)] hover:bg-[var(--color-pill-hover)] px-6 py-3 rounded-xl font-medium text-sm transition-all duration-300 active:scale-[0.97] cursor-pointer"
                 >
                   Learn More
                 </button>
@@ -93,31 +93,28 @@ const Hero = () => {
         >
           <div className="relative">
             <div className="absolute -inset-4 bg-gradient-to-b from-sky-500/10 to-transparent rounded-full blur-3xl" />
-            <div className="home__img rounded-2xl border border-white/10 shadow-glass" />
+            <div className="home__img rounded-2xl border border-[var(--color-border)] shadow-xl" />
           </div>
         </motion.div>
       </div>
 
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1, duration: 1 }}
-        className="absolute bottom-8 w-full flex justify-center items-center"
-      >
+      <div className="absolute xs:bottom-10 bottom-32 w-full flex justify-center items-center">
         <a href="#about">
-          <div className="w-[30px] h-[52px] rounded-full border border-white flex justify-center items-start p-2 hover:border-white/20 transition-colors">
+          <div className="w-[35px] h-[64px] rounded-3xl border-4 border-[var(--color-border)] flex justify-center items-start p-2 hover:border-[var(--color-accent)] transition-colors">
             <motion.div
-              animate={{ y: [0, 12, 0] }}
-              transition={{
-                duration: 2.5,
-                repeat: Infinity,
-                ease: [0.16, 1, 0.3, 1],
+              animate={{
+                y: [0, 24, 0],
               }}
-              className="w-2 h-2 rounded-full bg-slate-400"
+              transition={{
+                duration: 1.5,
+                repeat: Infinity,
+                repeatType: "loop",
+              }}
+              className="w-3 h-3 rounded-full bg-[var(--color-accent)] mb-1"
             />
           </div>
         </a>
-      </motion.div>
+      </div>
     </section>
   );
 };

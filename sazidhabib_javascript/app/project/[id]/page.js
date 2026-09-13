@@ -26,12 +26,14 @@ import "swiper/css/pagination";
 import { styles } from "@/styles";
 import { fadeIn, textVariant } from "@/utils/motion";
 import usePortfolioData from "@/hooks/usePortfolioData";
+import { useTheme } from "@/context/ThemeContext";
 
 export default function ProjectDetailsPage({ params }) {
   const resolvedParams = use(params);
   const id = resolvedParams.id;
   const router = useRouter();
   const { projects, loading } = usePortfolioData();
+  const { theme, toggleTheme } = useTheme();
 
   const project = projects.find((p) => String(p.id) === String(id));
   const fallbackMediaType = project?.image?.match(/\.(mp4|webm|ogg)$/i) ? "video" : "image";
@@ -93,10 +95,10 @@ export default function ProjectDetailsPage({ params }) {
 
   if (loading) {
     return (
-      <div className="bg-[#03030a] min-h-screen flex items-center justify-center">
+      <div className="bg-[var(--color-primary)] min-h-screen flex items-center justify-center transition-colors duration-400">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-sky-400 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-slate-400">Loading project details...</p>
+          <div className="w-16 h-16 border-4 border-sky-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-[var(--color-text-muted)] text-sm">Loading project details...</p>
         </div>
       </div>
     );
@@ -104,19 +106,19 @@ export default function ProjectDetailsPage({ params }) {
 
   if (!project) {
     return (
-      <div className="bg-[#03030a] min-h-screen flex items-center justify-center">
+      <div className="bg-[var(--color-primary)] min-h-screen flex items-center justify-center transition-colors duration-400">
         <div className="text-center">
-          <h1 className="text-4xl font-bold text-white mb-4">
+          <h1 className="text-3xl font-bold text-[var(--color-text)] mb-4">
             Project Not Found
           </h1>
-          <p className="text-slate-400">Redirecting to homepage...</p>
+          <p className="text-[var(--color-text-muted)] text-sm">Redirecting to homepage...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="bg-[#03030a] min-h-screen">
+    <div className="bg-[var(--color-primary)] min-h-screen transition-colors duration-400">
       <div className="bg-hero-pattern bg-cover bg-no-repeat bg-center">
         <motion.nav
           initial={{ y: -20, opacity: 0 }}
@@ -127,7 +129,7 @@ export default function ProjectDetailsPage({ params }) {
           <div className="w-full flex justify-between items-center max-w-7xl mx-auto py-3 px-4 sm:px-8 rounded-full glass shadow-lg">
             <button
               onClick={() => router.back()}
-              className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors group cursor-pointer"
+              className="flex items-center gap-2 text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors group cursor-pointer"
             >
               <FiArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
               <span className="text-[13px] font-medium hidden sm:inline">
@@ -137,12 +139,27 @@ export default function ProjectDetailsPage({ params }) {
 
             <Link
               href="/"
-              className="text-white font-bold cursor-pointer tracking-tight text-base"
+              className="text-[var(--color-text)] font-bold cursor-pointer tracking-tight text-base"
             >
-              Sazid<span className="text-sky-400">.</span>Habib
+              Sazid<span className="text-[var(--color-accent)]">.</span>Habib
             </Link>
 
-            <div className="w-16 sm:w-20" />
+            <button
+              type="button"
+              onClick={toggleTheme}
+              className="p-2 rounded-full bg-[var(--color-pill-bg)] hover:bg-[var(--color-pill-hover)] border border-[var(--color-border)] text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-all duration-300 flex items-center justify-center cursor-pointer active:scale-95"
+              aria-label="Toggle theme"
+            >
+              {theme === "dark" ? (
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 text-amber-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+              ) : (
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                </svg>
+              )}
+            </button>
           </div>
         </motion.nav>
 
@@ -152,7 +169,7 @@ export default function ProjectDetailsPage({ params }) {
               variants={fadeIn("up", "spring", 0.1, 0.75)}
               initial="hidden"
               animate="show"
-              className="relative w-full aspect-video rounded-2xl overflow-hidden glass-card glow-border group"
+              className="relative w-full aspect-video rounded-2xl overflow-hidden glass-card glow-border group shadow-2xl"
             >
               <Swiper
                 modules={[Autoplay, Navigation, Pagination]}
@@ -169,7 +186,7 @@ export default function ProjectDetailsPage({ params }) {
                 className="w-full h-full project-media-swiper"
               >
                 {media.map((item, index) => (
-                  <SwiperSlide key={index} className="w-full h-full relative">
+                  <SwiperSlide key={index} className="w-full h-full relative bg-slate-900/40">
                     {item.type === "video" ? (
                       <div
                         className="relative w-full h-full cursor-pointer"
@@ -183,7 +200,7 @@ export default function ProjectDetailsPage({ params }) {
                           controls
                         />
                         <div className="absolute inset-0 flex items-center justify-center bg-black/20 hover:bg-black/30 transition-colors">
-                          <div className="w-14 h-14 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                          <div className="w-14 h-14 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-lg">
                             <FiMaximize2 className="w-5 h-5 text-white" />
                           </div>
                         </div>
@@ -196,17 +213,16 @@ export default function ProjectDetailsPage({ params }) {
                         onClick={() => openLightbox(index)}
                       />
                     )}
-                    <div className="absolute top-3 left-3 z-10 flex items-center gap-1.5 bg-black/50 backdrop-blur-sm text-white text-[10px] font-medium px-2 py-1 rounded-md">
+                    <div className="absolute top-3 left-3 z-10 flex items-center gap-1.5 bg-black/60 backdrop-blur-sm text-white text-[10px] font-semibold px-2.5 py-1 rounded-md">
                       {item.type === "video" ? (
-                        <><FiPlay className="w-3 h-3" /> Video</>
+                        <><FiPlay className="w-3 h-3 text-purple-400" /> Video</>
                       ) : (
-                        <><FiImage className="w-3 h-3" /> Image</>
+                        <><FiImage className="w-3 h-3 text-sky-400" /> Image</>
                       )}
                     </div>
                   </SwiperSlide>
                 ))}
               </Swiper>
-              <div className="absolute inset-0 bg-gradient-to-t from-[#03030a]/80 via-transparent to-transparent pointer-events-none" />
             </motion.div>
           </div>
         </div>
@@ -220,19 +236,23 @@ export default function ProjectDetailsPage({ params }) {
           className="glass-card rounded-2xl p-6 sm:p-10 glow-border"
         >
           <div className="flex flex-wrap gap-2 mb-5">
-            {Array.isArray(project.tags) && project.tags.map((tag) => (
-              <span
-                key={`${project.id}-${tag.name || tag}`}
-                className={`text-[11px] font-mono ${tag.color || 'text-sky-400'} bg-white/5 px-3 py-1 rounded-full border border-white/5`}
-              >
-                #{tag.name || tag}
-              </span>
-            ))}
+            {Array.isArray(project.tags) && project.tags.map((tag, tIdx) => {
+              const tagName = typeof tag === 'object' && tag !== null && tag.name ? tag.name : String(tag);
+              const tagColor = typeof tag === 'object' && tag !== null && tag.color ? tag.color : 'text-sky-500';
+              return (
+                <span
+                  key={`${project.id}-${tIdx}`}
+                  className={`text-[11px] font-mono ${tagColor} bg-[var(--color-pill-bg)] px-3 py-1 rounded-full border border-[var(--color-border)] font-medium`}
+                >
+                  #{tagName}
+                </span>
+              );
+            })}
           </div>
 
           <motion.h1
             variants={textVariant()}
-            className="text-white font-bold text-[32px] sm:text-[44px] md:text-[52px] tracking-tight leading-none mb-6"
+            className="text-[var(--color-text)] font-bold text-[32px] sm:text-[44px] md:text-[52px] tracking-tight leading-none mb-6"
           >
             {project.name}
           </motion.h1>
@@ -246,7 +266,7 @@ export default function ProjectDetailsPage({ params }) {
                 href={project.source_code_link}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 text-white bg-sky-400/10 hover:bg-sky-400/20 border border-sky-400/20 rounded-lg px-5 py-2.5 text-sm font-medium transition-all duration-300"
+                className="inline-flex items-center gap-2 text-[var(--color-text)] bg-sky-500/10 hover:bg-sky-500/20 border border-sky-500/20 rounded-xl px-5 py-2.5 text-sm font-semibold transition-all duration-300 shadow-xs"
               >
                 <FiGithub className="w-4 h-4" />
                 Source Code
@@ -257,7 +277,7 @@ export default function ProjectDetailsPage({ params }) {
                 href={project.live_link}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 text-white bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 rounded-lg px-5 py-2.5 text-sm font-medium transition-all duration-300"
+                className="inline-flex items-center gap-2 text-white bg-emerald-500 hover:bg-emerald-600 rounded-xl px-5 py-2.5 text-sm font-semibold transition-all duration-300 shadow-md shadow-emerald-500/20"
               >
                 <FiExternalLink className="w-4 h-4" />
                 Live Demo
@@ -269,30 +289,30 @@ export default function ProjectDetailsPage({ params }) {
             variants={fadeIn("up", "spring", 0.4, 0.75)}
             className="mb-10"
           >
-            <h2 className="text-sky-400 text-[11px] uppercase tracking-[0.2em] font-medium mb-4">
+            <h2 className="text-[var(--color-accent)] text-[12px] uppercase tracking-[0.2em] font-bold mb-4">
               Overview
             </h2>
             <div 
-              className="text-slate-300 text-[15px] leading-relaxed max-w-3xl editor-content"
+              className="text-[var(--color-text-muted)] text-[15px] leading-relaxed max-w-3xl editor-content"
               dangerouslySetInnerHTML={{ __html: project.description }}
             />
           </motion.div>
 
           {Array.isArray(project.features) && project.features.length > 0 && (
             <motion.div variants={fadeIn("up", "spring", 0.5, 0.75)}>
-              <h2 className="text-sky-400 text-[11px] uppercase tracking-[0.2em] font-medium mb-5">
+              <h2 className="text-[var(--color-accent)] text-[12px] uppercase tracking-[0.2em] font-bold mb-5">
                 Key Features
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {project.features.map((feature, i) => (
                   <div
                     key={i}
-                    className="flex items-start gap-3 bg-white/[0.02] border border-white/[0.05] rounded-xl p-4 hover:bg-white/[0.04] transition-colors"
+                    className="flex items-start gap-3 bg-[var(--color-pill-bg)] border border-[var(--color-border)] rounded-xl p-4 hover:bg-[var(--color-pill-hover)] transition-colors"
                   >
-                    <span className="mt-0.5 flex-shrink-0 w-5 h-5 rounded-full bg-sky-400/10 flex items-center justify-center">
-                      <FiCheck className="w-3 h-3 text-sky-400" />
+                    <span className="mt-0.5 flex-shrink-0 w-5 h-5 rounded-full bg-sky-500/10 flex items-center justify-center">
+                      <FiCheck className="w-3.5 h-3.5 text-sky-500" />
                     </span>
-                    <span className="text-slate-300 text-[14px] leading-relaxed">
+                    <span className="text-[var(--color-text)] text-[14px] leading-relaxed font-medium">
                       {feature}
                     </span>
                   </div>

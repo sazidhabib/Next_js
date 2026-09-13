@@ -14,34 +14,34 @@ export const usePortfolioData = () => {
     const fetchAllData = async () => {
       try {
         setLoading(true);
-        const [skillsRes, expRes, projRes] = await Promise.all([
+        const [skillsRes, expRes, projRes] = await Promise.allSettled([
           fetch('/api/skills'),
           fetch('/api/experiences'),
           fetch('/api/projects')
         ]);
 
-        if (skillsRes.ok) {
-          const skillsData = await skillsRes.json();
-          if (skillsData && skillsData.length > 0) {
+        if (skillsRes.status === 'fulfilled' && skillsRes.value.ok) {
+          const skillsData = await skillsRes.value.json();
+          if (Array.isArray(skillsData) && skillsData.length > 0) {
             setSkills(skillsData);
           }
         }
 
-        if (expRes.ok) {
-          const expData = await expRes.json();
-          if (expData && expData.length > 0) {
+        if (expRes.status === 'fulfilled' && expRes.value.ok) {
+          const expData = await expRes.value.json();
+          if (Array.isArray(expData) && expData.length > 0) {
             setExperiences(expData);
           }
         }
 
-        if (projRes.ok) {
-          const projData = await projRes.json();
-          if (projData && projData.length > 0) {
+        if (projRes.status === 'fulfilled' && projRes.value.ok) {
+          const projData = await projRes.value.json();
+          if (Array.isArray(projData) && projData.length > 0) {
             setProjects(projData);
           }
         }
       } catch (err) {
-        console.warn('API error loading portfolio data. Falling back to local constants:', err);
+        console.warn('API error loading portfolio data:', err);
       } finally {
         setLoading(false);
       }

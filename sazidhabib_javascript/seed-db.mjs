@@ -2,21 +2,23 @@ import fs from 'fs';
 import path from 'path';
 import mysql from 'mysql2/promise';
 
-// 1. Load .env.local
-const envPath = path.resolve('.env.local');
-if (fs.existsSync(envPath)) {
-  const envConfig = fs.readFileSync(envPath, 'utf8');
-  envConfig.split('\n').forEach(line => {
-    const trimmed = line.trim();
-    if (trimmed && !trimmed.startsWith('#')) {
-      const [key, ...valueParts] = trimmed.split('=');
-      if (key && valueParts.length > 0) {
-        const val = valueParts.join('=').replace(/^["']|["']$/g, '');
-        process.env[key.trim()] = val;
+// 1. Load .env and .env.local
+['.env', '.env.local'].forEach(file => {
+  const envPath = path.resolve(file);
+  if (fs.existsSync(envPath)) {
+    const envConfig = fs.readFileSync(envPath, 'utf8');
+    envConfig.split('\n').forEach(line => {
+      const trimmed = line.trim();
+      if (trimmed && !trimmed.startsWith('#')) {
+        const [key, ...valueParts] = trimmed.split('=');
+        if (key && valueParts.length > 0) {
+          const val = valueParts.join('=').replace(/^["']|["']$/g, '');
+          process.env[key.trim()] = val;
+        }
       }
-    }
-  });
-}
+    });
+  }
+});
 
 const dbName = process.env.MYSQL_DATABASE || 'saziddb';
 const user = process.env.MYSQL_USER || 'root';

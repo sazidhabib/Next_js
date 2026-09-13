@@ -10,7 +10,7 @@ import { StarsCanvas } from "@/components/canvas";
 
 export default function Home() {
   return (
-    <main className="relative z-0 bg-[#03030a] overflow-hidden">
+    <main className="relative z-0 overflow-hidden min-h-screen">
       <div className="bg-hero-pattern bg-cover bg-no-repeat bg-center">
         <Navbar />
         <Hero />

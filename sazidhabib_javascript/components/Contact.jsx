@@ -84,7 +84,7 @@ const Contact = () => {
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mt-4 p-4 bg-sky-500/10 border border-sky-500/20 rounded-lg text-sky-400 text-sm"
+            className="mt-4 p-4 bg-sky-500/10 border border-sky-500/20 rounded-xl text-sky-500 text-sm font-medium"
           >
             Message sent successfully! I&apos;ll get back to you soon.
           </motion.div>
@@ -94,65 +94,64 @@ const Contact = () => {
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mt-4 p-4 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400 text-sm"
+            className="mt-4 p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-500 text-sm font-medium"
           >
             {error}
           </motion.div>
         )}
 
-        <form onSubmit={handleSubmit} className="mt-10 flex flex-col gap-6">
+        <form onSubmit={handleSubmit} className="mt-8 flex flex-col gap-6">
           <label className="flex flex-col">
-            <span className="text-white font-medium mb-2 text-sm">Your Name</span>
+            <span className="text-[var(--color-text)] font-semibold text-sm mb-2">Your Name</span>
             <input
               type="text"
               name="name"
               value={form.name}
               onChange={handleChange}
-              placeholder="What's your good name?"
-              className="bg-white/5 border border-white/10 py-3 px-5 placeholder:text-slate-500 text-white rounded-lg outline-none focus:border-sky-400/40 transition-colors font-medium text-sm disabled:opacity-50"
+              placeholder="What's your name?"
+              className="bg-[var(--color-surface)] py-3.5 px-5 placeholder:text-[var(--color-text-muted)] text-[var(--color-text)] rounded-xl outline-none border border-[var(--color-border)] focus:border-[var(--color-accent)] font-medium text-sm transition-all shadow-xs"
               required
-              disabled={loading}
             />
           </label>
+
           <label className="flex flex-col">
-            <span className="text-white font-medium mb-2 text-sm">Your Email</span>
+            <span className="text-[var(--color-text)] font-semibold text-sm mb-2">Your Email</span>
             <input
               type="email"
               name="email"
               value={form.email}
               onChange={handleChange}
               placeholder="What's your email address?"
-              className="bg-white/5 border border-white/10 py-3 px-5 placeholder:text-slate-500 text-white rounded-lg outline-none focus:border-sky-400/40 transition-colors font-medium text-sm disabled:opacity-50"
+              className="bg-[var(--color-surface)] py-3.5 px-5 placeholder:text-[var(--color-text-muted)] text-[var(--color-text)] rounded-xl outline-none border border-[var(--color-border)] focus:border-[var(--color-accent)] font-medium text-sm transition-all shadow-xs"
               required
-              disabled={loading}
             />
           </label>
+
           <label className="flex flex-col">
-            <span className="text-white font-medium mb-2 text-sm">Your Message</span>
+            <span className="text-[var(--color-text)] font-semibold text-sm mb-2">Your Message</span>
             <textarea
-              rows={5}
+              rows={6}
               name="message"
               value={form.message}
               onChange={handleChange}
               placeholder="What do you want to say?"
-              className="bg-white/5 border border-white/10 py-3 px-5 placeholder:text-slate-500 text-white rounded-lg outline-none focus:border-sky-400/40 transition-colors font-medium text-sm resize-none disabled:opacity-50"
+              className="bg-[var(--color-surface)] py-3.5 px-5 placeholder:text-[var(--color-text-muted)] text-[var(--color-text)] rounded-xl outline-none border border-[var(--color-border)] focus:border-[var(--color-accent)] font-medium text-sm transition-all resize-none shadow-xs"
               required
-              disabled={loading}
             />
           </label>
 
           <button
             type="submit"
             disabled={loading}
-            className="bg-sky-500 hover:bg-sky-600 text-white py-3 px-8 rounded-lg outline-none w-fit font-medium text-sm transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 active:scale-[0.97]"
+            className="bg-sky-500 hover:bg-sky-600 py-3.5 px-8 rounded-xl outline-none w-fit text-white font-bold shadow-lg shadow-sky-500/25 transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98] disabled:opacity-50"
           >
             {loading ? (
               <>
-                <LoadingSpinner size="sm" />
-                Sending...
+                <LoadingSpinner />
+                <span>Sending...</span>
               </>
             ) : (
-              'Send Message'
+              "Send Message"
             )}
           </button>
         </form>

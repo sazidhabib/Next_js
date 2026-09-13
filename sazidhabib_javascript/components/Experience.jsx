@@ -24,16 +24,16 @@ const ExperienceCard = ({ experience }) => {
         />
       }
       contentStyle={{
-        background: "rgba(17, 17, 34, 0.6)",
-        color: "#fff",
+        background: "var(--color-surface-translucent)",
+        color: "var(--color-text)",
         backdropFilter: "blur(16px)",
         WebkitBackdropFilter: "blur(16px)",
-        border: "1px solid rgba(255, 255, 255, 0.06)",
-        borderRadius: "12px",
-        boxShadow: "0 8px 32px rgba(0, 0, 0, 0.3)",
+        border: "1px solid var(--color-border)",
+        borderRadius: "16px",
+        boxShadow: "var(--shadow-card)",
       }}
       contentArrowStyle={{
-        borderRight: "7px solid rgba(255, 255, 255, 0.3)",
+        borderRight: "7px solid var(--color-border)",
       }}
       date={experience?.date}
     >
@@ -42,24 +42,24 @@ const ExperienceCard = ({ experience }) => {
           <img
             src={experience?.img}
             alt={experience?.company}
-            className="h-10 w-10 rounded-md object-cover mt-1"
+            className="h-10 w-10 rounded-xl object-cover mt-1 border border-[var(--color-border)]"
           />
           <div className="flex flex-col">
-            <div className="text-base font-semibold text-white">
+            <div className="text-base font-bold text-[var(--color-text)]">
               {experience?.role}
             </div>
-            <div className="text-sm font-medium text-slate-400">
+            <div className="text-sm font-semibold text-[var(--color-accent)]">
               {experience?.company}
             </div>
-            <div className="text-xs font-normal text-slate-500">
+            <div className="text-xs font-normal text-[var(--color-text-muted)]">
               {experience?.date}
             </div>
           </div>
         </div>
 
-        <div className="mt-4 text-sm text-slate-300">
+        <div className="mt-4 text-sm text-[var(--color-text-muted)]">
           {experience?.desc && (
-            <ul className="mt-4 list-disc ml-4 space-y-1.5">
+            <ul className="mt-3 list-disc ml-4 space-y-1.5">
               {experience.desc.map((item, i) => (
                 <li key={i} className="text-[13px] leading-relaxed pl-1">
                   {item}
@@ -74,7 +74,7 @@ const ExperienceCard = ({ experience }) => {
                 {experience.skills.map((skill, i) => (
                   <span
                     key={i}
-                    className="bg-white/5 text-slate-300 text-[11px] px-2 py-1 rounded-md border border-white/5"
+                    className="bg-[var(--color-pill-bg)] text-[var(--color-text)] text-[11px] px-2.5 py-1 rounded-md border border-[var(--color-border)] font-medium"
                   >
                     {skill}
                   </span>
@@ -100,8 +100,8 @@ const Experience = () => {
         </h2>
       </motion.div>
 
-      <div className="mt-16 flex flex-col">
-        <VerticalTimeline>
+      <div className="mt-20 flex flex-col">
+        <VerticalTimeline lineColor="var(--color-border)">
           {experiences.map((experience, index) => (
             <ExperienceCard
               key={`experience-${index}`}

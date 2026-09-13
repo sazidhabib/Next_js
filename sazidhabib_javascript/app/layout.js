@@ -8,8 +8,8 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" data-theme="dark" className="h-full antialiased">
-      <body className="min-h-full flex flex-col bg-[#03030a] text-white">
+    <html lang="en" data-theme="dark" className="h-full antialiased" suppressHydrationWarning>
+      <body className="min-h-full flex flex-col transition-colors duration-400">
         <ThemeProvider>
           {children}
         </ThemeProvider>
