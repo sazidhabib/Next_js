@@ -23,13 +23,14 @@ function EPaperReaderContent() {
   // Fetch Full Edition Tree
   const fetchEdition = useCallback(async () => {
     try {
-      setLoading(true);
       const res = await fetch('/api/editions/1');
       const data = await res.json();
       if (data.success) {
         setEdition(data.data);
-        // Default to first article if available
-        if (data.data.articles && data.data.articles.length > 0) {
+        if (directArticleId && data.data.articles) {
+          const directArt = data.data.articles.find((a) => a.id === parseInt(directArticleId, 10));
+          if (directArt) setSelectedArticle(directArt);
+        } else if (data.data.articles && data.data.articles.length > 0) {
           setSelectedArticle(data.data.articles[0]);
         }
       }
@@ -38,21 +39,11 @@ function EPaperReaderContent() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [directArticleId]);
 
   useEffect(() => {
     fetchEdition();
   }, [fetchEdition]);
-
-  // Handle direct permalink article opening
-  useEffect(() => {
-    if (directArticleId && edition?.articles) {
-      const art = edition.articles.find((a) => a.id === parseInt(directArticleId, 10));
-      if (art) {
-        setSelectedArticle(art);
-      }
-    }
-  }, [directArticleId, edition]);
 
   const currentPage = edition?.pages?.find((p) => p.pageNumber === activePageNumber) || edition?.pages?.[0];
   const pageHotspots = currentPage?.hotspots || [];

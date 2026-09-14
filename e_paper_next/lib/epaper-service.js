@@ -195,6 +195,164 @@ export async function saveArticle(articleData) {
   return savedArticle;
 }
 
+export async function saveEdition(editionData) {
+  const isDbReady = await initDatabase();
+  if (isDbReady) {
+    try {
+      if (editionData.id && typeof editionData.id === 'number') {
+        const existing = await Edition.findByPk(editionData.id);
+        if (existing) {
+          await existing.update(editionData);
+          return existing.toJSON();
+        }
+      }
+      const created = await Edition.create(editionData);
+      return created.toJSON();
+    } catch (err) {
+      console.warn('Sequelize save edition failed:', err.message);
+    }
+  }
+
+  let savedEdition = null;
+  updateMemoryStore(store => {
+    if (editionData.id && store.edition.id === editionData.id) {
+      store.edition = { ...store.edition, ...editionData };
+      savedEdition = store.edition;
+    } else {
+      const newId = (store.edition?.id || 0) + 1;
+      savedEdition = { id: newId, ...editionData, pages: [] };
+      store.edition = savedEdition;
+    }
+    return store;
+  });
+  return savedEdition;
+}
+
+export async function deleteEdition(editionId) {
+  const idNum = parseInt(editionId, 10);
+  const isDbReady = await initDatabase();
+  if (isDbReady) {
+    try {
+      await Edition.destroy({ where: { id: idNum } });
+      return true;
+    } catch (err) {
+      console.warn('Sequelize delete edition failed:', err.message);
+    }
+  }
+  return true;
+}
+
+export async function getArticlesList() {
+  const isDbReady = await initDatabase();
+  if (isDbReady) {
+    try {
+      const articles = await Article.findAll({
+        order: [['id', 'DESC']],
+        include: [
+          { model: Edition, as: 'edition', attributes: ['id', 'title', 'publishDate'] },
+          { model: Hotspot, as: 'hotspots', attributes: ['id', 'pageId'] },
+        ],
+      });
+      if (articles && articles.length > 0) return articles.map(a => a.toJSON());
+    } catch (err) {
+      console.warn('Sequelize fetch articles failed:', err.message);
+    }
+  }
+
+  const store = getMemoryStore();
+  return store.articles.map(a => ({
+    ...a,
+    edition: { id: store.edition.id, title: store.edition.title, publishDate: store.edition.publishDate },
+    hotspots: store.hotspots.filter(h => h.articleId === a.id),
+  }));
+}
+
+export async function deleteArticle(articleId) {
+  const idNum = parseInt(articleId, 10);
+  const isDbReady = await initDatabase();
+  if (isDbReady) {
+    try {
+      await Article.destroy({ where: { id: idNum } });
+      return true;
+    } catch (err) {
+      console.warn('Sequelize delete article failed:', err.message);
+    }
+  }
+
+  updateMemoryStore(store => {
+    store.articles = store.articles.filter(a => a.id !== idNum);
+    store.hotspots = store.hotspots.filter(h => h.articleId !== idNum);
+    return store;
+  });
+  return true;
+}
+
+export async function savePage(pageData) {
+  const isDbReady = await initDatabase();
+  if (isDbReady) {
+    try {
+      if (pageData.id && typeof pageData.id === 'number') {
+        const existing = await Page.findByPk(pageData.id);
+        if (existing) {
+          await existing.update(pageData);
+          return existing.toJSON();
+        }
+      }
+      const created = await Page.create(pageData);
+      return created.toJSON();
+    } catch (err) {
+      console.warn('Sequelize save page failed:', err.message);
+    }
+  }
+
+  let savedPage = null;
+  updateMemoryStore(store => {
+    if (pageData.id) {
+      const idx = store.pages.findIndex(p => p.id === pageData.id);
+      if (idx !== -1) {
+        store.pages[idx] = { ...store.pages[idx], ...pageData };
+        savedPage = store.pages[idx];
+        return store;
+      }
+    }
+    const newId = store.pages.length > 0 ? Math.max(...store.pages.map(p => p.id)) + 1 : 1;
+    savedPage = {
+      id: newId,
+      editionId: pageData.editionId || store.edition.id || 1,
+      pageNumber: pageData.pageNumber || (store.pages.length + 1),
+      pageTitle: pageData.pageTitle || `Page ${store.pages.length + 1}`,
+      imageUrl: pageData.imageUrl || '/sample-epaper/page_1.svg',
+      thumbUrl: pageData.thumbUrl || pageData.imageUrl || '/sample-epaper/page_1.svg',
+      widthPx: pageData.widthPx || 1000,
+      heightPx: pageData.heightPx || 1450,
+    };
+    store.pages.push(savedPage);
+    return store;
+  });
+  return savedPage;
+}
+
+export async function deletePage(pageId) {
+  const idNum = parseInt(pageId, 10);
+  const isDbReady = await initDatabase();
+  if (isDbReady) {
+    try {
+      await Page.destroy({ where: { id: idNum } });
+      return true;
+    } catch (err) {
+      console.warn('Sequelize delete page failed:', err.message);
+    }
+  }
+
+  updateMemoryStore(store => {
+    store.pages = store.pages.filter(p => p.id !== idNum);
+    store.hotspots = store.hotspots.filter(h => h.pageId !== idNum);
+    return store;
+  });
+  return true;
+}
+
+
 export async function seedDatabase() {
   const isDbReady = await initDatabase(true);
   if (isDbReady) {

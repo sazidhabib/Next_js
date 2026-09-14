@@ -15,7 +15,6 @@ export default function PageHotspotMapper({ params }) {
 
   const loadData = async () => {
     try {
-      setLoading(true);
       const res = await fetch('/api/editions/1');
       const data = await res.json();
       if (data.success) {
@@ -91,23 +90,23 @@ export default function PageHotspotMapper({ params }) {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
-      {/* Top Studio Header */}
-      <header className="h-16 px-6 bg-slate-900 border-b border-slate-800 flex items-center justify-between z-20">
-        <div className="flex items-center space-x-4">
+    <div className="flex flex-col space-y-4">
+      {/* Studio Bar */}
+      <div className="flex flex-wrap items-center justify-between gap-4 pb-3 border-b border-slate-800">
+        <div className="flex items-center space-x-3">
           <Link
             href="/admin"
-            className="flex items-center space-x-1.5 text-xs text-slate-400 hover:text-white transition"
+            className="flex items-center space-x-1.5 text-xs text-amber-400 hover:text-amber-300 font-semibold"
           >
-            <ArrowLeft className="w-4 h-4" />
-            <span>Admin Dashboard</span>
+            <ArrowLeft className="w-3.5 h-3.5" />
+            <span>Dashboard</span>
           </Link>
           <span className="text-slate-600">/</span>
           <div className="flex items-center space-x-2">
-            <span className="text-sm font-bold text-slate-200">
+            <span className="text-base font-bold text-slate-100">
               {targetPage?.pageTitle || `Page ${pageId}`}
             </span>
-            <span className="text-[11px] px-2 py-0.5 rounded-full bg-slate-800 text-amber-300 font-mono">
+            <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-slate-800 text-amber-300 font-mono border border-slate-700">
               Page {targetPage?.pageNumber || 1}
             </span>
           </div>
@@ -115,24 +114,25 @@ export default function PageHotspotMapper({ params }) {
 
         <div className="flex items-center space-x-3">
           {statusMsg && (
-            <span className="text-xs text-emerald-400 font-medium animate-pulse">
+            <span className="text-xs text-emerald-400 font-semibold animate-pulse">
               ✓ {statusMsg}
             </span>
           )}
           <Link
             href="/"
-            className="flex items-center space-x-1 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-medium text-slate-300 transition"
+            target="_blank"
+            className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 border border-slate-700 transition"
           >
-            <Eye className="w-3.5 h-3.5" />
+            <Eye className="w-3.5 h-3.5 text-amber-400" />
             <span>Test Reader View</span>
           </Link>
         </div>
-      </header>
+      </div>
 
       {/* Mapping Canvas Workspace */}
-      <main className="flex-1 overflow-hidden">
+      <div className="min-h-[750px] bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden shadow-2xl">
         {loading || !targetPage ? (
-          <div className="p-12 text-center text-sm text-slate-400">Loading Page Scan Workspace...</div>
+          <div className="p-16 text-center text-sm text-slate-400">Loading Page Scan Workspace...</div>
         ) : (
           <HotspotMappingCanvas
             page={targetPage}
@@ -143,7 +143,8 @@ export default function PageHotspotMapper({ params }) {
             onCreateArticle={handleCreateArticle}
           />
         )}
-      </main>
+      </div>
     </div>
   );
 }
+

@@ -1,5 +1,14 @@
 import { NextResponse } from 'next/server';
-import { saveArticle } from '@/lib/epaper-service';
+import { getArticlesList, saveArticle } from '@/lib/epaper-service';
+
+export async function GET() {
+  try {
+    const articles = await getArticlesList();
+    return NextResponse.json({ success: true, data: articles });
+  } catch (error) {
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  }
+}
 
 export async function POST(request) {
   try {

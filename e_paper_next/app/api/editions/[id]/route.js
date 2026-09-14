@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getEditionById } from '@/lib/epaper-service';
+import { getEditionById, deleteEdition } from '@/lib/epaper-service';
 
 export async function GET(request, { params }) {
   try {
@@ -9,6 +9,16 @@ export async function GET(request, { params }) {
       return NextResponse.json({ success: false, error: 'Edition not found' }, { status: 404 });
     }
     return NextResponse.json({ success: true, data: edition });
+  } catch (error) {
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  }
+}
+
+export async function DELETE(request, { params }) {
+  try {
+    const { id } = await params;
+    await deleteEdition(id);
+    return NextResponse.json({ success: true, message: 'Edition deleted' });
   } catch (error) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
