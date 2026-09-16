@@ -186,6 +186,7 @@ export default function ConverterWidget({ sourceFormat, targetFormat, compact = 
                 onFromChange={handleFromChange}
                 onToChange={handleToChange}
                 onSwap={handleSwap}
+                autoCycle={showHero && !sourceFormat && !targetFormat && !file}
               />
             </div>
           </div>
@@ -198,10 +199,12 @@ export default function ConverterWidget({ sourceFormat, targetFormat, compact = 
               onFromChange={handleFromChange}
               onToChange={handleToChange}
               onSwap={handleSwap}
+              autoCycle={false}
             />
           </div>
         )
       )}
+
 
 
       {(file || status !== 'idle') && (

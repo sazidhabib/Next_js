@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server'
 import { queryOne } from '@/lib/db'
-import { getDownloadUrl } from '@/lib/storage'
+import { getDownloadUrl, getFileBuffer } from '@/lib/storage'
 import { getFormat } from '@/lib/formats'
+import { getMimeType } from '@/lib/conversions'
 
 export async function GET(request, { params }) {
   try {
@@ -23,11 +24,30 @@ export async function GET(request, { params }) {
     const baseName = job.input_filename.replace(/\.[^.]+$/, '')
     const downloadFilename = `${baseName}${toFmt?.ext || '.' + job.output_format}`
 
-    const url = await getDownloadUrl(job.output_file_key, downloadFilename)
+    // If external S3 cloud storage is configured, redirect to signed URL
+    if (process.env.STORAGE_ENDPOINT) {
+      const url = await getDownloadUrl(job.output_file_key, downloadFilename)
+      return NextResponse.redirect(url)
+    }
 
-    return NextResponse.redirect(url)
+    // For local storage, read and stream the file directly with attachment disposition
+    const fileBuffer = await getFileBuffer(job.output_file_key)
+    const mimeType = getMimeType(job.output_format)
+
+    // UTF-8 encoded filename for Content-Disposition header
+    const encodedFilename = encodeURIComponent(downloadFilename)
+
+    return new NextResponse(fileBuffer, {
+      status: 200,
+      headers: {
+        'Content-Type': mimeType,
+        'Content-Disposition': `attachment; filename="${downloadFilename.replace(/"/g, '')}"; filename*=UTF-8''${encodedFilename}`,
+        'Content-Length': fileBuffer.length.toString(),
+      },
+    })
   } catch (error) {
     console.error('Download error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
+

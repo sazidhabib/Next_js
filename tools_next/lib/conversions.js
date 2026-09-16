@@ -42,7 +42,7 @@ function getCategory(format) {
   return 'unknown'
 }
 
-function getMimeType(format) {
+export function getMimeType(format) {
   const mimes = {
     jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', gif: 'image/gif',
     webp: 'image/webp', avif: 'image/avif', tiff: 'image/tiff', tif: 'image/tiff',
@@ -53,11 +53,24 @@ function getMimeType(format) {
     mp4: 'video/mp4', avi: 'video/x-msvideo', mkv: 'video/x-matroska',
     mov: 'video/quicktime', wmv: 'video/x-ms-wmv', flv: 'video/x-flv',
     webm: 'video/webm', pdf: 'application/pdf', txt: 'text/plain',
+    docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    doc: 'application/msword',
+    xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    xls: 'application/vnd.ms-excel',
+    pptx: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+    ppt: 'application/vnd.ms-powerpoint',
+    odt: 'application/vnd.oasis.opendocument.text',
+    ods: 'application/vnd.oasis.opendocument.spreadsheet',
+    odp: 'application/vnd.oasis.opendocument.presentation',
+    rtf: 'application/rtf',
+    csv: 'text/csv',
+    epub: 'application/epub+zip',
     html: 'text/html', md: 'text/markdown', zip: 'application/zip',
     tar: 'application/x-tar', gz: 'application/gzip',
   }
-  return mimes[format] || 'application/octet-stream'
+  return mimes[format?.toLowerCase()] || 'application/octet-stream'
 }
+
 
 async function convertWithSharp(inputBuffer, fromFormat, toFormat) {
   let pipeline = sharp(inputBuffer)
@@ -113,21 +126,24 @@ async function convertWithFfmpeg(inputBuffer, fromFormat, toFormat, tmpDir) {
 
 async function convertDocument(inputBuffer, fromFormat, toFormat, tmpDir) {
   const inputPath = join(tmpDir, `input.${fromFormat}`)
-  const outputPath = join(tmpDir, `output.${toFormat}`)
 
   await writeFile(inputPath, inputBuffer)
 
   const localLO = join(process.cwd(), 'bin', 'libreoffice', 'program', 'soffice.exe')
   const loCmd = existsSync(localLO) ? `"${localLO}"` : 'libreoffice'
 
+  const userProfileUri = `file:///${tmpDir.replace(/\\/g, '/')}/lo_profile`
+  const loBaseCmd = `${loCmd} -env:UserInstallation="${userProfileUri}" --headless`
+
   if (toFormat === 'pdf') {
-    await execAsync(`${loCmd} --headless --convert-to pdf --outdir "${tmpDir}" "${inputPath}"`, { timeout: 120000 })
+    await execAsync(`${loBaseCmd} --convert-to pdf --outdir "${tmpDir}" "${inputPath}"`, { timeout: 120000 })
   } else if (fromFormat === 'pdf') {
-    const convType = toFormat === 'docx' ? 'docx' : toFormat === 'txt' ? 'txt' : toFormat
-    await execAsync(`${loCmd} --headless --convert-to ${convType} --outdir "${tmpDir}" "${inputPath}"`, { timeout: 120000 })
+    const filterArg = toFormat === 'txt' ? 'txt:Text' : toFormat
+    await execAsync(`${loBaseCmd} --infilter="writer_pdf_import" --convert-to ${filterArg} --outdir "${tmpDir}" "${inputPath}"`, { timeout: 120000 })
   } else {
-    await execAsync(`${loCmd} --headless --convert-to ${toFormat} --outdir "${tmpDir}" "${inputPath}"`, { timeout: 120000 })
+    await execAsync(`${loBaseCmd} --convert-to ${toFormat} --outdir "${tmpDir}" "${inputPath}"`, { timeout: 120000 })
   }
+
 
   const possibleOutputs = [
     join(tmpDir, `output.${toFormat}`),
@@ -140,8 +156,19 @@ async function convertDocument(inputBuffer, fromFormat, toFormat, tmpDir) {
     } catch {}
   }
 
+  // Fallback: check any file generated in tmpDir with matching extension
+  try {
+    const { readdirSync } = await import('fs')
+    const files = readdirSync(tmpDir)
+    const match = files.find((f) => f.toLowerCase().endsWith(`.${toFormat.toLowerCase()}`))
+    if (match) {
+      return await readFile(join(tmpDir, match))
+    }
+  } catch {}
+
   throw new Error('Document conversion failed: output file not found')
 }
+
 
 async function convertArchive(inputBuffer, fromFormat, toFormat, tmpDir) {
   if (fromFormat === 'zip' && toFormat === 'tar') {

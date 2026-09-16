@@ -92,9 +92,29 @@ async function runTests() {
   
   // 1. Documents
   await testConversion('Documents', mockTxt, 'test.txt', 'txt', 'pdf', 'text/plain');
+  
+  // Generate mock PDF for PDF -> Word (DOCX) test
+  const localLO = join(process.cwd(), 'bin', 'libreoffice', 'program', 'soffice.exe');
+  const loCmd = existsSync(localLO) ? `"${localLO}"` : 'libreoffice';
+  const tempTxtPath = join(process.cwd(), 'public', 'temp-test-doc.txt');
+  const tempPdfPath = join(process.cwd(), 'public', 'temp-test-doc.pdf');
+  const mockProfile = `file:///${join(process.cwd(), 'public', 'temp-profile').replace(/\\/g, '/')}`;
+  writeFileSync(tempTxtPath, 'Sample text for PDF to Word conversion test.');
+  await execAsync(`${loCmd} -env:UserInstallation="${mockProfile}" --headless --convert-to pdf --outdir "${join(process.cwd(), 'public')}" "${tempTxtPath}"`);
+  const mockPdf = readFileSync(tempPdfPath);
+  unlinkSync(tempTxtPath);
+  unlinkSync(tempPdfPath);
+  try {
+    const { rmSync } = await import('fs');
+    rmSync(join(process.cwd(), 'public', 'temp-profile'), { recursive: true, force: true });
+  } catch {}
+
+
+  await testConversion('PDF to Word', mockPdf, 'test.pdf', 'pdf', 'docx', 'application/pdf');
 
   // 2. Images
   await testConversion('Images', mockPng, 'test.png', 'png', 'jpg', 'image/png');
+
 
   // 3. Audio
   await testConversion('Audio', mockWav, 'test.wav', 'wav', 'mp3', 'audio/wav');
