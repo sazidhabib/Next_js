@@ -15,7 +15,8 @@ import {
   OrderItem,
   OrderItemOption,
   OrderStatusLog,
-  Invoice
+  Invoice,
+  Offer
 } from './sequelize';
 
 // In-memory runtime cache for fallback and fast real-time synchronization
@@ -87,6 +88,12 @@ export async function getRestaurantBySlug(slug = 'bellavista-pizza') {
           {
             model: OperatingHour,
             as: 'operatingHours',
+            required: false,
+          },
+          {
+            model: Offer,
+            as: 'offers',
+            where: { isActive: true },
             required: false,
           },
         ],
@@ -871,3 +878,221 @@ export function updateDeliveryStatus(enableDelivery) {
   globalStore.__restaurantData.enableDelivery = !!enableDelivery;
   return globalStore.__restaurantData.enableDelivery;
 }
+
+// ----------------------------------------------------
+// OFFER & PROMOTION METHODS
+// ----------------------------------------------------
+
+export async function getOffersByRestaurant(restaurantId) {
+  try {
+    const connected = await isDbConnected();
+    if (connected) {
+      const offers = await Offer.findAll({
+        where: { restaurantId },
+        order: [['createdAt', 'DESC']],
+      });
+      return offers.map((o) => o.get({ plain: true }));
+    }
+  } catch (err) {
+    console.warn('DB getOffersByRestaurant fallback:', err.message);
+  }
+
+  // Fallback to memory store
+  if (!globalStore.__restaurantData.offers) {
+    globalStore.__restaurantData.offers = defaultRestaurant.offers || [];
+  }
+  return globalStore.__restaurantData.offers.filter((o) => !restaurantId || o.restaurantId === restaurantId);
+}
+
+export async function getOfferById(offerId) {
+  try {
+    const connected = await isDbConnected();
+    if (connected) {
+      const offer = await Offer.findByPk(offerId);
+      if (offer) return offer.get({ plain: true });
+    }
+  } catch (err) {
+    console.warn('DB getOfferById fallback:', err.message);
+  }
+
+  const offers = globalStore.__restaurantData.offers || [];
+  return offers.find((o) => o.id === offerId) || null;
+}
+
+export async function createOffer(offerData) {
+  const newOffer = {
+    id: `offer-${Date.now()}`,
+    restaurantId: offerData.restaurantId || 'resto-bella-vista-001',
+    title: offerData.title || 'Special Promotion',
+    description: offerData.description || '',
+    code: offerData.code ? offerData.code.trim().toUpperCase() : null,
+    discountType: offerData.discountType || 'PERCENTAGE',
+    discountValue: parseFloat(offerData.discountValue || 0),
+    minOrderAmount: parseFloat(offerData.minOrderAmount || 0),
+    maxDiscountAmount: offerData.maxDiscountAmount ? parseFloat(offerData.maxDiscountAmount) : null,
+    serviceType: offerData.serviceType || 'ALL',
+    isAutomatic: !!offerData.isAutomatic,
+    bannerText: offerData.bannerText || '',
+    bannerImageUrl: offerData.bannerImageUrl || null,
+    startDate: offerData.startDate || new Date().toISOString(),
+    endDate: offerData.endDate || null,
+    usageLimit: offerData.usageLimit ? parseInt(offerData.usageLimit) : null,
+    usedCount: 0,
+    isActive: offerData.isActive !== false,
+    applicableCategoryIds: Array.isArray(offerData.applicableCategoryIds) ? offerData.applicableCategoryIds : [],
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+
+  try {
+    const connected = await isDbConnected();
+    if (connected) {
+      const created = await Offer.create(newOffer);
+      return created.get({ plain: true });
+    }
+  } catch (err) {
+    console.warn('DB createOffer fallback:', err.message);
+  }
+
+  if (!globalStore.__restaurantData.offers) {
+    globalStore.__restaurantData.offers = [];
+  }
+  globalStore.__restaurantData.offers.unshift(newOffer);
+  return newOffer;
+}
+
+export async function updateOffer(offerId, offerData) {
+  try {
+    const connected = await isDbConnected();
+    if (connected) {
+      const offer = await Offer.findByPk(offerId);
+      if (offer) {
+        if (offerData.code !== undefined) {
+          offerData.code = offerData.code ? offerData.code.trim().toUpperCase() : null;
+        }
+        await offer.update(offerData);
+        return offer.get({ plain: true });
+      }
+    }
+  } catch (err) {
+    console.warn('DB updateOffer fallback:', err.message);
+  }
+
+  if (globalStore.__restaurantData.offers) {
+    const idx = globalStore.__restaurantData.offers.findIndex((o) => o.id === offerId);
+    if (idx !== -1) {
+      globalStore.__restaurantData.offers[idx] = {
+        ...globalStore.__restaurantData.offers[idx],
+        ...offerData,
+        code: offerData.code !== undefined ? (offerData.code ? offerData.code.trim().toUpperCase() : null) : globalStore.__restaurantData.offers[idx].code,
+        updatedAt: new Date().toISOString(),
+      };
+      return globalStore.__restaurantData.offers[idx];
+    }
+  }
+  return null;
+}
+
+export async function deleteOffer(offerId) {
+  try {
+    const connected = await isDbConnected();
+    if (connected) {
+      await Offer.destroy({ where: { id: offerId } });
+    }
+  } catch (err) {
+    console.warn('DB deleteOffer fallback:', err.message);
+  }
+
+  if (globalStore.__restaurantData.offers) {
+    globalStore.__restaurantData.offers = globalStore.__restaurantData.offers.filter((o) => o.id !== offerId);
+  }
+  return true;
+}
+
+export async function validateOfferCode({ restaurantId, code, subtotal = 0, serviceType = 'DELIVERY', deliveryFee = 0 }) {
+  const normalizedCode = code ? code.trim().toUpperCase() : '';
+  let offer = null;
+
+  try {
+    const connected = await isDbConnected();
+    if (connected) {
+      if (normalizedCode) {
+        let whereClause = { code: normalizedCode, isActive: true };
+        if (restaurantId) {
+          whereClause[Op.or] = [{ restaurantId }, { restaurantId: 'resto-bella-vista-001' }];
+        }
+        offer = await Offer.findOne({ where: whereClause });
+        if (!offer) {
+          offer = await Offer.findOne({ where: { code: normalizedCode, isActive: true } });
+        }
+        if (offer) offer = offer.get({ plain: true });
+      }
+    }
+  } catch (err) {
+    console.warn('DB validateOfferCode fallback:', err.message);
+  }
+
+  if (!offer) {
+    const offers = (globalStore.__restaurantData.offers || []).filter((o) => o.isActive);
+    if (normalizedCode) {
+      offer = offers.find((o) => o.code && o.code.toUpperCase() === normalizedCode);
+    }
+  }
+
+  if (!offer) {
+    return { valid: false, message: 'Invalid or inactive promotional coupon code.' };
+  }
+
+  // Check validity dates
+  const now = new Date();
+  if (offer.startDate && new Date(offer.startDate) > now) {
+    return { valid: false, message: 'This promotion has not started yet.' };
+  }
+  if (offer.endDate && new Date(offer.endDate) < now) {
+    return { valid: false, message: 'This promotion has expired.' };
+  }
+
+  // Check usage limit
+  if (offer.usageLimit && offer.usedCount >= offer.usageLimit) {
+    return { valid: false, message: 'This promotion has reached its maximum redemption limit.' };
+  }
+
+  // Check service type
+  if (offer.serviceType && offer.serviceType !== 'ALL' && offer.serviceType !== serviceType) {
+    return { valid: false, message: `This offer is only valid for ${offer.serviceType.toLowerCase()} orders.` };
+  }
+
+  // Check minimum spend
+  if (offer.minOrderAmount && subtotal < offer.minOrderAmount) {
+    const diff = (offer.minOrderAmount - subtotal).toFixed(2);
+    return {
+      valid: false,
+      message: `Minimum order of £${offer.minOrderAmount.toFixed(2)} required. Add £${diff} more to qualify!`,
+      minOrderAmount: offer.minOrderAmount,
+      shortfall: parseFloat(diff),
+    };
+  }
+
+  // Calculate discount amount
+  let calculatedDiscount = 0;
+  if (offer.discountType === 'PERCENTAGE') {
+    calculatedDiscount = (subtotal * (offer.discountValue || 0)) / 100;
+    if (offer.maxDiscountAmount && calculatedDiscount > offer.maxDiscountAmount) {
+      calculatedDiscount = offer.maxDiscountAmount;
+    }
+  } else if (offer.discountType === 'FIXED_AMOUNT') {
+    calculatedDiscount = Math.min(offer.discountValue || 0, subtotal);
+  } else if (offer.discountType === 'FREE_DELIVERY') {
+    calculatedDiscount = deliveryFee > 0 ? deliveryFee : (offer.discountValue || 0);
+  }
+
+  calculatedDiscount = Number(calculatedDiscount.toFixed(2));
+
+  return {
+    valid: true,
+    offer,
+    discountAmount: calculatedDiscount,
+    message: `Offer applied! Saved £${calculatedDiscount.toFixed(2)} with ${offer.title}`,
+  };
+}
+

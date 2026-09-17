@@ -21,6 +21,7 @@ import {
   ChevronDown,
   ChevronRight,
   Code,
+  BadgePercent,
 } from 'lucide-react';
 import { AdminProvider, useAdmin } from '@/lib/adminContext';
 import { AdminThemeProvider } from '@/lib/adminThemeContext';
@@ -69,6 +70,7 @@ function AdminLayoutContent({ children }) {
         { label: 'Restaurant Locations', href: '/admin/restaurants', icon: Building2 },
         { label: 'Live Order Receiver', href: '/admin/live-orders', icon: Bell, badge: 'LIVE' },
         { label: 'Menu & Modifiers', href: '/admin/menu', icon: UtensilsCrossed },
+        { label: 'Offers & Promotions', href: '/admin/offers', icon: BadgePercent, badge: 'PROMO' },
         { label: 'Delivery Zones & Fees', href: '/admin/zones', icon: MapPin },
         { label: 'Website Widget & Embed', href: '/admin/widget', icon: Code, badge: 'NEW' },
         {
@@ -90,6 +92,7 @@ function AdminLayoutContent({ children }) {
       { label: 'Overview & Metrics', href: '/admin', icon: LayoutDashboard },
       { label: 'Live Order Receiver', href: '/admin/live-orders', icon: Bell, badge: 'LIVE' },
       { label: 'Menu & Modifiers', href: '/admin/menu', icon: UtensilsCrossed },
+      { label: 'Offers & Promotions', href: '/admin/offers', icon: BadgePercent, badge: 'PROMO' },
       { label: 'Delivery Zones & Fees', href: '/admin/zones', icon: MapPin },
       { label: 'Website Widget & Embed', href: '/admin/widget', icon: Code, badge: 'NEW' },
       {

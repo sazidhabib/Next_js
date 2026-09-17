@@ -79,10 +79,12 @@ export default function CheckoutWizardModal({
   const [showComments, setShowComments] = useState(false);
   const [comments, setComments] = useState('');
 
-  // 6. Coupon code
+  // 6. Coupon code & Offers
   const [showCoupon, setShowCoupon] = useState(false);
   const [couponCode, setCouponCode] = useState('');
   const [discountAmount, setDiscountAmount] = useState(0);
+  const [appliedOffer, setAppliedOffer] = useState(null);
+  const [isValidatingCoupon, setIsValidatingCoupon] = useState(false);
 
   // 7. In-Modal Stripe Payment & Live Order Status State
   const [stripeModalData, setStripeModalData] = useState(null); // { clientSecret, publishableKey, orderId, orderNumber, amount, currency, orderData }
@@ -378,6 +380,83 @@ export default function CheckoutWizardModal({
     cartItems.length > 0 &&
     !isBelowMin;
 
+  // Coupon / Offer Handlers
+  const handleApplyCoupon = async (codeToUse) => {
+    const code = (codeToUse || couponCode).trim().toUpperCase();
+    if (!code) {
+      toast.warning('Please enter a coupon code');
+      return;
+    }
+
+    try {
+      setIsValidatingCoupon(true);
+      const res = await fetch('/api/offers/validate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          restaurantId: restaurant?.id,
+          slug: restaurant?.slug,
+          code,
+          subtotal,
+          serviceType,
+          deliveryFee,
+        }),
+      });
+
+      const json = await res.json();
+      if (json.success) {
+        setAppliedOffer(json.offer);
+        setDiscountAmount(json.discountAmount);
+        setCouponCode(code);
+        setShowCoupon(true);
+        toast.success(json.message || 'Offer discount applied!');
+      } else {
+        toast.error(json.message || 'Invalid coupon code');
+      }
+    } catch (err) {
+      console.error('Error applying coupon:', err);
+      toast.error('Failed to validate coupon code');
+    } finally {
+      setIsValidatingCoupon(false);
+    }
+  };
+
+  const handleRemoveCoupon = () => {
+    setAppliedOffer(null);
+    setDiscountAmount(0);
+    setCouponCode('');
+    toast.info('Offer coupon removed');
+  };
+
+  // Re-calculate or auto-check offer discount when subtotal or serviceType changes
+  useEffect(() => {
+    if (appliedOffer && appliedOffer.code) {
+      fetch('/api/offers/validate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          restaurantId: restaurant?.id,
+          slug: restaurant?.slug,
+          code: appliedOffer.code,
+          subtotal,
+          serviceType,
+          deliveryFee,
+        }),
+      })
+        .then((res) => res.json())
+        .then((json) => {
+          if (json.success) {
+            setDiscountAmount(json.discountAmount);
+          } else {
+            setDiscountAmount(0);
+            setAppliedOffer(null);
+            toast.warn(`Offer "${appliedOffer.title}" removed: ${json.message}`);
+          }
+        })
+        .catch(() => {});
+    }
+  }, [subtotal, serviceType, deliveryFee]);
+
   // Handlers for Saving Sections
   const handleSaveContact = (e) => {
     e?.preventDefault();
@@ -530,6 +609,8 @@ export default function CheckoutWizardModal({
         taxAmount: vatSubtotalIncluded + deliveryFeeTaxIncluded,
         deliveryFee,
         discountAmount,
+        offerId: appliedOffer?.id || null,
+        promoCode: appliedOffer?.code || (discountAmount > 0 ? couponCode : null),
         totalAmount,
         paymentMethod:
           paymentMethod === 'ONLINE'
@@ -1475,39 +1556,89 @@ export default function CheckoutWizardModal({
 
               {/* Financial Calculation Breakdown (20% VAT Breakdown) */}
               <div className="p-4 space-y-2 text-xs border-t border-slate-100">
-                {/* Coupon Code Toggle */}
-                <div>
-                  {!showCoupon ? (
-                    <button
-                      type="button"
-                      onClick={() => setShowCoupon(true)}
-                      className="text-xs text-blue-600 hover:text-blue-700 underline underline-offset-2 font-medium"
-                    >
-                      Add coupon code
-                    </button>
-                  ) : (
-                    <div className="flex gap-1.5 pt-1">
-                      <input
-                        type="text"
-                        value={couponCode}
-                        onChange={(e) => setCouponCode(e.target.value)}
-                        placeholder="Coupon code"
-                        className="flex-1 px-2.5 py-1.5 text-xs bg-slate-50 border border-slate-300 rounded-md uppercase"
-                      />
+                {/* Coupon & Offer Code Section */}
+                <div className="space-y-2">
+                  {discountAmount > 0 ? (
+                    <div className="p-2.5 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center justify-between">
+                      <div className="space-y-0.5">
+                        <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-800">
+                          <span>🎉 {appliedOffer?.title || 'Coupon Applied'}</span>
+                        </div>
+                        <div className="text-[11px] text-emerald-600 font-medium">
+                          {appliedOffer?.code ? `Code: ${appliedOffer.code} • ` : ''}Saved -£{discountAmount.toFixed(2)}
+                        </div>
+                      </div>
                       <button
                         type="button"
-                        onClick={() => {
-                          if (couponCode.toUpperCase() === 'DISCOUNT10') {
-                            setDiscountAmount(subtotal * 0.1);
-                            toast.success('10% Discount applied!');
-                          } else {
-                            toast.error('Invalid coupon code');
-                          }
-                        }}
-                        className="px-3 py-1.5 bg-slate-800 text-white rounded-md text-xs font-bold"
+                        onClick={handleRemoveCoupon}
+                        className="text-[11px] font-bold text-red-600 hover:text-red-700 hover:underline cursor-pointer px-2 py-1 rounded-md hover:bg-red-50"
                       >
-                        Apply
+                        Remove
                       </button>
+                    </div>
+                  ) : !showCoupon ? (
+                    <div className="flex items-center justify-between">
+                      <button
+                        type="button"
+                        onClick={() => setShowCoupon(true)}
+                        className="text-xs text-orange-600 hover:text-orange-700 font-bold underline underline-offset-2 flex items-center gap-1 cursor-pointer"
+                      >
+                        <span>Have a coupon or discount code?</span>
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="space-y-2 pt-1">
+                      <div className="flex gap-1.5">
+                        <input
+                          type="text"
+                          value={couponCode}
+                          onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                          placeholder="Enter Promo Code"
+                          className="flex-1 px-3 py-1.5 text-xs bg-slate-50 border border-slate-300 rounded-xl uppercase font-mono font-bold text-slate-800 focus:outline-none focus:border-orange-500"
+                        />
+                        <button
+                          type="button"
+                          disabled={isValidatingCoupon || !couponCode.trim()}
+                          onClick={() => handleApplyCoupon()}
+                          className="px-3.5 py-1.5 bg-orange-600 hover:bg-orange-500 disabled:opacity-50 text-white rounded-xl text-xs font-bold cursor-pointer transition flex items-center gap-1.5"
+                        >
+                          {isValidatingCoupon && <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></div>}
+                          <span>Apply</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setShowCoupon(false)}
+                          className="px-2 py-1.5 text-slate-400 hover:text-slate-600 text-xs"
+                        >
+                          ✕
+                        </button>
+                      </div>
+
+                      {/* Available Clickable Restaurant Offers */}
+                      {Array.isArray(restaurant?.offers) && restaurant.offers.filter((o) => o.isActive && o.code).length > 0 && (
+                        <div className="space-y-1 pt-1">
+                          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                            Available Offers for this Restaurant:
+                          </span>
+                          <div className="flex flex-wrap gap-1.5">
+                            {restaurant.offers
+                              .filter((o) => o.isActive && o.code)
+                              .map((off) => (
+                                <button
+                                  key={off.id}
+                                  type="button"
+                                  onClick={() => handleApplyCoupon(off.code)}
+                                  className="px-2 py-1 bg-orange-50 hover:bg-orange-100 border border-orange-200 text-orange-700 rounded-lg text-[11px] font-bold flex items-center gap-1 transition cursor-pointer"
+                                >
+                                  <span>{off.code}</span>
+                                  <span className="text-[10px] text-orange-500 font-normal">
+                                    ({off.discountType === 'PERCENTAGE' ? `${off.discountValue}% off` : off.discountType === 'FREE_DELIVERY' ? 'Free Del' : `£${off.discountValue} off`})
+                                  </span>
+                                </button>
+                              ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
@@ -1544,8 +1675,8 @@ export default function CheckoutWizardModal({
                   )}
 
                   {discountAmount > 0 && (
-                    <div className="flex justify-between text-emerald-600 font-medium">
-                      <span>Coupon Discount</span>
+                    <div className="flex justify-between text-emerald-600 font-bold bg-emerald-50 px-2 py-1 rounded-lg">
+                      <span>Promotional Discount</span>
                       <span>-£{discountAmount.toFixed(2)}</span>
                     </div>
                   )}

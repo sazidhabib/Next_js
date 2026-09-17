@@ -832,6 +832,89 @@ export const InvoiceTemplate = sequelize.define('InvoiceTemplate', {
   tableName: 'invoice_templates',
 });
 
+// 17. Offer / Promotion Model
+export const Offer = sequelize.define('Offer', {
+  id: {
+    type: DataTypes.STRING,
+    primaryKey: true,
+    defaultValue: DataTypes.UUIDV4,
+  },
+  restaurantId: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  title: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  description: {
+    type: DataTypes.TEXT,
+    allowNull: true,
+  },
+  code: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  discountType: {
+    type: DataTypes.ENUM('PERCENTAGE', 'FIXED_AMOUNT', 'FREE_DELIVERY'),
+    defaultValue: 'PERCENTAGE',
+  },
+  discountValue: {
+    type: DataTypes.DOUBLE,
+    defaultValue: 0.0,
+  },
+  minOrderAmount: {
+    type: DataTypes.DOUBLE,
+    defaultValue: 0.0,
+  },
+  maxDiscountAmount: {
+    type: DataTypes.DOUBLE,
+    allowNull: true,
+  },
+  serviceType: {
+    type: DataTypes.ENUM('ALL', 'DELIVERY', 'PICKUP', 'DINE_IN'),
+    defaultValue: 'ALL',
+  },
+  isAutomatic: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+  },
+  bannerText: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  bannerImageUrl: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  startDate: {
+    type: DataTypes.DATE,
+    allowNull: true,
+  },
+  endDate: {
+    type: DataTypes.DATE,
+    allowNull: true,
+  },
+  usageLimit: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+  },
+  usedCount: {
+    type: DataTypes.INTEGER,
+    defaultValue: 0,
+  },
+  isActive: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: true,
+  },
+  applicableCategoryIds: {
+    type: DataTypes.JSON,
+    allowNull: true,
+  },
+}, {
+  tableName: 'offers',
+});
+
 // ASSOCIATIONS
 
 // UserRestaurantRole relations
@@ -900,6 +983,10 @@ Invoice.belongsTo(Restaurant, { foreignKey: 'restaurantId', as: 'restaurant' });
 
 Restaurant.hasMany(InvoiceTemplate, { foreignKey: 'restaurantId', onDelete: 'CASCADE' });
 InvoiceTemplate.belongsTo(Restaurant, { foreignKey: 'restaurantId', as: 'restaurant' });
+
+// Offer relations
+Restaurant.hasMany(Offer, { foreignKey: 'restaurantId', onDelete: 'CASCADE', as: 'offers' });
+Offer.belongsTo(Restaurant, { foreignKey: 'restaurantId', as: 'restaurant' });
 
 let dbInitPromise = null;
 
@@ -993,7 +1080,86 @@ export async function ensureDatabaseReady() {
         await seedDatabaseWithoutForce();
         console.log('✅ [DB Init] Seeding completed.');
       } else {
-        console.log('ℹ️ [DB Init] Database already has data. Skipping seeding.');
+        console.log('ℹ️ [DB Init] Database already has data. Skipping full seeding.');
+
+        // Check if offers table is empty, seed initial sample offers
+        try {
+          const offerCount = await Offer.count();
+          if (offerCount === 0) {
+            const firstResto = await Restaurant.findOne();
+            if (firstResto) {
+              console.log('🏷️ [DB Init] Offers table is empty. Seeding default sample offers...');
+              await Offer.bulkCreate([
+                {
+                  id: 'offer-welcome-20',
+                  restaurantId: firstResto.id,
+                  title: 'Welcome 20% Discount',
+                  description: 'Get 20% off your entire order on purchases of £20 or more. Max discount £10.',
+                  code: 'WELCOME20',
+                  discountType: 'PERCENTAGE',
+                  discountValue: 20,
+                  minOrderAmount: 20.0,
+                  maxDiscountAmount: 10.0,
+                  serviceType: 'ALL',
+                  isAutomatic: false,
+                  bannerText: '🔥 20% OFF FIRST ORDER (CODE: WELCOME20)',
+                  bannerImageUrl: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=800&auto=format&fit=crop&q=80',
+                  startDate: new Date(),
+                  endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+                  usageLimit: 500,
+                  usedCount: 42,
+                  isActive: true,
+                  applicableCategoryIds: [],
+                },
+                {
+                  id: 'offer-free-del-25',
+                  restaurantId: firstResto.id,
+                  title: 'Free Delivery Special',
+                  description: 'Enjoy 100% Free Delivery on all delivery orders over £25. Automatically applied!',
+                  code: 'FREEDEL',
+                  discountType: 'FREE_DELIVERY',
+                  discountValue: 100,
+                  minOrderAmount: 25.0,
+                  maxDiscountAmount: null,
+                  serviceType: 'DELIVERY',
+                  isAutomatic: true,
+                  bannerText: '🚚 FREE DELIVERY ON ORDERS OVER £25',
+                  bannerImageUrl: 'https://images.unsplash.com/photo-1526367790999-0150786686a2?w=800&auto=format&fit=crop&q=80',
+                  startDate: new Date(),
+                  endDate: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000),
+                  usageLimit: null,
+                  usedCount: 128,
+                  isActive: true,
+                  applicableCategoryIds: [],
+                },
+                {
+                  id: 'offer-feast-5',
+                  restaurantId: firstResto.id,
+                  title: 'Weekend Feast £5 Off',
+                  description: 'Save flat £5 when you spend £30 or more on handcrafted pizzas and pastas.',
+                  code: 'FEAST5',
+                  discountType: 'FIXED_AMOUNT',
+                  discountValue: 5.0,
+                  minOrderAmount: 30.0,
+                  maxDiscountAmount: 5.0,
+                  serviceType: 'ALL',
+                  isAutomatic: false,
+                  bannerText: '🍕 SAVE £5 ON ORDERS OVER £30 (CODE: FEAST5)',
+                  bannerImageUrl: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80',
+                  startDate: new Date(),
+                  endDate: new Date(Date.now() + 45 * 24 * 60 * 60 * 1000),
+                  usageLimit: 200,
+                  usedCount: 19,
+                  isActive: true,
+                  applicableCategoryIds: [],
+                },
+              ]);
+              console.log('✅ [DB Init] Default offers seeded.');
+            }
+          }
+        } catch (err) {
+          console.warn('⚠️ [DB Init] Warning checking/seeding offers:', err.message);
+        }
       }
     } catch (error) {
       console.error('❌ [DB Init] Database initialization failed:', error);
@@ -1028,5 +1194,6 @@ export default {
   OrderStatusLog,
   Invoice,
   InvoiceTemplate,
+  Offer,
   ensureDatabaseReady,
 };

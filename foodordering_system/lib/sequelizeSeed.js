@@ -17,6 +17,7 @@ import {
   OrderStatusLog,
   Invoice,
   InvoiceTemplate,
+  Offer,
 } from './sequelize.js';
 export async function seedDatabaseWithoutForce() {
   // 2. Hash default password
@@ -688,6 +689,75 @@ export async function seedDatabaseWithoutForce() {
   );
 
   console.log('📦 Sample orders & invoices created.');
+
+  // 12. Create Sample Offers
+  await Offer.bulkCreate([
+    {
+      id: 'offer-welcome-20',
+      restaurantId: restaurant.id,
+      title: 'Welcome 20% Discount',
+      description: 'Get 20% off your entire order on purchases of £20 or more. Max discount £10.',
+      code: 'WELCOME20',
+      discountType: 'PERCENTAGE',
+      discountValue: 20,
+      minOrderAmount: 20.0,
+      maxDiscountAmount: 10.0,
+      serviceType: 'ALL',
+      isAutomatic: false,
+      bannerText: '🔥 20% OFF FIRST ORDER (CODE: WELCOME20)',
+      bannerImageUrl: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=800&auto=format&fit=crop&q=80',
+      startDate: new Date(),
+      endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+      usageLimit: 500,
+      usedCount: 42,
+      isActive: true,
+      applicableCategoryIds: [],
+    },
+    {
+      id: 'offer-free-del-25',
+      restaurantId: restaurant.id,
+      title: 'Free Delivery Special',
+      description: 'Enjoy 100% Free Delivery on all delivery orders over £25. Automatically applied!',
+      code: 'FREEDEL',
+      discountType: 'FREE_DELIVERY',
+      discountValue: 100,
+      minOrderAmount: 25.0,
+      maxDiscountAmount: null,
+      serviceType: 'DELIVERY',
+      isAutomatic: true,
+      bannerText: '🚚 FREE DELIVERY ON ORDERS OVER £25',
+      bannerImageUrl: 'https://images.unsplash.com/photo-1526367790999-0150786686a2?w=800&auto=format&fit=crop&q=80',
+      startDate: new Date(),
+      endDate: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000),
+      usageLimit: null,
+      usedCount: 128,
+      isActive: true,
+      applicableCategoryIds: [],
+    },
+    {
+      id: 'offer-feast-5',
+      restaurantId: restaurant.id,
+      title: 'Weekend Feast £5 Off',
+      description: 'Save flat £5 when you spend £30 or more on handcrafted pizzas and pastas.',
+      code: 'FEAST5',
+      discountType: 'FIXED_AMOUNT',
+      discountValue: 5.0,
+      minOrderAmount: 30.0,
+      maxDiscountAmount: 5.0,
+      serviceType: 'ALL',
+      isAutomatic: false,
+      bannerText: '🍕 SAVE £5 ON ORDERS OVER £30 (CODE: FEAST5)',
+      bannerImageUrl: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80',
+      startDate: new Date(),
+      endDate: new Date(Date.now() + 45 * 24 * 60 * 60 * 1000),
+      usageLimit: 200,
+      usedCount: 19,
+      isActive: true,
+      applicableCategoryIds: [],
+    },
+  ]);
+  console.log('🏷️ Sample offers created.');
+
   console.log('🎉 Seed complete!');
 }
 

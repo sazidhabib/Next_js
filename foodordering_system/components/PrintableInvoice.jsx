@@ -265,6 +265,12 @@ export default function PrintableInvoice({
             <span>Sub Total:</span>
             <span>£{order.subtotal?.toFixed(2)}</span>
           </div>
+          {order.discountAmount > 0 && (
+            <div className="flex justify-between items-baseline font-bold">
+              <span>Discount / Promo:</span>
+              <span>-£{order.discountAmount?.toFixed(2)}</span>
+            </div>
+          )}
           {order.taxAmount > 0 && (
             <div className="flex justify-between items-baseline text-[11px] text-slate-700">
               <span>VAT / Taxes:</span>

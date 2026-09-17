@@ -10,8 +10,11 @@ import {
   ShieldCheck,
   Check,
   CreditCard,
+  Image as ImageIcon,
+  Sparkles,
 } from 'lucide-react';
 import { useAdmin } from '@/lib/adminContext';
+import MediaPickerModal from '@/components/MediaPickerModal';
 
 export default function AdminSettingsPage() {
   const { selectedRestaurant, selectRestaurant } = useAdmin();
@@ -25,6 +28,8 @@ export default function AdminSettingsPage() {
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [address, setAddress] = useState('');
+  const [logoUrl, setLogoUrl] = useState('');
+  const [bannerUrl, setBannerUrl] = useState('');
   const [taxRate, setTaxRate] = useState(8.5);
   const [prepTime, setPrepTime] = useState(25);
   const [enableDelivery, setEnableDelivery] = useState(true);
@@ -35,6 +40,9 @@ export default function AdminSettingsPage() {
   const [enableOnline, setEnableOnline] = useState(false);
   const [stripePublishableKey, setStripePublishableKey] = useState('');
   const [stripeSecretKey, setStripeSecretKey] = useState('');
+
+  // Media Picker state
+  const [mediaPickerMode, setMediaPickerMode] = useState(null); // 'banner' | 'logo' | null
 
   const targetSlug = selectedRestaurant?.slug || 'bellavista-pizza';
 
@@ -51,6 +59,8 @@ export default function AdminSettingsPage() {
           setPhone(r.phone || '');
           setEmail(r.email || '');
           setAddress(r.address || '');
+          setLogoUrl(r.logoUrl || '');
+          setBannerUrl(r.bannerUrl || '');
           setTaxRate(r.taxRatePercent || 0.0);
           setPrepTime(r.estimatedPrepTime || 25);
           setEnableDelivery(r.enableDelivery !== false);
@@ -86,6 +96,8 @@ export default function AdminSettingsPage() {
           phone,
           email,
           address,
+          logoUrl,
+          bannerUrl,
           taxRatePercent: parseFloat(taxRate),
           estimatedPrepTime: parseInt(prepTime),
           enableDelivery,
@@ -369,6 +381,83 @@ export default function AdminSettingsPage() {
           )}
         </div>
 
+        {/* Visual Branding & Banners Card */}
+        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 sm:p-6 space-y-4">
+          <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+            <ImageIcon className="w-4 h-4 text-orange-400" />
+            <span>Storefront Visual Branding & Cover Banners</span>
+          </h3>
+          <p className="text-xs text-slate-400">
+            Upload the main hero cover banner and logo displayed at the top of your public menu storefront.
+          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+            {/* Storefront Hero Banner */}
+            <div className="space-y-2 bg-slate-950 p-4 rounded-xl border border-slate-800">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-white">Hero Cover Banner</span>
+                <button
+                  type="button"
+                  onClick={() => setMediaPickerMode('banner')}
+                  className="text-xs text-orange-400 hover:text-orange-300 font-bold flex items-center gap-1 cursor-pointer"
+                >
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>Choose / Upload</span>
+                </button>
+              </div>
+
+              <div className="h-32 w-full bg-slate-900 rounded-lg overflow-hidden border border-slate-800 relative group">
+                {bannerUrl ? (
+                  <img src={bannerUrl} alt="Storefront Banner" className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-slate-600 text-xs">
+                    No banner set
+                  </div>
+                )}
+              </div>
+
+              <input
+                type="text"
+                value={bannerUrl}
+                onChange={(e) => setBannerUrl(e.target.value)}
+                placeholder="https://..."
+                className="w-full px-3 py-1.5 bg-slate-900 border border-slate-800 rounded-lg text-xs text-slate-300"
+              />
+            </div>
+
+            {/* Restaurant Logo */}
+            <div className="space-y-2 bg-slate-950 p-4 rounded-xl border border-slate-800">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-white">Restaurant Logo</span>
+                <button
+                  type="button"
+                  onClick={() => setMediaPickerMode('logo')}
+                  className="text-xs text-orange-400 hover:text-orange-300 font-bold flex items-center gap-1 cursor-pointer"
+                >
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>Choose / Upload</span>
+                </button>
+              </div>
+
+              <div className="h-32 w-full bg-slate-900 rounded-lg overflow-hidden border border-slate-800 flex items-center justify-center relative">
+                {logoUrl ? (
+                  <img src={logoUrl} alt="Logo" className="w-20 h-20 rounded-full object-cover border-2 border-orange-500 shadow-md" />
+                ) : (
+                  <div className="text-slate-600 text-xs">No logo set</div>
+                )}
+              </div>
+
+              <input
+                type="text"
+                value={logoUrl}
+                onChange={(e) => setLogoUrl(e.target.value)}
+                placeholder="https://..."
+                className="w-full px-3 py-1.5 bg-slate-900 border border-slate-800 rounded-lg text-xs text-slate-300"
+              />
+            </div>
+          </div>
+        </div>
+
         {/* Operating Hours Table */}
         <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 sm:p-6 space-y-4">
           <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
@@ -401,6 +490,20 @@ export default function AdminSettingsPage() {
           </button>
         </div>
       </form>
+
+      {/* Media Picker for Settings */}
+      <MediaPickerModal
+        isOpen={!!mediaPickerMode}
+        onClose={() => setMediaPickerMode(null)}
+        currentImage={mediaPickerMode === 'banner' ? bannerUrl : logoUrl}
+        onSelectImage={(url) => {
+          if (mediaPickerMode === 'banner') setBannerUrl(url);
+          if (mediaPickerMode === 'logo') setLogoUrl(url);
+          setMediaPickerMode(null);
+          toast.success(`${mediaPickerMode === 'banner' ? 'Banner' : 'Logo'} image updated!`);
+        }}
+        title={`Select ${mediaPickerMode === 'banner' ? 'Hero Cover Banner' : 'Restaurant Logo'} Image`}
+      />
     </div>
   );
 }
