@@ -25,6 +25,13 @@ import {
   Truck,
   Layers,
   ArrowRight,
+  Gift,
+  Sparkles,
+  Copy,
+  CheckCircle2,
+  Zap,
+  ChevronRight,
+  BadgePercent,
 } from 'lucide-react';
 
 export default function EmbedMenuPage({ params }) {
@@ -37,6 +44,11 @@ export default function EmbedMenuPage({ params }) {
   const [isCategoryMenuOpen, setIsCategoryMenuOpen] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState('English');
   const [hoveredZoneIndex, setHoveredZoneIndex] = useState(null);
+
+  // Offers modal & interactive state
+  const [isOffersModalOpen, setIsOffersModalOpen] = useState(false);
+  const [copiedOfferCode, setCopiedOfferCode] = useState(null);
+  const [activeOfferIndex, setActiveOfferIndex] = useState(0);
 
   // Item customization modal
   const [selectedItem, setSelectedItem] = useState(null);
@@ -106,6 +118,18 @@ export default function EmbedMenuPage({ params }) {
     setCartItems([]);
     toast.info('Cart cleared');
   };
+
+  const handleCopyOfferCode = (code) => {
+    if (!code) return;
+    navigator.clipboard.writeText(code);
+    setCopiedOfferCode(code);
+    toast.success(`Copied code "${code}"! Apply it at checkout.`);
+    setTimeout(() => setCopiedOfferCode(null), 2500);
+  };
+
+  const activeOffers = (restaurant?.offers || []).filter((o) => o.isActive !== false);
+  const bestAutoOffer = activeOffers.find((o) => o.isAutomatic && o.minOrderAmount > 0) || activeOffers[0];
+  const currentFeaturedOffer = activeOffers[activeOfferIndex] || activeOffers[0];
 
   const cartCount = cartItems.reduce((sum, it) => sum + it.quantity, 0);
   const cartTotal = cartItems.reduce(
@@ -178,8 +202,23 @@ export default function EmbedMenuPage({ params }) {
             </h1>
           </div>
 
-          {/* Right Action Icons: Menu, Info (Active toggle), Cart, Close */}
+          {/* Right Action Icons: Deals, Menu, Info (Active toggle), Cart, Close */}
           <div className="flex items-stretch h-14 border-l border-slate-300">
+            {/* Special Deals / Offers Button */}
+            {activeOffers.length > 0 && (
+              <button
+                onClick={() => setIsOffersModalOpen(true)}
+                title="Special Deals & Exclusive Offers"
+                className="px-3 sm:px-4 flex items-center justify-center gap-1.5 text-amber-700 hover:text-amber-900 bg-amber-50 hover:bg-amber-100 border-r border-slate-300 transition-colors cursor-pointer text-xs font-bold"
+              >
+                <Gift className="w-4 h-4 text-amber-600 animate-pulse" />
+                <span className="hidden sm:inline">Deals</span>
+                <span className="bg-amber-600 text-white text-[10px] font-black min-w-[18px] h-[18px] px-1 rounded-full flex items-center justify-center">
+                  {activeOffers.length}
+                </span>
+              </button>
+            )}
+
             {/* Category Menu Jump Button */}
             <button
               onClick={() => {
@@ -263,6 +302,89 @@ export default function EmbedMenuPage({ params }) {
           </div>
         )}
       </header>
+
+      {/* Top Promotional Offers Ribbon */}
+      {activeOffers.length > 0 && (
+        <div className="bg-linear-to-r from-orange-600 via-amber-600 to-orange-700 text-white py-1.5 sm:py-2 px-4 shadow-sm relative z-30">
+          <div className="max-w-5xl mx-auto flex items-center justify-between gap-3 text-xs">
+            <div className="flex items-center gap-2.5 overflow-hidden">
+              <span className="bg-white/20 backdrop-blur-xs px-2.5 py-0.5 rounded-full text-[10px] font-extrabold tracking-wider uppercase shrink-0 flex items-center gap-1">
+                <Gift className="w-3 h-3 text-amber-300" />
+                <span>OFFERS</span>
+              </span>
+              <div className="flex items-center gap-3 overflow-x-auto no-scrollbar font-bold whitespace-nowrap">
+                {activeOffers.map((off, idx) => (
+                  <button
+                    key={off.id || idx}
+                    type="button"
+                    onClick={() => {
+                      if (off.code) handleCopyOfferCode(off.code);
+                      else setIsOffersModalOpen(true);
+                    }}
+                    className="flex items-center gap-1.5 hover:underline cursor-pointer"
+                  >
+                    <span>{off.bannerText || off.title}</span>
+                    {off.code && (
+                      <span className="font-mono bg-black/30 px-1.5 py-0.5 rounded text-[10px] border border-white/20">
+                        {off.code}
+                      </span>
+                    )}
+                    {idx < activeOffers.length - 1 && <span className="text-orange-200 ml-1">•</span>}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setIsOffersModalOpen(true)}
+              className="font-extrabold hover:text-amber-200 shrink-0 text-[11px] sm:text-xs flex items-center gap-1 bg-black/20 hover:bg-black/30 px-2.5 py-0.5 sm:py-1 rounded-full border border-white/10 transition cursor-pointer whitespace-nowrap"
+            >
+              <span>View Deals ({activeOffers.length})</span>
+              <ChevronRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Smart Deal Unlock Progress Bar */}
+      {cartItems.length > 0 && bestAutoOffer && bestAutoOffer.minOrderAmount > 0 && (
+        <div className="bg-amber-50/95 border-b border-amber-200 py-2 px-4 sticky top-14 z-30 shadow-xs backdrop-blur-xs">
+          <div className="max-w-5xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 text-xs">
+            <div className="flex items-center gap-2 font-bold text-amber-950">
+              <div className="p-1 bg-amber-500/20 text-amber-700 rounded-lg">
+                <Zap className="w-3.5 h-3.5" />
+              </div>
+              {cartTotal >= bestAutoOffer.minOrderAmount ? (
+                <span className="text-emerald-700 font-extrabold flex items-center gap-1">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 inline" />
+                  <span>🎉 Deal Unlocked! You qualify for {bestAutoOffer.title}!</span>
+                </span>
+              ) : (
+                <span>
+                  Add <strong className="text-orange-600">£{(bestAutoOffer.minOrderAmount - cartTotal).toFixed(2)}</strong> more to unlock <strong className="text-amber-900">{bestAutoOffer.title}</strong>!
+                </span>
+              )}
+            </div>
+
+            <div className="flex items-center gap-3 shrink-0">
+              <div className="w-28 sm:w-40 bg-amber-200/80 rounded-full h-2 overflow-hidden">
+                <div
+                  className="bg-linear-to-r from-orange-500 to-amber-500 h-full rounded-full transition-all duration-300"
+                  style={{ width: `${Math.min(100, (cartTotal / bestAutoOffer.minOrderAmount) * 100)}%` }}
+                ></div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsOffersModalOpen(true)}
+                className="text-[11px] font-bold text-orange-700 hover:underline cursor-pointer whitespace-nowrap"
+              >
+                All Deals ({activeOffers.length})
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* =========================================================
           VIEW A: RESTAURANT INFO & DELIVERY ZONES (SCREENSHOT 2)
@@ -480,41 +602,147 @@ export default function EmbedMenuPage({ params }) {
 
           {/* 3. Deal / Promotion Banner Overlay */}
           <div className="max-w-5xl mx-auto w-full px-4 -mt-10 sm:-mt-14 relative z-20 mb-6">
-            <div className="bg-black/90 backdrop-blur-md rounded-2xl border-2 border-white/30 shadow-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-4 text-white overflow-hidden relative">
-              <div className="space-y-1 text-center sm:text-left z-10">
-                <h2 className="text-lg sm:text-xl font-black tracking-tight text-white">
-                  10% off all collection orders
-                </h2>
-                <p className="text-xs sm:text-sm text-slate-300">
-                  Exclusively on our official online ordering portal!
-                </p>
-                <div className="pt-2 flex items-center gap-2 justify-center sm:justify-start">
-                  <span className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-300 bg-amber-400/10 px-2.5 py-0.5 rounded-full border border-amber-400/20">
-                    <Tag className="w-3 h-3" />
-                    Deal applied automatically at checkout
-                  </span>
+            {activeOffers.length > 0 && currentFeaturedOffer ? (
+              <div className="bg-slate-950/95 backdrop-blur-md rounded-2xl border-2 border-white/20 shadow-2xl p-4 sm:p-5 flex flex-col md:flex-row items-center justify-between gap-4 text-white overflow-hidden relative">
+                {/* Background ambient glow */}
+                <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 bg-orange-600/20 rounded-full blur-3xl pointer-events-none"></div>
+
+                <div className="space-y-2 text-center md:text-left z-10 flex-1 min-w-0">
+                  <div className="flex flex-wrap items-center justify-center md:justify-start gap-2">
+                    <span className="inline-flex items-center gap-1 text-[11px] font-extrabold uppercase tracking-wider text-white bg-orange-600 px-2.5 py-0.5 rounded-full shadow-xs">
+                      <Sparkles className="w-3 h-3 text-amber-300" />
+                      {currentFeaturedOffer.discountType === 'PERCENTAGE'
+                        ? `${currentFeaturedOffer.discountValue}% OFF SPECIAL`
+                        : currentFeaturedOffer.discountType === 'FREE_DELIVERY'
+                        ? 'FREE DELIVERY SPECIAL'
+                        : `£${currentFeaturedOffer.discountValue?.toFixed(2)} OFF DEAL`}
+                    </span>
+
+                    {currentFeaturedOffer.isAutomatic ? (
+                      <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-300 bg-emerald-900/40 px-2.5 py-0.5 rounded-full border border-emerald-500/30">
+                        <Zap className="w-3 h-3 text-emerald-400" />
+                        Auto-Applied at Checkout
+                      </span>
+                    ) : currentFeaturedOffer.code ? (
+                      <button
+                        type="button"
+                        onClick={() => handleCopyOfferCode(currentFeaturedOffer.code)}
+                        className="inline-flex items-center gap-1 text-[11px] font-mono font-bold text-amber-300 bg-amber-400/20 hover:bg-amber-400/30 px-2.5 py-0.5 rounded-full border border-amber-400/40 cursor-pointer transition"
+                        title="Click to copy promo code"
+                      >
+                        {copiedOfferCode === currentFeaturedOffer.code ? (
+                          <>
+                            <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+                            <span className="text-emerald-300">Code Copied!</span>
+                          </>
+                        ) : (
+                          <>
+                            <Copy className="w-3 h-3" />
+                            <span>Code: <strong>{currentFeaturedOffer.code}</strong></span>
+                          </>
+                        )}
+                      </button>
+                    ) : null}
+                  </div>
+
+                  <h2 className="text-lg sm:text-xl font-black tracking-tight text-white line-clamp-1">
+                    {currentFeaturedOffer.title}
+                  </h2>
+
+                  <p className="text-xs sm:text-sm text-slate-300 line-clamp-2 leading-relaxed max-w-2xl">
+                    {currentFeaturedOffer.description || currentFeaturedOffer.bannerText || 'Exclusive promotional savings on your online order.'}
+                  </p>
+
+                  {/* Offer meta & navigation buttons */}
+                  <div className="pt-1 flex flex-wrap items-center justify-center md:justify-start gap-3 text-xs">
+                    {currentFeaturedOffer.minOrderAmount > 0 && (
+                      <span className="text-slate-400">
+                        Min Spend: <strong className="text-white">£{currentFeaturedOffer.minOrderAmount.toFixed(2)}</strong>
+                      </span>
+                    )}
+
+                    {activeOffers.length > 1 && (
+                      <div className="flex items-center gap-1.5 ml-auto md:ml-0">
+                        <span className="text-[11px] text-slate-400">Deals:</span>
+                        {activeOffers.map((off, idx) => (
+                          <button
+                            key={off.id || idx}
+                            type="button"
+                            onClick={() => setActiveOfferIndex(idx)}
+                            className={`w-6 h-6 rounded-full text-[11px] font-black transition-all cursor-pointer flex items-center justify-center ${
+                              activeOfferIndex === idx
+                                ? 'bg-orange-600 text-white shadow-xs'
+                                : 'bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700'
+                            }`}
+                          >
+                            {idx + 1}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+
+                    <button
+                      type="button"
+                      onClick={() => setIsOffersModalOpen(true)}
+                      className="text-orange-400 hover:text-orange-300 font-extrabold flex items-center gap-1 cursor-pointer text-xs underline underline-offset-2 ml-auto"
+                    >
+                      <span>View All Offers ({activeOffers.length})</span>
+                      <ChevronRight className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Promo Thumbnail / Banner Image */}
+                <div className="flex items-center -space-x-3 shrink-0 z-10">
+                  {currentFeaturedOffer.bannerImageUrl ? (
+                    <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden border-2 border-white/30 shadow-xl relative group">
+                      <img
+                        src={currentFeaturedOffer.bannerImageUrl}
+                        alt={currentFeaturedOffer.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                      />
+                    </div>
+                  ) : (
+                    <>
+                      <img
+                        src="https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=300&auto=format&fit=crop&q=80"
+                        alt="Promo Dish 1"
+                        className="w-14 h-14 sm:w-16 sm:h-16 rounded-full border-2 border-white object-cover shadow-lg"
+                      />
+                      <img
+                        src="https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=300&auto=format&fit=crop&q=80"
+                        alt="Promo Dish 2"
+                        className="w-14 h-14 sm:w-16 sm:h-16 rounded-full border-2 border-white object-cover shadow-lg"
+                      />
+                      <img
+                        src="https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=300&auto=format&fit=crop&q=80"
+                        alt="Promo Dish 3"
+                        className="w-14 h-14 sm:w-16 sm:h-16 rounded-full border-2 border-white object-cover shadow-lg"
+                      />
+                    </>
+                  )}
                 </div>
               </div>
-
-              {/* Promo Dishes Thumbnail Collage */}
-              <div className="flex items-center -space-x-4 shrink-0 z-10">
-                <img
-                  src="https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=300&auto=format&fit=crop&q=80"
-                  alt="Promo Dish 1"
-                  className="w-16 h-16 sm:w-20 sm:h-20 rounded-full border-2 border-white object-cover shadow-lg"
-                />
-                <img
-                  src="https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=300&auto=format&fit=crop&q=80"
-                  alt="Promo Dish 2"
-                  className="w-16 h-16 sm:w-20 sm:h-20 rounded-full border-2 border-white object-cover shadow-lg"
-                />
-                <img
-                  src="https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=300&auto=format&fit=crop&q=80"
-                  alt="Promo Dish 3"
-                  className="w-16 h-16 sm:w-20 sm:h-20 rounded-full border-2 border-white object-cover shadow-lg"
-                />
+            ) : (
+              <div className="bg-black/90 backdrop-blur-md rounded-2xl border border-white/20 shadow-xl p-4 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-4 text-white">
+                <div className="space-y-1 text-center sm:text-left">
+                  <span className="inline-flex items-center gap-1 text-[10px] font-extrabold uppercase tracking-wider text-orange-400 bg-orange-500/10 px-2.5 py-0.5 rounded-full border border-orange-500/20">
+                    <Star className="w-3 h-3 fill-current" />
+                    Official Online Ordering Portal
+                  </span>
+                  <h2 className="text-base sm:text-lg font-black tracking-tight text-white">
+                    Freshly Prepared & Delivered Fast
+                  </h2>
+                  <p className="text-xs text-slate-300">
+                    Direct ordering with 0% middleman commission fee and guaranteed quick prep times.
+                  </p>
+                </div>
+                <div className="flex items-center gap-2 text-xs font-bold text-slate-300">
+                  <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                  <span>Verified Kitchen</span>
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
           {/* 4. Main Menu Feed - Two Column GloriaFood Style with Category Image & Left-aligned Dish Images */}
@@ -691,6 +919,153 @@ export default function EmbedMenuPage({ params }) {
         serviceType={serviceType}
         setServiceType={setServiceType}
       />
+
+      {/* Exclusive Restaurant Deals & Offers Modal Popup */}
+      {isOffersModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-6 animate-in fade-in duration-200">
+          <div className="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[90vh]">
+            {/* Modal Header */}
+            <div className="p-4 sm:p-5 border-b border-slate-200 flex items-center justify-between bg-linear-to-r from-orange-600 via-amber-600 to-orange-700 text-white shrink-0">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 bg-white/20 rounded-xl">
+                  <Gift className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h3 className="font-extrabold text-base sm:text-lg text-white">
+                    Exclusive Deals & Special Offers
+                  </h3>
+                  <p className="text-xs text-orange-100">
+                    Apply promo codes at checkout or enjoy automated savings on qualifying orders.
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsOffersModalOpen(false)}
+                className="w-8 h-8 rounded-full bg-black/20 hover:bg-black/30 text-white flex items-center justify-center transition-colors cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-4 sm:p-6 overflow-y-auto space-y-4 flex-1">
+              {activeOffers.length === 0 ? (
+                <div className="py-12 text-center text-slate-500 space-y-2">
+                  <Tag className="w-8 h-8 mx-auto text-slate-400" />
+                  <p className="text-sm font-bold">No active promotional deals right now.</p>
+                  <p className="text-xs text-slate-400">Check back soon for seasonal specials!</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {activeOffers.map((off) => {
+                    const isPct = off.discountType === 'PERCENTAGE';
+                    const isFreeDel = off.discountType === 'FREE_DELIVERY';
+
+                    return (
+                      <div
+                        key={off.id}
+                        className="bg-slate-50 border border-slate-200 rounded-2xl overflow-hidden flex flex-col justify-between hover:border-orange-300 hover:shadow-md transition duration-200"
+                      >
+                        {/* Offer Graphic Banner */}
+                        <div className="relative h-28 bg-slate-950 overflow-hidden">
+                          {off.bannerImageUrl ? (
+                            <img
+                              src={off.bannerImageUrl}
+                              alt={off.title}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full bg-linear-to-r from-orange-600 to-amber-600 flex items-center justify-center text-white/50">
+                              <Sparkles className="w-8 h-8" />
+                            </div>
+                          )}
+                          <div className="absolute inset-0 bg-linear-to-t from-slate-950/80 via-transparent to-transparent"></div>
+
+                          <div className="absolute top-2.5 left-2.5">
+                            <span className="text-[10px] font-extrabold px-2.5 py-1 rounded-full bg-orange-600 text-white uppercase tracking-wider shadow-xs">
+                              {isPct
+                                ? `${off.discountValue}% OFF`
+                                : isFreeDel
+                                ? 'FREE DELIVERY'
+                                : `£${off.discountValue?.toFixed(2)} OFF`}
+                            </span>
+                          </div>
+
+                          {off.bannerText && (
+                            <div className="absolute bottom-2 left-2.5 right-2.5">
+                              <span className="text-[11px] font-bold text-white bg-black/60 px-2 py-0.5 rounded-md backdrop-blur-xs line-clamp-1">
+                                {off.bannerText}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Content */}
+                        <div className="p-4 space-y-2.5 flex-1 flex flex-col justify-between">
+                          <div className="space-y-1">
+                            <h4 className="font-bold text-sm text-slate-900 leading-tight">
+                              {off.title}
+                            </h4>
+                            <p className="text-xs text-slate-600 leading-relaxed">
+                              {off.description || 'Applies at checkout when minimum order requirements are satisfied.'}
+                            </p>
+                          </div>
+
+                          <div className="pt-2 border-t border-slate-200 flex items-center justify-between text-xs">
+                            <span className="text-slate-500">
+                              Min Spend: <strong>{off.minOrderAmount > 0 ? `£${off.minOrderAmount.toFixed(2)}` : 'None'}</strong>
+                            </span>
+
+                            {off.isAutomatic ? (
+                              <span className="font-bold text-emerald-700 bg-emerald-50 px-2 py-1 rounded-md text-[11px] flex items-center gap-1">
+                                <Zap className="w-3 h-3 text-emerald-600" />
+                                <span>Auto-Applied</span>
+                              </span>
+                            ) : off.code ? (
+                              <button
+                                type="button"
+                                onClick={() => handleCopyOfferCode(off.code)}
+                                className="px-2.5 py-1 bg-orange-100 hover:bg-orange-200 text-orange-800 rounded-lg font-mono font-bold text-xs flex items-center gap-1 transition cursor-pointer"
+                              >
+                                {copiedOfferCode === off.code ? (
+                                  <>
+                                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                                    <span className="text-emerald-700">Copied!</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <Copy className="w-3.5 h-3.5" />
+                                    <span>{off.code}</span>
+                                  </>
+                                )}
+                              </button>
+                            ) : null}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* Footer */}
+            <div className="p-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between shrink-0">
+              <span className="text-xs text-slate-500">
+                Offers automatically apply or validate with your cart at checkout.
+              </span>
+              <button
+                type="button"
+                onClick={() => setIsOffersModalOpen(false)}
+                className="px-5 py-2 bg-orange-600 hover:bg-orange-500 text-white font-bold text-xs rounded-xl shadow-xs transition cursor-pointer"
+              >
+                Done
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
