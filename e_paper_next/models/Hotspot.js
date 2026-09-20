@@ -50,6 +50,11 @@ const Hotspot = sequelize.define('Hotspot', {
     allowNull: false,
     defaultValue: 0,
   },
+  isLead: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: false,
+  },
 }, {
   tableName: 'hotspots',
   timestamps: true,

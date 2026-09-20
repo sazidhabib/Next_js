@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useCallback } from 'react';
-import { Plus, Trash2, Link as LinkIcon, Check, Eye, Move } from 'lucide-react';
+import { Plus, Trash2, Link as LinkIcon, Check, Eye, Move, Star, Crown } from 'lucide-react';
 
 export default function HotspotMappingCanvas({
   page,
@@ -91,7 +91,8 @@ export default function HotspotMappingCanvas({
     setDrawCurrent(null);
   };
 
-  const selectedHotspot = hotspots.find((h) => h.id === selectedHotspotId);
+  const selectedHotspotIndex = hotspots.findIndex((h) => h.id === selectedHotspotId);
+  const selectedHotspot = selectedHotspotIndex !== -1 ? hotspots[selectedHotspotIndex] : null;
 
   return (
     <div className="flex flex-col lg:flex-row h-[calc(100vh-100px)] bg-slate-950 text-slate-100">
@@ -165,8 +166,12 @@ export default function HotspotMappingCanvas({
 
             {/* Render Existing Hotspots */}
             <div className="absolute inset-0 z-10 pointer-events-auto">
-              {hotspots.map((h) => {
+              {hotspots.map((h, idx) => {
                 const isSelected = h.id === selectedHotspotId;
+                const hasManualLead = hotspots.some((item) => item.isLead);
+                const isAutoLead = !hasManualLead && idx === 0;
+                const isLeadStory = h.isLead || isAutoLead;
+
                 return (
                   <div
                     key={h.id}
@@ -185,12 +190,15 @@ export default function HotspotMappingCanvas({
                         ? 'hover:bg-rose-500/20 hover:ring-2 hover:ring-rose-500 cursor-pointer'
                         : isSelected
                         ? 'border-2 border-amber-400 bg-amber-400/30 shadow-lg'
+                        : h.isLead
+                        ? 'border-2 border-amber-500 bg-amber-500/20 shadow-md'
                         : 'border border-rose-500 bg-rose-500/15 hover:bg-rose-500/30'
                     }`}
                   >
                     {activeMode !== 'preview' && (
-                      <div className="absolute top-0 left-0 bg-slate-900/90 text-white text-[10px] font-mono px-1 py-0.5 rounded-br">
-                        #{h.id} {articles.find((a) => a.id === h.articleId)?.title?.slice(0, 15) || 'Article'}
+                      <div className="absolute top-0 left-0 flex items-center bg-slate-900/90 text-white text-[10px] font-mono px-1 py-0.5 rounded-br space-x-1">
+                        {h.isLead && <Star className="w-2.5 h-2.5 text-amber-400 fill-amber-400" />}
+                        <span>#{idx + 1}</span>
                       </div>
                     )}
                   </div>
@@ -214,19 +222,116 @@ export default function HotspotMappingCanvas({
         </div>
       </div>
 
-      {/* Right Sidebar: Hotspot Properties & Article Linking */}
+      {/* Right Sidebar: Hotspot Properties & All Crop Images List */}
       <div className="w-full lg:w-96 bg-slate-900 border-t lg:border-t-0 lg:border-l border-slate-800 p-5 flex flex-col overflow-y-auto">
-        <h3 className="text-sm font-bold uppercase tracking-wider text-slate-400 mb-4 pb-2 border-b border-slate-800">
-          Hotspot Properties
-        </h3>
+        {/* Sidebar Header & Tab Bar */}
+        <div className="flex items-center justify-between pb-3 mb-4 border-b border-slate-800">
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={() => setSelectedHotspotId(null)}
+              className={`text-xs font-bold px-2.5 py-1 rounded-md transition ${
+                !selectedHotspot
+                  ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              All Crops ({hotspots.length})
+            </button>
+            {selectedHotspot && (
+              <button
+                className="text-xs font-bold px-2.5 py-1 rounded-md bg-rose-500/20 text-rose-300 border border-rose-500/30"
+              >
+                Hotspot #{selectedHotspotIndex + 1}
+              </button>
+            )}
+          </div>
+          <span className="text-[11px] text-slate-500 font-mono">
+            Page {page?.pageNumber || 1}
+          </span>
+        </div>
 
         {selectedHotspot ? (
           <div className="space-y-5">
+            {/* Back to All Crops button */}
+            <button
+              onClick={() => setSelectedHotspotId(null)}
+              className="text-xs text-slate-400 hover:text-amber-300 flex items-center space-x-1 transition"
+            >
+              <span>← View All {hotspots.length} Crop Images</span>
+            </button>
+
+            {/* Lead News Toggle Button */}
+            <button
+              onClick={() => {
+                onSaveHotspot({
+                  ...selectedHotspot,
+                  isLead: !selectedHotspot.isLead,
+                });
+              }}
+              className={`w-full flex items-center justify-between p-3 rounded-xl border text-xs font-semibold transition ${
+                selectedHotspot.isLead
+                  ? 'bg-amber-500/20 text-amber-300 border-amber-500/60 shadow-md ring-1 ring-amber-500/30'
+                  : 'bg-slate-950 text-slate-300 border-slate-800 hover:border-slate-700'
+              }`}
+            >
+              <div className="flex items-center space-x-2.5">
+                <div className={`p-1 rounded-lg ${selectedHotspot.isLead ? 'bg-amber-500 text-slate-950' : 'bg-slate-800 text-slate-400'}`}>
+                  <Star className={`w-4 h-4 ${selectedHotspot.isLead ? 'fill-current' : ''}`} />
+                </div>
+                <div className="text-left">
+                  <div className="font-bold">
+                    {selectedHotspot.isLead ? 'Page Lead News (Assigned)' : 'Set as Page Lead News'}
+                  </div>
+                  <div className="text-[10px] text-slate-400 font-normal">
+                    {selectedHotspot.isLead
+                      ? 'Opens automatically when readers load this page'
+                      : 'Unset: First cut is used as auto lead'}
+                  </div>
+                </div>
+              </div>
+              <span className={`text-[10px] font-mono px-2 py-0.5 rounded ${selectedHotspot.isLead ? 'bg-amber-400 text-slate-950 font-bold' : 'bg-slate-800 text-slate-400'}`}>
+                {selectedHotspot.isLead ? 'ACTIVE LEAD' : 'SET LEAD'}
+              </span>
+            </button>
+
+            {/* Cropped Image Snippet Preview */}
+            <div>
+              <div className="flex items-center justify-between text-xs font-semibold text-slate-300 mb-2">
+                <span>Bounded Image Preview</span>
+                <span className="text-[10px] text-amber-400 font-mono">
+                  {selectedHotspot.width}% × {selectedHotspot.height}%
+                </span>
+              </div>
+              <div className="relative w-full rounded-xl overflow-hidden border border-slate-700/80 bg-slate-950 p-2 shadow-inner flex items-center justify-center">
+                <div
+                  className="relative overflow-hidden rounded border border-amber-500/50 shadow-md bg-white max-h-[220px] w-full"
+                  style={{
+                    aspectRatio: `${Math.max(0.1, selectedHotspot.width)} / ${Math.max(0.1, selectedHotspot.height)}`,
+                  }}
+                >
+                  <img
+                    src={page?.imageUrl || '/sample-epaper/page_1.svg'}
+                    alt="Hotspot preview"
+                    style={{
+                      position: 'absolute',
+                      width: `${(100 / Math.max(0.01, selectedHotspot.width)) * 100}%`,
+                      height: `${(100 / Math.max(0.01, selectedHotspot.height)) * 100}%`,
+                      left: `-${(selectedHotspot.x / Math.max(0.01, selectedHotspot.width)) * 100}%`,
+                      top: `-${(selectedHotspot.y / Math.max(0.01, selectedHotspot.height)) * 100}%`,
+                      maxWidth: 'none',
+                    }}
+                    className="select-none pointer-events-none"
+                    draggable={false}
+                  />
+                </div>
+              </div>
+            </div>
+
             {/* Coordinate Details */}
             <div className="bg-slate-950 p-3 rounded-lg border border-slate-800 space-y-1.5 font-mono text-xs">
               <div className="flex justify-between text-slate-400">
-                <span>Hotspot ID:</span>
-                <span className="text-slate-200">#{selectedHotspot.id}</span>
+                <span>Box Number:</span>
+                <span className="text-slate-200 font-semibold">#{selectedHotspotIndex + 1}</span>
               </div>
               <div className="flex justify-between text-slate-400">
                 <span>Position (X, Y):</span>
@@ -273,7 +378,7 @@ export default function HotspotMappingCanvas({
             {/* Delete Hotspot Button */}
             <button
               onClick={() => {
-                if (confirm('Delete this hotspot?')) {
+                if (confirm(`Delete hotspot #${selectedHotspotIndex + 1}?`)) {
                   onDeleteHotspot(selectedHotspot.id);
                   setSelectedHotspotId(null);
                 }
@@ -285,9 +390,110 @@ export default function HotspotMappingCanvas({
             </button>
           </div>
         ) : (
-          <div className="flex-1 flex flex-col items-center justify-center text-center p-6 text-slate-500 text-xs">
-            <LinkIcon className="w-8 h-8 mb-2 opacity-40 text-slate-400" />
-            <p>Select a hotspot on the canvas or draw a new box to link it with an article headline.</p>
+          /* List of ALL Crop Images on this Page */
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-slate-300 uppercase tracking-wider">
+                Crop Snippets Gallery ({hotspots.length})
+              </span>
+              <span className="text-[11px] text-amber-400">Click to edit</span>
+            </div>
+
+            {hotspots.length === 0 ? (
+              <div className="p-8 text-center border-2 border-dashed border-slate-800 rounded-xl space-y-2 text-slate-500 text-xs">
+                <LinkIcon className="w-8 h-8 mx-auto opacity-40 text-slate-400" />
+                <p className="font-semibold text-slate-400">No Bounding Boxes Yet</p>
+                <p>Click &quot;Draw Bounding Box&quot; and drag on the newspaper to create your first crop snippet.</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {hotspots.map((h, idx) => {
+                  const linkedArticle = articles.find((a) => a.id === h.articleId);
+                  const hasManualLead = hotspots.some((item) => item.isLead);
+                  const isAutoLead = !hasManualLead && idx === 0;
+
+                  return (
+                    <div
+                      key={h.id}
+                      onClick={() => setSelectedHotspotId(h.id)}
+                      className={`group bg-slate-950 hover:bg-slate-800/80 border rounded-xl p-3 cursor-pointer transition-all shadow-sm flex space-x-3 items-center ${
+                        h.isLead
+                          ? 'border-amber-500/80 ring-1 ring-amber-500/30'
+                          : isAutoLead
+                          ? 'border-slate-700'
+                          : 'border-slate-800 hover:border-amber-500/50'
+                      }`}
+                    >
+                      {/* Cropped Image Thumbnail */}
+                      <div
+                        className="relative overflow-hidden rounded border border-slate-700 bg-white w-20 flex-shrink-0 shadow-xs"
+                        style={{
+                          aspectRatio: `${Math.max(0.1, h.width)} / ${Math.max(0.1, h.height)}`,
+                          maxHeight: '75px',
+                        }}
+                      >
+                        <img
+                          src={page?.imageUrl || '/sample-epaper/page_1.svg'}
+                          alt={`Crop #${idx + 1}`}
+                          style={{
+                            position: 'absolute',
+                            width: `${(100 / Math.max(0.01, h.width)) * 100}%`,
+                            height: `${(100 / Math.max(0.01, h.height)) * 100}%`,
+                            left: `-${(h.x / Math.max(0.01, h.width)) * 100}%`,
+                            top: `-${(h.y / Math.max(0.01, h.height)) * 100}%`,
+                            maxWidth: 'none',
+                          }}
+                          className="select-none pointer-events-none"
+                          draggable={false}
+                        />
+                      </div>
+
+                      {/* Info & Meta */}
+                      <div className="flex-1 min-w-0 space-y-1">
+                        <div className="flex items-center justify-between gap-1 flex-wrap">
+                          <span className="text-[10px] font-bold font-mono px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300">
+                            #{idx + 1}
+                          </span>
+                          {h.isLead ? (
+                            <span className="inline-flex items-center space-x-1 text-[9px] font-bold px-1.5 py-0.5 rounded bg-amber-500 text-slate-950">
+                              <Star className="w-2.5 h-2.5 fill-current" />
+                              <span>LEAD</span>
+                            </span>
+                          ) : isAutoLead ? (
+                            <span className="inline-flex items-center space-x-1 text-[9px] font-semibold px-1.5 py-0.5 rounded bg-slate-800 text-amber-300/80 border border-slate-700">
+                              <span>Auto Lead (1st Cut)</span>
+                            </span>
+                          ) : null}
+                          <span className="text-[10px] text-slate-500 font-mono ml-auto">
+                            {h.width}% × {h.height}%
+                          </span>
+                        </div>
+                        <h4 className="text-xs font-semibold text-slate-200 truncate group-hover:text-amber-300 transition-colors">
+                          {linkedArticle?.title || `Article #${h.articleId}`}
+                        </h4>
+                        <span className="inline-block text-[10px] text-slate-400 truncate">
+                          {linkedArticle?.category || 'News'}
+                        </span>
+                      </div>
+
+                      {/* Quick Delete Button */}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (confirm(`Delete hotspot #${idx + 1}?`)) {
+                            onDeleteHotspot(h.id);
+                          }
+                        }}
+                        className="p-1.5 text-slate-500 hover:text-rose-400 hover:bg-rose-950/30 rounded-lg transition"
+                        title="Delete crop"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         )}
       </div>

@@ -49,6 +49,29 @@ function EPaperReaderContent() {
   const pageHotspots = currentPage?.hotspots || [];
   const totalPages = edition?.pages?.length || 12;
 
+  // Automatically select the Lead News (or first cut) when switching pages
+  useEffect(() => {
+    if (!edition || !currentPage) return;
+    if (pageHotspots.length > 0) {
+      // 1. Manual Lead (isLead: true), or 2. First Cut on that page (pageHotspots[0])
+      const leadHotspot = pageHotspots.find((h) => h.isLead) || pageHotspots[0];
+      if (leadHotspot) {
+        const art = edition.articles?.find((a) => a.id === leadHotspot.articleId) || leadHotspot.article;
+        if (art) {
+          if (art.content) {
+            setSelectedArticle(art);
+          } else {
+            fetch(`/api/articles/${art.id || leadHotspot.articleId}`)
+              .then((res) => res.json())
+              .then((data) => {
+                if (data.success) setSelectedArticle(data.data);
+              });
+          }
+        }
+      }
+    }
+  }, [activePageNumber, edition, currentPage]);
+
   // Page Navigation Handlers
   const handlePrevPage = () => setActivePageNumber((p) => Math.max(1, p - 1));
   const handleNextPage = () => setActivePageNumber((p) => Math.min(totalPages, p + 1));
@@ -107,6 +130,20 @@ function EPaperReaderContent() {
         <section className="h-[85vh] min-h-[600px]">
           <ArticleDetailPanel
             article={selectedArticle}
+            page={currentPage}
+            hotspots={pageHotspots}
+            hotspot={pageHotspots.find((h) => h.articleId === selectedArticle?.id) || selectedArticle?.hotspots?.[0]}
+            onSelectArticle={(article) => {
+              if (article.content) {
+                setSelectedArticle(article);
+              } else {
+                fetch(`/api/articles/${article.id}`)
+                  .then((res) => res.json())
+                  .then((data) => {
+                    if (data.success) setSelectedArticle(data.data);
+                  });
+              }
+            }}
             viewMode={viewMode}
             onToggleViewMode={setViewMode}
           />

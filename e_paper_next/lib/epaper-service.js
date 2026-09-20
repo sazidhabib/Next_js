@@ -27,7 +27,7 @@ export async function getEditionById(editionId) {
   const isDbReady = await initDatabase();
   if (isDbReady) {
     try {
-      const edition = await Edition.findByPk(idNum, {
+      let edition = await Edition.findByPk(idNum, {
         include: [
           {
             model: Page,
@@ -50,6 +50,38 @@ export async function getEditionById(editionId) {
           [{ model: Page, as: 'pages' }, { model: Hotspot, as: 'hotspots' }, 'displayOrder', 'ASC'],
         ],
       });
+
+      // If MySQL is active but edition 1 is not found, seed initial dataset to MySQL
+      if (!edition && idNum === 1) {
+        const count = await Edition.count();
+        if (count === 0) {
+          await seedDatabase();
+          edition = await Edition.findByPk(idNum, {
+            include: [
+              {
+                model: Page,
+                as: 'pages',
+                include: [
+                  {
+                    model: Hotspot,
+                    as: 'hotspots',
+                    include: [{ model: Article, as: 'article' }],
+                  },
+                ],
+              },
+              {
+                model: Article,
+                as: 'articles',
+              },
+            ],
+            order: [
+              [{ model: Page, as: 'pages' }, 'pageNumber', 'ASC'],
+              [{ model: Page, as: 'pages' }, { model: Hotspot, as: 'hotspots' }, 'displayOrder', 'ASC'],
+            ],
+          });
+        }
+      }
+
       if (edition) return edition.toJSON();
     } catch (err) {
       console.warn('Sequelize edition lookup failed:', err.message);
@@ -108,6 +140,9 @@ export async function saveHotspot(hotspotData) {
   const isDbReady = await initDatabase();
   if (isDbReady) {
     try {
+      if (hotspotData.isLead && hotspotData.pageId) {
+        await Hotspot.update({ isLead: false }, { where: { pageId: hotspotData.pageId } });
+      }
       if (hotspotData.id && typeof hotspotData.id === 'number') {
         const existing = await Hotspot.findByPk(hotspotData.id);
         if (existing) {
@@ -124,6 +159,9 @@ export async function saveHotspot(hotspotData) {
 
   let savedItem = null;
   updateMemoryStore(store => {
+    if (hotspotData.isLead && hotspotData.pageId) {
+      store.hotspots = store.hotspots.map(h => h.pageId === hotspotData.pageId ? { ...h, isLead: false } : h);
+    }
     if (hotspotData.id) {
       const idx = store.hotspots.findIndex(h => h.id === hotspotData.id);
       if (idx !== -1) {
@@ -289,8 +327,25 @@ export async function deleteArticle(articleId) {
 
 export async function savePage(pageData) {
   const isDbReady = await initDatabase();
+  const editionId = parseInt(pageData.editionId || 1, 10);
+  const pageNum = parseInt(pageData.pageNumber || 1, 10);
+
   if (isDbReady) {
     try {
+      // 1. Ensure the parent edition exists in MySQL to avoid foreign key failure
+      let edition = await Edition.findByPk(editionId);
+      if (!edition) {
+        edition = await Edition.create({
+          id: editionId,
+          title: "আজকের পত্রিকা - ঢাকা সিটি",
+          publishDate: new Date().toISOString().split('T')[0],
+          editionType: "ঢাকা সিটি",
+          language: "bn",
+          status: "published",
+        });
+      }
+
+      // 2. If updating by primary key ID
       if (pageData.id && typeof pageData.id === 'number') {
         const existing = await Page.findByPk(pageData.id);
         if (existing) {
@@ -298,10 +353,29 @@ export async function savePage(pageData) {
           return existing.toJSON();
         }
       }
-      const created = await Page.create(pageData);
+
+      // 3. If a page with the same editionId and pageNumber already exists, update it
+      const existingByNumber = await Page.findOne({
+        where: { editionId, pageNumber: pageNum },
+      });
+      if (existingByNumber) {
+        await existingByNumber.update({
+          ...pageData,
+          editionId,
+          pageNumber: pageNum,
+        });
+        return existingByNumber.toJSON();
+      }
+
+      // 4. Otherwise create a new page in MySQL
+      const created = await Page.create({
+        ...pageData,
+        editionId,
+        pageNumber: pageNum,
+      });
       return created.toJSON();
     } catch (err) {
-      console.warn('Sequelize save page failed:', err.message);
+      console.warn('Sequelize save page failed, saving to fallback store:', err.message);
     }
   }
 
@@ -315,12 +389,23 @@ export async function savePage(pageData) {
         return store;
       }
     }
+    const pageNumIdx = store.pages.findIndex(p => p.pageNumber === pageNum);
+    if (pageNumIdx !== -1) {
+      store.pages[pageNumIdx] = {
+        ...store.pages[pageNumIdx],
+        ...pageData,
+        editionId,
+        pageNumber: pageNum,
+      };
+      savedPage = store.pages[pageNumIdx];
+      return store;
+    }
     const newId = store.pages.length > 0 ? Math.max(...store.pages.map(p => p.id)) + 1 : 1;
     savedPage = {
       id: newId,
-      editionId: pageData.editionId || store.edition.id || 1,
-      pageNumber: pageData.pageNumber || (store.pages.length + 1),
-      pageTitle: pageData.pageTitle || `Page ${store.pages.length + 1}`,
+      editionId: editionId || store.edition?.id || 1,
+      pageNumber: pageNum || (store.pages.length + 1),
+      pageTitle: pageData.pageTitle || `Page ${pageNum}`,
       imageUrl: pageData.imageUrl || '/sample-epaper/page_1.svg',
       thumbUrl: pageData.thumbUrl || pageData.imageUrl || '/sample-epaper/page_1.svg',
       widthPx: pageData.widthPx || 1000,

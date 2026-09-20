@@ -231,6 +231,7 @@ export const initialSeedData = {
       width: 24.0,
       height: 38.0,
       displayOrder: 1,
+      isLead: true,
     },
     // Page 1 - Hotspot 2: Center Story (Prime Minister Warning & Photo)
     {
@@ -279,13 +280,52 @@ export const initialSeedData = {
   ]
 };
 
-let memoryStore = JSON.parse(JSON.stringify(initialSeedData));
+import fs from 'fs';
+import path from 'path';
+
+const DATA_DIR = path.join(process.cwd(), 'data');
+const STORE_FILE = path.join(DATA_DIR, 'epaper-store.json');
+
+function loadStore() {
+  try {
+    if (fs.existsSync(STORE_FILE)) {
+      const content = fs.readFileSync(STORE_FILE, 'utf-8');
+      if (content && content.trim()) {
+        return JSON.parse(content);
+      }
+    }
+  } catch (err) {
+    console.warn('Failed to read persisted epaper-store.json, using initial seed data:', err.message);
+  }
+  return JSON.parse(JSON.stringify(initialSeedData));
+}
+
+function saveStore(data) {
+  try {
+    if (!fs.existsSync(DATA_DIR)) {
+      fs.mkdirSync(DATA_DIR, { recursive: true });
+    }
+    fs.writeFileSync(STORE_FILE, JSON.stringify(data, null, 2), 'utf-8');
+  } catch (err) {
+    console.warn('Failed to persist epaper-store.json to disk:', err.message);
+  }
+}
+
+let memoryStore = loadStore();
 
 export function getMemoryStore() {
+  if (!memoryStore) {
+    memoryStore = loadStore();
+  }
   return memoryStore;
 }
 
 export function updateMemoryStore(updater) {
-  memoryStore = updater(memoryStore);
+  if (!memoryStore) {
+    memoryStore = loadStore();
+  }
+  const updated = updater(memoryStore);
+  memoryStore = updated || memoryStore;
+  saveStore(memoryStore);
   return memoryStore;
 }

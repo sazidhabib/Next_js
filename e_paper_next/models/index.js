@@ -4,18 +4,34 @@ import Page from './Page';
 import Article from './Article';
 import Hotspot from './Hotspot';
 
-// Define Model Associations
-Edition.hasMany(Page, { foreignKey: 'editionId', as: 'pages', onDelete: 'CASCADE' });
-Page.belongsTo(Edition, { foreignKey: 'editionId', as: 'edition' });
+// Define Model Associations safely (prevents duplicate alias errors on Next.js hot reload)
+if (!Edition.associations?.pages) {
+  Edition.hasMany(Page, { foreignKey: 'editionId', as: 'pages', onDelete: 'CASCADE' });
+}
+if (!Page.associations?.edition) {
+  Page.belongsTo(Edition, { foreignKey: 'editionId', as: 'edition' });
+}
 
-Edition.hasMany(Article, { foreignKey: 'editionId', as: 'articles', onDelete: 'CASCADE' });
-Article.belongsTo(Edition, { foreignKey: 'editionId', as: 'edition' });
+if (!Edition.associations?.articles) {
+  Edition.hasMany(Article, { foreignKey: 'editionId', as: 'articles', onDelete: 'CASCADE' });
+}
+if (!Article.associations?.edition) {
+  Article.belongsTo(Edition, { foreignKey: 'editionId', as: 'edition' });
+}
 
-Page.hasMany(Hotspot, { foreignKey: 'pageId', as: 'hotspots', onDelete: 'CASCADE' });
-Hotspot.belongsTo(Page, { foreignKey: 'pageId', as: 'page' });
+if (!Page.associations?.hotspots) {
+  Page.hasMany(Hotspot, { foreignKey: 'pageId', as: 'hotspots', onDelete: 'CASCADE' });
+}
+if (!Hotspot.associations?.page) {
+  Hotspot.belongsTo(Page, { foreignKey: 'pageId', as: 'page' });
+}
 
-Article.hasMany(Hotspot, { foreignKey: 'articleId', as: 'hotspots', onDelete: 'CASCADE' });
-Hotspot.belongsTo(Article, { foreignKey: 'articleId', as: 'article' });
+if (!Article.associations?.hotspots) {
+  Article.hasMany(Hotspot, { foreignKey: 'articleId', as: 'hotspots', onDelete: 'CASCADE' });
+}
+if (!Hotspot.associations?.article) {
+  Hotspot.belongsTo(Article, { foreignKey: 'articleId', as: 'article' });
+}
 
 export {
   sequelize,
