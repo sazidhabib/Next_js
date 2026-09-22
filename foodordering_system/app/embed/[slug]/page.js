@@ -30,6 +30,7 @@ import {
   Copy,
   CheckCircle2,
   Zap,
+  ChevronLeft,
   ChevronRight,
   BadgePercent,
 } from 'lucide-react';
@@ -49,6 +50,7 @@ export default function EmbedMenuPage({ params }) {
   const [isOffersModalOpen, setIsOffersModalOpen] = useState(false);
   const [copiedOfferCode, setCopiedOfferCode] = useState(null);
   const [activeOfferIndex, setActiveOfferIndex] = useState(0);
+  const [isOfferHovered, setIsOfferHovered] = useState(false);
 
   // Item customization modal
   const [selectedItem, setSelectedItem] = useState(null);
@@ -90,8 +92,17 @@ export default function EmbedMenuPage({ params }) {
 
   // Cart Handlers
   const handleAddToCart = (customizedItem) => {
+    const itemTotal = (customizedItem.unitPrice || customizedItem.basePrice || 0) * (customizedItem.quantity || 1);
+    const newTotal = cartTotal + itemTotal;
+
     setCartItems((prev) => [...prev, customizedItem]);
     toast.success(`Added "${customizedItem.name || 'item'}" to cart!`);
+
+    if (bestAutoOffer && bestAutoOffer.minOrderAmount > 0 && cartTotal < bestAutoOffer.minOrderAmount && newTotal >= bestAutoOffer.minOrderAmount) {
+      setTimeout(() => {
+        toast.success(`🎉 ${bestAutoOffer.title} Unlocked! Free Delivery applied to your order.`);
+      }, 400);
+    }
   };
 
   const handleUpdateQuantity = (index, newQty) => {
@@ -130,6 +141,24 @@ export default function EmbedMenuPage({ params }) {
   const activeOffers = (restaurant?.offers || []).filter((o) => o.isActive !== false);
   const bestAutoOffer = activeOffers.find((o) => o.isAutomatic && o.minOrderAmount > 0) || activeOffers[0];
   const currentFeaturedOffer = activeOffers[activeOfferIndex] || activeOffers[0];
+
+  // Auto-swap featured offers every 5 seconds (pauses when hovered)
+  useEffect(() => {
+    if (activeOffers.length <= 1 || isOfferHovered) return;
+    const timer = setInterval(() => {
+      setActiveOfferIndex((prev) => (prev + 1) % activeOffers.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, [activeOffers.length, isOfferHovered]);
+
+  const fallbackOfferBgs = [
+    'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=1200&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=1200&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=1200&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=1200&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=1200&auto=format&fit=crop&q=80',
+  ];
+  const currentOfferBg = currentFeaturedOffer?.bannerImageUrl || fallbackOfferBgs[activeOfferIndex % fallbackOfferBgs.length];
 
   const cartCount = cartItems.reduce((sum, it) => sum + it.quantity, 0);
   const cartTotal = cartItems.reduce(
@@ -209,11 +238,11 @@ export default function EmbedMenuPage({ params }) {
               <button
                 onClick={() => setIsOffersModalOpen(true)}
                 title="Special Deals & Exclusive Offers"
-                className="px-3 sm:px-4 flex items-center justify-center gap-1.5 text-amber-700 hover:text-amber-900 bg-amber-50 hover:bg-amber-100 border-r border-slate-300 transition-colors cursor-pointer text-xs font-bold"
+                className="px-2.5 sm:px-4 flex items-center justify-center gap-1 sm:gap-1.5 text-amber-700 hover:text-amber-900 bg-amber-50 hover:bg-amber-100 border-r border-slate-300 transition-colors cursor-pointer text-xs font-bold shrink-0"
               >
                 <Gift className="w-4 h-4 text-amber-600 animate-pulse" />
                 <span className="hidden sm:inline">Deals</span>
-                <span className="bg-amber-600 text-white text-[10px] font-black min-w-[18px] h-[18px] px-1 rounded-full flex items-center justify-center">
+                <span className="bg-amber-600 text-white text-[10px] font-black min-w-[17px] h-[17px] px-1 rounded-full flex items-center justify-center">
                   {activeOffers.length}
                 </span>
               </button>
@@ -222,27 +251,35 @@ export default function EmbedMenuPage({ params }) {
             {/* Category Menu Jump Button */}
             <button
               onClick={() => {
-                setActiveTab('menu');
-                setIsCategoryMenuOpen(!isCategoryMenuOpen);
+                if (activeTab !== 'menu') {
+                  setActiveTab('menu');
+                  setIsCategoryMenuOpen(true);
+                } else {
+                  setIsCategoryMenuOpen((prev) => !prev);
+                }
               }}
-              title="Browse Categories"
-              className={`px-3.5 sm:px-4 flex items-center justify-center border-r border-slate-300 transition-colors cursor-pointer ${
-                activeTab === 'menu' && !isCategoryMenuOpen
-                  ? 'text-slate-800 hover:bg-slate-200/70'
-                  : 'text-orange-600 bg-slate-200'
+              title="Browse Categories & Menu"
+              className={`px-2.5 sm:px-4 flex items-center justify-center border-r border-slate-300 transition-colors cursor-pointer shrink-0 ${
+                activeTab === 'menu'
+                  ? isCategoryMenuOpen
+                    ? 'text-orange-600 bg-orange-50 font-black'
+                    : 'text-orange-600 bg-white font-black shadow-inner'
+                  : 'text-slate-700 hover:text-slate-950 hover:bg-slate-200/70'
               }`}
             >
               <MenuIcon className="w-5 h-5" />
             </button>
 
-            {/* Restaurant Info & Delivery Zones Button (Active Toggle) */}
+            {/* Restaurant Info & Delivery Zones Button (Single-direction Tab Switch) */}
             <button
               onClick={() => {
-                setActiveTab(activeTab === 'info' ? 'menu' : 'info');
-                setIsCategoryMenuOpen(false);
+                if (activeTab !== 'info') {
+                  setActiveTab('info');
+                  setIsCategoryMenuOpen(false);
+                }
               }}
               title="Restaurant Information & Delivery Zones"
-              className={`px-3.5 sm:px-4 flex items-center justify-center border-r border-slate-300 transition-colors cursor-pointer ${
+              className={`px-2.5 sm:px-4 flex items-center justify-center border-r border-slate-300 transition-colors cursor-pointer shrink-0 ${
                 activeTab === 'info'
                   ? 'text-orange-600 bg-white font-black shadow-inner'
                   : 'text-slate-700 hover:text-slate-950 hover:bg-slate-200/70'
@@ -255,11 +292,11 @@ export default function EmbedMenuPage({ params }) {
             <button
               onClick={() => setIsCartOpen(true)}
               title="View Cart"
-              className="px-4 sm:px-5 flex items-center justify-center gap-1.5 text-slate-800 hover:text-orange-600 hover:bg-slate-200/70 border-r border-slate-300 transition-colors relative cursor-pointer font-bold text-sm"
+              className="px-2.5 sm:px-5 flex items-center justify-center gap-1 sm:gap-1.5 text-slate-800 hover:text-orange-600 hover:bg-slate-200/70 border-r border-slate-300 transition-colors relative cursor-pointer font-bold text-xs sm:text-sm shrink-0"
             >
               <ShoppingBag className="w-5 h-5 text-slate-700" />
               {cartCount > 0 ? (
-                <span className="bg-red-600 text-white text-[11px] font-black min-w-[18px] h-[18px] px-1 rounded-full flex items-center justify-center -ml-1">
+                <span className="bg-red-600 text-white text-[10px] sm:text-[11px] font-black min-w-[17px] h-[17px] px-1 rounded-full flex items-center justify-center -ml-0.5">
                   {cartCount}
                 </span>
               ) : (
@@ -271,7 +308,7 @@ export default function EmbedMenuPage({ params }) {
             <button
               onClick={handleCloseModal}
               title="Close Ordering Modal"
-              className="px-3.5 sm:px-4 flex items-center justify-center text-slate-600 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
+              className="px-2.5 sm:px-4 flex items-center justify-center text-slate-600 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer shrink-0"
             >
               <X className="w-5 h-5" />
             </button>
@@ -349,35 +386,52 @@ export default function EmbedMenuPage({ params }) {
 
       {/* Smart Deal Unlock Progress Bar */}
       {cartItems.length > 0 && bestAutoOffer && bestAutoOffer.minOrderAmount > 0 && (
-        <div className="bg-amber-50/95 border-b border-amber-200 py-2 px-4 sticky top-14 z-30 shadow-xs backdrop-blur-xs">
+        <div className={`py-2 px-4 sticky top-14 z-30 shadow-xs backdrop-blur-xs transition-colors duration-300 ${
+          cartTotal >= bestAutoOffer.minOrderAmount
+            ? 'bg-emerald-50/95 border-b border-emerald-200'
+            : 'bg-amber-50/95 border-b border-amber-200'
+        }`}>
           <div className="max-w-5xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 text-xs">
-            <div className="flex items-center gap-2 font-bold text-amber-950">
-              <div className="p-1 bg-amber-500/20 text-amber-700 rounded-lg">
-                <Zap className="w-3.5 h-3.5" />
+            <div className="flex items-center gap-2 font-bold text-slate-900">
+              <div className={`p-1 rounded-lg ${
+                cartTotal >= bestAutoOffer.minOrderAmount
+                  ? 'bg-emerald-500/20 text-emerald-700'
+                  : 'bg-amber-500/20 text-amber-700'
+              }`}>
+                <Zap className="w-3.5 h-3.5 fill-current" />
               </div>
               {cartTotal >= bestAutoOffer.minOrderAmount ? (
-                <span className="text-emerald-700 font-extrabold flex items-center gap-1">
+                <span className="text-emerald-800 font-extrabold flex items-center gap-1.5 flex-wrap">
                   <CheckCircle2 className="w-4 h-4 text-emerald-600 inline" />
-                  <span>🎉 Deal Unlocked! You qualify for {bestAutoOffer.title}!</span>
+                  <span>🎉 Deal Unlocked! {bestAutoOffer.title} Applied</span>
+                  <span className="bg-emerald-600 text-white text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider">
+                    {bestAutoOffer.discountType === 'FREE_DELIVERY' ? '£0.00 DELIVERY FEE' : 'PROMO SAVINGS'}
+                  </span>
                 </span>
               ) : (
-                <span>
-                  Add <strong className="text-orange-600">£{(bestAutoOffer.minOrderAmount - cartTotal).toFixed(2)}</strong> more to unlock <strong className="text-amber-900">{bestAutoOffer.title}</strong>!
+                <span className="text-amber-950">
+                  Add <strong className="text-orange-600 font-extrabold">£{(bestAutoOffer.minOrderAmount - cartTotal).toFixed(2)}</strong> more to unlock <strong className="text-amber-900 font-bold">{bestAutoOffer.title}</strong>!
                 </span>
               )}
             </div>
 
             <div className="flex items-center gap-3 shrink-0">
-              <div className="w-28 sm:w-40 bg-amber-200/80 rounded-full h-2 overflow-hidden">
+              <div className="w-28 sm:w-40 bg-slate-200 rounded-full h-2 overflow-hidden">
                 <div
-                  className="bg-linear-to-r from-orange-500 to-amber-500 h-full rounded-full transition-all duration-300"
+                  className={`h-full rounded-full transition-all duration-300 ${
+                    cartTotal >= bestAutoOffer.minOrderAmount
+                      ? 'bg-emerald-500'
+                      : 'bg-linear-to-r from-orange-500 to-amber-500'
+                  }`}
                   style={{ width: `${Math.min(100, (cartTotal / bestAutoOffer.minOrderAmount) * 100)}%` }}
                 ></div>
               </div>
               <button
                 type="button"
                 onClick={() => setIsOffersModalOpen(true)}
-                className="text-[11px] font-bold text-orange-700 hover:underline cursor-pointer whitespace-nowrap"
+                className={`text-[11px] font-bold hover:underline cursor-pointer whitespace-nowrap ${
+                  cartTotal >= bestAutoOffer.minOrderAmount ? 'text-emerald-700' : 'text-orange-700'
+                }`}
               >
                 All Deals ({activeOffers.length})
               </button>
@@ -600,127 +654,216 @@ export default function EmbedMenuPage({ params }) {
             <div className="absolute inset-0 bg-linear-to-t from-black/40 via-transparent to-black/10"></div>
           </div>
 
-          {/* 3. Deal / Promotion Banner Overlay */}
-          <div className="max-w-5xl mx-auto w-full px-4 -mt-10 sm:-mt-14 relative z-20 mb-6">
+          {/* 3. Deal / Promotion Banner Overlay with Rich Background & Auto-Swapping */}
+          <div className="max-w-5xl mx-auto w-full px-3 sm:px-4 -mt-10 sm:-mt-14 relative z-20 mb-6">
             {activeOffers.length > 0 && currentFeaturedOffer ? (
-              <div className="bg-slate-950/95 backdrop-blur-md rounded-2xl border-2 border-white/20 shadow-2xl p-4 sm:p-5 flex flex-col md:flex-row items-center justify-between gap-4 text-white overflow-hidden relative">
-                {/* Background ambient glow */}
-                <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 bg-orange-600/20 rounded-full blur-3xl pointer-events-none"></div>
+              <div
+                onMouseEnter={() => setIsOfferHovered(true)}
+                onMouseLeave={() => setIsOfferHovered(false)}
+                className="relative bg-slate-950/95 backdrop-blur-md rounded-2xl border-2 border-white/20 shadow-2xl overflow-hidden group transition-all duration-300"
+              >
+                {/* Full-bleed background food image with subtle crossfade / Ken Burns scale */}
+                <div
+                  key={`offer-bg-${activeOfferIndex}`}
+                  className="absolute inset-0 bg-cover bg-center transition-all duration-1000 transform scale-105 animate-in fade-in zoom-in-95 pointer-events-none"
+                  style={{ backgroundImage: `url(${currentOfferBg})` }}
+                />
 
-                <div className="space-y-2 text-center md:text-left z-10 flex-1 min-w-0">
-                  <div className="flex flex-wrap items-center justify-center md:justify-start gap-2">
-                    <span className="inline-flex items-center gap-1 text-[11px] font-extrabold uppercase tracking-wider text-white bg-orange-600 px-2.5 py-0.5 rounded-full shadow-xs">
-                      <Sparkles className="w-3 h-3 text-amber-300" />
-                      {currentFeaturedOffer.discountType === 'PERCENTAGE'
-                        ? `${currentFeaturedOffer.discountValue}% OFF SPECIAL`
-                        : currentFeaturedOffer.discountType === 'FREE_DELIVERY'
-                        ? 'FREE DELIVERY SPECIAL'
-                        : `£${currentFeaturedOffer.discountValue?.toFixed(2)} OFF DEAL`}
-                    </span>
+                {/* Layered dark gradients for crystal-clear readability */}
+                <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/85 to-slate-950/45 pointer-events-none" />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-transparent to-black/30 pointer-events-none" />
 
-                    {currentFeaturedOffer.isAutomatic ? (
-                      <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-300 bg-emerald-900/40 px-2.5 py-0.5 rounded-full border border-emerald-500/30">
-                        <Zap className="w-3 h-3 text-emerald-400" />
-                        Auto-Applied at Checkout
-                      </span>
-                    ) : currentFeaturedOffer.code ? (
-                      <button
-                        type="button"
-                        onClick={() => handleCopyOfferCode(currentFeaturedOffer.code)}
-                        className="inline-flex items-center gap-1 text-[11px] font-mono font-bold text-amber-300 bg-amber-400/20 hover:bg-amber-400/30 px-2.5 py-0.5 rounded-full border border-amber-400/40 cursor-pointer transition"
-                        title="Click to copy promo code"
-                      >
-                        {copiedOfferCode === currentFeaturedOffer.code ? (
-                          <>
-                            <CheckCircle2 className="w-3 h-3 text-emerald-400" />
-                            <span className="text-emerald-300">Code Copied!</span>
-                          </>
-                        ) : (
-                          <>
-                            <Copy className="w-3 h-3" />
-                            <span>Code: <strong>{currentFeaturedOffer.code}</strong></span>
-                          </>
-                        )}
-                      </button>
-                    ) : null}
+                {/* Animated countdown progress bar for timed auto-swapping */}
+                {activeOffers.length > 1 && (
+                  <div className="absolute top-0 left-0 right-0 h-1 bg-white/10 z-30 overflow-hidden">
+                    <div
+                      key={`progress-${activeOfferIndex}-${isOfferHovered}`}
+                      className={`h-full bg-gradient-to-r from-orange-500 via-amber-400 to-orange-400 ${
+                        isOfferHovered ? 'w-full opacity-60' : 'animate-offer-progress'
+                      }`}
+                    />
                   </div>
+                )}
 
-                  <h2 className="text-lg sm:text-xl font-black tracking-tight text-white line-clamp-1">
-                    {currentFeaturedOffer.title}
-                  </h2>
-
-                  <p className="text-xs sm:text-sm text-slate-300 line-clamp-2 leading-relaxed max-w-2xl">
-                    {currentFeaturedOffer.description || currentFeaturedOffer.bannerText || 'Exclusive promotional savings on your online order.'}
-                  </p>
-
-                  {/* Offer meta & navigation buttons */}
-                  <div className="pt-1 flex flex-wrap items-center justify-center md:justify-start gap-3 text-xs">
-                    {currentFeaturedOffer.minOrderAmount > 0 && (
-                      <span className="text-slate-400">
-                        Min Spend: <strong className="text-white">£{currentFeaturedOffer.minOrderAmount.toFixed(2)}</strong>
-                      </span>
-                    )}
-
-                    {activeOffers.length > 1 && (
-                      <div className="flex items-center gap-1.5 ml-auto md:ml-0">
-                        <span className="text-[11px] text-slate-400">Deals:</span>
-                        {activeOffers.map((off, idx) => (
-                          <button
-                            key={off.id || idx}
-                            type="button"
-                            onClick={() => setActiveOfferIndex(idx)}
-                            className={`w-6 h-6 rounded-full text-[11px] font-black transition-all cursor-pointer flex items-center justify-center ${
-                              activeOfferIndex === idx
-                                ? 'bg-orange-600 text-white shadow-xs'
-                                : 'bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700'
-                            }`}
-                          >
-                            {idx + 1}
-                          </button>
-                        ))}
-                      </div>
-                    )}
-
+                {/* Desktop-only Previous / Next Offer side chevrons */}
+                {activeOffers.length > 1 && (
+                  <>
                     <button
                       type="button"
-                      onClick={() => setIsOffersModalOpen(true)}
-                      className="text-orange-400 hover:text-orange-300 font-extrabold flex items-center gap-1 cursor-pointer text-xs underline underline-offset-2 ml-auto"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setActiveOfferIndex((prev) => (prev - 1 + activeOffers.length) % activeOffers.length);
+                      }}
+                      aria-label="Previous Offer"
+                      className="hidden sm:flex absolute left-2.5 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/50 hover:bg-orange-600 text-white items-center justify-center backdrop-blur-xs transition z-20 cursor-pointer border border-white/15 opacity-80 group-hover:opacity-100 hover:scale-110"
                     >
-                      <span>View All Offers ({activeOffers.length})</span>
-                      <ChevronRight className="w-3.5 h-3.5" />
+                      <ChevronLeft className="w-4 h-4" />
                     </button>
-                  </div>
-                </div>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setActiveOfferIndex((prev) => (prev + 1) % activeOffers.length);
+                      }}
+                      aria-label="Next Offer"
+                      className="hidden sm:flex absolute right-2.5 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/50 hover:bg-orange-600 text-white items-center justify-center backdrop-blur-xs transition z-20 cursor-pointer border border-white/15 opacity-80 group-hover:opacity-100 hover:scale-110"
+                    >
+                      <ChevronRight className="w-4 h-4" />
+                    </button>
+                  </>
+                )}
 
-                {/* Promo Thumbnail / Banner Image */}
-                <div className="flex items-center -space-x-3 shrink-0 z-10">
-                  {currentFeaturedOffer.bannerImageUrl ? (
-                    <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden border-2 border-white/30 shadow-xl relative group">
-                      <img
-                        src={currentFeaturedOffer.bannerImageUrl}
-                        alt={currentFeaturedOffer.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                      />
+                {/* Card Content Container */}
+                <div className="p-3.5 sm:p-5 flex flex-col md:flex-row items-center justify-between gap-3 sm:gap-4 text-white relative z-10 sm:pl-10 sm:pr-10">
+                  <div
+                    key={`offer-content-${activeOfferIndex}`}
+                    className="space-y-1.5 sm:space-y-2 text-center md:text-left z-10 flex-1 min-w-0 animate-in fade-in duration-300 w-full"
+                  >
+                    <div className="flex flex-wrap items-center justify-center md:justify-start gap-1.5 sm:gap-2">
+                      <span className="inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-extrabold uppercase tracking-wider text-white bg-orange-600 px-2 sm:px-2.5 py-0.5 rounded-full shadow-xs">
+                        <Sparkles className="w-3 h-3 text-amber-300" />
+                        {currentFeaturedOffer.discountType === 'PERCENTAGE'
+                          ? `${currentFeaturedOffer.discountValue}% OFF SPECIAL`
+                          : currentFeaturedOffer.discountType === 'FREE_DELIVERY'
+                          ? 'FREE DELIVERY SPECIAL'
+                          : `£${currentFeaturedOffer.discountValue?.toFixed(2)} OFF DEAL`}
+                      </span>
+
+                      {currentFeaturedOffer.isAutomatic ? (
+                        <span className="inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-bold text-emerald-300 bg-emerald-900/50 px-2 sm:px-2.5 py-0.5 rounded-full border border-emerald-500/40 backdrop-blur-xs">
+                          <Zap className="w-3 h-3 text-emerald-400" />
+                          Auto-Applied at Checkout
+                        </span>
+                      ) : currentFeaturedOffer.code ? (
+                        <button
+                          type="button"
+                          onClick={() => handleCopyOfferCode(currentFeaturedOffer.code)}
+                          className="inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-mono font-bold text-amber-300 bg-amber-400/20 hover:bg-amber-400/30 px-2 sm:px-2.5 py-0.5 rounded-full border border-amber-400/40 cursor-pointer transition backdrop-blur-xs"
+                          title="Click to copy promo code"
+                        >
+                          {copiedOfferCode === currentFeaturedOffer.code ? (
+                            <>
+                              <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+                              <span className="text-emerald-300">Code Copied!</span>
+                            </>
+                          ) : (
+                            <>
+                              <Copy className="w-3 h-3" />
+                              <span>Code: <strong>{currentFeaturedOffer.code}</strong></span>
+                            </>
+                          )}
+                        </button>
+                      ) : null}
+
+                      {isOfferHovered && activeOffers.length > 1 && (
+                        <span className="text-[10px] font-semibold text-slate-400 bg-black/40 px-2 py-0.5 rounded-full">
+                          Paused
+                        </span>
+                      )}
                     </div>
-                  ) : (
-                    <>
-                      <img
-                        src="https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=300&auto=format&fit=crop&q=80"
-                        alt="Promo Dish 1"
-                        className="w-14 h-14 sm:w-16 sm:h-16 rounded-full border-2 border-white object-cover shadow-lg"
-                      />
-                      <img
-                        src="https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=300&auto=format&fit=crop&q=80"
-                        alt="Promo Dish 2"
-                        className="w-14 h-14 sm:w-16 sm:h-16 rounded-full border-2 border-white object-cover shadow-lg"
-                      />
-                      <img
-                        src="https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=300&auto=format&fit=crop&q=80"
-                        alt="Promo Dish 3"
-                        className="w-14 h-14 sm:w-16 sm:h-16 rounded-full border-2 border-white object-cover shadow-lg"
-                      />
-                    </>
-                  )}
+
+                    <h2 className="text-base sm:text-xl font-black tracking-tight text-white line-clamp-1 drop-shadow-sm">
+                      {currentFeaturedOffer.title}
+                    </h2>
+
+                    <p className="text-xs sm:text-sm text-slate-200 line-clamp-2 leading-relaxed max-w-2xl drop-shadow-xs">
+                      {currentFeaturedOffer.description || currentFeaturedOffer.bannerText || 'Exclusive promotional savings on your online order.'}
+                    </p>
+
+                    {/* Offer meta & interactive indicator pills */}
+                    <div className="pt-1.5 flex flex-wrap items-center justify-between gap-2.5 text-xs">
+                      {currentFeaturedOffer.minOrderAmount > 0 && (
+                        <span className="text-slate-300 font-medium text-[11px] sm:text-xs">
+                          Min Spend: <strong className="text-white font-bold">£{currentFeaturedOffer.minOrderAmount.toFixed(2)}</strong>
+                        </span>
+                      )}
+
+                      {/* Interactive slide indicator dots with mobile touch chevrons */}
+                      {activeOffers.length > 1 && (
+                        <div className="flex items-center gap-1.5 bg-black/50 px-2 py-1 rounded-full border border-white/10 backdrop-blur-xs">
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setActiveOfferIndex((prev) => (prev - 1 + activeOffers.length) % activeOffers.length);
+                            }}
+                            aria-label="Previous Offer"
+                            className="sm:hidden text-white/70 hover:text-white p-0.5 cursor-pointer"
+                          >
+                            <ChevronLeft className="w-3.5 h-3.5" />
+                          </button>
+
+                          <div className="flex items-center gap-1.5">
+                            {activeOffers.map((off, idx) => (
+                              <button
+                                key={off.id || idx}
+                                type="button"
+                                onClick={() => setActiveOfferIndex(idx)}
+                                className={`h-2 rounded-full transition-all duration-300 cursor-pointer ${
+                                  activeOfferIndex === idx
+                                    ? 'w-5 sm:w-6 bg-orange-500 shadow-xs shadow-orange-500/50'
+                                    : 'w-2 bg-white/40 hover:bg-white/70'
+                               }`}
+                                title={`Deal ${idx + 1}: ${off.title}`}
+                              />
+                            ))}
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setActiveOfferIndex((prev) => (prev + 1) % activeOffers.length);
+                            }}
+                            aria-label="Next Offer"
+                            className="sm:hidden text-white/70 hover:text-white p-0.5 cursor-pointer"
+                          >
+                            <ChevronRight className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      )}
+
+                      <button
+                        type="button"
+                        onClick={() => setIsOffersModalOpen(true)}
+                        className="text-orange-400 hover:text-orange-300 font-extrabold flex items-center gap-1 cursor-pointer text-xs underline underline-offset-2 ml-auto"
+                      >
+                        <span>View All Offers ({activeOffers.length})</span>
+                        <ChevronRight className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Promo Graphic Thumbnail */}
+                  <div className="hidden sm:flex items-center -space-x-3 shrink-0 z-10">
+                    {currentFeaturedOffer.bannerImageUrl ? (
+                      <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden border-2 border-white/30 shadow-xl relative group">
+                        <img
+                          src={currentFeaturedOffer.bannerImageUrl}
+                          alt={currentFeaturedOffer.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                        />
+                      </div>
+                    ) : (
+                      <>
+                        <img
+                          src="https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=300&auto=format&fit=crop&q=80"
+                          alt="Promo Dish 1"
+                          className="w-14 h-14 sm:w-16 sm:h-16 rounded-full border-2 border-white object-cover shadow-lg"
+                        />
+                        <img
+                          src="https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=300&auto=format&fit=crop&q=80"
+                          alt="Promo Dish 2"
+                          className="w-14 h-14 sm:w-16 sm:h-16 rounded-full border-2 border-white object-cover shadow-lg"
+                        />
+                        <img
+                          src="https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=300&auto=format&fit=crop&q=80"
+                          alt="Promo Dish 3"
+                          className="w-14 h-14 sm:w-16 sm:h-16 rounded-full border-2 border-white object-cover shadow-lg"
+                        />
+                      </>
+                    )}
+                  </div>
                 </div>
               </div>
             ) : (
@@ -769,6 +912,28 @@ export default function EmbedMenuPage({ params }) {
                     </h2>
                   </div>
 
+                  {/* Mobile-Only Category Banner Image Card (Rendered directly after Category Name on mobile) */}
+                  {cat.imageUrl && (
+                    <div className="block md:hidden w-full h-36 sm:h-44 rounded-2xl overflow-hidden shadow-xs relative border border-slate-200 bg-slate-900 group my-2">
+                      <img
+                        src={cat.imageUrl}
+                        alt={cat.name}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                      <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/20 to-transparent"></div>
+                      <div className="absolute bottom-3 left-3 right-3 text-white">
+                        <span className="font-black text-xs uppercase tracking-wider bg-orange-600 px-2 py-0.5 rounded-md shadow-xs">
+                          {cat.name}
+                        </span>
+                        {cat.description && (
+                          <p className="text-[11px] text-slate-200 mt-1 line-clamp-1 drop-shadow-sm">
+                            {cat.description}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
                   {/* Two Column Menu Layout */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-3">
                     {/* Left Column Items */}
@@ -809,11 +974,11 @@ export default function EmbedMenuPage({ params }) {
                       ))}
                     </div>
 
-                    {/* Right Column Items with Category Banner Image on Top */}
+                    {/* Right Column Items with Desktop-only Category Banner Image on Top */}
                     <div className="space-y-3">
-                      {/* Show Category/Menu Image in the featured card slot */}
+                      {/* Show Category/Menu Image in the featured card slot on desktop only */}
                       {cat.imageUrl && (
-                        <div className="w-full h-36 sm:h-44 rounded-2xl overflow-hidden shadow-xs relative border border-slate-200 bg-slate-900 group">
+                        <div className="hidden md:block w-full h-36 sm:h-44 rounded-2xl overflow-hidden shadow-xs relative border border-slate-200 bg-slate-900 group">
                           <img
                             src={cat.imageUrl}
                             alt={cat.name}
@@ -880,18 +1045,28 @@ export default function EmbedMenuPage({ params }) {
 
       {/* Floating Bottom Cart Bar (Mobile Sticky) */}
       {cartCount > 0 && (
-        <div className="sticky bottom-3 left-0 right-0 z-40 px-4 sm:hidden">
+        <div className="sticky bottom-3 left-0 right-0 z-40 px-3 sm:hidden animate-in slide-in-from-bottom-3 duration-200">
           <button
             onClick={() => setIsCartOpen(true)}
-            className="w-full bg-orange-600 hover:bg-orange-700 text-white p-3.5 rounded-2xl shadow-xl flex items-center justify-between font-bold text-sm cursor-pointer"
+            className="w-full bg-linear-to-r from-orange-600 via-amber-600 to-orange-700 hover:from-orange-500 hover:to-amber-500 text-white p-3.5 rounded-2xl shadow-xl flex items-center justify-between font-bold text-xs sm:text-sm cursor-pointer border border-white/20"
           >
-            <div className="flex items-center gap-2">
-              <span className="bg-white/20 px-2 py-0.5 rounded-lg text-xs">
-                {cartCount} items
+            <div className="flex items-center gap-2 min-w-0">
+              <span className="bg-black/30 px-2 py-1 rounded-lg text-xs font-black shrink-0">
+                {cartCount} {cartCount === 1 ? 'item' : 'items'}
               </span>
-              <span>View Your Order</span>
+              {cartTotal >= (bestAutoOffer?.minOrderAmount || 25) ? (
+                <span className="bg-emerald-500 text-white text-[10px] font-extrabold px-2 py-0.5 rounded-full flex items-center gap-1 shrink-0 animate-pulse shadow-xs">
+                  <Zap className="w-3 h-3 fill-current" />
+                  <span>FREE DELIVERY</span>
+                </span>
+              ) : (
+                <span className="truncate font-bold">View Your Order</span>
+              )}
             </div>
-            <span>£{cartTotal.toFixed(2)}</span>
+            <div className="flex items-center gap-1.5 font-black shrink-0">
+              <span>£{cartTotal.toFixed(2)}</span>
+              <ChevronRight className="w-4 h-4" />
+            </div>
           </button>
         </div>
       )}

@@ -67,14 +67,29 @@ export default function DeliveryZoneMap({
         attributionControl: false,
       });
 
-      // Default Tile Layer (OpenStreetMap - Free & No API Key Required)
+      // Default Tile Layer (ArcGIS World Street Map - Free, Global CDN, No API key, No watermarks)
       const streetLayer = L.tileLayer(
-        'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+        'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',
         {
           maxZoom: 19,
-          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+          crossOrigin: true,
+          attribution: '&copy; Esri &mdash; Source: Esri, DeLorme, NAVTEQ, USGS, Intermap, iPC, NRCAN, Esri Japan, METI, Esri China (Hong Kong), Esri (Thailand), TomTom',
         }
-      ).addTo(map);
+      );
+
+      streetLayer.on('tileerror', (error) => {
+        if (error.tile && !error.tile._hasRetried) {
+          error.tile._hasRetried = true;
+          setTimeout(() => {
+            if (error.tile && error.url) {
+              const sep = error.url.includes('?') ? '&' : '?';
+              error.tile.src = error.url + sep + '_retry=1';
+            }
+          }, 350);
+        }
+      });
+
+      streetLayer.addTo(map);
 
       layersRef.current.tileLayer = streetLayer;
       mapInstanceRef.current = map;
@@ -217,13 +232,28 @@ export default function DeliveryZoneMap({
           { maxZoom: 19 }
         ).addTo(map);
       } else {
-        layersRef.current.tileLayer = L.tileLayer(
-          'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+        const esriStreetLayer = L.tileLayer(
+          'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',
           {
             maxZoom: 19,
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+            crossOrigin: true,
+            attribution: '&copy; Esri &mdash; Source: Esri, DeLorme, NAVTEQ, USGS, Intermap, iPC, NRCAN, Esri Japan, METI, Esri China (Hong Kong), Esri (Thailand), TomTom',
           }
-        ).addTo(map);
+        );
+
+        esriStreetLayer.on('tileerror', (error) => {
+          if (error.tile && !error.tile._hasRetried) {
+            error.tile._hasRetried = true;
+            setTimeout(() => {
+              if (error.tile && error.url) {
+                const sep = error.url.includes('?') ? '&' : '?';
+                error.tile.src = error.url + sep + '_retry=1';
+              }
+            }, 350);
+          }
+        });
+
+        layersRef.current.tileLayer = esriStreetLayer.addTo(map);
       }
     });
   }, [mapType, leafletLoaded]);

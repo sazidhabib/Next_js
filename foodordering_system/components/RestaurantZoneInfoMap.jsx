@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useRef, useState, useId, useMemo } from 'react';
-import { MapPin } from 'lucide-react';
+import { MapPin, Layers } from 'lucide-react';
 
 export default function RestaurantZoneInfoMap({
   restaurantLocation = { lat: 51.5133, lng: -0.1362, name: 'Restaurant Location' },
@@ -12,19 +12,18 @@ export default function RestaurantZoneInfoMap({
   const mapUniqueId = useId().replace(/:/g, '_');
   const mapContainerId = `restaurant-zone-info-map-${mapUniqueId}`;
   const mapInstanceRef = useRef(null);
+  const tileLayerRef = useRef(null);
   const zoneLayersRef = useRef([]);
   // Keep a stable ref for the onHoverZone callback to avoid stale closures
   const onHoverZoneRef = useRef(onHoverZone);
-  onHoverZoneRef.current = onHoverZone;
+  useEffect(() => {
+    onHoverZoneRef.current = onHoverZone;
+  }, [onHoverZone]);
 
   const [activeZone, setActiveZone] = useState(null);
+  const [mapType, setMapType] = useState('roadmap'); // 'roadmap' | 'satellite'
 
-  // Stabilize zones so the map only reinitializes when zone DATA changes,
-  // not when the parent re-renders from hover state changes.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const stableZonesKey = useMemo(() => JSON.stringify(zones), [JSON.stringify(zones)]);
-  const zonesRef = useRef(zones);
-  zonesRef.current = zones;
+  const zonesKey = JSON.stringify(zones);
 
   useEffect(() => {
     let isMounted = true;
@@ -63,16 +62,40 @@ export default function RestaurantZoneInfoMap({
       const map = L.map(container, {
         center: [centerLat, centerLng],
         zoom: 13,
-        zoomControl: true,
+        zoomControl: false,
         attributionControl: false,
         // Disable zoom animation to prevent _onZoomTransitionEnd crash in iframes
         zoomAnimation: false,
       });
 
-      // OpenStreetMap Street Tiles
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19,
-      }).addTo(map);
+      // Position zoom control at bottom-right so it doesn't overlap the Map/Satellite switcher
+      L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+      // High-performance ArcGIS World Street Map tiles (Global CDN - 100% Free, No API key required, No watermarks)
+      const streetLayer = L.tileLayer(
+        'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',
+        {
+          maxZoom: 19,
+          crossOrigin: true,
+          attribution: '&copy; Esri &mdash; Source: Esri, DeLorme, NAVTEQ, USGS, Intermap, iPC, NRCAN, Esri Japan, METI, Esri China (Hong Kong), Esri (Thailand), TomTom',
+        }
+      );
+
+      // Automatic tile error retry on secure proxy drops
+      streetLayer.on('tileerror', (error) => {
+        if (error.tile && !error.tile._hasRetried) {
+          error.tile._hasRetried = true;
+          setTimeout(() => {
+            if (error.tile && error.url) {
+              const sep = error.url.includes('?') ? '&' : '?';
+              error.tile.src = error.url + sep + '_retry=1';
+            }
+          }, 350);
+        }
+      });
+
+      streetLayer.addTo(map);
+      tileLayerRef.current = streetLayer;
 
       // Custom Restaurant Pin Marker
       const storePinHtml = `
@@ -172,17 +195,22 @@ export default function RestaurantZoneInfoMap({
 
       if (zones.length > 0) {
         // Ensure map container is properly measured before fitting bounds.
-        // In iframe/modal contexts the container may not have final dimensions yet.
         map.invalidateSize({ animate: false });
-        // Use animate: false to avoid zoom transition that crashes in iframes
         map.fitBounds(bounds, { padding: [35, 35], animate: false });
       }
+
+      // Re-measure after layout stabilizes
+      setTimeout(() => {
+        if (mapInstanceRef.current) {
+          mapInstanceRef.current.invalidateSize({ animate: false });
+        }
+      }, 150);
 
       mapInstanceRef.current = map;
     }
 
-    // Longer delay to ensure iframe/modal container is fully laid out
-    const timer = setTimeout(initMap, 250);
+    // Delay to ensure iframe/modal container is fully laid out
+    const timer = setTimeout(initMap, 200);
 
     return () => {
       isMounted = false;
@@ -191,13 +219,58 @@ export default function RestaurantZoneInfoMap({
         try {
           mapInstanceRef.current.remove();
         } catch (_e) {
-          // Silently ignore errors during cleanup (map may already be detached)
+          // Silently ignore errors during cleanup
         }
         mapInstanceRef.current = null;
       }
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [restaurantLocation.lat, restaurantLocation.lng, restaurantLocation.name, stableZonesKey, mapContainerId]);
+  }, [restaurantLocation.lat, restaurantLocation.lng, restaurantLocation.name, zonesKey, mapContainerId]);
+
+  // Handle Switch Map Type (Roadmap / Satellite)
+  useEffect(() => {
+    if (!mapInstanceRef.current) return;
+    import('leaflet').then((module) => {
+      const L = module.default;
+      const map = mapInstanceRef.current;
+
+      if (tileLayerRef.current && map.hasLayer(tileLayerRef.current)) {
+        map.removeLayer(tileLayerRef.current);
+      }
+
+      let newLayer;
+      if (mapType === 'satellite') {
+        newLayer = L.tileLayer(
+          'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+          { maxZoom: 19, crossOrigin: true }
+        );
+      } else {
+        newLayer = L.tileLayer(
+          'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',
+          {
+            maxZoom: 19,
+            crossOrigin: true,
+            attribution: '&copy; Esri &mdash; Source: Esri, DeLorme, NAVTEQ, USGS, Intermap, iPC, NRCAN, Esri Japan, METI, Esri China (Hong Kong), Esri (Thailand), TomTom',
+          }
+        );
+      }
+
+      newLayer.on('tileerror', (error) => {
+        if (error.tile && !error.tile._hasRetried) {
+          error.tile._hasRetried = true;
+          setTimeout(() => {
+            if (error.tile && error.url) {
+              const sep = error.url.includes('?') ? '&' : '?';
+              error.tile.src = error.url + sep + '_retry=1';
+            }
+          }, 350);
+        }
+      });
+
+      newLayer.addTo(map);
+      tileLayerRef.current = newLayer;
+    });
+  }, [mapType]);
 
   // Handle external hover highlight from parent list
   useEffect(() => {
@@ -213,8 +286,34 @@ export default function RestaurantZoneInfoMap({
   }, [hoveredZoneIndex]);
 
   return (
-    <div className="relative w-full h-80 sm:h-96 rounded-2xl overflow-hidden border border-slate-300 shadow-md bg-slate-100">
+    <div className="relative w-full h-80 sm:h-96 rounded-2xl overflow-hidden border border-slate-300 shadow-md bg-slate-200">
       <div id={mapContainerId} className="w-full h-full z-10" />
+
+      {/* Map Type Switcher (Roadmap / Satellite) */}
+      <div className="absolute top-3 left-3 z-20 flex items-center bg-white/95 backdrop-blur-md rounded-xl shadow-md border border-slate-200 p-0.5">
+        <button
+          type="button"
+          onClick={() => setMapType('roadmap')}
+          className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all cursor-pointer ${
+            mapType === 'roadmap'
+              ? 'bg-orange-600 text-white shadow-sm'
+              : 'text-slate-700 hover:bg-slate-100'
+          }`}
+        >
+          Map
+        </button>
+        <button
+          type="button"
+          onClick={() => setMapType('satellite')}
+          className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all cursor-pointer ${
+            mapType === 'satellite'
+              ? 'bg-orange-600 text-white shadow-sm'
+              : 'text-slate-700 hover:bg-slate-100'
+          }`}
+        >
+          Satellite
+        </button>
+      </div>
 
       {/* Floating Zone Legend Badge */}
       <div className="absolute top-3 right-3 z-20 bg-white/95 backdrop-blur-md px-3 py-2 rounded-xl shadow-md border border-slate-200 text-xs font-semibold text-slate-800 space-y-1 max-w-xs">

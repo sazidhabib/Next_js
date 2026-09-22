@@ -21,6 +21,11 @@ import {
   ShoppingCart,
   Search,
   Lock,
+  Zap,
+  Sparkles,
+  Gift,
+  CheckCircle2,
+  Tag,
 } from 'lucide-react';
 import * as turf from '@turf/turf';
 import { loadStripe } from '@stripe/stripe-js';
@@ -215,9 +220,28 @@ export default function CheckoutWizardModal({
         zoomAnimation: false,
       });
 
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19,
-      }).addTo(map);
+      const tileLayer = L.tileLayer(
+        'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',
+        {
+          maxZoom: 19,
+          crossOrigin: true,
+          attribution: '&copy; Esri &mdash; Source: Esri, DeLorme, NAVTEQ, USGS, Intermap, iPC, NRCAN, Esri Japan, METI, Esri China (Hong Kong), Esri (Thailand), TomTom',
+        }
+      );
+
+      tileLayer.on('tileerror', (error) => {
+        if (error.tile && !error.tile._hasRetried) {
+          error.tile._hasRetried = true;
+          setTimeout(() => {
+            if (error.tile && error.url) {
+              const sep = error.url.includes('?') ? '&' : '?';
+              error.tile.src = error.url + sep + '_retry=1';
+            }
+          }, 350);
+        }
+      });
+
+      tileLayer.addTo(map);
 
       // Render Delivery Zones
       const zones = restaurant?.deliveryZones?.filter((z) => !z.isHidden && z.isActive !== false) || [];
@@ -341,32 +365,75 @@ export default function CheckoutWizardModal({
     }
   };
 
+  // Active offers from restaurant
+  const activeOffers = (restaurant?.offers || []).filter((o) => o.isActive !== false);
+
   // Pricing Calculations with 20% VAT Breakdown
   const subtotal = cartItems.reduce(
     (sum, item) => sum + item.unitPrice * item.quantity,
     0
   );
 
-  let deliveryFee = 0;
+  // Determine base delivery fee for zone or restaurant standard
+  let baseDeliveryFee = 0;
   if (serviceType === 'DELIVERY') {
     if (selectedZone) {
-      if (
-        selectedZone.freeDeliveryThreshold &&
-        subtotal >= selectedZone.freeDeliveryThreshold
-      ) {
-        deliveryFee = 0;
-      } else {
-        deliveryFee = selectedZone.deliveryFee || 2.5;
-      }
+      baseDeliveryFee = selectedZone.deliveryFee !== undefined ? Number(selectedZone.deliveryFee) : 2.5;
+    } else if (restaurant?.deliveryZones && restaurant.deliveryZones.length > 0) {
+      const activeZone = restaurant.deliveryZones.find((z) => !z.isHidden && z.isActive !== false) || restaurant.deliveryZones[0];
+      baseDeliveryFee = activeZone.deliveryFee !== undefined ? Number(activeZone.deliveryFee) : 2.5;
     } else {
-      deliveryFee = 5.0;
+      baseDeliveryFee = 2.5;
+    }
+  }
+
+  // Find qualifying automatic offers (e.g. Free Delivery on £25+ orders, % off, etc.)
+  const qualifyingAutoOffers = activeOffers.filter((o) => {
+    if (!o.isAutomatic) return false;
+    if (o.serviceType && o.serviceType !== 'ALL' && o.serviceType !== serviceType) return false;
+    if (o.minOrderAmount && subtotal < o.minOrderAmount) return false;
+    return true;
+  });
+
+  // Prefer Free Delivery auto offer if applicable for delivery, else top discount auto offer
+  const bestAutoOffer = qualifyingAutoOffers.find((o) => o.discountType === 'FREE_DELIVERY') || qualifyingAutoOffers[0] || null;
+
+  // Effective Offer: manual coupon takes precedence if valid, else automatic offer
+  const effectiveOffer = appliedOffer || bestAutoOffer || null;
+  const isAutoApplied = !appliedOffer && !!bestAutoOffer;
+
+  // Check if Free Delivery is unlocked (via offer or zone threshold)
+  const isFreeDeliveryUnlocked =
+    serviceType === 'DELIVERY' &&
+    (
+      (effectiveOffer && effectiveOffer.discountType === 'FREE_DELIVERY' && (!effectiveOffer.minOrderAmount || subtotal >= effectiveOffer.minOrderAmount)) ||
+      (selectedZone?.freeDeliveryThreshold && subtotal >= selectedZone.freeDeliveryThreshold)
+    );
+
+  // Delivery Fee is waived (£0.00) when Free Delivery is unlocked
+  const deliveryFee = serviceType === 'DELIVERY' ? (isFreeDeliveryUnlocked ? 0 : baseDeliveryFee) : 0;
+
+  // Calculate Promotional Discount Amount
+  let effectiveDiscountAmount = 0;
+  if (appliedOffer) {
+    effectiveDiscountAmount = discountAmount;
+  } else if (effectiveOffer && effectiveOffer.isAutomatic) {
+    if (effectiveOffer.discountType === 'PERCENTAGE') {
+      effectiveDiscountAmount = Number(((subtotal * (effectiveOffer.discountValue || 0)) / 100).toFixed(2));
+      if (effectiveOffer.maxDiscountAmount && effectiveDiscountAmount > effectiveOffer.maxDiscountAmount) {
+        effectiveDiscountAmount = effectiveOffer.maxDiscountAmount;
+      }
+    } else if (effectiveOffer.discountType === 'FIXED_AMOUNT') {
+      effectiveDiscountAmount = Math.min(effectiveOffer.discountValue || 0, subtotal);
+    } else if (effectiveOffer.discountType === 'FREE_DELIVERY') {
+      effectiveDiscountAmount = 0; // Handled directly as £0 delivery fee
     }
   }
 
   const vatRate = 0.2; // 20% UK VAT
   const vatSubtotalIncluded = (subtotal * vatRate) / (1 + vatRate);
   const deliveryFeeTaxIncluded = (deliveryFee * vatRate) / (1 + vatRate);
-  const totalAmount = Math.max(0, subtotal - discountAmount + deliveryFee);
+  const totalAmount = Math.max(0, subtotal - effectiveDiscountAmount + deliveryFee);
 
   const minDeliveryOrder = selectedZone?.minOrderAmount || 15.0;
   const isBelowMin = serviceType === 'DELIVERY' && subtotal < minDeliveryOrder;
@@ -399,7 +466,7 @@ export default function CheckoutWizardModal({
           code,
           subtotal,
           serviceType,
-          deliveryFee,
+          deliveryFee: baseDeliveryFee,
         }),
       });
 
@@ -440,7 +507,7 @@ export default function CheckoutWizardModal({
           code: appliedOffer.code,
           subtotal,
           serviceType,
-          deliveryFee,
+          deliveryFee: baseDeliveryFee,
         }),
       })
         .then((res) => res.json())
@@ -455,7 +522,7 @@ export default function CheckoutWizardModal({
         })
         .catch(() => {});
     }
-  }, [subtotal, serviceType, deliveryFee]);
+  }, [subtotal, serviceType, baseDeliveryFee]);
 
   // Handlers for Saving Sections
   const handleSaveContact = (e) => {
@@ -478,12 +545,23 @@ export default function CheckoutWizardModal({
     setIsMethodSaved(true);
     setActiveSection('time');
 
-    // Show the Delivery Fee Popup alert modal
+    // Show the Delivery Fee Popup alert modal with promotional awareness
     if (serviceType === 'DELIVERY') {
-      setFeeModalInfo({
-        fee: deliveryFee,
-        total: totalAmount,
-      });
+      if (isFreeDeliveryUnlocked) {
+        setFeeModalInfo({
+          isFree: true,
+          fee: 0,
+          savedFee: baseDeliveryFee,
+          total: totalAmount,
+          offerTitle: effectiveOffer?.title || 'Free Delivery Special',
+        });
+      } else {
+        setFeeModalInfo({
+          isFree: false,
+          fee: deliveryFee,
+          total: totalAmount,
+        });
+      }
     }
   };
 
@@ -608,9 +686,9 @@ export default function CheckoutWizardModal({
         subtotal,
         taxAmount: vatSubtotalIncluded + deliveryFeeTaxIncluded,
         deliveryFee,
-        discountAmount,
-        offerId: appliedOffer?.id || null,
-        promoCode: appliedOffer?.code || (discountAmount > 0 ? couponCode : null),
+        discountAmount: effectiveDiscountAmount,
+        offerId: effectiveOffer?.id || null,
+        promoCode: appliedOffer?.code || (effectiveDiscountAmount > 0 ? (effectiveOffer?.code || couponCode) : null),
         totalAmount,
         paymentMethod:
           paymentMethod === 'ONLINE'
@@ -1108,22 +1186,43 @@ export default function CheckoutWizardModal({
                         {/* Zone Status Notice */}
                         <div
                           className={`p-2.5 rounded-lg text-xs flex items-center justify-between font-medium ${
-                            isInsideZone
+                            isFreeDeliveryUnlocked
+                              ? 'bg-emerald-50 border border-emerald-300 text-emerald-900'
+                              : isInsideZone
                               ? 'bg-emerald-50 border border-emerald-200 text-emerald-800'
                               : 'bg-amber-50 border border-amber-200 text-amber-800'
                           }`}
                         >
                           <div className="flex items-center gap-1.5">
-                            <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                            {isFreeDeliveryUnlocked ? (
+                              <Zap className="w-3.5 h-3.5 shrink-0 text-emerald-600 fill-emerald-500" />
+                            ) : (
+                              <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                            )}
                             <span>
-                              {isInsideZone
+                              {isFreeDeliveryUnlocked
+                                ? `🎉 Free Delivery Applied (${effectiveOffer?.title || 'Orders over £25'})`
+                                : isInsideZone
                                 ? `Inside Delivery Zone: ${selectedZone?.name || 'Standard Area'}`
                                 : 'Outside standard delivery zones (surcharge applies)'}
                             </span>
                           </div>
-                          <span className="font-bold">
-                            Fee: £{deliveryFee.toFixed(2)}
-                          </span>
+                          <div className="text-right shrink-0">
+                            {isFreeDeliveryUnlocked ? (
+                              <span className="flex items-center gap-1.5 font-bold">
+                                <span className="line-through text-slate-400 font-normal text-[11px]">
+                                  £{baseDeliveryFee.toFixed(2)}
+                                </span>
+                                <span className="text-emerald-700 font-extrabold bg-emerald-100/80 px-1.5 py-0.5 rounded">
+                                  FREE (£0.00)
+                                </span>
+                              </span>
+                            ) : (
+                              <span className="font-bold">
+                                Fee: £{deliveryFee.toFixed(2)}
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -1555,26 +1654,82 @@ export default function CheckoutWizardModal({
               )}
 
               {/* Financial Calculation Breakdown (20% VAT Breakdown) */}
-              <div className="p-4 space-y-2 text-xs border-t border-slate-100">
-                {/* Coupon & Offer Code Section */}
+              <div className="p-4 space-y-3 text-xs border-t border-slate-100">
+                {/* 1. Prominent Free Delivery Deal Banner when Unlocked */}
+                {isFreeDeliveryUnlocked && (
+                  <div className="p-3 bg-linear-to-r from-emerald-50 via-teal-50 to-emerald-50 border border-emerald-300 rounded-xl flex items-center justify-between gap-2 shadow-2xs animate-in fade-in duration-300">
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <div className="w-8 h-8 rounded-lg bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+                        <Truck className="w-4 h-4 animate-pulse" />
+                      </div>
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-1.5">
+                          <span className="font-extrabold text-xs text-emerald-950 truncate">
+                            {effectiveOffer?.title || 'Free Delivery Special'}
+                          </span>
+                          <span className="bg-emerald-600 text-white text-[9px] font-black px-1.5 py-0.2 rounded-full uppercase tracking-wider shrink-0">
+                            UNLOCKED
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-emerald-700 truncate">
+                          Orders over £{(effectiveOffer?.minOrderAmount || 25).toFixed(2)} • Auto-Applied at Checkout
+                        </p>
+                      </div>
+                    </div>
+                    <span className="font-black text-xs text-emerald-700 bg-emerald-100 px-2 py-1 rounded-lg shrink-0">
+                      -£{baseDeliveryFee.toFixed(2)}
+                    </span>
+                  </div>
+                )}
+
+                {/* 2. Free Delivery Upsell Progress Bar (when below threshold) */}
+                {!isFreeDeliveryUnlocked && serviceType === 'DELIVERY' && activeOffers.some((o) => o.discountType === 'FREE_DELIVERY' && o.minOrderAmount > subtotal) && (() => {
+                  const targetOffer = activeOffers.find((o) => o.discountType === 'FREE_DELIVERY' && o.minOrderAmount > subtotal);
+                  const diff = (targetOffer.minOrderAmount - subtotal).toFixed(2);
+                  const pct = Math.min(100, Math.round((subtotal / targetOffer.minOrderAmount) * 100));
+                  return (
+                    <div className="p-2.5 bg-amber-50/90 border border-amber-200 rounded-xl space-y-1.5 text-xs">
+                      <div className="flex items-center justify-between text-amber-950 font-bold">
+                        <span className="flex items-center gap-1.5">
+                          <Truck className="w-3.5 h-3.5 text-orange-600" />
+                          <span>Add <strong>£{diff}</strong> more to get <strong>FREE DELIVERY</strong>!</span>
+                        </span>
+                        <span className="text-[10px] text-amber-700 font-extrabold">{pct}%</span>
+                      </div>
+                      <div className="w-full bg-amber-200/80 rounded-full h-1.5 overflow-hidden">
+                        <div className="bg-linear-to-r from-orange-500 to-amber-500 h-full rounded-full transition-all duration-300" style={{ width: `${pct}%` }} />
+                      </div>
+                    </div>
+                  );
+                })()}
+
+                {/* 3. Coupon & Offer Code Section */}
                 <div className="space-y-2">
-                  {discountAmount > 0 ? (
+                  {effectiveDiscountAmount > 0 ? (
                     <div className="p-2.5 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center justify-between">
                       <div className="space-y-0.5">
                         <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-800">
-                          <span>🎉 {appliedOffer?.title || 'Coupon Applied'}</span>
+                          <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
+                          <span>🎉 {effectiveOffer?.title || 'Offer Discount Applied'}</span>
+                          {isAutoApplied && (
+                            <span className="bg-emerald-600 text-white text-[9px] font-black px-1.5 py-0.2 rounded-full uppercase tracking-wider">
+                              AUTO
+                            </span>
+                          )}
                         </div>
                         <div className="text-[11px] text-emerald-600 font-medium">
-                          {appliedOffer?.code ? `Code: ${appliedOffer.code} • ` : ''}Saved -£{discountAmount.toFixed(2)}
+                          {appliedOffer?.code ? `Code: ${appliedOffer.code} • ` : ''}Saved -£{effectiveDiscountAmount.toFixed(2)}
                         </div>
                       </div>
-                      <button
-                        type="button"
-                        onClick={handleRemoveCoupon}
-                        className="text-[11px] font-bold text-red-600 hover:text-red-700 hover:underline cursor-pointer px-2 py-1 rounded-md hover:bg-red-50"
-                      >
-                        Remove
-                      </button>
+                      {appliedOffer && (
+                        <button
+                          type="button"
+                          onClick={handleRemoveCoupon}
+                          className="text-[11px] font-bold text-red-600 hover:text-red-700 hover:underline cursor-pointer px-2 py-1 rounded-md hover:bg-red-50"
+                        >
+                          Remove
+                        </button>
+                      )}
                     </div>
                   ) : !showCoupon ? (
                     <div className="flex items-center justify-between">
@@ -1583,6 +1738,7 @@ export default function CheckoutWizardModal({
                         onClick={() => setShowCoupon(true)}
                         className="text-xs text-orange-600 hover:text-orange-700 font-bold underline underline-offset-2 flex items-center gap-1 cursor-pointer"
                       >
+                        <Tag className="w-3 h-3" />
                         <span>Have a coupon or discount code?</span>
                       </button>
                     </div>
@@ -1643,7 +1799,8 @@ export default function CheckoutWizardModal({
                   )}
                 </div>
 
-                <div className="pt-2 space-y-1 text-slate-600 border-t border-slate-100">
+                {/* 4. Financial Calculations Breakdown */}
+                <div className="pt-2 space-y-1.5 text-slate-600 border-t border-slate-100">
                   {/* Subtotal */}
                   <div className="flex justify-between">
                     <span>Sub-Total</span>
@@ -1659,10 +1816,28 @@ export default function CheckoutWizardModal({
                   {/* Delivery Fee */}
                   {serviceType === 'DELIVERY' && (
                     <>
-                      <div className="flex justify-between">
-                        <span>Delivery Fee</span>
+                      <div className="flex justify-between items-center">
+                        <span className="flex items-center gap-1">
+                          <span>Delivery Fee</span>
+                          {isFreeDeliveryUnlocked && (
+                            <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-1.5 py-0.2 rounded">
+                              PROMO
+                            </span>
+                          )}
+                        </span>
                         <span className="font-semibold text-slate-800">
-                          {deliveryFee === 0 ? 'FREE' : `£${deliveryFee.toFixed(2)}`}
+                          {isFreeDeliveryUnlocked ? (
+                            <span className="flex items-center gap-1.5">
+                              <span className="line-through text-slate-400 font-normal text-[11px]">
+                                £{baseDeliveryFee.toFixed(2)}
+                              </span>
+                              <span className="font-bold text-emerald-600">FREE (£0.00)</span>
+                            </span>
+                          ) : deliveryFee === 0 ? (
+                            <span className="font-bold text-emerald-600">FREE</span>
+                          ) : (
+                            `£${deliveryFee.toFixed(2)}`
+                          )}
                         </span>
                       </div>
                       {deliveryFee > 0 && (
@@ -1674,10 +1849,10 @@ export default function CheckoutWizardModal({
                     </>
                   )}
 
-                  {discountAmount > 0 && (
+                  {effectiveDiscountAmount > 0 && (
                     <div className="flex justify-between text-emerald-600 font-bold bg-emerald-50 px-2 py-1 rounded-lg">
                       <span>Promotional Discount</span>
-                      <span>-£{discountAmount.toFixed(2)}</span>
+                      <span>-£{effectiveDiscountAmount.toFixed(2)}</span>
                     </div>
                   )}
 
@@ -1756,25 +1931,49 @@ export default function CheckoutWizardModal({
       {feeModalInfo && (
         <div className="fixed inset-0 z-60 bg-black/60 backdrop-blur-2xs flex items-center justify-center p-4 animate-fadeIn">
           <div className="w-full max-w-sm bg-white rounded-2xl p-6 shadow-2xl text-center space-y-4 border border-slate-100 animate-scaleUp">
-            <div className="w-16 h-16 rounded-full border-2 border-slate-300 mx-auto flex items-center justify-center text-slate-600">
-              <ShoppingCart className="w-7 h-7" />
+            <div
+              className={`w-16 h-16 rounded-full border-2 mx-auto flex items-center justify-center ${
+                feeModalInfo.isFree
+                  ? 'border-emerald-200 bg-emerald-50 text-emerald-600'
+                  : 'border-slate-300 text-slate-600'
+              }`}
+            >
+              {feeModalInfo.isFree ? (
+                <Truck className="w-8 h-8 animate-bounce text-emerald-600" />
+              ) : (
+                <ShoppingCart className="w-7 h-7" />
+              )}
             </div>
 
             <div className="space-y-1.5">
               <h3 className="text-sm sm:text-base font-bold text-slate-900 leading-snug">
-                A delivery fee of £{feeModalInfo.fee.toFixed(2)} was added to your location.
+                {feeModalInfo.isFree ? (
+                  <span className="text-emerald-700">🎉 Free Delivery Offer Applied!</span>
+                ) : (
+                  `A delivery fee of £${feeModalInfo.fee.toFixed(2)} was added to your location.`
+                )}
               </h3>
-              <p className="text-xs text-slate-600 font-medium">
-                Your total is £{feeModalInfo.total.toFixed(2)} (all taxes included).
+              <p className="text-xs text-slate-600 font-medium leading-relaxed">
+                {feeModalInfo.isFree ? (
+                  <>
+                    Your order qualifies for <strong className="text-slate-800">{feeModalInfo.offerTitle}</strong>. You saved <strong className="text-emerald-600">£{feeModalInfo.savedFee.toFixed(2)}</strong> on delivery fees!
+                  </>
+                ) : (
+                  `Your total is £${feeModalInfo.total.toFixed(2)} (all taxes included).`
+                )}
               </p>
             </div>
 
             <button
               type="button"
               onClick={() => setFeeModalInfo(null)}
-              className="w-full py-2.5 bg-[#c25e00] hover:bg-[#a34e00] text-white font-bold text-xs sm:text-sm rounded-lg transition-all cursor-pointer shadow-xs"
+              className={`w-full py-2.5 text-white font-bold text-xs sm:text-sm rounded-lg transition-all cursor-pointer shadow-xs ${
+                feeModalInfo.isFree
+                  ? 'bg-emerald-600 hover:bg-emerald-500'
+                  : 'bg-[#c25e00] hover:bg-[#a34e00]'
+              }`}
             >
-              OK, back to checkout
+              {feeModalInfo.isFree ? 'Awesome, Continue Checkout' : 'OK, back to checkout'}
             </button>
           </div>
         </div>

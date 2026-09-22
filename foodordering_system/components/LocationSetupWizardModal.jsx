@@ -196,9 +196,28 @@ export default function LocationSetupWizardModal({
         zoomAnimation: false,
       });
 
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19,
-      }).addTo(map);
+      const tileLayer = L.tileLayer(
+        'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',
+        {
+          maxZoom: 19,
+          crossOrigin: true,
+          attribution: '&copy; Esri &mdash; Source: Esri, DeLorme, NAVTEQ, USGS, Intermap, iPC, NRCAN, Esri Japan, METI, Esri China (Hong Kong), Esri (Thailand), TomTom',
+        }
+      );
+
+      tileLayer.on('tileerror', (error) => {
+        if (error.tile && !error.tile._hasRetried) {
+          error.tile._hasRetried = true;
+          setTimeout(() => {
+            if (error.tile && error.url) {
+              const sep = error.url.includes('?') ? '&' : '?';
+              error.tile.src = error.url + sep + '_retry=1';
+            }
+          }, 350);
+        }
+      });
+
+      tileLayer.addTo(map);
 
       // Custom Draggable Pin
       const pinHtml = `

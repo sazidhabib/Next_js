@@ -84,6 +84,15 @@ body {
   animation: urgent-content-zoom 1.5s infinite ease-in-out;
 }
 
+@keyframes offer-progress {
+  from { width: 0%; }
+  to { width: 100%; }
+}
+
+.animate-offer-progress {
+  animation: offer-progress 5s linear forwards;
+}
+
 /* Thermal Receipt 80mm Print Media Styles */
 @media print {
   body {
