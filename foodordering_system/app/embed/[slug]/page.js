@@ -355,17 +355,20 @@ export default function EmbedMenuPage({ params }) {
                     key={off.id || idx}
                     type="button"
                     onClick={() => {
-                      if (off.code) handleCopyOfferCode(off.code);
-                      else setIsOffersModalOpen(true);
+                      if (off.code && !off.isAutomatic) handleCopyOfferCode(off.code);
                     }}
                     className="flex items-center gap-1.5 hover:underline cursor-pointer"
                   >
                     <span>{off.bannerText || off.title}</span>
-                    {off.code && (
+                    {off.code && !off.isAutomatic ? (
                       <span className="font-mono bg-black/30 px-1.5 py-0.5 rounded text-[10px] border border-white/20">
                         {off.code}
                       </span>
-                    )}
+                    ) : off.isAutomatic ? (
+                      <span className="text-[10px] bg-white/20 px-1.5 py-0.5 rounded font-semibold text-emerald-200">
+                        Auto-Applied
+                      </span>
+                    ) : null}
                     {idx < activeOffers.length - 1 && <span className="text-orange-200 ml-1">•</span>}
                   </button>
                 ))}
@@ -405,7 +408,13 @@ export default function EmbedMenuPage({ params }) {
                   <CheckCircle2 className="w-4 h-4 text-emerald-600 inline" />
                   <span>🎉 Deal Unlocked! {bestAutoOffer.title} Applied</span>
                   <span className="bg-emerald-600 text-white text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider">
-                    {bestAutoOffer.discountType === 'FREE_DELIVERY' ? '£0.00 DELIVERY FEE' : 'PROMO SAVINGS'}
+                    {bestAutoOffer.discountType === 'FREE_DELIVERY'
+                      ? '£0.00 DELIVERY FEE'
+                      : bestAutoOffer.discountType === 'SPEND_GET_FREE_ITEM'
+                      ? 'FREE DISH REWARD'
+                      : bestAutoOffer.discountType === 'BOGO'
+                      ? 'BOGO FREE'
+                      : 'PROMO SAVINGS'}
                   </span>
                 </span>
               ) : (
@@ -1136,6 +1145,8 @@ export default function EmbedMenuPage({ params }) {
                   {activeOffers.map((off) => {
                     const isPct = off.discountType === 'PERCENTAGE';
                     const isFreeDel = off.discountType === 'FREE_DELIVERY';
+                    const isBogo = off.discountType === 'BOGO';
+                    const isSpendReward = off.discountType === 'SPEND_GET_FREE_ITEM';
 
                     return (
                       <div
@@ -1163,7 +1174,11 @@ export default function EmbedMenuPage({ params }) {
                                 ? `${off.discountValue}% OFF`
                                 : isFreeDel
                                 ? 'FREE DELIVERY'
-                                : `£${off.discountValue?.toFixed(2)} OFF`}
+                                : isBogo
+                                ? `BUY ${off.buyQuantity || 1} GET ${off.getQuantity || 1} FREE`
+                                : isSpendReward
+                                ? 'FREE DISH REWARD'
+                                : `£${(off.discountValue || 0).toFixed(2)} OFF`}
                             </span>
                           </div>
 

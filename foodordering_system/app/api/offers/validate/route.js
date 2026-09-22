@@ -3,11 +3,14 @@ import { Op } from 'sequelize';
 import { Restaurant } from '@/lib/sequelize';
 import { validateOfferCode, getOffersByRestaurant } from '@/lib/dataStore';
 
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
 // POST /api/offers/validate
 export async function POST(request) {
   try {
     const body = await request.json();
-    const { restaurantId: reqRestoId, slug, code, subtotal = 0, serviceType = 'DELIVERY', deliveryFee = 0 } = body;
+    const { restaurantId: reqRestoId, slug, code, subtotal = 0, serviceType = 'DELIVERY', deliveryFee = 0, items = [] } = body;
 
     let targetRestaurantId = reqRestoId;
     if (!targetRestaurantId && slug) {
@@ -40,6 +43,7 @@ export async function POST(request) {
           subtotal: parseFloat(subtotal),
           serviceType,
           deliveryFee: parseFloat(deliveryFee),
+          items,
         });
 
         if (res.valid && res.discountAmount > highestDiscount) {
@@ -61,6 +65,7 @@ export async function POST(request) {
       subtotal: parseFloat(subtotal),
       serviceType,
       deliveryFee: parseFloat(deliveryFee),
+      items,
     });
 
     if (!validationResult.valid) {

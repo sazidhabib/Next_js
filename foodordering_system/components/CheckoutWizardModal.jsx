@@ -90,6 +90,8 @@ export default function CheckoutWizardModal({
   const [discountAmount, setDiscountAmount] = useState(0);
   const [appliedOffer, setAppliedOffer] = useState(null);
   const [isValidatingCoupon, setIsValidatingCoupon] = useState(false);
+  const [selectedFreeReward, setSelectedFreeReward] = useState(null);
+  const [isRewardPickerOpen, setIsRewardPickerOpen] = useState(false);
 
   // 7. In-Modal Stripe Payment & Live Order Status State
   const [stripeModalData, setStripeModalData] = useState(null); // { clientSecret, publishableKey, orderId, orderNumber, amount, currency, orderData }
@@ -368,6 +370,11 @@ export default function CheckoutWizardModal({
   // Active offers from restaurant
   const activeOffers = (restaurant?.offers || []).filter((o) => o.isActive !== false);
 
+  // Flatten all menu items across categories for reward selection and item lookup
+  const allMenuItems = (restaurant?.categories || []).flatMap((cat) =>
+    (cat.items || []).map((item) => ({ ...item, categoryName: cat.name }))
+  );
+
   // Pricing Calculations with 20% VAT Breakdown
   const subtotal = cartItems.reduce(
     (sum, item) => sum + item.unitPrice * item.quantity,
@@ -387,11 +394,40 @@ export default function CheckoutWizardModal({
     }
   }
 
-  // Find qualifying automatic offers (e.g. Free Delivery on £25+ orders, % off, etc.)
+  // Helper to calculate BOGO discount dynamically
+  const calculateBogoDiscount = (offer, items) => {
+    if (!offer || offer.discountType !== 'BOGO') return 0;
+    const applicable = Array.isArray(offer.applicableItemIds) && offer.applicableItemIds.length > 0
+      ? offer.applicableItemIds
+      : null;
+    const qualifyingItems = [];
+    items.forEach((it) => {
+      if (it.isFreeReward) return;
+      const itId = it.menuItemId || it.id;
+      if (!applicable || applicable.includes(itId)) {
+        for (let i = 0; i < (it.quantity || 1); i++) {
+          qualifyingItems.push(Number(it.unitPrice || 0));
+        }
+      }
+    });
+    const buyQty = offer.buyQuantity || 1;
+    const getQty = offer.getQuantity || 1;
+    const groupSize = buyQty + getQty;
+    if (qualifyingItems.length < groupSize) return 0;
+    qualifyingItems.sort((a, b) => a - b);
+    const numFree = Math.floor(qualifyingItems.length / groupSize) * getQty;
+    return qualifyingItems.slice(0, numFree).reduce((s, p) => s + p, 0);
+  };
+
+  // Find qualifying automatic offers (e.g. Free Delivery on £25+ orders, % off, BOGO, etc.)
   const qualifyingAutoOffers = activeOffers.filter((o) => {
     if (!o.isAutomatic) return false;
     if (o.serviceType && o.serviceType !== 'ALL' && o.serviceType !== serviceType) return false;
     if (o.minOrderAmount && subtotal < o.minOrderAmount) return false;
+    if (o.discountType === 'BOGO') {
+      const bogoDisc = calculateBogoDiscount(o, cartItems);
+      if (bogoDisc <= 0) return false;
+    }
     return true;
   });
 
@@ -410,13 +446,40 @@ export default function CheckoutWizardModal({
       (selectedZone?.freeDeliveryThreshold && subtotal >= selectedZone.freeDeliveryThreshold)
     );
 
+  // Spend Threshold Free Dish Offer detection
+  const spendRewardOffer = (() => {
+    if (appliedOffer && appliedOffer.discountType === 'SPEND_GET_FREE_ITEM') {
+      return appliedOffer;
+    }
+    const autoSpendOffer = activeOffers.find(
+      (o) => o.discountType === 'SPEND_GET_FREE_ITEM' && (o.serviceType === 'ALL' || o.serviceType === serviceType)
+    );
+    return autoSpendOffer || null;
+  })();
+
+  const isSpendRewardUnlocked = spendRewardOffer && (!spendRewardOffer.minOrderAmount || subtotal >= spendRewardOffer.minOrderAmount);
+
+  // Eligible dishes for spend reward
+  const eligibleRewardDishes = (() => {
+    if (!spendRewardOffer) return [];
+    const ids = spendRewardOffer.freeRewardItemIds;
+    if (Array.isArray(ids) && ids.length > 0) {
+      return allMenuItems.filter((m) => ids.includes(m.id));
+    }
+    return allMenuItems.slice(0, 10);
+  })();
+
   // Delivery Fee is waived (£0.00) when Free Delivery is unlocked
   const deliveryFee = serviceType === 'DELIVERY' ? (isFreeDeliveryUnlocked ? 0 : baseDeliveryFee) : 0;
 
   // Calculate Promotional Discount Amount
   let effectiveDiscountAmount = 0;
   if (appliedOffer) {
-    effectiveDiscountAmount = discountAmount;
+    if (appliedOffer.discountType === 'BOGO') {
+      effectiveDiscountAmount = calculateBogoDiscount(appliedOffer, cartItems);
+    } else {
+      effectiveDiscountAmount = discountAmount;
+    }
   } else if (effectiveOffer && effectiveOffer.isAutomatic) {
     if (effectiveOffer.discountType === 'PERCENTAGE') {
       effectiveDiscountAmount = Number(((subtotal * (effectiveOffer.discountValue || 0)) / 100).toFixed(2));
@@ -425,8 +488,10 @@ export default function CheckoutWizardModal({
       }
     } else if (effectiveOffer.discountType === 'FIXED_AMOUNT') {
       effectiveDiscountAmount = Math.min(effectiveOffer.discountValue || 0, subtotal);
-    } else if (effectiveOffer.discountType === 'FREE_DELIVERY') {
-      effectiveDiscountAmount = 0; // Handled directly as £0 delivery fee
+    } else if (effectiveOffer.discountType === 'BOGO') {
+      effectiveDiscountAmount = calculateBogoDiscount(effectiveOffer, cartItems);
+    } else if (effectiveOffer.discountType === 'FREE_DELIVERY' || effectiveOffer.discountType === 'SPEND_GET_FREE_ITEM') {
+      effectiveDiscountAmount = 0; // Handled directly as £0 delivery or free gift item
     }
   }
 
@@ -467,6 +532,7 @@ export default function CheckoutWizardModal({
           subtotal,
           serviceType,
           deliveryFee: baseDeliveryFee,
+          items: cartItems,
         }),
       });
 
@@ -495,7 +561,7 @@ export default function CheckoutWizardModal({
     toast.info('Offer coupon removed');
   };
 
-  // Re-calculate or auto-check offer discount when subtotal or serviceType changes
+  // Re-calculate or auto-check offer discount when subtotal, cartItems, or serviceType changes
   useEffect(() => {
     if (appliedOffer && appliedOffer.code) {
       fetch('/api/offers/validate', {
@@ -508,6 +574,7 @@ export default function CheckoutWizardModal({
           subtotal,
           serviceType,
           deliveryFee: baseDeliveryFee,
+          items: cartItems,
         }),
       })
         .then((res) => res.json())
@@ -522,7 +589,7 @@ export default function CheckoutWizardModal({
         })
         .catch(() => {});
     }
-  }, [subtotal, serviceType, baseDeliveryFee]);
+  }, [subtotal, cartItems, serviceType, baseDeliveryFee]);
 
   // Handlers for Saving Sections
   const handleSaveContact = (e) => {
@@ -701,7 +768,21 @@ export default function CheckoutWizardModal({
             ? 'CARD_ON_DELIVERY'
             : 'CARD_ON_PICKUP',
         scheduledFor: timeChoiceType === 'LATER' ? `${selectedDate} ${selectedTimeSlot}` : 'ASAP',
-        items: cartItems,
+        items: (() => {
+          const finalItems = [...cartItems];
+          if (isSpendRewardUnlocked && selectedFreeReward) {
+            finalItems.push({
+              id: `reward-${selectedFreeReward.id}`,
+              menuItemId: selectedFreeReward.id,
+              name: selectedFreeReward.name,
+              quantity: 1,
+              unitPrice: 0,
+              isFreeReward: true,
+              specialNotes: `[FREE COMPLIMENTARY REWARD: ${spendRewardOffer?.title || 'Special Gift'}]`,
+            });
+          }
+          return finalItems;
+        })(),
       };
 
       const res = await fetch('/api/orders', {
@@ -715,6 +796,7 @@ export default function CheckoutWizardModal({
       if (data.success && data.data) {
         playSuccessSound();
         toast.success('Order placed successfully!');
+        setSelectedFreeReward(null);
         onClearCart();
 
         if (paymentMethod === 'ONLINE') {
@@ -1644,6 +1726,45 @@ export default function CheckoutWizardModal({
                     </div>
                   </div>
                 ))}
+
+                {/* Selected Free Reward Dish Row */}
+                {isSpendRewardUnlocked && selectedFreeReward && (
+                  <div className="px-4 py-3 bg-emerald-50/70 border-l-4 border-emerald-500 flex items-start justify-between text-xs gap-2 animate-in fade-in duration-200">
+                    <div className="flex items-start gap-2.5">
+                      <div className="w-6 h-6 rounded-lg bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-xs text-xs">
+                        🎁
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-1.5">
+                          <p className="font-extrabold text-emerald-950">{selectedFreeReward.name}</p>
+                          <span className="bg-emerald-600 text-white text-[9px] font-black px-1.5 py-0.2 rounded-full uppercase tracking-wider">
+                            FREE GIFT
+                          </span>
+                        </div>
+                        <p className="text-[10px] text-emerald-700 font-medium mt-0.5">
+                          Complimentary Reward • {spendRewardOffer?.title || 'Spend Threshold Special'}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 shrink-0">
+                      <div className="text-right">
+                        <span className="line-through text-slate-400 text-[10px] block">
+                          £{(selectedFreeReward.price || selectedFreeReward.basePrice || 0).toFixed(2)}
+                        </span>
+                        <span className="font-extrabold text-emerald-600">FREE (£0.00)</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedFreeReward(null)}
+                        className="text-slate-400 hover:text-red-500 transition-colors cursor-pointer"
+                        title="Remove complimentary gift"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Minimum Order Warning Bar */}
@@ -1655,7 +1776,124 @@ export default function CheckoutWizardModal({
 
               {/* Financial Calculation Breakdown (20% VAT Breakdown) */}
               <div className="p-4 space-y-3 text-xs border-t border-slate-100">
-                {/* 1. Prominent Free Delivery Deal Banner when Unlocked */}
+                {/* 1. Spend Threshold Free Dish Reward Card & Interactive Picker */}
+                {spendRewardOffer && isSpendRewardUnlocked && (
+                  <div className="p-3 bg-linear-to-r from-emerald-50 via-teal-50 to-emerald-50 border border-emerald-300 rounded-xl space-y-2.5 shadow-2xs animate-in fade-in duration-300">
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <div className="w-8 h-8 rounded-lg bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+                          <Gift className="w-4 h-4 animate-bounce" />
+                        </div>
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-1.5">
+                            <span className="font-extrabold text-xs text-emerald-950 truncate">
+                              {spendRewardOffer.title || 'Free Reward Dish Unlocked!'}
+                            </span>
+                            <span className="bg-emerald-600 text-white text-[9px] font-black px-1.5 py-0.2 rounded-full uppercase tracking-wider shrink-0">
+                              FREE DISH
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-emerald-700">
+                            Orders over £{(spendRewardOffer.minOrderAmount || 0).toFixed(2)} • Pick your free gift below
+                          </p>
+                        </div>
+                      </div>
+                      {selectedFreeReward && (
+                        <button
+                          type="button"
+                          onClick={() => setIsRewardPickerOpen(!isRewardPickerOpen)}
+                          className="px-2 py-1 bg-emerald-100 hover:bg-emerald-200 text-emerald-800 rounded-lg text-[10px] font-bold transition cursor-pointer shrink-0"
+                        >
+                          {isRewardPickerOpen ? 'Hide Dishes' : 'Change Gift'}
+                        </button>
+                      )}
+                    </div>
+
+                    {/* If gift is selected and picker is closed */}
+                    {selectedFreeReward && !isRewardPickerOpen ? (
+                      <div className="p-2 bg-white/80 border border-emerald-200 rounded-lg flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2">
+                          <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                          <span className="text-xs font-bold text-slate-800">
+                            Selected: <strong className="text-emerald-700">{selectedFreeReward.name}</strong>
+                          </span>
+                        </div>
+                        <span className="text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">
+                          £0.00
+                        </span>
+                      </div>
+                    ) : (
+                      /* Interactive Dish Selector Grid */
+                      <div className="space-y-1.5 pt-1">
+                        <span className="text-[10px] font-bold text-emerald-900 uppercase tracking-wider block">
+                          Choose 1 complimentary dish on the house:
+                        </span>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-48 overflow-y-auto pr-1">
+                          {eligibleRewardDishes.map((dish) => {
+                            const isChosen = selectedFreeReward?.id === dish.id;
+                            return (
+                              <button
+                                key={dish.id}
+                                type="button"
+                                onClick={() => {
+                                  setSelectedFreeReward(dish);
+                                  setIsRewardPickerOpen(false);
+                                  toast.success(`🎁 Selected "${dish.name}" as your free complimentary dish!`);
+                                }}
+                                className={`p-2 rounded-xl border text-left flex items-center justify-between gap-2 transition cursor-pointer ${
+                                  isChosen
+                                    ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs'
+                                    : 'bg-white hover:bg-emerald-50/80 border-emerald-200 text-slate-800'
+                                }`}
+                              >
+                                <div className="min-w-0">
+                                  <p className={`font-bold text-xs truncate ${isChosen ? 'text-white' : 'text-slate-900'}`}>
+                                    {dish.name}
+                                  </p>
+                                  <div className="flex items-center gap-1.5 text-[10px] mt-0.5">
+                                    <span className={`line-through ${isChosen ? 'text-emerald-200' : 'text-slate-400'}`}>
+                                      £{(dish.price || dish.basePrice || 0).toFixed(2)}
+                                    </span>
+                                    <span className={`font-extrabold ${isChosen ? 'text-white' : 'text-emerald-600'}`}>
+                                      FREE
+                                    </span>
+                                  </div>
+                                </div>
+                                <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 ${
+                                  isChosen ? 'bg-white text-emerald-600' : 'bg-emerald-100 text-emerald-700'
+                                }`}>
+                                  {isChosen ? <Check className="w-3 h-3 stroke-[3]" /> : <Gift className="w-3 h-3" />}
+                                </div>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* 2. Spend Threshold Free Dish Upsell Progress Bar (when below threshold) */}
+                {spendRewardOffer && !isSpendRewardUnlocked && spendRewardOffer.minOrderAmount > subtotal && (() => {
+                  const diff = (spendRewardOffer.minOrderAmount - subtotal).toFixed(2);
+                  const pct = Math.min(100, Math.round((subtotal / spendRewardOffer.minOrderAmount) * 100));
+                  return (
+                    <div className="p-2.5 bg-purple-50/90 border border-purple-200 rounded-xl space-y-1.5 text-xs">
+                      <div className="flex items-center justify-between text-purple-950 font-bold">
+                        <span className="flex items-center gap-1.5">
+                          <Gift className="w-3.5 h-3.5 text-purple-600" />
+                          <span>Add <strong>£{diff}</strong> more to choose a <strong>FREE REWARD DISH</strong>!</span>
+                        </span>
+                        <span className="text-[10px] text-purple-700 font-extrabold">{pct}%</span>
+                      </div>
+                      <div className="w-full bg-purple-200/80 rounded-full h-1.5 overflow-hidden">
+                        <div className="bg-linear-to-r from-purple-500 to-indigo-500 h-full rounded-full transition-all duration-300" style={{ width: `${pct}%` }} />
+                      </div>
+                    </div>
+                  );
+                })()}
+
+                {/* 3. Prominent Free Delivery Deal Banner when Unlocked */}
                 {isFreeDeliveryUnlocked && (
                   <div className="p-3 bg-linear-to-r from-emerald-50 via-teal-50 to-emerald-50 border border-emerald-300 rounded-xl flex items-center justify-between gap-2 shadow-2xs animate-in fade-in duration-300">
                     <div className="flex items-center gap-2.5 min-w-0">
@@ -1682,7 +1920,7 @@ export default function CheckoutWizardModal({
                   </div>
                 )}
 
-                {/* 2. Free Delivery Upsell Progress Bar (when below threshold) */}
+                {/* 4. Free Delivery Upsell Progress Bar (when below threshold) */}
                 {!isFreeDeliveryUnlocked && serviceType === 'DELIVERY' && activeOffers.some((o) => o.discountType === 'FREE_DELIVERY' && o.minOrderAmount > subtotal) && (() => {
                   const targetOffer = activeOffers.find((o) => o.discountType === 'FREE_DELIVERY' && o.minOrderAmount > subtotal);
                   const diff = (targetOffer.minOrderAmount - subtotal).toFixed(2);
@@ -1703,7 +1941,7 @@ export default function CheckoutWizardModal({
                   );
                 })()}
 
-                {/* 3. Coupon & Offer Code Section */}
+                {/* 5. Coupon & Offer Code Section */}
                 <div className="space-y-2">
                   {effectiveDiscountAmount > 0 ? (
                     <div className="p-2.5 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center justify-between">
@@ -1770,36 +2008,45 @@ export default function CheckoutWizardModal({
                         </button>
                       </div>
 
-                      {/* Available Clickable Restaurant Offers */}
-                      {Array.isArray(restaurant?.offers) && restaurant.offers.filter((o) => o.isActive && o.code).length > 0 && (
-                        <div className="space-y-1 pt-1">
-                          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
-                            Available Offers for this Restaurant:
-                          </span>
-                          <div className="flex flex-wrap gap-1.5">
-                            {restaurant.offers
-                              .filter((o) => o.isActive && o.code)
-                              .map((off) => (
-                                <button
-                                  key={off.id}
-                                  type="button"
-                                  onClick={() => handleApplyCoupon(off.code)}
-                                  className="px-2 py-1 bg-orange-50 hover:bg-orange-100 border border-orange-200 text-orange-700 rounded-lg text-[11px] font-bold flex items-center gap-1 transition cursor-pointer"
-                                >
-                                  <span>{off.code}</span>
-                                  <span className="text-[10px] text-orange-500 font-normal">
-                                    ({off.discountType === 'PERCENTAGE' ? `${off.discountValue}% off` : off.discountType === 'FREE_DELIVERY' ? 'Free Del' : `£${off.discountValue} off`})
-                                  </span>
-                                </button>
-                              ))}
+                      {/* Available Clickable Restaurant Promo Codes (Excludes Auto-Applied Deals like Free Delivery) */}
+                      {Array.isArray(restaurant?.offers) &&
+                        restaurant.offers.filter((o) => o.isActive !== false && !o.isAutomatic && o.code).length > 0 && (
+                          <div className="space-y-1 pt-1">
+                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                              Available Promo Codes:
+                            </span>
+                            <div className="flex flex-wrap gap-1.5">
+                              {restaurant.offers
+                                .filter((o) => o.isActive !== false && !o.isAutomatic && o.code)
+                                .map((off) => (
+                                  <button
+                                    key={off.id}
+                                    type="button"
+                                    onClick={() => handleApplyCoupon(off.code)}
+                                    className="px-2 py-1 bg-orange-50 hover:bg-orange-100 border border-orange-200 text-orange-700 rounded-lg text-[11px] font-bold flex items-center gap-1 transition cursor-pointer"
+                                  >
+                                    <span>{off.code}</span>
+                                    <span className="text-[10px] text-orange-500 font-normal">
+                                      ({off.discountType === 'PERCENTAGE'
+                                        ? `${off.discountValue}% off`
+                                        : off.discountType === 'FIXED_AMOUNT'
+                                        ? `£${off.discountValue} off`
+                                        : off.discountType === 'BOGO'
+                                        ? `Buy ${off.buyQuantity || 1} Get ${off.getQuantity || 1} Free`
+                                        : off.discountType === 'SPEND_GET_FREE_ITEM'
+                                        ? `Free Dish (£${off.minOrderAmount}+)`
+                                        : 'Free Delivery'})
+                                    </span>
+                                  </button>
+                                ))}
+                            </div>
                           </div>
-                        </div>
-                      )}
+                        )}
                     </div>
                   )}
                 </div>
 
-                {/* 4. Financial Calculations Breakdown */}
+                {/* 6. Financial Calculations Breakdown */}
                 <div className="pt-2 space-y-1.5 text-slate-600 border-t border-slate-100">
                   {/* Subtotal */}
                   <div className="flex justify-between">

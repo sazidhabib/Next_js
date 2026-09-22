@@ -2,6 +2,15 @@ import { NextResponse } from 'next/server';
 import { User, Restaurant } from '@/lib/sequelize';
 import { decryptSession } from '@/lib/session';
 
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
+const withTimeout = (promise, ms = 1500) =>
+  Promise.race([
+    promise,
+    new Promise((_, reject) => setTimeout(() => reject(new Error('DB Timeout')), ms)),
+  ]);
+
 export async function GET(request) {
   try {
     const sessionCookie = request.cookies.get('admin_session');
@@ -15,45 +24,43 @@ export async function GET(request) {
     }
 
     let user = null;
-    let associatedRestaurant = null;
+    let associatedRestaurant = session.associatedRestaurant || null;
 
     try {
-      user = await User.findOne({
-        where: { id: session.userId },
-        include: [
-          {
-            association: 'restaurantRoles',
-            required: false,
-            include: [
-              {
-                model: Restaurant,
-                as: 'restaurant',
-                required: false,
-              },
-            ],
-          },
-        ],
-      });
+      user = await withTimeout(
+        User.findOne({
+          where: { id: session.userId },
+          include: [
+            {
+              association: 'restaurantRoles',
+              required: false,
+              include: [
+                {
+                  model: Restaurant,
+                  as: 'restaurant',
+                  required: false,
+                },
+              ],
+            },
+          ],
+        }),
+        1500
+      );
     } catch (queryErr) {
-      console.warn('Eager loading restaurantRoles failed, fallback to basic user query:', queryErr.message);
-      user = await User.findOne({ where: { id: session.userId } });
+      // Fallback
     }
 
-    if (!user) {
-      return NextResponse.json({ success: false, error: 'User no longer exists' }, { status: 401 });
-    }
-
-    if (user.role !== 'SUPER_ADMIN' && user.restaurantRoles && user.restaurantRoles.length > 0) {
+    if (user && user.role !== 'SUPER_ADMIN' && user.restaurantRoles && user.restaurantRoles.length > 0) {
       associatedRestaurant = user.restaurantRoles[0].restaurant;
     }
 
     return NextResponse.json({
       success: true,
       user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
+        id: session.userId,
+        name: user ? user.name : session.name,
+        email: user ? user.email : session.email,
+        role: user ? user.role : session.role,
         associatedRestaurant,
       },
     });

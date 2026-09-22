@@ -178,23 +178,26 @@ export default function MenuPage({ params }) {
                 <span>OFFERS & DEALS</span>
               </span>
               <div className="flex items-center gap-3 overflow-x-auto no-scrollbar font-bold whitespace-nowrap">
-                {activeOffers.map((off) => (
+                {activeOffers.map((off, idx) => (
                   <button
                     key={off.id}
                     type="button"
                     onClick={() => {
-                      if (off.code) handleCopyOfferCode(off.code);
-                      else setIsOffersModalOpen(true);
+                      if (off.code && !off.isAutomatic) handleCopyOfferCode(off.code);
                     }}
                     className="flex items-center gap-1.5 hover:underline cursor-pointer"
                   >
                     <span>{off.bannerText || off.title}</span>
-                    {off.code && (
+                    {off.code && !off.isAutomatic ? (
                       <span className="font-mono bg-black/30 px-1.5 py-0.5 rounded text-[11px] border border-white/20">
                         {off.code}
                       </span>
-                    )}
-                    <span className="text-orange-200 ml-1">•</span>
+                    ) : off.isAutomatic ? (
+                      <span className="text-[10px] bg-white/20 px-1.5 py-0.5 rounded font-semibold text-emerald-200">
+                        Auto-Applied
+                      </span>
+                    ) : null}
+                    {idx < activeOffers.length - 1 && <span className="text-orange-200 ml-1">•</span>}
                   </button>
                 ))}
               </div>
@@ -661,6 +664,8 @@ export default function MenuPage({ params }) {
                   {activeOffers.map((off) => {
                     const isPct = off.discountType === 'PERCENTAGE';
                     const isFreeDel = off.discountType === 'FREE_DELIVERY';
+                    const isBogo = off.discountType === 'BOGO';
+                    const isSpendReward = off.discountType === 'SPEND_GET_FREE_ITEM';
 
                     return (
                       <div
@@ -688,7 +693,11 @@ export default function MenuPage({ params }) {
                                 ? `${off.discountValue}% OFF`
                                 : isFreeDel
                                 ? 'FREE DELIVERY'
-                                : `£${off.discountValue?.toFixed(2)} OFF`}
+                                : isBogo
+                                ? `BUY ${off.buyQuantity || 1} GET ${off.getQuantity || 1} FREE`
+                                : isSpendReward
+                                ? 'FREE DISH REWARD'
+                                : `£${(off.discountValue || 0).toFixed(2)} OFF`}
                             </span>
                           </div>
 

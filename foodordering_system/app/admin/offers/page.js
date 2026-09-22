@@ -26,17 +26,29 @@ import {
   Info,
   Layers,
   ArrowRight,
+  Gift,
+  Utensils,
+  CheckSquare,
+  Square,
+  ChevronRight,
+  X,
 } from 'lucide-react';
 import { useAdmin } from '@/lib/adminContext';
 import MediaPickerModal from '@/components/MediaPickerModal';
 
 export default function AdminOffersPage() {
-  const { selectedRestaurant } = useAdmin();
+  const { user, selectedRestaurant, loading: adminLoading } = useAdmin();
   const [offers, setOffers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  const [filterType, setFilterType] = useState('ALL'); // 'ALL' | 'ACTIVE' | 'AUTOMATIC' | 'CODE'
+  const [filterType, setFilterType] = useState('ALL'); // 'ALL' | 'ACTIVE' | 'AUTOMATIC' | 'CODE' | 'BOGO' | 'FREE_REWARD'
   const [copiedCode, setCopiedCode] = useState(null);
+
+  // Menu items & Categories for dish selection
+  const [menuItems, setMenuItems] = useState([]);
+  const [menuCategories, setMenuCategories] = useState([]);
+  const [dishSearch, setDishSearch] = useState('');
+  const [dishCategoryFilter, setDishCategoryFilter] = useState('ALL');
 
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -49,7 +61,7 @@ export default function AdminOffersPage() {
   const [formDescription, setFormDescription] = useState('');
   const [formCode, setFormCode] = useState('');
   const [formIsAutomatic, setFormIsAutomatic] = useState(false);
-  const [formDiscountType, setFormDiscountType] = useState('PERCENTAGE'); // 'PERCENTAGE' | 'FIXED_AMOUNT' | 'FREE_DELIVERY'
+  const [formDiscountType, setFormDiscountType] = useState('PERCENTAGE'); // 'PERCENTAGE' | 'FIXED_AMOUNT' | 'FREE_DELIVERY' | 'BOGO' | 'SPEND_GET_FREE_ITEM'
   const [formDiscountValue, setFormDiscountValue] = useState(15);
   const [formMinOrderAmount, setFormMinOrderAmount] = useState(20);
   const [formMaxDiscountAmount, setFormMaxDiscountAmount] = useState(10);
@@ -61,13 +73,22 @@ export default function AdminOffersPage() {
   const [formUsageLimit, setFormUsageLimit] = useState('');
   const [formIsActive, setFormIsActive] = useState(true);
 
-  const restaurantId = selectedRestaurant?.id || 'resto-bella-vista-001';
+  // New fields for BOGO & Spend Threshold Rewards
+  const [formApplicableItemIds, setFormApplicableItemIds] = useState([]);
+  const [formFreeRewardItemIds, setFormFreeRewardItemIds] = useState([]);
+  const [formBuyQuantity, setFormBuyQuantity] = useState(1);
+  const [formGetQuantity, setFormGetQuantity] = useState(1);
 
   // Fetch offers
   const fetchOffers = async () => {
     try {
       setLoading(true);
-      const res = await fetch(`/api/admin/offers?restaurantId=${restaurantId}`);
+      const targetParam = selectedRestaurant?.id
+        ? `?restaurantId=${encodeURIComponent(selectedRestaurant.id)}`
+        : selectedRestaurant?.slug
+        ? `?slug=${encodeURIComponent(selectedRestaurant.slug)}`
+        : '';
+      const res = await fetch(`/api/admin/offers${targetParam}`);
       const json = await res.json();
       if (json.success && Array.isArray(json.data)) {
         setOffers(json.data);
@@ -82,9 +103,34 @@ export default function AdminOffersPage() {
     }
   };
 
+  // Fetch menu dishes for multi-select
+  const fetchMenu = async () => {
+    try {
+      const activeSlug = selectedRestaurant?.slug || 'bellavista-pizza';
+      const res = await fetch(`/api/restaurant?slug=${encodeURIComponent(activeSlug)}`);
+      const json = await res.json();
+      if (json.success && json.data) {
+        const cats = json.data.categories || [];
+        setMenuCategories(cats);
+        const allDishes = [];
+        cats.forEach((c) => {
+          (c.items || []).forEach((item) => {
+            allDishes.push({ ...item, categoryName: c.name });
+          });
+        });
+        setMenuItems(allDishes);
+      }
+    } catch (e) {
+      console.warn('Error loading menu dishes:', e);
+    }
+  };
+
   useEffect(() => {
-    fetchOffers();
-  }, [restaurantId]);
+    if (!adminLoading) {
+      fetchOffers();
+      fetchMenu();
+    }
+  }, [selectedRestaurant?.id, selectedRestaurant?.slug, adminLoading]);
 
   // Open Create Modal
   const handleOpenCreate = () => {
@@ -104,6 +150,12 @@ export default function AdminOffersPage() {
     setFormEndDate(new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10));
     setFormUsageLimit('');
     setFormIsActive(true);
+    setFormApplicableItemIds([]);
+    setFormFreeRewardItemIds([]);
+    setFormBuyQuantity(1);
+    setFormGetQuantity(1);
+    setDishSearch('');
+    setDishCategoryFilter('ALL');
     setIsModalOpen(true);
   };
 
@@ -125,6 +177,12 @@ export default function AdminOffersPage() {
     setFormEndDate(offer.endDate ? offer.endDate.slice(0, 10) : '');
     setFormUsageLimit(offer.usageLimit || '');
     setFormIsActive(offer.isActive !== false);
+    setFormApplicableItemIds(Array.isArray(offer.applicableItemIds) ? offer.applicableItemIds : []);
+    setFormFreeRewardItemIds(Array.isArray(offer.freeRewardItemIds) ? offer.freeRewardItemIds : []);
+    setFormBuyQuantity(offer.buyQuantity || 1);
+    setFormGetQuantity(offer.getQuantity || 1);
+    setDishSearch('');
+    setDishCategoryFilter('ALL');
     setIsModalOpen(true);
   };
 
@@ -144,7 +202,7 @@ export default function AdminOffersPage() {
     } else if (preset === 'FREEDEL') {
       setFormTitle('Free Express Delivery on £25+');
       setFormDescription('Free delivery automatically applied for all qualifying orders over £25.');
-      setFormCode('FREEDEL');
+      setFormCode('');
       setFormIsAutomatic(true);
       setFormDiscountType('FREE_DELIVERY');
       setFormDiscountValue(100);
@@ -164,7 +222,57 @@ export default function AdminOffersPage() {
       setFormMaxDiscountAmount(5);
       setFormBannerText('🍕 £5 OFF ORDERS OVER £30 (CODE: FEAST5)');
       setFormBannerImageUrl('https://images.unsplash.com/photo-1604382354936-07c5d9983bd3?w=800&auto=format&fit=crop&q=80');
+    } else if (preset === 'BOGO_PIZZA') {
+      setFormTitle('Buy 1 Pizza Get 1 Free (BOGO)');
+      setFormDescription('Buy any artisanal stone-oven pizza and get a second one 100% free!');
+      setFormCode('BOGOPIZZA');
+      setFormIsAutomatic(false);
+      setFormDiscountType('BOGO');
+      setFormBuyQuantity(1);
+      setFormGetQuantity(1);
+      setFormMinOrderAmount(0);
+      setFormMaxDiscountAmount('');
+      setFormBannerText('🍕 BUY 1 GET 1 FREE ON SELECTED PIZZAS (CODE: BOGOPIZZA)');
+      setFormBannerImageUrl('https://images.unsplash.com/photo-1513104890138-7c749659a591?w=800&auto=format&fit=crop&q=80');
+      // Auto-select pizza dishes if available
+      const pizzaItems = menuItems.filter((i) => i.categoryName?.toLowerCase().includes('pizza') || i.name?.toLowerCase().includes('pizza'));
+      if (pizzaItems.length > 0) {
+        setFormApplicableItemIds(pizzaItems.map((i) => i.id));
+      }
+    } else if (preset === 'SPEND30_REWARD') {
+      setFormTitle('Free Dessert or Side on Orders £30+');
+      setFormDescription('Spend £30 or more to unlock your choice of 1 complimentary dessert, side, or drink at checkout!');
+      setFormCode('');
+      setFormIsAutomatic(true);
+      setFormDiscountType('SPEND_GET_FREE_ITEM');
+      setFormMinOrderAmount(30);
+      setFormMaxDiscountAmount('');
+      setFormBannerText('🎁 FREE COMPLIMENTARY DISH UNLOCKED ON ORDERS £30+');
+      setFormBannerImageUrl('https://images.unsplash.com/photo-1551024709-8f23befc6f87?w=800&auto=format&fit=crop&q=80');
+      // Auto-select dessert/sides items if available
+      const dessertSides = menuItems.filter((i) => 
+        i.categoryName?.toLowerCase().includes('dessert') || 
+        i.categoryName?.toLowerCase().includes('side') || 
+        i.categoryName?.toLowerCase().includes('drink') ||
+        i.categoryName?.toLowerCase().includes('appetizer')
+      );
+      if (dessertSides.length > 0) {
+        setFormFreeRewardItemIds(dessertSides.map((i) => i.id));
+      }
     }
+  };
+
+  // Toggle item selection helper
+  const handleToggleApplicableItem = (itemId) => {
+    setFormApplicableItemIds((prev) =>
+      prev.includes(itemId) ? prev.filter((id) => id !== itemId) : [...prev, itemId]
+    );
+  };
+
+  const handleToggleFreeRewardItem = (itemId) => {
+    setFormFreeRewardItemIds((prev) =>
+      prev.includes(itemId) ? prev.filter((id) => id !== itemId) : [...prev, itemId]
+    );
   };
 
   // Save (Create or Update)
@@ -175,9 +283,19 @@ export default function AdminOffersPage() {
       return;
     }
 
+    if (formDiscountType === 'BOGO' && formApplicableItemIds.length === 0) {
+      toast.warning('Please select at least one qualifying dish for the Buy 1 Get 1 Free promotion.');
+      return;
+    }
+
+    if (formDiscountType === 'SPEND_GET_FREE_ITEM' && formFreeRewardItemIds.length === 0) {
+      toast.warning('Please select at least one eligible free reward dish for customers to choose from.');
+      return;
+    }
+
     setSaving(true);
     const payload = {
-      restaurantId,
+      restaurantId: selectedRestaurant?.id || selectedRestaurant?.slug || undefined,
       title: formTitle.trim(),
       description: formDescription.trim(),
       code: formIsAutomatic ? null : (formCode ? formCode.trim().toUpperCase() : null),
@@ -193,6 +311,10 @@ export default function AdminOffersPage() {
       endDate: formEndDate ? new Date(formEndDate).toISOString() : null,
       usageLimit: formUsageLimit ? parseInt(formUsageLimit) : null,
       isActive: formIsActive,
+      applicableItemIds: formApplicableItemIds,
+      freeRewardItemIds: formFreeRewardItemIds,
+      buyQuantity: parseInt(formBuyQuantity) || 1,
+      getQuantity: parseInt(formGetQuantity) || 1,
     };
 
     try {
@@ -207,6 +329,9 @@ export default function AdminOffersPage() {
         if (json.success) {
           toast.success('Offer updated successfully');
           setIsModalOpen(false);
+          if (json.data) {
+            setOffers((prev) => prev.map((o) => (o.id === json.data.id ? json.data : o)));
+          }
           fetchOffers();
         } else {
           toast.error(json.error || 'Failed to update offer');
@@ -222,6 +347,9 @@ export default function AdminOffersPage() {
         if (json.success) {
           toast.success('Offer created successfully');
           setIsModalOpen(false);
+          if (json.data) {
+            setOffers((prev) => [json.data, ...prev.filter((o) => o.id !== json.data.id)]);
+          }
           fetchOffers();
         } else {
           toast.error(json.error || 'Failed to create offer');
@@ -298,7 +426,24 @@ export default function AdminOffersPage() {
     if (filterType === 'ACTIVE') return offer.isActive;
     if (filterType === 'AUTOMATIC') return offer.isAutomatic;
     if (filterType === 'CODE') return !offer.isAutomatic && offer.code;
+    if (filterType === 'BOGO') return offer.discountType === 'BOGO';
+    if (filterType === 'FREE_REWARD') return offer.discountType === 'SPEND_GET_FREE_ITEM';
     return true;
+  });
+
+  // Filtered menu items for modal dish selector
+  const filteredMenuItems = menuItems.filter((item) => {
+    const matchesSearch =
+      !dishSearch ||
+      item.name.toLowerCase().includes(dishSearch.toLowerCase()) ||
+      (item.description && item.description.toLowerCase().includes(dishSearch.toLowerCase()));
+
+    const matchesCategory =
+      dishCategoryFilter === 'ALL' ||
+      item.categoryId === dishCategoryFilter ||
+      item.categoryName === dishCategoryFilter;
+
+    return matchesSearch && matchesCategory;
   });
 
   return (
@@ -315,7 +460,7 @@ export default function AdminOffersPage() {
                 Offers & Promotions
               </h1>
               <p className="text-xs text-slate-400">
-                Create promotional discount codes, free delivery thresholds, and automatic banners for your customer storefront.
+                Create promotional discount codes, Buy 1 Get 1 Free, spend threshold free dishes, and automatic delivery threshold banners.
               </p>
             </div>
           </div>
@@ -393,6 +538,8 @@ export default function AdminOffersPage() {
             { key: 'ACTIVE', label: 'Active Only' },
             { key: 'CODE', label: 'Coupon Codes' },
             { key: 'AUTOMATIC', label: 'Auto-Applied' },
+            { key: 'BOGO', label: '🍕 BOGO (Buy 1 Get 1)' },
+            { key: 'FREE_REWARD', label: '🎁 Free Dish Reward' },
           ].map((tab) => (
             <button
               key={tab.key}
@@ -424,7 +571,7 @@ export default function AdminOffersPage() {
           <div className="space-y-1">
             <h3 className="text-base font-bold text-white">No promotional offers found</h3>
             <p className="text-xs text-slate-400 max-w-sm mx-auto">
-              Create special discounts and free delivery campaigns to attract more customers and drive repeat orders.
+              Create special discounts, BOGO deals, and spend threshold free dishes to attract more customers.
             </p>
           </div>
           <button
@@ -442,6 +589,8 @@ export default function AdminOffersPage() {
             const isPercentage = offer.discountType === 'PERCENTAGE';
             const isFreeDelivery = offer.discountType === 'FREE_DELIVERY';
             const isFixed = offer.discountType === 'FIXED_AMOUNT';
+            const isBogo = offer.discountType === 'BOGO';
+            const isSpendReward = offer.discountType === 'SPEND_GET_FREE_ITEM';
 
             return (
               <div
@@ -460,7 +609,13 @@ export default function AdminOffersPage() {
                     />
                   ) : (
                     <div className="w-full h-full bg-linear-to-br from-slate-800 via-slate-900 to-slate-950 flex items-center justify-center text-slate-600">
-                      <Sparkles className="w-10 h-10 opacity-30" />
+                      {isBogo ? (
+                        <Gift className="w-10 h-10 opacity-30 text-amber-400" />
+                      ) : isSpendReward ? (
+                        <Utensils className="w-10 h-10 opacity-30 text-emerald-400" />
+                      ) : (
+                        <Sparkles className="w-10 h-10 opacity-30" />
+                      )}
                     </div>
                   )}
                   <div className="absolute inset-0 bg-linear-to-t from-slate-900 via-slate-900/40 to-transparent"></div>
@@ -469,14 +624,22 @@ export default function AdminOffersPage() {
                   <div className="absolute top-3 left-3 right-3 flex items-center justify-between">
                     <span
                       className={`text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider backdrop-blur-md shadow-xs ${
-                        isPercentage
+                        isBogo
+                          ? 'bg-amber-500/90 text-white'
+                          : isSpendReward
+                          ? 'bg-emerald-600/90 text-white'
+                          : isPercentage
                           ? 'bg-orange-500/90 text-white'
                           : isFreeDelivery
                           ? 'bg-emerald-500/90 text-white'
                           : 'bg-blue-500/90 text-white'
                       }`}
                     >
-                      {isPercentage
+                      {isBogo
+                        ? `BUY ${offer.buyQuantity || 1} GET ${offer.getQuantity || 1} FREE`
+                        : isSpendReward
+                        ? `FREE DISH ON £${offer.minOrderAmount || 30}+`
+                        : isPercentage
                         ? `${offer.discountValue}% OFF`
                         : isFreeDelivery
                         ? 'FREE DELIVERY'
@@ -548,6 +711,28 @@ export default function AdminOffersPage() {
                       )}
                     </div>
 
+                    {isBogo && (
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="text-slate-400 font-medium">Qualifying Items:</span>
+                        <span className="font-bold text-amber-400">
+                          {Array.isArray(offer.applicableItemIds) && offer.applicableItemIds.length > 0
+                            ? `${offer.applicableItemIds.length} Selected Dishes`
+                            : 'All Menu Items'}
+                        </span>
+                      </div>
+                    )}
+
+                    {isSpendReward && (
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="text-slate-400 font-medium">Reward Choices:</span>
+                        <span className="font-bold text-emerald-400">
+                          {Array.isArray(offer.freeRewardItemIds) && offer.freeRewardItemIds.length > 0
+                            ? `${offer.freeRewardItemIds.length} Free Dish Options`
+                            : 'All Menu Items'}
+                        </span>
+                      </div>
+                    )}
+
                     <div className="flex items-center justify-between text-xs">
                       <span className="text-slate-400 font-medium">Min Basket Spend:</span>
                       <span className="font-semibold text-slate-200">
@@ -602,7 +787,7 @@ export default function AdminOffersPage() {
       {/* Create / Edit Offer Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl my-8">
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-3xl overflow-hidden shadow-2xl my-8">
             <div className="p-5 border-b border-slate-800 flex items-center justify-between bg-slate-950">
               <div className="flex items-center gap-2">
                 <div className="p-2 bg-orange-500/10 text-orange-400 rounded-xl">
@@ -613,7 +798,7 @@ export default function AdminOffersPage() {
                     {editingOffer ? 'Edit Promotion Campaign' : 'Create Promotional Offer'}
                   </h2>
                   <p className="text-xs text-slate-400">
-                    Configure promotional rules, discount tiers, and banner image.
+                    Configure promotional rules, discount tiers, BOGO pairings, and free reward gifts.
                   </p>
                 </div>
               </div>
@@ -621,7 +806,7 @@ export default function AdminOffersPage() {
               <button
                 type="button"
                 onClick={() => setIsModalOpen(false)}
-                className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800"
+                className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 cursor-pointer"
               >
                 <XCircle className="w-5 h-5" />
               </button>
@@ -653,7 +838,23 @@ export default function AdminOffersPage() {
                     onClick={() => applyPreset('FLAT5')}
                     className="px-2.5 py-1 bg-slate-800 hover:bg-blue-600/30 hover:border-blue-500/50 border border-slate-700 text-slate-200 rounded-lg text-xs font-semibold transition cursor-pointer"
                   >
-                    🍕 £5 Off Feast (£30+)
+                    🍕 £5 Off (£30+)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => applyPreset('BOGO_PIZZA')}
+                    className="px-2.5 py-1 bg-amber-500/10 hover:bg-amber-600/30 hover:border-amber-500/50 border border-amber-500/40 text-amber-300 rounded-lg text-xs font-bold transition cursor-pointer flex items-center gap-1"
+                  >
+                    <Gift className="w-3.5 h-3.5" />
+                    <span>🍕 Buy 1 Get 1 Free</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => applyPreset('SPEND30_REWARD')}
+                    className="px-2.5 py-1 bg-emerald-500/10 hover:bg-emerald-600/30 hover:border-emerald-500/50 border border-emerald-500/40 text-emerald-300 rounded-lg text-xs font-bold transition cursor-pointer flex items-center gap-1"
+                  >
+                    <Utensils className="w-3.5 h-3.5" />
+                    <span>🎁 Free Dish on £30+</span>
                   </button>
                 </div>
               </div>
@@ -752,46 +953,71 @@ export default function AdminOffersPage() {
                   Discount Mechanics & Logic
                 </span>
 
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
                   <label
                     onClick={() => setFormDiscountType('PERCENTAGE')}
                     className={`p-3 rounded-xl border flex flex-col items-center text-center gap-1.5 cursor-pointer transition ${
                       formDiscountType === 'PERCENTAGE'
-                        ? 'bg-orange-500/10 border-orange-500 text-orange-400'
+                        ? 'bg-orange-500/10 border-orange-500 text-orange-400 font-bold'
                         : 'bg-slate-900 border-slate-800 text-slate-400 hover:border-slate-700'
                     }`}
                   >
                     <Percent className="w-5 h-5" />
-                    <span className="text-xs font-bold">Percentage (%)</span>
+                    <span className="text-[11px]">Percentage (%)</span>
                   </label>
 
                   <label
                     onClick={() => setFormDiscountType('FIXED_AMOUNT')}
                     className={`p-3 rounded-xl border flex flex-col items-center text-center gap-1.5 cursor-pointer transition ${
                       formDiscountType === 'FIXED_AMOUNT'
-                        ? 'bg-blue-500/10 border-blue-500 text-blue-400'
+                        ? 'bg-blue-500/10 border-blue-500 text-blue-400 font-bold'
                         : 'bg-slate-900 border-slate-800 text-slate-400 hover:border-slate-700'
                     }`}
                   >
                     <DollarSign className="w-5 h-5" />
-                    <span className="text-xs font-bold">Fixed Amount (£)</span>
+                    <span className="text-[11px]">Fixed Amount (£)</span>
                   </label>
 
                   <label
                     onClick={() => setFormDiscountType('FREE_DELIVERY')}
                     className={`p-3 rounded-xl border flex flex-col items-center text-center gap-1.5 cursor-pointer transition ${
                       formDiscountType === 'FREE_DELIVERY'
-                        ? 'bg-emerald-500/10 border-emerald-500 text-emerald-400'
+                        ? 'bg-emerald-500/10 border-emerald-500 text-emerald-400 font-bold'
                         : 'bg-slate-900 border-slate-800 text-slate-400 hover:border-slate-700'
                     }`}
                   >
                     <Truck className="w-5 h-5" />
-                    <span className="text-xs font-bold">Free Delivery</span>
+                    <span className="text-[11px]">Free Delivery</span>
+                  </label>
+
+                  <label
+                    onClick={() => setFormDiscountType('BOGO')}
+                    className={`p-3 rounded-xl border flex flex-col items-center text-center gap-1.5 cursor-pointer transition ${
+                      formDiscountType === 'BOGO'
+                        ? 'bg-amber-500/10 border-amber-500 text-amber-400 font-bold'
+                        : 'bg-slate-900 border-slate-800 text-slate-400 hover:border-slate-700'
+                    }`}
+                  >
+                    <Gift className="w-5 h-5" />
+                    <span className="text-[11px]">Buy 1 Get 1 Free</span>
+                  </label>
+
+                  <label
+                    onClick={() => setFormDiscountType('SPEND_GET_FREE_ITEM')}
+                    className={`p-3 rounded-xl border flex flex-col items-center text-center gap-1.5 cursor-pointer transition ${
+                      formDiscountType === 'SPEND_GET_FREE_ITEM'
+                        ? 'bg-purple-500/10 border-purple-500 text-purple-400 font-bold'
+                        : 'bg-slate-900 border-slate-800 text-slate-400 hover:border-slate-700'
+                    }`}
+                  >
+                    <Utensils className="w-5 h-5" />
+                    <span className="text-[11px]">Free Dish Reward</span>
                   </label>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  {formDiscountType !== 'FREE_DELIVERY' && (
+                {/* Percentage / Fixed Amount Inputs */}
+                {(formDiscountType === 'PERCENTAGE' || formDiscountType === 'FIXED_AMOUNT') && (
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <div className="space-y-1">
                       <label className="text-xs font-semibold text-slate-300">
                         {formDiscountType === 'PERCENTAGE' ? 'Discount Percentage (%)' : 'Discount Amount (£)'}
@@ -805,39 +1031,276 @@ export default function AdminOffersPage() {
                         className="w-full px-3 py-1.5 bg-slate-900 border border-slate-700 rounded-lg text-xs text-white"
                       />
                     </div>
-                  )}
 
-                  <div className="space-y-1">
-                    <label className="text-xs font-semibold text-slate-300">
-                      Min Basket Subtotal (£)
-                    </label>
-                    <input
-                      type="number"
-                      step="0.5"
-                      min="0"
-                      value={formMinOrderAmount}
-                      onChange={(e) => setFormMinOrderAmount(e.target.value)}
-                      className="w-full px-3 py-1.5 bg-slate-900 border border-slate-700 rounded-lg text-xs text-white"
-                    />
-                  </div>
-
-                  {formDiscountType === 'PERCENTAGE' && (
                     <div className="space-y-1">
                       <label className="text-xs font-semibold text-slate-300">
-                        Max Cap (£) (Optional)
+                        Min Basket Subtotal (£)
                       </label>
                       <input
                         type="number"
                         step="0.5"
                         min="0"
-                        placeholder="e.g. 10.00"
-                        value={formMaxDiscountAmount}
-                        onChange={(e) => setFormMaxDiscountAmount(e.target.value)}
+                        value={formMinOrderAmount}
+                        onChange={(e) => setFormMinOrderAmount(e.target.value)}
                         className="w-full px-3 py-1.5 bg-slate-900 border border-slate-700 rounded-lg text-xs text-white"
                       />
                     </div>
-                  )}
-                </div>
+
+                    {formDiscountType === 'PERCENTAGE' && (
+                      <div className="space-y-1">
+                        <label className="text-xs font-semibold text-slate-300">
+                          Max Cap (£) (Optional)
+                        </label>
+                        <input
+                          type="number"
+                          step="0.5"
+                          min="0"
+                          placeholder="e.g. 10.00"
+                          value={formMaxDiscountAmount}
+                          onChange={(e) => setFormMaxDiscountAmount(e.target.value)}
+                          className="w-full px-3 py-1.5 bg-slate-900 border border-slate-700 rounded-lg text-xs text-white"
+                        />
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Free Delivery Inputs */}
+                {formDiscountType === 'FREE_DELIVERY' && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <label className="text-xs font-semibold text-slate-300">
+                        Min Basket Spend to Unlock Free Delivery (£)
+                      </label>
+                      <input
+                        type="number"
+                        step="0.5"
+                        min="0"
+                        value={formMinOrderAmount}
+                        onChange={(e) => setFormMinOrderAmount(e.target.value)}
+                        className="w-full px-3 py-1.5 bg-slate-900 border border-slate-700 rounded-lg text-xs text-white"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* BOGO Configuration & Dish Selection */}
+                {formDiscountType === 'BOGO' && (
+                  <div className="space-y-3 pt-2 border-t border-slate-800">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      <div className="space-y-1">
+                        <label className="text-xs font-semibold text-slate-300">Buy Quantity</label>
+                        <input
+                          type="number"
+                          min="1"
+                          value={formBuyQuantity}
+                          onChange={(e) => setFormBuyQuantity(parseInt(e.target.value) || 1)}
+                          className="w-full px-3 py-1.5 bg-slate-900 border border-slate-700 rounded-lg text-xs text-white"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-xs font-semibold text-slate-300">Get Free Quantity</label>
+                        <input
+                          type="number"
+                          min="1"
+                          value={formGetQuantity}
+                          onChange={(e) => setFormGetQuantity(parseInt(e.target.value) || 1)}
+                          className="w-full px-3 py-1.5 bg-slate-900 border border-slate-700 rounded-lg text-xs text-white"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-xs font-semibold text-slate-300">Min Cart Spend (Optional)</label>
+                        <input
+                          type="number"
+                          min="0"
+                          value={formMinOrderAmount}
+                          onChange={(e) => setFormMinOrderAmount(e.target.value)}
+                          className="w-full px-3 py-1.5 bg-slate-900 border border-slate-700 rounded-lg text-xs text-white"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Dish Multi-Select for BOGO */}
+                    <div className="space-y-2 pt-2">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <label className="text-xs font-bold text-amber-400 flex items-center gap-1.5">
+                          <Gift className="w-4 h-4" />
+                          <span>Select Qualifying Dishes for Buy 1 Get 1 Free ({formApplicableItemIds.length} selected):</span>
+                        </label>
+                        <div className="flex gap-2">
+                          <button
+                            type="button"
+                            onClick={() => setFormApplicableItemIds(menuItems.map((i) => i.id))}
+                            className="text-[11px] text-amber-400 hover:underline cursor-pointer"
+                          >
+                            Select All
+                          </button>
+                          <span className="text-slate-600">|</span>
+                          <button
+                            type="button"
+                            onClick={() => setFormApplicableItemIds([])}
+                            className="text-[11px] text-slate-400 hover:underline cursor-pointer"
+                          >
+                            Clear All
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Search and Category Filter for Dishes */}
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          placeholder="Search dish name..."
+                          value={dishSearch}
+                          onChange={(e) => setDishSearch(e.target.value)}
+                          className="flex-1 px-3 py-1 bg-slate-900 border border-slate-700 rounded-lg text-xs text-white placeholder-slate-500"
+                        />
+                        <select
+                          value={dishCategoryFilter}
+                          onChange={(e) => setDishCategoryFilter(e.target.value)}
+                          className="px-2 py-1 bg-slate-900 border border-slate-700 rounded-lg text-xs text-white"
+                        >
+                          <option value="ALL">All Categories</option>
+                          {menuCategories.map((c) => (
+                            <option key={c.id} value={c.id}>{c.name}</option>
+                          ))}
+                        </select>
+                      </div>
+
+                      {/* Dishes Grid */}
+                      <div className="max-h-48 overflow-y-auto bg-slate-900 p-2 rounded-xl border border-slate-800 grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                        {filteredMenuItems.map((item) => {
+                          const isSelected = formApplicableItemIds.includes(item.id);
+                          return (
+                            <button
+                              key={item.id}
+                              type="button"
+                              onClick={() => handleToggleApplicableItem(item.id)}
+                              className={`p-2 rounded-lg text-left text-xs flex items-center justify-between gap-2 transition cursor-pointer border ${
+                                isSelected
+                                  ? 'bg-amber-500/20 border-amber-500/50 text-amber-200'
+                                  : 'bg-slate-950/60 border-slate-800 text-slate-300 hover:bg-slate-800'
+                              }`}
+                            >
+                              <div className="flex items-center gap-2 truncate">
+                                {isSelected ? (
+                                  <CheckSquare className="w-4 h-4 text-amber-400 shrink-0" />
+                                ) : (
+                                  <Square className="w-4 h-4 text-slate-600 shrink-0" />
+                                )}
+                                <span className="font-semibold truncate">{item.name}</span>
+                              </div>
+                              <span className="text-[11px] font-mono text-slate-400 shrink-0">£{item.basePrice?.toFixed(2)}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Spend Threshold Free Dish Configuration */}
+                {formDiscountType === 'SPEND_GET_FREE_ITEM' && (
+                  <div className="space-y-3 pt-2 border-t border-slate-800">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div className="space-y-1">
+                        <label className="text-xs font-semibold text-slate-300">
+                          Target Cart Spend Threshold (£) <span className="text-orange-500">*</span>
+                        </label>
+                        <input
+                          type="number"
+                          step="0.5"
+                          min="1"
+                          required
+                          value={formMinOrderAmount}
+                          onChange={(e) => setFormMinOrderAmount(e.target.value)}
+                          placeholder="e.g. 30.00"
+                          className="w-full px-3 py-1.5 bg-slate-900 border border-slate-700 rounded-lg text-xs text-white"
+                        />
+                        <p className="text-[10px] text-slate-400">
+                          When customer reaches this cart total, they unlock 1 free choice from the selected reward dishes.
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Dish Multi-Select for Free Reward Choice */}
+                    <div className="space-y-2 pt-2">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <label className="text-xs font-bold text-emerald-400 flex items-center gap-1.5">
+                          <Utensils className="w-4 h-4" />
+                          <span>Select Eligible Free Reward Dishes for Customer to Choose ({formFreeRewardItemIds.length} selected):</span>
+                        </label>
+                        <div className="flex gap-2">
+                          <button
+                            type="button"
+                            onClick={() => setFormFreeRewardItemIds(menuItems.map((i) => i.id))}
+                            className="text-[11px] text-emerald-400 hover:underline cursor-pointer"
+                          >
+                            Select All
+                          </button>
+                          <span className="text-slate-600">|</span>
+                          <button
+                            type="button"
+                            onClick={() => setFormFreeRewardItemIds([])}
+                            className="text-[11px] text-slate-400 hover:underline cursor-pointer"
+                          >
+                            Clear All
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Search and Category Filter for Free Reward Dishes */}
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          placeholder="Search reward dish name..."
+                          value={dishSearch}
+                          onChange={(e) => setDishSearch(e.target.value)}
+                          className="flex-1 px-3 py-1 bg-slate-900 border border-slate-700 rounded-lg text-xs text-white placeholder-slate-500"
+                        />
+                        <select
+                          value={dishCategoryFilter}
+                          onChange={(e) => setDishCategoryFilter(e.target.value)}
+                          className="px-2 py-1 bg-slate-900 border border-slate-700 rounded-lg text-xs text-white"
+                        >
+                          <option value="ALL">All Categories</option>
+                          {menuCategories.map((c) => (
+                            <option key={c.id} value={c.id}>{c.name}</option>
+                          ))}
+                        </select>
+                      </div>
+
+                      {/* Dishes Grid for Free Reward */}
+                      <div className="max-h-48 overflow-y-auto bg-slate-900 p-2 rounded-xl border border-slate-800 grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                        {filteredMenuItems.map((item) => {
+                          const isSelected = formFreeRewardItemIds.includes(item.id);
+                          return (
+                            <button
+                              key={item.id}
+                              type="button"
+                              onClick={() => handleToggleFreeRewardItem(item.id)}
+                              className={`p-2 rounded-lg text-left text-xs flex items-center justify-between gap-2 transition cursor-pointer border ${
+                                isSelected
+                                  ? 'bg-emerald-500/20 border-emerald-500/50 text-emerald-200'
+                                  : 'bg-slate-950/60 border-slate-800 text-slate-300 hover:bg-slate-800'
+                              }`}
+                            >
+                              <div className="flex items-center gap-2 truncate">
+                                {isSelected ? (
+                                  <CheckSquare className="w-4 h-4 text-emerald-400 shrink-0" />
+                                ) : (
+                                  <Square className="w-4 h-4 text-slate-600 shrink-0" />
+                                )}
+                                <span className="font-semibold truncate">{item.name}</span>
+                              </div>
+                              <span className="text-[11px] font-mono text-slate-400 shrink-0">£{item.basePrice?.toFixed(2)}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Trigger & Coupon Code Settings */}
@@ -846,7 +1309,7 @@ export default function AdminOffersPage() {
                   <div>
                     <span className="text-xs font-bold text-white block">Auto-Apply to Cart</span>
                     <span className="text-[11px] text-slate-400">
-                      Automatically applies as soon as the cart reaches the minimum spend without needing a promo code.
+                      Automatically applies as soon as the cart reaches the minimum spend or qualifying dishes without needing a promo code.
                     </span>
                   </div>
                   <input
@@ -865,7 +1328,7 @@ export default function AdminOffersPage() {
                     <input
                       type="text"
                       required={!formIsAutomatic}
-                      placeholder="e.g. SUMMER20"
+                      placeholder="e.g. BOGOPIZZA"
                       value={formCode}
                       onChange={(e) => setFormCode(e.target.value.toUpperCase())}
                       className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-xs font-mono font-bold text-orange-400 uppercase placeholder-slate-500"

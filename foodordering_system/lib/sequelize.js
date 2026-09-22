@@ -856,7 +856,7 @@ export const Offer = sequelize.define('Offer', {
     allowNull: true,
   },
   discountType: {
-    type: DataTypes.ENUM('PERCENTAGE', 'FIXED_AMOUNT', 'FREE_DELIVERY'),
+    type: DataTypes.STRING, // 'PERCENTAGE' | 'FIXED_AMOUNT' | 'FREE_DELIVERY' | 'BOGO' | 'SPEND_GET_FREE_ITEM'
     defaultValue: 'PERCENTAGE',
   },
   discountValue: {
@@ -910,6 +910,22 @@ export const Offer = sequelize.define('Offer', {
   applicableCategoryIds: {
     type: DataTypes.JSON,
     allowNull: true,
+  },
+  applicableItemIds: {
+    type: DataTypes.JSON,
+    allowNull: true,
+  },
+  freeRewardItemIds: {
+    type: DataTypes.JSON,
+    allowNull: true,
+  },
+  buyQuantity: {
+    type: DataTypes.INTEGER,
+    defaultValue: 1,
+  },
+  getQuantity: {
+    type: DataTypes.INTEGER,
+    defaultValue: 1,
   },
 }, {
   tableName: 'offers',
@@ -1069,6 +1085,26 @@ export async function ensureDatabaseReady() {
           }
         } catch (err) {
           console.warn(`⚠️ [DB Init] Warning checking/adding ${col.name} column to delivery_zones table:`, err.message);
+        }
+      }
+
+      // Ensure columns exist on offers table
+      const offerCols = [
+        { name: 'applicableItemIds', def: 'LONGTEXT NULL' },
+        { name: 'freeRewardItemIds', def: 'LONGTEXT NULL' },
+        { name: 'buyQuantity', def: 'INT DEFAULT 1' },
+        { name: 'getQuantity', def: 'INT DEFAULT 1' },
+      ];
+      for (const col of offerCols) {
+        try {
+          const [results] = await sequelize.query(`SHOW COLUMNS FROM offers LIKE '${col.name}'`);
+          if (results.length === 0) {
+            console.log(`➕ [DB Init] Adding ${col.name} column to offers table...`);
+            await sequelize.query(`ALTER TABLE offers ADD COLUMN ${col.name} ${col.def}`);
+            console.log(`✅ [DB Init] ${col.name} column added to offers table.`);
+          }
+        } catch (err) {
+          console.warn(`⚠️ [DB Init] Warning checking/adding ${col.name} column to offers table:`, err.message);
         }
       }
 

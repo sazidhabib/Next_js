@@ -887,8 +887,35 @@ export async function getOffersByRestaurant(restaurantId) {
   try {
     const connected = await isDbConnected();
     if (connected) {
+      let targetId = restaurantId;
+      if (targetId && targetId !== 'resto-bella-vista-001' && targetId !== 'all' && targetId !== 'ALL') {
+        const resto = await Restaurant.findOne({
+          where: {
+            [Op.or]: [{ id: targetId }, { slug: targetId }],
+          },
+        });
+        if (resto) {
+          targetId = resto.id;
+        }
+      } else if (!targetId || targetId === 'resto-bella-vista-001') {
+        const firstResto = await Restaurant.findOne();
+        if (firstResto) {
+          targetId = firstResto.id;
+        }
+      }
+
+      let whereClause = {};
+      if (targetId && targetId !== 'all' && targetId !== 'ALL') {
+        whereClause = {
+          [Op.or]: [
+            { restaurantId: targetId },
+            { restaurantId: 'resto-bella-vista-001' },
+          ],
+        };
+      }
+
       const offers = await Offer.findAll({
-        where: { restaurantId },
+        where: whereClause,
         order: [['createdAt', 'DESC']],
       });
       return offers.map((o) => o.get({ plain: true }));
@@ -901,7 +928,9 @@ export async function getOffersByRestaurant(restaurantId) {
   if (!globalStore.__restaurantData.offers) {
     globalStore.__restaurantData.offers = defaultRestaurant.offers || [];
   }
-  return globalStore.__restaurantData.offers.filter((o) => !restaurantId || o.restaurantId === restaurantId);
+  return globalStore.__restaurantData.offers.filter(
+    (o) => !restaurantId || restaurantId === 'all' || restaurantId === 'ALL' || o.restaurantId === restaurantId || o.restaurantId === 'resto-bella-vista-001'
+  );
 }
 
 export async function getOfferById(offerId) {
@@ -920,9 +949,34 @@ export async function getOfferById(offerId) {
 }
 
 export async function createOffer(offerData) {
+  let targetRestaurantId = offerData.restaurantId;
+  try {
+    const connected = await isDbConnected();
+    if (connected) {
+      if (targetRestaurantId && targetRestaurantId !== 'resto-bella-vista-001') {
+        const resto = await Restaurant.findOne({
+          where: {
+            [Op.or]: [{ id: targetRestaurantId }, { slug: targetRestaurantId }],
+          },
+        });
+        if (resto) {
+          targetRestaurantId = resto.id;
+        } else {
+          const firstResto = await Restaurant.findOne();
+          if (firstResto) targetRestaurantId = firstResto.id;
+        }
+      } else {
+        const firstResto = await Restaurant.findOne();
+        if (firstResto) targetRestaurantId = firstResto.id;
+      }
+    }
+  } catch (err) {
+    console.warn('Error resolving restaurant in createOffer:', err.message);
+  }
+
   const newOffer = {
     id: `offer-${Date.now()}`,
-    restaurantId: offerData.restaurantId || 'resto-bella-vista-001',
+    restaurantId: targetRestaurantId || 'resto-bella-vista-001',
     title: offerData.title || 'Special Promotion',
     description: offerData.description || '',
     code: offerData.code ? offerData.code.trim().toUpperCase() : null,
@@ -940,6 +994,10 @@ export async function createOffer(offerData) {
     usedCount: 0,
     isActive: offerData.isActive !== false,
     applicableCategoryIds: Array.isArray(offerData.applicableCategoryIds) ? offerData.applicableCategoryIds : [],
+    applicableItemIds: Array.isArray(offerData.applicableItemIds) ? offerData.applicableItemIds : [],
+    freeRewardItemIds: Array.isArray(offerData.freeRewardItemIds) ? offerData.freeRewardItemIds : [],
+    buyQuantity: parseInt(offerData.buyQuantity) || 1,
+    getQuantity: parseInt(offerData.getQuantity) || 1,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };
@@ -967,10 +1025,17 @@ export async function updateOffer(offerId, offerData) {
     if (connected) {
       const offer = await Offer.findByPk(offerId);
       if (offer) {
-        if (offerData.code !== undefined) {
-          offerData.code = offerData.code ? offerData.code.trim().toUpperCase() : null;
+        const updatePayload = { ...offerData };
+        if (updatePayload.code !== undefined) {
+          updatePayload.code = updatePayload.code ? updatePayload.code.trim().toUpperCase() : null;
         }
-        await offer.update(offerData);
+        if (updatePayload.applicableItemIds && !Array.isArray(updatePayload.applicableItemIds)) {
+          updatePayload.applicableItemIds = [];
+        }
+        if (updatePayload.freeRewardItemIds && !Array.isArray(updatePayload.freeRewardItemIds)) {
+          updatePayload.freeRewardItemIds = [];
+        }
+        await offer.update(updatePayload);
         return offer.get({ plain: true });
       }
     }
@@ -985,6 +1050,10 @@ export async function updateOffer(offerId, offerData) {
         ...globalStore.__restaurantData.offers[idx],
         ...offerData,
         code: offerData.code !== undefined ? (offerData.code ? offerData.code.trim().toUpperCase() : null) : globalStore.__restaurantData.offers[idx].code,
+        applicableItemIds: Array.isArray(offerData.applicableItemIds) ? offerData.applicableItemIds : globalStore.__restaurantData.offers[idx].applicableItemIds || [],
+        freeRewardItemIds: Array.isArray(offerData.freeRewardItemIds) ? offerData.freeRewardItemIds : globalStore.__restaurantData.offers[idx].freeRewardItemIds || [],
+        buyQuantity: parseInt(offerData.buyQuantity) || globalStore.__restaurantData.offers[idx].buyQuantity || 1,
+        getQuantity: parseInt(offerData.getQuantity) || globalStore.__restaurantData.offers[idx].getQuantity || 1,
         updatedAt: new Date().toISOString(),
       };
       return globalStore.__restaurantData.offers[idx];
@@ -1009,7 +1078,7 @@ export async function deleteOffer(offerId) {
   return true;
 }
 
-export async function validateOfferCode({ restaurantId, code, subtotal = 0, serviceType = 'DELIVERY', deliveryFee = 0 }) {
+export async function validateOfferCode({ restaurantId, code, subtotal = 0, serviceType = 'DELIVERY', deliveryFee = 0, items = [] }) {
   const normalizedCode = code ? code.trim().toUpperCase() : '';
   let offer = null;
 
@@ -1084,6 +1153,36 @@ export async function validateOfferCode({ restaurantId, code, subtotal = 0, serv
     calculatedDiscount = Math.min(offer.discountValue || 0, subtotal);
   } else if (offer.discountType === 'FREE_DELIVERY') {
     calculatedDiscount = deliveryFee > 0 ? deliveryFee : (offer.discountValue || 0);
+  } else if (offer.discountType === 'BOGO') {
+    // Buy 1 Get 1 Free on qualifying items
+    const qualifyingIds = Array.isArray(offer.applicableItemIds) ? offer.applicableItemIds : [];
+    const qualifyingItems = items.filter((it) => 
+      qualifyingIds.length === 0 || qualifyingIds.includes(it.id || it.menuItemId)
+    );
+    const totalQualifyingQty = qualifyingItems.reduce((sum, it) => sum + (it.quantity || 1), 0);
+    const buyQty = offer.buyQuantity || 1;
+    const getQty = offer.getQuantity || 1;
+    const requiredPair = buyQty + getQty;
+
+    if (totalQualifyingQty < requiredPair) {
+      return {
+        valid: false,
+        message: `Add at least ${requiredPair} qualifying items to cart to activate Buy ${buyQty} Get ${getQty} Free!`,
+      };
+    }
+
+    // Discount the lowest priced matching item(s)
+    const freeItemCount = Math.floor(totalQualifyingQty / requiredPair) * getQty;
+    const itemPrices = [];
+    qualifyingItems.forEach((it) => {
+      for (let i = 0; i < (it.quantity || 1); i++) {
+        itemPrices.push(it.unitPrice || it.itemPrice || 0);
+      }
+    });
+    itemPrices.sort((a, b) => a - b);
+    calculatedDiscount = itemPrices.slice(0, freeItemCount).reduce((sum, p) => sum + p, 0);
+  } else if (offer.discountType === 'SPEND_GET_FREE_ITEM') {
+    calculatedDiscount = 0; // Handled as complimentary item reward selection at checkout
   }
 
   calculatedDiscount = Number(calculatedDiscount.toFixed(2));
@@ -1092,7 +1191,9 @@ export async function validateOfferCode({ restaurantId, code, subtotal = 0, serv
     valid: true,
     offer,
     discountAmount: calculatedDiscount,
-    message: `Offer applied! Saved £${calculatedDiscount.toFixed(2)} with ${offer.title}`,
+    message: offer.discountType === 'SPEND_GET_FREE_ITEM'
+      ? `Free Dish Reward unlocked! Choose your complimentary dish at checkout.`
+      : `Offer applied! Saved £${calculatedDiscount.toFixed(2)} with ${offer.title}`,
   };
 }
 
