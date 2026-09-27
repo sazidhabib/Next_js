@@ -1,0 +1,2288 @@
+{
+  "scraperConfig": {
+    "targetUrl": "https://www.startech.com.bd/component",
+    "priorityCategories": [
+      {
+        "id": "cat-1790360337446",
+        "name": "processor",
+        "url": "https://www.startech.com.bd/component/processor",
+        "priority": 1
+      },
+      {
+        "id": "cat-1790360360733",
+        "name": "CPU Cooler",
+        "url": "https://www.startech.com.bd/component/CPU-Cooler",
+        "priority": 2
+      },
+      {
+        "id": "cat-1",
+        "name": "smartphones",
+        "priority": 3
+      },
+      {
+        "id": "cat-2",
+        "name": "laptops",
+        "priority": 4
+      },
+      {
+        "id": "cat-3",
+        "name": "fragrances",
+        "priority": 5
+      }
+    ],
+    "maxProductsPerCategory": 5,
+    "downloadImages": true
+  },
+  "adminConfig": {
+    "adminLoginUrl": "https://hullotech.com/admin",
+    "adminUsername": "admin@hullotech.com",
+    "adminPassword": "admin123",
+    "newProductUrl": "https://hullotech.com/admin/products",
+    "headless": false,
+    "slowMoMs": 500,
+    "selectors": {
+      "loginUserSelector": "input[name=\"email\"], input[type=\"email\"], #email",
+      "loginPasswordSelector": "input[name=\"password\"], input[type=\"password\"], #password",
+      "loginSubmitSelector": "button[type=\"submit\"], #login-btn",
+      "titleSelector": "input[name=\"title\"], input[name=\"name\"], #title",
+      "slugSelector": "input[name=\"slug\"], #slug",
+      "priceSelector": "input[name=\"price\"], #price",
+      "regularPriceSelector": "input[name=\"regular_price\"], input[name=\"regularPrice\"], #regular-price",
+      "categorySelector": "select[name=\"category\"], #category",
+      "subcategorySelector": "select[name=\"subcategory\"], #subcategory",
+      "subSubcategorySelector": "select[name=\"sub_subcategory\"], #sub-subcategory",
+      "brandSelector": "input[name=\"brand\"], select[name=\"brand\"], #brand",
+      "modelSelector": "input[name=\"model\"], input[name=\"sku\"], #sku",
+      "warrantySelector": "input[name=\"warranty\"], #warranty",
+      "mainImageInputSelector": "#main-product-image, input[name=\"main_image\"], input[type=\"file\"]",
+      "galleryImageInputSelector": "#gallery-images, input[name=\"gallery_images\"], input[multiple]",
+      "keyFeaturesSelector": "input[name=\"key_features\"], textarea[name=\"key_features\"], #key-features",
+      "addSectionBtnSelector": "button:has-text(\"+ Add Section\"), #add-section-btn",
+      "sectionTitleInputSelector": "input[placeholder*=\"Section Title\"], .section-title-input",
+      "addFieldBtnSelector": "button:has-text(\"+ Field\"), .add-field-btn",
+      "specLabelInputSelector": "input[placeholder*=\"Label\"], input[placeholder*=\"Key\"], .spec-label-input",
+      "specValueInputSelector": "input[placeholder*=\"Value\"], textarea[placeholder*=\"Value\"], .spec-value-input",
+      "descriptionSelector": "textarea[name=\"description\"], #description",
+      "featuredCheckboxSelector": "input[name=\"featured\"], #featured-checkbox",
+      "inStockCheckboxSelector": "input[name=\"in_stock\"], #in-stock-checkbox",
+      "saveButtonSelector": "button[type=\"submit\"], #save-product-btn",
+      "successIndicatorSelector": ".success-badge, #product-created-alert",
+      "salePriceSelector": "input[name=\"sale_price\"], #sale_price",
+      "imageInputSelector": "input[type=\"file\"]"
+    }
+  },
+  "products": [
+    {
+      "id": "prod-netac-n535s",
+      "title": "Netac N535S 120GB 2.5-inch SATAIII SSD",
+      "slug": "netac-n535s-120gb-25-inch-sataii",
+      "price": 3450,
+      "regularPrice": 3740,
+      "currency": "৳",
+      "category": "Components",
+      "subcategory": "SSD",
+      "subSubcategory": "Netac",
+      "brand": "Netac",
+      "model": "N535S",
+      "warranty": "3 years warranty",
+      "mainImage": "https://www.startech.com.bd/image/cache/catalog/ssd/netac/n535s/n535s-001-500x500.webp",
+      "galleryImages": [
+        "https://www.startech.com.bd/image/cache/catalog/ssd/netac/n535s/n535s-02-500x500.webp",
+        "https://www.startech.com.bd/image/cache/catalog/ssd/netac/n535s/n535s-03-500x500.webp"
+      ],
+      "images": [
+        "https://www.startech.com.bd/image/cache/catalog/ssd/netac/n535s/n535s-001-500x500.webp",
+        "https://www.startech.com.bd/image/cache/catalog/ssd/netac/n535s/n535s-02-500x500.webp"
+      ],
+      "keyFeaturesText": "MPN: NT01N535S-120G-S3X, Model: N535S, Read Speed: 510MB/s, Write Speed: 440MB/s",
+      "structuredSpecs": [
+        {
+          "sectionTitle": "Key Features",
+          "fields": [
+            {
+              "label": "Capacity",
+              "value": "120GB"
+            },
+            {
+              "label": "Form Factor",
+              "value": "2.5\""
+            },
+            {
+              "label": "Flash Type",
+              "value": "3D NAND Flash"
+            },
+            {
+              "label": "Interface",
+              "value": "SATA III"
+            },
+            {
+              "label": "Sequential R/W",
+              "value": "Read Speed 510MB/s\nWrite Speed 440MB/s"
+            },
+            {
+              "label": "Others",
+              "value": "TRIM, S.M.A.R.T, LDPC ECC"
+            }
+          ]
+        },
+        {
+          "sectionTitle": "Physical Specification",
+          "fields": [
+            {
+              "label": "Dimension",
+              "value": "100 × 70 × 7 mm"
+            },
+            {
+              "label": "Weight",
+              "value": "54 g"
+            }
+          ]
+        },
+        {
+          "sectionTitle": "Warranty",
+          "fields": [
+            {
+              "label": "Manufacturing Warranty",
+              "value": "3 years warranty"
+            }
+          ]
+        }
+      ],
+      "description": "<h2>Netac N535S 120GB 2.5-inch SATAIII SSD</h2><p>Netac N535S SSD comes with SATA III 6.0 Gbit/s (backwards compatible with 3.0 Gbit/s and 1.5 Gbit/s) interface. This SSD featured with Read Speed: 510MB/s, Write Speed: 440MB/s and Form Factor: 2.5\". This new Netac N535S 120GB 2.5-inch SATAIII SSD has 3 years warranty.</p>",
+      "features": [
+        "Capacity: 120GB",
+        "Form Factor: 2.5\"",
+        "Interface: SATA III",
+        "3 Years Warranty"
+      ],
+      "specs": {
+        "Capacity": "120GB",
+        "Interface": "SATA III",
+        "Warranty": "3 years warranty"
+      },
+      "featuredProduct": true,
+      "inStock": true,
+      "sourceUrl": "https://www.startech.com.bd/netac-n535s-120gb-sataiii-ssd",
+      "status": "synced",
+      "scrapedAt": "2026-09-25T17:54:14.631Z",
+      "syncedAt": "2026-09-25T18:34:03.797Z"
+    },
+    {
+      "id": "prod-121-45d6",
+      "title": "iPhone 5s",
+      "model": "SMA-APP-IPH-121",
+      "price": 199.99,
+      "salePrice": 174.17,
+      "currency": "USD",
+      "category": "smartphones",
+      "description": "The iPhone 5s is a classic smartphone known for its compact design and advanced features during its release. While it's an older model, it still provides a reliable user experience.",
+      "features": [
+        "smartphones",
+        "apple"
+      ],
+      "specs": {
+        "Brand": "Apple",
+        "Rating": "2.83 / 5",
+        "Stock": "25 in stock",
+        "Weight": "2 kg",
+        "Warranty": "Lifetime warranty"
+      },
+      "images": [
+        "https://cdn.dummyjson.com/product-images/smartphones/iphone-5s/1.webp",
+        "https://cdn.dummyjson.com/product-images/smartphones/iphone-5s/2.webp",
+        "https://cdn.dummyjson.com/product-images/smartphones/iphone-5s/3.webp"
+      ],
+      "sourceUrl": "https://dummyjson.com/products/121",
+      "status": "synced",
+      "scrapedAt": "2026-09-25T12:16:09.027Z",
+      "localImages": [
+        "G:\\Github\\Next_js\\autopost\\public\\scraped_media\\prod-121-45d6_0.webp",
+        "G:\\Github\\Next_js\\autopost\\public\\scraped_media\\prod-121-45d6_1.webp",
+        "G:\\Github\\Next_js\\autopost\\public\\scraped_media\\prod-121-45d6_2.webp"
+      ],
+      "syncedAt": "2026-09-25T12:18:51.547Z"
+    },
+    {
+      "id": "prod-122-0ciz",
+      "title": "iPhone 6",
+      "model": "SMA-APP-IPH-122",
+      "price": 299.99,
+      "salePrice": 279.92,
+      "currency": "USD",
+      "category": "smartphones",
+      "description": "The iPhone 6 is a stylish and capable smartphone with a larger display and improved performance. It introduced new features and design elements, making it a popular choice in its time.",
+      "features": [
+        "smartphones",
+        "apple"
+      ],
+      "specs": {
+        "Brand": "Apple",
+        "Rating": "3.41 / 5",
+        "Stock": "60 in stock",
+        "Weight": "7 kg",
+        "Warranty": "1 month warranty"
+      },
+      "images": [
+        "https://cdn.dummyjson.com/product-images/smartphones/iphone-6/1.webp",
+        "https://cdn.dummyjson.com/product-images/smartphones/iphone-6/2.webp",
+        "https://cdn.dummyjson.com/product-images/smartphones/iphone-6/3.webp"
+      ],
+      "sourceUrl": "https://dummyjson.com/products/122",
+      "status": "pending",
+      "scrapedAt": "2026-09-25T12:16:09.027Z",
+      "localImages": [
+        "G:\\Github\\Next_js\\autopost\\public\\scraped_media\\prod-122-0ciz_0.webp",
+        "G:\\Github\\Next_js\\autopost\\public\\scraped_media\\prod-122-0ciz_1.webp",
+        "G:\\Github\\Next_js\\autopost\\public\\scraped_media\\prod-122-0ciz_2.webp"
+      ]
+    },
+    {
+      "id": "prod-123-rw0a",
+      "title": "iPhone 13 Pro",
+      "model": "SMA-APP-IPH-123",
+      "price": 1099.99,
+      "salePrice": 996.92,
+      "currency": "USD",
+      "category": "smartphones",
+      "description": "The iPhone 13 Pro is a cutting-edge smartphone with a powerful camera system, high-performance chip, and stunning display. It offers advanced features for users who demand top-notch technology.",
+      "features": [
+        "smartphones",
+        "apple"
+      ],
+      "specs": {
+        "Brand": "Apple",
+        "Rating": "4.12 / 5",
+        "Stock": "56 in stock",
+        "Weight": "8 kg",
+        "Warranty": "3 year warranty"
+      },
+      "images": [
+        "https://cdn.dummyjson.com/product-images/smartphones/iphone-13-pro/1.webp",
+        "https://cdn.dummyjson.com/product-images/smartphones/iphone-13-pro/2.webp",
+        "https://cdn.dummyjson.com/product-images/smartphones/iphone-13-pro/3.webp"
+      ],
+      "sourceUrl": "https://dummyjson.com/products/123",
+      "status": "pending",
+      "scrapedAt": "2026-09-25T12:16:09.027Z",
+      "localImages": [
+        "G:\\Github\\Next_js\\autopost\\public\\scraped_media\\prod-123-rw0a_0.webp",
+        "G:\\Github\\Next_js\\autopost\\public\\scraped_media\\prod-123-rw0a_1.webp",
+        "G:\\Github\\Next_js\\autopost\\public\\scraped_media\\prod-123-rw0a_2.webp"
+      ]
+    },
+    {
+      "id": "prod-78-57fb",
+      "title": "Apple MacBook Pro 14 Inch Space Grey",
+      "model": "LAP-APP-APP-078",
+      "price": 1999.99,
+      "salePrice": 1906.19,
+      "currency": "USD",
+      "category": "laptops",
+      "description": "The MacBook Pro 14 Inch in Space Grey is a powerful and sleek laptop, featuring Apple's M1 Pro chip for exceptional performance and a stunning Retina display.",
+      "features": [
+        "laptops",
+        "apple"
+      ],
+      "specs": {
+        "Brand": "Apple",
+        "Rating": "3.65 / 5",
+        "Stock": "24 in stock",
+        "Weight": "9 kg",
+        "Warranty": "3 year warranty"
+      },
+      "images": [
+        "https://cdn.dummyjson.com/product-images/laptops/apple-macbook-pro-14-inch-space-grey/1.webp",
+        "https://cdn.dummyjson.com/product-images/laptops/apple-macbook-pro-14-inch-space-grey/2.webp",
+        "https://cdn.dummyjson.com/product-images/laptops/apple-macbook-pro-14-inch-space-grey/3.webp"
+      ],
+      "sourceUrl": "https://dummyjson.com/products/78",
+      "status": "pending",
+      "scrapedAt": "2026-09-25T12:16:33.590Z",
+      "localImages": [
+        "G:\\Github\\Next_js\\autopost\\public\\scraped_media\\prod-78-57fb_0.webp",
+        "G:\\Github\\Next_js\\autopost\\public\\scraped_media\\prod-78-57fb_1.webp",
+        "G:\\Github\\Next_js\\autopost\\public\\scraped_media\\prod-78-57fb_2.webp"
+      ]
+    },
+    {
+      "id": "prod-79-zhx2",
+      "title": "Asus Zenbook Pro Dual Screen Laptop",
+      "model": "LAP-ASU-ASU-079",
+      "price": 1799.99,
+      "salePrice": 1599.47,
+      "currency": "USD",
+      "category": "laptops",
+      "description": "The Asus Zenbook Pro Dual Screen Laptop is a high-performance device with dual screens, providing productivity and versatility for creative professionals.",
+      "features": [
+        "laptops"
+      ],
+      "specs": {
+        "Brand": "Asus",
+        "Rating": "3.95 / 5",
+        "Stock": "45 in stock",
+        "Weight": "9 kg",
+        "Warranty": "3 year warranty"
+      },
+      "images": [
+        "https://cdn.dummyjson.com/product-images/laptops/asus-zenbook-pro-dual-screen-laptop/1.webp",
+        "https://cdn.dummyjson.com/product-images/laptops/asus-zenbook-pro-dual-screen-laptop/2.webp",
+        "https://cdn.dummyjson.com/product-images/laptops/asus-zenbook-pro-dual-screen-laptop/3.webp"
+      ],
+      "sourceUrl": "https://dummyjson.com/products/79",
+      "status": "pending",
+      "scrapedAt": "2026-09-25T12:16:33.590Z",
+      "localImages": [
+        "G:\\Github\\Next_js\\autopost\\public\\scraped_media\\prod-79-zhx2_0.webp",
+        "G:\\Github\\Next_js\\autopost\\public\\scraped_media\\prod-79-zhx2_1.webp",
+        "G:\\Github\\Next_js\\autopost\\public\\scraped_media\\prod-79-zhx2_2.webp"
+      ]
+    },
+    {
+      "id": "prod-80-3os3",
+      "title": "Huawei Matebook X Pro",
+      "model": "LAP-HUA-HUA-080",
+      "price": 1399.99,
+      "salePrice": 1268.67,
+      "currency": "USD",
+      "category": "laptops",
+      "description": "The Huawei Matebook X Pro is a slim and stylish laptop with a high-resolution touchscreen display, offering a premium experience for users on the go.",
+      "features": [
+        "laptops"
+      ],
+      "specs": {
+        "Brand": "Huawei",
+        "Rating": "4.98 / 5",
+        "Stock": "75 in stock",
+        "Weight": "9 kg",
+        "Warranty": "No warranty"
+      },
+      "images": [
+        "https://cdn.dummyjson.com/product-images/laptops/huawei-matebook-x-pro/1.webp",
+        "https://cdn.dummyjson.com/product-images/laptops/huawei-matebook-x-pro/2.webp",
+        "https://cdn.dummyjson.com/product-images/laptops/huawei-matebook-x-pro/3.webp"
+      ],
+      "sourceUrl": "https://dummyjson.com/products/80",
+      "status": "pending",
+      "scrapedAt": "2026-09-25T12:16:33.590Z",
+      "localImages": [
+        "G:\\Github\\Next_js\\autopost\\public\\scraped_media\\prod-80-3os3_0.webp",
+        "G:\\Github\\Next_js\\autopost\\public\\scraped_media\\prod-80-3os3_1.webp",
+        "G:\\Github\\Next_js\\autopost\\public\\scraped_media\\prod-80-3os3_2.webp"
+      ]
+    },
+    {
+      "id": "prod-6-luc2",
+      "title": "Calvin Klein CK One",
+      "model": "FRA-CAL-CAL-006",
+      "price": 49.99,
+      "salePrice": 49.05,
+      "currency": "USD",
+      "category": "fragrances",
+      "description": "CK One by Calvin Klein is a classic unisex fragrance, known for its fresh and clean scent. It's a versatile fragrance suitable for everyday wear.",
+      "features": [
+        "fragrances",
+        "perfumes"
+      ],
+      "specs": {
+        "Brand": "Calvin Klein",
+        "Rating": "4.37 / 5",
+        "Stock": "29 in stock",
+        "Weight": "7 kg",
+        "Warranty": "1 week warranty"
+      },
+      "images": [
+        "https://cdn.dummyjson.com/product-images/fragrances/calvin-klein-ck-one/1.webp",
+        "https://cdn.dummyjson.com/product-images/fragrances/calvin-klein-ck-one/2.webp",
+        "https://cdn.dummyjson.com/product-images/fragrances/calvin-klein-ck-one/3.webp"
+      ],
+      "sourceUrl": "https://dummyjson.com/products/6",
+      "status": "pending",
+      "scrapedAt": "2026-09-25T12:17:10.120Z",
+      "localImages": [
+        "G:\\Github\\Next_js\\autopost\\public\\scraped_media\\prod-6-luc2_0.webp",
+        "G:\\Github\\Next_js\\autopost\\public\\scraped_media\\prod-6-luc2_1.webp",
+        "G:\\Github\\Next_js\\autopost\\public\\scraped_media\\prod-6-luc2_2.webp"
+      ]
+    },
+    {
+      "id": "prod-7-0hli",
+      "title": "Chanel Coco Noir Eau De",
+      "model": "FRA-CHA-CHA-007",
+      "price": 129.99,
+      "salePrice": 108.53,
+      "currency": "USD",
+      "category": "fragrances",
+      "description": "Coco Noir by Chanel is an elegant and mysterious fragrance, featuring notes of grapefruit, rose, and sandalwood. Perfect for evening occasions.",
+      "features": [
+        "fragrances",
+        "perfumes"
+      ],
+      "specs": {
+        "Brand": "Chanel",
+        "Rating": "4.26 / 5",
+        "Stock": "58 in stock",
+        "Weight": "7 kg",
+        "Warranty": "3 year warranty"
+      },
+      "images": [
+        "https://cdn.dummyjson.com/product-images/fragrances/chanel-coco-noir-eau-de/1.webp",
+        "https://cdn.dummyjson.com/product-images/fragrances/chanel-coco-noir-eau-de/2.webp",
+        "https://cdn.dummyjson.com/product-images/fragrances/chanel-coco-noir-eau-de/3.webp"
+      ],
+      "sourceUrl": "https://dummyjson.com/products/7",
+      "status": "pending",
+      "scrapedAt": "2026-09-25T12:17:10.120Z",
+      "localImages": [
+        "G:\\Github\\Next_js\\autopost\\public\\scraped_media\\prod-7-0hli_0.webp",
+        "G:\\Github\\Next_js\\autopost\\public\\scraped_media\\prod-7-0hli_1.webp",
+        "G:\\Github\\Next_js\\autopost\\public\\scraped_media\\prod-7-0hli_2.webp"
+      ]
+    },
+    {
+      "id": "prod-8-pr46",
+      "title": "Dior J'adore",
+      "model": "FRA-DIO-DIO-008",
+      "price": 89.99,
+      "salePrice": 76.74,
+      "currency": "USD",
+      "category": "fragrances",
+      "description": "J'adore by Dior is a luxurious and floral fragrance, known for its blend of ylang-ylang, rose, and jasmine. It embodies femininity and sophistication.",
+      "features": [
+        "fragrances",
+        "perfumes"
+      ],
+      "specs": {
+        "Brand": "Dior",
+        "Rating": "3.8 / 5",
+        "Stock": "98 in stock",
+        "Weight": "4 kg",
+        "Warranty": "1 week warranty"
+      },
+      "images": [
+        "https://cdn.dummyjson.com/product-images/fragrances/dior-j'adore/1.webp",
+        "https://cdn.dummyjson.com/product-images/fragrances/dior-j'adore/2.webp",
+        "https://cdn.dummyjson.com/product-images/fragrances/dior-j'adore/3.webp"
+      ],
+      "sourceUrl": "https://dummyjson.com/products/8",
+      "status": "pending",
+      "scrapedAt": "2026-09-25T12:17:10.120Z",
+      "localImages": [
+        "G:\\Github\\Next_js\\autopost\\public\\scraped_media\\prod-8-pr46_0.webp",
+        "G:\\Github\\Next_js\\autopost\\public\\scraped_media\\prod-8-pr46_1.webp",
+        "G:\\Github\\Next_js\\autopost\\public\\scraped_media\\prod-8-pr46_2.webp"
+      ]
+    },
+    {
+      "id": "prod-1790360388228-dv1n",
+      "title": "AMD Athlon PRO 300GE AM4 Socket Desktop Processor with Radeon Vega 3 Graphics (Rebox)",
+      "slug": "amd-athlon-pro-300ge-am4-socket-desktop-processor-with-radeon-vega-3-graphics-rebox",
+      "price": 3990,
+      "regularPrice": 5200,
+      "currency": "৳",
+      "category": "Component",
+      "subcategory": "Component",
+      "subSubcategory": "Processor",
+      "brand": "AMD",
+      "model": "Athlon PRO 300GE (Tray Box)",
+      "warranty": "1 Year Warranty",
+      "galleryImages": [],
+      "images": [],
+      "keyFeaturesText": "Model: Athlon PRO 300GE (Tray Box), Base Clock Speed 3.4GHz, Package AM4, PCI Express PCIe 3.0, View More Info",
+      "structuredSpecs": [
+        {
+          "sectionTitle": "Key Features",
+          "fields": [
+            {
+              "label": "Base Frequency",
+              "value": "3.4GHz"
+            },
+            {
+              "label": "Cache",
+              "value": "Total L1 Cache 192KB\nTotal L2 Cache 1MB\nTotal L3 Cache 4MB"
+            },
+            {
+              "label": "Cores",
+              "value": "CPU Cores 2\nGPU Cores 3\nCompute Cores: 5 (2 CPU + 3 GPU)"
+            },
+            {
+              "label": "Threads",
+              "value": "4"
+            },
+            {
+              "label": "Default TDP",
+              "value": "35W"
+            },
+            {
+              "label": "Maximum Speed",
+              "value": "2667MHz"
+            },
+            {
+              "label": "Type",
+              "value": "DDR4"
+            },
+            {
+              "label": "Max Number of Channels",
+              "value": "2"
+            },
+            {
+              "label": "Processor Graphics",
+              "value": "1100 MHz"
+            },
+            {
+              "label": "Core Count",
+              "value": "3"
+            },
+            {
+              "label": "Manufacturing Warranty",
+              "value": "3 Years"
+            }
+          ]
+        }
+      ],
+      "description": "<h2>AMD Athlon PRO 300GE AM4 Socket Desktop Processor with Radeon Vega 3 Graphics (Rebox)</h2>\n<p>AMD processors are architected with a focus on security features. As a result, AMD GuardMI Technology was designed to help customers address cybersecurity concerns. Helps defend against cold boot attacks with real-time encryption and decryption of all your systemâ€™s memory. The worldâ€™s only business processor family with full memory encryption as a standard security feature. Enables a secure boot process to help secure the PC. Helps prevent threats from reaching critical software. Support of Windows 10 security features: Device Guard, Credential Guard, TPM 2.0, VBS, and others. Helping ensure latest security feature integration and support. Dedicated, integrated coprocessor that helps secure the processing and storage of sensitive data and trust applications. </p>",
+      "features": [
+        "Model: Athlon PRO 300GE (Tray Box)",
+        "Base Clock Speed 3.4GHz",
+        "Package AM4",
+        "PCI Express PCIe 3.0",
+        "View More Info"
+      ],
+      "specs": {
+        "Brand": "AMD",
+        "Model": "Athlon PRO 300GE (Tray Box)",
+        "Warranty": "1 Year Warranty"
+      },
+      "featuredProduct": false,
+      "inStock": true,
+      "sourceUrl": "https://www.startech.com.bd/amd-athlon-pro-300ge-processor",
+      "status": "pending",
+      "scrapedAt": "2026-09-25T18:19:48.228Z",
+      "localGalleryImages": [],
+      "localImages": []
+    },
+    {
+      "id": "prod-1790360391027-rypq",
+      "title": "AMD Ryzen 5 2400G Desktop Processor with Radeon RX Vega 11 Graphics",
+      "slug": "amd-ryzen-5-2400g-desktop-processor-with-radeon-rx-vega-11-graphics",
+      "price": 5900,
+      "regularPrice": 7200,
+      "currency": "৳",
+      "category": "Component",
+      "subcategory": "Component",
+      "subSubcategory": "Processor",
+      "brand": "AMD",
+      "model": "Ryzen 5 2400G (Tray Box)",
+      "warranty": "1 Year Warranty",
+      "galleryImages": [
+        "https://www.startech.com.bd/image/cache/catalog/processor/amd/2400g/ryzen-5-2400g-3-500x500.jpg",
+        "https://www.startech.com.bd/image/cache/catalog/processor/amd/ryzen-2200g/ryzen-2200g-4-500x500.jpg"
+      ],
+      "images": [
+        "https://www.startech.com.bd/image/cache/catalog/processor/amd/2400g/ryzen-5-2400g-3-500x500.jpg",
+        "https://www.startech.com.bd/image/cache/catalog/processor/amd/ryzen-2200g/ryzen-2200g-4-500x500.jpg"
+      ],
+      "keyFeaturesText": "Model: Ryzen 5 2400G (Tray Box), Speed: 3.6GHz Up To 3.9GHz, Cache: L1 384KB L2 2MB L3 4MB, Cores-4 & Threads-8, Powerful Radeon Vega graphics, View More Info",
+      "structuredSpecs": [
+        {
+          "sectionTitle": "Key Features",
+          "fields": [
+            {
+              "label": "Base Frequency",
+              "value": "3.6GHz"
+            },
+            {
+              "label": "Maximum Turbo Frequency",
+              "value": "3.9GHz"
+            },
+            {
+              "label": "Cache",
+              "value": "Total L2 Cache 2MB ,\nTotal L3 Cache 4MB"
+            },
+            {
+              "label": "Cores",
+              "value": "4"
+            },
+            {
+              "label": "Threads",
+              "value": "8"
+            },
+            {
+              "label": "Default TDP",
+              "value": "65W"
+            },
+            {
+              "label": "cTDP",
+              "value": "46-65W"
+            },
+            {
+              "label": "Supported Technologies",
+              "value": "AMD SenseMI Technology,\nAMD Ryzen™ Master Utility,\nEnmotus FuzeDrive™ for AMD Ryzen™,\nRadeon™ Software,\nRadeon™ FreeSync Technology"
+            },
+            {
+              "label": "Processor Graphics",
+              "value": "Radeon™ Vega 11 Processor Graphics"
+            },
+            {
+              "label": "Base Frequency",
+              "value": "1250 MHz"
+            },
+            {
+              "label": "Core Count",
+              "value": "11"
+            },
+            {
+              "label": "Manufacturing Warranty",
+              "value": "03 Years Warranty (No Warranty for Fan or Cooler)"
+            }
+          ]
+        }
+      ],
+      "description": "<p>AMD Ryzen 5 2400G Intelligent Desktop Processor is able to provide high-performance computing experience. The revolutionary AMD multi-threaded processor has 4 cores and 8 threads for ensuring blazing fast performance basic work &amp; professional game play. This micro-device also equipped with most powerful Radeon RX Vega graphics containing advanced â€˜Vegaâ€™ graphics technology to deliver fast &amp; smooth gaming performance. This graphics armed with most advanced, powerful computing combined in a single processor to create an impact on heavy duty performance without compromise. The most compatible AM4 socket for AMD Ryzen Ready AM4 Chipset motherboards gives the new future-proof platform. AMD SenseMI technology uses true machine intelligence and Master Utility provides Simple and Powerful Overclocking facility.</p><p>03 Years Warranty (No Warranty for Fan or Cooler)</p>",
+      "features": [
+        "Model: Ryzen 5 2400G (Tray Box)",
+        "Speed: 3.6GHz Up To 3.9GHz",
+        "Cache: L1 384KB L2 2MB L3 4MB",
+        "Cores-4 & Threads-8",
+        "Powerful Radeon Vega graphics",
+        "View More Info"
+      ],
+      "specs": {
+        "Brand": "AMD",
+        "Model": "Ryzen 5 2400G (Tray Box)",
+        "Warranty": "1 Year Warranty"
+      },
+      "featuredProduct": false,
+      "inStock": true,
+      "sourceUrl": "https://www.startech.com.bd/amd-ryzen-5-2400g-processor",
+      "status": "pending",
+      "scrapedAt": "2026-09-25T18:19:51.027Z",
+      "localGalleryImages": [
+        "G:\\Github\\Next_js\\autopost\\public\\scraped_media\\prod-1790360391027-rypq_gallery_1.jpg",
+        "G:\\Github\\Next_js\\autopost\\public\\scraped_media\\prod-1790360391027-rypq_gallery_2.jpg"
+      ],
+      "localImages": [
+        "G:\\Github\\Next_js\\autopost\\public\\scraped_media\\prod-1790360391027-rypq_gallery_1.jpg",
+        "G:\\Github\\Next_js\\autopost\\public\\scraped_media\\prod-1790360391027-rypq_gallery_2.jpg"
+      ]
+    },
+    {
+      "id": "prod-1790360393196-u5mt",
+      "title": "AMD Ryzen 5 Pro 2400GE Desktop Processor with Radeon RX Vega 11 Graphics",
+      "slug": "amd-ryzen-5-pro-2400ge-desktop-processor-with-radeon-rx-vega-11-graphics",
+      "price": 6200,
+      "regularPrice": 7200,
+      "currency": "৳",
+      "category": "Component",
+      "subcategory": "Component",
+      "subSubcategory": "Processor",
+      "brand": "AMD",
+      "model": "Ryzen 5 Pro 2400GE (Tray Box)",
+      "warranty": "1 Year Warranty",
+      "galleryImages": [
+        "https://www.startech.com.bd/image/cache/catalog/processor/amd/2400g/ryzen-5-2400g-3-500x500.jpg",
+        "https://www.startech.com.bd/image/cache/catalog/processor/amd/ryzen-2200g/ryzen-2200g-4-500x500.jpg"
+      ],
+      "images": [
+        "https://www.startech.com.bd/image/cache/catalog/processor/amd/2400g/ryzen-5-2400g-3-500x500.jpg",
+        "https://www.startech.com.bd/image/cache/catalog/processor/amd/ryzen-2200g/ryzen-2200g-4-500x500.jpg"
+      ],
+      "keyFeaturesText": "Model: Ryzen 5 Pro 2400GE (Tray Box), Speed: 3.2GHz Up To 3.8GHz, Cache: L1 384KB L2 2MB L3 4MB, Cores-4 & Threads-8, Powerful Radeon Vega graphics, View More Info",
+      "structuredSpecs": [
+        {
+          "sectionTitle": "Key Features",
+          "fields": [
+            {
+              "label": "Base Frequency",
+              "value": "3.2 GHz"
+            },
+            {
+              "label": "Maximum Turbo Frequency",
+              "value": "3.8GHz"
+            },
+            {
+              "label": "Cache",
+              "value": "Total L2 Cache 2MB ,\nTotal L3 Cache 4MB"
+            },
+            {
+              "label": "Cores",
+              "value": "4"
+            },
+            {
+              "label": "Threads",
+              "value": "8"
+            },
+            {
+              "label": "Default TDP",
+              "value": "35W"
+            },
+            {
+              "label": "Supported Technologies",
+              "value": "AMD VR Ready Processors \nAMD Ryzen™ Master Utility \nDirectX® 12 Technology"
+            },
+            {
+              "label": "Maximum Speed",
+              "value": "Up to 2933 MT/s"
+            },
+            {
+              "label": "Type",
+              "value": "DDR4"
+            },
+            {
+              "label": "Max Number of Channels",
+              "value": "2"
+            },
+            {
+              "label": "Processor Graphics",
+              "value": "Radeon™ Vega 11 Processor Graphics"
+            },
+            {
+              "label": "Base Frequency",
+              "value": "1250 MHz"
+            },
+            {
+              "label": "Core Count",
+              "value": "11"
+            },
+            {
+              "label": "Manufacturing Warranty",
+              "value": "03 Years Warranty (No Warranty for Fan or Cooler)"
+            }
+          ]
+        }
+      ],
+      "description": "<h2>AMD Ryzen 5 Pro 2400GE Desktop Processor with Radeon RX Vega 11 Graphics</h2><p>The AMD <strong>Ryzen 5 Pro 2400GE</strong> processor is a powerful yet energy‑efficient solution designed for professionals, students, and home users who need dependable computing performance. With a base frequency of 3.2 GHz and a maximum turbo boost up to 3.8 GHz, the Ryzen 5 Pro 2400GE CPU delivers smooth multitasking and responsive speed across productivity, entertainment, and light creative workloads.Built with 4 cores and 8 threads, this Ryzen 5 Desktop Processor ensures reliable performance for modern applications. It comes with 2MB of L2 cache and 4MB of L3 cache, reducing latency and improving overall efficiency. With a default TDP of just 35W, the Ryzen 5 Pro CPU is ideal for compact and energy‑conscious desktop builds without compromising on capability.Graphics are powered by integrated Radeon Vega 11, running at 1250 MHz with 11 cores. This allows the AMD Ryzen 5 Pro 2400GE processor to deliver sharp visuals, smooth video playback, and the ability to handle casual gaming and creative tasks without requiring a dedicated GPU.Memory support includes DDR4 dual‑channel configurations with speeds up to 2933 MT/s, ensuring flexibility for modern systems. The processor also supports advanced technologies such as AMD VR Ready Processors, AMD Ryzen Master Utility, and DirectX 12, enhancing both productivity and entertainment experiences.The AMD Ryzen 5 Pro 2400GE Desktop Processor with Radeon Vega 11 Graphics is a balanced choice for users who want efficient power consumption, strong CPU performance, and capable integrated graphics in one compact package. It is well‑suited for business desktops, educational setups, and home PCs that demand reliability and versatility.</p><h2>Buy AMD Ryzen 5 Pro 2400GE Desktop Processor with Radeon RX Vega 11 Graphics from Star Tech</h2><p>In Bangladesh, you can get original <strong>AMD Ryzen 5 Pro 2400GE Desktop Processor</strong> from Star Tech. We have a large collection of latest <a href=\"https://www.startech.com.bd/component/processor/amd-processor\">AMD Processor</a> to purchase for your <a href=\"https://www.startech.com.bd/desktops\">Desktop PC</a>. Order Online Or Visit your Nearest <a href=\"https://www.startech.com.bd/\">Star Tech Shop</a> to get yours at lowest price. The AMD Ryzen 5 Pro 2400GE Desktop Processor comes with 03 Years Warranty (No Warranty for Fan or Cooler).</p>",
+      "features": [
+        "Model: Ryzen 5 Pro 2400GE (Tray Box)",
+        "Speed: 3.2GHz Up To 3.8GHz",
+        "Cache: L1 384KB L2 2MB L3 4MB",
+        "Cores-4 & Threads-8",
+        "Powerful Radeon Vega graphics",
+        "View More Info"
+      ],
+      "specs": {
+        "Brand": "AMD",
+        "Model": "Ryzen 5 Pro 2400GE (Tray Box)",
+        "Warranty": "1 Year Warranty"
+      },
+      "featuredProduct": false,
+      "inStock": true,
+      "sourceUrl": "https://www.startech.com.bd/amd-ryzen-5-pro-2400ge-processor",
+      "status": "pending",
+      "scrapedAt": "2026-09-25T18:19:53.196Z",
+      "localGalleryImages": [
+        "G:\\Github\\Next_js\\autopost\\public\\scraped_media\\prod-1790360393196-u5mt_gallery_1.jpg",
+        "G:\\Github\\Next_js\\autopost\\public\\scraped_media\\prod-1790360393196-u5mt_gallery_2.jpg"
+      ],
+      "localImages": [
+        "G:\\Github\\Next_js\\autopost\\public\\scraped_media\\prod-1790360393196-u5mt_gallery_1.jpg",
+        "G:\\Github\\Next_js\\autopost\\public\\scraped_media\\prod-1790360393196-u5mt_gallery_2.jpg"
+      ]
+    },
+    {
+      "id": "prod-1790360395273-drcn",
+      "title": "Intel Pentium Gold G6400 10th gen Coffee Lake Processor",
+      "slug": "intel-pentium-gold-g6400-10th-gen-coffee-lake-processor",
+      "price": 6200,
+      "regularPrice": 7300,
+      "currency": "৳",
+      "category": "Component",
+      "subcategory": "Component",
+      "subSubcategory": "Processor",
+      "brand": "Intel",
+      "model": "Pentium Gold G6400 (Tray Box)",
+      "warranty": "1 Year Warranty",
+      "galleryImages": [],
+      "images": [],
+      "keyFeaturesText": "Model: Pentium Gold G6400 (Tray Box), Socket  Supported FCLGA1200, Speed 4.00 GHz, Cores- 2 & Threads- 4, 4M Intel Smart  Cache, View More Info",
+      "structuredSpecs": [
+        {
+          "sectionTitle": "Key Features",
+          "fields": [
+            {
+              "label": "Base Frequency",
+              "value": "4.00 GHz"
+            },
+            {
+              "label": "Cache",
+              "value": "4 MB SmartCache"
+            },
+            {
+              "label": "Cores",
+              "value": "2"
+            },
+            {
+              "label": "Threads",
+              "value": "4"
+            },
+            {
+              "label": "Default TDP",
+              "value": "58 W"
+            },
+            {
+              "label": "Maximum Size",
+              "value": "128 GB"
+            },
+            {
+              "label": "Maximum Speed",
+              "value": "41.6 GB/s"
+            },
+            {
+              "label": "Type",
+              "value": "DDR4-2666"
+            },
+            {
+              "label": "Max Number of Channels",
+              "value": "2"
+            },
+            {
+              "label": "Processor Graphics",
+              "value": "Intel UHD Graphics 610"
+            },
+            {
+              "label": "Base Frequency",
+              "value": "350 MHz"
+            },
+            {
+              "label": "Max Dynamic Frequency",
+              "value": "1.05 GHz"
+            },
+            {
+              "label": "Max Video Memory",
+              "value": "64 GB"
+            },
+            {
+              "label": "Max Resolution",
+              "value": "Max Resolution (HDMI): 4096x2160@30Hz\nMax Resolution (DP): 4096x2304@60Hz\nMax Resolution (eDP - Integrated Flat Panel): 4096x2304@60Hz"
+            },
+            {
+              "label": "Manufacturing Warranty",
+              "value": "03 Years (No Warranty for Fan or Cooler)"
+            }
+          ]
+        }
+      ],
+      "description": "<h2>Intel Pentium Gold G6400 10th gen Coffee Lake Processor</h2><p>This processor comes with a new breed that has an integrated GPU, so a separate graphics card is not required for its functionality. This new 10th gen Comet Lake microarchitecture is manufactured with the 14nm process that comes with two cores and HyperThreading. As this chip is updated to the latest BIOS revision, it nicely fits into any Intel 300-series motherboard. Focusing on this, all the major motherboard manufacturers have already started BIOS updates for their 300-series lineup</p><h3 style=\"text-align: justify; \">Core Benefits of the Processor</h3><p style=\"text-align: justify; \">Intel 10th Generation Intel Pentium Gold G6400&nbsp;Processor having the base frequency of 4.00 GHz. It has the L3 SmartCache of 4 MB containing 2 cores and 4 threads. With the bus speed of 8 GT/s DMI, it has thermal design power (TDP) rating of 58W. This latest microchip has few expansion options such 3.0 PCI express revision having configured up to 1x16, 2x8, 1x8+2x4 and maximum 16 lanes. Considering the memory this processor has dual channel of max 128 GB of size that supports up to DDR4-2666 bus speed.</p><h3 style=\"text-align: justify; \">Advanced Facilities</h3><p style=\"text-align: justify; \">On the process of advance technology this processor has 2.0 Intel turbo boost and Intel virtualization that is directed to I/O (VT-d). This Optane Memory supported chip also has Intel VT-x with extended page tables (EPT). Furthermore, Enhanced Intel SpeedStep and Intel Identity Protection Technology are integrated to increase its efficiency. </p><p style=\"text-align: justify; \"><span style=\"font-weight: bold;\">Enjoy this latest processor at best price with 03 years of warranty facility&nbsp;</span><span style=\"font-weight: 700;\">(No Warranty for Fan or Cooler)</span><span style=\"font-weight: bold;\">.</span></p><div><br></div><div><br></div>",
+      "features": [
+        "Model: Pentium Gold G6400 (Tray Box)",
+        "Socket  Supported FCLGA1200",
+        "Speed 4.00 GHz",
+        "Cores- 2 & Threads- 4",
+        "4M Intel Smart  Cache",
+        "View More Info"
+      ],
+      "specs": {
+        "Brand": "Intel",
+        "Model": "Pentium Gold G6400 (Tray Box)",
+        "Warranty": "1 Year Warranty"
+      },
+      "featuredProduct": false,
+      "inStock": true,
+      "sourceUrl": "https://www.startech.com.bd/intel-pentium-gold-g6400-processor",
+      "status": "pending",
+      "scrapedAt": "2026-09-25T18:19:55.273Z",
+      "localGalleryImages": [],
+      "localImages": []
+    },
+    {
+      "id": "prod-1790360397170-zgd2",
+      "title": "AMD Ryzen 3 3200G Processor with Radeon RX Vega 8 Graphics",
+      "slug": "amd-ryzen-3-3200g-processor-with-radeon-rx-vega-8-graphics",
+      "price": 6500,
+      "regularPrice": 7800,
+      "currency": "৳",
+      "category": "Component",
+      "subcategory": "Component",
+      "subSubcategory": "Processor",
+      "brand": "AMD",
+      "model": "Ryzen 3 3200G",
+      "warranty": "1 Year Warranty",
+      "galleryImages": [],
+      "images": [],
+      "keyFeaturesText": "Model: Ryzen 3 3200G, Speed: 3.6 GHz up to 4.0 GHz, Cores-4 & Threads-4, Memory Speed: Up to 2933MHz, Radeon Vega 8 Graphics, View More Info",
+      "structuredSpecs": [
+        {
+          "sectionTitle": "Key Features",
+          "fields": [
+            {
+              "label": "Base Frequency",
+              "value": "3.6GHz"
+            },
+            {
+              "label": "Maximum Turbo Frequency",
+              "value": "4.0GHz"
+            },
+            {
+              "label": "Cache",
+              "value": "Total L2 Cache: 2MB\nTotal L3 Cache: 4MB"
+            },
+            {
+              "label": "Cores",
+              "value": "4"
+            },
+            {
+              "label": "Threads",
+              "value": "4"
+            },
+            {
+              "label": "Default TDP",
+              "value": "65W"
+            },
+            {
+              "label": "Maximum Speed",
+              "value": "2933MHz"
+            },
+            {
+              "label": "Type",
+              "value": "DDR4"
+            },
+            {
+              "label": "Max Number of Channels",
+              "value": "2"
+            },
+            {
+              "label": "Processor Graphics",
+              "value": "Radeon RX Vega 8 Graphics"
+            },
+            {
+              "label": "Base Frequency",
+              "value": "1250 MHz"
+            },
+            {
+              "label": "Core Count",
+              "value": "8"
+            },
+            {
+              "label": "Manufacturing Warranty",
+              "value": "03 years warranty (No Warranty for Fan or Cooler)."
+            }
+          ]
+        }
+      ],
+      "description": "<h2 style=\"text-align: justify; \"><span style=\"font-weight: bold;\">AMD Ryzen 3 3200G Processor with Radeon RX Vega 8 Graphics</span><br></h2><p style=\"text-align: justify; \">The AMD Ryzen 3 3200G Processor is built-in intelligence featuring 4 processor cores, 4 threads, and an astonishingly efficient 65W TDP. In this processor, It stands with 3.6GHz Base Clock, 4.0GHz Max Boost Clock, 2MB L2 Cache, 4MB L3 Cache with AM4 Package and TSMC 12nm FinFET CMOS. This processor is built with PCIe 3.0 x8 and Wraith Spire Thermal Solution. The Ryzen 3 3200G provides DDR4 2933MHz memory with 2 memory channels. This processor also has 03 years warranty (No Warranty for Fan or Cooler).</p><div class=\"video-wrapper\" style=\"text-align: justify; \"><iframe width=\"560\" height=\"315\" src=\"https://www.youtube.com/embed/1WyUOPTDCFU\" frameborder=\"0\" allow=\"accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture\" allowfullscreen=\"\"></iframe></div>",
+      "features": [
+        "Model: Ryzen 3 3200G",
+        "Speed: 3.6 GHz up to 4.0 GHz",
+        "Cores-4 & Threads-4",
+        "Memory Speed: Up to 2933MHz",
+        "Radeon Vega 8 Graphics",
+        "View More Info"
+      ],
+      "specs": {
+        "Brand": "AMD",
+        "Model": "Ryzen 3 3200G",
+        "Warranty": "1 Year Warranty"
+      },
+      "featuredProduct": false,
+      "inStock": true,
+      "sourceUrl": "https://www.startech.com.bd/amd-ryzen-3-3200g",
+      "status": "approved",
+      "scrapedAt": "2026-09-25T18:19:57.170Z",
+      "localGalleryImages": [],
+      "localImages": []
+    },
+    {
+      "id": "prod-1790360402669-24at",
+      "title": "Deepcool CK-11509 CPU Cooler",
+      "slug": "deepcool-ck-11509-cpu-cooler",
+      "price": 350,
+      "regularPrice": 400,
+      "currency": "৳",
+      "category": "Component",
+      "subcategory": "Component",
+      "subSubcategory": "CPU Cooler",
+      "brand": "Deepcool",
+      "model": "CK-11509",
+      "warranty": "1 Year Warranty",
+      "galleryImages": [
+        "https://www.startech.com.bd/image/cache/catalog/cpu-cooler/deepcool/ck-11509/ck-11509-02-500x500.jpg",
+        "https://www.startech.com.bd/image/cache/catalog/cpu-cooler/deepcool/ck-11509/ck-11509-03-500x500.jpg"
+      ],
+      "images": [
+        "https://www.startech.com.bd/image/cache/catalog/cpu-cooler/deepcool/ck-11509/ck-11509-02-500x500.jpg",
+        "https://www.startech.com.bd/image/cache/catalog/cpu-cooler/deepcool/ck-11509/ck-11509-03-500x500.jpg"
+      ],
+      "keyFeaturesText": "Model: CK-11509, Radial aluminum heatsink for excellent cooling performance., Fan Dimension: 92X25mm, Rated Voltage: 12VDC, Started Voltage: 7VDC, View More Info",
+      "structuredSpecs": [
+        {
+          "sectionTitle": "Key Features",
+          "fields": [
+            {
+              "label": "Fan Speed",
+              "value": "2200±10%RPM"
+            },
+            {
+              "label": "Fan Airflow",
+              "value": "38.62CFM"
+            },
+            {
+              "label": "Noise",
+              "value": "26.8dB(A)"
+            },
+            {
+              "label": "Dimension",
+              "value": "Overall Dimension\t94.5X94.5X56mmFan Dimension\tФ92X25mm"
+            },
+            {
+              "label": "Weight",
+              "value": "147g"
+            }
+          ]
+        }
+      ],
+      "description": "<h2 style=\"text-align: justify; \">Deepcool CK-11509 CPU Cooler</h2><p style=\"text-align: justify; \">The Deepcool CK-11509 CPU Cooler's 92 x 25 mm inverted fan provides excellent airflow while producing little noise. The overall dimensions of this cooler are 94.5X94.5X56mm, and the bearing type is hydro bearing. It has a radial aluminum heatsink for superior cooling performance and Pushpins for quick and simple installation. The Deepcool CK-11509 has a rated voltage of 12VDC, an operating voltage of 10.813.2VDC, and a starting voltage of 7VDC. The Deepcool CK-11509 CPU Cooler has no warranty.</p>",
+      "features": [
+        "Model: CK-11509",
+        "Radial aluminum heatsink for excellent cooling performance.",
+        "Fan Dimension: 92X25mm",
+        "Rated Voltage: 12VDC",
+        "Started Voltage: 7VDC",
+        "View More Info"
+      ],
+      "specs": {
+        "Brand": "Deepcool",
+        "Model": "CK-11509",
+        "Warranty": "1 Year Warranty"
+      },
+      "featuredProduct": false,
+      "inStock": true,
+      "sourceUrl": "https://www.startech.com.bd/deepcool-ck-11509-cpu-cooler",
+      "status": "approved",
+      "scrapedAt": "2026-09-25T18:20:02.669Z",
+      "localGalleryImages": [
+        "G:\\Github\\Next_js\\autopost\\public\\scraped_media\\prod-1790360402669-24at_gallery_1.jpg",
+        "G:\\Github\\Next_js\\autopost\\public\\scraped_media\\prod-1790360402669-24at_gallery_2.jpg"
+      ],
+      "localImages": [
+        "G:\\Github\\Next_js\\autopost\\public\\scraped_media\\prod-1790360402669-24at_gallery_1.jpg",
+        "G:\\Github\\Next_js\\autopost\\public\\scraped_media\\prod-1790360402669-24at_gallery_2.jpg"
+      ]
+    },
+    {
+      "id": "prod-1790360404656-vls7",
+      "title": "DeepCool ALTA 9 Air CPU Cooler",
+      "slug": "deepcool-alta-9-air-cpu-cooler",
+      "price": 540,
+      "regularPrice": 700,
+      "currency": "৳",
+      "category": "Component",
+      "subcategory": "Component",
+      "subSubcategory": "CPU Cooler",
+      "brand": "DeepCool",
+      "model": "ALTA 9",
+      "warranty": "1 Year Warranty",
+      "galleryImages": [
+        "https://www.startech.com.bd/image/cache/catalog/cpu-cooler/deepcool/alta-9/alta-9-02-500x500.webp"
+      ],
+      "images": [
+        "https://www.startech.com.bd/image/cache/catalog/cpu-cooler/deepcool/alta-9/alta-9-02-500x500.webp"
+      ],
+      "keyFeaturesText": "MPN: DP-ICAP-AT9-17, Model: ALTA 9, Fan Dimensions: Ф92X25mm, Fan Speed: 2200±10%RPM, Max. Air Flow: 42.35CFM, Bearing Type: Hydro Bearing, View More Info",
+      "structuredSpecs": [
+        {
+          "sectionTitle": "Key Features",
+          "fields": [
+            {
+              "label": "Type",
+              "value": "Air Cooler"
+            },
+            {
+              "label": "Fan Speed",
+              "value": "2200±10%RPM"
+            },
+            {
+              "label": "Fan Airflow",
+              "value": "Max. Air Flow: 42.35CFM"
+            },
+            {
+              "label": "Noise",
+              "value": "26.3dB(A)"
+            },
+            {
+              "label": "Dimension",
+              "value": "Overall Dimension: 113X113X58.5mm\nFan Dimension: Ф92X25mm"
+            },
+            {
+              "label": "Weight",
+              "value": "208g"
+            },
+            {
+              "label": "Intel",
+              "value": "LGA1700/ LGA1851"
+            },
+            {
+              "label": "Warranty",
+              "value": "01-year"
+            }
+          ]
+        }
+      ],
+      "description": "<h2>DeepCool ALTA 9 Air CPU Cooler</h2><p>The Deepcool <span style=\"font-weight: bold;\">ALTA 9 </span>Air <a href=\"https://www.startech.com.bd/component/CPU-Cooler\" target=\"\" style=\"color: rgb(0, 0, 0);\">CPU Cooler</a> Fan is a compact yet efficient thermal solution engineered for Intel-based systems, offering a balance of performance, quiet operation, and easy installation. Designed with a single 92mm fan and a Hydro Bearing mechanism, this cooler delivers consistent airflow and long-lasting reliability, making it ideal for users seeking a budget-friendly upgrade or a dependable stock replacement. With a fan speed of 2200 RPM and an airflow capacity of 42.35 CFM, the DeepCool ALTA 9 ensures effective heat dissipation even under moderate workloads. Despite its power, it maintains a low noise level of just 26.3 dBA, allowing for a quieter computing experience—perfect for home offices, media centers, or compact builds where acoustics matter. The fan operates on a 12VDC rated voltage, with a safe operating range between 10.8V and 13.2V DC, and starts reliably at 7V DC, consuming approximately 5W of power. This energy-efficient profile makes it suitable for systems with limited power budgets or thermal headroom. Physically, the DeepCool ALTA 9 sports a sleek black finish and compact dimensions of 113 x 113 x 58.5mm, weighing in at just 208 grams. Its low-profile design ensures compatibility with smaller cases and tighter motherboard layouts, while the push-pin mounting system simplifies installation—no tools or brackets required. The cooler is specifically compatible with Intel LGA1700 and LGA1851 sockets, making it a ready-to-go solution for newer Intel CPUs without the need for additional adapters . Unlike RGB-heavy alternatives, the DeepCool ALTA 9 opts for a minimalist aesthetic with no LED lighting, catering to users who prefer clean, distraction-free builds. The absence of a theme display or flashy visuals reinforces its focus on functionality and performance over flair.From a technical standpoint, the 92mm radiator complements the fan’s airflow dynamics, ensuring that heat is efficiently transferred away from the CPU. The PWM 3-pin connector allows for basic fan control, helping users maintain optimal cooling without complex BIOS configurations or third-party software.Whether you're assembling a cost-effective workstation, upgrading an aging system, or building a minimalist PC, the Deepcool ALTA 9 Air CPU Cooler Fan offers a reliable cooling solution.</p><h2>Buy DeepCool ALTA 9 Air CPU Cooler from Star Tech</h2><p>In Bangladesh, you can get original <span style=\"font-weight: bold;\">DeepCool ALTA 9 Air CPU Cooler</span> From Star Tech. We have a large collection of latest <a href=\"https://www.startech.com.bd/deepcool-cpu-cooler\" target=\"\">DeepCool CPU Cooler</a> to purchase for your <a href=\"https://www.startech.com.bd/desktops\" target=\"\">Desktop PC</a>. Order Online Or Visit your Nearest <a href=\"https://www.startech.com.bd/\" target=\"\">Star Tech</a> Shop to get yours at lowest price. The DeepCool ALTA 9 Air CPU Cooler comes with 1 years warranty.</p>",
+      "features": [
+        "MPN: DP-ICAP-AT9-17",
+        "Model: ALTA 9",
+        "Fan Dimensions: Ф92X25mm",
+        "Fan Speed: 2200±10%RPM",
+        "Max. Air Flow: 42.35CFM",
+        "Bearing Type: Hydro Bearing",
+        "View More Info"
+      ],
+      "specs": {
+        "Brand": "DeepCool",
+        "Model": "ALTA 9",
+        "Warranty": "1 Year Warranty"
+      },
+      "featuredProduct": false,
+      "inStock": true,
+      "sourceUrl": "https://www.startech.com.bd/deepcool-alta-9-air-cpu-cooler",
+      "status": "approved",
+      "scrapedAt": "2026-09-25T18:20:04.656Z",
+      "localGalleryImages": [
+        "G:\\Github\\Next_js\\autopost\\public\\scraped_media\\prod-1790360404656-vls7_gallery_1.webp"
+      ],
+      "localImages": [
+        "G:\\Github\\Next_js\\autopost\\public\\scraped_media\\prod-1790360404656-vls7_gallery_1.webp"
+      ]
+    },
+    {
+      "id": "prod-1790360406731-p8yl",
+      "title": "Value-Top GLACIO X100 RGB Air CPU Cooler",
+      "slug": "value-top-glacio-x100-rgb-air-cpu-cooler",
+      "price": 540,
+      "regularPrice": 700,
+      "currency": "৳",
+      "category": "Component",
+      "subcategory": "Component",
+      "subSubcategory": "CPU Cooler",
+      "brand": "Value-Top",
+      "model": "GLACIO X100 RGB",
+      "warranty": "1 Year Warranty",
+      "galleryImages": [
+        "https://www.startech.com.bd/image/cache/catalog/cpu-cooler/value-top/glacio-x100-rgb/glacio-x100-rgb-02-500x500.webp",
+        "https://www.startech.com.bd/image/cache/catalog/cpu-cooler/value-top/glacio-x100-rgb/glacio-x100-rgb-03-500x500.webp"
+      ],
+      "images": [
+        "https://www.startech.com.bd/image/cache/catalog/cpu-cooler/value-top/glacio-x100-rgb/glacio-x100-rgb-02-500x500.webp",
+        "https://www.startech.com.bd/image/cache/catalog/cpu-cooler/value-top/glacio-x100-rgb/glacio-x100-rgb-03-500x500.webp"
+      ],
+      "keyFeaturesText": "Model: GLACIO X100 RGB, Fan speed: 800-2600 RPM ± 10%, Max Air Flow: 43 CFM ± 10%, Max Noise Level: 31.5 dBA ± 10%, Supports Intel and AMD CPU, Max TDP: 100W, View More Info",
+      "structuredSpecs": [
+        {
+          "sectionTitle": "Key Features",
+          "fields": [
+            {
+              "label": "Type",
+              "value": "Air CPU Cooler"
+            },
+            {
+              "label": "Fan Speed",
+              "value": "800-2600 RPM ± 10%"
+            },
+            {
+              "label": "Fan Airflow",
+              "value": "43 CFM ± 10%"
+            },
+            {
+              "label": "Noise",
+              "value": "31.5 dBA ± 10%"
+            },
+            {
+              "label": "Connector",
+              "value": "2510-4PIN"
+            },
+            {
+              "label": "LED Number",
+              "value": "RGB Lighting"
+            },
+            {
+              "label": "Others",
+              "value": "Heat Pipes: 2 x Φ6 mm\nFastener Type: Screw Column Fastener\nBearing Type: Hydraulic Bearing\nMax TDP: 100 W"
+            },
+            {
+              "label": "Dimension",
+              "value": "Product Size: 90 x 61 x 132 mm\nFan Size: 90 x 90 x25 mm"
+            },
+            {
+              "label": "Weight",
+              "value": "260 g"
+            },
+            {
+              "label": "Intel",
+              "value": "LGA 115X/1200/1700/1851/1366"
+            },
+            {
+              "label": "AMD",
+              "value": "FM2/AM2/AM3/AM4/AM5"
+            },
+            {
+              "label": "Warranty",
+              "value": "1 Year Warranty"
+            }
+          ]
+        }
+      ],
+      "description": "<h2>Value-Top GLACIO X100 RGB Air CPU Cooler</h2><p>The Value‑Top <strong>GLACIO X100 RGB</strong> Air CPU Cooler is a compact and efficient cooling solution designed for mainstream gaming and productivity PCs, combining stylish RGB lighting with reliable thermal performance. Built with 2 × Φ6 mm heat pipes and a hydraulic bearing fan, it ensures smooth, quiet operation with speeds ranging from 800 to 2600 RPM ±10%, delivering up to 43 CFM airflow while keeping noise levels at just 31.5 dBA ±10%. Its screw column fastener provides secure installation across a wide range of CPU sockets, including Intel LGA 115X/1200/1700/1851/1366 and AMD FM2/AM2/AM3/AM4/AM5, making it versatile for different platforms. With a maximum TDP support of 100 W, the cooler is ideal for mid‑range processors, balancing cooling efficiency and compact design. The fan measures 90 × 90 × 25 mm, housed in a cooler size of 90 × 61 × 132 mm, with a lightweight build of 260 g, making it suitable for smaller cases without compromising performance. Electrically, it runs on a 2510‑4PIN interface, with a 12 V rated voltage, 0.3 A current draw, and 3.6 W power input, ensuring energy‑efficient operation. Packaged in a 117 × 105 × 145 mm color box, the GLACIO X100 is easy to store and ship. With its combination of RGB aesthetics, reliable hydraulic bearing, and broad socket compatibility, the Value‑Top GLACIO X100 RGB Air CPU Cooler stands out as a cost‑effective choice for users seeking dependable cooling with a touch of style. Perfect for catalog listings, this model is also optimized for search visibility with keywords like Value‑Top Air CPU Cooler, Value‑Top CPU Cooler, and Value‑Top Single Fan CPU Cooler, making it an excellent option for builders looking for affordable cooling solutions in Bangladesh and beyond.</p><h2>Buy Value-Top GLACIO X100 RGB Air CPU Cooler from Star Tech</h2><p>In Bangladesh, you can get the original <strong>Value-Top GLACIO X100 RGB Air CPU Cooler</strong> From Star Tech. We have a large collection of the latest <a href=\"https://www.startech.com.bd/value-top-cpu-cooler\">Value-Top cooler</a> to purchase for your <a href=\"https://www.startech.com.bd/desktops\">Desktop PC</a>. Order Online Or Visit your Nearest <a href=\"https://www.startech.com.bd\">Star Tech</a> Shop to get yours at the lowest price. Value-Top GLACIO X100 RGB Air CPU Cooler comes with 01 Year warranty. </p>",
+      "features": [
+        "Model: GLACIO X100 RGB",
+        "Fan speed: 800-2600 RPM ± 10%",
+        "Max Air Flow: 43 CFM ± 10%",
+        "Max Noise Level: 31.5 dBA ± 10%",
+        "Supports Intel and AMD CPU, Max TDP: 100W",
+        "View More Info"
+      ],
+      "specs": {
+        "Brand": "Value-Top",
+        "Model": "GLACIO X100 RGB",
+        "Warranty": "1 Year Warranty"
+      },
+      "featuredProduct": false,
+      "inStock": true,
+      "sourceUrl": "https://www.startech.com.bd/value-top-glacio-x100-rgb-cpu-cooler",
+      "status": "synced",
+      "scrapedAt": "2026-09-25T18:20:06.731Z",
+      "localGalleryImages": [
+        "G:\\Github\\Next_js\\autopost\\public\\scraped_media\\prod-1790360406731-p8yl_gallery_1.webp",
+        "G:\\Github\\Next_js\\autopost\\public\\scraped_media\\prod-1790360406731-p8yl_gallery_2.webp"
+      ],
+      "localImages": [
+        "G:\\Github\\Next_js\\autopost\\public\\scraped_media\\prod-1790360406731-p8yl_gallery_1.webp",
+        "G:\\Github\\Next_js\\autopost\\public\\scraped_media\\prod-1790360406731-p8yl_gallery_2.webp"
+      ],
+      "syncedAt": "2026-09-25T18:23:35.183Z"
+    },
+    {
+      "id": "prod-1790360408492-8dds",
+      "title": "DeepCool ICE EDGE MINI FS V2.0 CPU Air Cooler",
+      "slug": "deepcool-ice-edge-mini-fs-v20-cpu-air-cooler",
+      "price": 850,
+      "regularPrice": 1250,
+      "currency": "৳",
+      "category": "Component",
+      "subcategory": "Component",
+      "subSubcategory": "CPU Cooler",
+      "brand": "DeepCool",
+      "model": "ICE EDGE MINI FS V2.0",
+      "warranty": "1 Year Warranty",
+      "galleryImages": [
+        "https://www.startech.com.bd/image/cache/catalog/cpu-cooler/deepcool/ice-edge-mini-fs-v2-0/ice-edge-mini-fs-v2-0-1-500x500.jpg",
+        "https://www.startech.com.bd/image/cache/catalog/cpu-cooler/deepcool/ice-edge-mini-fs-v2-0/ice-edge-mini-fs-v2-0-2-500x500.jpg",
+        "https://www.startech.com.bd/image/cache/catalog/cpu-cooler/deepcool/ice-edge-mini-fs-v2-0/ice-edge-mini-fs-v2-0-box-500x500.jpg"
+      ],
+      "images": [
+        "https://www.startech.com.bd/image/cache/catalog/cpu-cooler/deepcool/ice-edge-mini-fs-v2-0/ice-edge-mini-fs-v2-0-1-500x500.jpg",
+        "https://www.startech.com.bd/image/cache/catalog/cpu-cooler/deepcool/ice-edge-mini-fs-v2-0/ice-edge-mini-fs-v2-0-2-500x500.jpg",
+        "https://www.startech.com.bd/image/cache/catalog/cpu-cooler/deepcool/ice-edge-mini-fs-v2-0/ice-edge-mini-fs-v2-0-box-500x500.jpg"
+      ],
+      "keyFeaturesText": "MPN: DP-MCH2-IEMV2, Model: ICE EDGE MINI FS V2.0, Fan Speed: 2200 RPMÂ±10%, Fan Connector: 3-pin, Hydro Bearing, Supports Intel and AMD, View More Info",
+      "structuredSpecs": [
+        {
+          "sectionTitle": "Key Features",
+          "fields": [
+            {
+              "label": "Type",
+              "value": "CPU Air Cooler"
+            },
+            {
+              "label": "Fan Speed",
+              "value": "2200 RPM±10%"
+            },
+            {
+              "label": "Fan Airflow",
+              "value": "25.13 CFM"
+            },
+            {
+              "label": "Noise",
+              "value": "24.7 dB(A)"
+            },
+            {
+              "label": "Air Pressure",
+              "value": "2.23 mmAq"
+            },
+            {
+              "label": "Connector",
+              "value": "3-pin"
+            },
+            {
+              "label": "Dimension",
+              "value": "119X75X112mm"
+            },
+            {
+              "label": "Weight",
+              "value": "258g"
+            },
+            {
+              "label": "Intel",
+              "value": "LGA1700/1200/1151/1150/1155"
+            },
+            {
+              "label": "AMD",
+              "value": "AM5/AM4"
+            },
+            {
+              "label": "Warranty",
+              "value": "1 year"
+            }
+          ]
+        }
+      ],
+      "description": "<h2 style=\"text-align: justify; \">DeepCool ICE EDGE MINI FS V2.0 CPU Air Cooler</h2><p style=\"text-align: justify; \">DeepCool ICE EDGE MINI FS V2.0 CPU Air Cooler is AMD AM4 Ready. (NOTE: Refer to FM2+/ FM2/ FM1/ AM3+/ AM3/ AM2+/ AM2 for the manuals). It is equipped with multiple clips to support Intel LGA1155/ 1156/ 775 and AMD AM4/ AM3/ AM2+/ AM2/ K8. It has 2 sintered metal powder heatpipes directly contacting the CPU surface for removing heat and eliminating chances of overheating. It features specialized aluminum heatsink construction for efficient heat dissipation. TPE fan housing designed to absorb operating vibration and reduce fan noise. it has a 1-year warranty.</p>",
+      "features": [
+        "MPN: DP-MCH2-IEMV2",
+        "Model: ICE EDGE MINI FS V2.0",
+        "Fan Speed: 2200 RPMÂ±10%",
+        "Fan Connector: 3-pin",
+        "Hydro Bearing",
+        "Supports Intel and AMD",
+        "View More Info"
+      ],
+      "specs": {
+        "Brand": "DeepCool",
+        "Model": "ICE EDGE MINI FS V2.0",
+        "Warranty": "1 Year Warranty"
+      },
+      "featuredProduct": false,
+      "inStock": true,
+      "sourceUrl": "https://www.startech.com.bd/deepcool-ice-edge-mini-fs-v2-0-cpu-cooler",
+      "status": "synced",
+      "scrapedAt": "2026-09-25T18:20:08.492Z",
+      "localGalleryImages": [
+        "G:\\Github\\Next_js\\autopost\\public\\scraped_media\\prod-1790360408492-8dds_gallery_1.jpg",
+        "G:\\Github\\Next_js\\autopost\\public\\scraped_media\\prod-1790360408492-8dds_gallery_2.jpg",
+        "G:\\Github\\Next_js\\autopost\\public\\scraped_media\\prod-1790360408492-8dds_gallery_3.jpg"
+      ],
+      "localImages": [
+        "G:\\Github\\Next_js\\autopost\\public\\scraped_media\\prod-1790360408492-8dds_gallery_1.jpg",
+        "G:\\Github\\Next_js\\autopost\\public\\scraped_media\\prod-1790360408492-8dds_gallery_2.jpg",
+        "G:\\Github\\Next_js\\autopost\\public\\scraped_media\\prod-1790360408492-8dds_gallery_3.jpg"
+      ],
+      "syncedAt": "2026-09-25T18:23:11.079Z"
+    },
+    {
+      "id": "prod-1790360410406-vi5j",
+      "title": "Arctic Alpine 23 CO Compact AMD CPU Cooler",
+      "slug": "arctic-alpine-23-co-compact-amd-cpu-cooler",
+      "price": 850,
+      "regularPrice": 1250,
+      "currency": "৳",
+      "category": "Component",
+      "subcategory": "Component",
+      "subSubcategory": "CPU Cooler",
+      "brand": "Arctic",
+      "model": "Alpine 23 CO",
+      "warranty": "1 Year Warranty",
+      "galleryImages": [
+        "https://www.startech.com.bd/image/cache/catalog/cpu-cooler/arctic/alpine-23-co/alpine-23-co-03-500x500.webp",
+        "https://www.startech.com.bd/image/cache/catalog/cpu-cooler/arctic/alpine-23-co/alpine-23-co-04-500x500.webp",
+        "https://www.startech.com.bd/image/cache/catalog/cpu-cooler/arctic/alpine-23-co/alpine-23-co-02-500x500.webp"
+      ],
+      "images": [
+        "https://www.startech.com.bd/image/cache/catalog/cpu-cooler/arctic/alpine-23-co/alpine-23-co-03-500x500.webp",
+        "https://www.startech.com.bd/image/cache/catalog/cpu-cooler/arctic/alpine-23-co/alpine-23-co-04-500x500.webp",
+        "https://www.startech.com.bd/image/cache/catalog/cpu-cooler/arctic/alpine-23-co/alpine-23-co-02-500x500.webp"
+      ],
+      "keyFeaturesText": "Model: Alpine 23 CO, Fan Speed: 200-2700 rpm, Fan Size: 90 mm, Fan Bearing: Dual Ball Bearing, Compatibility: AMD AM5, AM4 Socket, View More Info",
+      "structuredSpecs": [
+        {
+          "sectionTitle": "Key Features",
+          "fields": [
+            {
+              "label": "Type",
+              "value": "Air Cooler"
+            },
+            {
+              "label": "Fan Speed",
+              "value": "200—2700 rpm"
+            },
+            {
+              "label": "Noise",
+              "value": "0.3 Sone"
+            },
+            {
+              "label": "Connector",
+              "value": "4-Pin Connector"
+            },
+            {
+              "label": "Material",
+              "value": "Fin Material:\tAluminum"
+            },
+            {
+              "label": "Others",
+              "value": "Thermal Paste: MX-2 pre-applied\nFan Bearing:\tDual Ball Bearing\nOperating Ambient Temperature: 0–40 °C\nRAM Clearance: Unlimited"
+            },
+            {
+              "label": "Dimension",
+              "value": "98.6 mm x 121 mm x 65 mm (LxWxH)"
+            },
+            {
+              "label": "Weight",
+              "value": "275.5g"
+            },
+            {
+              "label": "AMD",
+              "value": "AM5, AM4"
+            },
+            {
+              "label": "Warranty",
+              "value": "6 years"
+            }
+          ]
+        }
+      ],
+      "description": "<h2>Arctic Alpine 23 CO Compact AMD CPU Cooler</h2><p>The Arctic <strong>Alpine 23 CO</strong> Compact AMD <a href=\"https://www.startech.com.bd/component/CPU-Cooler\" target=\"\" style=\"color: rgb(0, 0, 0);\">CPU Cooler</a> is a high-performance cooling solution designed for AMD AM5 and AM4 sockets, offering unlimited RAM clearance for seamless compatibility. With a compact 65mm installation height, this cooler is perfect for small form factor (SFF) builds, delivering efficient heat dissipation through its 50-y-shaped aluminum fins. The 93.4mm outer diameter optimizes airflow, while the pre-applied MX-2 thermal paste ensures superior heat transfer right out of the box. The Arctic Alpine 23 CO CPU Cooler features a 90mm dual ball-bearing fan, engineered for continuous operation (CO) and ideal for 24/7 workloads. With a speed range of 200–2700 RPM, it dynamically adjusts cooling while maintaining whisper-quiet operation at just 0.3 sone. The 4-pin connector supports PWM control for precise speed adjustments. Designed to operate in ambient temperatures up to 40°C, the Arctic Alpine 23 CO AMD CPU Cooler ensures reliable performance under demanding conditions. Weighing only 275.5g, this compact AMD CPU cooler combines durability with efficiency, backed by an outstanding 6-year warranty, making the Arctic Alpine 23 CO CPU Cooler a top choice for AMD users seeking long-lasting cooling performance.</p><h2>Buy Arctic Alpine 23 CO Compact AMD CPU Cooler from Star Tech<br></h2><p>In Bangladesh, you can get original <strong>Arctic Alpine 23 CO Compact AMD CPU Cooler</strong> From Star Tech. We have a large collection of latest <a href=\"https://www.startech.com.bd/arctic-cpu-cooler\" target=\"\">Arctic CPU Cooler</a> to purchase for your <a href=\"https://www.startech.com.bd/desktops\" target=\"\">Desktop PC</a>. Order Online Or Visit your Nearest <a href=\"https://www.startech.com.bd\" target=\"\">Star Tech Shop</a> to get yours at lowest price. The Arctic Alpine 23 CO Compact AMD CPU Cooler comes with 6 years warranty.</p>",
+      "features": [
+        "Model: Alpine 23 CO",
+        "Fan Speed: 200-2700 rpm",
+        "Fan Size: 90 mm",
+        "Fan Bearing: Dual Ball Bearing",
+        "Compatibility: AMD AM5, AM4 Socket",
+        "View More Info"
+      ],
+      "specs": {
+        "Brand": "Arctic",
+        "Model": "Alpine 23 CO",
+        "Warranty": "1 Year Warranty"
+      },
+      "featuredProduct": false,
+      "inStock": true,
+      "sourceUrl": "https://www.startech.com.bd/arctic-alpine-23-co-cpu-cooler",
+      "status": "synced",
+      "scrapedAt": "2026-09-25T18:20:10.406Z",
+      "localGalleryImages": [
+        "G:\\Github\\Next_js\\autopost\\public\\scraped_media\\prod-1790360410406-vi5j_gallery_1.webp",
+        "G:\\Github\\Next_js\\autopost\\public\\scraped_media\\prod-1790360410406-vi5j_gallery_2.webp",
+        "G:\\Github\\Next_js\\autopost\\public\\scraped_media\\prod-1790360410406-vi5j_gallery_3.webp"
+      ],
+      "localImages": [
+        "G:\\Github\\Next_js\\autopost\\public\\scraped_media\\prod-1790360410406-vi5j_gallery_1.webp",
+        "G:\\Github\\Next_js\\autopost\\public\\scraped_media\\prod-1790360410406-vi5j_gallery_2.webp",
+        "G:\\Github\\Next_js\\autopost\\public\\scraped_media\\prod-1790360410406-vi5j_gallery_3.webp"
+      ],
+      "syncedAt": "2026-09-25T18:39:19.821Z"
+    }
+  ],
+  "logs": [
+    {
+      "id": "log-1790361559831-nhlww",
+      "timestamp": "2026-09-25T18:39:19.831Z",
+      "level": "success",
+      "message": "Admin Auto-Post finished! Successfully published: 1, Failed: 0.",
+      "category": "AdminBot"
+    },
+    {
+      "id": "log-1790361559818-elyly",
+      "timestamp": "2026-09-25T18:39:19.818Z",
+      "level": "success",
+      "message": "Successfully published \"Arctic Alpine 23 CO Compact AMD CPU Cooler\" (Alpine 23 CO) to Admin Panel!",
+      "category": "AdminBot"
+    },
+    {
+      "id": "log-1790361554550-iritm",
+      "timestamp": "2026-09-25T18:39:14.550Z",
+      "level": "info",
+      "message": "Entering 1 Structured Specification sections...",
+      "category": "AdminBot"
+    },
+    {
+      "id": "log-1790361552211-ccw9b",
+      "timestamp": "2026-09-25T18:39:12.211Z",
+      "level": "info",
+      "message": "Filled Product Name: \"Arctic Alpine 23 CO Compact AMD CPU Cooler\"",
+      "category": "AdminBot"
+    },
+    {
+      "id": "log-1790361541870-67m29",
+      "timestamp": "2026-09-25T18:39:01.870Z",
+      "level": "info",
+      "message": "Checking for \"Add Product\" button on page...",
+      "category": "AdminBot"
+    },
+    {
+      "id": "log-1790361539601-gvswv",
+      "timestamp": "2026-09-25T18:38:59.602Z",
+      "level": "info",
+      "message": "[Alpine 23 CO] Navigating to product page: https://hullotech.com/admin/products",
+      "category": "AdminBot"
+    },
+    {
+      "id": "log-1790361539587-a0sub",
+      "timestamp": "2026-09-25T18:38:59.587Z",
+      "level": "success",
+      "message": "Admin authentication completed successfully.",
+      "category": "AdminBot"
+    },
+    {
+      "id": "log-1790361531876-24rc9",
+      "timestamp": "2026-09-25T18:38:51.876Z",
+      "level": "info",
+      "message": "Navigating to Admin Login: https://hullotech.com/admin",
+      "category": "AdminBot"
+    },
+    {
+      "id": "log-1790361531140-tu8gz",
+      "timestamp": "2026-09-25T18:38:51.140Z",
+      "level": "info",
+      "message": "Launching Chromium (Headless: No - Visible Mode, SlowMo: 500ms)...",
+      "category": "AdminBot"
+    },
+    {
+      "id": "log-1790361531135-w35g1",
+      "timestamp": "2026-09-25T18:38:51.135Z",
+      "level": "info",
+      "message": "Starting Admin Auto-Post synchronization for 1 items...",
+      "category": "AdminBot"
+    },
+    {
+      "id": "log-1790361243803-int4d",
+      "timestamp": "2026-09-25T18:34:03.803Z",
+      "level": "success",
+      "message": "Admin Auto-Post finished! Successfully published: 1, Failed: 0.",
+      "category": "AdminBot"
+    },
+    {
+      "id": "log-1790361243794-r9tz5",
+      "timestamp": "2026-09-25T18:34:03.794Z",
+      "level": "success",
+      "message": "Successfully published \"Netac N535S 120GB 2.5-inch SATAIII SSD\" (N535S) to Admin Panel!",
+      "category": "AdminBot"
+    },
+    {
+      "id": "log-1790361239922-l3oqr",
+      "timestamp": "2026-09-25T18:33:59.922Z",
+      "level": "info",
+      "message": "Clicking \"Save Product\" button...",
+      "category": "AdminBot"
+    },
+    {
+      "id": "log-1790361219485-jx93u",
+      "timestamp": "2026-09-25T18:33:39.485Z",
+      "level": "info",
+      "message": "Entering 3 Structured Specification sections...",
+      "category": "AdminBot"
+    },
+    {
+      "id": "log-1790361218567-dsi9y",
+      "timestamp": "2026-09-25T18:33:38.567Z",
+      "level": "info",
+      "message": "Pasted Main Product Image URL into image field.",
+      "category": "AdminBot"
+    },
+    {
+      "id": "log-1790361207128-h0y56",
+      "timestamp": "2026-09-25T18:33:27.128Z",
+      "level": "info",
+      "message": "Filled Product Name: \"Netac N535S 120GB 2.5-inch SATAIII SSD\"",
+      "category": "AdminBot"
+    },
+    {
+      "id": "log-1790361203795-2jnpf",
+      "timestamp": "2026-09-25T18:33:23.795Z",
+      "level": "info",
+      "message": "Found \"Add Product\" button. Clicking to open creation modal...",
+      "category": "AdminBot"
+    },
+    {
+      "id": "log-1790361203647-dq99f",
+      "timestamp": "2026-09-25T18:33:23.647Z",
+      "level": "info",
+      "message": "Checking for \"Add Product\" button on page...",
+      "category": "AdminBot"
+    },
+    {
+      "id": "log-1790361201460-9yvyt",
+      "timestamp": "2026-09-25T18:33:21.460Z",
+      "level": "info",
+      "message": "[N535S] Navigating to product page: https://hullotech.com/admin/products",
+      "category": "AdminBot"
+    },
+    {
+      "id": "log-1790361201433-y72p6",
+      "timestamp": "2026-09-25T18:33:21.434Z",
+      "level": "success",
+      "message": "Admin authentication completed successfully.",
+      "category": "AdminBot"
+    },
+    {
+      "id": "log-1790361194570-l1izl",
+      "timestamp": "2026-09-25T18:33:14.570Z",
+      "level": "info",
+      "message": "Navigating to Admin Login: https://hullotech.com/admin",
+      "category": "AdminBot"
+    },
+    {
+      "id": "log-1790361193821-8i4bb",
+      "timestamp": "2026-09-25T18:33:13.821Z",
+      "level": "info",
+      "message": "Launching Chromium (Headless: No - Visible Mode, SlowMo: 500ms)...",
+      "category": "AdminBot"
+    },
+    {
+      "id": "log-1790361193817-63uzr",
+      "timestamp": "2026-09-25T18:33:13.817Z",
+      "level": "info",
+      "message": "Starting Admin Auto-Post synchronization for 1 items...",
+      "category": "AdminBot"
+    },
+    {
+      "id": "log-1790360709854-9wv37",
+      "timestamp": "2026-09-25T18:25:09.854Z",
+      "level": "success",
+      "message": "Admin Auto-Post finished! Successfully published: 1, Failed: 0.",
+      "category": "AdminBot"
+    },
+    {
+      "id": "log-1790360709838-p4emo",
+      "timestamp": "2026-09-25T18:25:09.838Z",
+      "level": "success",
+      "message": "Successfully published \"Arctic Alpine 23 CO Compact AMD CPU Cooler\" (Alpine 23 CO) with all structured specifications!",
+      "category": "AdminBot"
+    },
+    {
+      "id": "log-1790360705594-4ysoa",
+      "timestamp": "2026-09-25T18:25:05.594Z",
+      "level": "info",
+      "message": "Filling 1 Structured Specification sections...",
+      "category": "AdminBot"
+    },
+    {
+      "id": "log-1790360702729-xbfbb",
+      "timestamp": "2026-09-25T18:25:02.729Z",
+      "level": "info",
+      "message": "[Alpine 23 CO] Navigating to product form: https://hullotech.com/admin/products",
+      "category": "AdminBot"
+    },
+    {
+      "id": "log-1790360702713-g2v5l",
+      "timestamp": "2026-09-25T18:25:02.713Z",
+      "level": "success",
+      "message": "Admin authentication completed.",
+      "category": "AdminBot"
+    },
+    {
+      "id": "log-1790360696873-x613c",
+      "timestamp": "2026-09-25T18:24:56.873Z",
+      "level": "info",
+      "message": "Navigating to Admin Login: https://hullotech.com/admin",
+      "category": "AdminBot"
+    },
+    {
+      "id": "log-1790360696159-sbm50",
+      "timestamp": "2026-09-25T18:24:56.159Z",
+      "level": "info",
+      "message": "Launching Chromium (Headless: No - Visible Mode, SlowMo: 500ms)...",
+      "category": "AdminBot"
+    },
+    {
+      "id": "log-1790360696152-58i5x",
+      "timestamp": "2026-09-25T18:24:56.152Z",
+      "level": "info",
+      "message": "Starting Admin Auto-Post synchronization for 1 items...",
+      "category": "AdminBot"
+    },
+    {
+      "id": "log-1790360615190-w3dhu",
+      "timestamp": "2026-09-25T18:23:35.190Z",
+      "level": "success",
+      "message": "Admin Auto-Post finished! Successfully published: 1, Failed: 0.",
+      "category": "AdminBot"
+    },
+    {
+      "id": "log-1790360615180-8gd68",
+      "timestamp": "2026-09-25T18:23:35.180Z",
+      "level": "success",
+      "message": "Successfully published \"Value-Top GLACIO X100 RGB Air CPU Cooler\" (GLACIO X100 RGB) with all structured specifications!",
+      "category": "AdminBot"
+    },
+    {
+      "id": "log-1790360611298-unxpv",
+      "timestamp": "2026-09-25T18:23:31.298Z",
+      "level": "info",
+      "message": "Filling 1 Structured Specification sections...",
+      "category": "AdminBot"
+    },
+    {
+      "id": "log-1790360608583-a4yvi",
+      "timestamp": "2026-09-25T18:23:28.583Z",
+      "level": "info",
+      "message": "[GLACIO X100 RGB] Navigating to product form: https://hullotech.com/admin/products",
+      "category": "AdminBot"
+    },
+    {
+      "id": "log-1790360608486-m7u39",
+      "timestamp": "2026-09-25T18:23:28.486Z",
+      "level": "success",
+      "message": "Admin authentication completed.",
+      "category": "AdminBot"
+    },
+    {
+      "id": "log-1790360602586-zny0r",
+      "timestamp": "2026-09-25T18:23:22.586Z",
+      "level": "info",
+      "message": "Navigating to Admin Login: https://hullotech.com/admin",
+      "category": "AdminBot"
+    },
+    {
+      "id": "log-1790360601069-rkk23",
+      "timestamp": "2026-09-25T18:23:21.069Z",
+      "level": "info",
+      "message": "Launching Chromium (Headless: No - Visible Mode, SlowMo: 500ms)...",
+      "category": "AdminBot"
+    },
+    {
+      "id": "log-1790360601064-sr5x0",
+      "timestamp": "2026-09-25T18:23:21.064Z",
+      "level": "info",
+      "message": "Starting Admin Auto-Post synchronization for 1 items...",
+      "category": "AdminBot"
+    },
+    {
+      "id": "log-1790360591092-8ueim",
+      "timestamp": "2026-09-25T18:23:11.092Z",
+      "level": "success",
+      "message": "Admin Auto-Post finished! Successfully published: 1, Failed: 0.",
+      "category": "AdminBot"
+    },
+    {
+      "id": "log-1790360591076-itjfh",
+      "timestamp": "2026-09-25T18:23:11.076Z",
+      "level": "success",
+      "message": "Successfully published \"DeepCool ICE EDGE MINI FS V2.0 CPU Air Cooler\" (ICE EDGE MINI FS V2.0) with all structured specifications!",
+      "category": "AdminBot"
+    },
+    {
+      "id": "log-1790360586520-q5voy",
+      "timestamp": "2026-09-25T18:23:06.520Z",
+      "level": "info",
+      "message": "Filling 1 Structured Specification sections...",
+      "category": "AdminBot"
+    },
+    {
+      "id": "log-1790360583800-9nnkt",
+      "timestamp": "2026-09-25T18:23:03.800Z",
+      "level": "info",
+      "message": "[ICE EDGE MINI FS V2.0] Navigating to product form: https://hullotech.com/admin/products",
+      "category": "AdminBot"
+    },
+    {
+      "id": "log-1790360583788-52624",
+      "timestamp": "2026-09-25T18:23:03.788Z",
+      "level": "success",
+      "message": "Admin authentication completed.",
+      "category": "AdminBot"
+    },
+    {
+      "id": "log-1790360578097-agttt",
+      "timestamp": "2026-09-25T18:22:58.097Z",
+      "level": "info",
+      "message": "Navigating to Admin Login: https://hullotech.com/admin",
+      "category": "AdminBot"
+    },
+    {
+      "id": "log-1790360576433-5mvyl",
+      "timestamp": "2026-09-25T18:22:56.433Z",
+      "level": "info",
+      "message": "Launching Chromium (Headless: No - Visible Mode, SlowMo: 500ms)...",
+      "category": "AdminBot"
+    },
+    {
+      "id": "log-1790360576428-fpqn9",
+      "timestamp": "2026-09-25T18:22:56.428Z",
+      "level": "info",
+      "message": "Starting Admin Auto-Post synchronization for 1 items...",
+      "category": "AdminBot"
+    },
+    {
+      "id": "log-1790360556696-dtsku",
+      "timestamp": "2026-09-25T18:22:36.696Z",
+      "level": "success",
+      "message": "Admin Auto-Post finished! Successfully published: 1, Failed: 0.",
+      "category": "AdminBot"
+    },
+    {
+      "id": "log-1790360556643-lqa0w",
+      "timestamp": "2026-09-25T18:22:36.643Z",
+      "level": "success",
+      "message": "Successfully published \"Arctic Alpine 23 CO Compact AMD CPU Cooler\" (Alpine 23 CO) with all structured specifications!",
+      "category": "AdminBot"
+    },
+    {
+      "id": "log-1790360552675-w02pc",
+      "timestamp": "2026-09-25T18:22:32.676Z",
+      "level": "info",
+      "message": "Filling 1 Structured Specification sections...",
+      "category": "AdminBot"
+    },
+    {
+      "id": "log-1790360550069-czsaq",
+      "timestamp": "2026-09-25T18:22:30.069Z",
+      "level": "info",
+      "message": "[Alpine 23 CO] Navigating to product form: https://hullotech.com/admin/products",
+      "category": "AdminBot"
+    },
+    {
+      "id": "log-1790360549965-467x5",
+      "timestamp": "2026-09-25T18:22:29.965Z",
+      "level": "success",
+      "message": "Admin authentication completed.",
+      "category": "AdminBot"
+    },
+    {
+      "id": "log-1790360543447-ich5t",
+      "timestamp": "2026-09-25T18:22:23.447Z",
+      "level": "info",
+      "message": "Navigating to Admin Login: https://hullotech.com/admin",
+      "category": "AdminBot"
+    },
+    {
+      "id": "log-1790360542243-bqufr",
+      "timestamp": "2026-09-25T18:22:22.243Z",
+      "level": "info",
+      "message": "Launching Chromium (Headless: No - Visible Mode, SlowMo: 500ms)...",
+      "category": "AdminBot"
+    },
+    {
+      "id": "log-1790360542225-4oivn",
+      "timestamp": "2026-09-25T18:22:22.225Z",
+      "level": "info",
+      "message": "Starting Admin Auto-Post synchronization for 1 items...",
+      "category": "AdminBot"
+    },
+    {
+      "id": "log-1790360414420-nlu7q",
+      "timestamp": "2026-09-25T18:20:14.420Z",
+      "level": "error",
+      "message": "Scraper encountered an error: EPERM: operation not permitted, rename 'G:\\Github\\Next_js\\autopost\\.data\\agent_store.json.tmp' -> 'G:\\Github\\Next_js\\autopost\\.data\\agent_store.json'"
+    },
+    {
+      "id": "log-1790360414311-ik9xv",
+      "timestamp": "2026-09-25T18:20:14.311Z",
+      "level": "info",
+      "message": "Extracted 5 structured products for category \"smartphones\".",
+      "category": "smartphones"
+    },
+    {
+      "id": "log-1790360413578-b2dzs",
+      "timestamp": "2026-09-25T18:20:13.578Z",
+      "level": "info",
+      "message": "Found 0 product links in category \"smartphones\". Crawling detail pages...",
+      "category": "smartphones"
+    },
+    {
+      "id": "log-1790360411522-h6s8x",
+      "timestamp": "2026-09-25T18:20:11.522Z",
+      "level": "info",
+      "message": "Visiting category URL: https://www.startech.com.bd/component/search?q=smartphones",
+      "category": "smartphones"
+    },
+    {
+      "id": "log-1790360411371-h9q3j",
+      "timestamp": "2026-09-25T18:20:11.371Z",
+      "level": "info",
+      "message": "Navigating to Priority #3: \"smartphones\"...",
+      "category": "smartphones"
+    },
+    {
+      "id": "log-1790360411364-4gue8",
+      "timestamp": "2026-09-25T18:20:11.364Z",
+      "level": "success",
+      "message": "Saved 5 products to Staging Queue (#2 CPU Cooler).",
+      "category": "CPU Cooler"
+    },
+    {
+      "id": "log-1790360410428-o3ll2",
+      "timestamp": "2026-09-25T18:20:10.428Z",
+      "level": "info",
+      "message": "Downloading and caching media assets for \"CPU Cooler\"...",
+      "category": "CPU Cooler"
+    },
+    {
+      "id": "log-1790360410421-0tqtv",
+      "timestamp": "2026-09-25T18:20:10.421Z",
+      "level": "info",
+      "message": "Extracted 5 structured products for category \"CPU Cooler\".",
+      "category": "CPU Cooler"
+    },
+    {
+      "id": "log-1790360408513-2o8t3",
+      "timestamp": "2026-09-25T18:20:08.513Z",
+      "level": "info",
+      "message": "Parsing product: https://www.startech.com.bd/arctic-alpine-23-co-cpu-cooler",
+      "category": "CPU Cooler"
+    },
+    {
+      "id": "log-1790360406740-7wo8o",
+      "timestamp": "2026-09-25T18:20:06.740Z",
+      "level": "info",
+      "message": "Parsing product: https://www.startech.com.bd/deepcool-ice-edge-mini-fs-v2-0-cpu-cooler",
+      "category": "CPU Cooler"
+    },
+    {
+      "id": "log-1790360404660-cfgim",
+      "timestamp": "2026-09-25T18:20:04.660Z",
+      "level": "info",
+      "message": "Parsing product: https://www.startech.com.bd/value-top-glacio-x100-rgb-cpu-cooler",
+      "category": "CPU Cooler"
+    },
+    {
+      "id": "log-1790360402684-gmun7",
+      "timestamp": "2026-09-25T18:20:02.684Z",
+      "level": "info",
+      "message": "Parsing product: https://www.startech.com.bd/deepcool-alta-9-air-cpu-cooler",
+      "category": "CPU Cooler"
+    },
+    {
+      "id": "log-1790360400606-0iswb",
+      "timestamp": "2026-09-25T18:20:00.606Z",
+      "level": "info",
+      "message": "Parsing product: https://www.startech.com.bd/deepcool-ck-11509-cpu-cooler",
+      "category": "CPU Cooler"
+    },
+    {
+      "id": "log-1790360400601-4c003",
+      "timestamp": "2026-09-25T18:20:00.601Z",
+      "level": "info",
+      "message": "Found 5 product links in category \"CPU Cooler\". Crawling detail pages...",
+      "category": "CPU Cooler"
+    },
+    {
+      "id": "log-1790360397997-7rhsp",
+      "timestamp": "2026-09-25T18:19:57.997Z",
+      "level": "info",
+      "message": "Visiting category URL: https://www.startech.com.bd/component/CPU-Cooler",
+      "category": "CPU Cooler"
+    },
+    {
+      "id": "log-1790360397656-e63m9",
+      "timestamp": "2026-09-25T18:19:57.656Z",
+      "level": "info",
+      "message": "Navigating to Priority #2: \"CPU Cooler\"...",
+      "category": "CPU Cooler"
+    },
+    {
+      "id": "log-1790360397644-lwt1s",
+      "timestamp": "2026-09-25T18:19:57.644Z",
+      "level": "success",
+      "message": "Saved 5 products to Staging Queue (#1 processor).",
+      "category": "processor"
+    },
+    {
+      "id": "log-1790360397297-ulh8z",
+      "timestamp": "2026-09-25T18:19:57.297Z",
+      "level": "info",
+      "message": "Downloading and caching media assets for \"processor\"...",
+      "category": "processor"
+    },
+    {
+      "id": "log-1790360397293-jbnkj",
+      "timestamp": "2026-09-25T18:19:57.293Z",
+      "level": "info",
+      "message": "Extracted 5 structured products for category \"processor\".",
+      "category": "processor"
+    },
+    {
+      "id": "log-1790360395279-3dxat",
+      "timestamp": "2026-09-25T18:19:55.279Z",
+      "level": "info",
+      "message": "Parsing product: https://www.startech.com.bd/amd-ryzen-3-3200g",
+      "category": "processor"
+    },
+    {
+      "id": "log-1790360393256-h8cn7",
+      "timestamp": "2026-09-25T18:19:53.256Z",
+      "level": "info",
+      "message": "Parsing product: https://www.startech.com.bd/intel-pentium-gold-g6400-processor",
+      "category": "processor"
+    },
+    {
+      "id": "log-1790360391129-mw5fa",
+      "timestamp": "2026-09-25T18:19:51.129Z",
+      "level": "info",
+      "message": "Parsing product: https://www.startech.com.bd/amd-ryzen-5-pro-2400ge-processor",
+      "category": "processor"
+    },
+    {
+      "id": "log-1790360388277-gehg7",
+      "timestamp": "2026-09-25T18:19:48.277Z",
+      "level": "info",
+      "message": "Parsing product: https://www.startech.com.bd/amd-ryzen-5-2400g-processor",
+      "category": "processor"
+    },
+    {
+      "id": "log-1790360385363-dx5t3",
+      "timestamp": "2026-09-25T18:19:45.363Z",
+      "level": "info",
+      "message": "Parsing product: https://www.startech.com.bd/amd-athlon-pro-300ge-processor",
+      "category": "processor"
+    },
+    {
+      "id": "log-1790360385358-cmnfd",
+      "timestamp": "2026-09-25T18:19:45.358Z",
+      "level": "info",
+      "message": "Found 5 product links in category \"processor\". Crawling detail pages...",
+      "category": "processor"
+    },
+    {
+      "id": "log-1790360379605-ibh3h",
+      "timestamp": "2026-09-25T18:19:39.605Z",
+      "level": "info",
+      "message": "Visiting category URL: https://www.startech.com.bd/component/processor",
+      "category": "processor"
+    },
+    {
+      "id": "log-1790360377251-u2au4",
+      "timestamp": "2026-09-25T18:19:37.251Z",
+      "level": "info",
+      "message": "Launching Playwright crawler...",
+      "category": "Crawler"
+    },
+    {
+      "id": "log-1790360377247-vhro6",
+      "timestamp": "2026-09-25T18:19:37.247Z",
+      "level": "info",
+      "message": "Navigating to Priority #1: \"processor\"...",
+      "category": "processor"
+    },
+    {
+      "id": "log-1790360377243-jj3dt",
+      "timestamp": "2026-09-25T18:19:37.243Z",
+      "level": "info",
+      "message": "Category Priority Queue: #1 processor -> #2 CPU Cooler -> #3 smartphones -> #4 laptops -> #5 fragrances",
+      "category": "Queue"
+    },
+    {
+      "id": "log-1790360377238-rgzuq",
+      "timestamp": "2026-09-25T18:19:37.238Z",
+      "level": "info",
+      "message": "Target Scraper started for: https://www.startech.com.bd/component",
+      "category": "Scraper"
+    },
+    {
+      "id": "log-1790358885897-5pe24",
+      "timestamp": "2026-09-25T17:54:45.897Z",
+      "level": "success",
+      "message": "Admin Auto-Post finished! Successfully published: 1, Failed: 0.",
+      "category": "AdminBot"
+    },
+    {
+      "id": "log-1790358885693-ikxwy",
+      "timestamp": "2026-09-25T17:54:45.693Z",
+      "level": "success",
+      "message": "Successfully published \"Netac N535S 120GB 2.5-inch SATAIII SSD\" (N535S) with all structured specifications!",
+      "category": "AdminBot"
+    },
+    {
+      "id": "log-1790358881104-63gi1",
+      "timestamp": "2026-09-25T17:54:41.104Z",
+      "level": "info",
+      "message": "Filling 3 Structured Specification sections...",
+      "category": "AdminBot"
+    },
+    {
+      "id": "log-1790358878589-f416v",
+      "timestamp": "2026-09-25T17:54:38.589Z",
+      "level": "info",
+      "message": "[N535S] Navigating to product form: https://hullotech.com/admin/products",
+      "category": "AdminBot"
+    },
+    {
+      "id": "log-1790358878577-23gxg",
+      "timestamp": "2026-09-25T17:54:38.577Z",
+      "level": "success",
+      "message": "Admin authentication completed.",
+      "category": "AdminBot"
+    },
+    {
+      "id": "log-1790358872037-4w9j1",
+      "timestamp": "2026-09-25T17:54:32.037Z",
+      "level": "info",
+      "message": "Navigating to Admin Login: https://hullotech.com/admin",
+      "category": "AdminBot"
+    },
+    {
+      "id": "log-1790358870371-l587l",
+      "timestamp": "2026-09-25T17:54:30.371Z",
+      "level": "info",
+      "message": "Launching Chromium (Headless: No - Visible Mode, SlowMo: 500ms)...",
+      "category": "AdminBot"
+    },
+    {
+      "id": "log-1790358870359-d82t8",
+      "timestamp": "2026-09-25T17:54:30.359Z",
+      "level": "info",
+      "message": "Starting Admin Auto-Post synchronization for 1 items...",
+      "category": "AdminBot"
+    },
+    {
+      "id": "log-1790357361225-a6di9",
+      "timestamp": "2026-09-25T17:29:21.225Z",
+      "level": "info",
+      "message": "Agent and Admin settings saved successfully.",
+      "category": "Settings"
+    },
+    {
+      "id": "log-1790338731555-9b4nz",
+      "timestamp": "2026-09-25T12:18:51.555Z",
+      "level": "success",
+      "message": "Admin Auto-Post finished! Successfully published: 1, Failed: 0.",
+      "category": "AdminBot"
+    },
+    {
+      "id": "log-1790338731545-11tof",
+      "timestamp": "2026-09-25T12:18:51.545Z",
+      "level": "success",
+      "message": "Successfully published \"iPhone 5s\" (SMA-APP-IPH-121) to Admin Panel!",
+      "category": "AdminBot"
+    },
+    {
+      "id": "log-1790338726698-u5tx7",
+      "timestamp": "2026-09-25T12:18:46.698Z",
+      "level": "info",
+      "message": "Attaching 3 images for iPhone 5s...",
+      "category": "AdminBot"
+    },
+    {
+      "id": "log-1790338710473-2rfvj",
+      "timestamp": "2026-09-25T12:18:30.473Z",
+      "level": "info",
+      "message": "[SMA-APP-IPH-121] Navigating to new product form: http://localhost:3002/mock-admin/products/new",
+      "category": "AdminBot"
+    },
+    {
+      "id": "log-1790338710466-rfs5f",
+      "timestamp": "2026-09-25T12:18:30.466Z",
+      "level": "success",
+      "message": "Admin authentication submitted.",
+      "category": "AdminBot"
+    },
+    {
+      "id": "log-1790338686069-18aqu",
+      "timestamp": "2026-09-25T12:18:06.069Z",
+      "level": "info",
+      "message": "Navigating to Admin Login: http://localhost:3002/mock-admin/login",
+      "category": "AdminBot"
+    },
+    {
+      "id": "log-1790338683851-1v6i9",
+      "timestamp": "2026-09-25T12:18:03.851Z",
+      "level": "info",
+      "message": "Launching Chromium (Headless: No - Visible Mode, SlowMo: 500ms)...",
+      "category": "AdminBot"
+    },
+    {
+      "id": "log-1790338683847-f4jaz",
+      "timestamp": "2026-09-25T12:18:03.847Z",
+      "level": "info",
+      "message": "Starting Admin Auto-Post synchronization for 1 items...",
+      "category": "AdminBot"
+    },
+    {
+      "id": "log-1790338654757-eimr0",
+      "timestamp": "2026-09-25T12:17:34.757Z",
+      "level": "success",
+      "message": "Scraping run completed successfully! Total new products staged: 9."
+    },
+    {
+      "id": "log-1790338654755-0majm",
+      "timestamp": "2026-09-25T12:17:34.755Z",
+      "level": "success",
+      "message": "Saved 3 products from category \"fragrances\" to Staging Queue.",
+      "category": "fragrances"
+    },
+    {
+      "id": "log-1790338630124-8g604",
+      "timestamp": "2026-09-25T12:17:10.124Z",
+      "level": "info",
+      "message": "Downloading media assets for \"fragrances\" products...",
+      "category": "fragrances"
+    },
+    {
+      "id": "log-1790338630121-3zidi",
+      "timestamp": "2026-09-25T12:17:10.121Z",
+      "level": "info",
+      "message": "Extracted 3 products for category \"fragrances\".",
+      "category": "fragrances"
+    },
+    {
+      "id": "log-1790338629580-2x9a9",
+      "timestamp": "2026-09-25T12:17:09.580Z",
+      "level": "info",
+      "message": "Visiting priority category #3: \"fragrances\"...",
+      "category": "fragrances"
+    },
+    {
+      "id": "log-1790338629577-57hxo",
+      "timestamp": "2026-09-25T12:17:09.577Z",
+      "level": "success",
+      "message": "Saved 3 products from category \"laptops\" to Staging Queue.",
+      "category": "laptops"
+    },
+    {
+      "id": "log-1790338593593-73zt1",
+      "timestamp": "2026-09-25T12:16:33.593Z",
+      "level": "info",
+      "message": "Downloading media assets for \"laptops\" products...",
+      "category": "laptops"
+    },
+    {
+      "id": "log-1790338593591-13qsg",
+      "timestamp": "2026-09-25T12:16:33.591Z",
+      "level": "info",
+      "message": "Extracted 3 products for category \"laptops\".",
+      "category": "laptops"
+    },
+    {
+      "id": "log-1790338592986-xs5rm",
+      "timestamp": "2026-09-25T12:16:32.986Z",
+      "level": "info",
+      "message": "Visiting priority category #2: \"laptops\"...",
+      "category": "laptops"
+    },
+    {
+      "id": "log-1790338592984-d5u7q",
+      "timestamp": "2026-09-25T12:16:32.984Z",
+      "level": "success",
+      "message": "Saved 3 products from category \"smartphones\" to Staging Queue.",
+      "category": "smartphones"
+    },
+    {
+      "id": "log-1790338569030-28zc6",
+      "timestamp": "2026-09-25T12:16:09.030Z",
+      "level": "info",
+      "message": "Downloading media assets for \"smartphones\" products...",
+      "category": "smartphones"
+    },
+    {
+      "id": "log-1790338569027-v73m3",
+      "timestamp": "2026-09-25T12:16:09.027Z",
+      "level": "info",
+      "message": "Extracted 3 products for category \"smartphones\".",
+      "category": "smartphones"
+    },
+    {
+      "id": "log-1790338564932-oa2dv",
+      "timestamp": "2026-09-25T12:16:04.932Z",
+      "level": "info",
+      "message": "Visiting priority category #1: \"smartphones\"...",
+      "category": "smartphones"
+    },
+    {
+      "id": "log-1790338564930-gp332",
+      "timestamp": "2026-09-25T12:16:04.930Z",
+      "level": "info",
+      "message": "Category priority queue: #1 smartphones -> #2 laptops -> #3 fragrances",
+      "category": "Queue"
+    },
+    {
+      "id": "log-1790338564928-z9t3z",
+      "timestamp": "2026-09-25T12:16:04.928Z",
+      "level": "info",
+      "message": "Target Scraper started for: https://dummyjson.com"
+    },
+    {
+      "id": "log-init",
+      "timestamp": "2026-09-25T12:14:16.554Z",
+      "level": "info",
+      "message": "Product AutoPost Agent initialized and ready."
+    }
+  ],
+  "isScrapingActive": false,
+  "isSyncingActive": false
+}

@@ -10,7 +10,7 @@ const nextConfig = {
         headers: [
           {
             key: 'Content-Security-Policy',
-            value: "frame-ancestors *",
+            value: "frame-ancestors * file:",
           },
           {
             key: 'Access-Control-Allow-Origin',
