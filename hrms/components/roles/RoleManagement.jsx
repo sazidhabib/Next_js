@@ -1,8 +1,36 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Shield, Plus, Edit, Trash2, Key } from 'lucide-react';
+import { Shield, Plus, Edit, Trash2, Key, CheckCircle2 } from 'lucide-react';
 import { Card, Modal, Badge } from '../ui';
+
+const DEFAULT_PERMISSION_OPTIONS = [
+  'ALL',
+  'VIEW_DASHBOARD',
+  'MANAGE_EMPLOYEES',
+  'MANAGE_COMPLIANCE',
+  'MANAGE_IMMIGRATION',
+  'MANAGE_RTW',
+  'APPROVE_LEAVES',
+  'REQUEST_LEAVE',
+  'VIEW_DEPARTMENT',
+  'VIEW_OWN_PROFILE',
+  'MANAGE_USERS',
+];
+
+const parsePermissions = (perms) => {
+  if (Array.isArray(perms)) return perms;
+  if (typeof perms === 'string') {
+    try {
+      const parsed = JSON.parse(perms);
+      if (Array.isArray(parsed)) return parsed;
+      return [perms];
+    } catch {
+      return perms.split(',').map((p) => p.trim()).filter(Boolean);
+    }
+  }
+  return ['STANDARD'];
+};
 
 export default function RoleManagement({ onUpdated }) {
   const [roles, setRoles] = useState([]);
@@ -33,11 +61,26 @@ export default function RoleManagement({ onUpdated }) {
   const openEdit = (role) => {
     setEditingRole(role);
     setForm({
-      name: role.name,
+      name: role.name || '',
       description: role.description || '',
-      permissions: role.permissions || [],
+      permissions: parsePermissions(role.permissions),
     });
     setIsModalOpen(true);
+  };
+
+  const togglePermission = (perm) => {
+    setForm((prev) => {
+      const current = Array.isArray(prev.permissions) ? prev.permissions : [];
+      if (perm === 'ALL') {
+        return { ...prev, permissions: current.includes('ALL') ? [] : ['ALL'] };
+      }
+      const filtered = current.filter((p) => p !== 'ALL');
+      if (filtered.includes(perm)) {
+        return { ...prev, permissions: filtered.filter((p) => p !== perm) };
+      } else {
+        return { ...prev, permissions: [...filtered, perm] };
+      }
+    });
   };
 
   const handleSave = async (e) => {
@@ -55,9 +98,27 @@ export default function RoleManagement({ onUpdated }) {
         setIsModalOpen(false);
         fetchRoles();
         if (onUpdated) onUpdated();
+      } else {
+        alert('Error: ' + data.error);
       }
     } catch (err) {
       alert(err.message);
+    }
+  };
+
+  const handleDelete = async (id, name) => {
+    if (!confirm(`Are you sure you want to delete role "${name}"?`)) return;
+    try {
+      const res = await fetch(`/api/roles/${id}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (data.success) {
+        fetchRoles();
+        if (onUpdated) onUpdated();
+      } else {
+        alert('Error: ' + data.error);
+      }
+    } catch (err) {
+      alert('Delete failed: ' + err.message);
     }
   };
 
@@ -69,11 +130,11 @@ export default function RoleManagement({ onUpdated }) {
             <Shield className="w-5 h-5 text-amber-600" />
             <span>Roles & Permissions (RBAC)</span>
           </h3>
-          <p className="text-xs text-zinc-500">Configure role privileges and system access boundaries</p>
+          <p className="text-xs text-zinc-500">Configure role privileges, RBAC rules and access boundaries</p>
         </div>
         <button
           onClick={openAdd}
-          className="self-start sm:self-auto px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold shadow-md shadow-amber-600/20 flex items-center space-x-2"
+          className="self-start sm:self-auto px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold shadow-md shadow-amber-600/20 flex items-center space-x-2 transition"
         >
           <Plus className="w-4 h-4" />
           <span>Add Role</span>
@@ -81,55 +142,98 @@ export default function RoleManagement({ onUpdated }) {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-4">
-        {roles.map((r) => (
-          <Card key={r.id}>
-            <div className="flex items-start justify-between">
-              <div>
-                <h4 className="text-sm sm:text-base font-bold text-zinc-900 dark:text-zinc-100">{r.name}</h4>
-                <p className="text-xs text-zinc-500 mt-1">{r.description || 'System access role'}</p>
+        {roles.map((r) => {
+          const perms = parsePermissions(r.permissions);
+          return (
+            <Card key={r.id}>
+              <div className="flex items-start justify-between">
+                <div>
+                  <h4 className="text-sm sm:text-base font-bold text-zinc-900 dark:text-zinc-100">{r.name}</h4>
+                  <p className="text-xs text-zinc-500 mt-1">{r.description || 'System access role'}</p>
+                </div>
+                <div className="flex items-center space-x-1">
+                  <button onClick={() => openEdit(r)} className="p-1.5 text-zinc-400 hover:text-amber-600 transition" title="Edit Role">
+                    <Edit className="w-4 h-4" />
+                  </button>
+                  <button onClick={() => handleDelete(r.id, r.name)} className="p-1.5 text-zinc-400 hover:text-rose-600 transition" title="Delete Role">
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
-              <button onClick={() => openEdit(r)} className="p-1.5 text-zinc-400 hover:text-amber-600">
-                <Edit className="w-4 h-4" />
-              </button>
-            </div>
 
-            <div className="mt-4 pt-3 border-t border-zinc-100 dark:border-zinc-800 flex flex-wrap gap-1.5">
-              {(r.permissions || ['STANDARD']).map((perm, idx) => (
-                <span key={idx} className="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400">
-                  {perm}
-                </span>
-              ))}
-            </div>
-          </Card>
-        ))}
+              <div className="mt-4 pt-3 border-t border-zinc-100 dark:border-zinc-800 flex flex-wrap gap-1.5">
+                {perms.length === 0 ? (
+                  <span className="text-[10px] text-zinc-400 font-mono">No specific permissions</span>
+                ) : (
+                  perms.map((perm, idx) => (
+                    <span
+                      key={idx}
+                      className="text-[10px] font-mono px-2 py-0.5 rounded bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-900/60"
+                    >
+                      {perm}
+                    </span>
+                  ))
+                )}
+              </div>
+            </Card>
+          );
+        })}
       </div>
 
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={editingRole ? 'Edit Role' : 'Create Role'}>
         <form onSubmit={handleSave} className="space-y-4 text-xs">
           <div>
-            <label className="block font-semibold mb-1">Role Name *</label>
+            <label className="block font-semibold text-zinc-700 dark:text-zinc-300 mb-1">Role Name *</label>
             <input
               type="text"
               required
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
-              className="w-full px-3 py-2 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700"
+              className="w-full px-3 py-2 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-amber-500"
             />
           </div>
           <div>
-            <label className="block font-semibold mb-1">Description</label>
+            <label className="block font-semibold text-zinc-700 dark:text-zinc-300 mb-1">Description</label>
             <input
               type="text"
               value={form.description}
               onChange={(e) => setForm({ ...form, description: e.target.value })}
-              className="w-full px-3 py-2 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700"
+              className="w-full px-3 py-2 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-amber-500"
             />
           </div>
+
+          <div>
+            <label className="block font-semibold text-zinc-700 dark:text-zinc-300 mb-2">Permissions</label>
+            <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto p-2 rounded-xl bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700">
+              {DEFAULT_PERMISSION_OPTIONS.map((p) => {
+                const isChecked = Array.isArray(form.permissions) && form.permissions.includes(p);
+                return (
+                  <label key={p} className="flex items-center space-x-2 text-[11px] font-mono text-zinc-700 dark:text-zinc-300 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={isChecked}
+                      onChange={() => togglePermission(p)}
+                      className="w-3.5 h-3.5 rounded text-amber-600 focus:ring-amber-500"
+                    />
+                    <span className="truncate">{p}</span>
+                  </label>
+                );
+              })}
+            </div>
+          </div>
+
           <div className="flex justify-end space-x-2 pt-2">
-            <button type="button" onClick={() => setIsModalOpen(false)} className="px-4 py-2 border rounded-xl">
+            <button
+              type="button"
+              onClick={() => setIsModalOpen(false)}
+              className="px-4 py-2 border rounded-xl border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400"
+            >
               Cancel
             </button>
-            <button type="submit" className="px-5 py-2 bg-amber-600 text-white rounded-xl font-bold hover:bg-amber-700">
+            <button
+              type="submit"
+              className="px-5 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl font-bold shadow-md shadow-amber-600/20 transition"
+            >
               Save Role
             </button>
           </div>

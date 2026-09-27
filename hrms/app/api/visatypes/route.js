@@ -18,9 +18,15 @@ export async function POST(request) {
   try {
     await initDb();
     const body = await request.json();
-    const visaType = await VisaType.create(body);
+    const payload = {
+      ...body,
+      description: body.description || body.notes || '',
+      notes: body.notes || body.description || '',
+    };
+    const visaType = await VisaType.create(payload);
     return NextResponse.json({ success: true, visaType }, { status: 201 });
   } catch (error) {
     return NextResponse.json({ success: false, error: error.message }, { status: 400 });
   }
 }
+

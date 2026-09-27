@@ -12,6 +12,8 @@ import DepartmentManagement from '../departments/DepartmentManagement';
 import RoleManagement from '../roles/RoleManagement';
 import UserManagement from '../users/UserManagement';
 import VisaTypeManagement from '../visatypes/VisaTypeManagement';
+import SettingsManagement from '../settings/SettingsManagement';
+import MediaManagement from '../media/MediaManagement';
 
 export default function AppShell() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -22,47 +24,65 @@ export default function AppShell() {
   const [departments, setDepartments] = useState([]);
   const [employees, setEmployees] = useState([]);
   const [visaTypes, setVisaTypes] = useState([]);
+  const [settings, setSettings] = useState({
+    appName: 'HRMS Pro',
+    appSubtitle: 'Enterprise Compliance',
+    companyName: 'The Royal Kitchen Hospitality Ltd',
+    appLogo: '',
+    sponsorLicenceNo: '0W01ABC89',
+    complianceOfficer: 'James Wilson',
+    complianceEmail: 'compliance@hrms.local',
+    currencySymbol: '£',
+    visaWarningDays: 90,
+    rtwWarningDays: 30,
+  });
   const [isSeeding, setIsSeeding] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
 
-  // Initialize theme
+  // Sync theme with document class on mount
   useEffect(() => {
-    const savedTheme = localStorage.getItem('hrms_theme');
-    if (savedTheme) {
-      setTheme(savedTheme);
-    } else {
-      setTheme('light');
+    const saved = localStorage.getItem('hrms_theme');
+    if (saved) {
+      setTheme(saved);
+      if (saved === 'dark') {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    } else if (document.documentElement.classList.contains('dark')) {
+      setTheme('dark');
     }
   }, []);
 
-  // Update HTML class
-  useEffect(() => {
-    if (theme === 'dark') {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-    localStorage.setItem('hrms_theme', theme);
-  }, [theme]);
-
   const toggleTheme = () => {
-    setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
+    setTheme((prev) => {
+      const nextTheme = prev === 'dark' ? 'light' : 'dark';
+      if (nextTheme === 'dark') {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+      localStorage.setItem('hrms_theme', nextTheme);
+      return nextTheme;
+    });
   };
 
-  // Fetch Master Data
+  // Fetch Master Data & Settings
   const refreshAllData = async () => {
     try {
-      const [statsRes, deptRes, empRes, visaRes] = await Promise.all([
+      const [statsRes, deptRes, empRes, visaRes, settRes] = await Promise.all([
         fetch('/api/stats'),
         fetch('/api/departments'),
         fetch('/api/employees'),
         fetch('/api/visatypes'),
+        fetch('/api/settings'),
       ]);
 
       const statsData = await statsRes.json();
       const deptData = await deptRes.json();
       const empData = await empRes.json();
       const visaData = await visaRes.json();
+      const settData = await settRes.json();
 
       if (statsData.success) {
         setStats(statsData.stats);
@@ -72,6 +92,7 @@ export default function AppShell() {
       if (deptData.success) setDepartments(deptData.departments);
       if (empData.success) setEmployees(empData.employees);
       if (visaData.success) setVisaTypes(visaData.visaTypes);
+      if (settData.success && settData.settings) setSettings(settData.settings);
 
       if (statsData.success && statsData.stats.totalEmployees === 0 && !isInitialized) {
         setIsInitialized(true);
@@ -122,6 +143,8 @@ export default function AppShell() {
         return 'User Accounts';
       case 'visatypes':
         return 'Visa Categories';
+      case 'settings':
+        return 'System & Application Settings';
       default:
         return activeTab;
     }
@@ -134,6 +157,7 @@ export default function AppShell() {
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         stats={stats}
+        settings={settings}
         onSeedData={() => triggerSeed(true)}
         isSeeding={isSeeding}
         theme={theme}
@@ -147,6 +171,7 @@ export default function AppShell() {
         <Header
           stats={stats}
           alerts={alerts}
+          settings={settings}
           activeTabTitle={getActiveTabTitle()}
           theme={theme}
           onToggleTheme={toggleTheme}
@@ -215,6 +240,22 @@ export default function AppShell() {
               <VisaTypeManagement
                 visaTypes={visaTypes}
                 onUpdated={refreshAllData}
+              />
+            )}
+
+            {activeTab === 'media' && (
+              <MediaManagement />
+            )}
+
+            {activeTab === 'settings' && (
+              <SettingsManagement
+                settings={settings}
+                onSettingsUpdated={(updatedSettings) => {
+                  setSettings(updatedSettings);
+                  refreshAllData();
+                }}
+                onSeedData={() => triggerSeed(true)}
+                isSeeding={isSeeding}
               />
             )}
           </div>

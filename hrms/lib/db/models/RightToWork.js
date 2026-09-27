@@ -12,26 +12,22 @@ const RightToWork = sequelize.define('RightToWork', {
     allowNull: false,
     field: 'employee_id',
   },
-  checkType: {
-    type: DataTypes.ENUM('ONLINE_SHARE_CODE', 'MANUAL_DOCUMENT', 'DIGITAL_IDSP'),
-    allowNull: false,
-    defaultValue: 'ONLINE_SHARE_CODE',
-    field: 'check_type',
-  },
   checkDate: {
     type: DataTypes.DATEONLY,
     allowNull: false,
     field: 'check_date',
   },
-  nextReviewDate: {
-    type: DataTypes.DATEONLY,
-    allowNull: true,
-    field: 'next_review_date',
-  },
-  verifiedBy: {
+  checkMethod: {
     type: DataTypes.STRING(100),
-    allowNull: false,
-    field: 'verified_by',
+    allowNull: true,
+    defaultValue: 'Online Home Office Share Code Check',
+    field: 'check_method',
+  },
+  checkType: {
+    type: DataTypes.STRING(100),
+    allowNull: true,
+    defaultValue: 'ONLINE_SHARE_CODE',
+    field: 'check_type',
   },
   documentType: {
     type: DataTypes.STRING(100),
@@ -39,10 +35,46 @@ const RightToWork = sequelize.define('RightToWork', {
     defaultValue: 'Passport / Share Code',
     field: 'document_type',
   },
+  documentRef: {
+    type: DataTypes.STRING(100),
+    allowNull: true,
+    field: 'document_ref',
+  },
   documentRefNumber: {
-    type: DataTypes.STRING(80),
+    type: DataTypes.STRING(100),
     allowNull: true,
     field: 'document_ref_number',
+  },
+  performedByUserId: {
+    type: DataTypes.STRING(100),
+    allowNull: true,
+    field: 'performed_by_user_id',
+  },
+  verifiedBy: {
+    type: DataTypes.STRING(100),
+    allowNull: true,
+    field: 'verified_by',
+  },
+  outcome: {
+    type: DataTypes.STRING(100),
+    allowNull: true,
+    defaultValue: 'Continuous Right to Work',
+  },
+  followUpRequired: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: false,
+    field: 'follow_up_required',
+  },
+  followUpDate: {
+    type: DataTypes.DATEONLY,
+    allowNull: true,
+    field: 'follow_up_date',
+  },
+  nextReviewDate: {
+    type: DataTypes.DATEONLY,
+    allowNull: true,
+    field: 'next_review_date',
   },
   documentUrl: {
     type: DataTypes.TEXT,
@@ -56,7 +88,7 @@ const RightToWork = sequelize.define('RightToWork', {
     field: 'statutory_excuse_granted',
   },
   status: {
-    type: DataTypes.ENUM('VERIFIED', 'PENDING_REVIEW', 'EXPIRED', 'REQUIRES_RECHECK'),
+    type: DataTypes.STRING(50),
     allowNull: false,
     defaultValue: 'VERIFIED',
   },
@@ -71,3 +103,4 @@ const RightToWork = sequelize.define('RightToWork', {
 });
 
 export default RightToWork;
+

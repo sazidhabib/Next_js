@@ -8,7 +8,12 @@ export async function PUT(request, { params }) {
     const body = await request.json();
     const visaType = await VisaType.findByPk(id);
     if (!visaType) return NextResponse.json({ success: false, error: 'VisaType not found' }, { status: 404 });
-    await visaType.update(body);
+    const payload = {
+      ...body,
+      description: body.description !== undefined ? body.description : body.notes,
+      notes: body.notes !== undefined ? body.notes : body.description,
+    };
+    await visaType.update(payload);
     return NextResponse.json({ success: true, visaType });
   } catch (error) {
     return NextResponse.json({ success: false, error: error.message }, { status: 400 });

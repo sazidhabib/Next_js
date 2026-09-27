@@ -7,6 +7,8 @@ import VisaType from './VisaType.js';
 import ImmigrationRecord from './ImmigrationRecord.js';
 import RightToWork from './RightToWork.js';
 import LeaveRequest from './LeaveRequest.js';
+import Setting from './Setting.js';
+import MediaFile from './MediaFile.js';
 
 // Department <-> Employee
 Department.hasMany(Employee, { foreignKey: 'department_id', as: 'employees' });
@@ -42,13 +44,13 @@ export async function initDb() {
   if (isInitialized) {
     return {
       sequelize,
-      models: { Department, Role, User, Employee, VisaType, ImmigrationRecord, RightToWork, LeaveRequest },
+      models: { Department, Role, User, Employee, VisaType, ImmigrationRecord, RightToWork, LeaveRequest, Setting, MediaFile },
     };
   }
 
   try {
     await sequelize.authenticate();
-    await sequelize.sync({ alter: false });
+    await sequelize.sync({ alter: true });
     isInitialized = true;
   } catch (error) {
     console.warn('Database sync Notice:', error.message);
@@ -65,6 +67,8 @@ export async function initDb() {
       ImmigrationRecord,
       RightToWork,
       LeaveRequest,
+      Setting,
+      MediaFile,
     },
   };
 }
@@ -79,4 +83,8 @@ export {
   ImmigrationRecord,
   RightToWork,
   LeaveRequest,
+  Setting,
+  MediaFile,
 };
+
+

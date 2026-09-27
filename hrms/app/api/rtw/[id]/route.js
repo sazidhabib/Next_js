@@ -34,7 +34,19 @@ export async function PUT(request, { params }) {
       return NextResponse.json({ success: false, error: 'RTW record not found' }, { status: 404 });
     }
 
-    await record.update(body);
+    const payload = {
+      ...body,
+      checkMethod: body.checkMethod || body.checkType || record.checkMethod,
+      checkType: body.checkType || body.checkMethod || record.checkType,
+      documentRef: body.documentRef !== undefined ? body.documentRef : body.documentRefNumber || record.documentRef,
+      documentRefNumber: body.documentRefNumber !== undefined ? body.documentRefNumber : body.documentRef || record.documentRefNumber,
+      performedByUserId: body.performedByUserId || body.verifiedBy || record.performedByUserId,
+      verifiedBy: body.verifiedBy || body.performedByUserId || record.verifiedBy,
+      nextReviewDate: body.followUpDate !== undefined ? body.followUpDate : body.nextReviewDate || record.nextReviewDate,
+      followUpDate: body.followUpDate !== undefined ? body.followUpDate : body.nextReviewDate || record.followUpDate,
+    };
+
+    await record.update(payload);
     const updated = await RightToWork.findByPk(id, {
       include: [{ model: Employee, as: 'employee' }],
     });

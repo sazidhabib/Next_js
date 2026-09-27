@@ -20,6 +20,7 @@ import {
   Download,
 } from 'lucide-react';
 import { Badge, Card } from '../ui';
+import MediaPickerModal from '../media/MediaPickerModal';
 
 export default function EmployeeManagement({ departments, onEmployeeUpdated }) {
   const [activeSubTab, setActiveSubTab] = useState('list'); // 'list' | 'add' | 'edit'
@@ -28,6 +29,7 @@ export default function EmployeeManagement({ departments, onEmployeeUpdated }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [deptFilter, setDeptFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
+  const [isMediaModalOpen, setIsMediaModalOpen] = useState(false);
   
   // Selected employee for Edit
   const [selectedEmployee, setSelectedEmployee] = useState(null);
@@ -685,7 +687,7 @@ export default function EmployeeManagement({ departments, onEmployeeUpdated }) {
                     />
                   </div>
 
-                  {/* Photo Box Preview with Browse Photo Button matching legacy UI */}
+                  {/* Photo Box Preview with Media Library / Upload Button */}
                   <div className="flex flex-col items-center justify-center p-3 rounded-xl border border-dashed border-zinc-300 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/40">
                     <img
                       src={
@@ -697,28 +699,14 @@ export default function EmployeeManagement({ departments, onEmployeeUpdated }) {
                       alt="Preview"
                       className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl object-cover border border-zinc-200 mb-2 shadow-2xs"
                     />
-                    <input
-                      type="file"
-                      id="employeePhotoUpload"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) {
-                          const reader = new FileReader();
-                          reader.onloadend = () => {
-                            setFormData({ ...formData, photoUrl: reader.result });
-                          };
-                          reader.readAsDataURL(file);
-                        }
-                      }}
-                    />
-                    <label
-                      htmlFor="employeePhotoUpload"
-                      className="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-[11px] font-bold cursor-pointer transition shadow-xs text-center w-full mb-1.5"
+                    <button
+                      type="button"
+                      onClick={() => setIsMediaModalOpen(true)}
+                      className="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-[11px] font-bold transition shadow-xs text-center w-full mb-1.5 flex items-center justify-center space-x-1"
                     >
-                      Browse Photo
-                    </label>
+                      <ImageIcon className="w-3.5 h-3.5" />
+                      <span>Choose / Upload Photo</span>
+                    </button>
                     <input
                       type="text"
                       placeholder="Or Paste Image URL"
@@ -860,6 +848,16 @@ export default function EmployeeManagement({ departments, onEmployeeUpdated }) {
           </form>
         </Card>
       )}
+
+      {/* Centralized Media Picker Modal */}
+      <MediaPickerModal
+        isOpen={isMediaModalOpen}
+        onClose={() => setIsMediaModalOpen(false)}
+        onSelect={(url) => setFormData((prev) => ({ ...prev, photoUrl: url }))}
+        initialUrl={formData.photoUrl}
+        title="Select Employee Profile Photo"
+        preferredCategory="EMPLOYEE_PHOTO"
+      />
     </div>
   );
 }

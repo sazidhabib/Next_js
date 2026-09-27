@@ -16,6 +16,7 @@ import {
 export default function Header({
   stats,
   alerts,
+  settings,
   onSearch,
   activeTabTitle,
   theme,
@@ -62,11 +63,18 @@ export default function Header({
         </button>
 
         <div className="truncate">
-          <h2 className="text-base sm:text-lg font-bold text-zinc-900 dark:text-zinc-100 tracking-tight capitalize truncate">
-            {activeTabTitle || 'Dashboard'}
-          </h2>
-          <span className="hidden md:inline-flex px-2 py-0.5 rounded-md text-[10px] font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400">
-            UK Compliance Ready
+          <div className="flex items-center space-x-2">
+            <h2 className="text-base sm:text-lg font-bold text-zinc-900 dark:text-zinc-100 tracking-tight capitalize truncate">
+              {activeTabTitle || 'Dashboard'}
+            </h2>
+            {settings?.companyName && (
+              <span className="hidden lg:inline-flex px-2 py-0.5 rounded-md text-[10px] font-semibold bg-blue-50 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300 border border-blue-200 dark:border-blue-900/60 truncate max-w-[200px]">
+                {settings.companyName}
+              </span>
+            )}
+          </div>
+          <span className="hidden md:inline-flex text-[11px] text-zinc-500 font-medium">
+            Sponsor License: {settings?.sponsorLicenceNo || '0W01ABC89'}
           </span>
         </div>
       </div>

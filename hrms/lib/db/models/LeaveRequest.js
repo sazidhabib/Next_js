@@ -13,9 +13,9 @@ const LeaveRequest = sequelize.define('LeaveRequest', {
     field: 'employee_id',
   },
   leaveType: {
-    type: DataTypes.ENUM('ANNUAL', 'SICK', 'MATERNITY', 'PATERNITY', 'UNPAID', 'EMERGENCY'),
+    type: DataTypes.STRING(60),
     allowNull: false,
-    defaultValue: 'ANNUAL',
+    defaultValue: 'Annual Leave',
     field: 'leave_type',
   },
   startDate: {
@@ -39,12 +39,12 @@ const LeaveRequest = sequelize.define('LeaveRequest', {
     allowNull: true,
   },
   status: {
-    type: DataTypes.ENUM('PENDING', 'APPROVED', 'REJECTED', 'CANCELLED'),
+    type: DataTypes.STRING(40),
     allowNull: false,
-    defaultValue: 'PENDING',
+    defaultValue: 'Pending',
   },
   approvedBy: {
-    type: DataTypes.INTEGER,
+    type: DataTypes.STRING(100),
     allowNull: true,
     field: 'approved_by',
   },
@@ -65,3 +65,4 @@ const LeaveRequest = sequelize.define('LeaveRequest', {
 });
 
 export default LeaveRequest;
+

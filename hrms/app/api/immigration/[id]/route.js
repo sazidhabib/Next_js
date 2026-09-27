@@ -38,7 +38,18 @@ export async function PUT(request, { params }) {
       return NextResponse.json({ success: false, error: 'Record not found' }, { status: 404 });
     }
 
-    await record.update(body);
+    const payload = {
+      ...body,
+      expiryDate: body.expiryDate || body.visaExpiryDate || record.expiryDate,
+      visaExpiryDate: body.visaExpiryDate || body.expiryDate || record.visaExpiryDate,
+      issueDate: body.issueDate || body.visaStartDate || record.issueDate,
+      visaStartDate: body.visaStartDate || body.issueDate || record.visaStartDate,
+      cosNumber: body.cosNumber || body.sponsorCosNumber || record.cosNumber,
+      sponsorCosNumber: body.sponsorCosNumber || body.cosNumber || record.sponsorCosNumber,
+      brpOrEvisaNumber: body.brpOrEvisaNumber || body.brpNumber || record.brpOrEvisaNumber,
+    };
+
+    await record.update(payload);
     const updated = await ImmigrationRecord.findByPk(id, {
       include: [
         { model: Employee, as: 'employee' },

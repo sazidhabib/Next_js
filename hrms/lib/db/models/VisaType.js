@@ -37,6 +37,10 @@ const VisaType = sequelize.define('VisaType', {
     type: DataTypes.STRING(255),
     allowNull: true,
   },
+  notes: {
+    type: DataTypes.TEXT,
+    allowNull: true,
+  },
 }, {
   tableName: 'visa_types',
   timestamps: true,
@@ -44,3 +48,4 @@ const VisaType = sequelize.define('VisaType', {
 });
 
 export default VisaType;
+

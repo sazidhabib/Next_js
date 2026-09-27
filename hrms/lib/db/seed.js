@@ -21,19 +21,24 @@ export async function seedDatabase() {
   if (roleCount === 0) {
     await Role.bulkCreate([
       {
-        name: 'Super Admin',
-        description: 'Full system access and compliance auditing',
+        name: 'Manager',
+        description: 'Store and kitchen manager with approval authority',
+        permissions: ['MANAGE_EMPLOYEES', 'APPROVE_LEAVES'],
+      },
+      {
+        name: 'Admin',
+        description: 'System administrator with full operations control',
+        permissions: ['ALL'],
+      },
+      {
+        name: 'Restaurant Owner',
+        description: 'Business owner with compliance and executive oversight',
         permissions: ['ALL'],
       },
       {
         name: 'HR Manager',
         description: 'Manage employees, RTW checks, visas, and leaves',
         permissions: ['MANAGE_EMPLOYEES', 'MANAGE_COMPLIANCE', 'APPROVE_LEAVES'],
-      },
-      {
-        name: 'Department Head',
-        description: 'Oversee department staff and approve department leave',
-        permissions: ['VIEW_DEPARTMENT', 'APPROVE_LEAVES'],
       },
       {
         name: 'Employee',
@@ -64,12 +69,40 @@ export async function seedDatabase() {
   if (visaTypeCount === 0) {
     visaTypes = await VisaType.bulkCreate([
       {
-        name: 'Skilled Worker Visa',
+        name: 'Skilled Worker',
         code: 'SKILLED_WORKER',
         category: 'Work Visa',
         requiresSponsorship: true,
         maxWeeklyHours: 48,
         description: 'Sponsored UK employment under Home Office license',
+        notes: 'CoS required',
+      },
+      {
+        name: 'Health and Care Worker',
+        code: 'HEALTH_CARE_WORKER',
+        category: 'Healthcare',
+        requiresSponsorship: true,
+        maxWeeklyHours: 48,
+        description: 'Health and care professionals sponsored route',
+        notes: 'Eligible NHS / Care providers',
+      },
+      {
+        name: 'Global Talent Visa',
+        code: 'GLOBAL_TALENT',
+        category: 'Talent',
+        requiresSponsorship: true,
+        maxWeeklyHours: 48,
+        description: 'Leaders in academia, research, arts and tech',
+        notes: 'Endorsement required',
+      },
+      {
+        name: 'Youth Mobility Scheme',
+        code: 'YOUTH_MOBILITY',
+        category: 'Tier 5 Temporary',
+        requiresSponsorship: true,
+        maxWeeklyHours: 40,
+        description: '2-year temporary work visa for participating nations',
+        notes: 'Working holiday route',
       },
       {
         name: 'Student Visa (20h Work Limit)',
@@ -94,14 +127,6 @@ export async function seedDatabase() {
         requiresSponsorship: false,
         maxWeeklyHours: 48,
         description: 'Permanent residency with unrestricted RTW',
-      },
-      {
-        name: 'Youth Mobility Scheme',
-        code: 'YOUTH_MOBILITY',
-        category: 'Tier 5 Temporary',
-        requiresSponsorship: false,
-        maxWeeklyHours: 40,
-        description: '2-year temporary work visa for participating nations',
       },
       {
         name: 'Spouse / Dependant Visa',
@@ -357,19 +382,43 @@ export async function seedDatabase() {
       },
     ]);
 
-    // 7. Seed Admin User
-    const adminRole = (await Role.findOne({ where: { name: 'Super Admin' } })) || { id: 1 };
+    // 7. Seed Admin & Manager Users
+    const managerRole = (await Role.findOne({ where: { name: 'Manager' } })) || { id: 1 };
+    const adminRole = (await Role.findOne({ where: { name: 'Admin' } })) || { id: 2 };
+    const ownerRole = (await Role.findOne({ where: { name: 'Restaurant Owner' } })) || { id: 3 };
     const passwordHash = await bcrypt.hash('admin123', 10);
 
-    await User.create({
-      employeeId: employees[2].id,
-      name: 'System Administrator',
-      email: 'admin@hrms.local',
-      passwordHash,
-      roleId: adminRole.id,
-      isActive: true,
-    });
+    const userCount = await User.count();
+    if (userCount === 0) {
+      await User.bulkCreate([
+        {
+          username: 'Bishnu',
+          name: 'Bishnu Hari',
+          email: 'bishnu.hari@example.com',
+          passwordHash,
+          roleId: managerRole.id,
+          isActive: true,
+        },
+        {
+          username: 'Obi',
+          name: 'Obi kazi',
+          email: 'obi.kazi@example.com',
+          passwordHash,
+          roleId: adminRole.id,
+          isActive: true,
+        },
+        {
+          username: 'KaaR',
+          name: 'Kaiseer Kazi',
+          email: 'kaiseer.kazi@example.com',
+          passwordHash,
+          roleId: ownerRole.id,
+          isActive: true,
+        },
+      ]);
+    }
   }
 
   return { success: true, message: 'HRMS Database initialized and seeded successfully.' };
 }
+

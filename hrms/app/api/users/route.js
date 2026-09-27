@@ -29,8 +29,9 @@ export async function POST(request) {
 
     const passwordHash = await bcrypt.hash(body.password, 10);
     const user = await User.create({
+      username: body.username || (body.name ? body.name.toLowerCase().replace(/\s+/g, '') : 'user'),
       name: body.name,
-      email: body.email,
+      email: body.email || `${(body.username || body.name || 'user').toLowerCase().replace(/\s+/g, '')}@hrms.local`,
       passwordHash,
       roleId: body.roleId || null,
       employeeId: body.employeeId || null,

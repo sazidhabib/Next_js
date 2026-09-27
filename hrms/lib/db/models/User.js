@@ -12,6 +12,10 @@ const User = sequelize.define('User', {
     allowNull: true,
     field: 'employee_id',
   },
+  username: {
+    type: DataTypes.STRING(100),
+    allowNull: true,
+  },
   name: {
     type: DataTypes.STRING(100),
     allowNull: false,
@@ -47,3 +51,4 @@ const User = sequelize.define('User', {
 });
 
 export default User;
+

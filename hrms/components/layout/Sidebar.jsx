@@ -16,12 +16,15 @@ import {
   ChevronRight,
   Database,
   X,
+  Settings as SettingsIcon,
+  Image as ImageIcon,
 } from 'lucide-react';
 
 export default function Sidebar({
   activeTab,
   setActiveTab,
   stats,
+  settings,
   onSeedData,
   isSeeding,
   isOpen,
@@ -55,6 +58,14 @@ export default function Sidebar({
     { id: 'roles', label: 'Roles', icon: Shield },
     { id: 'users', label: 'Users', icon: UserCheck },
     { id: 'visatypes', label: 'VisaTypes', icon: FileBadge },
+    { id: 'media', label: 'Media Library', icon: ImageIcon },
+    {
+      id: 'settings',
+      label: 'Settings',
+      icon: SettingsIcon,
+      badge: 'Super Admin',
+      badgeColor: 'bg-indigo-600/90 text-white text-[10px]',
+    },
   ];
 
   const handleNavClick = (id) => {
@@ -62,17 +73,38 @@ export default function Sidebar({
     if (onClose) onClose();
   };
 
+  const appName = settings?.appName || 'HRMS Pro';
+  const appSubtitle = settings?.appSubtitle || 'Enterprise Compliance';
+  const appLogo = settings?.appLogo;
+
   const sidebarContent = (
     <div className="flex flex-col h-full bg-slate-900 text-slate-100 border-r border-slate-800 select-none shadow-2xl">
       {/* Brand Header */}
       <div className="p-4 sm:p-5 border-b border-slate-800 flex items-center justify-between">
-        <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-blue-600 to-cyan-400 flex items-center justify-center shadow-lg shadow-blue-500/20 shrink-0">
-            <Sparkles className="w-5 h-5 text-white" />
-          </div>
-          <div>
-            <h1 className="font-bold text-base tracking-tight text-white leading-tight">HRMS Pro</h1>
-            <p className="text-[11px] text-slate-400 font-medium tracking-wide">Enterprise Compliance</p>
+        <div className="flex items-center space-x-3 min-w-0">
+          {appLogo ? (
+            <div className="w-10 h-10 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center p-1 shrink-0 overflow-hidden shadow-md">
+              <img
+                src={appLogo}
+                alt="Logo"
+                className="w-full h-full object-contain"
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none';
+                }}
+              />
+            </div>
+          ) : (
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-blue-600 to-cyan-400 flex items-center justify-center shadow-lg shadow-blue-500/20 shrink-0">
+              <Sparkles className="w-5 h-5 text-white" />
+            </div>
+          )}
+          <div className="min-w-0">
+            <h1 className="font-bold text-base tracking-tight text-white leading-tight truncate">
+              {appName}
+            </h1>
+            <p className="text-[11px] text-slate-400 font-medium tracking-wide truncate">
+              {appSubtitle}
+            </p>
           </div>
         </div>
 
@@ -80,7 +112,7 @@ export default function Sidebar({
         {onClose && (
           <button
             onClick={onClose}
-            className="md:hidden p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition"
+            className="md:hidden p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition shrink-0"
           >
             <X className="w-5 h-5" />
           </button>

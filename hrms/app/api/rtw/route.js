@@ -36,7 +36,19 @@ export async function POST(request) {
     await initDb();
     const body = await request.json();
 
-    const record = await RightToWork.create(body);
+    const payload = {
+      ...body,
+      checkMethod: body.checkMethod || body.checkType || 'Online Home Office Share Code Check',
+      checkType: body.checkType || body.checkMethod || 'ONLINE_SHARE_CODE',
+      documentRef: body.documentRef || body.documentRefNumber || '',
+      documentRefNumber: body.documentRefNumber || body.documentRef || '',
+      performedByUserId: body.performedByUserId || body.verifiedBy || '',
+      verifiedBy: body.verifiedBy || body.performedByUserId || '',
+      nextReviewDate: body.followUpDate || body.nextReviewDate || null,
+      followUpDate: body.followUpDate || body.nextReviewDate || null,
+    };
+
+    const record = await RightToWork.create(payload);
     const fetched = await RightToWork.findByPk(record.id, {
       include: [{ model: Employee, as: 'employee' }],
     });

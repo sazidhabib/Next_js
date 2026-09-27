@@ -38,7 +38,18 @@ export async function POST(request) {
     await initDb();
     const body = await request.json();
 
-    const record = await ImmigrationRecord.create(body);
+    const payload = {
+      ...body,
+      expiryDate: body.expiryDate || body.visaExpiryDate || null,
+      visaExpiryDate: body.visaExpiryDate || body.expiryDate || null,
+      issueDate: body.issueDate || body.visaStartDate || null,
+      visaStartDate: body.visaStartDate || body.issueDate || null,
+      cosNumber: body.cosNumber || body.sponsorCosNumber || null,
+      sponsorCosNumber: body.sponsorCosNumber || body.cosNumber || null,
+      brpOrEvisaNumber: body.brpOrEvisaNumber || body.brpNumber || null,
+    };
+
+    const record = await ImmigrationRecord.create(payload);
     const fetched = await ImmigrationRecord.findByPk(record.id, {
       include: [
         { model: Employee, as: 'employee' },
