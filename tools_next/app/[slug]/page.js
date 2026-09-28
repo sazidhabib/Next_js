@@ -96,7 +96,7 @@ function FormatHubPage({ format, fmt }) {
   return (
     <div className="flex flex-col">
       <section className="py-12 sm:py-16 px-4">
-        <div className="mx-auto max-w-3xl text-center">
+        <div className="mx-auto max-w-6xl text-center">
           <span className="format-badge text-lg px-4 py-1.5 mb-4">{fmt.name}</span>
           <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground">
             {fmt.name} Converter
@@ -106,7 +106,7 @@ function FormatHubPage({ format, fmt }) {
             Free, fast, and secure. No software installation required.
           </p>
           <div className="mt-8">
-            <ConverterWidget />
+            <ConverterWidget sourceFormat={format} />
           </div>
         </div>
       </section>
@@ -186,7 +186,7 @@ function ConversionPage({ from, to, fromFmt, toFmt }) {
   return (
     <div className="flex flex-col">
       <section className="py-12 sm:py-16 px-4">
-        <div className="mx-auto max-w-3xl text-center">
+        <div className="mx-auto max-w-6xl text-center">
           <div className="flex items-center justify-center gap-3 mb-4">
             <span className="format-badge text-base px-4 py-1">{fromFmt.name}</span>
             <svg className="w-5 h-5 text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
