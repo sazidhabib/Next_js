@@ -1,6 +1,6 @@
 # 🚀 FileConvert (Next Tools) — Google Top 1-5/10 Ranking & SEO Master Plan
 
-> **টার্গেট ডোমেন:** `https://fileconvert.com` (বা আপনার লাইভ ডোমেন)  
+> **টার্গেট ডোমেন:** `https://tools.nextdigit.dev` (বা আপনার লাইভ ডোমেন)  
 > **প্রাথমিক লক্ষ্য:** গুগল সার্চে "Convert [X] to [Y]", "[Format] Converter Online", "Free File Converter", এবং নির্দিষ্ট ২০০+ ফাইল ফরম্যাট কনভার্সন সার্চে প্রথম ১-৫ কিংবা ১-১০ এর মধ্যে র‍্যাংক করা এবং Convertio, CloudConvert, FreeConvert-এর মতো জায়ান্টদের সাথে টেক্কা দেওয়া।
 
 ---
