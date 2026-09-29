@@ -441,3 +441,25 @@ export function generateFormatHubFAQs(fmt) {
     },
   ]
 }
+
+export function generateCategoryHubFAQs(category) {
+  return [
+    {
+      question: `What is the best online ${category.name} converter?`,
+      answer: `FileConvert provides a fast, free, and secure online ${category.name.toLowerCase()} converter supporting over ${category.count || category.formats?.length || '20+'} different ${category.name.toLowerCase()} formats with zero software installation.`,
+    },
+    {
+      question: `How many ${category.name.toLowerCase()} formats are supported?`,
+      answer: `We support all popular and specialized ${category.name.toLowerCase()} formats including ${category.formats?.slice(0, 6).map((f) => f.name).join(', ') || 'all standard formats'} and many more.`,
+    },
+    {
+      question: `Is file conversion in the ${category.name} category free?`,
+      answer: `Yes, 100% free! You can batch convert ${category.name.toLowerCase()} files up to 100MB each with high speed, secure 256-bit SSL encryption, and automatic file cleanup after 60 minutes.`,
+    },
+    {
+      question: `Can I convert ${category.name.toLowerCase()} files on mobile devices?`,
+      answer: `Yes. FileConvert works on any device with a modern web browser, including iOS (iPhone/iPad), Android, Mac, Windows, and Linux.`,
+    },
+  ]
+}
+

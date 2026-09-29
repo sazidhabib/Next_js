@@ -7,21 +7,56 @@ import {
   CREDIT_COSTS,
   getAllFormatIds,
   CATEGORIES,
+  getCategoryBySlug,
+  getAllCategoryHubSlugs,
 } from '@/lib/formats'
-import { getFormatSpec, generatePairFAQs, generateFormatHubFAQs } from '@/lib/format-details'
+import {
+  getFormatSpec,
+  generatePairFAQs,
+  generateFormatHubFAQs,
+  generateCategoryHubFAQs,
+} from '@/lib/format-details'
 import ConverterWidget from '@/components/converter/ConverterWidget'
 
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://tools.nextdigit.dev'
 
 export async function generateStaticParams() {
+  const categories = getAllCategoryHubSlugs().map((slug) => ({ slug }))
   const formats = getAllFormatIds().map((format) => ({ slug: `${format}-converter` }))
   const pairs = getTopConversionPairs(300).map((p) => ({ slug: `${p.from}-to-${p.to}` }))
-  return [...formats, ...pairs]
+  return [...categories, ...formats, ...pairs]
 }
 
 export async function generateMetadata({ params }) {
   const { slug } = await params
   if (!slug) return {}
+
+  const category = getCategoryBySlug(slug)
+  if (category) {
+    const title = `Free Online ${category.name} Converter - Convert ${category.count || '20+'} ${category.name} Formats`
+    const description = `Batch convert ${category.name.toLowerCase()} files online for free. Support for ${category.formats?.slice(0, 5).map((f) => f.name).join(', ')} and 50+ formats with high quality and secure 256-bit SSL encryption.`
+    const url = `${BASE_URL}/${slug}`
+
+    return {
+      title,
+      description,
+      alternates: {
+        canonical: url,
+      },
+      openGraph: {
+        title: `${title} | FileConvert`,
+        description,
+        url,
+        siteName: 'FileConvert',
+        type: 'website',
+      },
+      twitter: {
+        card: 'summary_large_image',
+        title: `${title} | FileConvert`,
+        description,
+      },
+    }
+  }
 
   if (slug.endsWith('-converter')) {
     const format = slug.slice(0, -10)
@@ -93,6 +128,11 @@ export async function generateMetadata({ params }) {
 export default async function SlugPage({ params }) {
   const { slug } = await params
   if (!slug) notFound()
+
+  const category = getCategoryBySlug(slug)
+  if (category) {
+    return <CategoryHubPage category={category} slug={slug} />
+  }
 
   if (slug.endsWith('-converter')) {
     const format = slug.slice(0, -10)
@@ -803,3 +843,233 @@ function FormatHubPage({ format, fmt, slug }) {
     </div>
   )
 }
+
+// ----------------------------------------------------------------------
+// Category Hub Page Component (e.g. /image-converter, /video-converter)
+// ----------------------------------------------------------------------
+function CategoryHubPage({ category, slug }) {
+  const faqs = generateCategoryHubFAQs(category)
+  const pageUrl = `${BASE_URL}/${slug}`
+  const formats = category.formats || []
+  const firstFormatId = formats[0]?.id || 'pdf'
+
+  const allCategorySlugs = [
+    { slug: 'image-converter', name: 'Images', icon: '🖼️' },
+    { slug: 'document-converter', name: 'Documents', icon: '📄' },
+    { slug: 'video-converter', name: 'Video', icon: '🎬' },
+    { slug: 'audio-converter', name: 'Audio', icon: '🎵' },
+    { slug: 'spreadsheet-converter', name: 'Spreadsheets', icon: '📊' },
+    { slug: 'presentation-converter', name: 'Slides', icon: '📽️' },
+    { slug: 'ebook-converter', name: 'E-books', icon: '📚' },
+    { slug: 'archive-converter', name: 'Archives', icon: '📦' },
+    { slug: 'vector-converter', name: 'Vector', icon: '✏️' },
+    { slug: 'cad-converter', name: 'CAD', icon: '📐' },
+    { slug: 'font-converter', name: 'Fonts', icon: '🔤' },
+  ].filter((c) => c.slug !== slug)
+
+  const jsonLdData = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'WebApplication',
+        '@id': `${pageUrl}/#webapp`,
+        name: `Free Online ${category.name} Converter`,
+        url: pageUrl,
+        applicationCategory: 'UtilitiesApplication',
+        operatingSystem: 'All (Web Browser)',
+        offers: {
+          '@type': 'Offer',
+          price: '0',
+          priceCurrency: 'USD',
+        },
+        aggregateRating: {
+          '@type': 'AggregateRating',
+          ratingValue: '4.9',
+          reviewCount: '1540',
+          bestRating: '5',
+          worstRating: '1',
+        },
+      },
+      {
+        '@type': 'FAQPage',
+        '@id': `${pageUrl}/#faq`,
+        mainEntity: faqs.map((faq) => ({
+          '@type': 'Question',
+          name: faq.question,
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: faq.answer,
+          },
+        })),
+      },
+      {
+        '@type': 'BreadcrumbList',
+        '@id': `${pageUrl}/#breadcrumbs`,
+        itemListElement: [
+          {
+            '@type': 'ListItem',
+            position: 1,
+            name: 'Home',
+            item: BASE_URL,
+          },
+          {
+            '@type': 'ListItem',
+            position: 2,
+            name: `${category.name} Converter Hub`,
+            item: pageUrl,
+          },
+        ],
+      },
+    ],
+  }
+
+  return (
+    <div className="flex flex-col">
+      {/* Inject Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdData) }}
+      />
+
+      {/* Breadcrumb Bar */}
+      <div className="border-b border-border bg-surface/50 py-3 px-4">
+        <div className="mx-auto max-w-5xl flex items-center gap-2 text-xs sm:text-sm text-muted">
+          <Link href="/" className="hover:text-foreground transition-colors">
+            Home
+          </Link>
+          <span>/</span>
+          <span className="text-foreground font-medium">{category.name} Converter Hub</span>
+        </div>
+      </div>
+
+      {/* Hero */}
+      <section className="py-12 sm:py-16 px-4">
+        <div className="mx-auto max-w-5xl text-center">
+          <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary-light text-primary text-xs font-semibold uppercase tracking-wider mb-4">
+            <span>{category.icon} Category Hub ({formats.length} Formats)</span>
+          </span>
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-foreground">
+            Free Online <span className="text-primary">{category.name}</span> Converter
+          </h1>
+          <p className="mt-3 text-muted text-base sm:text-lg max-w-2xl mx-auto leading-relaxed">
+            Convert any {category.name.toLowerCase()} files online for free. Support for{' '}
+            {formats.slice(0, 6).map((f) => f.name).join(', ')} and {formats.length}+ file extensions with maximum quality retention.
+          </p>
+
+          {/* Converter Widget */}
+          <div className="mt-8">
+            <ConverterWidget sourceFormat={firstFormatId} />
+          </div>
+
+          {/* Trust Highlights */}
+          <div className="mt-8 grid grid-cols-2 sm:grid-cols-4 gap-4 text-left">
+            <div className="flex items-center gap-2.5 p-3 rounded-lg bg-surface border border-border">
+              <span className="text-lg">🔒</span>
+              <div className="text-xs">
+                <p className="font-semibold text-foreground">256-Bit SSL</p>
+                <p className="text-muted">Encrypted transfers</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2.5 p-3 rounded-lg bg-surface border border-border">
+              <span className="text-lg">⏱️</span>
+              <div className="text-xs">
+                <p className="font-semibold text-foreground">Auto-Purged</p>
+                <p className="text-muted">Deleted in 60 mins</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2.5 p-3 rounded-lg bg-surface border border-border">
+              <span className="text-lg">⚡</span>
+              <div className="text-xs">
+                <p className="font-semibold text-foreground">Cloud Speed</p>
+                <p className="text-muted">Instant conversion</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2.5 p-3 rounded-lg bg-surface border border-border">
+              <span className="text-lg">🎯</span>
+              <div className="text-xs">
+                <p className="font-semibold text-foreground">Zero Loss</p>
+                <p className="text-muted">High fidelity output</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Formats in Category Grid */}
+      <section className="py-12 px-4 border-t border-border bg-surface/30">
+        <div className="mx-auto max-w-5xl">
+          <div className="text-center mb-8">
+            <h2 className="text-2xl sm:text-3xl font-bold text-foreground">
+              All Supported {category.name} Formats
+            </h2>
+            <p className="mt-2 text-sm text-muted">
+              Select any format below to explore individual conversion tools:
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+            {formats.map((fmt) => (
+              <Link
+                key={fmt.id}
+                href={`/${fmt.id}-converter`}
+                className="flex items-center justify-between p-3 rounded-xl border border-border bg-background hover:border-primary hover:shadow-sm transition-all group"
+              >
+                <div>
+                  <span className="font-bold text-foreground group-hover:text-primary transition-colors text-sm">
+                    {fmt.name}
+                  </span>
+                  <p className="text-xs text-muted truncate max-w-[130px]">{fmt.desc}</p>
+                </div>
+                <span className="text-xs font-mono text-muted bg-surface px-1.5 py-0.5 rounded">
+                  {fmt.ext}
+                </span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Category FAQs */}
+      <section className="py-16 px-4 border-t border-border" id="faq">
+        <div className="mx-auto max-w-4xl">
+          <h2 className="text-2xl font-bold text-foreground mb-6 text-center">
+            {category.name} Conversion FAQs
+          </h2>
+          <div className="space-y-4">
+            {faqs.map((faq, idx) => (
+              <div key={idx} className="rounded-xl border border-border bg-background p-6">
+                <h3 className="text-base font-semibold text-foreground mb-2 flex items-start gap-2">
+                  <span className="text-primary font-bold">Q:</span>
+                  <span>{faq.question}</span>
+                </h3>
+                <p className="text-sm text-muted leading-relaxed pl-6">{faq.answer}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Other Category Hubs Navigation */}
+      <section className="py-12 px-4 bg-surface border-t border-border">
+        <div className="mx-auto max-w-5xl text-center">
+          <h3 className="text-lg font-semibold text-foreground mb-4">
+            Explore Other File Converter Categories
+          </h3>
+          <div className="flex flex-wrap justify-center gap-2.5">
+            {allCategorySlugs.map((cat) => (
+              <Link
+                key={cat.slug}
+                href={`/${cat.slug}`}
+                className="format-badge hover:border-primary text-xs inline-flex items-center gap-1.5"
+              >
+                <span>{cat.icon}</span>
+                <span>{cat.name} Converter</span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+    </div>
+  )
+}
+

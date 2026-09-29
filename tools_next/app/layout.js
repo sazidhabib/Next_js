@@ -66,6 +66,13 @@ export const metadata = {
   alternates: {
     canonical: BASE_URL,
   },
+  verification: {
+    google: process.env.GOOGLE_SITE_VERIFICATION || process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || undefined,
+    yandex: process.env.YANDEX_SITE_VERIFICATION || undefined,
+    other: {
+      ...(process.env.BING_SITE_VERIFICATION ? { 'msvalidate.01': process.env.BING_SITE_VERIFICATION } : {}),
+    },
+  },
 };
 
 const GLOBAL_SCHEMA = {

@@ -385,3 +385,55 @@ export function getCreditCost(from, to) {
   if (from === pdfFormat && officeFormats.includes(to)) return CREDIT_COSTS.pdf_to_office
   return CREDIT_COSTS.general
 }
+
+export const CATEGORY_SLUG_MAP = {
+  'image-converter': 'images',
+  'images-converter': 'images',
+  'document-converter': 'documents',
+  'documents-converter': 'documents',
+  'video-converter': 'video',
+  'videos-converter': 'video',
+  'audio-converter': 'audio',
+  'audios-converter': 'audio',
+  'archive-converter': 'archives',
+  'archives-converter': 'archives',
+  'spreadsheet-converter': 'spreadsheets',
+  'spreadsheets-converter': 'spreadsheets',
+  'slide-converter': 'slides',
+  'slides-converter': 'slides',
+  'presentation-converter': 'slides',
+  'ebook-converter': 'ebooks',
+  'ebooks-converter': 'ebooks',
+  'vector-converter': 'vector',
+  'cad-converter': 'cad',
+  'font-converter': 'fonts',
+  'fonts-converter': 'fonts',
+}
+
+export function getCategoryBySlug(slug) {
+  const categoryKey = CATEGORY_SLUG_MAP[slug]
+  if (!categoryKey || !CATEGORIES[categoryKey]) return null
+  return {
+    key: categoryKey,
+    ...CATEGORIES[categoryKey],
+    formats: FORMATS[categoryKey] || [],
+    slug,
+  }
+}
+
+export function getAllCategoryHubSlugs() {
+  return [
+    'image-converter',
+    'document-converter',
+    'video-converter',
+    'audio-converter',
+    'spreadsheet-converter',
+    'presentation-converter',
+    'ebook-converter',
+    'archive-converter',
+    'vector-converter',
+    'cad-converter',
+    'font-converter',
+  ]
+}
+

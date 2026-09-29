@@ -1,4 +1,9 @@
-import { getAllFormatIds, isValidConversion, POPULAR_CONVERSIONS } from '@/lib/formats'
+import {
+  getAllFormatIds,
+  isValidConversion,
+  POPULAR_CONVERSIONS,
+  getAllCategoryHubSlugs,
+} from '@/lib/formats'
 
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://tools.nextdigit.dev'
 
@@ -25,6 +30,14 @@ export default function sitemap() {
     url: `${BASE_URL}/${pair.from}-to-${pair.to}`,
     changefreq: 'weekly',
     priority: 0.9,
+    lastModified: now,
+  }))
+
+  // Tier 1.5: Broad Category Hub Pages (e.g. /image-converter, /video-converter)
+  const tier1CategoryUrls = getAllCategoryHubSlugs().map((slug) => ({
+    url: `${BASE_URL}/${slug}`,
+    changefreq: 'weekly',
+    priority: 0.85,
     lastModified: now,
   }))
 
@@ -62,5 +75,11 @@ export default function sitemap() {
     lastModified: now,
   }))
 
-  return [...staticUrls, ...tier1Urls, ...tier2FormatUrls, ...tier3PairUrls]
+  return [
+    ...staticUrls,
+    ...tier1Urls,
+    ...tier1CategoryUrls,
+    ...tier2FormatUrls,
+    ...tier3PairUrls,
+  ]
 }
