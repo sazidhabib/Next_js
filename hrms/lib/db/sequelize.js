@@ -1,4 +1,5 @@
 import { Sequelize } from 'sequelize';
+import mysql2 from 'mysql2';
 
 // Global cached connection for Next.js hot-reloading
 let sequelize;
@@ -25,6 +26,7 @@ function getSequelizeInstance() {
         host: dbHost,
         port: dbPort,
         dialect: 'mysql',
+        dialectModule: mysql2,
         logging: false,
         pool: {
           max: 10,

@@ -78,11 +78,11 @@ export default function AppShell() {
         fetch('/api/settings'),
       ]);
 
-      const statsData = await statsRes.json();
-      const deptData = await deptRes.json();
-      const empData = await empRes.json();
-      const visaData = await visaRes.json();
-      const settData = await settRes.json();
+      const statsData = statsRes.ok ? await statsRes.json() : {};
+      const deptData = deptRes.ok ? await deptRes.json() : {};
+      const empData = empRes.ok ? await empRes.json() : {};
+      const visaData = visaRes.ok ? await visaRes.json() : {};
+      const settData = settRes.ok ? await settRes.json() : {};
 
       if (statsData.success) {
         setStats(statsData.stats);
