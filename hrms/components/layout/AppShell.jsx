@@ -1,6 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { AuthProvider, useAuth } from '@/context/AuthContext';
+import LoginView from '../auth/LoginView';
 import Sidebar from './Sidebar';
 import Header from './Header';
 import DashboardView from '../dashboard/DashboardView';
@@ -14,8 +16,10 @@ import UserManagement from '../users/UserManagement';
 import VisaTypeManagement from '../visatypes/VisaTypeManagement';
 import SettingsManagement from '../settings/SettingsManagement';
 import MediaManagement from '../media/MediaManagement';
+import { Sparkles, Loader2 } from 'lucide-react';
 
-export default function AppShell() {
+function AppShellContent() {
+  const { isAuthenticated, isLoading, user, role, canAccessTab } = useAuth();
   const [activeTab, setActiveTab] = useState('dashboard');
   const [theme, setTheme] = useState('light');
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
@@ -26,7 +30,7 @@ export default function AppShell() {
   const [visaTypes, setVisaTypes] = useState([]);
   const [settings, setSettings] = useState({
     appName: 'HRMS Pro',
-    appSubtitle: 'Enterprise Compliance',
+    appSubtitle: 'Enterprise Compliance & UK Sponsorship',
     companyName: 'The Royal Kitchen Hospitality Ltd',
     appLogo: '',
     sponsorLicenceNo: '0W01ABC89',
@@ -120,13 +124,42 @@ export default function AppShell() {
   };
 
   useEffect(() => {
-    refreshAllData();
-  }, []);
+    if (isAuthenticated) {
+      refreshAllData();
+    }
+  }, [isAuthenticated]);
+
+  // Tab permission guard: reset to dashboard if active tab is disallowed
+  useEffect(() => {
+    if (isAuthenticated && !canAccessTab(activeTab)) {
+      setActiveTab('dashboard');
+    }
+  }, [isAuthenticated, activeTab, canAccessTab, role]);
+
+  // Show loading spinner during session authentication
+  if (isLoading) {
+    return (
+      <div className="h-screen w-screen flex flex-col items-center justify-center bg-slate-950 text-white space-y-4">
+        <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-cyan-400 flex items-center justify-center shadow-xl shadow-blue-500/20 animate-pulse">
+          <Sparkles className="w-7 h-7 text-white" />
+        </div>
+        <div className="flex items-center space-x-2 text-slate-400 text-sm font-medium">
+          <Loader2 className="w-4 h-4 animate-spin text-blue-400" />
+          <span>Connecting to secure workspace...</span>
+        </div>
+      </div>
+    );
+  }
+
+  // If not logged in, enforce login screen barrier
+  if (!isAuthenticated) {
+    return <LoginView settings={settings} />;
+  }
 
   const getActiveTabTitle = () => {
     switch (activeTab) {
       case 'dashboard':
-        return 'Executive Dashboard';
+        return role === 'Employee' ? 'My Self-Service Dashboard' : role === 'Manager' ? 'Store Manager Dashboard' : 'Executive Dashboard';
       case 'employees':
         return 'Employee Records';
       case 'immigration':
@@ -134,7 +167,7 @@ export default function AppShell() {
       case 'rtw':
         return 'Right To Work (RTW)';
       case 'leave':
-        return 'Leave Tracking';
+        return role === 'Employee' ? 'My Leave Applications' : 'Leave Tracking';
       case 'departments':
         return 'Departments';
       case 'roles':
@@ -143,6 +176,8 @@ export default function AppShell() {
         return 'User Accounts';
       case 'visatypes':
         return 'Visa Categories';
+      case 'media':
+        return 'Media & Compliance Library';
       case 'settings':
         return 'System & Application Settings';
       default:
@@ -160,8 +195,6 @@ export default function AppShell() {
         settings={settings}
         onSeedData={() => triggerSeed(true)}
         isSeeding={isSeeding}
-        theme={theme}
-        onToggleTheme={toggleTheme}
         isOpen={isMobileNavOpen}
         onClose={() => setIsMobileNavOpen(false)}
       />
@@ -185,18 +218,22 @@ export default function AppShell() {
               <DashboardView
                 stats={stats}
                 alerts={alerts}
-                onNavigate={(tab) => setActiveTab(tab)}
+                onNavigate={(tab) => {
+                  if (canAccessTab(tab)) {
+                    setActiveTab(tab);
+                  }
+                }}
               />
             )}
 
-            {activeTab === 'employees' && (
+            {activeTab === 'employees' && canAccessTab('employees') && (
               <EmployeeManagement
                 departments={departments}
                 onEmployeeUpdated={refreshAllData}
               />
             )}
 
-            {activeTab === 'immigration' && (
+            {activeTab === 'immigration' && canAccessTab('immigration') && (
               <ImmigrationManagement
                 employees={employees}
                 visaTypes={visaTypes}
@@ -204,50 +241,50 @@ export default function AppShell() {
               />
             )}
 
-            {activeTab === 'rtw' && (
+            {activeTab === 'rtw' && canAccessTab('rtw') && (
               <RightToWorkManagement
                 employees={employees}
                 onUpdated={refreshAllData}
               />
             )}
 
-            {activeTab === 'leave' && (
+            {activeTab === 'leave' && canAccessTab('leave') && (
               <LeaveManagement
                 employees={employees}
                 onUpdated={refreshAllData}
               />
             )}
 
-            {activeTab === 'departments' && (
+            {activeTab === 'departments' && canAccessTab('departments') && (
               <DepartmentManagement
                 departments={departments}
                 onUpdated={refreshAllData}
               />
             )}
 
-            {activeTab === 'roles' && (
+            {activeTab === 'roles' && canAccessTab('roles') && (
               <RoleManagement onUpdated={refreshAllData} />
             )}
 
-            {activeTab === 'users' && (
+            {activeTab === 'users' && canAccessTab('users') && (
               <UserManagement
                 employees={employees}
                 onUpdated={refreshAllData}
               />
             )}
 
-            {activeTab === 'visatypes' && (
+            {activeTab === 'visatypes' && canAccessTab('visatypes') && (
               <VisaTypeManagement
                 visaTypes={visaTypes}
                 onUpdated={refreshAllData}
               />
             )}
 
-            {activeTab === 'media' && (
+            {activeTab === 'media' && canAccessTab('media') && (
               <MediaManagement />
             )}
 
-            {activeTab === 'settings' && (
+            {activeTab === 'settings' && canAccessTab('settings') && (
               <SettingsManagement
                 settings={settings}
                 onSettingsUpdated={(updatedSettings) => {
@@ -264,3 +301,12 @@ export default function AppShell() {
     </div>
   );
 }
+
+export default function AppShell() {
+  return (
+    <AuthProvider>
+      <AppShellContent />
+    </AuthProvider>
+  );
+}
+

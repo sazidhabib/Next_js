@@ -382,37 +382,57 @@ export async function seedDatabase() {
       },
     ]);
 
-    // 7. Seed Admin & Manager Users
-    const managerRole = (await Role.findOne({ where: { name: 'Manager' } })) || { id: 1 };
-    const adminRole = (await Role.findOne({ where: { name: 'Admin' } })) || { id: 2 };
-    const ownerRole = (await Role.findOne({ where: { name: 'Restaurant Owner' } })) || { id: 3 };
+    // 7. Seed Admin, HR Manager, Owner, Manager & Employee Users
+    const managerRole = await Role.findOne({ where: { name: 'Manager' } });
+    const adminRole = await Role.findOne({ where: { name: 'Admin' } });
+    const ownerRole = await Role.findOne({ where: { name: 'Restaurant Owner' } });
+    const hrRole = await Role.findOne({ where: { name: 'HR Manager' } });
+    const employeeRole = await Role.findOne({ where: { name: 'Employee' } });
     const passwordHash = await bcrypt.hash('admin123', 10);
 
     const userCount = await User.count();
     if (userCount === 0) {
       await User.bulkCreate([
         {
-          username: 'Bishnu',
-          name: 'Bishnu Hari',
-          email: 'bishnu.hari@example.com',
-          passwordHash,
-          roleId: managerRole.id,
-          isActive: true,
-        },
-        {
-          username: 'Obi',
-          name: 'Obi kazi',
+          username: 'admin',
+          name: 'Obi Kazi',
           email: 'obi.kazi@example.com',
           passwordHash,
-          roleId: adminRole.id,
+          roleId: adminRole?.id || 2,
           isActive: true,
         },
         {
-          username: 'KaaR',
+          username: 'hrmanager',
+          name: 'James Wilson',
+          email: 'james.wilson@example.com',
+          passwordHash,
+          roleId: hrRole?.id || 4,
+          employeeId: employees[2]?.id || null,
+          isActive: true,
+        },
+        {
+          username: 'owner',
           name: 'Kaiseer Kazi',
           email: 'kaiseer.kazi@example.com',
           passwordHash,
-          roleId: ownerRole.id,
+          roleId: ownerRole?.id || 3,
+          isActive: true,
+        },
+        {
+          username: 'manager',
+          name: 'Bishnu Hari',
+          email: 'bishnu.hari@example.com',
+          passwordHash,
+          roleId: managerRole?.id || 1,
+          isActive: true,
+        },
+        {
+          username: 'employee',
+          name: 'Tariq Ahmed',
+          email: 'tariq.ahmed@example.com',
+          passwordHash,
+          roleId: employeeRole?.id || 5,
+          employeeId: employees[0]?.id || null,
           isActive: true,
         },
       ]);

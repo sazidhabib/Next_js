@@ -1,6 +1,6 @@
-'use client';
-
 import React from 'react';
+import { useAuth } from '@/context/AuthContext';
+import EmployeeDashboardView from './EmployeeDashboardView';
 import {
   Users,
   UserCheck,
@@ -17,6 +17,12 @@ import {
 import { Badge, Card } from '../ui';
 
 export default function DashboardView({ stats, alerts, onNavigate }) {
+  const { user } = useAuth();
+
+  // If the logged-in user is an Employee, show the Employee Self-Service Dashboard
+  if (user?.roleName === 'Employee') {
+    return <EmployeeDashboardView onNavigate={onNavigate} />;
+  }
   const statCards = [
     {
       title: 'Total Employees',

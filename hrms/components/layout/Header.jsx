@@ -1,6 +1,5 @@
-'use client';
-
 import React, { useState, useEffect } from 'react';
+import { useAuth } from '@/context/AuthContext';
 import {
   Bell,
   Search,
@@ -23,6 +22,7 @@ export default function Header({
   onToggleTheme,
   onOpenMobileMenu,
 }) {
+  const { user, role } = useAuth();
   const [currentTime, setCurrentTime] = useState('');
   const [showNotifications, setShowNotifications] = useState(false);
 
@@ -47,7 +47,7 @@ export default function Header({
     return () => clearInterval(timer);
   }, []);
 
-  const totalAlerts = (stats?.expiringVisasCount || 0) + (stats?.pendingRTWCount || 0);
+  const totalAlerts = role === 'Employee' ? 0 : (stats?.expiringVisasCount || 0) + (stats?.pendingRTWCount || 0);
   const isDarkMode = theme === 'dark';
 
   return (
@@ -56,7 +56,7 @@ export default function Header({
       <div className="flex items-center space-x-3 min-w-0">
         <button
           onClick={onOpenMobileMenu}
-          className="md:hidden p-2 -ml-1 rounded-xl text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition"
+          className="md:hidden p-2 -ml-1 rounded-xl text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition cursor-pointer"
           aria-label="Open Navigation Menu"
         >
           <Menu className="w-5 h-5" />
@@ -92,7 +92,7 @@ export default function Header({
           onClick={onToggleTheme}
           title={isDarkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
           aria-label="Toggle theme"
-          className="p-2 sm:px-3 sm:py-1.5 rounded-xl border border-zinc-200 dark:border-zinc-700/80 bg-zinc-50 dark:bg-zinc-800/80 text-zinc-700 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-700/80 transition shadow-2xs flex items-center space-x-1.5"
+          className="p-2 sm:px-3 sm:py-1.5 rounded-xl border border-zinc-200 dark:border-zinc-700/80 bg-zinc-50 dark:bg-zinc-800/80 text-zinc-700 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-700/80 transition shadow-2xs flex items-center space-x-1.5 cursor-pointer"
         >
           {isDarkMode ? (
             <>
@@ -107,63 +107,70 @@ export default function Header({
           )}
         </button>
 
-        {/* Notifications Dropdown */}
-        <div className="relative">
-          <button
-            onClick={() => setShowNotifications(!showNotifications)}
-            className="relative p-2 rounded-xl text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition"
-          >
-            <Bell className="w-5 h-5" />
-            {totalAlerts > 0 && (
-              <span className="absolute top-1 right-1 w-4 h-4 rounded-full bg-rose-500 text-white text-[10px] font-bold flex items-center justify-center animate-pulse">
-                {totalAlerts}
-              </span>
-            )}
-          </button>
+        {/* Notifications Dropdown (Hidden or tailored for regular employees) */}
+        {role !== 'Employee' && (
+          <div className="relative">
+            <button
+              onClick={() => setShowNotifications(!showNotifications)}
+              className="relative p-2 rounded-xl text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition cursor-pointer"
+            >
+              <Bell className="w-5 h-5" />
+              {totalAlerts > 0 && (
+                <span className="absolute top-1 right-1 w-4 h-4 rounded-full bg-rose-500 text-white text-[10px] font-bold flex items-center justify-center animate-pulse">
+                  {totalAlerts}
+                </span>
+              )}
+            </button>
 
-          {showNotifications && (
-            <div className="fixed sm:absolute right-4 sm:right-0 top-16 sm:top-auto sm:mt-2 w-[calc(100vw-2rem)] sm:w-80 bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl border border-zinc-200 dark:border-zinc-800 p-4 z-50 animate-in fade-in zoom-in-95 duration-100">
-              <div className="flex items-center justify-between pb-3 border-b border-zinc-100 dark:border-zinc-800">
-                <h4 className="font-semibold text-sm text-zinc-900 dark:text-zinc-100">Compliance Notifications</h4>
-                <span className="text-xs text-zinc-500">{totalAlerts} Pending</span>
-              </div>
-              <div className="py-2 space-y-2 max-h-64 overflow-y-auto">
-                {alerts?.immigration?.length > 0 ? (
-                  alerts.immigration.map((item) => (
-                    <div
-                      key={item.id}
-                      className="p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 flex items-start space-x-2 text-xs"
-                    >
-                      <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
-                      <div>
-                        <p className="font-semibold text-zinc-800 dark:text-zinc-200">
-                          {item.employee?.firstName} {item.employee?.lastName}
-                        </p>
-                        <p className="text-amber-700 dark:text-amber-400 text-[11px]">
-                          {item.visaType?.name} expires on {item.expiryDate}
-                        </p>
+            {showNotifications && (
+              <div className="fixed sm:absolute right-4 sm:right-0 top-16 sm:top-auto sm:mt-2 w-[calc(100vw-2rem)] sm:w-80 bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl border border-zinc-200 dark:border-zinc-800 p-4 z-50 animate-in fade-in zoom-in-95 duration-100">
+                <div className="flex items-center justify-between pb-3 border-b border-zinc-100 dark:border-zinc-800">
+                  <h4 className="font-semibold text-sm text-zinc-900 dark:text-zinc-100">Compliance Notifications</h4>
+                  <span className="text-xs text-zinc-500">{totalAlerts} Pending</span>
+                </div>
+                <div className="py-2 space-y-2 max-h-64 overflow-y-auto">
+                  {alerts?.immigration?.length > 0 ? (
+                    alerts.immigration.map((item) => (
+                      <div
+                        key={item.id}
+                        className="p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 flex items-start space-x-2 text-xs"
+                      >
+                        <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                        <div>
+                          <p className="font-semibold text-zinc-800 dark:text-zinc-200">
+                            {item.employee?.firstName} {item.employee?.lastName}
+                          </p>
+                          <p className="text-amber-700 dark:text-amber-400 text-[11px]">
+                            {item.visaType?.name} expires on {item.expiryDate}
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                  ))
-                ) : (
-                  <p className="text-xs text-zinc-500 py-3 text-center">No urgent visa alerts.</p>
-                )}
+                    ))
+                  ) : (
+                    <p className="text-xs text-zinc-500 py-3 text-center">No urgent visa alerts.</p>
+                  )}
+                </div>
               </div>
-            </div>
-          )}
-        </div>
+            )}
+          </div>
+        )}
 
         {/* User Profile Pill */}
-        <div className="flex items-center space-x-2 pl-1.5 border-l border-zinc-200 dark:border-zinc-800">
-          <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white font-semibold text-xs shadow-xs">
-            HR
+        <div className="flex items-center space-x-2.5 pl-2 border-l border-zinc-200 dark:border-zinc-800">
+          <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white font-bold text-xs shadow-xs overflow-hidden">
+            {user?.employee?.photoUrl ? (
+              <img src={user.employee.photoUrl} alt="Avatar" className="w-full h-full object-cover" />
+            ) : (
+              <span>{user?.name?.charAt(0) || 'U'}</span>
+            )}
           </div>
-          <div className="hidden xl:block text-left">
-            <p className="text-xs font-bold text-zinc-900 dark:text-zinc-100 leading-tight">Admin</p>
-            <p className="text-[10px] text-zinc-500">Super Admin</p>
+          <div className="hidden sm:block text-left">
+            <p className="text-xs font-bold text-zinc-900 dark:text-zinc-100 leading-tight">{user?.name || 'User'}</p>
+            <p className="text-[10px] text-blue-600 dark:text-blue-400 font-semibold">{role}</p>
           </div>
         </div>
       </div>
     </header>
   );
 }
+

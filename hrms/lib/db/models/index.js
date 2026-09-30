@@ -38,7 +38,8 @@ RightToWork.belongsTo(Employee, { foreignKey: 'employee_id', as: 'employee' });
 Employee.hasMany(LeaveRequest, { foreignKey: 'employee_id', as: 'leaveRequests' });
 LeaveRequest.belongsTo(Employee, { foreignKey: 'employee_id', as: 'employee' });
 
-let isInitialized = false;
+// Global cached initialization state across Next.js dev server reloads
+let isInitialized = global._hrmsDbInitialized || false;
 
 export async function initDb() {
   if (isInitialized) {
@@ -50,8 +51,9 @@ export async function initDb() {
 
   try {
     await sequelize.authenticate();
-    await sequelize.sync({ alter: true });
+    await sequelize.sync();
     isInitialized = true;
+    global._hrmsDbInitialized = true;
   } catch (error) {
     console.warn('Database sync Notice:', error.message);
   }
