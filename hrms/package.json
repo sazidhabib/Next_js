@@ -8,7 +8,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "db:seed": "node scripts/seed.mjs"
+    "db:seed": "node scripts/seed.mjs",
+    "deploy:build": "next build --webpack && node scripts/prepare-deploy.mjs"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",
