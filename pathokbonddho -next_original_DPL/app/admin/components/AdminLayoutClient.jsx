@@ -36,7 +36,7 @@ export default function AdminLayoutClient({ children, user }) {
 
     // Auto-expand sub-menus based on current path
     useEffect(() => {
-        if (pathname?.startsWith('/admin/news') || pathname?.startsWith('/admin/photo-news') || pathname?.startsWith('/admin/video-news')) {
+        if (pathname?.startsWith('/admin/news') || pathname?.startsWith('/admin/photo-news') || pathname?.startsWith('/admin/video-news') || pathname?.startsWith('/admin/section-shortlist')) {
             setIsNewsOpen(true);
         }
         if (pathname?.startsWith('/admin/album') || pathname?.startsWith('/admin/photos')) {
@@ -244,6 +244,11 @@ export default function AdminLayoutClient({ children, user }) {
                                                 <li className="nav-item">
                                                     <Link href="/admin/news" className={`sidebar-link py-2 ${isActiveRoute('/admin/news') ? 'sidebar-link-active' : ''}`}>
                                                         <i className="fas fa-list me-2" style={{ fontSize: '0.7rem' }}></i> All Articles
+                                                    </Link>
+                                                </li>
+                                                <li className="nav-item">
+                                                    <Link href="/admin/section-shortlist" className={`sidebar-link py-2 ${isActiveRoute('/admin/section-shortlist') ? 'sidebar-link-active' : ''}`}>
+                                                        <i className="fas fa-list-ol me-2" style={{ fontSize: '0.7rem' }}></i> Section Short List
                                                     </Link>
                                                 </li>
                                                 {hasViewPermission('gallery') && (
