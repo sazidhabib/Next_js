@@ -151,13 +151,14 @@ export async function seedDatabase() {
 
   // 4. Seed Employees
   const employeeCount = await Employee.count();
+  let employees = [];
   if (employeeCount === 0) {
     const kitchenDept = depts.find(d => d.code === 'KITCHEN') || depts[0];
     const techDept = depts.find(d => d.code === 'TECH') || depts[0];
     const hrDept = depts.find(d => d.code === 'HR') || depts[0];
     const opsDept = depts.find(d => d.code === 'OPS') || depts[0];
 
-    const employees = await Employee.bulkCreate([
+    employees = await Employee.bulkCreate([
       {
         employeeCode: 'EMP-001',
         firstName: 'Tariq',
@@ -381,61 +382,72 @@ export async function seedDatabase() {
         adminComments: 'Self-certification received.',
       },
     ]);
+  } else {
+    employees = await Employee.findAll();
+  }
 
-    // 7. Seed Admin, HR Manager, Owner, Manager & Employee Users
-    const managerRole = await Role.findOne({ where: { name: 'Manager' } });
-    const adminRole = await Role.findOne({ where: { name: 'Admin' } });
-    const ownerRole = await Role.findOne({ where: { name: 'Restaurant Owner' } });
-    const hrRole = await Role.findOne({ where: { name: 'HR Manager' } });
-    const employeeRole = await Role.findOne({ where: { name: 'Employee' } });
-    const passwordHash = await bcrypt.hash('admin123', 10);
+  // 7. Seed Admin, HR Manager, Owner, Manager & Employee Users
+  const managerRole = await Role.findOne({ where: { name: 'Manager' } });
+  const adminRole = await Role.findOne({ where: { name: 'Admin' } });
+  const ownerRole = await Role.findOne({ where: { name: 'Restaurant Owner' } });
+  const hrRole = await Role.findOne({ where: { name: 'HR Manager' } });
+  const employeeRole = await Role.findOne({ where: { name: 'Employee' } });
+  const passwordHash = await bcrypt.hash('admin123', 10);
 
-    const userCount = await User.count();
-    if (userCount === 0) {
-      await User.bulkCreate([
-        {
-          username: 'admin',
-          name: 'Obi Kazi',
-          email: 'obi.kazi@example.com',
-          passwordHash,
-          roleId: adminRole?.id || 2,
-          isActive: true,
-        },
-        {
-          username: 'hrmanager',
-          name: 'James Wilson',
-          email: 'james.wilson@example.com',
-          passwordHash,
-          roleId: hrRole?.id || 4,
-          employeeId: employees[2]?.id || null,
-          isActive: true,
-        },
-        {
-          username: 'owner',
-          name: 'Kaiseer Kazi',
-          email: 'kaiseer.kazi@example.com',
-          passwordHash,
-          roleId: ownerRole?.id || 3,
-          isActive: true,
-        },
-        {
-          username: 'manager',
-          name: 'Bishnu Hari',
-          email: 'bishnu.hari@example.com',
-          passwordHash,
-          roleId: managerRole?.id || 1,
-          isActive: true,
-        },
-        {
-          username: 'employee',
-          name: 'Tariq Ahmed',
-          email: 'tariq.ahmed@example.com',
-          passwordHash,
-          roleId: employeeRole?.id || 5,
-          employeeId: employees[0]?.id || null,
-          isActive: true,
-        },
-      ]);
+  const empTariq = employees.find(e => e.email === 'tariq.ahmed@example.com' || e.employeeCode === 'EMP-001');
+  const empWilson = employees.find(e => e.email === 'james.wilson@example.com' || e.employeeCode === 'EMP-003');
+
+  const defaultUsers = [
+    {
+      username: 'admin',
+      name: 'Obi Kazi',
+      email: 'obi.kazi@example.com',
+      passwordHash,
+      roleId: adminRole?.id || 2,
+      isActive: true,
+    },
+    {
+      username: 'hrmanager',
+      name: 'James Wilson',
+      email: 'james.wilson@example.com',
+      passwordHash,
+      roleId: hrRole?.id || 4,
+      employeeId: empWilson?.id || null,
+      isActive: true,
+    },
+    {
+      username: 'owner',
+      name: 'Kaiseer Kazi',
+      email: 'kaiseer.kazi@example.com',
+      passwordHash,
+      roleId: ownerRole?.id || 3,
+      isActive: true,
+    },
+    {
+      username: 'manager',
+      name: 'Bishnu Hari',
+      email: 'bishnu.hari@example.com',
+      passwordHash,
+      roleId: managerRole?.id || 1,
+      isActive: true,
+    },
+    {
+      username: 'employee',
+      name: 'Tariq Ahmed',
+      email: 'tariq.ahmed@example.com',
+      passwordHash,
+      roleId: employeeRole?.id || 5,
+      employeeId: empTariq?.id || null,
+      isActive: true,
+    },
+  ];
+
+  for (const u of defaultUsers) {
+    const existing = await User.findOne({ where: { email: u.email } });
+    if (existing) {
+      await existing.update(u);
+    } else {
+      await User.create(u);
     }
   }
 
