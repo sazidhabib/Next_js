@@ -182,33 +182,6 @@ export default function AdminLayoutClient({ children, user }) {
                             </>
                         )}
 
-                        {(hasViewPermission('menu') || hasViewPermission('pageLayout') || hasViewPermission('design')) && (
-                            <>
-                                <div className="sidebar-category-header">Site Architecture</div>
-                                {hasViewPermission('menu') && (
-                                    <li className="nav-item">
-                                        <Link href="/admin/menu" className={`sidebar-link ${isActiveRoute('/admin/menu') ? 'sidebar-link-active' : ''}`}>
-                                            <i className="fas fa-compass me-2"></i> Menu Settings
-                                        </Link>
-                                    </li>
-                                )}
-                                {hasViewPermission('pageLayout') && (
-                                    <li className="nav-item">
-                                        <Link href="/admin/page-layout" className={`sidebar-link ${isActiveRoute('/admin/page-layout') ? 'sidebar-link-active' : ''}`}>
-                                            <i className="fas fa-columns me-2"></i> Page Layout
-                                        </Link>
-                                    </li>
-                                )}
-                                {hasViewPermission('design') && (
-                                    <li className="nav-item">
-                                        <Link href="/admin/design" className={`sidebar-link ${isActiveRoute('/admin/design') ? 'sidebar-link-active' : ''}`}>
-                                            <i className="fas fa-paint-brush me-2"></i> Design & Theme
-                                        </Link>
-                                    </li>
-                                )}
-                            </>
-                        )}
-
                         {(hasViewPermission('news') || hasViewPermission('gallery') || hasViewPermission('tags') || hasViewPermission('authors') || hasViewPermission('heroSection') || hasViewPermission('ads')) && (
                             <>
                                 <div className="sidebar-category-header">Content Management</div>
@@ -340,6 +313,33 @@ export default function AdminLayoutClient({ children, user }) {
                                     <li className="nav-item">
                                         <Link href="/admin/photocard-stats" className={`sidebar-link ${isActiveRoute('/admin/photocard-stats') ? 'sidebar-link-active' : ''}`}>
                                             <i className="fas fa-image me-2"></i> Photocard Stats
+                                        </Link>
+                                    </li>
+                                )}
+                            </>
+                        )}
+
+                        {(hasViewPermission('menu') || hasViewPermission('pageLayout') || hasViewPermission('design')) && (
+                            <>
+                                <div className="sidebar-category-header">Site Architecture</div>
+                                {hasViewPermission('menu') && (
+                                    <li className="nav-item">
+                                        <Link href="/admin/menu" className={`sidebar-link ${isActiveRoute('/admin/menu') ? 'sidebar-link-active' : ''}`}>
+                                            <i className="fas fa-compass me-2"></i> Menu Settings
+                                        </Link>
+                                    </li>
+                                )}
+                                {hasViewPermission('pageLayout') && (
+                                    <li className="nav-item">
+                                        <Link href="/admin/page-layout" className={`sidebar-link ${isActiveRoute('/admin/page-layout') ? 'sidebar-link-active' : ''}`}>
+                                            <i className="fas fa-columns me-2"></i> Page Layout
+                                        </Link>
+                                    </li>
+                                )}
+                                {hasViewPermission('design') && (
+                                    <li className="nav-item">
+                                        <Link href="/admin/design" className={`sidebar-link ${isActiveRoute('/admin/design') ? 'sidebar-link-active' : ''}`}>
+                                            <i className="fas fa-paint-brush me-2"></i> Design & Theme
                                         </Link>
                                     </li>
                                 )}

@@ -573,44 +573,56 @@ export default function SectionShortlistClient({ initialLayout, isAdmin, user })
             {/* KPI Cards Banner */}
             <Row className="mb-4 g-3">
                 <Col xs={6} md={3}>
-                    <Card className="border-0 shadow-sm bg-primary text-white h-100">
+                    <Card className="border shadow-sm h-100 bg-white">
                         <Card.Body className="py-3 px-3">
-                            <div className="text-white-50 small fw-bold text-uppercase">Total Editorial Slots</div>
-                            <h2 className="fw-bold mb-0 mt-1">{editorialSlots.length}</h2>
-                            <div className="small mt-1 text-white-50">#1 Lead + {editorialSlots.length - 1} Left Slots</div>
+                            <div className="d-flex justify-content-between align-items-center mb-1">
+                                <span className="text-muted small fw-bold text-uppercase" style={{ letterSpacing: '0.05em', fontSize: '0.72rem' }}>Total Editorial Slots</span>
+                                <span className="p-1 px-2 rounded-circle bg-light text-primary"><i className="fas fa-layer-group"></i></span>
+                            </div>
+                            <h2 className="fw-bold mb-0 text-dark">{editorialSlots.length}</h2>
+                            <div className="small mt-1 text-muted">#1 Lead + {editorialSlots.length > 0 ? editorialSlots.length - 1 : 0} Left Slots</div>
                         </Card.Body>
                     </Card>
                 </Col>
                 <Col xs={6} md={3}>
-                    <Card className="border-0 shadow-sm bg-dark text-white h-100">
+                    <Card className="border shadow-sm h-100 bg-white">
                         <Card.Body className="py-3 px-3">
-                            <div className="text-white-50 small fw-bold text-uppercase">Lead Position #1</div>
-                            <h6 className="fw-bold mb-0 mt-2 text-truncate text-warning">
+                            <div className="d-flex justify-content-between align-items-center mb-1">
+                                <span className="text-muted small fw-bold text-uppercase" style={{ letterSpacing: '0.05em', fontSize: '0.72rem' }}>Lead Position #1</span>
+                                <span className="p-1 px-2 rounded-circle bg-light text-warning"><i className="fas fa-star"></i></span>
+                            </div>
+                            <h6 className="fw-bold mb-0 mt-2 text-truncate text-dark" title={resolvedItems[`${editorialSlots[0]?.rIdx}-${editorialSlots[0]?.cIdx}`]?.newsHeadline || 'Master Merged Cell'}>
                                 {resolvedItems[`${editorialSlots[0]?.rIdx}-${editorialSlots[0]?.cIdx}`]?.newsHeadline || 'Master Merged Cell'}
                             </h6>
-                            <div className="small text-white-50 mt-1">Section Main Merged Lead</div>
+                            <div className="small text-muted mt-1">Section Main Merged Lead</div>
                         </Card.Body>
                     </Card>
                 </Col>
                 <Col xs={6} md={3}>
-                    <Card className="border-0 shadow-sm bg-info text-white h-100">
+                    <Card className="border shadow-sm h-100 bg-white">
                         <Card.Body className="py-3 px-3">
-                            <div className="text-white-50 small fw-bold text-uppercase">Content Types</div>
-                            <div className="d-flex gap-2 mt-2">
-                                <Badge bg="light" text="dark">📰 News</Badge>
-                                <Badge bg="light" text="dark">🎥 Videos</Badge>
-                                <Badge bg="light" text="dark">🖼️ Photos</Badge>
+                            <div className="d-flex justify-content-between align-items-center mb-1">
+                                <span className="text-muted small fw-bold text-uppercase" style={{ letterSpacing: '0.05em', fontSize: '0.72rem' }}>Content Types</span>
+                                <span className="p-1 px-2 rounded-circle bg-light text-teal-500"><i className="fas fa-photo-video"></i></span>
                             </div>
-                            <div className="small text-white-50 mt-2">Strictly Editorial Only</div>
+                            <div className="d-flex flex-wrap gap-1 mt-2">
+                                <Badge bg="light" text="dark" className="border">📰 News</Badge>
+                                <Badge bg="light" text="dark" className="border">🎥 Videos</Badge>
+                                <Badge bg="light" text="dark" className="border">🖼️ Photos</Badge>
+                            </div>
+                            <div className="small text-muted mt-2">Strictly Editorial Only</div>
                         </Card.Body>
                     </Card>
                 </Col>
                 <Col xs={6} md={3}>
-                    <Card className="border-0 shadow-sm bg-secondary text-white h-100">
+                    <Card className="border shadow-sm h-100 bg-white">
                         <Card.Body className="py-3 px-3">
-                            <div className="text-white-50 small fw-bold text-uppercase">Protected Ads</div>
-                            <h2 className="fw-bold mb-0 mt-1">{adSlotsCount}</h2>
-                            <div className="small text-white-50 mt-1">Ad slots untouched & excluded</div>
+                            <div className="d-flex justify-content-between align-items-center mb-1">
+                                <span className="text-muted small fw-bold text-uppercase" style={{ letterSpacing: '0.05em', fontSize: '0.72rem' }}>Protected Ads</span>
+                                <span className="p-1 px-2 rounded-circle bg-light text-secondary"><i className="fas fa-shield-alt"></i></span>
+                            </div>
+                            <h2 className="fw-bold mb-0 text-dark">{adSlotsCount}</h2>
+                            <div className="small text-muted mt-1">Ad slots untouched & excluded</div>
                         </Card.Body>
                     </Card>
                 </Col>
