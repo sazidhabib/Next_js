@@ -8,6 +8,8 @@ import api, { STATIC_URL } from "@/app/lib/api";
 import { useAuth } from "@/app/providers/AuthProvider";
 import WYSIWYGEditor from '@/app/admin/components/WYSIWYGEditor';
 import ImageFormatModal from '@/app/admin/components/ImageFormatModal';
+import HomepageLeadPositionSelector from '@/app/admin/components/HomepageLeadPositionSelector';
+import { assignContentToHomepageSection1 } from '@/app/lib/homepageSection1Sync';
 
 
 
@@ -20,6 +22,7 @@ const NewsEdit = () => {
     const [loading, setLoading] = useState(false);
     const [fetching, setFetching] = useState(true);
     const [uploading, setUploading] = useState(false);
+    const [leadPosition, setLeadPosition] = useState(null);
     const [authors, setAuthors] = useState([]);
     const [tags, setTags] = useState([]);
     const [categories, setCategories] = useState([]);
@@ -328,6 +331,20 @@ const NewsEdit = () => {
             Object.keys(selectedImages).forEach(k => { if (selectedImages[k]) submitData.append(`${k}Path`, selectedImages[k].imageUrl); });
 
             await api.patch(`/news/${id}`, submitData);
+
+            if (leadPosition !== null && id) {
+                try {
+                    await assignContentToHomepageSection1({
+                        contentId: id,
+                        contentTitle: formData.newsHeadline || 'Untitled News',
+                        contentType: 'news',
+                        targetPosition: leadPosition
+                    });
+                } catch (syncErr) {
+                    console.error("Homepage Section 1 sync error:", syncErr);
+                }
+            }
+
             toast.success("News updated successfully!");
             router.push('/admin/news');
         } catch (err) { 
@@ -491,6 +508,13 @@ const NewsEdit = () => {
                     </Col>
 
                     <Col md={4}>
+                        <HomepageLeadPositionSelector
+                            value={leadPosition}
+                            onChange={setLeadPosition}
+                            currentContentId={id}
+                            currentContentType="news"
+                        />
+
                         <Card className="mb-3">
                             <Card.Body>
                                 <h5 className="border-bottom pb-2 mb-3">Author & Status</h5>

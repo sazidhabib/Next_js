@@ -8,6 +8,8 @@ import api, { STATIC_URL } from "@/app/lib/api";
 import { useAuth } from "@/app/providers/AuthProvider";
 import WYSIWYGEditor from '@/app/admin/components/WYSIWYGEditor';
 import ImageFormatModal from '@/app/admin/components/ImageFormatModal';
+import HomepageLeadPositionSelector from '@/app/admin/components/HomepageLeadPositionSelector';
+import { assignContentToHomepageSection1 } from '@/app/lib/homepageSection1Sync';
 
 
 
@@ -18,6 +20,7 @@ const NewsCreate = () => {
 
     const [loading, setLoading] = useState(false);
     const [uploading, setUploading] = useState(false);
+    const [leadPosition, setLeadPosition] = useState('none');
     const [authors, setAuthors] = useState([]);
     const [tags, setTags] = useState([]);
     const [categories, setCategories] = useState([]);
@@ -309,7 +312,22 @@ const NewsCreate = () => {
             Object.keys(files).forEach(k => { if (files[k]) submitData.append(k, files[k]); });
             Object.keys(selectedImages).forEach(k => { if (selectedImages[k]) submitData.append(`${k}Path`, selectedImages[k].imageUrl); });
 
-            await api.post('/news', submitData);
+            const createRes = await api.post('/news', submitData);
+            const createdNewsId = createRes.data?.news?.id || createRes.data?.id || createRes.data?.data?.id;
+
+            if (leadPosition && leadPosition !== 'none' && createdNewsId) {
+                try {
+                    await assignContentToHomepageSection1({
+                        contentId: createdNewsId,
+                        contentTitle: formData.newsHeadline || 'Untitled News',
+                        contentType: 'news',
+                        targetPosition: leadPosition
+                    });
+                } catch (syncErr) {
+                    console.error("Homepage Section 1 sync error:", syncErr);
+                }
+            }
+
             toast.success("News created successfully!");
             router.push('/admin/news');
         } catch (err) { toast.error(err.response?.data?.message || "Failed to create news"); }
@@ -465,6 +483,12 @@ const NewsCreate = () => {
                     </Col>
 
                     <Col md={4}>
+                        <HomepageLeadPositionSelector
+                            value={leadPosition}
+                            onChange={setLeadPosition}
+                            currentContentType="news"
+                        />
+
                         <Card className="mb-3">
                             <Card.Body>
                                 <h5 className="border-bottom pb-2 mb-3">Author & Status</h5>

@@ -44,6 +44,10 @@ export default function SectionShortlistClient({ initialLayout, isAdmin, user })
     const [resolvedItems, setResolvedItems] = useState({});
     const [resolvingLoading, setResolvingLoading] = useState(false);
 
+    // Drag and Drop state
+    const [draggedIndex, setDraggedIndex] = useState(null);
+    const [dragOverIndex, setDragOverIndex] = useState(null);
+
     // Modal state for content replacement
     const [showModal, setShowModal] = useState(false);
     const [activeSlotTarget, setActiveSlotTarget] = useState(null); // { sIdx, rIdx, cIdx, position }
@@ -289,66 +293,79 @@ export default function SectionShortlistClient({ initialLayout, isAdmin, user })
         });
     }, [editorialSlots, resolvedItems, searchFilter, typeFilter]);
 
-    // Handle swapping content between two positions safely - CELL DESIGN IS LOCKED AND NEVER CHANGED
-    const handleSwapSlots = (fromFilteredIndex, toFilteredIndex) => {
+    // Handle reordering content between two positions safely via Shift/Insert (CELL DESIGN REMAINS LOCKED TO ITS POSITION)
+    const handleReorderSlots = (fromFilteredIndex, toFilteredIndex) => {
         if (fromFilteredIndex < 0 || fromFilteredIndex >= filteredSlots.length || toFilteredIndex < 0 || toFilteredIndex >= filteredSlots.length) return;
+        if (fromFilteredIndex === toFilteredIndex) return;
 
         const slotA = filteredSlots[fromFilteredIndex];
         const slotB = filteredSlots[toFilteredIndex];
         if (!slotA || !slotB) return;
 
-        const keyA = `${slotA.rIdx}-${slotA.cIdx}`;
-        const keyB = `${slotB.rIdx}-${slotB.cIdx}`;
+        const fromEditorialIdx = editorialSlots.findIndex(s => s.rIdx === slotA.rIdx && s.cIdx === slotA.cIdx);
+        const toEditorialIdx = editorialSlots.findIndex(s => s.rIdx === slotB.rIdx && s.cIdx === slotB.cIdx);
+        if (fromEditorialIdx === -1 || toEditorialIdx === -1 || fromEditorialIdx === toEditorialIdx) return;
 
+        // Extract ordered editorial contents
+        const currentSlotContents = editorialSlots.map(s => {
+            const key = `${s.rIdx}-${s.cIdx}`;
+            return {
+                contentType: s.cell.contentType,
+                contentId: s.cell.contentId,
+                contentTitle: s.cell.contentTitle,
+                tag: s.cell.tag,
+                resolved: resolvedItems[key]
+            };
+        });
+
+        // Perform Shift / Insert: remove from source index and insert at target index
+        const reorderedContents = [...currentSlotContents];
+        const [movedPayload] = reorderedContents.splice(fromEditorialIdx, 1);
+        reorderedContents.splice(toEditorialIdx, 0, movedPayload);
+
+        // Update layout state with reordered contents across fixed slot geometries
         setLayout(prev => {
             const updated = normalizeLayout(prev);
             if (!updated?.PageSections?.[0]) return prev;
 
             const sec = updated.PageSections[0];
             const rows = sec.rows || [];
-            const rowA = rows[slotA.rIdx];
-            const rowB = rows[slotB.rIdx];
-            if (!rowA || !rowB) return prev;
 
-            const colsA = rowA.columns || [];
-            const colsB = rowB.columns || [];
-            const cellA = colsA[slotA.cIdx];
-            const cellB = colsB[slotB.cIdx];
-            if (!cellA || !cellB) return prev;
+            editorialSlots.forEach((slot, idx) => {
+                const row = rows[slot.rIdx];
+                if (!row) return;
+                const col = (row.columns || [])[slot.cIdx];
+                if (!col) return;
 
-            // SWAP CONTENT ONLY: (contentId, contentTitle, contentType, tag)
-            // Cell design, width, rowSpan, colSpan, merged, masterCell remain 100% LOCKED to their respective slot!
-            const tempContent = {
-                contentType: cellA.contentType,
-                contentId: cellA.contentId,
-                contentTitle: cellA.contentTitle,
-                tag: cellA.tag
-            };
-
-            cellA.contentType = cellB.contentType;
-            cellA.contentId = cellB.contentId;
-            cellA.contentTitle = cellB.contentTitle;
-            cellA.tag = cellB.tag;
-
-            cellB.contentType = tempContent.contentType;
-            cellB.contentId = tempContent.contentId;
-            cellB.contentTitle = tempContent.contentTitle;
-            cellB.tag = tempContent.tag;
+                const newPayload = reorderedContents[idx];
+                if (newPayload) {
+                    col.contentType = newPayload.contentType;
+                    col.contentId = newPayload.contentId;
+                    col.contentTitle = newPayload.contentTitle;
+                    col.tag = newPayload.tag;
+                }
+            });
 
             return updated;
         });
 
-        // Immediately swap resolved items in local cache so the UI reflects the change instantly
+        // Update local resolved items cache
         setResolvedItems(prev => {
             const next = { ...prev };
-            const itemA = next[keyA];
-            const itemB = next[keyB];
-            next[keyA] = itemB;
-            next[keyB] = itemA;
+            editorialSlots.forEach((slot, idx) => {
+                const key = `${slot.rIdx}-${slot.cIdx}`;
+                next[key] = reorderedContents[idx]?.resolved;
+            });
             return next;
         });
 
-        toast.info(`Moved content between Position #${slotA.position} and Position #${slotB.position} (Design preserved)`);
+        const movedHeadline = slotA.cell.contentTitle || resolvedItems[`${slotA.rIdx}-${slotA.cIdx}`]?.newsHeadline || `Item #${slotA.position}`;
+        toast.info(`Moved to Position #${slotB.position} (Design preserved)`);
+    };
+
+    // Handle swapping content between two positions safely - CELL DESIGN IS LOCKED AND NEVER CHANGED
+    const handleSwapSlots = (fromFilteredIndex, toFilteredIndex) => {
+        handleReorderSlots(fromFilteredIndex, toFilteredIndex);
     };
 
     // Open Content Replacement Modal
@@ -677,7 +694,10 @@ export default function SectionShortlistClient({ initialLayout, isAdmin, user })
                     <Table hover align="middle" className="mb-0">
                         <thead className="table-light">
                             <tr>
-                                <th style={{ width: '100px' }} className="text-center">Position</th>
+                                <th style={{ width: '45px' }} className="text-center" title="Drag to reorder">
+                                    <i className="fas fa-arrows-alt text-muted"></i>
+                                </th>
+                                <th style={{ width: '90px' }} className="text-center">Position</th>
                                 <th>Headline & Details</th>
                                 <th style={{ width: '130px' }}>Type</th>
                                 <th style={{ width: '180px' }}>Placement Slot</th>
@@ -688,7 +708,7 @@ export default function SectionShortlistClient({ initialLayout, isAdmin, user })
                         <tbody>
                             {filteredSlots.length === 0 ? (
                                 <tr>
-                                    <td colSpan="6" className="text-center py-5 text-muted">
+                                    <td colSpan="7" className="text-center py-5 text-muted">
                                         No editorial items match your filter.
                                     </td>
                                 </tr>
@@ -702,9 +722,56 @@ export default function SectionShortlistClient({ initialLayout, isAdmin, user })
                                     const headlineBn = content?.newsHeadlineBangla || '';
                                     const authorName = content?.Author?.name || content?.author?.name || 'Editorial Desk';
                                     const cellDesign = slot.cell.design || 'Default Design';
+                                    const isBeingDragged = draggedIndex === index;
+                                    const isDragOver = dragOverIndex === index && draggedIndex !== index;
 
                                     return (
-                                        <tr key={slotKey} className={isLead ? 'table-warning bg-opacity-25' : ''}>
+                                        <tr 
+                                            key={slotKey} 
+                                            className={`${isLead ? 'table-warning bg-opacity-25' : ''} ${isBeingDragged ? 'opacity-50 bg-light' : ''}`}
+                                            draggable={!searchFilter}
+                                            onDragStart={(e) => {
+                                                setDraggedIndex(index);
+                                                e.dataTransfer.effectAllowed = 'move';
+                                                e.dataTransfer.setData('text/plain', String(index));
+                                            }}
+                                            onDragOver={(e) => {
+                                                e.preventDefault();
+                                                e.dataTransfer.dropEffect = 'move';
+                                                if (dragOverIndex !== index) {
+                                                    setDragOverIndex(index);
+                                                }
+                                            }}
+                                            onDragLeave={() => {
+                                                if (dragOverIndex === index) {
+                                                    setDragOverIndex(null);
+                                                }
+                                            }}
+                                            onDragEnd={() => {
+                                                setDraggedIndex(null);
+                                                setDragOverIndex(null);
+                                            }}
+                                            onDrop={(e) => {
+                                                e.preventDefault();
+                                                const sourceIdx = draggedIndex !== null ? draggedIndex : parseInt(e.dataTransfer.getData('text/plain'), 10);
+                                                if (!isNaN(sourceIdx) && sourceIdx !== index) {
+                                                    handleReorderSlots(sourceIdx, index);
+                                                }
+                                                setDraggedIndex(null);
+                                                setDragOverIndex(null);
+                                            }}
+                                            style={{
+                                                transition: 'all 0.15s ease',
+                                                borderTop: isDragOver ? '3px solid #006a60' : undefined,
+                                                backgroundColor: isDragOver ? 'rgba(0, 106, 96, 0.08)' : undefined,
+                                                cursor: searchFilter ? 'default' : 'grab'
+                                            }}
+                                        >
+                                            {/* Drag Handle */}
+                                            <td className="text-center text-muted align-middle" style={{ cursor: searchFilter ? 'default' : 'grab', userSelect: 'none' }}>
+                                                <i className="fas fa-grip-vertical text-muted opacity-75" title={searchFilter ? "Clear search to reorder" : "Drag to reorder position"}></i>
+                                            </td>
+
                                             {/* Position Rank */}
                                             <td className="text-center">
                                                 {isLead ? (

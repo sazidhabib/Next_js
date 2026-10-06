@@ -8,6 +8,8 @@ import { useRouter, useParams } from 'next/navigation';
 import api, { STATIC_URL } from "@/app/lib/api";
 import { useAuth } from "@/app/providers/AuthProvider";
 import WYSIWYGEditor from '../../../components/WYSIWYGEditor';
+import HomepageLeadPositionSelector from '@/app/admin/components/HomepageLeadPositionSelector';
+import { assignContentToHomepageSection1 } from '@/app/lib/homepageSection1Sync';
 
 
 
@@ -19,6 +21,7 @@ const PhotoNewsEdit = () => {
 
     const [loading, setLoading] = useState(false);
     const [fetching, setFetching] = useState(true);
+    const [leadPosition, setLeadPosition] = useState(null);
     const [authors, setAuthors] = useState([]);
     const [tags, setTags] = useState([]);
     const [categories, setCategories] = useState([]);
@@ -177,6 +180,20 @@ const PhotoNewsEdit = () => {
             Object.keys(selectedImages).forEach(k => { if (selectedImages[k]) submitData.append(`${k}Path`, selectedImages[k].imageUrl); });
 
             await api.patch(`/news/${id}`, submitData);
+
+            if (leadPosition !== null && id) {
+                try {
+                    await assignContentToHomepageSection1({
+                        contentId: id,
+                        contentTitle: formData.newsHeadline || 'Untitled Photo News',
+                        contentType: 'photo',
+                        targetPosition: leadPosition
+                    });
+                } catch (syncErr) {
+                    console.error("Homepage Section 1 sync error:", syncErr);
+                }
+            }
+
             toast.success("Photo News updated successfully!");
             router.push('/admin/news');
         } catch (err) { toast.error(err.response?.data?.message || "Failed to update photo news"); }
@@ -408,6 +425,13 @@ const PhotoNewsEdit = () => {
                         </Card.Body></Card>
                     </Col>
                     <Col md={4}>
+                        <HomepageLeadPositionSelector
+                            value={leadPosition}
+                            onChange={setLeadPosition}
+                            currentContentId={id}
+                            currentContentType="photo"
+                        />
+
                         <Card className="mb-3"><Card.Body>
                             <h6>Metadata</h6><hr/>
                             <Form.Group className="mb-3"><Form.Label>Author *</Form.Label>
