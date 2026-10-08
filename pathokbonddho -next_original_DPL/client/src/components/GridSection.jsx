@@ -189,7 +189,6 @@ const GridSection = ({ section }) => {
                                             top: '20px',
                                             bottom: '20px',
                                             width: '1px',
-                                            backgroundColor: '#e5e5e5',
                                             zIndex: 1
                                         }} 
                                     />
@@ -205,7 +204,6 @@ const GridSection = ({ section }) => {
                                             left: '5px',
                                             right: isLastCol ? '5px' : '-5px',
                                             height: '1px',
-                                            backgroundColor: '#e5e5e5',
                                             zIndex: 1
                                         }} 
                                     />

@@ -6,6 +6,7 @@ import 'animate.css/animate.min.css';
 import { AuthProvider } from './providers/AuthProvider';
 import { MenuProvider } from './providers/MenuProvider';
 import { SettingsProvider } from './providers/SettingsProvider';
+import { ThemeProvider } from './providers/ThemeProvider';
 import { ToastContainer } from 'react-toastify';
 import PopupAd from './components/PopupAd';
 import Script from 'next/script';
@@ -60,8 +61,24 @@ export async function generateMetadata() {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="bn" data-scroll-behavior="smooth">
+    <html lang="bn" data-scroll-behavior="smooth" suppressHydrationWarning>
       <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var saved = localStorage.getItem('app-theme');
+                  var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                  var theme = saved || (prefersDark ? 'dark' : 'light');
+                  document.documentElement.setAttribute('data-bs-theme', theme);
+                  document.documentElement.setAttribute('data-theme', theme);
+                  document.documentElement.classList.add(theme);
+                } catch(e) {}
+              })();
+            `,
+          }}
+        />
         {/* Google tag (gtag.js) */}
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-0TFVFXRWKF"
@@ -77,15 +94,17 @@ export default function RootLayout({ children }) {
         </Script>
       </head>
       <body suppressHydrationWarning>
-        <AuthProvider>
-          <MenuProvider>
-            <SettingsProvider>
-              {children}
-              <PopupAd />
-              <ToastContainer position="top-right" autoClose={3000} />
-            </SettingsProvider>
-          </MenuProvider>
-        </AuthProvider>
+        <ThemeProvider>
+          <AuthProvider>
+            <MenuProvider>
+              <SettingsProvider>
+                {children}
+                <PopupAd />
+                <ToastContainer position="top-right" autoClose={3000} />
+              </SettingsProvider>
+            </MenuProvider>
+          </AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

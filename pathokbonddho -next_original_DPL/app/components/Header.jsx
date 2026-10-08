@@ -7,6 +7,7 @@ import { useMenu } from '../providers/MenuProvider';
 import { useSettings } from '../providers/SettingsProvider';
 import { formatBengaliDate } from '@/app/lib/dateUtils';
 import HeaderAd from './HeaderAd';
+import ThemeToggle from './ThemeToggle';
 
 const normalizePath = (path, includeQuery = false) => {
   if (!path) return '/';
@@ -213,6 +214,9 @@ const Header = () => {
               priority
             />
           </Link>
+          <div className="d-flex align-items-center">
+            <ThemeToggle size="sm" />
+          </div>
         </div>
       )}
 
@@ -239,6 +243,9 @@ const Header = () => {
               style={{ objectFit: 'contain' }}
             />
           </Link>
+          <div className="d-flex align-items-center">
+            <ThemeToggle size="sm" />
+          </div>
         </div>
       )}
 
@@ -259,9 +266,12 @@ const Header = () => {
             onClick={e => e.stopPropagation()}
           >
             <div className="modal-content bg-dark text-white">
-              <div className="modal-header border-0">
-                <h5 className="modal-title">মেনু</h5>
-                <button type="button" className="btn-close btn-close-white" onClick={toggleSidebar}></button>
+              <div className="modal-header border-0 d-flex justify-content-between align-items-center">
+                <h5 className="modal-title m-0">মেনু</h5>
+                <div className="d-flex align-items-center gap-2">
+                  <ThemeToggle size="sm" />
+                  <button type="button" className="btn-close btn-close-white" onClick={toggleSidebar}></button>
+                </div>
               </div>
               <div className="modal-body d-flex flex-column align-items-start">
                 {/* Mobile Search In Sidebar */}
@@ -341,6 +351,9 @@ const Header = () => {
                   );
                 })}
               </ul>
+              <div className="nav-actions d-flex justify-content-end align-items-center">
+                <ThemeToggle showLabel={false} />
+              </div>
             </div>
           </div>
         </div>

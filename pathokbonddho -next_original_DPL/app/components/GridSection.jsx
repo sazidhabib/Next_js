@@ -283,7 +283,7 @@ const GridSection = ({ section }) => {
 
                                 {/* Vertical Separator Line */}
                                 {!isLastCol && (
-                                    <div 
+                                    <div
                                         className="grid-separator-v"
                                         style={{
                                             position: 'absolute',
@@ -291,15 +291,14 @@ const GridSection = ({ section }) => {
                                             top: '20px',
                                             bottom: '20px',
                                             width: '1px',
-                                            backgroundColor: '#e5e5e5',
                                             zIndex: 1
-                                        }} 
+                                        }}
                                     />
                                 )}
 
                                 {/* Horizontal Separator Line */}
                                 {!isLastRow && (
-                                    <div 
+                                    <div
                                         className="grid-separator-h"
                                         style={{
                                             position: 'absolute',
@@ -307,9 +306,8 @@ const GridSection = ({ section }) => {
                                             left: '5px',
                                             right: isLastCol ? '5px' : '-5px',
                                             height: '1px',
-                                            backgroundColor: '#e5e5e5',
                                             zIndex: 1
-                                        }} 
+                                        }}
                                     />
                                 )}
                             </div>
@@ -322,18 +320,18 @@ const GridSection = ({ section }) => {
                     {/* 1. Lead content: Merged cells OR first news item */}
                     {mergedCells.map(({ col, key }) => (
                         <div key={`mobile-merged-${key}`} className="mb-3 mobile-lead-news">
-                            <GridCell 
-                                cell={{ ...col, design: isPhotoSection ? 'text-inside-image' : (col.design === 'text-inside-image' ? 'text-inside-image' : 'image-top') }} 
-                                isPriority={false} 
+                            <GridCell
+                                cell={{ ...col, design: isPhotoSection ? 'text-inside-image' : (col.design === 'text-inside-image' ? 'text-inside-image' : 'image-top') }}
+                                isPriority={false}
                             />
                         </div>
                     ))}
 
                     {leadNews && (
                         <div key={`mobile-lead-${leadNews.key}`} className="mb-3 mobile-lead-news">
-                            <GridCell 
-                                cell={{ ...leadNews.col, design: isPhotoSection ? 'text-inside-image' : (leadNews.col.design === 'text-inside-image' ? 'text-inside-image' : 'image-top') }} 
-                                isPriority={false} 
+                            <GridCell
+                                cell={{ ...leadNews.col, design: isPhotoSection ? 'text-inside-image' : (leadNews.col.design === 'text-inside-image' ? 'text-inside-image' : 'image-top') }}
+                                isPriority={false}
                             />
                         </div>
                     )}
@@ -361,9 +359,9 @@ const GridSection = ({ section }) => {
                                 <div key={`mobile-row-${rowIdx}`} className="row g-2 mb-3">
                                     {row.cells.map(({ col, key }) => (
                                         <div key={`mobile-pd-${key}`} className="col-6">
-                                            <GridCell 
-                                                cell={{ ...col, design: 'text-inside-image', rowSpan: 1, colSpan: 1 }} 
-                                                isPriority={false} 
+                                            <GridCell
+                                                cell={{ ...col, design: 'text-inside-image', rowSpan: 1, colSpan: 1 }}
+                                                isPriority={false}
                                             />
                                         </div>
                                     ))}
@@ -383,10 +381,10 @@ const GridSection = ({ section }) => {
                             return (
                                 <div key={`mobile-row-${rowIdx}`} className="mb-3 mobile-row-title-image-left">
                                     {row.cells.map(({ col, key }) => (
-                                        <GridCell 
-                                            key={`mobile-til-${key}`} 
-                                            cell={{ ...col, design: col.design === 'text-inside-image' ? 'text-inside-image' : 'title-image-left', rowSpan: 1, colSpan: 1 }} 
-                                            isPriority={false} 
+                                        <GridCell
+                                            key={`mobile-til-${key}`}
+                                            cell={{ ...col, design: col.design === 'text-inside-image' ? 'text-inside-image' : 'title-image-left', rowSpan: 1, colSpan: 1 }}
+                                            isPriority={false}
                                         />
                                     ))}
                                 </div>
@@ -397,9 +395,9 @@ const GridSection = ({ section }) => {
                             <div key={`mobile-row-${rowIdx}`} className="row g-2 mb-3 mobile-row-image-top">
                                 {row.cells.map(({ col, key }) => (
                                     <div key={`mobile-it-${key}`} className="col-6">
-                                        <GridCell 
-                                            cell={{ ...col, design: col.design === 'text-inside-image' ? 'text-inside-image' : 'image-top', rowSpan: 1, colSpan: 1 }} 
-                                            isPriority={false} 
+                                        <GridCell
+                                            cell={{ ...col, design: col.design === 'text-inside-image' ? 'text-inside-image' : 'image-top', rowSpan: 1, colSpan: 1 }}
+                                            isPriority={false}
                                         />
                                     </div>
                                 ))}

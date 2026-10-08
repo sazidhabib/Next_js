@@ -99,7 +99,7 @@ const HeaderAd = () => {
     const imgSrcMobile = getFullImgSrc(adMobileImage);
 
     return (
-        <div className="header-ad-container  text-center pt-2" style={{ backgroundColor: '#ffffffff' }}>
+        <div className="header-ad-container text-center pt-2">
             <div className="container">
                 {ad.type === 'google_adsense' ? (
                     <div className="google-ad-container mx-auto">

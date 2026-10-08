@@ -11,7 +11,7 @@ export default function AjpHeader() {
     const isPhotocard = pathname === '/photocard-ajp';
 
     return (
-        <header className="custom-font w-100 py-3 mb-4" style={{ backgroundColor: '#ffffff', boxShadow: '0 2px 10px rgba(0,0,0,0.05)' }}>
+        <header className="custom-font w-100 py-3 mb-4 ajp-header-wrapper" style={{ boxShadow: '0 2px 10px rgba(0,0,0,0.05)' }}>
             <style jsx>{`
                 :global(.logo-img) {
                     max-width: 300px !important;
