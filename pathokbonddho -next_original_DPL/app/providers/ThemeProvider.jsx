@@ -28,6 +28,22 @@ export const ThemeProvider = ({ children }) => {
 
   const applyTheme = (newTheme) => {
     const root = document.documentElement;
+
+    // Temporarily suppress all transitions during theme switch for an instant toggle
+    const disableTransitionStyle = document.createElement('style');
+    disableTransitionStyle.appendChild(
+      document.createTextNode(
+        `*, *::before, *::after {
+          -webkit-transition: none !important;
+          -moz-transition: none !important;
+          -o-transition: none !important;
+          -ms-transition: none !important;
+          transition: none !important;
+        }`
+      )
+    );
+    document.head.appendChild(disableTransitionStyle);
+
     if (newTheme === 'dark') {
       root.setAttribute('data-bs-theme', 'dark');
       root.setAttribute('data-theme', 'dark');
@@ -39,6 +55,10 @@ export const ThemeProvider = ({ children }) => {
       root.classList.add('light');
       root.classList.remove('dark');
     }
+
+    // Force a repaint so styles take effect immediately without transition
+    window.getComputedStyle(root).opacity;
+    document.head.removeChild(disableTransitionStyle);
   };
 
   const setTheme = (newTheme) => {

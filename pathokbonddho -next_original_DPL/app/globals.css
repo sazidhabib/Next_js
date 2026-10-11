@@ -301,10 +301,9 @@ body {
 }
 
 .header_contentent {
-    background: var(--ht-gradient-dark);
+    background: transparent;
     position: relative;
     z-index: 10;
-
 }
 
 .text-container {
@@ -584,11 +583,11 @@ body {
 
 /* White Navbar */
 .main-navbar-custom {
-    background-color: white;
+    background-color: var(--bs-body-bg, white);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     padding: 15px 30px;
 
-    transition: top 0.3s ease-in-out, box-shadow 0.3s ease;
+    transition: top 0.3s ease-in-out, box-shadow 0.3s ease, background-color 0.3s ease;
     width: 100%;
     z-index: 1050;
 }
@@ -1507,7 +1506,7 @@ footer {
 
 .news-title-only-headline {
     line-height: 1.5;
-    transition: color 0.2s ease;
+    transition: none !important;
 }
 
 .news-title-only-headline:hover {
@@ -1521,7 +1520,7 @@ footer {
 
 .news-design-title-image-side h5 {
     line-height: 1.4;
-    transition: color 0.2s ease;
+    transition: none !important;
 }
 
 .news-design-title-image-side h5:hover {
@@ -1551,7 +1550,7 @@ footer {
 
 .news-design-image-top h6 {
     line-height: 1.4;
-    transition: color 0.2s ease;
+    transition: none !important;
 }
 
 .news-design-image-top h6:hover {
@@ -1581,7 +1580,7 @@ footer {
 .news-design-image-compact h6 {
     font-size: 0.95rem;
     line-height: 1.4;
-    transition: color 0.2s ease;
+    transition: none !important;
 }
 
 .news-design-image-compact h6:hover {
@@ -2544,7 +2543,7 @@ footer {
 .news-design-side-layout h5,
 .news-design-title-only h5,
 .news-design-text-inside-image .text-inside-image-title {
-    transition: color 0.3s ease !important;
+    transition: none !important;
 }
 
 @media (max-width: 767.98px) {
@@ -2660,12 +2659,14 @@ footer {
 
 /* ════════════ MOBILE NAVBAR SHADOW FIXES ════════════ */
 .mobile-topbardef {
+    background-color: var(--bs-body-bg, white);
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08) !important;
     position: relative;
     z-index: 1040;
 }
 
 .mobile-topbar {
+    background-color: var(--bs-body-bg, white);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12) !important;
     z-index: 1050;
 }
@@ -2774,6 +2775,8 @@ html.dark,
 [data-bs-theme="dark"],
 [data-theme="dark"] {
     color-scheme: dark;
+    --bs-body-bg: #0f172a;
+    --bs-body-bg-rgb: 15, 23, 42;
 }
 
 html.dark body,
@@ -2786,7 +2789,7 @@ html.dark body,
 /* Navbar in Dark Mode */
 html.dark .main-navbar-custom,
 [data-bs-theme="dark"] .main-navbar-custom {
-    background-color: #111827 !important;
+    background-color: var(--bs-body-bg, #0f172a) !important;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.45) !important;
     border-bottom: 1px solid #1f2937;
 }
@@ -2816,7 +2819,7 @@ html.dark .mobile-topbardef,
 html.dark .mobile-topbar,
 [data-bs-theme="dark"] .mobile-topbardef,
 [data-bs-theme="dark"] .mobile-topbar {
-    background-color: #111827 !important;
+    background-color: var(--bs-body-bg, #0f172a) !important;
     border-bottom: 1px solid #1f2937 !important;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4) !important;
 }
@@ -2964,7 +2967,7 @@ html.dark .modal-content.bg-dark,
 .grid-separator-v,
 .grid-separator-h {
     background-color: #e5e5e5;
-    transition: background-color 0.3s ease;
+    transition: none !important;
 }
 
 html.dark .grid-separator-v,
@@ -2982,14 +2985,11 @@ html.dark .mobile-section-layout .mobile-row-title-image-left,
 
 /* Header Ad Container matches homepage background in both Light & Dark modes */
 .header-ad-container {
-    background-color: var(--ht-bg-light, #F4F7FF);
-    transition: background-color 0.3s ease;
+    background-color: transparent;
 }
 
-html.dark .header-ad-container,
-[data-bs-theme="dark"] .header-ad-container {
-    background-color: #0f172a !important;
-}
+
+
 
 .ajp-header-wrapper {
     background-color: #ffffff;

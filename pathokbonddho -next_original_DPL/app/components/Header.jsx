@@ -198,7 +198,7 @@ const Header = () => {
       {/* Mobile Top Bar */}
       {isMediumOrSmaller && (
         <div
-          className="mobile-topbardef d-flex justify-content-between align-items-center px-3 py-2 bg-white shadow-sm w-100"
+          className="mobile-topbardef d-flex justify-content-between align-items-center px-3 py-2 shadow-sm w-100"
         >
           <div className="hamburger" onClick={toggleSidebar}>
             <i className="fas fa-bars text-dark fs-4"></i>
@@ -223,7 +223,7 @@ const Header = () => {
       {/* Top Bar hidden */}
       {isMediumOrSmaller && (
         <div
-          className="mobile-topbar d-flex justify-content-between align-items-center px-3 py-2 bg-white shadow-sm position-fixed w-100"
+          className="mobile-topbar d-flex justify-content-between align-items-center px-3 py-2 shadow-sm position-fixed w-100"
           style={{
             top: showScrollingNavbar ? "0" : "-150px",
             transition: "top 0.3s ease-in-out",
