@@ -3,7 +3,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import {
-  ShieldCheck,
   Lock,
   User,
   Eye,
@@ -112,11 +111,6 @@ export default function LoginView({ settings }) {
       <div className="w-full max-w-5xl z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
         {/* Left Side: Brand Narrative & Demo Role Quick Switch */}
         <div className="lg:col-span-6 space-y-6 text-center lg:text-left">
-          <div className="inline-flex items-center space-x-2 px-3 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/30 text-blue-400 text-xs font-semibold backdrop-blur-md">
-            <ShieldCheck className="w-4 h-4 text-blue-400" />
-            <span>UK Home Office Compliance & HR Portal</span>
-          </div>
-
           <div className="space-y-2">
             <div className="flex items-center justify-center lg:justify-start space-x-3">
               {appLogo ? (

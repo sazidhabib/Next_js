@@ -193,8 +193,6 @@ function AppShellContent() {
         setActiveTab={setActiveTab}
         stats={stats}
         settings={settings}
-        onSeedData={() => triggerSeed(true)}
-        isSeeding={isSeeding}
         isOpen={isMobileNavOpen}
         onClose={() => setIsMobileNavOpen(false)}
       />
@@ -291,8 +289,6 @@ function AppShellContent() {
                   setSettings(updatedSettings);
                   refreshAllData();
                 }}
-                onSeedData={() => triggerSeed(true)}
-                isSeeding={isSeeding}
               />
             )}
           </div>

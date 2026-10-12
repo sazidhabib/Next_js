@@ -13,9 +13,8 @@ const Department = sequelize.define('Department', {
     unique: true,
   },
   code: {
-    type: DataTypes.STRING(20),
-    allowNull: false,
-    unique: true,
+    type: DataTypes.STRING(50),
+    allowNull: true,
   },
   description: {
     type: DataTypes.TEXT,

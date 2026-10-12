@@ -27,6 +27,12 @@ export async function POST(request) {
     await initDb();
     const body = await request.json();
 
+    // Auto-populate code if omitted for backwards compatibility with database column
+    if (!body.code && body.name) {
+      const base = body.name.replace(/[^a-zA-Z0-9]/g, '').slice(0, 8).toUpperCase() || 'DEPT';
+      body.code = `${base}_${Date.now().toString(36).slice(-4).toUpperCase()}`;
+    }
+
     const department = await Department.create(body);
     return NextResponse.json({ success: true, department }, { status: 201 });
   } catch (error) {

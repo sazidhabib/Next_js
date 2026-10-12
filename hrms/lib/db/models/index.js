@@ -52,6 +52,14 @@ export async function initDb() {
   try {
     await sequelize.authenticate();
     await sequelize.sync();
+
+    // Ensure departments.code is nullable in existing database tables
+    try {
+      await sequelize.query('ALTER TABLE departments MODIFY COLUMN code VARCHAR(50) NULL DEFAULT NULL;');
+    } catch {
+      // Ignored for non-MySQL or if already applied
+    }
+
     isInitialized = true;
     global._hrmsDbInitialized = true;
   } catch (error) {

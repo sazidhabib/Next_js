@@ -20,7 +20,6 @@ import {
   UserCheck,
   CheckCircle2,
   X,
-  Database,
 } from 'lucide-react';
 import { Card, Badge } from '../ui';
 import MediaPickerModal from '../media/MediaPickerModal';
@@ -28,8 +27,6 @@ import MediaPickerModal from '../media/MediaPickerModal';
 export default function SettingsManagement({
   settings: initialSettings,
   onSettingsUpdated,
-  onSeedData,
-  isSeeding,
 }) {
   const [settings, setSettings] = useState(
     initialSettings || {
@@ -471,34 +468,6 @@ export default function SettingsManagement({
                 />
                 <p className="text-[11px] text-zinc-400 mt-1">Used for salaries and financial figures (£, $, €, etc.).</p>
               </div>
-            </div>
-          </Card>
-
-          {/* Section 3: Database & Maintenance Actions */}
-          <Card>
-            <div className="flex items-center space-x-2 pb-3 mb-4 border-b border-zinc-100 dark:border-zinc-800">
-              <Database className="w-4.5 h-4.5 text-cyan-600" />
-              <h3 className="font-bold text-sm text-zinc-900 dark:text-zinc-100">
-                Database Operations & Maintenance
-              </h3>
-            </div>
-
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-xs">
-              <div>
-                <p className="font-semibold text-zinc-800 dark:text-zinc-200">Re-seed Demo Compliance Database</p>
-                <p className="text-zinc-500 mt-0.5">
-                  Populate demo employees, Home Office visas, RTW statutory audit checks, and users.
-                </p>
-              </div>
-
-              <button
-                type="button"
-                onClick={onSeedData}
-                disabled={isSeeding}
-                className="px-4 py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-700 text-white font-bold text-xs shadow-md shadow-cyan-600/20 transition disabled:opacity-50 shrink-0"
-              >
-                {isSeeding ? 'Syncing Database...' : 'Run Demo Database Seed'}
-              </button>
             </div>
           </Card>
 

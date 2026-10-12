@@ -15,7 +15,6 @@ import {
   LogOut,
   Sparkles,
   ChevronRight,
-  Database,
   X,
   Settings as SettingsIcon,
   Image as ImageIcon,
@@ -27,8 +26,6 @@ export default function Sidebar({
   setActiveTab,
   stats,
   settings,
-  onSeedData,
-  isSeeding,
   isOpen,
   onClose,
 }) {
@@ -89,7 +86,6 @@ export default function Sidebar({
   const appName = settings?.appName || 'HRMS Pro';
   const appSubtitle = settings?.appSubtitle || 'Enterprise Compliance';
   const appLogo = settings?.appLogo;
-  const isSuperUser = role === 'Admin' || role === 'Restaurant Owner';
 
   const sidebarContent = (
     <div className="flex flex-col h-full bg-slate-900 text-slate-100 border-r border-slate-800 select-none shadow-2xl">
@@ -176,25 +172,6 @@ export default function Sidebar({
           );
         })}
       </nav>
-
-      {/* Database Quick Seed / Reset Bar for Admin / Owner */}
-      {isSuperUser && (
-        <div className="p-3 mx-3 mb-2 bg-slate-800/60 rounded-xl border border-slate-700/60">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <Database className="w-3.5 h-3.5 text-cyan-400" />
-              <span className="text-xs font-medium text-slate-300">Database Sync</span>
-            </div>
-            <button
-              onClick={onSeedData}
-              disabled={isSeeding}
-              className="text-[11px] bg-cyan-600/20 hover:bg-cyan-600 text-cyan-300 hover:text-white px-2 py-1 rounded-md transition font-medium disabled:opacity-50 cursor-pointer"
-            >
-              {isSeeding ? 'Syncing...' : 'Seed Data'}
-            </button>
-          </div>
-        </div>
-      )}
 
       {/* User Info & Logout Action Card */}
       <div className="p-3 border-t border-slate-800 bg-slate-950/60 space-y-2">
