@@ -5,13 +5,13 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 const AuthContext = createContext(null);
 
 export const ROLE_PERMISSIONS = {
-  'Super Admin': ['dashboard', 'employees', 'immigration', 'rtw', 'leave', 'departments', 'roles', 'users', 'visatypes', 'media', 'settings'],
-  Admin: ['dashboard', 'employees', 'immigration', 'rtw', 'leave', 'departments', 'roles', 'users', 'visatypes', 'media', 'settings'],
-  'Restaurant Owner': ['dashboard', 'employees', 'immigration', 'rtw', 'leave', 'departments', 'roles', 'users', 'visatypes', 'media', 'settings'],
-  'HR Manager': ['dashboard', 'employees', 'immigration', 'rtw', 'leave', 'departments', 'visatypes', 'media'],
-  'Department Head': ['dashboard', 'employees', 'leave', 'departments', 'media'],
-  Manager: ['dashboard', 'employees', 'leave', 'departments', 'media'],
-  Employee: ['dashboard', 'leave', 'media'],
+  'Super Admin': ['dashboard', 'employees', 'rota', 'immigration', 'rtw', 'leave', 'departments', 'roles', 'users', 'visatypes', 'media', 'settings'],
+  Admin: ['dashboard', 'employees', 'rota', 'immigration', 'rtw', 'leave', 'departments', 'roles', 'users', 'visatypes', 'media', 'settings'],
+  'Restaurant Owner': ['dashboard', 'employees', 'rota', 'immigration', 'rtw', 'leave', 'departments', 'roles', 'users', 'visatypes', 'media', 'settings'],
+  'HR Manager': ['dashboard', 'employees', 'rota', 'immigration', 'rtw', 'leave', 'departments', 'visatypes', 'media'],
+  'Department Head': ['dashboard', 'employees', 'rota', 'leave', 'departments', 'media'],
+  Manager: ['dashboard', 'employees', 'rota', 'leave', 'departments', 'media'],
+  Employee: ['dashboard', 'rota', 'leave', 'media'],
 };
 
 export function AuthProvider({ children }) {

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   Image as ImageIcon,
   Upload,
@@ -45,11 +45,13 @@ export default function MediaPickerModal({
   const fileInputRef = useRef(null);
   const [uploadCategory, setUploadCategory] = useState(preferredCategory !== 'ALL' ? preferredCategory : 'GENERAL');
 
-  const fetchMedia = async () => {
+  const prevIsOpenRef = useRef(false);
+
+  const fetchMedia = useCallback(async (cat = selectedCategory, search = searchQuery) => {
     setLoading(true);
     try {
-      let url = `/api/media?category=${selectedCategory}`;
-      if (searchQuery) url += `&search=${encodeURIComponent(searchQuery)}`;
+      let url = `/api/media?category=${cat}`;
+      if (search && search.trim()) url += `&search=${encodeURIComponent(search.trim())}`;
       const res = await fetch(url);
       const data = await res.json();
       if (data.success) {
@@ -60,15 +62,48 @@ export default function MediaPickerModal({
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedCategory, searchQuery]);
 
+  // Re-initialize state only when modal transitions from closed to open
   useEffect(() => {
-    if (isOpen) {
-      fetchMedia();
-      setSelectedFileUrl(initialUrl || '');
+    if (isOpen && !prevIsOpenRef.current) {
       setSelectedCategory(preferredCategory || 'ALL');
+      setSelectedFileUrl(initialUrl || '');
+      setUploadCategory(preferredCategory !== 'ALL' ? preferredCategory : 'GENERAL');
+      setSearchQuery('');
+      setDirectUrl('');
+      setActiveTab('library');
     }
-  }, [isOpen, selectedCategory, preferredCategory]);
+    prevIsOpenRef.current = isOpen;
+  }, [isOpen, preferredCategory, initialUrl]);
+
+  // Fetch media whenever modal is open and category or search changes
+  useEffect(() => {
+    if (!isOpen) return;
+
+    let isMounted = true;
+    const timer = setTimeout(async () => {
+      setLoading(true);
+      try {
+        let url = `/api/media?category=${selectedCategory}`;
+        if (searchQuery.trim()) url += `&search=${encodeURIComponent(searchQuery.trim())}`;
+        const res = await fetch(url);
+        const data = await res.json();
+        if (isMounted && data.success) {
+          setFiles(data.files || []);
+        }
+      } catch (err) {
+        console.error('Fetch media error:', err);
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    }, searchQuery ? 250 : 0);
+
+    return () => {
+      isMounted = false;
+      clearTimeout(timer);
+    };
+  }, [isOpen, selectedCategory, searchQuery]);
 
   const handleFileUpload = async (e) => {
     const fileList = e.target.files;
@@ -88,7 +123,11 @@ export default function MediaPickerModal({
       const data = await res.json();
       if (data.success && data.file) {
         setSelectedFileUrl(data.file.url);
-        await fetchMedia();
+        if (selectedCategory !== 'ALL' && selectedCategory !== uploadCategory) {
+          setSelectedCategory(uploadCategory);
+        } else {
+          await fetchMedia(selectedCategory, searchQuery);
+        }
         setActiveTab('library');
       } else {
         alert('Upload failed: ' + (data.error || 'Unknown error'));
@@ -97,6 +136,7 @@ export default function MediaPickerModal({
       alert('Upload error: ' + err.message);
     } finally {
       setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
     }
   };
 
@@ -196,22 +236,26 @@ export default function MediaPickerModal({
           <div className="space-y-3">
             {/* Filter & Search Bar */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-              {/* Category Pills */}
+              {/* Category / Album Folder Pills */}
               <div className="flex items-center gap-1.5 overflow-x-auto pb-1 max-w-full">
-                {CATEGORIES.map((cat) => (
-                  <button
-                    key={cat.id}
-                    type="button"
-                    onClick={() => setSelectedCategory(cat.id)}
-                    className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold whitespace-nowrap transition ${
-                      selectedCategory === cat.id
-                        ? 'bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 border border-blue-300 dark:border-blue-800'
-                        : 'bg-zinc-50 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 border border-zinc-200 dark:border-zinc-700'
-                    }`}
-                  >
-                    {cat.label}
-                  </button>
-                ))}
+                {CATEGORIES.map((cat) => {
+                  const isActive = selectedCategory === cat.id;
+                  return (
+                    <button
+                      key={cat.id}
+                      type="button"
+                      onClick={() => setSelectedCategory(cat.id)}
+                      className={`px-3 py-1.5 rounded-xl text-[11px] font-semibold whitespace-nowrap transition flex items-center space-x-1.5 ${
+                        isActive
+                          ? 'bg-blue-600 text-white shadow-xs font-bold'
+                          : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 border border-zinc-200/80 dark:border-zinc-700'
+                      }`}
+                    >
+                      <FolderOpen className={`w-3 h-3 ${isActive ? 'text-blue-100' : 'text-zinc-400'}`} />
+                      <span>{cat.label}</span>
+                    </button>
+                  );
+                })}
               </div>
 
               {/* Search Bar */}
@@ -223,10 +267,23 @@ export default function MediaPickerModal({
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onKeyDown={(e) => {
-                    if (e.key === 'Enter') fetchMedia();
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      fetchMedia(selectedCategory, searchQuery);
+                    }
                   }}
-                  className="w-full pl-8 pr-2.5 py-1.5 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full pl-8 pr-7 py-1.5 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
+                {searchQuery && (
+                  <button
+                    type="button"
+                    onClick={() => setSearchQuery('')}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 p-0.5 rounded"
+                    title="Clear search"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                )}
               </div>
             </div>
 

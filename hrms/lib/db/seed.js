@@ -8,6 +8,8 @@ import {
   ImmigrationRecord,
   RightToWork,
   LeaveRequest,
+  Shift,
+  Timesheet,
   sequelize
 } from './models/index.js';
 import bcrypt from 'bcryptjs';
@@ -449,6 +451,63 @@ export async function seedDatabase() {
     } else {
       await User.create(u);
     }
+  }
+
+  // 9. Seed Sample Shifts & Timesheets (Matching user rota screenshot)
+  const shiftCount = await Shift.count();
+  if (shiftCount === 0 && employees.length > 0) {
+    await Shift.bulkCreate([
+      {
+        employeeId: employees[0].id,
+        shiftDate: '2026-10-12',
+        dayName: 'Monday',
+        startTime: '09:00',
+        endTime: '17:00',
+        breakMinutes: 60,
+        plannedHours: 7.00,
+        shiftType: 'Early',
+        notes: '',
+      },
+      {
+        employeeId: employees[1]?.id || employees[0].id,
+        shiftDate: '2026-10-12',
+        dayName: 'Monday',
+        startTime: '15:00',
+        endTime: '23:00',
+        breakMinutes: 60,
+        plannedHours: 7.00,
+        shiftType: 'Late',
+        notes: '',
+      },
+      {
+        employeeId: employees[0].id,
+        shiftDate: '2026-10-13',
+        dayName: 'Tuesday',
+        startTime: '09:00',
+        endTime: '17:00',
+        breakMinutes: 60,
+        plannedHours: 7.00,
+        shiftType: 'Early',
+        notes: '',
+      },
+    ]);
+  }
+
+  const timesheetCount = await Timesheet.count();
+  if (timesheetCount === 0 && employees.length > 0) {
+    await Timesheet.bulkCreate([
+      {
+        employeeId: employees[0].id,
+        workDate: '2026-10-12',
+        dayName: 'Monday',
+        clockIn: '09:00',
+        clockOut: '17:00',
+        breakMinutes: 60,
+        paidHours: 7.00,
+        approvalStatus: 'Pending',
+        notes: '',
+      },
+    ]);
   }
 
   return { success: true, message: 'HRMS Database initialized and seeded successfully.' };

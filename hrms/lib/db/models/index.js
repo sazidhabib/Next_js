@@ -9,6 +9,8 @@ import RightToWork from './RightToWork.js';
 import LeaveRequest from './LeaveRequest.js';
 import Setting from './Setting.js';
 import MediaFile from './MediaFile.js';
+import Shift from './Shift.js';
+import Timesheet from './Timesheet.js';
 
 // Department <-> Employee
 Department.hasMany(Employee, { foreignKey: 'department_id', as: 'employees' });
@@ -38,6 +40,14 @@ RightToWork.belongsTo(Employee, { foreignKey: 'employee_id', as: 'employee' });
 Employee.hasMany(LeaveRequest, { foreignKey: 'employee_id', as: 'leaveRequests' });
 LeaveRequest.belongsTo(Employee, { foreignKey: 'employee_id', as: 'employee' });
 
+// Employee <-> Shift (Weekly Rota)
+Employee.hasMany(Shift, { foreignKey: 'employee_id', as: 'shifts' });
+Shift.belongsTo(Employee, { foreignKey: 'employee_id', as: 'employee' });
+
+// Employee <-> Timesheet
+Employee.hasMany(Timesheet, { foreignKey: 'employee_id', as: 'timesheets' });
+Timesheet.belongsTo(Employee, { foreignKey: 'employee_id', as: 'employee' });
+
 // Global cached initialization state across Next.js dev server reloads
 let isInitialized = global._hrmsDbInitialized || false;
 
@@ -45,7 +55,7 @@ export async function initDb() {
   if (isInitialized) {
     return {
       sequelize,
-      models: { Department, Role, User, Employee, VisaType, ImmigrationRecord, RightToWork, LeaveRequest, Setting, MediaFile },
+      models: { Department, Role, User, Employee, VisaType, ImmigrationRecord, RightToWork, LeaveRequest, Setting, MediaFile, Shift, Timesheet },
     };
   }
 
@@ -79,6 +89,8 @@ export async function initDb() {
       LeaveRequest,
       Setting,
       MediaFile,
+      Shift,
+      Timesheet,
     },
   };
 }
@@ -95,6 +107,8 @@ export {
   LeaveRequest,
   Setting,
   MediaFile,
+  Shift,
+  Timesheet,
 };
 
 

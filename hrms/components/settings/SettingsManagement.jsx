@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   Settings as SettingsIcon,
   Shield,
@@ -49,15 +49,7 @@ export default function SettingsManagement({
   const [isMediaModalOpen, setIsMediaModalOpen] = useState(false);
   const fileInputRef = useRef(null);
 
-  useEffect(() => {
-    if (initialSettings) {
-      setSettings(initialSettings);
-    } else {
-      fetchSettings();
-    }
-  }, [initialSettings]);
-
-  const fetchSettings = async () => {
+  const fetchSettings = useCallback(async () => {
     setLoading(true);
     try {
       const res = await fetch('/api/settings');
@@ -70,7 +62,15 @@ export default function SettingsManagement({
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    if (initialSettings) {
+      setSettings(initialSettings);
+    } else {
+      fetchSettings();
+    }
+  }, [initialSettings, fetchSettings]);
 
   const isSuperAdmin = currentUserRole === 'Super Admin' || currentUserRole === 'Admin';
 

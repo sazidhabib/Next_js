@@ -21,6 +21,7 @@ import {
   X,
   Settings as SettingsIcon,
   Image as ImageIcon,
+  CalendarClock,
 } from 'lucide-react';
 
 export default function Sidebar({
@@ -39,6 +40,7 @@ export default function Sidebar({
   const allMenuItems = [
     { id: 'dashboard', href: '/', label: role === 'Employee' ? 'My Dashboard' : 'Dashboard', icon: LayoutDashboard },
     { id: 'employees', href: '/employees', label: 'Employees', icon: Users, badge: stats?.totalEmployees },
+    { id: 'rota', href: '/rota', label: 'Rota & Timesheets', icon: CalendarClock },
     {
       id: 'immigration',
       href: '/immigration',
