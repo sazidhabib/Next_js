@@ -37,12 +37,30 @@ const SHIFT_PRESETS = {
   Custom: { start: '09:00', end: '17:00', breakMin: 30, label: 'Custom' },
 };
 
+function parseLocalDate(dateStr) {
+  if (!dateStr) return new Date();
+  if (typeof dateStr === 'string' && dateStr.includes('-')) {
+    const [y, m, d] = dateStr.split('T')[0].split('-').map(Number);
+    return new Date(y, m - 1, d || 1);
+  }
+  return new Date(dateStr);
+}
+
+function formatLocalDate(d) {
+  if (!d) return '';
+  const date = typeof d === 'string' ? parseLocalDate(d) : d;
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
 function getMonday(d) {
-  const date = new Date(d);
+  const date = parseLocalDate(d);
   const day = date.getDay();
   const diff = date.getDate() - day + (day === 0 ? -6 : 1);
   date.setDate(diff);
-  return date.toISOString().split('T')[0];
+  return formatLocalDate(date);
 }
 
 function getCurrentMonthString() {
@@ -71,8 +89,9 @@ function calculateHours(start, end, breakMin = 0) {
 
 function getDayName(dateStr) {
   if (!dateStr) return '';
-  const d = new Date(dateStr + 'T00:00:00');
-  return d.toLocaleDateString('en-US', { weekday: 'long' });
+  const [y, m, d] = dateStr.split('T')[0].split('-').map(Number);
+  const date = new Date(y, m - 1, d);
+  return date.toLocaleDateString('en-US', { weekday: 'long' });
 }
 
 export default function RotaManagement({ employees = [] }) {
@@ -143,7 +162,10 @@ export default function RotaManagement({ employees = [] }) {
   // Fetch shifts for the selected week (for table & matrix view)
   const fetchWeekShifts = useCallback(async () => {
     try {
-      const res = await fetch(`/api/rota/shifts?week=${weekCommencing}`);
+      const res = await fetch(`/api/rota/shifts?week=${weekCommencing}&_t=${Date.now()}`, {
+        cache: 'no-store',
+        headers: { 'Cache-Control': 'no-cache' },
+      });
       const data = await res.json();
       if (data.success) {
         setShifts(data.shifts || []);
@@ -157,7 +179,10 @@ export default function RotaManagement({ employees = [] }) {
   const fetchMonthShifts = useCallback(async () => {
     if (!currentSelectedEmpId) return;
     try {
-      const res = await fetch(`/api/rota/shifts?month=${activeMonth}&employeeId=${currentSelectedEmpId}`);
+      const res = await fetch(`/api/rota/shifts?month=${activeMonth}&employeeId=${currentSelectedEmpId}&_t=${Date.now()}`, {
+        cache: 'no-store',
+        headers: { 'Cache-Control': 'no-cache' },
+      });
       const data = await res.json();
       if (data.success) {
         setMonthShifts(data.shifts || []);
@@ -170,9 +195,12 @@ export default function RotaManagement({ employees = [] }) {
   // Fetch timesheets
   const fetchTimesheets = useCallback(async () => {
     try {
-      let url = `/api/rota/timesheets?week=${weekCommencing}`;
+      let url = `/api/rota/timesheets?week=${weekCommencing}&_t=${Date.now()}`;
       if (statusFilter !== 'ALL') url += `&status=${statusFilter}`;
-      const res = await fetch(url);
+      const res = await fetch(url, {
+        cache: 'no-store',
+        headers: { 'Cache-Control': 'no-cache' },
+      });
       const data = await res.json();
       if (data.success) {
         setTimesheets(data.timesheets || []);
@@ -189,10 +217,14 @@ export default function RotaManagement({ employees = [] }) {
       if (!isCancelled) setLoading(true);
     });
 
+    const timestamp = Date.now();
     const promises = [];
     if (activeTab === 'table' || (activeTab === 'calendar' && calendarMode === 'matrix')) {
       promises.push(
-        fetch(`/api/rota/shifts?week=${weekCommencing}`)
+        fetch(`/api/rota/shifts?week=${weekCommencing}&_t=${timestamp}`, {
+          cache: 'no-store',
+          headers: { 'Cache-Control': 'no-cache' },
+        })
           .then((r) => r.json())
           .then((d) => {
             if (!isCancelled && d.success) setShifts(d.shifts || []);
@@ -202,7 +234,10 @@ export default function RotaManagement({ employees = [] }) {
 
     if (activeTab === 'calendar' && calendarMode === 'month' && currentSelectedEmpId) {
       promises.push(
-        fetch(`/api/rota/shifts?month=${activeMonth}&employeeId=${currentSelectedEmpId}`)
+        fetch(`/api/rota/shifts?month=${activeMonth}&employeeId=${currentSelectedEmpId}&_t=${timestamp}`, {
+          cache: 'no-store',
+          headers: { 'Cache-Control': 'no-cache' },
+        })
           .then((r) => r.json())
           .then((d) => {
             if (!isCancelled && d.success) setMonthShifts(d.shifts || []);
@@ -211,10 +246,13 @@ export default function RotaManagement({ employees = [] }) {
     }
 
     if (activeTab === 'timesheets') {
-      let url = `/api/rota/timesheets?week=${weekCommencing}`;
+      let url = `/api/rota/timesheets?week=${weekCommencing}&_t=${timestamp}`;
       if (statusFilter !== 'ALL') url += `&status=${statusFilter}`;
       promises.push(
-        fetch(url)
+        fetch(url, {
+          cache: 'no-store',
+          headers: { 'Cache-Control': 'no-cache' },
+        })
           .then((r) => r.json())
           .then((d) => {
             if (!isCancelled && d.success) setTimesheets(d.timesheets || []);
@@ -237,18 +275,18 @@ export default function RotaManagement({ employees = [] }) {
 
   // Week navigation helpers
   const handlePrevWeek = () => {
-    const cur = new Date(weekCommencing + 'T00:00:00');
+    const cur = parseLocalDate(weekCommencing);
     cur.setDate(cur.getDate() - 7);
-    const prev = cur.toISOString().split('T')[0];
+    const prev = formatLocalDate(cur);
     setWeekCommencing(prev);
     setShiftForm((f) => ({ ...f, shiftDate: prev }));
     setTimesheetForm((f) => ({ ...f, workDate: prev }));
   };
 
   const handleNextWeek = () => {
-    const cur = new Date(weekCommencing + 'T00:00:00');
+    const cur = parseLocalDate(weekCommencing);
     cur.setDate(cur.getDate() + 7);
-    const next = cur.toISOString().split('T')[0];
+    const next = formatLocalDate(cur);
     setWeekCommencing(next);
     setShiftForm((f) => ({ ...f, shiftDate: next }));
     setTimesheetForm((f) => ({ ...f, workDate: next }));
@@ -290,13 +328,13 @@ export default function RotaManagement({ employees = [] }) {
   // Compute 7 days of the active week for the Team Matrix View
   const weekDays = useMemo(() => {
     const days = [];
-    const start = new Date(weekCommencing + 'T00:00:00');
-    const todayStr = new Date().toISOString().split('T')[0];
+    const start = parseLocalDate(weekCommencing);
+    const todayStr = formatLocalDate(new Date());
 
     for (let i = 0; i < 7; i++) {
       const d = new Date(start);
       d.setDate(start.getDate() + i);
-      const dateStr = d.toISOString().split('T')[0];
+      const dateStr = formatLocalDate(d);
       const dayName = d.toLocaleDateString('en-US', { weekday: 'short' });
       const fullDayName = d.toLocaleDateString('en-US', { weekday: 'long' });
       const [y, m, dayNum] = dateStr.split('-');
@@ -317,7 +355,7 @@ export default function RotaManagement({ employees = [] }) {
     const [year, monthNum] = activeMonth.split('-').map(Number);
     const firstDayOfMonth = new Date(year, monthNum - 1, 1);
     const lastDayOfMonth = new Date(year, monthNum, 0);
-    const todayStr = new Date().toISOString().split('T')[0];
+    const todayStr = formatLocalDate(new Date());
 
     // Align to Monday
     const startDay = new Date(firstDayOfMonth);
@@ -328,7 +366,7 @@ export default function RotaManagement({ employees = [] }) {
     const days = [];
     const current = new Date(startDay);
     while (days.length < 35 || (days.length < 42 && current <= lastDayOfMonth)) {
-      const dateStr = current.toISOString().split('T')[0];
+      const dateStr = formatLocalDate(current);
       const isCurrentMonth = current.getMonth() === monthNum - 1;
       const dayNum = current.getDate();
       days.push({
@@ -434,12 +472,37 @@ export default function RotaManagement({ employees = [] }) {
       });
 
       const data = await res.json();
-      if (data.success) {
+      if (data.success && data.shift) {
+        const savedShift = data.shift;
         setShiftModal((prev) => ({ ...prev, isOpen: false }));
-        await fetchWeekShifts();
-        await fetchMonthShifts();
+
+        // Real-time optimistic update
+        setShifts((prev) => {
+          const exists = prev.some((s) => s.id === savedShift.id);
+          if (exists) return prev.map((s) => (s.id === savedShift.id ? savedShift : s));
+          return [...prev, savedShift].sort((a, b) =>
+            a.shiftDate.localeCompare(b.shiftDate) || a.startTime.localeCompare(b.startTime)
+          );
+        });
+        setMonthShifts((prev) => {
+          const exists = prev.some((s) => s.id === savedShift.id);
+          if (exists) return prev.map((s) => (s.id === savedShift.id ? savedShift : s));
+          return [...prev, savedShift].sort((a, b) =>
+            a.shiftDate.localeCompare(b.shiftDate) || a.startTime.localeCompare(b.startTime)
+          );
+        });
+
+        // Ensure week aligns if shift was scheduled for a different week
+        const shiftMonday = getMonday(savedShift.shiftDate);
+        if (shiftMonday !== weekCommencing) {
+          setWeekCommencing(shiftMonday);
+        }
+
+        // Background server re-sync
+        fetchWeekShifts();
+        fetchMonthShifts();
       } else {
-        alert('Operation failed: ' + data.error);
+        alert('Operation failed: ' + (data.error || 'Unknown error'));
       }
     } catch (err) {
       alert('Error saving shift: ' + err.message);
@@ -485,11 +548,36 @@ export default function RotaManagement({ employees = [] }) {
         }),
       });
       const data = await res.json();
-      if (data.success) {
-        await fetchWeekShifts();
+      if (data.success && data.shift) {
+        const newShift = data.shift;
+
+        // Real-time optimistic update
+        setShifts((prev) => {
+          const exists = prev.some((s) => s.id === newShift.id);
+          if (exists) return prev.map((s) => (s.id === newShift.id ? newShift : s));
+          return [...prev, newShift].sort((a, b) =>
+            a.shiftDate.localeCompare(b.shiftDate) || a.startTime.localeCompare(b.startTime)
+          );
+        });
+        setMonthShifts((prev) => {
+          const exists = prev.some((s) => s.id === newShift.id);
+          if (exists) return prev.map((s) => (s.id === newShift.id ? newShift : s));
+          return [...prev, newShift].sort((a, b) =>
+            a.shiftDate.localeCompare(b.shiftDate) || a.startTime.localeCompare(b.startTime)
+          );
+        });
+
+        // Ensure week aligns if shift was scheduled for another week
+        const shiftMonday = getMonday(shiftDate);
+        if (shiftMonday !== weekCommencing) {
+          setWeekCommencing(shiftMonday);
+        }
+
         setShiftForm((prev) => ({ ...prev, notes: '' }));
+        // Background sync
+        fetchWeekShifts();
       } else {
-        alert('Failed to add shift: ' + data.error);
+        alert('Failed to add shift: ' + (data.error || 'Unknown error'));
       }
     } catch (err) {
       alert('Error creating shift: ' + err.message);
@@ -517,11 +605,27 @@ export default function RotaManagement({ employees = [] }) {
         }),
       });
       const data = await res.json();
-      if (data.success) {
-        await fetchTimesheets();
+      if (data.success && data.timesheet) {
+        const newTimesheet = data.timesheet;
+
+        // Real-time optimistic update
+        setTimesheets((prev) => {
+          const exists = prev.some((t) => t.id === newTimesheet.id);
+          if (exists) return prev.map((t) => (t.id === newTimesheet.id ? newTimesheet : t));
+          return [newTimesheet, ...prev];
+        });
+
+        // Ensure week aligns if timesheet was recorded for another week
+        const workMonday = getMonday(workDate);
+        if (workMonday !== weekCommencing) {
+          setWeekCommencing(workMonday);
+        }
+
         setTimesheetForm((prev) => ({ ...prev, notes: '' }));
+        // Background sync
+        fetchTimesheets();
       } else {
-        alert('Failed to add timesheet: ' + data.error);
+        alert('Failed to add timesheet: ' + (data.error || 'Unknown error'));
       }
     } catch (err) {
       alert('Error creating timesheet: ' + err.message);
@@ -530,6 +634,11 @@ export default function RotaManagement({ employees = [] }) {
 
   // Timesheet Status Approval
   const handleSetApprovalStatus = async (id, status) => {
+    // Real-time optimistic update
+    setTimesheets((prev) =>
+      prev.map((t) => (t.id === id ? { ...t, approvalStatus: status } : t))
+    );
+
     try {
       const res = await fetch(`/api/rota/timesheets/${id}`, {
         method: 'PUT',
@@ -537,13 +646,17 @@ export default function RotaManagement({ employees = [] }) {
         body: JSON.stringify({ approvalStatus: status }),
       });
       const data = await res.json();
-      if (data.success) {
-        fetchTimesheets();
-      } else {
+      if (data.success && data.timesheet) {
+        setTimesheets((prev) =>
+          prev.map((t) => (t.id === id ? data.timesheet : t))
+        );
+      } else if (!data.success) {
         alert('Failed to update status: ' + data.error);
+        fetchTimesheets();
       }
     } catch (err) {
       alert('Error updating status: ' + err.message);
+      fetchTimesheets();
     }
   };
 
@@ -573,6 +686,10 @@ export default function RotaManagement({ employees = [] }) {
       });
       const data = await res.json();
       if (data.success) {
+        const updated = data.timesheet || editingTimesheet;
+        setTimesheets((prev) =>
+          prev.map((t) => (t.id === updated.id ? updated : t))
+        );
         setEditingTimesheet(null);
         fetchTimesheets();
       } else {

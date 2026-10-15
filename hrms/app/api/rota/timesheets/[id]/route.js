@@ -23,6 +23,9 @@ function getDayName(dateStr) {
   return d.toLocaleDateString('en-US', { weekday: 'long' });
 }
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export async function PUT(request, { params }) {
   try {
     await initDb();
@@ -72,7 +75,14 @@ export async function PUT(request, { params }) {
       ],
     });
 
-    return NextResponse.json({ success: true, timesheet: updated });
+    return NextResponse.json(
+      { success: true, timesheet: updated },
+      {
+        headers: {
+          'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+        },
+      }
+    );
   } catch (error) {
     console.error('Timesheet PUT error:', error);
     return NextResponse.json({ success: false, error: error.message }, { status: 400 });
@@ -89,7 +99,14 @@ export async function DELETE(request, { params }) {
     }
 
     await timesheet.destroy();
-    return NextResponse.json({ success: true, message: 'Timesheet deleted successfully' });
+    return NextResponse.json(
+      { success: true, message: 'Timesheet deleted successfully' },
+      {
+        headers: {
+          'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+        },
+      }
+    );
   } catch (error) {
     console.error('Timesheet DELETE error:', error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });

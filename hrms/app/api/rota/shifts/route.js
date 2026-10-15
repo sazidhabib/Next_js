@@ -24,6 +24,9 @@ function getDayName(dateStr) {
   return d.toLocaleDateString('en-US', { weekday: 'long' });
 }
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export async function GET(request) {
   try {
     await initDb();
@@ -53,9 +56,9 @@ export async function GET(request) {
       };
     } else if (weekCommencing) {
       const start = weekCommencing;
-      const end = new Date(weekCommencing + 'T00:00:00');
-      end.setDate(end.getDate() + 6);
-      const endFormatted = end.toISOString().split('T')[0];
+      const [y, m, d] = weekCommencing.split('-').map(Number);
+      const end = new Date(y, m - 1, d + 6);
+      const endFormatted = `${end.getFullYear()}-${String(end.getMonth() + 1).padStart(2, '0')}-${String(end.getDate()).padStart(2, '0')}`;
       where.shiftDate = {
         [Op.between]: [start, endFormatted],
       };
@@ -76,7 +79,14 @@ export async function GET(request) {
       ],
     });
 
-    return NextResponse.json({ success: true, shifts });
+    return NextResponse.json(
+      { success: true, shifts },
+      {
+        headers: {
+          'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+        },
+      }
+    );
   } catch (error) {
     console.error('Shifts GET error:', error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
@@ -116,7 +126,15 @@ export async function POST(request) {
       ],
     });
 
-    return NextResponse.json({ success: true, shift: fetched }, { status: 201 });
+    return NextResponse.json(
+      { success: true, shift: fetched },
+      {
+        status: 201,
+        headers: {
+          'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+        },
+      }
+    );
   } catch (error) {
     console.error('Shifts POST error:', error);
     return NextResponse.json({ success: false, error: error.message }, { status: 400 });
