@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { initDb, User, Role, Employee, Department } from '@/lib/db/models/index';
+import { SUPER_ADMIN_USER_OBJECT } from '@/lib/auth/systemAccounts';
 
 export async function GET(request) {
   try {
@@ -13,8 +14,8 @@ export async function GET(request) {
 
     if (!token) {
       return NextResponse.json(
-        { success: false, authenticated: false, message: 'No active session' },
-        { status: 401 }
+        { success: true, authenticated: false, user: null, message: 'No active session' },
+        { status: 200 }
       );
     }
 
@@ -24,16 +25,25 @@ export async function GET(request) {
       decoded = JSON.parse(decodedString);
     } catch (e) {
       return NextResponse.json(
-        { success: false, authenticated: false, message: 'Invalid token format' },
-        { status: 401 }
+        { success: true, authenticated: false, user: null, message: 'Invalid token format' },
+        { status: 200 }
       );
     }
 
     if (!decoded?.uid) {
       return NextResponse.json(
-        { success: false, authenticated: false, message: 'Invalid session payload' },
-        { status: 401 }
+        { success: true, authenticated: false, user: null, message: 'Invalid session payload' },
+        { status: 200 }
       );
+    }
+
+    // Check if Super Admin virtual session
+    if (decoded.uid === 'system-superadmin' || decoded.role === 'Super Admin') {
+      return NextResponse.json({
+        success: true,
+        authenticated: true,
+        user: SUPER_ADMIN_USER_OBJECT,
+      });
     }
 
     const user = await User.findByPk(decoded.uid, {
@@ -59,8 +69,8 @@ export async function GET(request) {
 
     if (!user || !user.isActive) {
       return NextResponse.json(
-        { success: false, authenticated: false, message: 'User account inactive or not found' },
-        { status: 401 }
+        { success: true, authenticated: false, user: null, message: 'User account inactive or not found' },
+        { status: 200 }
       );
     }
 

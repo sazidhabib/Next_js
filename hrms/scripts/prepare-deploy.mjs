@@ -60,5 +60,20 @@ if (fs.existsSync(appJsSrc)) {
   fs.copyFileSync(appJsSrc, appJsDest);
 }
 
-console.log('\n✅ Deployment bundle ready in: .next/standalone');
-console.log('📁 You can upload the contents of ".next/standalone" directly to your SmarterASP.NET site root (/site1 or /wwwroot).');
+// 5. Create or update deploy.zip automatically
+console.log('➡️  Compressing package into deploy.zip...');
+try {
+  const { execSync } = await import('child_process');
+  const zipPath = path.join(rootDir, 'deploy.zip');
+  execSync(`powershell -Command "Compress-Archive -Path '${standaloneDir}\\*' -DestinationPath '${zipPath}' -Force"`, { stdio: 'inherit' });
+  console.log('✅ Generated fresh deploy.zip at project root!');
+} catch (err) {
+  console.warn('⚠️ Could not automatically compress deploy.zip:', err.message);
+}
+
+console.log('\n✅ Deployment bundle ready in: .next/standalone & deploy.zip');
+console.log('📁 How to deploy:');
+console.log('   1. Upload the newly created "deploy.zip" to your server root (/site1 or /wwwroot) and extract it,');
+console.log('      OR upload the contents of ".next/standalone" directly.');
+console.log('   2. Important: In your hosting control panel (e.g. SmarterASP.NET), click "Restart Site" / recycle the Application Pool, or re-upload web.config.');
+

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { initDb, VisaType } from '@/lib/db/models/index';
+import { initDb, VisaType, ImmigrationRecord } from '@/lib/db/models/index';
 
 export async function PUT(request, { params }) {
   try {
@@ -26,6 +26,10 @@ export async function DELETE(request, { params }) {
     const { id } = await params;
     const visaType = await VisaType.findByPk(id);
     if (!visaType) return NextResponse.json({ success: false, error: 'VisaType not found' }, { status: 404 });
+
+    // Unlink or delete dependent immigration records to prevent foreign key errors
+    await ImmigrationRecord.destroy({ where: { visaTypeId: id } }).catch(() => {});
+
     await visaType.destroy();
     return NextResponse.json({ success: true, message: 'VisaType deleted' });
   } catch (error) {

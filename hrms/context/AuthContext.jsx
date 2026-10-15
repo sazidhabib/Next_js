@@ -30,8 +30,11 @@ export function AuthProvider({ children }) {
           localStorage.setItem('hrms_current_user', JSON.stringify(data.user));
           return;
         }
+        setUser(null);
+        localStorage.removeItem('hrms_current_user');
+        return;
       }
-      // If server session check fails, check local storage cache fallback
+      // If server session check fails (network error), check local storage cache fallback
       const cached = localStorage.getItem('hrms_current_user');
       if (cached) {
         try {

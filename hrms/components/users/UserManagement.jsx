@@ -30,7 +30,7 @@ export default function UserManagement({ employees = [], onUpdated }) {
       const uData = await uRes.json();
       const rData = await rRes.json();
       if (uData.success) setUsers(uData.users);
-      if (rData.success) setRoles(rData.roles);
+      if (rData.success) setRoles(rData.roles.filter((r) => r.name !== 'Super Admin'));
     } catch (err) {
       console.error(err);
     } finally {
@@ -217,7 +217,15 @@ export default function UserManagement({ employees = [], onUpdated }) {
               ) : (
                 filtered.map((u) => (
                   <tr key={u.id} className="hover:bg-zinc-50/80 dark:hover:bg-zinc-800/40 transition">
-                    <td className="px-3 sm:px-4 py-3 font-mono text-xs text-zinc-500">#{u.id}</td>
+                    <td className="px-3 sm:px-4 py-3 font-mono text-xs text-zinc-500">
+                      {u.isSystemSuperAdmin ? (
+                        <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-300 dark:border-amber-800">
+                          ROOT
+                        </span>
+                      ) : (
+                        `#${u.id}`
+                      )}
+                    </td>
 
                     <td className="px-3 sm:px-4 py-3 font-semibold text-zinc-900 dark:text-zinc-100 text-xs">
                       {u.username || u.name}
@@ -228,8 +236,12 @@ export default function UserManagement({ employees = [], onUpdated }) {
                     </td>
 
                     <td className="px-3 sm:px-4 py-3">
-                      <span className="px-2 py-0.5 rounded text-xs font-semibold bg-blue-50 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300 border border-blue-200 dark:border-blue-900/60">
-                        {u.role?.name || 'Manager'}
+                      <span className={`px-2 py-0.5 rounded text-xs font-semibold border ${
+                        u.isSystemSuperAdmin
+                          ? 'bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300 border-amber-200 dark:border-amber-900/60'
+                          : 'bg-blue-50 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300 border-blue-200 dark:border-blue-900/60'
+                      }`}>
+                        {u.role?.name || (u.isSystemSuperAdmin ? 'Super Admin' : 'Manager')}
                       </span>
                     </td>
 
@@ -239,28 +251,37 @@ export default function UserManagement({ employees = [], onUpdated }) {
                       </Badge>
                     </td>
 
-                    <td className="px-3 sm:px-4 py-3 text-right space-x-1">
-                      <button
-                        onClick={() => openEdit(u)}
-                        className="p-1.5 rounded-lg text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/50 transition"
-                        title="Update Info"
-                      >
-                        <Edit className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={() => handleResetPassword(u)}
-                        className="p-1.5 rounded-lg text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-950/50 transition"
-                        title="Reset Password"
-                      >
-                        <Key className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(u.id, u.name)}
-                        className="p-1.5 rounded-lg text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/50 transition"
-                        title="Delete User"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                    <td className="px-3 sm:px-4 py-3 text-right">
+                      {u.isSystemSuperAdmin ? (
+                        <span className="inline-flex items-center gap-1 text-[11px] font-medium text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40 px-2.5 py-1 rounded-lg border border-amber-200 dark:border-amber-900/60" title="System root account credentials cannot be modified or deleted">
+                          <ShieldCheck className="w-3.5 h-3.5" />
+                          Locked
+                        </span>
+                      ) : (
+                        <div className="space-x-1">
+                          <button
+                            onClick={() => openEdit(u)}
+                            className="p-1.5 rounded-lg text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/50 transition"
+                            title="Update Info"
+                          >
+                            <Edit className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => handleResetPassword(u)}
+                            className="p-1.5 rounded-lg text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-950/50 transition"
+                            title="Reset Password"
+                          >
+                            <Key className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(u.id, u.name)}
+                            className="p-1.5 rounded-lg text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/50 transition"
+                            title="Delete User"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      )}
                     </td>
                   </tr>
                 ))

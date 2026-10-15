@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { initDb, MediaFile } from '@/lib/db/models/index';
 import fs from 'fs/promises';
 import path from 'path';
+import { getUploadsDir } from '@/lib/uploads';
 
 const INITIAL_MEDIA = [
   {
@@ -63,13 +64,6 @@ export async function GET(request) {
     const category = searchParams.get('category');
     const search = searchParams.get('search');
 
-    const count = await MediaFile.count().catch(() => 0);
-    if (count === 0) {
-      await MediaFile.bulkCreate(INITIAL_MEDIA).catch((e) => {
-        console.warn('Initial media seed notice:', e.message);
-      });
-    }
-
     const where = {};
     if (category && category !== 'ALL') {
       where.category = category;
@@ -117,7 +111,7 @@ export async function POST(request) {
       const bytes = await file.arrayBuffer();
       const buffer = Buffer.from(bytes);
 
-      const uploadsDir = path.join(process.cwd(), 'public', 'uploads');
+      const uploadsDir = getUploadsDir();
       await fs.mkdir(uploadsDir, { recursive: true });
 
       const originalExt = path.extname(file.name) || '.png';

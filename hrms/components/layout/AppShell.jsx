@@ -1,140 +1,27 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { AuthProvider, useAuth } from '@/context/AuthContext';
+import React from 'react';
+import { usePathname, useRouter } from 'next/navigation';
+import { useAuth } from '@/context/AuthContext';
+import { useData } from '@/context/DataContext';
 import LoginView from '../auth/LoginView';
 import Sidebar from './Sidebar';
 import Header from './Header';
-import DashboardView from '../dashboard/DashboardView';
-import EmployeeManagement from '../employees/EmployeeManagement';
-import ImmigrationManagement from '../immigration/ImmigrationManagement';
-import RightToWorkManagement from '../rtw/RightToWorkManagement';
-import LeaveManagement from '../leave/LeaveManagement';
-import DepartmentManagement from '../departments/DepartmentManagement';
-import RoleManagement from '../roles/RoleManagement';
-import UserManagement from '../users/UserManagement';
-import VisaTypeManagement from '../visatypes/VisaTypeManagement';
-import SettingsManagement from '../settings/SettingsManagement';
-import MediaManagement from '../media/MediaManagement';
-import { Sparkles, Loader2 } from 'lucide-react';
+import { Sparkles, Loader2, ShieldAlert } from 'lucide-react';
 
-function AppShellContent() {
-  const { isAuthenticated, isLoading, user, role, canAccessTab } = useAuth();
-  const [activeTab, setActiveTab] = useState('dashboard');
-  const [theme, setTheme] = useState('light');
-  const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
-  const [stats, setStats] = useState(null);
-  const [alerts, setAlerts] = useState({ immigration: [], rtw: [] });
-  const [departments, setDepartments] = useState([]);
-  const [employees, setEmployees] = useState([]);
-  const [visaTypes, setVisaTypes] = useState([]);
-  const [settings, setSettings] = useState({
-    appName: 'HRMS Pro',
-    appSubtitle: 'Enterprise Compliance & UK Sponsorship',
-    companyName: 'The Royal Kitchen Hospitality Ltd',
-    appLogo: '',
-    sponsorLicenceNo: '0W01ABC89',
-    complianceOfficer: 'James Wilson',
-    complianceEmail: 'compliance@hrms.local',
-    currencySymbol: '£',
-    visaWarningDays: 90,
-    rtwWarningDays: 30,
-  });
-  const [isSeeding, setIsSeeding] = useState(false);
-  const [isInitialized, setIsInitialized] = useState(false);
-
-  // Sync theme with document class on mount
-  useEffect(() => {
-    const saved = localStorage.getItem('hrms_theme');
-    if (saved) {
-      setTheme(saved);
-      if (saved === 'dark') {
-        document.documentElement.classList.add('dark');
-      } else {
-        document.documentElement.classList.remove('dark');
-      }
-    } else if (document.documentElement.classList.contains('dark')) {
-      setTheme('dark');
-    }
-  }, []);
-
-  const toggleTheme = () => {
-    setTheme((prev) => {
-      const nextTheme = prev === 'dark' ? 'light' : 'dark';
-      if (nextTheme === 'dark') {
-        document.documentElement.classList.add('dark');
-      } else {
-        document.documentElement.classList.remove('dark');
-      }
-      localStorage.setItem('hrms_theme', nextTheme);
-      return nextTheme;
-    });
-  };
-
-  // Fetch Master Data & Settings
-  const refreshAllData = async () => {
-    try {
-      const [statsRes, deptRes, empRes, visaRes, settRes] = await Promise.all([
-        fetch('/api/stats'),
-        fetch('/api/departments'),
-        fetch('/api/employees'),
-        fetch('/api/visatypes'),
-        fetch('/api/settings'),
-      ]);
-
-      const statsData = statsRes.ok ? await statsRes.json() : {};
-      const deptData = deptRes.ok ? await deptRes.json() : {};
-      const empData = empRes.ok ? await empRes.json() : {};
-      const visaData = visaRes.ok ? await visaRes.json() : {};
-      const settData = settRes.ok ? await settRes.json() : {};
-
-      if (statsData.success) {
-        setStats(statsData.stats);
-        setAlerts(statsData.alerts);
-      }
-
-      if (deptData.success) setDepartments(deptData.departments);
-      if (empData.success) setEmployees(empData.employees);
-      if (visaData.success) setVisaTypes(visaData.visaTypes);
-      if (settData.success && settData.settings) setSettings(settData.settings);
-
-      if (statsData.success && statsData.stats.totalEmployees === 0 && !isInitialized) {
-        setIsInitialized(true);
-        triggerSeed(false);
-      }
-    } catch (err) {
-      console.error('Error fetching global HRMS data:', err);
-    }
-  };
-
-  const triggerSeed = async (showPrompt = true) => {
-    setIsSeeding(true);
-    try {
-      const res = await fetch('/api/seed', { method: 'POST' });
-      const data = await res.json();
-      if (data.success) {
-        if (showPrompt) alert('Database seeded with demo compliance records!');
-        refreshAllData();
-      }
-    } catch (err) {
-      if (showPrompt) alert('Seeder notice: ' + err.message);
-    } finally {
-      setIsSeeding(false);
-    }
-  };
-
-  useEffect(() => {
-    if (isAuthenticated) {
-      refreshAllData();
-    }
-  }, [isAuthenticated]);
-
-  // Tab permission guard: reset to dashboard if active tab is disallowed
-  useEffect(() => {
-    if (isAuthenticated && !canAccessTab(activeTab)) {
-      setActiveTab('dashboard');
-    }
-  }, [isAuthenticated, activeTab, canAccessTab, role]);
+export default function AppShell({ children }) {
+  const { isAuthenticated, isLoading, role, canAccessTab } = useAuth();
+  const {
+    stats,
+    alerts,
+    settings,
+    theme,
+    toggleTheme,
+    isMobileNavOpen,
+    setIsMobileNavOpen,
+  } = useData();
+  const pathname = usePathname();
+  const router = useRouter();
 
   // Show loading spinner during session authentication
   if (isLoading) {
@@ -156,10 +43,20 @@ function AppShellContent() {
     return <LoginView settings={settings} />;
   }
 
+  // Determine current active section for permission and title
+  const currentTab =
+    !pathname || pathname === '/' || pathname === '/dashboard'
+      ? 'dashboard'
+      : pathname.replace(/^\//, '').split('/')[0];
+
   const getActiveTabTitle = () => {
-    switch (activeTab) {
+    switch (currentTab) {
       case 'dashboard':
-        return role === 'Employee' ? 'My Self-Service Dashboard' : role === 'Manager' ? 'Store Manager Dashboard' : 'Executive Dashboard';
+        return role === 'Employee'
+          ? 'My Self-Service Dashboard'
+          : role === 'Manager'
+          ? 'Store Manager Dashboard'
+          : 'Executive Dashboard';
       case 'employees':
         return 'Employee Records';
       case 'immigration':
@@ -181,20 +78,20 @@ function AppShellContent() {
       case 'settings':
         return 'System & Application Settings';
       default:
-        return activeTab;
+        return 'Dashboard';
     }
   };
+
+  const hasAccess = canAccessTab(currentTab);
 
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-slate-50 dark:bg-zinc-950 font-sans antialiased text-slate-900 dark:text-zinc-100 transition-colors duration-200">
       {/* Sidebar (Desktop + Mobile Drawer) */}
       <Sidebar
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        stats={stats}
-        settings={settings}
         isOpen={isMobileNavOpen}
         onClose={() => setIsMobileNavOpen(false)}
+        stats={stats}
+        settings={settings}
       />
 
       {/* Main View Container */}
@@ -209,87 +106,25 @@ function AppShellContent() {
           onOpenMobileMenu={() => setIsMobileNavOpen(true)}
         />
 
-        {/* Dynamic Page Content */}
+        {/* Dynamic Route Content */}
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 md:p-8 bg-slate-100/70 dark:bg-zinc-950 transition-colors duration-200">
           <div className="max-w-7xl mx-auto">
-            {activeTab === 'dashboard' && (
-              <DashboardView
-                stats={stats}
-                alerts={alerts}
-                onNavigate={(tab) => {
-                  if (canAccessTab(tab)) {
-                    setActiveTab(tab);
-                  }
-                }}
-              />
-            )}
-
-            {activeTab === 'employees' && canAccessTab('employees') && (
-              <EmployeeManagement
-                departments={departments}
-                onEmployeeUpdated={refreshAllData}
-              />
-            )}
-
-            {activeTab === 'immigration' && canAccessTab('immigration') && (
-              <ImmigrationManagement
-                employees={employees}
-                visaTypes={visaTypes}
-                onUpdated={refreshAllData}
-              />
-            )}
-
-            {activeTab === 'rtw' && canAccessTab('rtw') && (
-              <RightToWorkManagement
-                employees={employees}
-                onUpdated={refreshAllData}
-              />
-            )}
-
-            {activeTab === 'leave' && canAccessTab('leave') && (
-              <LeaveManagement
-                employees={employees}
-                onUpdated={refreshAllData}
-              />
-            )}
-
-            {activeTab === 'departments' && canAccessTab('departments') && (
-              <DepartmentManagement
-                departments={departments}
-                onUpdated={refreshAllData}
-              />
-            )}
-
-            {activeTab === 'roles' && canAccessTab('roles') && (
-              <RoleManagement onUpdated={refreshAllData} />
-            )}
-
-            {activeTab === 'users' && canAccessTab('users') && (
-              <UserManagement
-                employees={employees}
-                onUpdated={refreshAllData}
-              />
-            )}
-
-            {activeTab === 'visatypes' && canAccessTab('visatypes') && (
-              <VisaTypeManagement
-                visaTypes={visaTypes}
-                onUpdated={refreshAllData}
-              />
-            )}
-
-            {activeTab === 'media' && canAccessTab('media') && (
-              <MediaManagement />
-            )}
-
-            {activeTab === 'settings' && canAccessTab('settings') && (
-              <SettingsManagement
-                settings={settings}
-                onSettingsUpdated={(updatedSettings) => {
-                  setSettings(updatedSettings);
-                  refreshAllData();
-                }}
-              />
+            {hasAccess ? (
+              children
+            ) : (
+              <div className="p-8 bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200 dark:border-zinc-800 text-center max-w-lg mx-auto mt-12 shadow-sm">
+                <ShieldAlert className="w-12 h-12 text-rose-500 mx-auto mb-3" />
+                <h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-100">Access Restricted</h3>
+                <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1 mb-6">
+                  Your current account role ({role}) does not have permission to view this section.
+                </p>
+                <button
+                  onClick={() => router.push('/')}
+                  className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm transition shadow-sm cursor-pointer"
+                >
+                  Return to Dashboard
+                </button>
+              </div>
             )}
           </div>
         </main>
@@ -297,12 +132,3 @@ function AppShellContent() {
     </div>
   );
 }
-
-export default function AppShell() {
-  return (
-    <AuthProvider>
-      <AppShellContent />
-    </AuthProvider>
-  );
-}
-

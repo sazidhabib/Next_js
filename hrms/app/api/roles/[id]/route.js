@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { initDb, Role } from '@/lib/db/models/index';
+import { initDb, Role, User } from '@/lib/db/models/index';
 
 export async function PUT(request, { params }) {
   try {
@@ -21,6 +21,10 @@ export async function DELETE(request, { params }) {
     const { id } = await params;
     const role = await Role.findByPk(id);
     if (!role) return NextResponse.json({ success: false, error: 'Role not found' }, { status: 404 });
+
+    // Unlink users from this role to prevent foreign key errors
+    await User.update({ roleId: null }, { where: { roleId: id } }).catch(() => {});
+
     await role.destroy();
     return NextResponse.json({ success: true, message: 'Role deleted' });
   } catch (error) {

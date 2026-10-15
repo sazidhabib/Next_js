@@ -6,6 +6,8 @@ import {
   ImmigrationRecord,
   RightToWork,
   VisaType,
+  LeaveRequest,
+  User,
 } from '@/lib/db/models/index';
 
 export async function GET(request, { params }) {
@@ -77,6 +79,14 @@ export async function DELETE(request, { params }) {
     if (!employee) {
       return NextResponse.json({ success: false, error: 'Employee not found' }, { status: 404 });
     }
+
+    // Clean up dependent child records to prevent foreign key errors
+    await Promise.allSettled([
+      LeaveRequest.destroy({ where: { employeeId: id } }),
+      RightToWork.destroy({ where: { employeeId: id } }),
+      ImmigrationRecord.destroy({ where: { employeeId: id } }),
+      User.update({ employeeId: null }, { where: { employeeId: id } }),
+    ]);
 
     await employee.destroy();
     return NextResponse.json({ success: true, message: 'Employee deleted successfully' });

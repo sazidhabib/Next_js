@@ -52,6 +52,9 @@ export async function DELETE(request, { params }) {
       return NextResponse.json({ success: false, error: 'Department not found' }, { status: 404 });
     }
 
+    // Unlink employees from this department so deletion never fails due to foreign key constraints
+    await Employee.update({ departmentId: null }, { where: { departmentId: id } }).catch(() => {});
+
     await department.destroy();
     return NextResponse.json({ success: true, message: 'Department deleted' });
   } catch (error) {

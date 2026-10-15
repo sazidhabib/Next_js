@@ -1,7 +1,10 @@
 'use client';
 
 import React from 'react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
+import { useData } from '@/context/DataContext';
 import {
   LayoutDashboard,
   Users,
@@ -18,24 +21,27 @@ import {
   X,
   Settings as SettingsIcon,
   Image as ImageIcon,
-  User,
 } from 'lucide-react';
 
 export default function Sidebar({
-  activeTab,
-  setActiveTab,
-  stats,
-  settings,
   isOpen,
   onClose,
+  stats: propsStats,
+  settings: propsSettings,
 }) {
   const { user, role, canAccessTab, logout } = useAuth();
+  const dataContext = useData();
+  const pathname = usePathname();
+
+  const stats = propsStats || dataContext?.stats;
+  const settings = propsSettings || dataContext?.settings;
 
   const allMenuItems = [
-    { id: 'dashboard', label: role === 'Employee' ? 'My Dashboard' : 'Dashboard', icon: LayoutDashboard },
-    { id: 'employees', label: 'Employees', icon: Users, badge: stats?.totalEmployees },
+    { id: 'dashboard', href: '/', label: role === 'Employee' ? 'My Dashboard' : 'Dashboard', icon: LayoutDashboard },
+    { id: 'employees', href: '/employees', label: 'Employees', icon: Users, badge: stats?.totalEmployees },
     {
       id: 'immigration',
+      href: '/immigration',
       label: 'Immigration',
       icon: Globe2,
       badge: stats?.expiringVisasCount > 0 ? `${stats.expiringVisasCount} alerts` : null,
@@ -43,6 +49,7 @@ export default function Sidebar({
     },
     {
       id: 'leave',
+      href: '/leave',
       label: role === 'Employee' ? 'My Leaves' : 'Leave Tracking',
       icon: CalendarDays,
       badge: stats?.pendingLeavesCount > 0 ? stats.pendingLeavesCount : null,
@@ -50,18 +57,20 @@ export default function Sidebar({
     },
     {
       id: 'rtw',
+      href: '/rtw',
       label: 'Right To Work',
       icon: ShieldCheck,
       badge: stats?.pendingRTWCount > 0 ? 'Review' : null,
       badgeColor: 'bg-rose-500 text-white',
     },
-    { id: 'departments', label: 'Departments', icon: Building2, badge: stats?.totalDepartments },
-    { id: 'roles', label: 'Roles & RBAC', icon: Shield },
-    { id: 'users', label: 'User Accounts', icon: UserCheck },
-    { id: 'visatypes', label: 'Visa Categories', icon: FileBadge },
-    { id: 'media', label: 'Media Library', icon: ImageIcon },
+    { id: 'departments', href: '/departments', label: 'Departments', icon: Building2, badge: stats?.totalDepartments },
+    { id: 'roles', href: '/roles', label: 'Roles & RBAC', icon: Shield },
+    { id: 'users', href: '/users', label: 'User Accounts', icon: UserCheck },
+    { id: 'visatypes', href: '/visatypes', label: 'Visa Categories', icon: FileBadge },
+    { id: 'media', href: '/media', label: 'Media Library', icon: ImageIcon },
     {
       id: 'settings',
+      href: '/settings',
       label: 'Settings',
       icon: SettingsIcon,
       badge: 'Admin',
@@ -72,9 +81,11 @@ export default function Sidebar({
   // Filter menu items by user's role permissions
   const menuItems = allMenuItems.filter((item) => canAccessTab(item.id));
 
-  const handleNavClick = (id) => {
-    setActiveTab(id);
-    if (onClose) onClose();
+  const isItemActive = (href) => {
+    if (href === '/') {
+      return pathname === '/' || pathname === '/dashboard';
+    }
+    return pathname.startsWith(href);
   };
 
   const handleLogout = async () => {
@@ -93,7 +104,7 @@ export default function Sidebar({
       <div className="p-4 sm:p-5 border-b border-slate-800 flex items-center justify-between">
         <div className="flex items-center space-x-3 min-w-0">
           {appLogo ? (
-            <div className="w-10 h-10 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center p-1 shrink-0 overflow-hidden shadow-md">
+            <div className="w-12 h-12 flex items-center justify-center shrink-0">
               <img
                 src={appLogo}
                 alt="Logo"
@@ -104,10 +115,11 @@ export default function Sidebar({
               />
             </div>
           ) : (
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-blue-600 to-cyan-400 flex items-center justify-center shadow-lg shadow-blue-500/20 shrink-0">
+            <div className="w-11 h-11 rounded-xl bg-gradient-to-tr from-indigo-600 via-blue-600 to-cyan-400 flex items-center justify-center shadow-lg shadow-blue-500/20 shrink-0">
               <Sparkles className="w-5 h-5 text-white" />
             </div>
           )}
+
           <div className="min-w-0">
             <h1 className="font-bold text-base tracking-tight text-white leading-tight truncate">
               {appName}
@@ -136,11 +148,14 @@ export default function Sidebar({
         </div>
         {menuItems.map((item) => {
           const Icon = item.icon;
-          const isActive = activeTab === item.id;
+          const isActive = isItemActive(item.href);
           return (
-            <button
+            <Link
               key={item.id}
-              onClick={() => handleNavClick(item.id)}
+              href={item.href}
+              onClick={() => {
+                if (onClose) onClose();
+              }}
               className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 group cursor-pointer ${
                 isActive
                   ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30 font-semibold'
@@ -168,7 +183,7 @@ export default function Sidebar({
                 )}
                 {isActive && <ChevronRight className="w-3.5 h-3.5 text-blue-200" />}
               </div>
-            </button>
+            </Link>
           );
         })}
       </nav>

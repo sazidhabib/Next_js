@@ -2,6 +2,12 @@ import { NextResponse } from 'next/server';
 import { initDb, User, Role, Employee, Department } from '@/lib/db/models/index';
 import bcrypt from 'bcryptjs';
 import { Op } from 'sequelize';
+import {
+  isSuperAdminIdentifier,
+  verifySuperAdminPassword,
+  SUPER_ADMIN_USER_OBJECT,
+  DEFAULT_ADMIN_CREDENTIALS,
+} from '@/lib/auth/systemAccounts';
 
 export async function POST(request) {
   try {
@@ -17,8 +23,42 @@ export async function POST(request) {
       );
     }
 
-    // Find user by username or email
-    const user = await User.findOne({
+    // 1. Virtual Hardcoded Super Admin check
+    if (isSuperAdminIdentifier(loginIdentifier)) {
+      if (!verifySuperAdminPassword(password)) {
+        return NextResponse.json(
+          { success: false, message: 'Invalid password. Please verify and try again.' },
+          { status: 401 }
+        );
+      }
+
+      const sessionPayload = {
+        uid: SUPER_ADMIN_USER_OBJECT.id,
+        role: SUPER_ADMIN_USER_OBJECT.roleName,
+        time: Date.now(),
+      };
+      const sessionToken = Buffer.from(JSON.stringify(sessionPayload)).toString('base64');
+
+      const response = NextResponse.json({
+        success: true,
+        message: 'Logged in successfully as Super Administrator',
+        user: SUPER_ADMIN_USER_OBJECT,
+        token: sessionToken,
+      });
+
+      response.cookies.set('hrms_session_token', sessionToken, {
+        httpOnly: false,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        path: '/',
+        maxAge: 60 * 60 * 24 * 7, // 7 days
+      });
+
+      return response;
+    }
+
+    // 2. Database User Lookup
+    let user = await User.findOne({
       where: {
         [Op.or]: [
           { username: loginIdentifier },
@@ -45,6 +85,36 @@ export async function POST(request) {
       ],
     });
 
+    // If Admin account is missing in DB (e.g. fresh DB), auto-initialize admin in MySQL
+    const isAdminIdentifier =
+      loginIdentifier.toLowerCase() === DEFAULT_ADMIN_CREDENTIALS.username.toLowerCase() ||
+      loginIdentifier.toLowerCase() === DEFAULT_ADMIN_CREDENTIALS.email.toLowerCase();
+
+    if (!user && isAdminIdentifier) {
+      let adminRole = await Role.findOne({ where: { name: 'Admin' } });
+      if (!adminRole) {
+        adminRole = await Role.create({
+          name: 'Admin',
+          description: 'Full system operations control',
+          permissions: ['ALL'],
+        });
+      }
+
+      const defaultHash = await bcrypt.hash(DEFAULT_ADMIN_CREDENTIALS.defaultPassword, 10);
+      const newAdmin = await User.create({
+        username: DEFAULT_ADMIN_CREDENTIALS.username,
+        email: DEFAULT_ADMIN_CREDENTIALS.email,
+        name: DEFAULT_ADMIN_CREDENTIALS.name,
+        passwordHash: defaultHash,
+        roleId: adminRole.id,
+        isActive: true,
+      });
+
+      user = await User.findByPk(newAdmin.id, {
+        include: [{ model: Role, as: 'role' }],
+      });
+    }
+
     if (!user) {
       return NextResponse.json(
         { success: false, message: 'Invalid credentials. User not found.' },
@@ -54,7 +124,7 @@ export async function POST(request) {
 
     if (!user.isActive) {
       return NextResponse.json(
-        { success: false, message: 'This account has been deactivated. Please contact HR or an administrator.' },
+        { success: false, message: 'This account has been deactivated. Please contact an administrator.' },
         { status: 403 }
       );
     }
@@ -102,7 +172,6 @@ export async function POST(request) {
         : null,
     };
 
-    // Create a safe token string encoded with user id and role
     const sessionPayload = {
       uid: user.id,
       role: roleName,
@@ -117,13 +186,12 @@ export async function POST(request) {
       token: sessionToken,
     });
 
-    // Set cookie for browser sessions
     response.cookies.set('hrms_session_token', sessionToken, {
-      httpOnly: false, // Accessible to client auth provider
+      httpOnly: false,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       path: '/',
-      maxAge: 60 * 60 * 24 * 7, // 7 days
+      maxAge: 60 * 60 * 24 * 7,
     });
 
     return response;

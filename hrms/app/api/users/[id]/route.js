@@ -6,6 +6,15 @@ export async function PUT(request, { params }) {
   try {
     await initDb();
     const { id } = await params;
+
+    // Disallow modifying virtual Super Admin
+    if (id === 'system-superadmin') {
+      return NextResponse.json(
+        { success: false, error: 'Super Admin credentials are system-locked and cannot be altered.' },
+        { status: 403 }
+      );
+    }
+
     const body = await request.json();
     const user = await User.findByPk(id);
     if (!user) return NextResponse.json({ success: false, error: 'User not found' }, { status: 404 });
@@ -32,6 +41,15 @@ export async function DELETE(request, { params }) {
   try {
     await initDb();
     const { id } = await params;
+
+    // Disallow deleting virtual Super Admin
+    if (id === 'system-superadmin') {
+      return NextResponse.json(
+        { success: false, error: 'The Super Admin account is protected and cannot be deleted.' },
+        { status: 403 }
+      );
+    }
+
     const user = await User.findByPk(id);
     if (!user) return NextResponse.json({ success: false, error: 'User not found' }, { status: 404 });
     await user.destroy();
