@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const { Op } = require('sequelize');
 const Photo = require('../models/photo');
 const Album = require('../models/album');
 const ImageRegistry = require('../models/imageRegistry');
@@ -9,16 +10,20 @@ const News = require('../models/news-model');
 // NEW: Get all images from all sources
 exports.getAllImages = async (req, res, next) => {
     try {
-        const { page = 1, limit = 20, sourceType } = req.query;
+        const { page = 1, limit = 20, sourceType, search } = req.query;
 
-        console.log('📸 Fetching all images - Page:', page, 'Limit:', limit, 'Source:', sourceType);
+        console.log('📸 Fetching all images - Page:', page, 'Limit:', limit, 'Source:', sourceType, 'Search:', search);
 
         // Simple query without associations
         const offset = (page - 1) * limit;
 
         const whereClause = {};
-        if (sourceType) {
+        if (sourceType && sourceType !== 'all') {
             whereClause.sourceType = sourceType;
+        }
+
+        if (search && search.trim()) {
+            whereClause.filename = { [Op.like]: `%${search.trim()}%` };
         }
 
         // Get total count

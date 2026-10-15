@@ -8,6 +8,7 @@ import api, { STATIC_URL } from "@/app/lib/api";
 import { useAuth } from "@/app/providers/AuthProvider";
 import WYSIWYGEditor from '../../../components/WYSIWYGEditor';
 import HomepageLeadPositionSelector from '@/app/admin/components/HomepageLeadPositionSelector';
+import MediaPickerModal from '@/app/admin/components/MediaPickerModal';
 import { assignContentToHomepageSection1 } from '@/app/lib/homepageSection1Sync';
 
 
@@ -65,13 +66,12 @@ const VideoNewsEdit = () => {
         if (!isAdmin || !id) return;
         const fetchData = async () => {
             try {
-                const [newsRes, authRes, tagRes, menuRes, albumRes, photoRes] = await Promise.all([
+                const [newsRes, authRes, tagRes, menuRes, albumRes] = await Promise.all([
                     api.get(`/news/${id}`),
                     api.get('/authors', { params: { limit: 1000 } }),
                     api.get('/tags'),
                     api.get('/menus'),
-                    api.get('/albums'),
-                    api.get('/all/images', { params: { limit: 500 } })
+                    api.get('/albums')
                 ]);
 
                 const n = newsRes.data;
@@ -94,12 +94,24 @@ const VideoNewsEdit = () => {
                 setTags(tagRes.data.tags || tagRes.data || []);
                 setCategories(processCategories(menuRes.data.data || menuRes.data || []));
                 setAlbums(albumRes.data.albums || albumRes.data || []);
-                setPhotos((photoRes.data.images || []).map(p => ({ ...p, imageUrl: p.imageUrl || p.image })));
             } catch (err) { toast.error("Failed to load dependency data"); }
             finally { setFetching(false); }
         };
         fetchData();
     }, [isAdmin, id]);
+
+    const handleImageSelect = (photo) => {
+        if (selectedImageType) {
+            setSelectedImages(prev => ({ ...prev, [selectedImageType]: photo }));
+            setFiles(prev => ({ ...prev, [selectedImageType]: null }));
+            setModals(prev => ({ ...prev, [selectedImageType]: false }));
+        }
+    };
+
+    const handleEditorImageSelect = (photo) => {
+        setPhotoToFormat(photo);
+        setModals(prev => ({ ...prev, format: true, editor: false }));
+    };
 
     const processCategories = (cats) => {
         const map = {}, root = [];
@@ -168,30 +180,7 @@ const VideoNewsEdit = () => {
     if (fetching) return <div className="p-4 text-center"><Spinner animation="border" /></div>;
     if (!isAdmin) return <div className="p-4 text-center"><h4>Access Denied</h4></div>;
 
-    const ImageModal = ({ type, show, onHide }) => (
-        <Modal show={show} onHide={onHide} size="xl" scrollable centered>
-            <Modal.Header closeButton><Modal.Title>Select Image</Modal.Title></Modal.Header>
-            <Modal.Body>
-                <Row className="mb-3">
-                    <Col md={6}><Form.Select onChange={e => setSelectedAlbum(e.target.value)} value={selectedAlbum}><option value="all">All Albums</option>{albums.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}</Form.Select></Col>
-                    <Col md={6}><Form.Control placeholder="Search images..." onChange={e => setImageSearch(e.target.value)} /></Col>
-                </Row>
-                <Row className="g-2">
-                    {photos.filter(p => (selectedAlbum === 'all' || p.albumId == selectedAlbum) && (p.filename.toLowerCase().includes(imageSearch.toLowerCase()))).map(p => (
-                        <Col md={3} key={p.id}>
-                            <Card className="h-100 cursor-pointer" onClick={() => { 
-                                if(type === 'editor') { setPhotoToFormat(p); setModals(prev => ({ ...prev, format: true, editor: false })); }
-                                else { setSelectedImages({...selectedImages, [type]: p}); setFiles({...files, [type]: null}); onHide(); } 
-                            }}>
-                                <Card.Img src={getImageUrl(p.imageUrl)} style={{height: '120px', objectFit: 'cover'}} />
-                                <Card.Body className="p-1 text-center"><small className="text-truncate d-block">{p.filename}</small></Card.Body>
-                            </Card>
-                        </Col>
-                    ))}
-                </Row>
-            </Modal.Body>
-        </Modal>
-    );
+
 
     return (
         <Container fluid className="py-4">
@@ -266,8 +255,8 @@ const VideoNewsEdit = () => {
                 </Row>
             </Form>
 
-            <ImageModal type="editor" show={modals.editor} onHide={() => setModals({...modals, editor: false})} />
-            <ImageModal type="thumbImage" show={modals.thumbImage} onHide={() => setModals({...modals, thumbImage: false})} />
+            <MediaPickerModal show={modals.editor} onClose={() => setModals(prev => ({ ...prev, editor: false }))} onSelect={handleEditorImageSelect} title="Select Image for Editor" />
+            <MediaPickerModal show={modals.thumbImage} onClose={() => setModals(prev => ({ ...prev, thumbImage: false }))} onSelect={handleImageSelect} title="Select Thumbnail Image" />
             
             <Modal show={modals.format} onHide={() => setModals({...modals, format: false})} centered>
                 <Modal.Header closeButton><Modal.Title>Image Format</Modal.Title></Modal.Header>

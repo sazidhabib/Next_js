@@ -9,6 +9,7 @@ import { useAuth } from "@/app/providers/AuthProvider";
 import WYSIWYGEditor from '@/app/admin/components/WYSIWYGEditor';
 import ImageFormatModal from '@/app/admin/components/ImageFormatModal';
 import HomepageLeadPositionSelector from '@/app/admin/components/HomepageLeadPositionSelector';
+import MediaPickerModal from '@/app/admin/components/MediaPickerModal';
 import { assignContentToHomepageSection1 } from '@/app/lib/homepageSection1Sync';
 
 
@@ -26,14 +27,6 @@ const NewsEdit = () => {
     const [authors, setAuthors] = useState([]);
     const [tags, setTags] = useState([]);
     const [categories, setCategories] = useState([]);
-    const [albums, setAlbums] = useState([]);
-    const [photos, setPhotos] = useState([]);
-    const [filteredPhotos, setFilteredPhotos] = useState([]);
-    const [selectedAlbum, setSelectedAlbum] = useState('all');
-    const [imageSearch, setImageSearch] = useState('');
-    const [uploadFile, setUploadFile] = useState(null);
-    const [uploadAlbumId, setUploadAlbumId] = useState('');
-    const [showUploadSection, setShowUploadSection] = useState(false);
     const [showThumbSection, setShowThumbSection] = useState(false);
 
     const [authorSearch, setAuthorSearch] = useState('');
@@ -72,13 +65,11 @@ const NewsEdit = () => {
         if (!isAdmin || !id) return;
         const fetchData = async () => {
             try {
-                const [newsRes, authRes, tagRes, menuRes, albumRes, photoRes] = await Promise.all([
+                const [newsRes, authRes, tagRes, menuRes] = await Promise.all([
                     api.get(`/news/${id}`),
                     api.get('/authors', { params: { limit: 1000 } }),
                     api.get('/tags'),
-                    api.get('/menus'),
-                    api.get('/albums'),
-                    api.get('/all/images', { params: { limit: 500 } })
+                    api.get('/menus')
                 ]);
 
                 const n = newsRes.data.data || newsRes.data.news || newsRes.data;
@@ -110,16 +101,6 @@ const NewsEdit = () => {
                 setAuthors(authRes.data.authors || authRes.data || []);
                 setTags(tagRes.data.tags || tagRes.data || []);
                 setCategories(processCategories(menuRes.data.data || menuRes.data || []));
-                setAlbums(albumRes.data.albums || albumRes.data || []);
-                
-                const validPhotos = (photoRes.data.images || []).filter(p => p && (p.imageUrl || p.image) && p.filename).map(p => ({
-                    id: p.id, filename: p.filename, imageUrl: p.imageUrl || p.image,
-                    caption: p.caption || '', albumId: p.albumId || null,
-                    source: p.source || 'other', createdAt: p.createdAt
-                }));
-                validPhotos.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-                setPhotos(validPhotos);
-                setFilteredPhotos(validPhotos);
             } catch (err) { 
                 console.error('Error fetching data:', err);
                 toast.error("Failed to load news data"); 
@@ -128,21 +109,6 @@ const NewsEdit = () => {
         };
         fetchData();
     }, [isAdmin, id]);
-
-    useEffect(() => {
-        filterPhotosByAlbum();
-    }, [selectedAlbum, photos]);
-
-    const filterPhotosByAlbum = () => {
-        if (selectedAlbum === 'all') {
-            setFilteredPhotos(photos);
-        } else if (['article', 'blog', 'news', 'photo', 'other'].includes(selectedAlbum)) {
-            setFilteredPhotos(photos.filter(p => p.source?.toLowerCase() === selectedAlbum.toLowerCase()));
-        } else {
-            const albumId = parseInt(selectedAlbum);
-            setFilteredPhotos(photos.filter(p => p.albumId === albumId || p.albumId?.toString() === selectedAlbum));
-        }
-    };
 
     const processCategories = (cats) => {
         const map = {}, root = [];
@@ -280,41 +246,6 @@ const NewsEdit = () => {
         closeImageModal();
     };
 
-    const handleUploadImage = async () => {
-        if (!uploadFile) { toast.error('Please select a file to upload'); return; }
-        setUploading(true);
-        try {
-            const fd = new FormData();
-            fd.append('images', uploadFile);
-            if (uploadAlbumId) fd.append('albumId', uploadAlbumId);
-            await api.post('/upload', fd);
-            toast.success('Image uploaded successfully!');
-            setUploadFile(null);
-            setUploadAlbumId('');
-            const response = await api.get('/all/images', { params: { limit: 500 } });
-            const validPhotos = (response.data.images || []).filter(p => p && (p.imageUrl || p.image) && p.filename).map(p => ({
-                id: p.id, filename: p.filename, imageUrl: p.imageUrl || p.image,
-                caption: p.caption || '', albumId: p.albumId || null,
-                source: p.source || 'other', createdAt: p.createdAt
-            }));
-            validPhotos.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-            setPhotos(validPhotos);
-        } catch (err) {
-            console.error('Upload error:', err);
-            toast.error(err.response?.data?.message || 'Failed to upload image');
-        } finally { setUploading(false); }
-    };
-
-    const handleAlbumChange = (e) => {
-        const value = e.target.value;
-        setSelectedAlbum(value);
-    };
-
-    const getSourceLabel = (source) => {
-        const labels = { 'article': 'Article', 'blog': 'Blog', 'news': 'News', 'photo': 'Gallery', 'other': 'Other' };
-        return labels[source] || source;
-    };
-
     const handleAction = async (e) => {
         e.preventDefault();
         setLoading(true);
@@ -378,57 +309,7 @@ const NewsEdit = () => {
         return null;
     };
 
-    const ImageSelectionModal = ({ show, onClose, onSelect, title }) => {
-        if (!show) return null;
-        return (
-            <Modal show={show} onHide={onClose} size="xl" scrollable centered>
-                <Modal.Header closeButton><Modal.Title>{title}</Modal.Title></Modal.Header>
-                <Modal.Body>
-                    <div className="card mb-4">
-                        <div className="card-header">
-                            <Button variant="link text-decoration-none" onClick={() => setShowUploadSection(!showUploadSection)}>
-                                {showUploadSection ? '▲' : '▼'} Upload New Image
-                            </Button>
-                        </div>
-                        {showUploadSection && (
-                            <div className="card-body">
-                                <Row>
-                                    <Col md={6}>
-                                        <Form.Group className="mb-3"><Form.Label>Select Image</Form.Label><Form.Control type="file" accept="image/*" onChange={e => setUploadFile(e.target.files[0])} />{uploadFile && <small className="text-muted">Selected: {uploadFile.name}</small>}</Form.Group>
-                                    </Col>
-                                    <Col md={4}>
-                                        <Form.Group className="mb-3"><Form.Label>Album (Optional)</Form.Label><Form.Select value={uploadAlbumId} onChange={e => setUploadAlbumId(e.target.value)}><option value="">Select Album</option>{albums.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}</Form.Select></Form.Group>
-                                    </Col>
-                                    <Col md={2} className="d-flex align-items-end">
-                                        <Button className="w-100" onClick={handleUploadImage} disabled={uploading || !uploadFile}>{uploading ? 'Uploading...' : 'Upload'}</Button>
-                                    </Col>
-                                </Row>
-                            </div>
-                        )}
-                    </div>
-                    <Row className="mb-3">
-                        <Col md={6}><Form.Group><Form.Label>Filter Images</Form.Label><Form.Select value={selectedAlbum} onChange={handleAlbumChange}><option value="all">All Images ({photos.length})</option><optgroup label="By Source">{['article', 'blog', 'news', 'photo', 'other'].map(s => <option key={s} value={s}>{getSourceLabel(s)} ({photos.filter(p => p.source === s).length})</option>)}</optgroup><optgroup label="By Album">{albums.map(a => <option key={a.id} value={a.id}>{a.name} ({photos.filter(p => p.albumId === a.id || p.albumId?.toString() === a.id.toString()).length})</option>)}</optgroup></Form.Select></Form.Group></Col>
-                        <Col md={6}><Form.Group><Form.Label>Search Images</Form.Label><Form.Control placeholder="Search by filename, caption..." value={imageSearch} onChange={e => setImageSearch(e.target.value)} /></Form.Group></Col>
-                    </Row>
-                    <div className="mb-3"><small className="text-muted">Showing {searchedPhotos.length} of {photos.length} images</small></div>
-                    <Row className="g-2">
-                        {searchedPhotos.length === 0 ? <div className="text-center text-muted py-4">No images found</div> : searchedPhotos.map(photo => (
-                            <Col md={3} key={photo.id}>
-                                <Card className="h-100 cursor-pointer" onClick={() => onSelect(photo)} style={{ cursor: 'pointer' }}>
-                                    <div className="position-relative">
-                                        {photo.imageUrl && <Card.Img src={photo.imageUrl.startsWith('http') ? photo.imageUrl : `${IMG_BASE}/${photo.imageUrl.replace(/^\/+/, '')}`} style={{ height: '150px', objectFit: 'cover' }} />}
-                                        <Badge bg="dark" className="position-absolute top-0 end-0 m-1">{getSourceLabel(photo.source)}</Badge>
-                                    </div>
-                                    <Card.Body className="p-2"><small className="d-block text-truncate">{photo.caption || photo.filename}</small></Card.Body>
-                                </Card>
-                            </Col>
-                        ))}
-                    </Row>
-                </Modal.Body>
-                <Modal.Footer><Button variant="secondary" onClick={onClose}>Close</Button></Modal.Footer>
-            </Modal>
-        );
-    };
+
 
     return (
         <Container fluid className="py-4">
@@ -619,10 +500,10 @@ const NewsEdit = () => {
                 </Row>
             </Form>
 
-            <ImageSelectionModal show={showImageModal.editor} onClose={closeImageModal} onSelect={handleEditorImageSelect} title="Select Image for Editor" />
-            <ImageSelectionModal show={showImageModal.leadImage} onClose={closeImageModal} onSelect={handleImageSelect} title="Select Lead Image" />
-            <ImageSelectionModal show={showImageModal.thumbImage} onClose={closeImageModal} onSelect={handleImageSelect} title="Select Thumbnail Image" />
-            <ImageSelectionModal show={showImageModal.metaImage} onClose={closeImageModal} onSelect={handleImageSelect} title="Select Meta Image" />
+            <MediaPickerModal show={showImageModal.editor} onClose={closeImageModal} onSelect={handleEditorImageSelect} title="Select Image for Editor" />
+            <MediaPickerModal show={showImageModal.leadImage} onClose={closeImageModal} onSelect={handleImageSelect} title="Select Lead Image" />
+            <MediaPickerModal show={showImageModal.thumbImage} onClose={closeImageModal} onSelect={handleImageSelect} title="Select Thumbnail Image" />
+            <MediaPickerModal show={showImageModal.metaImage} onClose={closeImageModal} onSelect={handleImageSelect} title="Select Meta Image" />
             <ImageFormatModal show={showFormatModal} onHide={() => setShowFormatModal(false)} onConfirm={handleFormatConfirm} photo={photoToFormat} />
         </Container>
     );

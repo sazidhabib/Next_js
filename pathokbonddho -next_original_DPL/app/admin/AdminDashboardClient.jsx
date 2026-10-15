@@ -43,7 +43,7 @@ export default function AdminDashboardClient({ initialStats, user }) {
     return (
         <div className="admin-title-font">
             {/* Header Greeting Banner */}
-            <div className="mb-4 p-4 rounded-4 bg-white border border-zinc-200/50 shadow-sm d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div className="mb-4 p-4 rounded-4 card border shadow-sm d-flex justify-content-between align-items-center flex-wrap gap-3 flex-row">
                 <div>
                     <h2 className="fw-bold text-slate-800 mb-1" style={{ fontSize: '1.5rem', letterSpacing: '-0.02em' }}>Dashboard</h2>
                     <p className="text-muted mb-0 small">Welcome back, <strong className="text-teal-600">{user?.username || user?.email}</strong>. Here is the latest overview of your portal.</p>

@@ -91,9 +91,8 @@ const Header = () => {
 
   const homeMenu = getMenuByOrder(1);
 
-  // Track screen size on resize
+  // Track screen size and scroll direction smoothly
   useEffect(() => {
-    // FIX 1b: Set initial values inside useEffect
     setIsMediumOrSmaller(window.innerWidth < 992);
     lastScrollY.current = window.scrollY;
 
@@ -101,30 +100,58 @@ const Header = () => {
       setIsMediumOrSmaller(window.innerWidth < 992);
     };
 
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY;
+    let ticking = false;
+    let accumulatedDelta = 0;
+    let prevScrollY = window.scrollY;
+    const SCROLL_THRESHOLD = 140; // Height of top-bar and site logo before auto-hide takes effect
+    const DELTA_MIN = 8; // Filter out micro-scroll vibrations / trackpad bounce
 
-      if (showSidebar && currentScrollY > lastScrollY.current) {
+    const updateScrollDirection = () => {
+      const currentScrollY = window.scrollY;
+      const diff = currentScrollY - prevScrollY;
+
+      // Close mobile sidebar if scrolling down significantly
+      if (showSidebar && diff > 10) {
         setShowSidebar(false);
       }
 
-      if (currentScrollY < 400) {
+      if (currentScrollY <= SCROLL_THRESHOLD) {
+        // Near top of page: hide the floating sticky navbar (default in-page navbar is already visible)
         setShowScrollingNavbar(false);
-      } else if (currentScrollY < lastScrollY.current) {
-        // scrolling up
-        setShowScrollingNavbar(true);
+        accumulatedDelta = 0;
       } else {
-        // scrolling down
-        setShowScrollingNavbar(false);
+        // Scrolled down past header area
+        if (diff > 0) {
+          // Scrolling DOWN: reset negative delta and accumulate down delta
+          if (accumulatedDelta < 0) accumulatedDelta = 0;
+          accumulatedDelta += diff;
+          if (accumulatedDelta >= DELTA_MIN) {
+            setShowScrollingNavbar(false);
+          }
+        } else if (diff < 0) {
+          // Scrolling UP: reset positive delta and accumulate up delta
+          if (accumulatedDelta > 0) accumulatedDelta = 0;
+          accumulatedDelta += diff;
+          if (Math.abs(accumulatedDelta) >= DELTA_MIN) {
+            setShowScrollingNavbar(true);
+          }
+        }
       }
 
+      prevScrollY = currentScrollY;
       lastScrollY.current = currentScrollY;
+      ticking = false;
+    };
+
+    const handleScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(updateScrollDirection);
+        ticking = true;
+      }
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
     window.addEventListener("resize", handleResize);
-
-    handleResize();
 
     return () => {
       window.removeEventListener("scroll", handleScroll);
@@ -139,6 +166,41 @@ const Header = () => {
       setShowSidebar(prev => !prev);
     }
   };
+
+  const renderDesktopNavbarInner = () => (
+    <div className="inside_main container">
+      <Link href="/" className="logo-container d-flex align-items-center gap-3" style={{ textDecoration: 'none' }}>
+        <Image
+          src={settings?.logo || "/images/Logo.png"}
+          alt={settings?.siteNameBn || "Logo"}
+          width={150}
+          height={50}
+          className="logo-logo"
+          priority
+          style={{ objectFit: 'contain' }}
+        />
+      </Link>
+      <ul className="nav-custom-links">
+        {menus.sort((a, b) => a.order - b.order).map((menu, index) => {
+          const menuPath = normalizePath(menu.path.startsWith('/') ? menu.path : `/${menu.path}`);
+          const isActive = normalizedPathname === menuPath;
+          return (
+            <li key={menu._id || index}>
+              <Link
+                href={menuPath}
+                className={`nav-link-custom fw-bold ${isActive ? 'active' : ''}`}
+              >
+                {menu.name}
+              </Link>
+            </li>
+          );
+        })}
+      </ul>
+      <div className="nav-actions d-flex justify-content-end align-items-center">
+        <ThemeToggle showLabel={false} />
+      </div>
+    </div>
+  );
 
   return (
     <header className="header_contentent custom-font">
@@ -220,14 +282,19 @@ const Header = () => {
         </div>
       )}
 
-      {/* Top Bar hidden */}
+      {/* Top Bar hidden (smooth floating on scroll up) */}
       {isMediumOrSmaller && (
         <div
-          className="mobile-topbar d-flex justify-content-between align-items-center px-3 py-2 shadow-sm position-fixed w-100"
+          className={`mobile-topbar d-flex justify-content-between align-items-center px-3 py-2 shadow-sm position-fixed w-100 ${showScrollingNavbar ? 'is-visible' : 'is-hidden'}`}
           style={{
-            top: showScrollingNavbar ? "0" : "-150px",
-            transition: "top 0.3s ease-in-out",
-            zIndex: 1050,
+            top: 0,
+            left: 0,
+            right: 0,
+            transform: showScrollingNavbar ? "translateY(0)" : "translateY(-100%)",
+            transition: "transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s ease",
+            pointerEvents: showScrollingNavbar ? "auto" : "none",
+            visibility: showScrollingNavbar ? "visible" : "hidden",
+            zIndex: 1060,
           }}
         >
           <div className="hamburger" onClick={toggleSidebar}>
@@ -319,44 +386,22 @@ const Header = () => {
 
 
       {!isMediumOrSmaller && (
-        <div className="site-header position-relative" style={{ zIndex: 1020 }}>
-          {/* White Sticky Navbar */}
-          <div className={`main-navbar-custom ${showScrollingNavbar ? 'sticky' : ''}`}>
-            <div className="inside_main container">
-              <Link href="/" className="logo-container d-flex align-items-center gap-3" style={{ textDecoration: 'none' }}>
-                <Image
-                  src={settings?.logo || "/images/Logo.png"}
-                  alt={settings?.siteNameBn || "Logo"}
-                  width={150}
-                  height={50}
-                  className="logo-logo"
-                  priority
-                  style={{ objectFit: 'contain' }}
-                />
-
-              </Link>
-              <ul className="nav-custom-links">
-                {menus.sort((a, b) => a.order - b.order).map((menu, index) => {
-                  const menuPath = normalizePath(menu.path.startsWith('/') ? menu.path : `/${menu.path}`);
-                  const isActive = normalizedPathname === menuPath;
-                  return (
-                    <li key={menu._id || index}>
-                      <Link
-                        href={menuPath}
-                        className={`nav-link-custom fw-bold ${isActive ? 'active' : ''}`}
-                      >
-                        {menu.name}
-                      </Link>
-                    </li>
-                  );
-                })}
-              </ul>
-              <div className="nav-actions d-flex justify-content-end align-items-center">
-                <ThemeToggle showLabel={false} />
-              </div>
+        <>
+          {/* Main In-Flow Desktop Navbar (Never causes layout shift) */}
+          <div className="site-header position-relative" style={{ zIndex: 1020 }}>
+            <div className="main-navbar-custom">
+              {renderDesktopNavbarInner()}
             </div>
           </div>
-        </div>
+
+          {/* Floating Smooth Auto-Hiding Navbar (Appears seamlessly on scroll up) */}
+          <div
+            className={`main-navbar-custom sticky-floating-navbar ${showScrollingNavbar ? 'is-visible' : 'is-hidden'}`}
+            aria-hidden={!showScrollingNavbar}
+          >
+            {renderDesktopNavbarInner()}
+          </div>
+        </>
       )}
 
       {/* Header Ad */}

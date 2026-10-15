@@ -254,7 +254,7 @@ const PhotosListClient = ({ initialImages, initialAlbums, initialTotalPages, ini
                         const imgFullUrl = getImageUrl(img.imageUrl);
                         return (
                             <Col key={img.id}>
-                                <Card className="h-100 shadow-sm border rounded-3 overflow-hidden d-flex flex-column transition-all" style={{ backgroundColor: '#ffffff' }}>
+                                <Card className="h-100 shadow-sm border rounded-3 overflow-hidden d-flex flex-column transition-all">
                                     {/* Image Container with overlay */}
                                     <div 
                                         className="position-relative bg-dark d-flex align-items-center justify-content-center overflow-hidden" 
@@ -407,9 +407,9 @@ const PhotosListClient = ({ initialImages, initialAlbums, initialTotalPages, ini
                                 width: '38px',
                                 height: '38px',
                                 borderRadius: '8px',
-                                border: '1px solid #e2e8f0',
-                                backgroundColor: page <= 1 ? '#f1f5f9' : '#eef2f6',
-                                color: page <= 1 ? '#94a3b8' : '#0284c7',
+                                border: '1px solid var(--admin-table-border, #e2e8f0)',
+                                backgroundColor: page <= 1 ? 'var(--admin-table-header-bg, #f1f5f9)' : 'var(--admin-card-bg, #ffffff)',
+                                color: page <= 1 ? 'var(--admin-text-muted, #94a3b8)' : '#0284c7',
                                 display: 'inline-flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
@@ -428,7 +428,7 @@ const PhotosListClient = ({ initialImages, initialAlbums, initialTotalPages, ini
                         <div 
                             style={{ 
                                 fontSize: '15px', 
-                                color: '#475569', 
+                                color: 'var(--admin-text-secondary, #475569)', 
                                 whiteSpace: 'nowrap',
                                 display: 'flex',
                                 alignItems: 'center',
@@ -436,9 +436,9 @@ const PhotosListClient = ({ initialImages, initialAlbums, initialTotalPages, ini
                             }}
                         >
                             <span>Page</span>
-                            <span style={{ fontWeight: '700', color: '#1e293b' }}>{page}</span>
+                            <span style={{ fontWeight: '700', color: 'var(--admin-text-main, #1e293b)' }}>{page}</span>
                             <span>of</span>
-                            <span style={{ fontWeight: '700', color: '#1e293b' }}>{totalPages}</span>
+                            <span style={{ fontWeight: '700', color: 'var(--admin-text-main, #1e293b)' }}>{totalPages}</span>
                         </div>
 
                         {/* Page Jump Input Box */}
@@ -460,9 +460,9 @@ const PhotosListClient = ({ initialImages, initialAlbums, initialTotalPages, ini
                                     width: '84px',
                                     height: '38px',
                                     borderRadius: '8px',
-                                    border: '1.5px solid #cbd5e1',
-                                    backgroundColor: '#ffffff',
-                                    color: '#0284c7',
+                                    border: '1.5px solid var(--admin-input-border, #cbd5e1)',
+                                    backgroundColor: 'var(--admin-input-bg, #ffffff)',
+                                    color: 'var(--admin-input-color, #0284c7)',
                                     textAlign: 'center',
                                     fontSize: '15px',
                                     fontWeight: '500',
@@ -483,9 +483,9 @@ const PhotosListClient = ({ initialImages, initialAlbums, initialTotalPages, ini
                                 width: '38px',
                                 height: '38px',
                                 borderRadius: '8px',
-                                border: '1.5px solid #bfdbfe',
-                                backgroundColor: '#ffffff',
-                                color: page >= totalPages ? '#94a3b8' : '#0284c7',
+                                border: '1.5px solid var(--admin-table-border, #bfdbfe)',
+                                backgroundColor: page >= totalPages ? 'var(--admin-table-header-bg, #f1f5f9)' : 'var(--admin-card-bg, #ffffff)',
+                                color: page >= totalPages ? 'var(--admin-text-muted, #94a3b8)' : '#0284c7',
                                 display: 'inline-flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',

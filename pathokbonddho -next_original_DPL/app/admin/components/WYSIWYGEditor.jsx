@@ -212,7 +212,7 @@ const WYSIWYGEditor = forwardRef(({
             </div>
             <div style={{ flex: 1, overflow: 'auto', position: 'relative' }}>
                 <div ref={editorRef} contentEditable onInput={handleInput} onPaste={handlePaste} onFocus={() => setIsFocused(true)} onBlur={() => { setIsFocused(false); saveSelection(); }} onClick={handleEditorClick}
-                    style={{ height: '100%', minHeight: '100px', padding: '1rem', outline: 'none', overflow: 'auto', lineHeight: '1.6', border: isFocused ? '2px solid #3b82f6' : 'none', backgroundColor: 'white' }} className="editor-content" data-placeholder={placeholder} />
+                    style={{ height: '100%', minHeight: '100px', padding: '1rem', outline: 'none', overflow: 'auto', lineHeight: '1.6', border: isFocused ? '2px solid #3b82f6' : 'none', backgroundColor: 'var(--admin-card-bg, white)', color: 'var(--admin-text-main, inherit)' }} className="editor-content" data-placeholder={placeholder} />
                 {selectedElement && (
                     <div className="position-absolute bg-dark text-white rounded shadow d-flex gap-2 p-1" style={{ top: `${toolbarPosition.top}px`, left: `${toolbarPosition.left}px`, transform: 'translateX(-50%)', zIndex: 1000, height: '32px' }} onMouseDown={e => e.preventDefault()}>
                         <button type="button" className="btn btn-sm btn-dark p-1 d-flex align-items-center" onClick={handleEditElement} title="Edit Image"><i className="fa-solid fa-pen-to-square"></i></button>

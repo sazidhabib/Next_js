@@ -10,6 +10,7 @@ import { useAuth } from "@/app/providers/AuthProvider";
 import WYSIWYGEditor from '@/app/admin/components/WYSIWYGEditor';
 import ImageFormatModal from '@/app/admin/components/ImageFormatModal';
 import HomepageLeadPositionSelector from '@/app/admin/components/HomepageLeadPositionSelector';
+import MediaPickerModal from '@/app/admin/components/MediaPickerModal';
 import { assignContentToHomepageSection1 } from '@/app/lib/homepageSection1Sync';
 
 
@@ -22,18 +23,10 @@ const PhotoNewsCreate = () => {
     const [loading, setLoading] = useState(false);
     const [uploading, setUploading] = useState(false);
     const [leadPosition, setLeadPosition] = useState('none');
+    const [showThumbSection, setShowThumbSection] = useState(false);
     const [authors, setAuthors] = useState([]);
     const [tags, setTags] = useState([]);
     const [categories, setCategories] = useState([]);
-    const [albums, setAlbums] = useState([]);
-    const [photos, setPhotos] = useState([]);
-    const [filteredPhotos, setFilteredPhotos] = useState([]);
-    const [selectedAlbum, setSelectedAlbum] = useState('all');
-    const [imageSearch, setImageSearch] = useState('');
-    const [uploadFile, setUploadFile] = useState(null);
-    const [uploadAlbumId, setUploadAlbumId] = useState('');
-    const [showUploadSection, setShowUploadSection] = useState(false);
-    const [showThumbSection, setShowThumbSection] = useState(false);
 
     const [authorSearch, setAuthorSearch] = useState('');
     const [tagSearch, setTagSearch] = useState('');
@@ -74,13 +67,7 @@ const PhotoNewsCreate = () => {
     useEffect(() => {
         if (!isAdmin) return;
         fetchDropdownData();
-        fetchAlbums();
-        fetchAllPhotos();
     }, [isAdmin]);
-
-    useEffect(() => {
-        filterPhotosByAlbum();
-    }, [selectedAlbum, photos]);
 
     const fetchDropdownData = async () => {
         try {
@@ -92,44 +79,10 @@ const PhotoNewsCreate = () => {
             setAuthors(authorsRes.data.authors || authorsRes.data || []);
             setTags(tagRes.data.tags || tagRes.data || []);
             setCategories(processCategories(menuRes.data.data || menuRes.data || []));
-        } catch (err) { 
+        } catch (err) {
             console.error('Error fetching dropdown data:', err);
-            toast.error("Failed to load dropdown data"); 
+            toast.error("Failed to load dropdown data");
         }
-    };
-
-    const fetchAlbums = async () => {
-        try {
-            const response = await api.get('/albums');
-            setAlbums(response.data.albums || response.data || []);
-        } catch (err) {
-            console.warn('Albums endpoint not available:', err.message);
-            setAlbums([]);
-        }
-    };
-
-    const fetchAllPhotos = async () => {
-        try {
-            const response = await api.get('/all/images', { params: { limit: 500 } });
-            const validPhotos = (response.data.images || []).filter(p => p && (p.imageUrl || p.image) && p.filename).map(p => ({
-                id: p.id, filename: p.filename, imageUrl: p.imageUrl || p.image,
-                caption: p.caption || '', albumId: p.albumId || null,
-                source: p.source || 'other', createdAt: p.createdAt
-            }));
-            validPhotos.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-            setPhotos(validPhotos);
-            setFilteredPhotos(validPhotos);
-        } catch (err) {
-            console.warn('Images endpoint not available:', err.message);
-            setPhotos([]);
-            setFilteredPhotos([]);
-        }
-    };
-
-    const filterPhotosByAlbum = () => {
-        if (selectedAlbum === 'all') setFilteredPhotos(photos);
-        else if (['article', 'blog', 'news', 'photo', 'other'].includes(selectedAlbum)) setFilteredPhotos(photos.filter(p => p.source?.toLowerCase() === selectedAlbum.toLowerCase()));
-        else setFilteredPhotos(photos.filter(p => p.albumId === parseInt(selectedAlbum) || p.albumId?.toString() === selectedAlbum));
     };
 
     const processCategories = (cats) => {
@@ -384,71 +337,12 @@ const PhotoNewsCreate = () => {
 
     const filteredAuthors = authors.filter(a => a.name?.toLowerCase().includes(authorSearch.toLowerCase()));
     const filteredTags = tags.filter(t => t.name?.toLowerCase().includes(tagSearch.toLowerCase()));
-    const searchedPhotos = imageSearch ? filteredPhotos.filter(p => p.filename.toLowerCase().includes(imageSearch.toLowerCase()) || p.caption?.toLowerCase().includes(imageSearch.toLowerCase())) : filteredPhotos;
-
     const ImagePreview = ({ imageType }) => {
         const file = files[imageType];
         const selImg = selectedImages[imageType];
         if (file) return <div className="mt-2"><img src={URL.createObjectURL(file)} alt="Preview" className="img-thumbnail" style={{ maxHeight: '100px' }} /><div className="text-muted small">New upload</div></div>;
         if (selImg) return <div className="mt-2"><img src={getImageUrl(selImg.imageUrl)} alt="Selected" className="img-thumbnail" style={{ maxHeight: '100px' }} /><div className="text-muted small">From gallery</div></div>;
         return null;
-    };
-
-    const ImageSelectionModal = ({ show, onClose, onSelect, title, galleryMode = false }) => {
-        if (!show) return null;
-        return (
-            <Modal show={show} onHide={onClose} size="xl" scrollable centered>
-                <Modal.Header closeButton><Modal.Title>{title}</Modal.Title></Modal.Header>
-                <Modal.Body>
-                    <div className="card mb-4">
-                        <div className="card-header">
-                            <Button variant="link text-decoration-none" onClick={() => setShowUploadSection(!showUploadSection)}>
-                                {showUploadSection ? '▲' : '▼'} Upload New Image
-                            </Button>
-                        </div>
-                        {showUploadSection && (
-                            <div className="card-body">
-                                <Row>
-                                    <Col md={6}>
-                                        <Form.Group className="mb-3">
-                                            <Form.Label>Select Image</Form.Label>
-                                            <Form.Control type="file" accept="image/*" onChange={e => setUploadFile(e.target.files[0])} />
-                                            {uploadFile && (
-                                                <div className="mt-2">
-                                                    <img src={URL.createObjectURL(uploadFile)} alt="Upload Preview" className="img-thumbnail" style={{ maxHeight: '100px' }} />
-                                                    <div className="text-muted small">Ready to upload: {uploadFile.name}</div>
-                                                </div>
-                                            )}
-                                        </Form.Group>
-                                    </Col>
-                                    <Col md={4}><Form.Group className="mb-3"><Form.Label>Album (Optional)</Form.Label><Form.Select value={uploadAlbumId} onChange={e => setUploadAlbumId(e.target.value)}><option value="">Select Album</option>{albums.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}</Form.Select></Form.Group></Col>
-                                    <Col md={2} className="d-flex align-items-end"><Button className="w-100" onClick={handleUploadImage} disabled={uploading || !uploadFile}>{uploading ? 'Uploading...' : 'Upload'}</Button></Col>
-                                </Row>
-                            </div>
-                        )}
-                    </div>
-                    <Row className="mb-3">
-                        <Col md={6}><Form.Group><Form.Label>Filter Images</Form.Label><Form.Select value={selectedAlbum} onChange={handleAlbumChange}><option value="all">All Images ({photos.length})</option><optgroup label="By Source">{['article', 'blog', 'news', 'photo', 'other'].map(s => <option key={s} value={s}>{getSourceLabel(s)} ({photos.filter(p => p.source === s).length})</option>)}</optgroup><optgroup label="By Album">{albums.map(a => <option key={a.id} value={a.id}>{a.name} ({photos.filter(p => p.albumId === a.id || p.albumId?.toString() === a.id.toString()).length})</option>)}</optgroup></Form.Select></Form.Group></Col>
-                        <Col md={6}><Form.Group><Form.Label>Search Images</Form.Label><Form.Control placeholder="Search by filename, caption..." value={imageSearch} onChange={e => setImageSearch(e.target.value)} /></Form.Group></Col>
-                    </Row>
-                    <div className="mb-3"><small className="text-muted">Showing {searchedPhotos.length} of {photos.length} images</small></div>
-                    <Row className="g-2">
-                        {searchedPhotos.length === 0 ? <div className="text-center text-muted py-4">No images found</div> : searchedPhotos.map(photo => (
-                            <Col md={3} key={photo.id}>
-                                <Card className="h-100 cursor-pointer" onClick={() => { if (galleryMode) { handleGalleryImageSelect(photo); } else onSelect(photo); }} style={{ cursor: 'pointer' }}>
-                                    <div className="position-relative">
-                                        <Card.Img src={getImageUrl(photo.imageUrl)} style={{ height: '150px', objectFit: 'cover' }} />
-                                        <Badge bg="dark" className="position-absolute top-0 end-0 m-1">{getSourceLabel(photo.source)}</Badge>
-                                    </div>
-                                    <Card.Body className="p-2"><small className="d-block text-truncate">{photo.caption || photo.filename}</small></Card.Body>
-                                </Card>
-                            </Col>
-                        ))}
-                    </Row>
-                </Modal.Body>
-                <Modal.Footer><Button variant="secondary" onClick={onClose}>Close</Button></Modal.Footer>
-            </Modal>
-        );
     };
 
     return (
@@ -486,9 +380,9 @@ const PhotoNewsCreate = () => {
                                 </div>
 
                                 {galleryItems.map((item, index) => (
-                                    <div key={index} className="mb-4 border" style={{ backgroundColor: '#fff', borderRadius: '8px', overflow: 'hidden' }}>
+                                    <div key={index} className="mb-4 border" style={{ backgroundColor: 'var(--admin-card-bg, #fff)', borderColor: 'var(--admin-card-border, #dee2e6)', borderRadius: '8px', overflow: 'hidden' }}>
                                         {/* Header */}
-                                        <div className="d-flex align-items-center justify-content-between p-2" style={{ borderBottom: '1px solid #dee2e6', backgroundColor: '#f8f9fa' }}>
+                                        <div className="d-flex align-items-center justify-content-between p-2" style={{ borderBottom: '1px solid var(--admin-card-border, #dee2e6)', backgroundColor: 'var(--admin-modal-header-bg, #f8f9fa)' }}>
                                             <div className="d-flex align-items-center cursor-pointer" onClick={() => toggleGalleryExpand(index)}>
                                                 {expandedGalleryItems[index] ? <MdExpandLess size={20} className="me-2 text-primary" /> : <MdExpandMore size={20} className="me-2 text-primary" />}
                                                 <span className="fw-semibold text-dark">Gallery images {index + 1}</span>
@@ -506,7 +400,7 @@ const PhotoNewsCreate = () => {
                                                 {/* Image Selection Block */}
                                                 <div className="mb-4">
                                                     <Form.Label className="small fw-bold text-secondary text-uppercase">Image <span className="text-danger">*</span></Form.Label>
-                                                    <div className="d-flex align-items-center gap-3 p-2 rounded border" style={{ backgroundColor: '#fdfdfd' }}>
+                                                    <div className="d-flex align-items-center gap-3 p-2 rounded border" style={{ backgroundColor: 'var(--admin-table-row-hover, #fdfdfd)', borderColor: 'var(--admin-card-border, #dee2e6)' }}>
                                                         <div className="rounded border overflow-hidden bg-light d-flex align-items-center justify-content-center shadow-sm" style={{ width: '100px', height: '60px' }}>
                                                             {item.imageUrl ? (
                                                                 <img src={getImageUrl(item.imageUrl)} alt="Gallery" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -657,10 +551,10 @@ const PhotoNewsCreate = () => {
                 </Row>
             </Form>
 
-            <ImageSelectionModal show={showImageModal.editor} onClose={closeImageModal} onSelect={handleEditorImageSelect} title="Select Image for Editor" />
-            <ImageSelectionModal show={showImageModal.thumbImage} onClose={closeImageModal} onSelect={handleImageSelect} title="Select Thumbnail Image" />
-            <ImageSelectionModal show={showImageModal.metaImage} onClose={closeImageModal} onSelect={handleImageSelect} title="Select Meta Image" />
-            <ImageSelectionModal show={showImageModal.gallery} onClose={closeImageModal} onSelect={handleGalleryImageSelect} title="Select Gallery Image" galleryMode={true} />
+            <MediaPickerModal show={showImageModal.editor} onClose={closeImageModal} onSelect={handleEditorImageSelect} title="Select Image for Editor" />
+            <MediaPickerModal show={showImageModal.thumbImage} onClose={closeImageModal} onSelect={handleImageSelect} title="Select Thumbnail Image" />
+            <MediaPickerModal show={showImageModal.metaImage} onClose={closeImageModal} onSelect={handleImageSelect} title="Select Meta Image" />
+            <MediaPickerModal show={showImageModal.gallery} onClose={closeImageModal} onSelect={handleGalleryImageSelect} title="Select Gallery Image" />
             <ImageFormatModal show={showFormatModal} onHide={() => setShowFormatModal(false)} onConfirm={handleFormatConfirm} photo={photoToFormat} />
         </Container>
     );

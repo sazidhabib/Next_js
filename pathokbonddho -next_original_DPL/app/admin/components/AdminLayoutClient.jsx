@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/app/providers/AuthProvider';
+import ThemeToggle from '@/app/components/ThemeToggle';
 
 export default function AdminLayoutClient({ children, user }) {
     const { loading, logout } = useAuth();
@@ -114,10 +115,21 @@ export default function AdminLayoutClient({ children, user }) {
                         <span>Control Center</span>
                     </Link>
 
-                    <div className="navbar-nav ms-auto">
+                    <div className="navbar-nav ms-auto d-flex align-items-center gap-2 gap-sm-3">
+                        <ThemeToggle size="sm" />
+                        <Link
+                            href="/"
+                            target="_blank"
+                            className="btn btn-link nav-link px-2 text-white-50 border-0 hover:text-white d-flex align-items-center gap-2"
+                            style={{ textDecoration: 'none', fontSize: '0.875rem' }}
+                            title="Open live website in new tab"
+                        >
+                            <i className="fas fa-external-link-alt text-teal-400"></i>
+                            <span className="d-none d-sm-inline">Live Portal</span>
+                        </Link>
                         <div className="nav-item text-nowrap">
                             <button
-                                className="btn btn-link nav-link px-3 text-white-50 border-0 hover:text-white d-flex align-items-center gap-2"
+                                className="btn btn-link nav-link px-2 px-sm-3 text-white-50 border-0 hover:text-white d-flex align-items-center gap-2"
                                 onClick={handleLogout}
                                 style={{ textDecoration: 'none', fontSize: '0.875rem' }}
                             >
@@ -375,7 +387,7 @@ export default function AdminLayoutClient({ children, user }) {
                     </ul>
                 </aside>
 
-                <main className="flex-grow-1" style={{ minWidth: 0, backgroundColor: '#f8fafc' }}>
+                <main className="flex-grow-1 admin-main-content" style={{ minWidth: 0 }}>
                     <div className="p-4" style={{ minHeight: 'calc(100vh - 56px)' }}>
                         {children}
                     </div>
