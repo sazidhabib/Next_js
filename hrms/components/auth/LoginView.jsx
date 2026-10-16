@@ -20,7 +20,16 @@ export default function LoginView({ settings: propSettings }) {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [activeSettings, setActiveSettings] = useState(propSettings || null);
+  const [activeSettings, setActiveSettings] = useState(() => {
+    if (propSettings && propSettings.appName) return propSettings;
+    if (typeof window !== 'undefined') {
+      try {
+        const cached = localStorage.getItem('hrms_public_settings');
+        if (cached) return JSON.parse(cached);
+      } catch (e) {}
+    }
+    return propSettings || null;
+  });
 
   useEffect(() => {
     if (propSettings) {

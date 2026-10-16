@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { initDb, Setting } from '@/lib/db/models/index';
+import { invalidateServerSettingsCache } from '@/lib/serverSettings';
 
 const DEFAULT_SETTINGS = {
   appName: 'HRMS Pro',
@@ -49,6 +50,8 @@ export async function PUT(request) {
     } else {
       await setting.update(body);
     }
+
+    invalidateServerSettingsCache();
 
     return NextResponse.json({
       success: true,

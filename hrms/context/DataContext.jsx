@@ -5,7 +5,7 @@ import { useAuth } from './AuthContext';
 
 const DataContext = createContext(null);
 
-export function DataProvider({ children }) {
+export function DataProvider({ children, initialSettings }) {
   const { isAuthenticated } = useAuth();
   const [stats, setStats] = useState(null);
   const [alerts, setAlerts] = useState({ immigration: [], rtw: [] });
@@ -16,6 +16,14 @@ export function DataProvider({ children }) {
   const [theme, setTheme] = useState('light');
 
   const [settings, setSettings] = useState(() => {
+    if (initialSettings && typeof initialSettings === 'object' && initialSettings.appName) {
+      if (typeof window !== 'undefined') {
+        try {
+          localStorage.setItem('hrms_public_settings', JSON.stringify(initialSettings));
+        } catch (e) {}
+      }
+      return initialSettings;
+    }
     if (typeof window !== 'undefined') {
       try {
         const cached = localStorage.getItem('hrms_public_settings');
@@ -35,6 +43,12 @@ export function DataProvider({ children }) {
       rtwWarningDays: 30,
     };
   });
+
+  useEffect(() => {
+    if (initialSettings && initialSettings.appName) {
+      setSettings((prev) => ({ ...prev, ...initialSettings }));
+    }
+  }, [initialSettings]);
 
   // Always fetch public system settings on initial mount so login page and brand elements reflect current system data
   const refreshSettings = useCallback(async () => {
@@ -57,6 +71,15 @@ export function DataProvider({ children }) {
   useEffect(() => {
     refreshSettings();
   }, [refreshSettings]);
+
+  // Keep cached public settings synchronized whenever settings change
+  useEffect(() => {
+    if (settings && typeof window !== 'undefined') {
+      try {
+        localStorage.setItem('hrms_public_settings', JSON.stringify(settings));
+      } catch (e) {}
+    }
+  }, [settings]);
 
   // Theme synchronization
   useEffect(() => {

@@ -4,10 +4,10 @@ import React from 'react';
 import { AuthProvider } from '@/context/AuthContext';
 import { DataProvider } from '@/context/DataContext';
 
-export default function AppProviders({ children }) {
+export default function AppProviders({ children, initialSettings }) {
   return (
     <AuthProvider>
-      <DataProvider>{children}</DataProvider>
+      <DataProvider initialSettings={initialSettings}>{children}</DataProvider>
     </AuthProvider>
   );
 }

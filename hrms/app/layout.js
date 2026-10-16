@@ -2,6 +2,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import AppProviders from "@/components/providers/AppProviders";
 import AppShell from "@/components/layout/AppShell";
+import { getServerSettings } from "@/lib/serverSettings";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -18,7 +19,8 @@ export const metadata = {
   description: "Modern Human Resource Management System with automated Right to Work (RTW) and Immigration Visa compliance tracking.",
 };
 
-export default function RootLayout({ children }) {
+export default async function RootLayout({ children }) {
+  const initialSettings = await getServerSettings();
   return (
     <html
       lang="en"
@@ -45,7 +47,7 @@ export default function RootLayout({ children }) {
         />
       </head>
       <body className="min-h-full flex flex-col font-sans bg-zinc-100 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100">
-        <AppProviders>
+        <AppProviders initialSettings={initialSettings}>
           <AppShell>{children}</AppShell>
         </AppProviders>
       </body>

@@ -96,9 +96,44 @@ export default function Sidebar({
     }
   };
 
-  const appName = settings?.appName || 'HRMS Pro';
-  const appSubtitle = settings?.appSubtitle || 'Enterprise Compliance';
-  const appLogo = settings?.appLogo;
+  const appName =
+    settings?.appName ||
+    (typeof window !== 'undefined'
+      ? (() => {
+          try {
+            const cached = localStorage.getItem('hrms_public_settings');
+            return cached ? JSON.parse(cached)?.appName : 'HRMS Pro';
+          } catch (e) {
+            return 'HRMS Pro';
+          }
+        })()
+      : 'HRMS Pro');
+
+  const appSubtitle =
+    settings?.appSubtitle ||
+    (typeof window !== 'undefined'
+      ? (() => {
+          try {
+            const cached = localStorage.getItem('hrms_public_settings');
+            return cached ? JSON.parse(cached)?.appSubtitle : 'Enterprise Compliance';
+          } catch (e) {
+            return 'Enterprise Compliance';
+          }
+        })()
+      : 'Enterprise Compliance');
+
+  const appLogo =
+    settings?.appLogo ||
+    (typeof window !== 'undefined'
+      ? (() => {
+          try {
+            const cached = localStorage.getItem('hrms_public_settings');
+            return cached ? JSON.parse(cached)?.appLogo : '';
+          } catch (e) {
+            return '';
+          }
+        })()
+      : '');
 
   const sidebarContent = (
     <div className="flex flex-col h-full bg-slate-900 text-slate-100 border-r border-slate-800 select-none shadow-2xl">
