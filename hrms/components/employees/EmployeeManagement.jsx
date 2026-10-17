@@ -55,6 +55,7 @@ export default function EmployeeManagement({ departments, onEmployeeUpdated }) {
     endDate: '',
     salary: '',
     weeklyHours: '37.5',
+    holidayAllowance: '28.0',
     isSponsoredWorker: false,
     emergencyContact: '',
     nextOfKin: '',
@@ -121,6 +122,7 @@ export default function EmployeeManagement({ departments, onEmployeeUpdated }) {
       endDate: emp.endDate || '',
       salary: emp.salary || '',
       weeklyHours: emp.weeklyHours || '37.5',
+      holidayAllowance: emp.holidayAllowance != null ? String(emp.holidayAllowance) : '28.0',
       isSponsoredWorker: Boolean(emp.isSponsoredWorker),
       emergencyContact: emp.emergencyContact || '',
       nextOfKin: emp.nextOfKin || '',
@@ -395,7 +397,13 @@ export default function EmployeeManagement({ departments, onEmployeeUpdated }) {
                           <p className="font-semibold text-zinc-900 dark:text-zinc-100">
                             £{Number(emp.salary || 0).toLocaleString()}
                           </p>
-                          <p className="text-[11px] text-zinc-500">{emp.weeklyHours || 37.5} hrs/wk</p>
+                          <div className="flex items-center space-x-1.5 text-[11px] text-zinc-500">
+                            <span>{emp.weeklyHours || 37.5} hrs/wk</span>
+                            <span>•</span>
+                            <span className="text-emerald-600 dark:text-emerald-400 font-medium">
+                              {emp.holidayAllowance ?? 28}d holiday
+                            </span>
+                          </div>
                         </td>
 
                         <td className="px-3 sm:px-4 py-3.5 sm:py-4">
@@ -717,7 +725,7 @@ export default function EmployeeManagement({ departments, onEmployeeUpdated }) {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
                   <div>
                     <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-1">
                       Salary (£ / Annual)
@@ -740,6 +748,20 @@ export default function EmployeeManagement({ departments, onEmployeeUpdated }) {
                       step="0.5"
                       value={formData.weeklyHours}
                       onChange={(e) => setFormData({ ...formData, weeklyHours: e.target.value })}
+                      className="w-full px-3 py-2 rounded-xl text-xs sm:text-sm bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 font-semibold"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-1">
+                      Holiday Allowance (Days)
+                    </label>
+                    <input
+                      type="number"
+                      step="0.5"
+                      min="0"
+                      placeholder="28"
+                      value={formData.holidayAllowance}
+                      onChange={(e) => setFormData({ ...formData, holidayAllowance: e.target.value })}
                       className="w-full px-3 py-2 rounded-xl text-xs sm:text-sm bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 font-semibold"
                     />
                   </div>

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import {
   User,
@@ -26,6 +26,7 @@ export default function EmployeeDashboardView({ onNavigate }) {
   const { user } = useAuth();
   const [employeeData, setEmployeeData] = useState(null);
   const [leaves, setLeaves] = useState([]);
+  const [allOrgLeaves, setAllOrgLeaves] = useState([]);
   const [immigrationRecord, setImmigrationRecord] = useState(null);
   const [rtwRecord, setRtwRecord] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -62,10 +63,10 @@ export default function EmployeeDashboardView({ onNavigate }) {
 
       if (leaveRes.ok) {
         const d = await leaveRes.json();
-        if (d.success && Array.isArray(d.leaves)) {
-          const myLeaves = d.leaves.filter((l) => l.employeeId === employeeId || l.employee_id === employeeId);
-          setLeaves(myLeaves);
-        }
+        const list = d.leaveRequests || d.leaves || [];
+        setAllOrgLeaves(list);
+        const myLeaves = list.filter((l) => String(l.employeeId) === String(employeeId) || String(l.employee_id) === String(employeeId));
+        setLeaves(myLeaves);
       }
 
       if (immRes.ok) {
@@ -94,9 +95,64 @@ export default function EmployeeDashboardView({ onNavigate }) {
     fetchEmployeeData();
   }, [employeeId]);
 
+  // Live Check for concurrent leave conflicts in employee portal (max 2 approved leaves)
+  const modalConflict = useMemo(() => {
+    if (!newLeave.startDate || !newLeave.endDate) {
+      return { isBlocked: false, count: 0, conflictingEmployees: [] };
+    }
+
+    const targetStart = new Date(newLeave.startDate);
+    const targetEnd = new Date(newLeave.endDate);
+    if (isNaN(targetStart.getTime()) || isNaN(targetEnd.getTime())) {
+      return { isBlocked: false, count: 0, conflictingEmployees: [] };
+    }
+
+    const approvedLeaves = allOrgLeaves.filter((l) => {
+      if (String(l.employeeId) === String(employeeId) || String(l.employee_id) === String(employeeId)) return false;
+      const st = (l.status || '').toUpperCase();
+      if (st !== 'APPROVED') return false;
+      if (!l.startDate || !l.endDate) return false;
+
+      const lStart = new Date(l.startDate);
+      const lEnd = new Date(l.endDate);
+      return targetStart <= lEnd && targetEnd >= lStart;
+    });
+
+    const empMap = new Map();
+    approvedLeaves.forEach((l) => {
+      const empId = String(l.employeeId || l.employee_id);
+      if (!empMap.has(empId)) {
+        const emp = l.employee;
+        empMap.set(empId, {
+          ...l,
+          employeeName: emp ? `${emp.firstName} ${emp.lastName}` : `Employee #${empId}`,
+        });
+      }
+    });
+
+    const conflictingList = Array.from(empMap.values());
+    return {
+      isBlocked: conflictingList.length >= 2,
+      count: conflictingList.length,
+      conflictingEmployees: conflictingList,
+    };
+  }, [newLeave.startDate, newLeave.endDate, allOrgLeaves, employeeId]);
+
   const handleApplyLeave = async (e) => {
     e.preventDefault();
     if (!employeeId) return;
+
+    if (!newLeave.startDate || !newLeave.endDate) {
+      alert('Please select both start and end date');
+      return;
+    }
+
+    if (modalConflict.isBlocked) {
+      alert(
+        `Leave Booking Blocked:\n2 employees already have approved leave during this date period (${newLeave.startDate} to ${newLeave.endDate}). Maximum 2 concurrent employees allowed. Please choose a different date range.`
+      );
+      return;
+    }
 
     try {
       setIsSubmittingLeave(true);
@@ -115,7 +171,7 @@ export default function EmployeeDashboardView({ onNavigate }) {
         setNewLeave({ leaveType: 'ANNUAL', startDate: '', endDate: '', reason: '' });
         fetchEmployeeData();
       } else {
-        alert(data.message || 'Failed to submit leave request');
+        alert(data.error || data.message || 'Failed to submit leave request');
       }
     } catch (err) {
       alert('Error: ' + err.message);
@@ -125,7 +181,7 @@ export default function EmployeeDashboardView({ onNavigate }) {
   };
 
   // Leave calculations
-  const totalEntitlement = 28;
+  const totalEntitlement = parseFloat(employee?.holidayAllowance) || 28;
   const approvedLeaves = leaves.filter((l) => l.status === 'APPROVED');
   const usedDays = approvedLeaves.reduce((acc, curr) => acc + (parseFloat(curr.totalDays) || 0), 0);
   const remainingDays = Math.max(0, totalEntitlement - usedDays);
@@ -479,7 +535,11 @@ export default function EmployeeDashboardView({ onNavigate }) {
                     required
                     value={newLeave.startDate}
                     onChange={(e) => setNewLeave({ ...newLeave, startDate: e.target.value })}
-                    className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 rounded-xl px-3 py-2 text-sm text-zinc-900 dark:text-zinc-100"
+                    className={`w-full bg-zinc-50 dark:bg-zinc-800 border rounded-xl px-3 py-2 text-sm text-zinc-900 dark:text-zinc-100 transition ${
+                      modalConflict.isBlocked
+                        ? 'border-rose-500 focus:ring-2 focus:ring-rose-500'
+                        : 'border-zinc-300 dark:border-zinc-700'
+                    }`}
                   />
                 </div>
                 <div>
@@ -491,10 +551,37 @@ export default function EmployeeDashboardView({ onNavigate }) {
                     required
                     value={newLeave.endDate}
                     onChange={(e) => setNewLeave({ ...newLeave, endDate: e.target.value })}
-                    className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 rounded-xl px-3 py-2 text-sm text-zinc-900 dark:text-zinc-100"
+                    className={`w-full bg-zinc-50 dark:bg-zinc-800 border rounded-xl px-3 py-2 text-sm text-zinc-900 dark:text-zinc-100 transition ${
+                      modalConflict.isBlocked
+                        ? 'border-rose-500 focus:ring-2 focus:ring-rose-500'
+                        : 'border-zinc-300 dark:border-zinc-700'
+                    }`}
                   />
                 </div>
               </div>
+
+              {/* Conflict warning in Employee Modal */}
+              {modalConflict.isBlocked && (
+                <div className="p-3.5 rounded-2xl bg-rose-50 dark:bg-rose-950/60 border border-rose-300 dark:border-rose-800 text-rose-900 dark:text-rose-100 space-y-2 text-xs">
+                  <div className="flex items-center space-x-1.5 font-bold text-rose-700 dark:text-rose-300">
+                    <XCircle className="w-4 h-4 text-rose-600 shrink-0" />
+                    <span>Booking Not Allowed (Capacity Limit)</span>
+                  </div>
+                  <p className="text-[11px] leading-relaxed">
+                    2 employees already have approved leave booked for this date period. The system limit allows a maximum of 2 concurrent employees off at the same time.
+                  </p>
+                  <div className="text-[11px] font-mono text-rose-600 dark:text-rose-400">
+                    * Please select another date period for your request.
+                  </div>
+                </div>
+              )}
+
+              {modalConflict.count === 1 && (
+                <div className="p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-amber-900 dark:text-amber-100 text-xs flex items-center space-x-2">
+                  <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
+                  <span>Notice: 1 colleague already has approved leave during these dates (1 slot left).</span>
+                </div>
+              )}
 
               <div>
                 <label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-1 block">
@@ -519,10 +606,21 @@ export default function EmployeeDashboardView({ onNavigate }) {
                 </button>
                 <button
                   type="submit"
-                  disabled={isSubmittingLeave}
-                  className="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold shadow-md transition disabled:opacity-50"
+                  disabled={isSubmittingLeave || modalConflict.isBlocked}
+                  className={`px-5 py-2 rounded-xl text-sm font-bold shadow-md transition flex items-center space-x-1.5 ${
+                    modalConflict.isBlocked
+                      ? 'bg-zinc-300 dark:bg-zinc-800 text-zinc-500 cursor-not-allowed border border-zinc-300 dark:border-zinc-700'
+                      : 'bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50'
+                  }`}
                 >
-                  {isSubmittingLeave ? 'Submitting...' : 'Submit Request'}
+                  {modalConflict.isBlocked ? (
+                    <>
+                      <XCircle className="w-4 h-4 text-rose-500" />
+                      <span>Booking Blocked (Max 2 Off)</span>
+                    </>
+                  ) : (
+                    <span>{isSubmittingLeave ? 'Submitting...' : 'Submit Request'}</span>
+                  )}
                 </button>
               </div>
             </form>

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   CalendarDays,
   CheckCircle,
@@ -14,6 +14,13 @@ import {
   Edit,
   CheckCircle2,
   Calendar,
+  Palmtree,
+  PieChart,
+  AlertCircle,
+  TrendingDown,
+  Building2,
+  Search,
+  Check,
 } from 'lucide-react';
 import { Badge, Card } from '../ui';
 
@@ -33,8 +40,10 @@ export default function LeaveManagement({ employees = [], onUpdated }) {
   const [leaves, setLeaves] = useState([]);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [activeSubTab, setActiveSubTab] = useState('requests'); // 'requests' | 'add' | 'edit'
+  const [activeSubTab, setActiveSubTab] = useState('requests'); // 'requests' | 'balances' | 'add' | 'edit'
   const [statusFilter, setStatusFilter] = useState('');
+  const [balanceSearch, setBalanceSearch] = useState('');
+  const [balanceDeptFilter, setBalanceDeptFilter] = useState('');
   const [editingLeave, setEditingLeave] = useState(null);
 
   const calculateDays = (start, end) => {
@@ -94,9 +103,63 @@ export default function LeaveManagement({ employees = [], onUpdated }) {
     fetchUsers();
   }, [statusFilter]);
 
-  const openAddTab = () => {
+  // Helper to calculate Allowance, Used, and Remaining for any employee
+  const getEmployeeHolidayStats = (employeeId, employeeAllowance) => {
+    const emp = employees.find((e) => String(e.id) === String(employeeId));
+    const allowance = parseFloat(employeeAllowance ?? emp?.holidayAllowance ?? 28);
+
+    // Sum all approved annual leave days for this employee
+    const approvedLeaves = leaves.filter((l) => {
+      const matchEmp = String(l.employeeId) === String(employeeId);
+      const isApproved = (l.status || '').toUpperCase() === 'APPROVED';
+      const isAnnual = (l.leaveType || '').toUpperCase().includes('ANNUAL');
+      return matchEmp && isApproved && isAnnual;
+    });
+
+    const used = approvedLeaves.reduce(
+      (sum, curr) => sum + (parseFloat(curr.totalDays || curr.days) || 0),
+      0
+    );
+    const remaining = Math.max(0, allowance - used);
+
+    // Pending annual leaves
+    const pendingLeaves = leaves.filter((l) => {
+      const matchEmp = String(l.employeeId) === String(employeeId);
+      const isPending = (l.status || '').toUpperCase() === 'PENDING';
+      const isAnnual = (l.leaveType || '').toUpperCase().includes('ANNUAL');
+      return matchEmp && isPending && isAnnual;
+    });
+    const pendingDays = pendingLeaves.reduce(
+      (sum, curr) => sum + (parseFloat(curr.totalDays || curr.days) || 0),
+      0
+    );
+
+    const percentUsed = allowance > 0 ? Math.min(100, Math.round((used / allowance) * 100)) : 0;
+
+    return { allowance, used, remaining, pendingDays, pendingCount: pendingLeaves.length, percentUsed };
+  };
+
+  // Aggregate stats across all employees
+  const aggregateStats = useMemo(() => {
+    let totalAllowance = 0;
+    let totalUsed = 0;
+    let totalRemaining = 0;
+    let lowBalanceCount = 0;
+
+    employees.forEach((emp) => {
+      const { allowance, used, remaining } = getEmployeeHolidayStats(emp.id, emp.holidayAllowance);
+      totalAllowance += allowance;
+      totalUsed += used;
+      totalRemaining += remaining;
+      if (remaining <= 5) lowBalanceCount += 1;
+    });
+
+    return { totalAllowance, totalUsed, totalRemaining, lowBalanceCount };
+  }, [employees, leaves]);
+
+  const openAddTab = (preselectedEmpId = '') => {
     setEditingLeave(null);
-    const defaultEmp = employees?.[0]?.id || '';
+    const defaultEmp = preselectedEmpId || employees?.[0]?.id || '';
     const today = new Date().toISOString().split('T')[0];
     const defaultApprover = users?.[0]?.name || 'Bishnu Hari';
 
@@ -139,6 +202,15 @@ export default function LeaveManagement({ employees = [], onUpdated }) {
 
   const handleSave = async (e) => {
     e.preventDefault();
+    if (dateConflicts.isBlocked) {
+      alert(
+        `Booking Blocked: 2 employees already have approved leave during this date period (${form.startDate} to ${form.endDate}):\n` +
+        dateConflicts.conflictingEmployees.map((c) => `• ${c.employeeName} (${c.startDate} to ${c.endDate})`).join('\n') +
+        '\n\nMaximum 2 concurrent employees allowed. A 3rd leave cannot be booked for these dates.'
+      );
+      return;
+    }
+
     try {
       const isEdit = activeSubTab === 'edit' && editingLeave;
       const url = isEdit ? `/api/leave/${editingLeave.id}` : '/api/leave';
@@ -168,7 +240,7 @@ export default function LeaveManagement({ employees = [], onUpdated }) {
         fetchLeaves();
         if (onUpdated) onUpdated();
       } else {
-        alert('Error: ' + data.error);
+        alert('Error: ' + (data.error || 'Operation failed'));
       }
     } catch (err) {
       alert('Submit failed: ' + err.message);
@@ -176,6 +248,40 @@ export default function LeaveManagement({ employees = [], onUpdated }) {
   };
 
   const handleQuickStatus = async (id, status) => {
+    if ((status || '').toUpperCase() === 'APPROVED') {
+      const targetLeave = leaves.find((l) => String(l.id) === String(id));
+      if (targetLeave) {
+        const tStart = new Date(targetLeave.startDate);
+        const tEnd = new Date(targetLeave.endDate);
+        const approvedConflicts = leaves.filter((l) => {
+          if (String(l.id) === String(id)) return false;
+          if (String(l.employeeId) === String(targetLeave.employeeId)) return false;
+          if ((l.status || '').toUpperCase() !== 'APPROVED') return false;
+          if (!l.startDate || !l.endDate) return false;
+          const lStart = new Date(l.startDate);
+          const lEnd = new Date(l.endDate);
+          return tStart <= lEnd && tEnd >= lStart;
+        });
+
+        const distinctMap = new Map();
+        approvedConflicts.forEach((l) => {
+          const empId = String(l.employeeId);
+          if (!distinctMap.has(empId)) {
+            const emp = employees.find((e) => String(e.id) === empId) || l.employee;
+            distinctMap.set(empId, emp ? `${emp.firstName} ${emp.lastName}` : `Employee #${empId}`);
+          }
+        });
+
+        if (distinctMap.size >= 2) {
+          const names = Array.from(distinctMap.values()).join(', ');
+          alert(
+            `Approval Blocked!\n\n2 employees already have approved leave during this date period (${targetLeave.startDate} to ${targetLeave.endDate}):\n• ${names}\n\nMaximum 2 concurrent employees allowed per date period.`
+          );
+          return;
+        }
+      }
+    }
+
     try {
       const res = await fetch(`/api/leave/${id}`, {
         method: 'PUT',
@@ -186,9 +292,11 @@ export default function LeaveManagement({ employees = [], onUpdated }) {
       if (data.success) {
         fetchLeaves();
         if (onUpdated) onUpdated();
+      } else {
+        alert('Status update failed: ' + (data.error || 'Unknown error'));
       }
     } catch (err) {
-      alert('Status update failed');
+      alert('Status update failed: ' + err.message);
     }
   };
 
@@ -208,6 +316,80 @@ export default function LeaveManagement({ employees = [], onUpdated }) {
 
   const pendingCount = leaves.filter((l) => (l.status || '').toUpperCase() === 'PENDING').length;
 
+  // Selected employee stats for Add/Edit Form live calculation
+  const currentFormEmpStats = form.employeeId
+    ? getEmployeeHolidayStats(form.employeeId)
+    : null;
+
+  // Live Concurrent Leave Conflict Detection (Max 2 Approved Employees during same date frame)
+  const dateConflicts = useMemo(() => {
+    if (!form.startDate || !form.endDate) {
+      return { isBlocked: false, count: 0, conflictingEmployees: [] };
+    }
+
+    const targetStart = new Date(form.startDate);
+    const targetEnd = new Date(form.endDate);
+
+    if (isNaN(targetStart.getTime()) || isNaN(targetEnd.getTime())) {
+      return { isBlocked: false, count: 0, conflictingEmployees: [] };
+    }
+
+    const approvedLeaves = leaves.filter((l) => {
+      // Exclude current request if editing
+      if (form.id && String(l.id) === String(form.id)) return false;
+      // Exclude same employee
+      if (form.employeeId && String(l.employeeId) === String(form.employeeId)) return false;
+      // Only Approved leaves count toward capacity
+      const st = (l.status || '').toUpperCase();
+      if (st !== 'APPROVED') return false;
+
+      if (!l.startDate || !l.endDate) return false;
+      const lStart = new Date(l.startDate);
+      const lEnd = new Date(l.endDate);
+      return targetStart <= lEnd && targetEnd >= lStart;
+    });
+
+    const empMap = new Map();
+    approvedLeaves.forEach((l) => {
+      const empId = String(l.employeeId);
+      if (!empMap.has(empId)) {
+        const emp = employees.find((e) => String(e.id) === empId) || l.employee;
+        empMap.set(empId, {
+          ...l,
+          employeeName: emp ? `${emp.firstName} ${emp.lastName}` : (l.employee ? `${l.employee.firstName} ${l.employee.lastName}` : `Employee #${empId}`),
+          employeeCode: emp?.employeeCode || '',
+          department: emp?.department?.name || '',
+        });
+      }
+    });
+
+    const conflictingList = Array.from(empMap.values());
+    return {
+      isBlocked: conflictingList.length >= 2,
+      count: conflictingList.length,
+      conflictingEmployees: conflictingList,
+    };
+  }, [form.startDate, form.endDate, form.employeeId, form.id, leaves, employees]);
+
+  // Filtered employees for Balances tab
+  const filteredEmployeesForBalances = useMemo(() => {
+    return employees.filter((emp) => {
+      const query = balanceSearch.toLowerCase().trim();
+      const matchSearch =
+        !query ||
+        `${emp.firstName} ${emp.lastName}`.toLowerCase().includes(query) ||
+        (emp.employeeCode || '').toLowerCase().includes(query) ||
+        (emp.jobTitle || '').toLowerCase().includes(query);
+
+      const matchDept =
+        !balanceDeptFilter ||
+        String(emp.departmentId) === String(balanceDeptFilter) ||
+        emp.department?.name === balanceDeptFilter;
+
+      return matchSearch && matchDept;
+    });
+  }, [employees, balanceSearch, balanceDeptFilter]);
+
   return (
     <div className="space-y-4">
       {/* Module Navigation Card with System Style Sub-Tabs */}
@@ -216,10 +398,10 @@ export default function LeaveManagement({ employees = [], onUpdated }) {
           <div>
             <h2 className="text-base sm:text-lg font-bold text-zinc-900 dark:text-zinc-100 flex items-center space-x-2">
               <CalendarDays className="w-5 h-5 text-blue-600" />
-              <span>Leave & Absence Management</span>
+              <span>Leave & Holiday Tracking</span>
             </h2>
             <p className="text-xs text-zinc-500 mt-0.5">
-              Submit and approve statutory leaves, annual holidays, sick leaves and manager sign-offs
+              Monitor Holiday Allowance, Used, and Remaining balances for every employee and approve statutory leaves
             </p>
           </div>
         </div>
@@ -237,11 +419,29 @@ export default function LeaveManagement({ employees = [], onUpdated }) {
           >
             <FileText className="w-4 h-4" />
             <span>Leave Requests</span>
+            {pendingCount > 0 && (
+              <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-amber-400 text-zinc-900 font-bold ml-1">
+                {pendingCount}
+              </span>
+            )}
           </button>
 
           <button
             type="button"
-            onClick={openAddTab}
+            onClick={() => setActiveSubTab('balances')}
+            className={`px-4 py-2 rounded-xl text-xs font-semibold transition flex items-center space-x-2 ${
+              activeSubTab === 'balances'
+                ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20'
+                : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700'
+            }`}
+          >
+            <Palmtree className="w-4 h-4 text-emerald-500" />
+            <span>Holiday Balances ({employees.length})</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => openAddTab()}
             className={`px-4 py-2 rounded-xl text-xs font-semibold transition flex items-center space-x-2 ${
               activeSubTab === 'add'
                 ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20'
@@ -296,10 +496,10 @@ export default function LeaveManagement({ employees = [], onUpdated }) {
           </div>
 
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs sm:text-sm min-w-[700px]">
+            <table className="w-full text-left text-xs sm:text-sm min-w-[750px]">
               <thead className="bg-zinc-50 dark:bg-zinc-800/80 text-zinc-600 dark:text-zinc-400 font-semibold text-[11px] sm:text-xs uppercase tracking-wider border-b border-zinc-200 dark:border-zinc-800">
                 <tr>
-                  <th className="px-3 sm:px-4 py-3">Employee</th>
+                  <th className="px-3 sm:px-4 py-3">Employee & Balances</th>
                   <th className="px-3 sm:px-4 py-3">Leave Type</th>
                   <th className="px-3 sm:px-4 py-3">Duration & Dates</th>
                   <th className="px-3 sm:px-4 py-3">Days</th>
@@ -319,15 +519,36 @@ export default function LeaveManagement({ employees = [], onUpdated }) {
                 ) : (
                   leaves.map((l) => {
                     const st = (l.status || 'Pending').toUpperCase();
+                    const stats = getEmployeeHolidayStats(l.employeeId, l.employee?.holidayAllowance);
+
                     return (
                       <tr key={l.id} className="hover:bg-zinc-50/80 dark:hover:bg-zinc-800/40 transition">
                         <td className="px-3 sm:px-4 py-3">
-                          <div className="font-bold text-zinc-900 dark:text-zinc-100 text-xs truncate max-w-[140px]">
+                          <div className="font-bold text-zinc-900 dark:text-zinc-100 text-xs truncate max-w-[150px]">
                             {l.employee?.firstName} {l.employee?.lastName}
                           </div>
-                          <span className="text-[10px] text-zinc-400 font-mono">
+                          <span className="text-[10px] text-zinc-400 font-mono block">
                             {l.employee?.employeeCode || `EMP-${l.employeeId}`}
                           </span>
+                          {/* Live 3 Holiday Fields Preview per Row */}
+                          <div className="mt-1 flex items-center space-x-1.5 text-[10px] font-mono">
+                            <span className="px-1.5 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400" title="Holiday Allowance">
+                              Allw: {stats.allowance}d
+                            </span>
+                            <span className="px-1.5 py-0.5 rounded bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-400 font-semibold" title="Holiday Used">
+                              Used: {stats.used}d
+                            </span>
+                            <span
+                              className={`px-1.5 py-0.5 rounded font-bold ${
+                                stats.remaining <= 5
+                                  ? 'bg-rose-50 text-rose-700 dark:bg-rose-950/60 dark:text-rose-400'
+                                  : 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400'
+                              }`}
+                              title="Holiday Remaining"
+                            >
+                              Rem: {stats.remaining}d
+                            </span>
+                          </div>
                         </td>
 
                         <td className="px-3 sm:px-4 py-3 text-xs font-semibold">
@@ -408,7 +629,230 @@ export default function LeaveManagement({ employees = [], onUpdated }) {
         </Card>
       )}
 
-      {/* Sub-Tab 2 & 3: Create / Edit Leave Request Form */}
+      {/* Sub-Tab 2: Holiday Balances Overview Table for Every Employee */}
+      {activeSubTab === 'balances' && (
+        <div className="space-y-4">
+          {/* Organization Holiday Balances KPI Cards */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+            <div className="p-4 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-xs">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs font-semibold text-zinc-500">Total Org Allowance</span>
+                <div className="p-2 rounded-xl bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400">
+                  <Palmtree className="w-4 h-4" />
+                </div>
+              </div>
+              <div className="text-xl sm:text-2xl font-black text-zinc-900 dark:text-zinc-100">
+                {aggregateStats.totalAllowance} <span className="text-xs font-normal text-zinc-500">days</span>
+              </div>
+              <p className="text-[11px] text-zinc-400 mt-1">Across {employees.length} employees</p>
+            </div>
+
+            <div className="p-4 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-xs">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs font-semibold text-zinc-500">Total Holidays Used</span>
+                <div className="p-2 rounded-xl bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400">
+                  <Clock className="w-4 h-4" />
+                </div>
+              </div>
+              <div className="text-xl sm:text-2xl font-black text-amber-600 dark:text-amber-400">
+                {aggregateStats.totalUsed} <span className="text-xs font-normal text-zinc-500">days</span>
+              </div>
+              <p className="text-[11px] text-zinc-400 mt-1">Approved holiday bookings</p>
+            </div>
+
+            <div className="p-4 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-xs">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs font-semibold text-zinc-500">Total Remaining</span>
+                <div className="p-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400">
+                  <Calendar className="w-4 h-4" />
+                </div>
+              </div>
+              <div className="text-xl sm:text-2xl font-black text-emerald-600 dark:text-emerald-400">
+                {aggregateStats.totalRemaining} <span className="text-xs font-normal text-zinc-500">days</span>
+              </div>
+              <p className="text-[11px] text-zinc-400 mt-1">Available company entitlement</p>
+            </div>
+
+            <div className="p-4 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-xs">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs font-semibold text-zinc-500">Low Balance Staff</span>
+                <div className="p-2 rounded-xl bg-rose-50 dark:bg-rose-950/50 text-rose-600 dark:text-rose-400">
+                  <AlertCircle className="w-4 h-4" />
+                </div>
+              </div>
+              <div className="text-xl sm:text-2xl font-black text-zinc-900 dark:text-zinc-100">
+                {aggregateStats.lowBalanceCount} <span className="text-xs font-normal text-zinc-500">staff</span>
+              </div>
+              <p className="text-[11px] text-zinc-400 mt-1">≤ 5 days remaining</p>
+            </div>
+          </div>
+
+          {/* Master Employee Holiday Table */}
+          <Card>
+            <div className="mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="flex-1 flex items-center space-x-2">
+                <div className="relative flex-1 max-w-sm">
+                  <Search className="w-3.5 h-3.5 text-zinc-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    placeholder="Search employee by name, ID or role..."
+                    value={balanceSearch}
+                    onChange={(e) => setBalanceSearch(e.target.value)}
+                    className="w-full pl-9 pr-3 py-1.5 rounded-xl text-xs bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              </div>
+
+              <div className="text-xs text-zinc-500">
+                Showing {filteredEmployeesForBalances.length} of {employees.length} employees
+              </div>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs sm:text-sm min-w-[750px]">
+                <thead className="bg-zinc-50 dark:bg-zinc-800/80 text-zinc-600 dark:text-zinc-400 font-semibold text-[11px] sm:text-xs uppercase tracking-wider border-b border-zinc-200 dark:border-zinc-800">
+                  <tr>
+                    <th className="px-4 py-3.5">Employee</th>
+                    <th className="px-4 py-3.5">Department & Role</th>
+                    <th className="px-4 py-3.5 text-center font-bold">Holiday Allowance</th>
+                    <th className="px-4 py-3.5 text-center font-bold text-amber-600 dark:text-amber-400">
+                      Holiday Used
+                    </th>
+                    <th className="px-4 py-3.5 text-center font-bold text-emerald-600 dark:text-emerald-400">
+                      Holiday Remaining
+                    </th>
+                    <th className="px-4 py-3.5">Allowance Usage</th>
+                    <th className="px-4 py-3.5 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800/80">
+                  {filteredEmployeesForBalances.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} className="text-center py-10 text-zinc-500 text-xs">
+                        No employees found matching filter.
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredEmployeesForBalances.map((emp) => {
+                      const { allowance, used, remaining, pendingDays, pendingCount: pCount, percentUsed } =
+                        getEmployeeHolidayStats(emp.id, emp.holidayAllowance);
+
+                      return (
+                        <tr key={emp.id} className="hover:bg-zinc-50/80 dark:hover:bg-zinc-800/40 transition">
+                          <td className="px-4 py-3.5">
+                            <div className="flex items-center space-x-3">
+                              <img
+                                src={
+                                  emp.photoUrl ||
+                                  `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                                    emp.firstName + ' ' + emp.lastName
+                                  )}&background=0D8ABC&color=fff`
+                                }
+                                alt={emp.firstName}
+                                className="w-8 h-8 rounded-full object-cover border border-zinc-200 dark:border-zinc-700 shrink-0"
+                              />
+                              <div className="min-w-0">
+                                <div className="font-bold text-zinc-900 dark:text-zinc-100 text-xs truncate">
+                                  {emp.firstName} {emp.lastName}
+                                </div>
+                                <span className="font-mono text-[10px] text-zinc-400">
+                                  {emp.employeeCode || `EMP-${emp.id}`}
+                                </span>
+                              </div>
+                            </div>
+                          </td>
+
+                          <td className="px-4 py-3.5">
+                            <div className="text-xs font-medium text-zinc-800 dark:text-zinc-200">
+                              {emp.jobTitle || 'Staff Member'}
+                            </div>
+                            <div className="text-[11px] text-zinc-500 flex items-center space-x-1">
+                              <Building2 className="w-3 h-3" />
+                              <span>{emp.department?.name || 'General'}</span>
+                            </div>
+                          </td>
+
+                          {/* 1. Holiday Allowance */}
+                          <td className="px-4 py-3.5 text-center">
+                            <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-black bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 font-mono">
+                              {allowance} days
+                            </span>
+                          </td>
+
+                          {/* 2. Holiday Used */}
+                          <td className="px-4 py-3.5 text-center">
+                            <div>
+                              <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-black bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400 font-mono">
+                                {used} days
+                              </span>
+                              {pCount > 0 && (
+                                <p className="text-[10px] text-amber-600 dark:text-amber-400 font-mono mt-0.5">
+                                  +{pendingDays}d pending
+                                </p>
+                              )}
+                            </div>
+                          </td>
+
+                          {/* 3. Holiday Remaining */}
+                          <td className="px-4 py-3.5 text-center">
+                            <span
+                              className={`inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-black font-mono shadow-2xs ${
+                                remaining <= 5
+                                  ? 'bg-rose-100 text-rose-800 dark:bg-rose-950/80 dark:text-rose-300'
+                                  : remaining <= 12
+                                  ? 'bg-amber-100 text-amber-800 dark:bg-amber-950/80 dark:text-amber-300'
+                                  : 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-300'
+                              }`}
+                            >
+                              {remaining} days
+                            </span>
+                          </td>
+
+                          {/* Usage Progress Bar */}
+                          <td className="px-4 py-3.5 min-w-[140px]">
+                            <div className="space-y-1">
+                              <div className="flex items-center justify-between text-[10px] font-mono text-zinc-500">
+                                <span>{percentUsed}% taken</span>
+                                <span>{remaining}d left</span>
+                              </div>
+                              <div className="w-full bg-zinc-100 dark:bg-zinc-800 h-2 rounded-full overflow-hidden">
+                                <div
+                                  className={`h-full rounded-full transition-all duration-500 ${
+                                    percentUsed >= 85
+                                      ? 'bg-rose-500'
+                                      : percentUsed >= 50
+                                      ? 'bg-amber-500'
+                                      : 'bg-emerald-500'
+                                  }`}
+                                  style={{ width: `${percentUsed}%` }}
+                                />
+                              </div>
+                            </div>
+                          </td>
+
+                          {/* Quick Action */}
+                          <td className="px-4 py-3.5 text-right">
+                            <button
+                              type="button"
+                              onClick={() => openAddTab(emp.id)}
+                              className="px-3 py-1.5 rounded-xl text-xs font-bold bg-blue-50 text-blue-700 hover:bg-blue-100 dark:bg-blue-950/60 dark:text-blue-300 transition shadow-2xs flex items-center space-x-1 ml-auto"
+                            >
+                              <Plus className="w-3.5 h-3.5" />
+                              <span>Book Leave</span>
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </Card>
+        </div>
+      )}
+
+      {/* Sub-Tab 3 & 4: Create / Edit Leave Request Form */}
       {(activeSubTab === 'add' || activeSubTab === 'edit') && (
         <Card>
           <div className="border-b border-zinc-100 dark:border-zinc-800 pb-3 mb-5">
@@ -435,11 +879,62 @@ export default function LeaveManagement({ employees = [], onUpdated }) {
                 <option value="">Select Employee</option>
                 {employees?.map((emp) => (
                   <option key={emp.id} value={emp.id}>
-                    {emp.firstName} {emp.lastName} ({emp.employeeCode || `ID-${emp.id}`})
+                    {emp.firstName} {emp.lastName} ({emp.employeeCode || `ID-${emp.id}`}) — Allw: {emp.holidayAllowance ?? 28}d
                   </option>
                 ))}
               </select>
             </div>
+
+            {/* Live Holiday Balance Card for Selected Employee */}
+            {currentFormEmpStats && (
+              <div className="p-3.5 rounded-xl bg-blue-50/70 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800/60 space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <span className="font-semibold text-zinc-800 dark:text-zinc-200 text-xs flex items-center space-x-1.5">
+                    <CalendarDays className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                    <span>Employee Holiday Balance Tracker</span>
+                  </span>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300">
+                    Annual Entitlement
+                  </span>
+                </div>
+                <div className="grid grid-cols-3 gap-2 text-center">
+                  <div className="p-2.5 rounded-xl bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 shadow-2xs">
+                    <p className="text-[10px] text-zinc-500 uppercase font-semibold">Holiday Allowance</p>
+                    <p className="text-sm font-black text-zinc-900 dark:text-zinc-100 mt-0.5">
+                      {currentFormEmpStats.allowance} days
+                    </p>
+                  </div>
+                  <div className="p-2.5 rounded-xl bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 shadow-2xs">
+                    <p className="text-[10px] text-zinc-500 uppercase font-semibold">Holiday Used</p>
+                    <p className="text-sm font-black text-amber-600 dark:text-amber-400 mt-0.5">
+                      {currentFormEmpStats.used} days
+                    </p>
+                  </div>
+                  <div className="p-2.5 rounded-xl bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 shadow-2xs">
+                    <p className="text-[10px] text-zinc-500 uppercase font-semibold">Holiday Remaining</p>
+                    <p
+                      className={`text-sm font-black mt-0.5 ${
+                        currentFormEmpStats.remaining <= 5
+                          ? 'text-rose-600 dark:text-rose-400'
+                          : 'text-emerald-600 dark:text-emerald-400'
+                      }`}
+                    >
+                      {currentFormEmpStats.remaining} days
+                    </p>
+                  </div>
+                </div>
+
+                {parseFloat(form.days) > currentFormEmpStats.remaining &&
+                  (form.leaveType || '').toLowerCase().includes('annual') && (
+                    <div className="flex items-center space-x-1.5 text-rose-600 dark:text-rose-400 text-[11px] font-medium pt-0.5 bg-rose-50 dark:bg-rose-950/50 p-2 rounded-lg border border-rose-200 dark:border-rose-900">
+                      <AlertCircle className="w-4 h-4 shrink-0" />
+                      <span>
+                        Notice: Requested booking ({form.days} days) exceeds remaining allowance ({currentFormEmpStats.remaining} days).
+                      </span>
+                    </div>
+                  )}
+              </div>
+            )}
 
             {/* Leave Type */}
             <div>
@@ -471,7 +966,11 @@ export default function LeaveManagement({ employees = [], onUpdated }) {
                   required
                   value={form.startDate}
                   onChange={(e) => handleDateChange('startDate', e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                  className={`w-full px-3.5 py-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-800 border text-zinc-900 dark:text-zinc-100 focus:outline-none transition ${
+                    dateConflicts.isBlocked
+                      ? 'border-rose-500 focus:ring-2 focus:ring-rose-500'
+                      : 'border-zinc-200 dark:border-zinc-700 focus:ring-2 focus:ring-blue-500'
+                  }`}
                 />
               </div>
 
@@ -484,10 +983,63 @@ export default function LeaveManagement({ employees = [], onUpdated }) {
                   required
                   value={form.endDate}
                   onChange={(e) => handleDateChange('endDate', e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                  className={`w-full px-3.5 py-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-800 border text-zinc-900 dark:text-zinc-100 focus:outline-none transition ${
+                    dateConflicts.isBlocked
+                      ? 'border-rose-500 focus:ring-2 focus:ring-rose-500'
+                      : 'border-zinc-200 dark:border-zinc-700 focus:ring-2 focus:ring-blue-500'
+                  }`}
                 />
               </div>
             </div>
+
+            {/* Concurrent Leave Overlap Warning & Hard Blocking Alert */}
+            {dateConflicts.isBlocked && (
+              <div className="p-4 rounded-2xl bg-rose-50 dark:bg-rose-950/60 border-2 border-rose-300 dark:border-rose-800 text-rose-900 dark:text-rose-100 space-y-2.5 animate-in fade-in">
+                <div className="flex items-center space-x-2 text-rose-700 dark:text-rose-300 font-bold text-xs">
+                  <XCircle className="w-5 h-5 text-rose-600 dark:text-rose-400 shrink-0" />
+                  <span className="text-sm">Leave Booking Blocked (Maximum 2 Employees Reached)</span>
+                </div>
+                <p className="text-xs text-rose-800 dark:text-rose-200 leading-relaxed">
+                  You cannot add a 3rd employee leave for this date period. The system rule requires that no more than <strong>2 employees</strong> have approved leave during the same date period.
+                </p>
+                <div className="p-3 bg-white/80 dark:bg-zinc-900/80 rounded-xl border border-rose-200 dark:border-rose-900 space-y-1.5">
+                  <div className="text-[11px] font-semibold text-rose-700 dark:text-rose-300 uppercase tracking-wider">
+                    Already Approved Employees for this period:
+                  </div>
+                  {dateConflicts.conflictingEmployees.map((conf) => (
+                    <div key={conf.id} className="flex items-center justify-between text-xs py-1 border-b last:border-b-0 border-rose-100 dark:border-zinc-800">
+                      <div className="flex items-center space-x-2">
+                        <span className="w-2 h-2 rounded-full bg-rose-500"></span>
+                        <span className="font-bold text-zinc-900 dark:text-zinc-100">{conf.employeeName}</span>
+                        {conf.employeeCode && (
+                          <span className="text-[10px] text-zinc-500">({conf.employeeCode})</span>
+                        )}
+                        {conf.department && (
+                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400">
+                            {conf.department}
+                          </span>
+                        )}
+                      </div>
+                      <div className="font-mono text-[11px] font-medium text-rose-700 dark:text-rose-300">
+                        {conf.startDate} to {conf.endDate}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="text-[11px] text-rose-600 dark:text-rose-400 italic">
+                  * Please choose different dates for this employee.
+                </div>
+              </div>
+            )}
+
+            {dateConflicts.count === 1 && (
+              <div className="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 text-amber-900 dark:text-amber-100 flex items-start space-x-2.5 text-xs">
+                <AlertCircle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                <div>
+                  <span className="font-bold">1 Concurrent Booking Notice:</span> {dateConflicts.conflictingEmployees[0].employeeName} is already on approved leave for overlapping dates ({dateConflicts.conflictingEmployees[0].startDate} to {dateConflicts.conflictingEmployees[0].endDate}). <strong>1 slot remaining</strong> before concurrency lock.
+                </div>
+              </div>
+            )}
 
             {/* Days */}
             <div>
@@ -575,10 +1127,24 @@ export default function LeaveManagement({ employees = [], onUpdated }) {
               </button>
               <button
                 type="submit"
-                className="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md shadow-emerald-600/20 transition flex items-center space-x-2"
+                disabled={dateConflicts.isBlocked}
+                className={`px-6 py-2.5 rounded-xl font-bold text-xs transition flex items-center space-x-2 ${
+                  dateConflicts.isBlocked
+                    ? 'bg-zinc-200 dark:bg-zinc-800 text-zinc-400 dark:text-zinc-500 cursor-not-allowed border border-zinc-300 dark:border-zinc-700'
+                    : 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-md shadow-emerald-600/20'
+                }`}
               >
-                <CheckCircle2 className="w-4 h-4" />
-                <span>{activeSubTab === 'edit' ? 'Update Leave' : 'Request Leave'}</span>
+                {dateConflicts.isBlocked ? (
+                  <>
+                    <XCircle className="w-4 h-4 text-rose-500" />
+                    <span>Booking Blocked (Max 2 Reached)</span>
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle2 className="w-4 h-4" />
+                    <span>{activeSubTab === 'edit' ? 'Update Leave' : 'Request Leave'}</span>
+                  </>
+                )}
               </button>
             </div>
           </form>

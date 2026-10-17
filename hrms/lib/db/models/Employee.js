@@ -103,6 +103,12 @@ const Employee = sequelize.define('Employee', {
     defaultValue: 37.5,
     field: 'weekly_hours',
   },
+  holidayAllowance: {
+    type: DataTypes.DECIMAL(4, 1),
+    allowNull: false,
+    defaultValue: 28.0,
+    field: 'holiday_allowance',
+  },
   isSponsoredWorker: {
     type: DataTypes.BOOLEAN,
     allowNull: false,

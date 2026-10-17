@@ -70,6 +70,13 @@ export async function initDb() {
       // Ignored for non-MySQL or if already applied
     }
 
+    // Ensure employees.holiday_allowance column exists in existing database tables
+    try {
+      await sequelize.query('ALTER TABLE employees ADD COLUMN holiday_allowance DECIMAL(4, 1) DEFAULT 28.0;');
+    } catch {
+      // Ignored if column already exists
+    }
+
     isInitialized = true;
     global._hrmsDbInitialized = true;
   } catch (error) {
