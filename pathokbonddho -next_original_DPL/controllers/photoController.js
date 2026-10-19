@@ -1,11 +1,8 @@
 const fs = require('fs');
 const path = require('path');
 const { Op } = require('sequelize');
-const Photo = require('../models/photo');
-const Album = require('../models/album');
-const ImageRegistry = require('../models/imageRegistry');
+const { Photo, Album, ImageRegistry, News } = require('../models');
 const ImageService = require('../services/imageService');
-const News = require('../models/news-model');
 
 // NEW: Get all images from all sources
 exports.getAllImages = async (req, res, next) => {

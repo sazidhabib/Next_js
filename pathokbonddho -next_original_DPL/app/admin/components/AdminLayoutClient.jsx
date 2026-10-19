@@ -177,7 +177,7 @@ export default function AdminLayoutClient({ children, user }) {
                             {user?.username ? user.username[0].toUpperCase() : 'A'}
                         </div>
                         <div className="overflow-hidden">
-                            <h6 className="mb-0 text-white text-truncate font-semibold" style={{ fontSize: '0.875rem' }}>{user?.username || 'Admin User'}</h6>
+                            <h6 className="mb-0 text-white text-truncate font-semibold" style={{ fontSize: '0.875rem', color: '#ffffff' }}>{user?.username || 'Admin User'}</h6>
                             <span className="text-uppercase text-teal-400 font-bold" style={{ fontSize: '0.65rem', letterSpacing: '0.05em' }}>{user?.role || 'Administrator'}</span>
                         </div>
                     </div>

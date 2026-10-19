@@ -4,6 +4,11 @@ import Ad from '@/lib/models/ad-model';
 export async function GET(req, { params }) {
     try {
         const { id } = await params;
+
+        if (id === 'position') {
+            return NextResponse.json([], { status: 200 });
+        }
+
         const ad = await Ad.findByPk(id);
 
         if (!ad) {

@@ -3,10 +3,9 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Modal, Button, Form, Row, Col, Card, Badge, Spinner, InputGroup } from 'react-bootstrap';
 import { toast } from 'react-toastify';
-import api, { STATIC_URL } from '@/app/lib/api';
+import api, { STATIC_URL, sanitizeImageUrl } from '@/app/lib/api';
 
-const IMG_BASE = STATIC_URL || 'http://localhost:5000';
-const getImageUrl = (url) => (!url || url.startsWith('http')) ? url : `${IMG_BASE}/${url.replace(/^\/+/, '')}`;
+const getImageUrl = (url) => sanitizeImageUrl(url) || url;
 
 const getSourceLabel = (source) => {
     switch (source) {

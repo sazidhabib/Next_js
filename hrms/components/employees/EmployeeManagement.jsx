@@ -18,13 +18,33 @@ import {
   Save,
   Filter,
   Download,
+  RefreshCw,
 } from 'lucide-react';
 import { Badge, Card } from '../ui';
 import MediaPickerModal from '../media/MediaPickerModal';
 
+export const generateNextEmployeeCode = (existingEmployees = []) => {
+  let maxNum = 0;
+  existingEmployees.forEach((emp) => {
+    if (!emp) return;
+    const code = emp.employeeCode || '';
+    const match = code.match(/EMP-(\d+)/i) || code.match(/(\d+)/);
+    if (match) {
+      const num = parseInt(match[1], 10);
+      if (!isNaN(num) && num > maxNum) {
+        maxNum = num;
+      }
+    } else if (emp.id && !isNaN(emp.id) && emp.id > maxNum) {
+      maxNum = emp.id;
+    }
+  });
+  return `EMP-${String(maxNum + 1).padStart(3, '0')}`;
+};
+
 export default function EmployeeManagement({ departments, onEmployeeUpdated }) {
   const [activeSubTab, setActiveSubTab] = useState('list'); // 'list' | 'add' | 'edit'
   const [employees, setEmployees] = useState([]);
+  const [serverNextCode, setServerNextCode] = useState('');
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [deptFilter, setDeptFilter] = useState('');
@@ -77,6 +97,9 @@ export default function EmployeeManagement({ departments, onEmployeeUpdated }) {
       const data = await res.json();
       if (data.success) {
         setEmployees(data.employees);
+        if (data.nextEmployeeCode) {
+          setServerNextCode(data.nextEmployeeCode);
+        }
       }
     } catch (err) {
       console.error('Error fetching employees:', err);
@@ -89,13 +112,27 @@ export default function EmployeeManagement({ departments, onEmployeeUpdated }) {
     fetchEmployees();
   }, [deptFilter, statusFilter]);
 
+  // Keep Add form employee code populated if opened
+  useEffect(() => {
+    if (activeSubTab === 'add' && !selectedEmployee && !formData.employeeCode) {
+      const code = serverNextCode || generateNextEmployeeCode(employees);
+      if (code) {
+        setFormData((prev) => ({ ...prev, employeeCode: code }));
+      }
+    }
+  }, [activeSubTab, employees, serverNextCode, selectedEmployee, formData.employeeCode]);
+
   const handleSearch = (e) => {
     e.preventDefault();
     fetchEmployees();
   };
 
   const handleOpenAdd = () => {
-    setFormData(initialFormState);
+    const code = serverNextCode || generateNextEmployeeCode(employees);
+    setFormData({
+      ...initialFormState,
+      employeeCode: code,
+    });
     setSelectedEmployee(null);
     setActiveSubTab('add');
   };
@@ -683,16 +720,36 @@ export default function EmployeeManagement({ departments, onEmployeeUpdated }) {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 items-center">
                   <div>
-                    <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-1">
-                      Employee ID / Code
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="Auto (e.g. EMP-005)"
-                      value={formData.employeeCode}
-                      onChange={(e) => setFormData({ ...formData, employeeCode: e.target.value })}
-                      className="w-full px-3 py-2 rounded-xl text-xs sm:text-sm bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 font-mono font-bold"
-                    />
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                        Employee ID / Code
+                      </label>
+                      <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-blue-50 text-blue-600 dark:bg-blue-900/40 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
+                        {activeSubTab === 'edit' ? 'Employee Code' : 'Auto Generated'}
+                      </span>
+                    </div>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        placeholder="Auto (e.g. EMP-005)"
+                        value={formData.employeeCode}
+                        onChange={(e) => setFormData({ ...formData, employeeCode: e.target.value })}
+                        className="w-full pl-3 pr-8 py-2 rounded-xl text-xs sm:text-sm bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 font-mono font-bold text-zinc-900 dark:text-zinc-100 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                      />
+                      {activeSubTab === 'add' && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const code = generateNextEmployeeCode(employees);
+                            setFormData((prev) => ({ ...prev, employeeCode: code }));
+                          }}
+                          title="Regenerate next employee code"
+                          className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-zinc-400 hover:text-blue-600 transition"
+                        >
+                          <RefreshCw className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                    </div>
                   </div>
 
                   {/* Photo Box Preview with Media Library / Upload Button */}

@@ -85,13 +85,11 @@ html.dark {
 .admin-workspace-bg {
   background-color: var(--admin-bg) !important;
   color: var(--admin-text-main);
-  transition: background-color 0.25s ease, color 0.25s ease;
 }
 
 .admin-main-content {
   background-color: var(--admin-bg) !important;
   color: var(--admin-text-main);
-  transition: background-color 0.25s ease, color 0.25s ease;
 }
 
 /* Scrollbar Customization */
@@ -116,13 +114,26 @@ html.dark {
 }
 
 /* Text & Heading Adaptations in Admin */
-.admin-workspace-bg h1,
-.admin-workspace-bg h2,
-.admin-workspace-bg h3,
-.admin-workspace-bg h4,
-.admin-workspace-bg h5,
-.admin-workspace-bg h6 {
+.admin-main-content h1,
+.admin-main-content h2,
+.admin-main-content h3,
+.admin-main-content h4,
+.admin-main-content h5,
+.admin-main-content h6 {
   color: var(--admin-text-main) !important;
+}
+
+/* Ensure Admin Sidebar and Navbar elements always stay white on their dark background in day & night modes */
+.admin-sidebar,
+.admin-sidebar h1,
+.admin-sidebar h2,
+.admin-sidebar h3,
+.admin-sidebar h4,
+.admin-sidebar h5,
+.admin-sidebar h6,
+.admin-sidebar .text-white,
+header.navbar .text-white {
+  color: #ffffff !important;
 }
 
 html.dark .text-slate-800,
@@ -192,7 +203,7 @@ html.dark .bg-emerald-50, [data-bs-theme="dark"] .bg-emerald-50 {
   box-shadow: var(--admin-card-shadow) !important;
   background-color: var(--admin-card-bg) !important;
   color: var(--admin-text-main) !important;
-  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease !important;
 }
 
 .card-header {
@@ -251,11 +262,11 @@ html.dark .bg-emerald-50, [data-bs-theme="dark"] .bg-emerald-50 {
 
 .table tbody tr {
   background-color: var(--admin-table-bg) !important;
-  transition: background-color 0.2s ease, color 0.2s ease !important;
 }
 
 .table tbody tr:hover {
   background-color: var(--admin-table-row-hover) !important;
+  transition: background-color 0.15s ease;
 }
 
 .table td {
@@ -282,18 +293,26 @@ html.dark .bg-emerald-50, [data-bs-theme="dark"] .bg-emerald-50 {
 /* ==========================================
    Forms & Controls
    ========================================== */
-.form-control, .form-select {
+.form-control, 
+.form-select,
+.admin-workspace-bg input:not(.form-check-input):not([type="checkbox"]):not([type="radio"]):not([type="button"]):not([type="submit"]):not([type="reset"]),
+.admin-workspace-bg select,
+.admin-workspace-bg textarea {
   border: 1px solid var(--admin-input-border) !important;
   border-radius: 8px !important;
   padding: 10px 14px !important;
   font-size: 0.9rem !important;
   color: var(--admin-input-color) !important;
-  transition: all 0.2s ease !important;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out !important;
   box-shadow: none !important;
   background-color: var(--admin-input-bg) !important;
 }
 
-.form-control:focus, .form-select:focus {
+.form-control:focus, 
+.form-select:focus,
+.admin-workspace-bg input:not(.form-check-input):not([type="checkbox"]):not([type="radio"]):not([type="button"]):not([type="submit"]):not([type="reset"]):focus,
+.admin-workspace-bg select:focus,
+.admin-workspace-bg textarea:focus {
   border-color: var(--admin-input-focus-border) !important;
   box-shadow: 0 0 0 4px rgba(13, 148, 136, 0.15) !important;
   outline: none !important;
@@ -326,21 +345,54 @@ select.form-control option {
   background-color: var(--admin-table-header-bg) !important;
   color: var(--admin-text-secondary) !important;
   border-color: var(--admin-input-border) !important;
+  transition: none !important;
 }
 
-/* Form switch toggle redesign */
-.form-check-input {
+/* Form switch and checkbox design */
+.form-check-input,
+.admin-workspace-bg .form-check-input {
   cursor: pointer !important;
+  width: 1.15em !important;
+  height: 1.15em !important;
+  margin-top: 0.15em !important;
+  padding: 0 !important;
   background-color: var(--admin-input-bg) !important;
-  border-color: var(--admin-input-border) !important;
+  border: 1.5px solid var(--admin-input-border) !important;
+  border-radius: 4px !important;
+  box-shadow: none !important;
+  transition: background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out !important;
 }
-.form-check-input:checked {
+
+.form-check-input:checked,
+.admin-workspace-bg .form-check-input:checked {
   background-color: #006a60 !important;
   border-color: #006a60 !important;
 }
-.form-check-input:focus {
-  box-shadow: 0 0 0 4px rgba(0, 106, 96, 0.12) !important;
+
+.form-check-input:checked[type="checkbox"],
+.admin-workspace-bg .form-check-input:checked[type="checkbox"] {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3e%3cpath fill='none' stroke='%23fff' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='m6 10 3 3 6-6'/%3e%3c/svg%3e") !important;
+  background-size: 100% 100% !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+}
+
+.form-check-input:focus,
+.admin-workspace-bg .form-check-input:focus {
+  box-shadow: 0 0 0 3px rgba(0, 106, 96, 0.25) !important;
   border-color: #006a60 !important;
+}
+
+.form-check-input:checked:focus,
+.admin-workspace-bg .form-check-input:checked:focus {
+  background-color: #006a60 !important;
+  border-color: #006a60 !important;
+}
+
+.form-switch .form-check-input,
+.admin-workspace-bg .form-switch .form-check-input {
+  width: 2em !important;
+  border-radius: 2em !important;
 }
 
 /* ==========================================

@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import api from '@/app/lib/api';
+import api, { sanitizeImageUrl } from '@/app/lib/api';
 
 // Swiper imports
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -106,7 +106,11 @@ const Report = () => {
     setSelectedReport(null);
   };
 
-  const fullImageUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000'}/uploads/`;
+  const getReportImageUrl = (imgPath) => {
+    if (!imgPath) return '';
+    if (imgPath.startsWith('http')) return sanitizeImageUrl(imgPath);
+    return sanitizeImageUrl(`uploads/${imgPath.replace(/^\/+/, '')}`);
+  };
 
   useEffect(() => {
     const fetchPublishedReports = async () => {
@@ -165,24 +169,27 @@ const Report = () => {
               992: { slidesPerView: 3 },
             }}
           >
-            {reports.map((report) => (
-              <SwiperSlide key={report._id || report.id}>
-                <ReportCard
-                  title={report.title}
-                  date={report.publishDate}
-                  description={report.description}
-                  image={`${fullImageUrl}${report.image.startsWith("/") ? "" : "/"}${report.image}`}
-                  onClick={() =>
-                    handleOpenModal({
-                      title: report.title,
-                      publishDate: report.publishDate,
-                      description: report.description,
-                      image: `${fullImageUrl}${report.image.startsWith("/") ? "" : "/"}${report.image}`,
-                    })
-                  }
-                />
-              </SwiperSlide>
-            ))}
+            {reports.map((report) => {
+              const img = getReportImageUrl(report.image);
+              return (
+                <SwiperSlide key={report._id || report.id}>
+                  <ReportCard
+                    title={report.title}
+                    date={report.publishDate}
+                    description={report.description}
+                    image={img}
+                    onClick={() =>
+                      handleOpenModal({
+                        title: report.title,
+                        publishDate: report.publishDate,
+                        description: report.description,
+                        image: img,
+                      })
+                    }
+                  />
+                </SwiperSlide>
+              );
+            })}
           </Swiper>
 
 

@@ -24,7 +24,10 @@ export async function GET(request) {
       order: [['checkDate', 'DESC']],
     });
 
-    return NextResponse.json({ success: true, records });
+    const maxId = await RightToWork.max('id');
+    const nextId = (maxId || 0) + 1;
+
+    return NextResponse.json({ success: true, records, nextId });
   } catch (error) {
     console.error('RTW GET error:', error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
@@ -47,6 +50,7 @@ export async function POST(request) {
       nextReviewDate: body.followUpDate || body.nextReviewDate || null,
       followUpDate: body.followUpDate || body.nextReviewDate || null,
     };
+    delete payload.id;
 
     const record = await RightToWork.create(payload);
     const fetched = await RightToWork.findByPk(record.id, {

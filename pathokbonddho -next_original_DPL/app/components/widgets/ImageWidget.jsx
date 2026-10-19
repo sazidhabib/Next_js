@@ -1,12 +1,12 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import api from '@/app/lib/api';
+import api, { sanitizeImageUrl } from '@/app/lib/api';
 import Image from 'next/image';
 
 const ImageWidget = ({ cell, isPriority }) => {
     const [imageData, setImageData] = useState(cell.resolvedContent || null);
     const [loading, setLoading] = useState(!cell.resolvedContent);
-    const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+    const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '/api';
 
     useEffect(() => {
         // Skip fetching if content is already resolved by the server
@@ -36,16 +36,8 @@ const ImageWidget = ({ cell, isPriority }) => {
     if (loading && !imageData) return <div className="h-100 w-100 bg-light animate-pulse"></div>;
 
     const imageUrl = imageData?.imageUrl
-        ? (() => {
-            const rawUrl = imageData.imageUrl.startsWith('http') ? imageData.imageUrl : `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000'}/${imageData.imageUrl.replace(/^\//, '')}`;
-            if (rawUrl.startsWith('http')) {
-                const isLocal = rawUrl.includes('127.0.0.1') || rawUrl.includes('localhost');
-                if (isLocal) return rawUrl;
-                return rawUrl.replace(/^http:\/\//, 'https://');
-            }
-            return rawUrl;
-        })()
-        : (cell.contentId && (cell.contentId.startsWith('http') || cell.contentId.startsWith('/')) ? cell.contentId : null);
+        ? sanitizeImageUrl(imageData.imageUrl)
+        : (cell.contentId && (cell.contentId.startsWith('http') || cell.contentId.startsWith('/')) ? sanitizeImageUrl(cell.contentId) : null);
 
     if (!imageUrl) return null;
 

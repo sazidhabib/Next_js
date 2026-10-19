@@ -26,7 +26,10 @@ export async function GET(request) {
       order: [['expiryDate', 'ASC']],
     });
 
-    return NextResponse.json({ success: true, records });
+    const maxId = await ImmigrationRecord.max('id');
+    const nextId = (maxId || 0) + 1;
+
+    return NextResponse.json({ success: true, records, nextId });
   } catch (error) {
     console.error('Immigration GET error:', error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
@@ -48,6 +51,7 @@ export async function POST(request) {
       sponsorCosNumber: body.sponsorCosNumber || body.cosNumber || null,
       brpOrEvisaNumber: body.brpOrEvisaNumber || body.brpNumber || null,
     };
+    delete payload.id;
 
     const record = await ImmigrationRecord.create(payload);
     const fetched = await ImmigrationRecord.findByPk(record.id, {

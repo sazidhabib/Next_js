@@ -56,7 +56,21 @@ export async function GET(request) {
       order: [['createdAt', 'DESC']],
     });
 
-    return NextResponse.json({ success: true, employees });
+    // Calculate next employee code
+    const allEmps = await Employee.findAll({ attributes: ['employeeCode', 'id'] });
+    let maxNum = 0;
+    for (const emp of allEmps) {
+      const match = emp.employeeCode?.match(/EMP-(\d+)/i) || emp.employeeCode?.match(/(\d+)/);
+      if (match) {
+        const n = parseInt(match[1], 10);
+        if (!isNaN(n) && n > maxNum) maxNum = n;
+      } else if (emp.id && !isNaN(emp.id) && emp.id > maxNum) {
+        maxNum = emp.id;
+      }
+    }
+    const nextEmployeeCode = `EMP-${String(maxNum + 1).padStart(3, '0')}`;
+
+    return NextResponse.json({ success: true, employees, nextEmployeeCode });
   } catch (error) {
     console.error('Employees GET error:', error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
@@ -70,8 +84,18 @@ export async function POST(request) {
 
     // Auto-generate employee code if missing
     if (!body.employeeCode) {
-      const count = await Employee.count();
-      body.employeeCode = `EMP-${String(count + 1).padStart(3, '0')}`;
+      const allEmps = await Employee.findAll({ attributes: ['employeeCode', 'id'] });
+      let maxNum = 0;
+      for (const emp of allEmps) {
+        const match = emp.employeeCode?.match(/EMP-(\d+)/i) || emp.employeeCode?.match(/(\d+)/);
+        if (match) {
+          const n = parseInt(match[1], 10);
+          if (!isNaN(n) && n > maxNum) maxNum = n;
+        } else if (emp.id && !isNaN(emp.id) && emp.id > maxNum) {
+          maxNum = emp.id;
+        }
+      }
+      body.employeeCode = `EMP-${String(maxNum + 1).padStart(3, '0')}`;
     }
 
     const newEmployee = await Employee.create(body);

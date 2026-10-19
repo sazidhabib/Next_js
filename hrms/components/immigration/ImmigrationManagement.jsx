@@ -23,6 +23,7 @@ import MediaPickerModal from '../media/MediaPickerModal';
 
 export default function ImmigrationManagement({ employees = [], visaTypes = [], onUpdated }) {
   const [records, setRecords] = useState([]);
+  const [serverNextId, setServerNextId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [activeSubTab, setActiveSubTab] = useState('records'); // 'records' | 'add' | 'edit'
   const [search, setSearch] = useState('');
@@ -55,6 +56,13 @@ export default function ImmigrationManagement({ employees = [], visaTypes = [], 
 
   const [form, setForm] = useState(initialFormState);
 
+  const getNextRecordId = () => {
+    if (serverNextId) return serverNextId;
+    if (!records || records.length === 0) return 1;
+    const maxId = records.reduce((max, r) => Math.max(max, Number(r.id) || 0), 0);
+    return maxId + 1;
+  };
+
   const fetchRecords = async () => {
     setLoading(true);
     try {
@@ -62,6 +70,9 @@ export default function ImmigrationManagement({ employees = [], visaTypes = [], 
       const data = await res.json();
       if (data.success) {
         setRecords(data.records);
+        if (data.nextId) {
+          setServerNextId(data.nextId);
+        }
       }
     } catch (err) {
       console.error('Fetch immigration error:', err);
@@ -73,6 +84,12 @@ export default function ImmigrationManagement({ employees = [], visaTypes = [], 
   useEffect(() => {
     fetchRecords();
   }, []);
+
+  useEffect(() => {
+    if (activeSubTab === 'add' && !editingRecord && !form.id) {
+      setForm((prev) => ({ ...prev, id: getNextRecordId() }));
+    }
+  }, [activeSubTab, editingRecord, form.id, records, serverNextId]);
 
   const handleSelectEmployee = (empId) => {
     const selectedEmp = employees.find((e) => String(e.id) === String(empId));
@@ -89,9 +106,11 @@ export default function ImmigrationManagement({ employees = [], visaTypes = [], 
     const defaultEmp = employees?.[0]?.id || '';
     const defaultVisa = visaTypes?.[0]?.id || '';
     const today = new Date().toISOString().split('T')[0];
+    const nextId = getNextRecordId();
     
     setForm({
       ...initialFormState,
+      id: nextId,
       employeeId: defaultEmp,
       visaTypeId: defaultVisa,
       lastVerifiedDate: today,
@@ -415,15 +434,20 @@ export default function ImmigrationManagement({ employees = [], visaTypes = [], 
                 {/* Immigration Record ID & Employee ID */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="block font-semibold text-zinc-700 dark:text-zinc-300 mb-1">
-                      Immigration Record Id
-                    </label>
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="block font-semibold text-zinc-700 dark:text-zinc-300">
+                        Immigration Record Id
+                      </label>
+                      <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-blue-50 text-blue-600 dark:bg-blue-900/40 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
+                        {activeSubTab === 'edit' ? 'Record ID' : 'Auto Generated'}
+                      </span>
+                    </div>
                     <input
                       type="text"
                       readOnly
                       placeholder="Auto Generated"
-                      value={form.id ? `#${form.id}` : 'Auto Generated'}
-                      className="w-full px-3 py-2 rounded-xl bg-zinc-100 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700 text-zinc-500 cursor-not-allowed font-mono"
+                      value={form.id ? `#${form.id}` : `#${getNextRecordId()}`}
+                      className="w-full px-3 py-2 rounded-xl bg-zinc-100 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 cursor-not-allowed font-mono font-semibold"
                     />
                   </div>
 

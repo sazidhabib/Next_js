@@ -2,6 +2,7 @@
 import Image from 'next/image';
 import React from 'react';
 import { Modal, Button, Carousel } from 'react-bootstrap';
+import { sanitizeImageUrl } from '@/app/lib/api';
 
 const PhotoModal = ({
     show,
@@ -31,10 +32,10 @@ const PhotoModal = ({
                     nextIcon={<span aria-hidden="true" style={{ color: '#41ad47', fontSize: '2rem' }}>›</span>}
                 >
                     {photos.map((photo) => (
-                        <Carousel.Item key={photo._id}>
+                        <Carousel.Item key={photo._id || photo.id}>
                             <img
                                 className="img-fluid d-block mx-auto"
-                                src={`${''}/${photo.imageUrl}`}
+                                src={sanitizeImageUrl(photo.imageUrl)}
                                 alt=""
                                 style={{
                                     maxHeight: '70vh',

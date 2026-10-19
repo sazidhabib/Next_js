@@ -27,22 +27,26 @@ export const ThemeProvider = ({ children }) => {
   }, []);
 
   const applyTheme = (newTheme) => {
+    if (typeof window === 'undefined') return;
     const root = document.documentElement;
 
     // Temporarily suppress all transitions during theme switch for an instant toggle
-    const disableTransitionStyle = document.createElement('style');
-    disableTransitionStyle.appendChild(
-      document.createTextNode(
-        `*, *::before, *::after {
+    const styleId = 'disable-theme-transitions';
+    let disableTransitionStyle = document.getElementById(styleId);
+    if (!disableTransitionStyle) {
+      disableTransitionStyle = document.createElement('style');
+      disableTransitionStyle.id = styleId;
+      disableTransitionStyle.textContent = `
+        *, *::before, *::after {
           -webkit-transition: none !important;
           -moz-transition: none !important;
           -o-transition: none !important;
           -ms-transition: none !important;
           transition: none !important;
-        }`
-      )
-    );
-    document.head.appendChild(disableTransitionStyle);
+        }
+      `;
+      document.head.appendChild(disableTransitionStyle);
+    }
 
     if (newTheme === 'dark') {
       root.setAttribute('data-bs-theme', 'dark');
@@ -56,9 +60,22 @@ export const ThemeProvider = ({ children }) => {
       root.classList.remove('dark');
     }
 
-    // Force a repaint so styles take effect immediately without transition
-    window.getComputedStyle(root).opacity;
-    document.head.removeChild(disableTransitionStyle);
+    // Force reflow so new theme values take effect immediately
+    if (document.body) {
+      window.getComputedStyle(document.body).opacity;
+    } else {
+      window.getComputedStyle(root).opacity;
+    }
+
+    // Wait until browser renders the frame with the new theme before re-enabling transitions
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        const el = document.getElementById(styleId);
+        if (el && el.parentNode) {
+          el.parentNode.removeChild(el);
+        }
+      });
+    });
   };
 
   const setTheme = (newTheme) => {

@@ -25,8 +25,24 @@ const nextConfig = {
         hostname: 'pathakbondhu.com',
       },
       {
+        protocol: 'https',
+        hostname: 'www.pathakbondhu.com',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.pathakbondhu.com',
+      },
+      {
         protocol: 'http',
         hostname: 'pathakbondhu.com',
+      },
+      {
+        protocol: 'http',
+        hostname: 'www.pathakbondhu.com',
+      },
+      {
+        protocol: 'http',
+        hostname: '*.pathakbondhu.com',
       },
       {
         protocol: 'http',
@@ -49,6 +65,27 @@ const nextConfig = {
     ],
   },
   serverExternalPackages: ['mysql2', 'sequelize', 'bcryptjs'],
+  async rewrites() {
+    const backendUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000';
+    return {
+      beforeFiles: [
+        {
+          source: '/uploads/:path*',
+          destination: `${backendUrl}/uploads/:path*`,
+        },
+        {
+          source: '/images/:path*',
+          destination: `${backendUrl}/images/:path*`,
+        },
+      ],
+      fallback: [
+        {
+          source: '/api/:path*',
+          destination: `${backendUrl}/api/:path*`,
+        },
+      ],
+    };
+  },
 };
 
 export default nextConfig;

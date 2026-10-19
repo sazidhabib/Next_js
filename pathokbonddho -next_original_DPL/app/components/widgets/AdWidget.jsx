@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect, useMemo } from 'react';
-import api from '@/app/lib/api';
+import api, { sanitizeImageUrl } from '@/app/lib/api';
 import { usePathname } from 'next/navigation';
 import NextImage from 'next/image';
 
@@ -131,13 +131,10 @@ const AdWidget = ({ cell, isPriority }) => {
     
     const getFullImgSrc = (imgName) => {
         if (!imgName) return null;
-        const rawUrl = imgName.startsWith('http') ? imgName : `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000'}/uploads/ads/${imgName}`;
-        if (rawUrl.startsWith('http')) {
-            const isLocal = rawUrl.includes('127.0.0.1') || rawUrl.includes('localhost');
-            if (isLocal) return rawUrl;
-            return rawUrl.replace(/^http:\/\//, 'https://');
+        if (imgName.startsWith('http')) {
+            return sanitizeImageUrl(imgName);
         }
-        return rawUrl;
+        return sanitizeImageUrl(`uploads/ads/${imgName}`);
     };
 
     const imgSrc = getFullImgSrc(adImage);

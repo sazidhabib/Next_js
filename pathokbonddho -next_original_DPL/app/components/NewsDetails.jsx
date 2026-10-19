@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import api, { STATIC_URL } from '@/app/lib/api';
+import api, { STATIC_URL, sanitizeImageUrl } from '@/app/lib/api';
 import { Container, Row, Col, Spinner, Alert, Badge } from 'react-bootstrap';
 import Image from 'next/image';
 import { formatBengaliDate } from '@/app/lib/dateUtils';
@@ -96,13 +96,7 @@ const NewsDetails = ({ id, initialData, initialAds }) => {
 
     const getImageUrl = (imagePath) => {
         if (!imagePath) return null;
-        if (imagePath.startsWith('http')) {
-            // Only force https if not on a local environment
-            const isLocal = imagePath.includes('127.0.0.1') || imagePath.includes('localhost');
-            if (isLocal) return imagePath;
-            return imagePath.replace(/^http:\/\//, 'https://');
-        }
-        return `${STATIC_BASE}/${imagePath.replace(/^\//, '')}`;
+        return sanitizeImageUrl(imagePath);
     };
 
     const formatDate = (dateStr) => {
@@ -220,15 +214,7 @@ const NewsDetails = ({ id, initialData, initialAds }) => {
                                             {/* Desktop view */}
                                             <div className="d-none d-md-block" style={{ position: 'relative', height: '120px', width: '100%', maxWidth: '728px', margin: '0 auto' }}>
                                                 <Image
-                                                    src={(() => {
-                                                        const rawUrl = ad.image.startsWith('http') ? ad.image : `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000'}/uploads/ads/${ad.image}`;
-                                                        if (rawUrl.startsWith('http')) {
-                                                            const isLocal = rawUrl.includes('127.0.0.1') || rawUrl.includes('localhost');
-                                                            if (isLocal) return rawUrl;
-                                                            return rawUrl.replace(/^http:\/\//, 'https://');
-                                                        }
-                                                        return rawUrl;
-                                                    })()}
+                                                    src={sanitizeImageUrl(ad.image.startsWith('http') ? ad.image : `uploads/ads/${ad.image}`)}
                                                     alt={ad.name || 'Advertisement'}
                                                     fill
                                                     className="rounded shadow-sm"
@@ -240,15 +226,7 @@ const NewsDetails = ({ id, initialData, initialAds }) => {
                                             {/* Mobile view */}
                                             <div className="d-block d-md-none" style={{ position: 'relative', height: '100px', width: '100%', maxWidth: '480px', margin: '0 auto' }}>
                                                 <Image
-                                                    src={(() => {
-                                                        const rawUrl = ad.mobileImage.startsWith('http') ? ad.mobileImage : `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000'}/uploads/ads/${ad.mobileImage}`;
-                                                        if (rawUrl.startsWith('http')) {
-                                                            const isLocal = rawUrl.includes('127.0.0.1') || rawUrl.includes('localhost');
-                                                            if (isLocal) return rawUrl;
-                                                            return rawUrl.replace(/^http:\/\//, 'https://');
-                                                        }
-                                                        return rawUrl;
-                                                    })()}
+                                                    src={sanitizeImageUrl(ad.mobileImage.startsWith('http') ? ad.mobileImage : `uploads/ads/${ad.mobileImage}`)}
                                                     alt={ad.name || 'Advertisement'}
                                                     fill
                                                     className="rounded shadow-sm"
@@ -261,15 +239,7 @@ const NewsDetails = ({ id, initialData, initialAds }) => {
                                     ) : (
                                         <div style={{ position: 'relative', height: '120px', width: '100%', maxWidth: '728px', margin: '0 auto' }}>
                                             <Image
-                                                src={(() => {
-                                                    const rawUrl = ad.image.startsWith('http') ? ad.image : `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000'}/uploads/ads/${ad.image}`;
-                                                    if (rawUrl.startsWith('http')) {
-                                                        const isLocal = rawUrl.includes('127.0.0.1') || rawUrl.includes('localhost');
-                                                        if (isLocal) return rawUrl;
-                                                        return rawUrl.replace(/^http:\/\//, 'https://');
-                                                    }
-                                                    return rawUrl;
-                                                })()}
+                                                src={sanitizeImageUrl(ad.image.startsWith('http') ? ad.image : `uploads/ads/${ad.image}`)}
                                                 alt={ad.name || 'Advertisement'}
                                                 fill
                                                 className="rounded shadow-sm"
@@ -403,9 +373,9 @@ const NewsDetails = ({ id, initialData, initialAds }) => {
                             if ((isVideo || news.Categories?.some(cat => cat.name === 'ভিডিও' || cat.path === 'video')) && youtubeId) {
                                 return (
                                     <div className="mb-4 no-print">
-                                        <div className="video-responsive rounded shadow-sm overflow-hidden bg-black" style={{ position: 'relative', paddingBottom: '56.25%', height: 0, overflow: 'hidden' }}>
+                                        <div className="video-responsive shadow-sm overflow-hidden bg-black" style={{ position: 'relative', paddingBottom: '56.25%', height: 0, overflow: 'hidden', borderRadius: 0 }}>
                                             <iframe
-                                                style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
+                                                style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', borderRadius: 0 }}
                                                 src={`https://www.youtube.com/embed/${youtubeId}?autoplay=0`}
                                                 title={news.newsHeadline}
                                                 frameBorder="0"
@@ -421,13 +391,14 @@ const NewsDetails = ({ id, initialData, initialAds }) => {
 
                             return leadImageUrl && (
                                 <div className="mb-4">
-                                    <div className="hero-image-wrapper rounded shadow-sm overflow-hidden bg-light" style={{ position: 'relative', width: '100%' }}>
+                                    <div className="hero-image-wrapper shadow-sm overflow-hidden bg-light" style={{ position: 'relative', width: '100%', borderRadius: 0 }}>
                                         <Image
                                             src={leadImageUrl}
                                             alt={news.imageCaption || news.newsHeadline}
                                             width={800}
                                             height={500}
                                             className="w-100 h-auto object-fit-cover"
+                                            style={{ borderRadius: 0 }}
                                             priority={news.newsType !== 'video'} // Only prioritize if not a video post
                                             sizes="(max-width: 800px) 100vw, 800px"
                                         />
@@ -446,6 +417,15 @@ const NewsDetails = ({ id, initialData, initialAds }) => {
                                 .news-main-headline { font-size: 2.5rem; line-height: 1.4; color: #1a1a1a; }
                                 .news-highlight-content { font-size: 1.2rem; line-height: 1.6; font-weight: 500; }
                                 .image-caption { font-size: 1rem !important; }
+
+                                .hero-image-wrapper,
+                                .hero-image-wrapper img,
+                                .video-responsive,
+                                .video-responsive iframe,
+                                .related-news-list .flex-shrink-0,
+                                .related-news-list img {
+                                    border-radius: 0 !important;
+                                }
 
                                 .article-body { color: #333; word-wrap: break-word; line-height: 1.9; font-size: ${fontSize}px !important; }
                                 .article-body p, .article-body div, .article-body span, .article-body li, .article-body blockquote, .article-body section, .article-body article {
@@ -481,6 +461,192 @@ const NewsDetails = ({ id, initialData, initialAds }) => {
                                 .share-btn.fb { background: #3b5998; }
                                 .share-btn.tw { background: #1da1f2; }
                                 .share-btn.wa { background: #25d366; }
+
+                                /* Dark Mode Support */
+                                html.dark .news-details-page,
+                                [data-bs-theme="dark"] .news-details-page,
+                                [data-theme="dark"] .news-details-page {
+                                    background-color: transparent !important;
+                                }
+
+                                html.dark .news-main-headline,
+                                [data-bs-theme="dark"] .news-main-headline,
+                                [data-theme="dark"] .news-main-headline {
+                                    color: #f8fafc !important;
+                                }
+
+                                html.dark .news-highlight-content,
+                                [data-bs-theme="dark"] .news-highlight-content,
+                                [data-theme="dark"] .news-highlight-content {
+                                    color: #cbd5e1 !important;
+                                }
+
+                                html.dark .meta-info-container,
+                                [data-bs-theme="dark"] .meta-info-container,
+                                [data-theme="dark"] .meta-info-container {
+                                    border-color: #334155 !important;
+                                }
+
+                                html.dark .author-info,
+                                [data-bs-theme="dark"] .author-info,
+                                [data-theme="dark"] .author-info {
+                                    color: #e2e8f0 !important;
+                                }
+
+                                html.dark .font-size-controls,
+                                [data-bs-theme="dark"] .font-size-controls,
+                                [data-theme="dark"] .font-size-controls {
+                                    background: #1e293b !important;
+                                    border-color: #334155 !important;
+                                    box-shadow: none !important;
+                                }
+
+                                html.dark .font-size-controls button,
+                                [data-bs-theme="dark"] .font-size-controls button,
+                                [data-theme="dark"] .font-size-controls button {
+                                    background: transparent !important;
+                                    background-color: transparent !important;
+                                    border: none !important;
+                                    color: #d7dee8 !important;
+                                    box-shadow: none !important;
+                                }
+
+                                html.dark .font-size-controls button:hover:not(:disabled),
+                                [data-bs-theme="dark"] .font-size-controls button:hover:not(:disabled),
+                                [data-theme="dark"] .font-size-controls button:hover:not(:disabled) {
+                                    background: rgba(255, 255, 255, 0.1) !important;
+                                    background-color: rgba(255, 255, 255, 0.1) !important;
+                                    color: #fbbf24 !important;
+                                }
+
+                                html.dark .font-size-controls button:disabled,
+                                [data-bs-theme="dark"] .font-size-controls button:disabled,
+                                [data-theme="dark"] .font-size-controls button:disabled {
+                                    opacity: 0.35 !important;
+                                    color: #64748b !important;
+                                    cursor: not-allowed !important;
+                                }
+
+                                html.dark .font-size-controls .border-start,
+                                [data-bs-theme="dark"] .font-size-controls .border-start,
+                                [data-theme="dark"] .font-size-controls .border-start {
+                                    border-color: #334155 !important;
+                                }
+
+                                html.dark .btn-tool,
+                                [data-bs-theme="dark"] .btn-tool,
+                                [data-theme="dark"] .btn-tool {
+                                    background-color: #1e293b !important;
+                                    color: #d7dee8 !important;
+                                    border-color: #334155 !important;
+                                    box-shadow: none !important;
+                                }
+
+                                html.dark .btn-tool:hover,
+                                [data-bs-theme="dark"] .btn-tool:hover,
+                                [data-theme="dark"] .btn-tool:hover {
+                                    background-color: #2d3b55 !important;
+                                    color: #fbbf24 !important;
+                                }
+
+                                html.dark .share-btn.btn-light,
+                                [data-bs-theme="dark"] .share-btn.btn-light,
+                                [data-theme="dark"] .share-btn.btn-light {
+                                    background-color: #1e293b !important;
+                                    border: 1px solid #334155 !important;
+                                }
+
+                                html.dark .article-body,
+                                [data-bs-theme="dark"] .article-body,
+                                [data-theme="dark"] .article-body {
+                                    color: #e2e8f0 !important;
+                                }
+
+                                html.dark .article-body p,
+                                html.dark .article-body div,
+                                html.dark .article-body span,
+                                html.dark .article-body li,
+                                html.dark .article-body blockquote,
+                                html.dark .article-body section,
+                                html.dark .article-body article,
+                                html.dark .article-body strong,
+                                html.dark .article-body em,
+                                html.dark .article-body b,
+                                html.dark .article-body i,
+                                html.dark .article-body font,
+                                [data-bs-theme="dark"] .article-body p,
+                                [data-bs-theme="dark"] .article-body div,
+                                [data-bs-theme="dark"] .article-body span,
+                                [data-bs-theme="dark"] .article-body li,
+                                [data-bs-theme="dark"] .article-body blockquote,
+                                [data-bs-theme="dark"] .article-body section,
+                                [data-bs-theme="dark"] .article-body article,
+                                [data-bs-theme="dark"] .article-body strong,
+                                [data-bs-theme="dark"] .article-body em,
+                                [data-bs-theme="dark"] .article-body b,
+                                [data-bs-theme="dark"] .article-body i,
+                                [data-bs-theme="dark"] .article-body font,
+                                [data-theme="dark"] .article-body p,
+                                [data-theme="dark"] .article-body div,
+                                [data-theme="dark"] .article-body span,
+                                [data-theme="dark"] .article-body li,
+                                [data-theme="dark"] .article-body blockquote,
+                                [data-theme="dark"] .article-body section,
+                                [data-theme="dark"] .article-body article,
+                                [data-theme="dark"] .article-body strong,
+                                [data-theme="dark"] .article-body em,
+                                [data-theme="dark"] .article-body b,
+                                [data-theme="dark"] .article-body i,
+                                [data-theme="dark"] .article-body font {
+                                    color: #e2e8f0 !important;
+                                    background-color: transparent !important;
+                                }
+
+                                html.dark .article-body h1,
+                                html.dark .article-body h2,
+                                html.dark .article-body h3,
+                                html.dark .article-body h4,
+                                html.dark .article-body h5,
+                                html.dark .article-body h6,
+                                [data-bs-theme="dark"] .article-body h1,
+                                [data-bs-theme="dark"] .article-body h2,
+                                [data-bs-theme="dark"] .article-body h3,
+                                [data-bs-theme="dark"] .article-body h4,
+                                [data-bs-theme="dark"] .article-body h5,
+                                [data-bs-theme="dark"] .article-body h6,
+                                [data-theme="dark"] .article-body h1,
+                                [data-theme="dark"] .article-body h2,
+                                [data-theme="dark"] .article-body h3,
+                                [data-theme="dark"] .article-body h4,
+                                [data-theme="dark"] .article-body h5,
+                                [data-theme="dark"] .article-body h6 {
+                                    color: #f8fafc !important;
+                                }
+
+                                html.dark .article-body a,
+                                [data-bs-theme="dark"] .article-body a,
+                                [data-theme="dark"] .article-body a {
+                                    color: #38bdf8 !important;
+                                }
+
+                                html.dark .article-body a:hover,
+                                [data-bs-theme="dark"] .article-body a:hover,
+                                [data-theme="dark"] .article-body a:hover {
+                                    color: #7dd3fc !important;
+                                }
+
+                                html.dark .article-body table,
+                                html.dark .article-body td,
+                                html.dark .article-body th,
+                                [data-bs-theme="dark"] .article-body table,
+                                [data-bs-theme="dark"] .article-body td,
+                                [data-bs-theme="dark"] .article-body th,
+                                [data-theme="dark"] .article-body table,
+                                [data-theme="dark"] .article-body td,
+                                [data-theme="dark"] .article-body th {
+                                    border-color: #334155 !important;
+                                    color: #e2e8f0 !important;
+                                }
 
                                 @media print {
                                     body * { visibility: hidden; }
@@ -571,15 +737,7 @@ const NewsDetails = ({ id, initialData, initialAds }) => {
                                                     >
                                                         <div style={{ position: 'relative', height: '250px', width: '100%' }}>
                                                             <Image
-                                                                src={(() => {
-                                                                    const rawUrl = ad.image.startsWith('http') ? ad.image : `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000'}/uploads/ads/${ad.image}`;
-                                                                    if (rawUrl.startsWith('http')) {
-                                                                        const isLocal = rawUrl.includes('127.0.0.1') || rawUrl.includes('localhost');
-                                                                        if (isLocal) return rawUrl;
-                                                                        return rawUrl.replace(/^http:\/\//, 'https://');
-                                                                    }
-                                                                    return rawUrl;
-                                                                })()}
+                                                                src={sanitizeImageUrl(ad.image.startsWith('http') ? ad.image : `uploads/ads/${ad.image}`)}
                                                                 alt={ad.name || 'Advertisement'}
                                                                 fill
                                                                 className="rounded"
@@ -609,15 +767,16 @@ const NewsDetails = ({ id, initialData, initialAds }) => {
                                 {relatedNews.map((item, idx) => {
                                     const rImg = getImageUrl(item.thumbImage || item.leadImage);
                                     return (
-                                        <div key={item.id || idx} className="d-flex align-items-start gap-3 mb-4 pb-3 border-bottom hover-bg-light transition rounded p-2">
+                                        <div key={item.id || idx} className="d-flex align-items-start gap-3 mb-4 pb-3 border-bottom hover-bg-light transition p-2">
                                             {rImg && (
-                                                <div className="flex-shrink-0" style={{ width: '100px', height: '70px', overflow: 'hidden', borderRadius: '4px', position: 'relative' }}>
+                                                <div className="flex-shrink-0" style={{ width: '100px', height: '70px', overflow: 'hidden', borderRadius: 0, position: 'relative' }}>
                                                     <Link href={`/news/${item.id || item._id}`} className="d-block w-100 h-100 position-relative">
                                                         <Image
                                                             src={rImg}
                                                             alt={item.newsHeadline}
                                                             fill
                                                             className="object-fit-cover hover-zoom"
+                                                            style={{ borderRadius: 0 }}
                                                             sizes="100px"
                                                         />
                                                     </Link>
@@ -666,15 +825,7 @@ const NewsDetails = ({ id, initialData, initialAds }) => {
                                             {/* Desktop view */}
                                             <div className="d-none d-md-block" style={{ position: 'relative', height: '120px', width: '100%', maxWidth: '728px', margin: '0 auto' }}>
                                                 <Image
-                                                    src={(() => {
-                                                        const rawUrl = ad.image.startsWith('http') ? ad.image : `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000'}/uploads/ads/${ad.image}`;
-                                                        if (rawUrl.startsWith('http')) {
-                                                            const isLocal = rawUrl.includes('127.0.0.1') || rawUrl.includes('localhost');
-                                                            if (isLocal) return rawUrl;
-                                                            return rawUrl.replace(/^http:\/\//, 'https://');
-                                                        }
-                                                        return rawUrl;
-                                                    })()}
+                                                    src={sanitizeImageUrl(ad.image.startsWith('http') ? ad.image : `uploads/ads/${ad.image}`)}
                                                     alt={ad.name || 'Advertisement'}
                                                     fill
                                                     className="rounded shadow-sm"
@@ -685,15 +836,7 @@ const NewsDetails = ({ id, initialData, initialAds }) => {
                                             {/* Mobile view */}
                                             <div className="d-block d-md-none" style={{ position: 'relative', height: '100px', width: '100%', maxWidth: '480px', margin: '0 auto' }}>
                                                 <Image
-                                                    src={(() => {
-                                                        const rawUrl = ad.mobileImage.startsWith('http') ? ad.mobileImage : `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000'}/uploads/ads/${ad.mobileImage}`;
-                                                        if (rawUrl.startsWith('http')) {
-                                                            const isLocal = rawUrl.includes('127.0.0.1') || rawUrl.includes('localhost');
-                                                            if (isLocal) return rawUrl;
-                                                            return rawUrl.replace(/^http:\/\//, 'https://');
-                                                        }
-                                                        return rawUrl;
-                                                    })()}
+                                                    src={sanitizeImageUrl(ad.mobileImage.startsWith('http') ? ad.mobileImage : `uploads/ads/${ad.mobileImage}`)}
                                                     alt={ad.name || 'Advertisement'}
                                                     fill
                                                     className="rounded shadow-sm"
@@ -705,15 +848,7 @@ const NewsDetails = ({ id, initialData, initialAds }) => {
                                     ) : (
                                         <div style={{ position: 'relative', height: '120px', width: '100%', maxWidth: '728px', margin: '0 auto' }}>
                                             <Image
-                                                src={(() => {
-                                                    const rawUrl = ad.image.startsWith('http') ? ad.image : `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000'}/uploads/ads/${ad.image}`;
-                                                    if (rawUrl.startsWith('http')) {
-                                                        const isLocal = rawUrl.includes('127.0.0.1') || rawUrl.includes('localhost');
-                                                        if (isLocal) return rawUrl;
-                                                        return rawUrl.replace(/^http:\/\//, 'https://');
-                                                    }
-                                                    return rawUrl;
-                                                })()}
+                                                src={sanitizeImageUrl(ad.image.startsWith('http') ? ad.image : `uploads/ads/${ad.image}`)}
                                                 alt={ad.name || 'Advertisement'}
                                                 fill
                                                 className="rounded shadow-sm"

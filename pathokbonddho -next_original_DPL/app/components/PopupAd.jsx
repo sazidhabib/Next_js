@@ -3,7 +3,7 @@ import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react'
 import { Modal } from 'react-bootstrap';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import api from '@/app/lib/api';
+import api, { sanitizeImageUrl } from '@/app/lib/api';
 import dynamic from 'next/dynamic';
 import { useSettings } from '@/app/providers/SettingsProvider';
 
@@ -198,15 +198,7 @@ const PopupAd = () => {
     const adLink = ad.imageUrl || ad.link || ad.url || '#';
 
     const imgSrc = adImage
-        ? (() => {
-            const rawUrl = adImage.startsWith('http') ? adImage : `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000'}/uploads/ads/${adImage}`;
-            if (rawUrl.startsWith('http')) {
-                const isLocal = rawUrl.includes('127.0.0.1') || rawUrl.includes('localhost');
-                if (isLocal) return rawUrl;
-                return rawUrl.replace(/^http:\/\//, 'https://');
-            }
-            return rawUrl;
-        })()
+        ? (adImage.startsWith('http') ? sanitizeImageUrl(adImage) : sanitizeImageUrl(`uploads/ads/${adImage}`))
         : null;
 
     // Calculate countdown progress for the visual bar

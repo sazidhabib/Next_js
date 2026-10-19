@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { Op } from 'sequelize';
+import path from 'path';
+import fs from 'fs';
 import { News, Tag, Menu, Author, NewsTag, NewsCategory } from '@/lib/models/index.js';
 
 export async function GET(request, { params }) {
@@ -49,7 +51,44 @@ export async function GET(request, { params }) {
 export async function PATCH(request, { params }) {
     try {
         const { id } = await params;
-        const body = await request.json();
+        const contentType = request.headers.get('content-type') || '';
+        let body = {};
+        let leadImagePath = null;
+        let thumbImagePath = null;
+        let metaImagePath = null;
+
+        if (contentType.includes('multipart/form-data')) {
+            const formData = await request.formData();
+            for (const [key, value] of formData.entries()) {
+                if (value instanceof File) {
+                    // Check if file has size
+                    if (value.size > 0) {
+                        const buffer = Buffer.from(await value.arrayBuffer());
+                        const filename = `${Date.now()}-${Math.random().toString(36).substring(2, 7)}-${value.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+                        const uploadDir = path.join(process.cwd(), 'uploads', 'post_image');
+                        if (!fs.existsSync(uploadDir)) {
+                            fs.mkdirSync(uploadDir, { recursive: true });
+                        }
+                        const filePath = path.join(uploadDir, filename);
+                        fs.writeFileSync(filePath, buffer);
+                        const relPath = `uploads/post_image/${filename}`;
+                        if (key === 'leadImage') leadImagePath = relPath;
+                        if (key === 'thumbImage') thumbImagePath = relPath;
+                        if (key === 'metaImage') metaImagePath = relPath;
+                    }
+                } else {
+                    body[key] = value;
+                }
+            }
+            if (body.leadImagePath) leadImagePath = body.leadImagePath;
+            if (body.thumbImagePath) thumbImagePath = body.thumbImagePath;
+            if (body.metaImagePath) metaImagePath = body.metaImagePath;
+        } else {
+            body = await request.json();
+            leadImagePath = body.leadImagePath || body.leadImage;
+            thumbImagePath = body.thumbImagePath || body.thumbImage;
+            metaImagePath = body.metaImagePath || body.metaImage;
+        }
 
         const existingNews = await News.findByPk(id);
         if (!existingNews) {
@@ -79,12 +118,12 @@ export async function PATCH(request, { params }) {
         } = body;
 
         const updateData = {
-            newsHeadline: newsHeadline || existingNews.newsHeadline,
+            newsHeadline: newsHeadline !== undefined ? newsHeadline : existingNews.newsHeadline,
             highlight: highlight !== undefined ? highlight : existingNews.highlight,
             alternativeHeadline: alternativeHeadline !== undefined ? alternativeHeadline : existingNews.alternativeHeadline,
             authorId: authorId ? parseInt(authorId) : existingNews.authorId,
             shortDescription: shortDescription !== undefined ? shortDescription : existingNews.shortDescription,
-            content: content || existingNews.content,
+            content: content !== undefined ? content : existingNews.content,
             imageCaption: imageCaption !== undefined ? imageCaption : existingNews.imageCaption,
             videoLink: videoLink !== undefined ? videoLink : existingNews.videoLink,
             newsSchedule: newsSchedule === '' ? null : (newsSchedule !== undefined ? newsSchedule : existingNews.newsSchedule),
@@ -92,7 +131,10 @@ export async function PATCH(request, { params }) {
             metaKeywords: metaKeywords !== undefined ? metaKeywords : existingNews.metaKeywords,
             metaDescription: metaDescription !== undefined ? metaDescription : existingNews.metaDescription,
             status: status || existingNews.status,
-            newsType: newsType || existingNews.newsType
+            newsType: newsType || existingNews.newsType,
+            ...(leadImagePath ? { leadImage: leadImagePath } : {}),
+            ...(thumbImagePath ? { thumbImage: thumbImagePath } : {}),
+            ...(metaImagePath ? { metaImage: metaImagePath } : {})
         };
 
         const updatedNews = await existingNews.update(updateData);

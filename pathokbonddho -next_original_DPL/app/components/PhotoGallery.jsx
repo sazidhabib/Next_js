@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import api from '@/app/lib/api';
+import api, { sanitizeImageUrl } from '@/app/lib/api';
 import {
     Container, Row, Col, Card, ListGroup, Spinner,
     Button, Pagination
@@ -199,8 +199,7 @@ const PhotoGallery = () => {
                                     <>
                                         <Row>
                                             {currentPhotos.map((photo, index) => {
-                                                const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000';
-                                                const imageUrl = photo.imageUrl.startsWith('http') ? photo.imageUrl : `${baseUrl}/${photo.imageUrl.replace(/^\//, '')}`;
+                                                const imageUrl = photo.imageUrl ? sanitizeImageUrl(photo.imageUrl) : '';
                                                 return (
                                                     <Col
                                                         key={photo.id}

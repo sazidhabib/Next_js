@@ -50,13 +50,13 @@ const AuthorsListClient = ({ initialAuthors, initialPagination, isAdmin }) => {
         keepPreviousData: true
     });
 
-    const authors = swrData?.authors || swrData?.data || [];
+    const authors = Array.isArray(swrData) ? swrData : (swrData?.authors || swrData?.data || []);
     const pagination = {
         currentPage: swrData?.currentPage || page,
         totalPages: swrData?.totalPages || 1,
-        totalCount: swrData?.totalCount || 0,
-        hasNext: swrData?.hasNext || false,
-        hasPrev: swrData?.hasPrev || false
+        totalCount: swrData?.totalCount ?? (Array.isArray(swrData) ? swrData.length : 0),
+        hasNext: swrData?.hasNext ?? false,
+        hasPrev: swrData?.hasPrev ?? false
     };
 
     const refreshData = () => mutate(swrKey);

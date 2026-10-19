@@ -32,28 +32,48 @@ const setupExpress = () => {
     app.use("/uploads", express.static(path.join(__dirname, "uploads")));
     app.use("/images", express.static(path.join(__dirname, "uploads")));
 
-    // CORS Configuration (Updated for Production)
+    // CORS Configuration (Updated for Production to support www and non-www)
+    const allowedOrigins = [
+        "http://localhost:3000",
+        "http://localhost:5000",
+        "http://127.0.0.1:3000",
+        "http://127.0.0.1:5000",
+        "https://pathakbondhu.com",
+        "https://www.pathakbondhu.com",
+        "http://pathakbondhu.com",
+        "http://www.pathakbondhu.com",
+        "https://pathokbonddhu.kamrulhasan.info",
+        "https://www.pathokbonddhu.kamrulhasan.info",
+        "http://pathokbonddhu.kamrulhasan.info",
+        "http://www.pathokbonddhu.kamrulhasan.info"
+    ];
+
     const corsOptions = {
-        origin: [
-            "http://localhost:3000",
-            "http://localhost:5000",
-            "https://pathakbondhu.com",
-            "http://pathakbondhu.com",
-            "https://pathokbonddhu.kamrulhasan.info",
-            "http://pathokbonddhu.kamrulhasan.info"
-        ],
+        origin: (origin, callback) => {
+            if (!origin) return callback(null, true);
+            const isAllowed = allowedOrigins.includes(origin) ||
+                /^https?:\/\/([a-zA-Z0-9-]+\.)*pathakbondhu\.com(:\d+)?$/.test(origin) ||
+                /^https?:\/\/([a-zA-Z0-9-]+\.)*kamrulhasan\.info(:\d+)?$/.test(origin);
+
+            if (isAllowed) {
+                return callback(null, true);
+            }
+            return callback(null, false);
+        },
         methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS"],
+        allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept", "Origin"],
         credentials: true,
         optionsSuccessStatus: 200
     };
     app.use(cors(corsOptions));
+    app.options(/(.*)/, cors(corsOptions));
     app.use(express.json({ limit: '10mb' }));
 
     // Security Headers (CSP) - Important for Custom Servers
     app.use((req, res, next) => {
         res.setHeader(
             "Content-Security-Policy",
-            "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://static.cloudflareinsights.com https://pathakbondhu.com https://pathokbonddho.kamrulhasan.info https://www.googletagmanager.com https://www.google-analytics.com https://ssl.google-analytics.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https: http://localhost:5000 http://127.0.0.1:5000; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' http://localhost:5000 http://127.0.0.1:5000 http://localhost:3000 http://127.0.0.1:3000 https://pathakbondhu.com https://pathokbonddho.kamrulhasan.info https://www.google-analytics.com https://ssl.google-analytics.com https://www.googletagmanager.com; frame-src 'self' https://www.google.com https://www.youtube.com https://youtube.com;"
+            "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://static.cloudflareinsights.com https://pathakbondhu.com https://www.pathakbondhu.com https://pathokbonddhu.kamrulhasan.info https://www.pathokbonddhu.kamrulhasan.info https://www.googletagmanager.com https://www.google-analytics.com https://ssl.google-analytics.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https: http://localhost:5000 http://127.0.0.1:5000; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' http://localhost:5000 http://127.0.0.1:5000 http://localhost:3000 http://127.0.0.1:3000 https://pathakbondhu.com https://www.pathakbondhu.com https://pathokbonddhu.kamrulhasan.info https://www.pathokbonddhu.kamrulhasan.info https://www.google-analytics.com https://ssl.google-analytics.com https://www.googletagmanager.com; frame-src 'self' https://www.google.com https://www.youtube.com https://youtube.com;"
         );
         next();
     });

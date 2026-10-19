@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import api, { STATIC_URL } from '@/app/lib/api';
+import api, { STATIC_URL, sanitizeImageUrl } from '@/app/lib/api';
 import { Card, Badge, Spinner } from 'react-bootstrap';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -9,7 +9,7 @@ import { formatBengaliDate } from '@/app/lib/dateUtils';
 const NewsWidget = ({ cell, isPriority }) => {
     const [news, setNews] = useState(cell.resolvedContent || null);
     const [loading, setLoading] = useState(!cell.resolvedContent);
-    const STATIC_BASE = STATIC_URL || 'http://localhost:5000';
+    const STATIC_BASE = STATIC_URL;
 
     const stripHtml = (html) => {
         if (!html) return '';
@@ -87,13 +87,7 @@ const NewsWidget = ({ cell, isPriority }) => {
         }
 
         if (!imagePath) return null;
-        if (imagePath.startsWith('http')) {
-            // Only force https if not on a local environment
-            const isLocal = imagePath.includes('127.0.0.1') || imagePath.includes('localhost');
-            if (isLocal) return imagePath;
-            return imagePath.replace(/^http:\/\//, 'https://');
-        }
-        return `${STATIC_BASE}/${imagePath.replace(/^\//, '')}`;
+        return sanitizeImageUrl(imagePath);
     };
 
     const formatDate = (dateStr) => {

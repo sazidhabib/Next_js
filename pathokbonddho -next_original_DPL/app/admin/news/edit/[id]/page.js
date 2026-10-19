@@ -290,7 +290,6 @@ const NewsEdit = () => {
 
     const filteredAuthors = authors.filter(a => a.name?.toLowerCase().includes(authorSearch.toLowerCase()));
     const filteredTags = tags.filter(t => t.name?.toLowerCase().includes(tagSearch.toLowerCase()));
-    const searchedPhotos = imageSearch ? filteredPhotos.filter(p => p.filename.toLowerCase().includes(imageSearch.toLowerCase()) || p.caption?.toLowerCase().includes(imageSearch.toLowerCase())) : filteredPhotos;
 
     const ImagePreview = ({ imageType }) => {
         const file = files[imageType];

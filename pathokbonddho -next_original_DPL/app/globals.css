@@ -2620,10 +2620,19 @@ footer {
 
 /* ════════════ NEWS DETAILS PAGE FIXES ════════════ */
 
-/* 1. Remove Horizontal Scroll */
+/* 1. Remove Horizontal Scroll & Enforce Sharp Corners */
 .news-details-page {
     overflow-x: hidden;
     width: 100%;
+}
+
+.hero-image-wrapper,
+.hero-image-wrapper img,
+.video-responsive,
+.video-responsive iframe,
+.related-news-list .flex-shrink-0,
+.related-news-list img {
+    border-radius: 0 !important;
 }
 
 /* 2. Desktop Image Height Limiter */
@@ -2936,36 +2945,204 @@ html.dark .border,
 }
 
 /* Article / News Details in Dark Mode */
+html.dark .news-details-page,
+[data-bs-theme="dark"] .news-details-page,
+[data-theme="dark"] .news-details-page,
 html.dark .news-details-container,
-[data-bs-theme="dark"] .news-details-container {
-    background-color: #161f30 !important;
+[data-bs-theme="dark"] .news-details-container,
+[data-theme="dark"] .news-details-container {
+    background-color: transparent !important;
     border-color: #26334d !important;
     color: #e2e8f0 !important;
 }
 
+html.dark .news-main-headline,
+[data-bs-theme="dark"] .news-main-headline,
+[data-theme="dark"] .news-main-headline {
+    color: #f8fafc !important;
+}
+
+html.dark .news-highlight-content,
+[data-bs-theme="dark"] .news-highlight-content,
+[data-theme="dark"] .news-highlight-content {
+    color: #cbd5e1 !important;
+}
+
+html.dark .meta-info-container,
+[data-bs-theme="dark"] .meta-info-container,
+[data-theme="dark"] .meta-info-container {
+    border-color: #26334d !important;
+}
+
+html.dark .author-info,
+[data-bs-theme="dark"] .author-info,
+[data-theme="dark"] .author-info {
+    color: #e2e8f0 !important;
+}
+
+/* Article Body Text in Dark Mode */
+html.dark .article-body,
+[data-bs-theme="dark"] .article-body,
+[data-theme="dark"] .article-body {
+    color: #e2e8f0 !important;
+}
+
+html.dark .article-body p,
+html.dark .article-body div,
+html.dark .article-body span,
+html.dark .article-body li,
+html.dark .article-body blockquote,
+html.dark .article-body section,
+html.dark .article-body article,
+html.dark .article-body strong,
+html.dark .article-body em,
+html.dark .article-body b,
+html.dark .article-body i,
+html.dark .article-body font,
+[data-bs-theme="dark"] .article-body p,
+[data-bs-theme="dark"] .article-body div,
+[data-bs-theme="dark"] .article-body span,
+[data-bs-theme="dark"] .article-body li,
+[data-bs-theme="dark"] .article-body blockquote,
+[data-bs-theme="dark"] .article-body section,
+[data-bs-theme="dark"] .article-body article,
+[data-bs-theme="dark"] .article-body strong,
+[data-bs-theme="dark"] .article-body em,
+[data-bs-theme="dark"] .article-body b,
+[data-bs-theme="dark"] .article-body i,
+[data-bs-theme="dark"] .article-body font,
+[data-theme="dark"] .article-body p,
+[data-theme="dark"] .article-body div,
+[data-theme="dark"] .article-body span,
+[data-theme="dark"] .article-body li,
+[data-theme="dark"] .article-body blockquote,
+[data-theme="dark"] .article-body section,
+[data-theme="dark"] .article-body article,
+[data-theme="dark"] .article-body strong,
+[data-theme="dark"] .article-body em,
+[data-theme="dark"] .article-body b,
+[data-theme="dark"] .article-body i,
+[data-theme="dark"] .article-body font {
+    color: #e2e8f0 !important;
+    background-color: transparent !important;
+}
+
+html.dark .article-body h1,
+html.dark .article-body h2,
+html.dark .article-body h3,
+html.dark .article-body h4,
+html.dark .article-body h5,
+html.dark .article-body h6,
+[data-bs-theme="dark"] .article-body h1,
+[data-bs-theme="dark"] .article-body h2,
+[data-bs-theme="dark"] .article-body h3,
+[data-bs-theme="dark"] .article-body h4,
+[data-bs-theme="dark"] .article-body h5,
+[data-bs-theme="dark"] .article-body h6,
+[data-theme="dark"] .article-body h1,
+[data-theme="dark"] .article-body h2,
+[data-theme="dark"] .article-body h3,
+[data-theme="dark"] .article-body h4,
+[data-theme="dark"] .article-body h5,
+[data-theme="dark"] .article-body h6 {
+    color: #f8fafc !important;
+}
+
+html.dark .article-body a,
+[data-bs-theme="dark"] .article-body a,
+[data-theme="dark"] .article-body a {
+    color: #38bdf8 !important;
+}
+
+html.dark .article-body a:hover,
+[data-bs-theme="dark"] .article-body a:hover,
+[data-theme="dark"] .article-body a:hover {
+    color: #7dd3fc !important;
+}
+
+html.dark .article-body table,
+html.dark .article-body td,
+html.dark .article-body th,
+[data-bs-theme="dark"] .article-body table,
+[data-bs-theme="dark"] .article-body td,
+[data-bs-theme="dark"] .article-body th,
+[data-theme="dark"] .article-body table,
+[data-theme="dark"] .article-body td,
+[data-theme="dark"] .article-body th {
+    border-color: #334155 !important;
+    color: #e2e8f0 !important;
+}
+
 html.dark .editor-content blockquote,
-[data-bs-theme="dark"] .editor-content blockquote {
+[data-bs-theme="dark"] .editor-content blockquote,
+[data-theme="dark"] .editor-content blockquote {
     background: #111827 !important;
     color: #cbd5e1 !important;
     border-left-color: #00897b !important;
 }
 
-/* Action tool buttons (Print, Font Size, Share) */
-html.dark .action-tools button,
+/* Action Tool Buttons & Font-Size Controls in Dark Mode */
+html.dark .font-size-controls,
+[data-bs-theme="dark"] .font-size-controls,
+[data-theme="dark"] .font-size-controls {
+    background: #1e293b !important;
+    border-color: #334155 !important;
+    box-shadow: none !important;
+}
+
 html.dark .font-size-controls button,
-[data-bs-theme="dark"] .action-tools button,
-[data-bs-theme="dark"] .font-size-controls button {
-    background-color: #1f293d !important;
+[data-bs-theme="dark"] .font-size-controls button,
+[data-theme="dark"] .font-size-controls button {
+    background: transparent !important;
+    background-color: transparent !important;
+    border: none !important;
     color: #d7dee8 !important;
+    box-shadow: none !important;
+}
+
+html.dark .font-size-controls button:hover:not(:disabled),
+[data-bs-theme="dark"] .font-size-controls button:hover:not(:disabled),
+[data-theme="dark"] .font-size-controls button:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.1) !important;
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    color: #fbbf24 !important;
+}
+
+html.dark .font-size-controls button:disabled,
+[data-bs-theme="dark"] .font-size-controls button:disabled,
+[data-theme="dark"] .font-size-controls button:disabled {
+    opacity: 0.35 !important;
+    color: #64748b !important;
+    cursor: not-allowed !important;
+}
+
+html.dark .font-size-controls .border-start,
+[data-bs-theme="dark"] .font-size-controls .border-start,
+[data-theme="dark"] .font-size-controls .border-start {
     border-color: #334155 !important;
 }
 
-html.dark .action-tools button:hover,
-html.dark .font-size-controls button:hover,
-[data-bs-theme="dark"] .action-tools button:hover,
-[data-bs-theme="dark"] .font-size-controls button:hover {
+html.dark .btn-tool,
+[data-bs-theme="dark"] .btn-tool,
+[data-theme="dark"] .btn-tool {
+    background-color: #1e293b !important;
+    color: #d7dee8 !important;
+    border-color: #334155 !important;
+    box-shadow: none !important;
+}
+
+html.dark .btn-tool:hover,
+[data-bs-theme="dark"] .btn-tool:hover,
+[data-theme="dark"] .btn-tool:hover {
     background-color: #2d3b55 !important;
     color: #fbbf24 !important;
+}
+
+html.dark .share-btn.btn-light,
+[data-bs-theme="dark"] .share-btn.btn-light,
+[data-theme="dark"] .share-btn.btn-light {
+    background-color: #1e293b !important;
+    border: 1px solid #334155 !important;
 }
 
 /* Search bar & inputs in Dark Mode */

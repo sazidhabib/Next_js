@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Form, Button, Card, Spinner, Modal, Badge, Row, Col } from 'react-bootstrap';
 import { toast } from 'react-toastify';
-import api, { STATIC_URL } from "@/app/lib/api";
+import api, { STATIC_URL, sanitizeImageUrl } from "@/app/lib/api";
 import NextImage from 'next/image';
 import useSWR from 'swr';
 import { fetcher } from "@/app/lib/swr-config";
@@ -120,8 +120,7 @@ const PhotosListClient = ({ initialImages, initialAlbums, initialTotalPages, ini
 
     const getImageUrl = (url) => {
         if (!url) return '';
-        if (url.startsWith('http://') || url.startsWith('https://')) return url;
-        return `${IMG_URL}/${url.startsWith('/') ? url.substring(1) : url}`;
+        return sanitizeImageUrl(url) || '';
     };
 
     const handleCopyUrl = (e, img) => {

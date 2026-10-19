@@ -45,6 +45,7 @@ const OUTCOME_OPTIONS = [
 
 export default function RightToWorkManagement({ employees = [], onUpdated }) {
   const [records, setRecords] = useState([]);
+  const [serverNextId, setServerNextId] = useState(null);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [activeSubTab, setActiveSubTab] = useState('rtw'); // 'rtw' | 'add' | 'edit'
@@ -67,6 +68,13 @@ export default function RightToWorkManagement({ employees = [], onUpdated }) {
 
   const [form, setForm] = useState(initialFormState);
 
+  const getNextCheckId = () => {
+    if (serverNextId) return serverNextId;
+    if (!records || records.length === 0) return 1;
+    const maxId = records.reduce((max, r) => Math.max(max, Number(r.id) || 0), 0);
+    return maxId + 1;
+  };
+
   const fetchUsers = async () => {
     try {
       const res = await fetch('/api/users');
@@ -86,6 +94,9 @@ export default function RightToWorkManagement({ employees = [], onUpdated }) {
       const data = await res.json();
       if (data.success) {
         setRecords(data.records);
+        if (data.nextId) {
+          setServerNextId(data.nextId);
+        }
       }
     } catch (err) {
       console.error('Fetch RTW error:', err);
@@ -99,14 +110,22 @@ export default function RightToWorkManagement({ employees = [], onUpdated }) {
     fetchUsers();
   }, []);
 
+  useEffect(() => {
+    if (activeSubTab === 'add' && !editingRecord && !form.id) {
+      setForm((prev) => ({ ...prev, id: getNextCheckId() }));
+    }
+  }, [activeSubTab, editingRecord, form.id, records, serverNextId]);
+
   const openAddTab = () => {
     setEditingRecord(null);
     const defaultEmp = employees?.[0]?.id || '';
     const defaultUser = users?.[0]?.name || 'Bishnu';
     const today = new Date().toISOString().split('T')[0];
+    const nextId = getNextCheckId();
 
     setForm({
       ...initialFormState,
+      id: nextId,
       employeeId: defaultEmp,
       performedByUserId: defaultUser,
       checkDate: today,
@@ -393,15 +412,20 @@ export default function RightToWorkManagement({ employees = [], onUpdated }) {
                 
                 {/* Check Id */}
                 <div>
-                  <label className="block font-semibold text-zinc-700 dark:text-zinc-300 mb-1">
-                    Check Id:
-                  </label>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="block font-semibold text-zinc-700 dark:text-zinc-300">
+                      Check Id:
+                    </label>
+                    <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-600 dark:bg-emerald-900/40 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                      {activeSubTab === 'edit' ? 'Check ID' : 'Auto Generated'}
+                    </span>
+                  </div>
                   <input
                     type="text"
                     readOnly
                     placeholder="Auto Generated"
-                    value={form.id ? `#${form.id}` : 'Auto Generated'}
-                    className="w-full px-3 py-2 rounded-xl bg-zinc-100 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700 text-zinc-500 cursor-not-allowed font-mono"
+                    value={form.id ? `#${form.id}` : `#${getNextCheckId()}`}
+                    className="w-full px-3 py-2 rounded-xl bg-zinc-100 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 cursor-not-allowed font-mono font-semibold"
                   />
                 </div>
 

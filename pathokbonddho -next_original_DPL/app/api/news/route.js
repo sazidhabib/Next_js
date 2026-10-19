@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { Op } from 'sequelize';
+import path from 'path';
+import fs from 'fs';
 import { News, Tag, Menu, Author, NewsTag, NewsCategory } from '@/lib/models/index.js';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -94,7 +96,44 @@ export async function GET(request) {
 
 export async function POST(request) {
     try {
-        const body = await request.json();
+        const contentType = request.headers.get('content-type') || '';
+        let body = {};
+        let leadImagePath = null;
+        let thumbImagePath = null;
+        let metaImagePath = null;
+
+        if (contentType.includes('multipart/form-data')) {
+            const formData = await request.formData();
+            for (const [key, value] of formData.entries()) {
+                if (value instanceof File) {
+                    if (value.size > 0) {
+                        const buffer = Buffer.from(await value.arrayBuffer());
+                        const filename = `${Date.now()}-${Math.random().toString(36).substring(2, 7)}-${value.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+                        const uploadDir = path.join(process.cwd(), 'uploads', 'post_image');
+                        if (!fs.existsSync(uploadDir)) {
+                            fs.mkdirSync(uploadDir, { recursive: true });
+                        }
+                        const filePath = path.join(uploadDir, filename);
+                        fs.writeFileSync(filePath, buffer);
+                        const relPath = `uploads/post_image/${filename}`;
+                        if (key === 'leadImage') leadImagePath = relPath;
+                        if (key === 'thumbImage') thumbImagePath = relPath;
+                        if (key === 'metaImage') metaImagePath = relPath;
+                    }
+                } else {
+                    body[key] = value;
+                }
+            }
+            if (body.leadImagePath) leadImagePath = body.leadImagePath;
+            if (body.thumbImagePath) thumbImagePath = body.thumbImagePath;
+            if (body.metaImagePath) metaImagePath = body.metaImagePath;
+        } else {
+            body = await request.json();
+            leadImagePath = body.leadImagePath || body.leadImage;
+            thumbImagePath = body.thumbImagePath || body.thumbImage;
+            metaImagePath = body.metaImagePath || body.metaImage;
+        }
+
         const {
             newsHeadline,
             highlight,
@@ -173,7 +212,10 @@ export async function POST(request) {
             metaDescription: metaDescription || shortDescription,
             status: status || 'draft',
             newsType: newsType || 'standard',
-            slug
+            slug,
+            leadImage: leadImagePath || null,
+            thumbImage: thumbImagePath || leadImagePath || null,
+            metaImage: metaImagePath || null
         });
 
         if (parsedTagIds.length > 0) {

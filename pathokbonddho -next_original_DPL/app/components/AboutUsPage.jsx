@@ -4,7 +4,7 @@ import { Spinner } from "react-bootstrap";
 import Link from 'next/link';
 import Image from 'next/image';
 import "@fortawesome/fontawesome-free/css/all.min.css";
-import api from '@/app/lib/api';
+import api, { sanitizeImageUrl } from '@/app/lib/api';
 import { useSettings } from '../providers/SettingsProvider';
 
 const AboutUsPage = ({ initialData }) => {
@@ -64,13 +64,11 @@ const AboutUsPage = ({ initialData }) => {
 
   const getFullImageUrl = (path) => {
     if (!path) return "/images/kamrul_hasan_bio2.jpg";
-    if (path.startsWith('http')) return path;
-    const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000';
-    // Ensure we append /uploads/ if it's just a filename
+    if (path.startsWith('http')) return sanitizeImageUrl(path);
     const cleanPath = path.replace(/^\/+/, "");
     return cleanPath.startsWith('uploads/')
-      ? `${baseUrl}/${cleanPath}`
-      : `${baseUrl}/uploads/${cleanPath}`;
+      ? sanitizeImageUrl(cleanPath)
+      : sanitizeImageUrl(`uploads/${cleanPath}`);
   };
 
   const imageUrl = getFullImageUrl(aboutData?.imageUrl);
