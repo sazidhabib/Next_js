@@ -203,6 +203,7 @@ export default function UserManagement({ employees = [], onUpdated }) {
                 <th className="px-3 sm:px-4 py-3">Username</th>
                 <th className="px-3 sm:px-4 py-3">Full Name</th>
                 <th className="px-3 sm:px-4 py-3">Role</th>
+                <th className="px-3 sm:px-4 py-3">Linked Employee</th>
                 <th className="px-3 sm:px-4 py-3 text-center">Active</th>
                 <th className="px-3 sm:px-4 py-3 text-right">Actions</th>
               </tr>
@@ -210,7 +211,7 @@ export default function UserManagement({ employees = [], onUpdated }) {
             <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800/80">
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="text-center py-8 text-zinc-500 text-xs">
+                  <td colSpan={7} className="text-center py-8 text-zinc-500 text-xs">
                     {loading ? 'Loading users...' : 'No users found.'}
                   </td>
                 </tr>
@@ -243,6 +244,19 @@ export default function UserManagement({ employees = [], onUpdated }) {
                       }`}>
                         {u.role?.name || (u.isSystemSuperAdmin ? 'Super Admin' : 'Manager')}
                       </span>
+                    </td>
+
+                    <td className="px-3 sm:px-4 py-3 text-xs">
+                      {u.employee ? (
+                        <div className="flex items-center space-x-1.5 font-medium text-zinc-900 dark:text-zinc-100">
+                          <span className="font-mono text-[10px] px-1.5 py-0.5 rounded bg-blue-50 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300 border border-blue-200 dark:border-blue-900/40">
+                            {u.employee.employeeCode || `EMP-${u.employee.id}`}
+                          </span>
+                          <span>{u.employee.firstName} {u.employee.lastName}</span>
+                        </div>
+                      ) : (
+                        <span className="text-zinc-400 italic text-[11px]">System Account (None)</span>
+                      )}
                     </td>
 
                     <td className="px-3 sm:px-4 py-3 text-center">
@@ -345,6 +359,37 @@ export default function UserManagement({ employees = [], onUpdated }) {
                 </option>
               ))}
             </select>
+          </div>
+
+          {/* Linked Employee Profile */}
+          <div>
+            <label className="block font-semibold text-zinc-700 dark:text-zinc-300 mb-1">
+              Linked Employee Profile
+            </label>
+            <select
+              value={form.employeeId}
+              onChange={(e) => {
+                const empId = e.target.value;
+                const selectedEmp = employees?.find((emp) => String(emp.id) === String(empId));
+                setForm((prev) => ({
+                  ...prev,
+                  employeeId: empId,
+                  name: prev.name || (selectedEmp ? `${selectedEmp.firstName} ${selectedEmp.lastName}` : ''),
+                  username: prev.username || (selectedEmp ? `${selectedEmp.firstName.toLowerCase()}${selectedEmp.lastName ? '.' + selectedEmp.lastName.toLowerCase() : ''}` : ''),
+                }));
+              }}
+              className="w-full px-3 py-2 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">None / Standalone User</option>
+              {employees?.map((emp) => (
+                <option key={emp.id} value={emp.id}>
+                  {emp.employeeCode ? `${emp.employeeCode} - ` : ''}{emp.firstName} {emp.lastName} ({emp.email})
+                </option>
+              ))}
+            </select>
+            <p className="text-[11px] text-zinc-400 mt-1">
+              Select which employee record this login account represents. When logged in, the system will load this employee&apos;s personal profile, shifts, and leaves.
+            </p>
           </div>
 
           {/* Active Checkbox */}

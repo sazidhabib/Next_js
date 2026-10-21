@@ -3,6 +3,8 @@ import Footer from './components/Footer';
 import ScrollToSection from './components/ScrollToSection';
 import PageRenderer from './components/PageRenderer';
 
+export const dynamic = 'force-dynamic';
+
 // Helper to prevent fetch from hanging when backend isn't ready
 async function fetchWithTimeout(url, options = {}, timeoutMs = 5000) {
   const controller = new AbortController();

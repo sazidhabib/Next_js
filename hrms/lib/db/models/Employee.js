@@ -29,7 +29,7 @@ const Employee = sequelize.define('Employee', {
   },
   dateOfBirth: {
     type: DataTypes.DATEONLY,
-    allowNull: true,
+    allowNull: false,
     field: 'date_of_birth',
   },
   email: {
@@ -42,7 +42,7 @@ const Employee = sequelize.define('Employee', {
   },
   phone: {
     type: DataTypes.STRING(30),
-    allowNull: true,
+    allowNull: false,
   },
   addressLine1: {
     type: DataTypes.STRING(150),
@@ -69,7 +69,7 @@ const Employee = sequelize.define('Employee', {
   },
   jobTitle: {
     type: DataTypes.STRING(80),
-    allowNull: false,
+    allowNull: true,
     field: 'job_title',
   },
   departmentId: {

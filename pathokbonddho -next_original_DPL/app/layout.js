@@ -11,6 +11,8 @@ import { ToastContainer } from 'react-toastify';
 import PopupAd from './components/PopupAd';
 import Script from 'next/script';
 
+export const dynamic = 'force-dynamic';
+
 async function fetchWithTimeout(url, options = {}, timeoutMs = 5000) {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeoutMs);

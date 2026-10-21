@@ -49,6 +49,37 @@ export async function PUT(request, { params }) {
       return NextResponse.json({ success: false, error: 'Employee not found' }, { status: 404 });
     }
 
+    // Validate mandatory fields
+    if (
+      !body.firstName?.trim() ||
+      !body.lastName?.trim() ||
+      !body.email?.trim() ||
+      !body.phone?.trim() ||
+      !body.dateOfBirth
+    ) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'First Name, Last Name, Email, Phone No, and Date Of Birth are mandatory.',
+        },
+        { status: 400 }
+      );
+    }
+
+    // Clean optional fields
+    body.firstName = body.firstName.trim();
+    body.lastName = body.lastName.trim();
+    body.email = body.email.trim();
+    body.phone = body.phone.trim();
+    body.jobTitle = body.jobTitle?.trim() || null;
+    body.departmentId = body.departmentId ? Number(body.departmentId) : null;
+    body.hireDate = body.hireDate || null;
+    body.startDate = body.startDate || null;
+    body.endDate = body.endDate || null;
+    body.salary = body.salary !== '' && body.salary != null ? parseFloat(body.salary) : 0;
+    body.weeklyHours = body.weeklyHours !== '' && body.weeklyHours != null ? parseFloat(body.weeklyHours) : 37.5;
+    body.holidayAllowance = body.holidayAllowance !== '' && body.holidayAllowance != null ? parseFloat(body.holidayAllowance) : 28.0;
+
     await employee.update(body);
 
     const updated = await Employee.findByPk(id, {

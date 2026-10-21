@@ -10,7 +10,7 @@ import Header from './Header';
 import { Sparkles, Loader2, ShieldAlert } from 'lucide-react';
 
 export default function AppShell({ children }) {
-  const { isAuthenticated, isLoading, role, canAccessTab } = useAuth();
+  const { isAuthenticated, isLoading, role, canAccessTab, hasPermission } = useAuth();
   const {
     stats,
     alerts,
@@ -98,8 +98,8 @@ export default function AppShell({ children }) {
   const getActiveTabTitle = () => {
     switch (currentTab) {
       case 'dashboard':
-        return role === 'Employee'
-          ? 'My Self-Service Dashboard'
+        return role === 'Employee' || (hasPermission('VIEW_OWN_PROFILE') && !hasPermission('VIEW_DASHBOARD'))
+          ? 'My Employee Profile'
           : role === 'Manager'
           ? 'Store Manager Dashboard'
           : 'Executive Dashboard';

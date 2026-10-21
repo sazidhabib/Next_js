@@ -80,14 +80,23 @@ export async function POST(request) {
       }
     }
 
+    const finalUsername = requestedUsername || (body.name ? body.name.toLowerCase().replace(/\s+/g, '') : 'user');
+    const existingUser = await User.findOne({ where: { username: finalUsername } });
+    if (existingUser) {
+      return NextResponse.json(
+        { success: false, error: `The username '${finalUsername}' is already taken. Please choose a different username.` },
+        { status: 400 }
+      );
+    }
+
     const passwordHash = await bcrypt.hash(body.password, 10);
     const user = await User.create({
-      username: requestedUsername || (body.name ? body.name.toLowerCase().replace(/\s+/g, '') : 'user'),
+      username: finalUsername,
       name: body.name,
-      email: requestedEmail || `${(requestedUsername || body.name || 'user').toLowerCase().replace(/\s+/g, '')}@hrms.local`,
+      email: requestedEmail || `${finalUsername.toLowerCase()}@hrms.local`,
       passwordHash,
       roleId: body.roleId || null,
-      employeeId: body.employeeId || null,
+      employeeId: body.employeeId ? parseInt(body.employeeId, 10) : null,
       isActive: body.isActive !== undefined ? body.isActive : true,
     });
 

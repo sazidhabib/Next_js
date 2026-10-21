@@ -82,6 +82,23 @@ export async function POST(request) {
     await initDb();
     const body = await request.json();
 
+    // Validate mandatory fields
+    if (
+      !body.firstName?.trim() ||
+      !body.lastName?.trim() ||
+      !body.email?.trim() ||
+      !body.phone?.trim() ||
+      !body.dateOfBirth
+    ) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'First Name, Last Name, Email, Phone No, and Date Of Birth are mandatory.',
+        },
+        { status: 400 }
+      );
+    }
+
     // Auto-generate employee code if missing
     if (!body.employeeCode) {
       const allEmps = await Employee.findAll({ attributes: ['employeeCode', 'id'] });
@@ -97,6 +114,20 @@ export async function POST(request) {
       }
       body.employeeCode = `EMP-${String(maxNum + 1).padStart(3, '0')}`;
     }
+
+    // Clean optional fields
+    body.firstName = body.firstName.trim();
+    body.lastName = body.lastName.trim();
+    body.email = body.email.trim();
+    body.phone = body.phone.trim();
+    body.jobTitle = body.jobTitle?.trim() || null;
+    body.departmentId = body.departmentId ? Number(body.departmentId) : null;
+    body.hireDate = body.hireDate || null;
+    body.startDate = body.startDate || null;
+    body.endDate = body.endDate || null;
+    body.salary = body.salary !== '' && body.salary != null ? parseFloat(body.salary) : 0;
+    body.weeklyHours = body.weeklyHours !== '' && body.weeklyHours != null ? parseFloat(body.weeklyHours) : 37.5;
+    body.holidayAllowance = body.holidayAllowance !== '' && body.holidayAllowance != null ? parseFloat(body.holidayAllowance) : 28.0;
 
     const newEmployee = await Employee.create(body);
 

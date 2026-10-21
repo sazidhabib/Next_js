@@ -30,15 +30,23 @@ export default function Sidebar({
   stats: propsStats,
   settings: propsSettings,
 }) {
-  const { user, role, canAccessTab, logout } = useAuth();
+  const { user, role, canAccessTab, hasPermission, logout } = useAuth();
   const dataContext = useData();
   const pathname = usePathname();
 
   const stats = propsStats || dataContext?.stats;
   const settings = propsSettings || dataContext?.settings;
 
+  const isEmployeeOnlyProfile =
+    role === 'Employee' || (hasPermission('VIEW_OWN_PROFILE') && !hasPermission('VIEW_DASHBOARD'));
+
   const allMenuItems = [
-    { id: 'dashboard', href: '/', label: role === 'Employee' ? 'My Dashboard' : 'Dashboard', icon: LayoutDashboard },
+    {
+      id: 'dashboard',
+      href: '/',
+      label: isEmployeeOnlyProfile ? 'My Profile' : role === 'Employee' ? 'My Dashboard' : 'Dashboard',
+      icon: isEmployeeOnlyProfile ? UserCheck : LayoutDashboard,
+    },
     { id: 'employees', href: '/employees', label: 'Employees', icon: Users, badge: stats?.totalEmployees },
     { id: 'rota', href: '/rota', label: 'Rota & Timesheets', icon: CalendarClock },
     {

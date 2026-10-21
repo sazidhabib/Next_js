@@ -18,36 +18,40 @@ export async function seedDatabase() {
   await initDb();
   await sequelize.sync({ force: false });
 
-  // 1. Seed Roles
-  const roleCount = await Role.count();
-  if (roleCount === 0) {
-    await Role.bulkCreate([
-      {
-        name: 'Manager',
-        description: 'Store and kitchen manager with approval authority',
-        permissions: ['MANAGE_EMPLOYEES', 'APPROVE_LEAVES'],
-      },
-      {
-        name: 'Admin',
-        description: 'System administrator with full operations control',
-        permissions: ['ALL'],
-      },
-      {
-        name: 'Restaurant Owner',
-        description: 'Business owner with compliance and executive oversight',
-        permissions: ['ALL'],
-      },
-      {
-        name: 'HR Manager',
-        description: 'Manage employees, RTW checks, visas, and leaves',
-        permissions: ['MANAGE_EMPLOYEES', 'MANAGE_COMPLIANCE', 'APPROVE_LEAVES'],
-      },
-      {
-        name: 'Employee',
-        description: 'Self-service portal for profile and leave applications',
-        permissions: ['VIEW_OWN_PROFILE', 'REQUEST_LEAVE'],
-      },
-    ]);
+  // 1. Seed Roles - Ensure all standard roles exist
+  const standardRoles = [
+    {
+      name: 'Manager',
+      description: 'Store and kitchen manager with approval authority',
+      permissions: ['MANAGE_EMPLOYEES', 'APPROVE_LEAVES'],
+    },
+    {
+      name: 'Admin',
+      description: 'System administrator with full operations control',
+      permissions: ['ALL'],
+    },
+    {
+      name: 'Restaurant Owner',
+      description: 'Business owner with compliance and executive oversight',
+      permissions: ['ALL'],
+    },
+    {
+      name: 'HR Manager',
+      description: 'Manage employees, RTW checks, visas, and leaves',
+      permissions: ['MANAGE_EMPLOYEES', 'MANAGE_COMPLIANCE', 'APPROVE_LEAVES'],
+    },
+    {
+      name: 'Employee',
+      description: 'Self-service portal for profile and leave applications',
+      permissions: ['VIEW_OWN_PROFILE', 'REQUEST_LEAVE'],
+    },
+  ];
+
+  for (const roleData of standardRoles) {
+    const existingRole = await Role.findOne({ where: { name: roleData.name } });
+    if (!existingRole) {
+      await Role.create(roleData);
+    }
   }
 
   // 2. Seed Departments
@@ -394,6 +398,8 @@ export async function seedDatabase() {
   const ownerRole = await Role.findOne({ where: { name: 'Restaurant Owner' } });
   const hrRole = await Role.findOne({ where: { name: 'HR Manager' } });
   const employeeRole = await Role.findOne({ where: { name: 'Employee' } });
+  const anyRole = adminRole || managerRole || (await Role.findOne());
+  const fallbackRoleId = anyRole ? anyRole.id : null;
   const passwordHash = await bcrypt.hash('admin123', 10);
 
   const empTariq = employees.find(e => e.email === 'tariq.ahmed@example.com' || e.employeeCode === 'EMP-001');
@@ -405,7 +411,7 @@ export async function seedDatabase() {
       name: 'Obi Kazi',
       email: 'obi.kazi@example.com',
       passwordHash,
-      roleId: adminRole?.id || 2,
+      roleId: adminRole?.id || fallbackRoleId,
       isActive: true,
     },
     {
@@ -413,7 +419,7 @@ export async function seedDatabase() {
       name: 'James Wilson',
       email: 'james.wilson@example.com',
       passwordHash,
-      roleId: hrRole?.id || 4,
+      roleId: hrRole?.id || fallbackRoleId,
       employeeId: empWilson?.id || null,
       isActive: true,
     },
@@ -422,7 +428,7 @@ export async function seedDatabase() {
       name: 'Kaiseer Kazi',
       email: 'kaiseer.kazi@example.com',
       passwordHash,
-      roleId: ownerRole?.id || 3,
+      roleId: ownerRole?.id || fallbackRoleId,
       isActive: true,
     },
     {
@@ -430,7 +436,7 @@ export async function seedDatabase() {
       name: 'Bishnu Hari',
       email: 'bishnu.hari@example.com',
       passwordHash,
-      roleId: managerRole?.id || 1,
+      roleId: managerRole?.id || fallbackRoleId,
       isActive: true,
     },
     {
@@ -438,7 +444,7 @@ export async function seedDatabase() {
       name: 'Tariq Ahmed',
       email: 'tariq.ahmed@example.com',
       passwordHash,
-      roleId: employeeRole?.id || 5,
+      roleId: employeeRole?.id || fallbackRoleId,
       employeeId: empTariq?.id || null,
       isActive: true,
     },

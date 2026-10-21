@@ -14,6 +14,23 @@ export const ROLE_PERMISSIONS = {
   Employee: ['dashboard', 'rota', 'leave', 'media'],
 };
 
+export const getUserPermissions = (user) => {
+  if (!user) return [];
+  let perms = user.permissions;
+  if (!perms && user.role?.permissions) perms = user.role.permissions;
+  if (Array.isArray(perms)) return perms;
+  if (typeof perms === 'string') {
+    try {
+      const parsed = JSON.parse(perms);
+      if (Array.isArray(parsed)) return parsed;
+      return [perms];
+    } catch {
+      return perms.split(',').map((p) => p.trim()).filter(Boolean);
+    }
+  }
+  return [];
+};
+
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -99,11 +116,62 @@ export function AuthProvider({ children }) {
   const canAccessTab = useCallback(
     (tabId) => {
       if (!user) return false;
-      const role = user.roleName || 'Employee';
-      if (role === 'Admin' || role === 'Super Admin') return true;
+      const role = user.roleName || user.role?.name || '';
+      if (role === 'Admin' || role === 'Super Admin' || role === 'Restaurant Owner') return true;
 
-      const allowedTabs = ROLE_PERMISSIONS[role] || ROLE_PERMISSIONS['Employee'];
-      return allowedTabs.includes(tabId);
+      const perms = getUserPermissions(user);
+      if (perms.includes('ALL')) return true;
+
+      switch (tabId) {
+        case 'dashboard':
+          return (
+            perms.includes('VIEW_DASHBOARD') ||
+            perms.includes('VIEW_OWN_PROFILE') ||
+            perms.includes('MANAGE_EMPLOYEES') ||
+            perms.length > 0
+          );
+
+        case 'employees':
+          return perms.includes('MANAGE_EMPLOYEES');
+
+        case 'leave':
+          return perms.includes('REQUEST_LEAVE') || perms.includes('APPROVE_LEAVES');
+
+        case 'rota':
+          return (
+            perms.includes('MANAGE_ROTA') ||
+            perms.includes('VIEW_ROTA') ||
+            ((role === 'Manager' || role === 'HR Manager' || role === 'Department Head') && perms.includes('MANAGE_EMPLOYEES'))
+          );
+
+        case 'immigration':
+          return perms.includes('MANAGE_IMMIGRATION') || perms.includes('MANAGE_COMPLIANCE');
+
+        case 'rtw':
+          return perms.includes('MANAGE_RTW') || perms.includes('MANAGE_COMPLIANCE');
+
+        case 'departments':
+          return perms.includes('VIEW_DEPARTMENT') || perms.includes('MANAGE_EMPLOYEES');
+
+        case 'roles':
+        case 'users':
+          return perms.includes('MANAGE_USERS');
+
+        case 'visatypes':
+          return perms.includes('MANAGE_COMPLIANCE') || perms.includes('MANAGE_IMMIGRATION');
+
+        case 'media':
+          return (
+            perms.includes('MANAGE_MEDIA') ||
+            ((role === 'Manager' || role === 'HR Manager') && perms.includes('MANAGE_EMPLOYEES'))
+          );
+
+        case 'settings':
+          return perms.includes('MANAGE_SETTINGS');
+
+        default:
+          return false;
+      }
     },
     [user]
   );
@@ -111,8 +179,9 @@ export function AuthProvider({ children }) {
   const hasPermission = useCallback(
     (permissionCode) => {
       if (!user) return false;
-      if (user.roleName === 'Admin' || user.roleName === 'Restaurant Owner') return true;
-      const perms = Array.isArray(user.permissions) ? user.permissions : [];
+      const role = user.roleName || user.role?.name || '';
+      if (role === 'Admin' || role === 'Super Admin' || role === 'Restaurant Owner') return true;
+      const perms = getUserPermissions(user);
       return perms.includes('ALL') || perms.includes(permissionCode);
     },
     [user]
@@ -121,6 +190,7 @@ export function AuthProvider({ children }) {
   const value = {
     user,
     role: user?.roleName || 'Guest',
+    permissions: getUserPermissions(user),
     isAuthenticated: !!user,
     isLoading,
     login,
@@ -128,6 +198,7 @@ export function AuthProvider({ children }) {
     canAccessTab,
     hasPermission,
     checkSession,
+    refreshUserSession: checkSession,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

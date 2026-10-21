@@ -39,16 +39,30 @@ export async function POST(request) {
     await initDb();
     const body = await request.json();
 
+    if (!body.employeeId) {
+      return NextResponse.json({ success: false, error: 'Employee is mandatory.' }, { status: 400 });
+    }
+    if (!body.checkDate) {
+      return NextResponse.json({ success: false, error: 'Check Date is mandatory.' }, { status: 400 });
+    }
+
     const payload = {
-      ...body,
+      employeeId: parseInt(body.employeeId, 10),
+      checkDate: body.checkDate,
       checkMethod: body.checkMethod || body.checkType || 'Online Home Office Share Code Check',
       checkType: body.checkType || body.checkMethod || 'ONLINE_SHARE_CODE',
-      documentRef: body.documentRef || body.documentRefNumber || '',
-      documentRefNumber: body.documentRefNumber || body.documentRef || '',
-      performedByUserId: body.performedByUserId || body.verifiedBy || '',
-      verifiedBy: body.verifiedBy || body.performedByUserId || '',
-      nextReviewDate: body.followUpDate || body.nextReviewDate || null,
-      followUpDate: body.followUpDate || body.nextReviewDate || null,
+      documentType: body.documentType || 'Passport',
+      documentRef: body.documentRef?.trim() || body.documentRefNumber?.trim() || null,
+      documentRefNumber: body.documentRefNumber?.trim() || body.documentRef?.trim() || null,
+      performedByUserId: body.performedByUserId?.trim() || body.verifiedBy?.trim() || null,
+      verifiedBy: body.verifiedBy?.trim() || body.performedByUserId?.trim() || null,
+      outcome: body.outcome || 'Continuous Right to Work',
+      followUpRequired: Boolean(body.followUpRequired),
+      followUpDate: body.followUpRequired && body.followUpDate ? body.followUpDate : null,
+      nextReviewDate: body.followUpRequired && (body.nextReviewDate || body.followUpDate) ? (body.nextReviewDate || body.followUpDate) : null,
+      notes: body.notes?.trim() || null,
+      statutoryExcuseGranted: body.outcome !== 'No Right to Work',
+      status: body.status || 'VERIFIED',
     };
     delete payload.id;
 

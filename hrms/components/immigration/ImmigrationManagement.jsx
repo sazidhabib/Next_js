@@ -158,6 +158,16 @@ export default function ImmigrationManagement({ employees = [], visaTypes = [], 
 
   const handleSave = async (e) => {
     e.preventDefault();
+
+    if (!form.employeeId) {
+      alert('Please select an Employee (Mandatory).');
+      return;
+    }
+    if (!form.visaExpiryDate && !form.expiryDate) {
+      alert('Visa Expiry Date is mandatory.');
+      return;
+    }
+
     try {
       const isEdit = activeSubTab === 'edit' && editingRecord;
       const url = isEdit ? `/api/immigration/${editingRecord.id}` : '/api/immigration';
@@ -165,11 +175,24 @@ export default function ImmigrationManagement({ employees = [], visaTypes = [], 
 
       const payload = {
         ...form,
-        employeeId: parseInt(form.employeeId, 10) || form.employeeId,
+        employeeId: parseInt(form.employeeId, 10),
         visaTypeId: form.visaTypeId ? parseInt(form.visaTypeId, 10) : null,
-        offeredSalary: form.offeredSalary ? parseFloat(form.offeredSalary) : 0,
-        expiryDate: form.visaExpiryDate || form.expiryDate || null,
+        nationality: form.nationality?.trim() || null,
+        niNumber: form.niNumber?.trim() || null,
+        passportNumber: form.passportNumber?.trim() || null,
+        passportExpiryDate: form.passportExpiryDate || null,
+        brpOrEvisaNumber: form.brpNumber?.trim() || form.brpOrEvisaNumber?.trim() || null,
+        visaStartDate: form.visaStartDate || null,
+        visaExpiryDate: form.visaExpiryDate || form.expiryDate || null,
         issueDate: form.visaStartDate || form.issueDate || null,
+        expiryDate: form.visaExpiryDate || form.expiryDate || null,
+        sponsorLicenceNo: form.sponsorLicenceNo?.trim() || null,
+        sponsorCosNumber: form.cosNumber?.trim() || form.sponsorCosNumber?.trim() || null,
+        cosNumber: form.cosNumber?.trim() || form.sponsorCosNumber?.trim() || null,
+        offeredSalary: form.offeredSalary !== '' && form.offeredSalary != null ? parseFloat(form.offeredSalary) : 0,
+        notes: form.notes?.trim() || null,
+        lastVerifiedDate: form.lastVerifiedDate || null,
+        nextReviewDate: form.nextReviewDate || null,
       };
 
       const res = await fetch(url, {

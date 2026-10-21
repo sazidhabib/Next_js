@@ -153,23 +153,33 @@ export default function RightToWorkManagement({ employees = [], onUpdated }) {
 
   const handleSave = async (e) => {
     e.preventDefault();
+
+    if (!form.employeeId) {
+      alert('Please select an Employee (Mandatory).');
+      return;
+    }
+    if (!form.checkDate) {
+      alert('Check Date is mandatory.');
+      return;
+    }
+
     try {
       const isEdit = activeSubTab === 'edit' && editingRecord;
       const url = isEdit ? `/api/rtw/${editingRecord.id}` : '/api/rtw';
       const method = isEdit ? 'PUT' : 'POST';
 
       const payload = {
-        employeeId: parseInt(form.employeeId, 10) || form.employeeId,
+        employeeId: parseInt(form.employeeId, 10),
         checkDate: form.checkDate,
-        checkMethod: form.checkMethod,
-        documentType: form.documentType,
-        documentRef: form.documentRef,
-        performedByUserId: form.performedByUserId,
-        outcome: form.outcome,
-        followUpRequired: form.followUpRequired,
-        followUpDate: form.followUpRequired ? form.followUpDate : null,
-        nextReviewDate: form.followUpRequired ? form.followUpDate : null,
-        notes: form.notes,
+        checkMethod: form.checkMethod || 'Online Share Code Check',
+        documentType: form.documentType || 'Passport',
+        documentRef: form.documentRef?.trim() || null,
+        performedByUserId: form.performedByUserId?.trim() || null,
+        outcome: form.outcome || 'Continuous Right to Work',
+        followUpRequired: Boolean(form.followUpRequired),
+        followUpDate: form.followUpRequired && form.followUpDate ? form.followUpDate : null,
+        nextReviewDate: form.followUpRequired && form.followUpDate ? form.followUpDate : null,
+        notes: form.notes?.trim() || null,
         statutoryExcuseGranted: form.outcome !== 'No Right to Work',
       };
 

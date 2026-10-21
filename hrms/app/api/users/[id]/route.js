@@ -20,6 +20,28 @@ export async function PUT(request, { params }) {
     if (!user) return NextResponse.json({ success: false, error: 'User not found' }, { status: 404 });
 
     const updateData = { ...body };
+
+    if (body.username) {
+      const { Op } = await import('sequelize');
+      const existingUser = await User.findOne({
+        where: {
+          username: body.username.trim(),
+          id: { [Op.ne]: id },
+        },
+      });
+      if (existingUser) {
+        return NextResponse.json(
+          { success: false, error: `The username '${body.username.trim()}' is already taken by another user.` },
+          { status: 400 }
+        );
+      }
+      updateData.username = body.username.trim();
+    }
+
+    if (body.employeeId !== undefined) {
+      updateData.employeeId = body.employeeId ? parseInt(body.employeeId, 10) : null;
+    }
+
     if (body.password) {
       updateData.passwordHash = await bcrypt.hash(body.password, 10);
       delete updateData.password;

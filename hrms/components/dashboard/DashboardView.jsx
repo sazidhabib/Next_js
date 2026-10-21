@@ -17,10 +17,10 @@ import {
 import { Badge, Card } from '../ui';
 
 export default function DashboardView({ stats, alerts, onNavigate }) {
-  const { user } = useAuth();
+  const { user, hasPermission } = useAuth();
 
-  // If the logged-in user is an Employee, show the Employee Self-Service Dashboard
-  if (user?.roleName === 'Employee') {
+  // If the logged-in user is an Employee or has VIEW_OWN_PROFILE without management dashboard access
+  if (user?.roleName === 'Employee' || (!hasPermission('VIEW_DASHBOARD') && hasPermission('VIEW_OWN_PROFILE'))) {
     return <EmployeeDashboardView onNavigate={onNavigate} />;
   }
   const statCards = [

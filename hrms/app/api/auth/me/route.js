@@ -84,6 +84,17 @@ export async function GET(request) {
       }
     }
 
+    let linkedEmp = user.employee;
+    if (!linkedEmp && user.email) {
+      linkedEmp = await Employee.findOne({
+        where: { email: user.email },
+        include: [{ model: Department, as: 'department', attributes: ['id', 'name', 'code'] }],
+      });
+      if (linkedEmp && !user.employeeId) {
+        user.update({ employeeId: linkedEmp.id }).catch(() => {});
+      }
+    }
+
     const userData = {
       id: user.id,
       username: user.username,
@@ -92,19 +103,19 @@ export async function GET(request) {
       roleId: user.roleId,
       roleName: roleName,
       permissions: permissions,
-      employeeId: user.employeeId,
-      employee: user.employee
+      employeeId: user.employeeId || linkedEmp?.id || null,
+      employee: linkedEmp
         ? {
-            id: user.employee.id,
-            employeeCode: user.employee.employeeCode,
-            firstName: user.employee.firstName,
-            lastName: user.employee.lastName,
-            jobTitle: user.employee.jobTitle,
-            department: user.employee.department?.name,
-            departmentId: user.employee.departmentId,
-            photoUrl: user.employee.photoUrl,
-            weeklyHours: user.employee.weeklyHours,
-            isSponsoredWorker: user.employee.isSponsoredWorker,
+            id: linkedEmp.id,
+            employeeCode: linkedEmp.employeeCode,
+            firstName: linkedEmp.firstName,
+            lastName: linkedEmp.lastName,
+            jobTitle: linkedEmp.jobTitle,
+            department: linkedEmp.department?.name,
+            departmentId: linkedEmp.departmentId,
+            photoUrl: linkedEmp.photoUrl,
+            weeklyHours: linkedEmp.weeklyHours,
+            isSponsoredWorker: linkedEmp.isSponsoredWorker,
           }
         : null,
     };

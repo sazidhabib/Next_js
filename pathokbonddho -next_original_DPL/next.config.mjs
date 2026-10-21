@@ -1,8 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'standalone',
   reactStrictMode: false,
   images: {
+    qualities: [75, 90, 100],
     remotePatterns: [
       {
         protocol: 'https',
@@ -73,6 +73,8 @@ const nextConfig = {
           source: '/uploads/:path*',
           destination: `${backendUrl}/uploads/:path*`,
         },
+      ],
+      afterFiles: [
         {
           source: '/images/:path*',
           destination: `${backendUrl}/images/:path*`,

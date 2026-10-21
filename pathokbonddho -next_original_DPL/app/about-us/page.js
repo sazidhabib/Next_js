@@ -3,6 +3,8 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import AboutUsPage from '../components/AboutUsPage';
 
+export const dynamic = 'force-dynamic';
+
 async function getAboutData() {
     const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
     try {

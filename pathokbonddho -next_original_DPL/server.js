@@ -30,7 +30,9 @@ const setupExpress = () => {
     }
 
     app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+    app.use("/images", express.static(path.join(__dirname, "public", "images")));
     app.use("/images", express.static(path.join(__dirname, "uploads")));
+    app.use(express.static(path.join(__dirname, "public")));
 
     // CORS Configuration (Updated for Production to support www and non-www)
     const allowedOrigins = [

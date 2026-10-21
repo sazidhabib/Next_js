@@ -2,9 +2,10 @@ import { Sequelize } from 'sequelize';
 import mysql2 from 'mysql2';
 
 // Global cached connection for Next.js hot-reloading
-let sequelize;
+let sequelize = global._hrmsSequelize;
 
 function getSequelizeInstance() {
+  if (global._hrmsSequelize) return global._hrmsSequelize;
   if (sequelize) return sequelize;
 
   const dialect = process.env.DB_DIALECT || 'mysql';
@@ -49,6 +50,7 @@ function getSequelizeInstance() {
     }
   }
 
+  global._hrmsSequelize = sequelize;
   return sequelize;
 }
 

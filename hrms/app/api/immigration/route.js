@@ -41,17 +41,40 @@ export async function POST(request) {
     await initDb();
     const body = await request.json();
 
+    if (!body.employeeId) {
+      return NextResponse.json({ success: false, error: 'Employee is mandatory.' }, { status: 400 });
+    }
+    const expiryDate = body.visaExpiryDate || body.expiryDate;
+    if (!expiryDate) {
+      return NextResponse.json({ success: false, error: 'Visa Expiry Date is mandatory.' }, { status: 400 });
+    }
+
     const payload = {
-      ...body,
-      expiryDate: body.expiryDate || body.visaExpiryDate || null,
-      visaExpiryDate: body.visaExpiryDate || body.expiryDate || null,
-      issueDate: body.issueDate || body.visaStartDate || null,
-      visaStartDate: body.visaStartDate || body.issueDate || null,
-      cosNumber: body.cosNumber || body.sponsorCosNumber || null,
-      sponsorCosNumber: body.sponsorCosNumber || body.cosNumber || null,
+      employeeId: parseInt(body.employeeId, 10),
+      visaTypeId: body.visaTypeId ? parseInt(body.visaTypeId, 10) : null,
+      nationality: body.nationality?.trim() || null,
+      niNumber: body.niNumber?.trim() || null,
+      passportNumber: body.passportNumber?.trim() || null,
+      passportExpiryDate: body.passportExpiryDate || null,
       brpOrEvisaNumber: body.brpOrEvisaNumber || body.brpNumber || null,
+      visaStartDate: body.visaStartDate || body.issueDate || null,
+      visaExpiryDate: expiryDate,
+      issueDate: body.issueDate || body.visaStartDate || null,
+      expiryDate: expiryDate,
+      sponsorLicenceNo: body.sponsorLicenceNo?.trim() || null,
+      sponsorCosNumber: body.sponsorCosNumber || body.cosNumber || null,
+      cosNumber: body.cosNumber || body.sponsorCosNumber || null,
+      isSkilledWorkerEligible: Boolean(body.isSkilledWorkerEligible),
+      offeredSalary: body.offeredSalary !== '' && body.offeredSalary != null ? parseFloat(body.offeredSalary) : 0,
+      salaryMeetsThreshold: Boolean(body.salaryMeetsThreshold),
+      rightToWorkStatus: body.rightToWorkStatus || 'Valid',
+      notes: body.notes?.trim() || null,
+      lastVerifiedDate: body.lastVerifiedDate || null,
+      nextReviewDate: body.nextReviewDate || null,
+      passportPhoto: body.passportPhoto || null,
+      documentUrl: body.documentUrl || null,
+      status: body.status || 'VALID',
     };
-    delete payload.id;
 
     const record = await ImmigrationRecord.create(payload);
     const fetched = await ImmigrationRecord.findByPk(record.id, {

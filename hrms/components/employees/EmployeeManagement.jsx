@@ -19,6 +19,7 @@ import {
   Filter,
   Download,
   RefreshCw,
+  Calendar,
 } from 'lucide-react';
 import { Badge, Card } from '../ui';
 import MediaPickerModal from '../media/MediaPickerModal';
@@ -171,15 +172,55 @@ export default function EmployeeManagement({ departments, onEmployeeUpdated }) {
 
   const handleSave = async (e) => {
     e.preventDefault();
+
+    // Check mandatory fields
+    if (!formData.firstName?.trim()) {
+      alert('First Name is required.');
+      return;
+    }
+    if (!formData.lastName?.trim()) {
+      alert('Last Name is required.');
+      return;
+    }
+    if (!formData.email?.trim()) {
+      alert('Email is required.');
+      return;
+    }
+    if (!formData.phone?.trim()) {
+      alert('Phone No is required.');
+      return;
+    }
+    if (!formData.dateOfBirth?.trim()) {
+      alert('Date Of Birth is required.');
+      return;
+    }
+
     try {
       const isEdit = activeSubTab === 'edit' && selectedEmployee?.id;
       const url = isEdit ? `/api/employees/${selectedEmployee.id}` : '/api/employees';
       const method = isEdit ? 'PUT' : 'POST';
 
+      const payload = {
+        ...formData,
+        firstName: formData.firstName.trim(),
+        lastName: formData.lastName.trim(),
+        email: formData.email.trim(),
+        phone: formData.phone.trim(),
+        dateOfBirth: formData.dateOfBirth.trim(),
+        jobTitle: formData.jobTitle?.trim() || null,
+        departmentId: formData.departmentId ? Number(formData.departmentId) : null,
+        hireDate: formData.hireDate || null,
+        startDate: formData.startDate || null,
+        endDate: formData.endDate || null,
+        salary: formData.salary !== '' && formData.salary != null ? parseFloat(formData.salary) : 0,
+        weeklyHours: formData.weeklyHours !== '' && formData.weeklyHours != null ? parseFloat(formData.weeklyHours) : 37.5,
+        holidayAllowance: formData.holidayAllowance !== '' && formData.holidayAllowance != null ? parseFloat(formData.holidayAllowance) : 28.0,
+      };
+
       const res = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       });
 
       const result = await res.json();
@@ -238,6 +279,7 @@ export default function EmployeeManagement({ departments, onEmployeeUpdated }) {
       'Weekly Hours',
       'Sponsored Worker',
       'Hire Date',
+      'Start Date',
       'Status',
     ];
 
@@ -253,6 +295,7 @@ export default function EmployeeManagement({ departments, onEmployeeUpdated }) {
       `"${emp.weeklyHours || 37.5}"`,
       `"${emp.isSponsoredWorker ? 'Yes' : 'No'}"`,
       `"${emp.hireDate || ''}"`,
+      `"${emp.startDate || ''}"`,
       `"${emp.status || ''}"`,
     ]);
 
@@ -372,12 +415,13 @@ export default function EmployeeManagement({ departments, onEmployeeUpdated }) {
           {/* Responsive Employee Data Table */}
           <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200 dark:border-zinc-800 overflow-hidden shadow-xs">
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs sm:text-sm min-w-[650px]">
+              <table className="w-full text-left text-xs sm:text-sm min-w-[700px]">
                 <thead className="bg-zinc-50 dark:bg-zinc-800/80 text-zinc-600 dark:text-zinc-400 font-semibold text-[11px] sm:text-xs uppercase tracking-wider border-b border-zinc-200 dark:border-zinc-800">
                   <tr>
                     <th className="px-4 sm:px-5 py-3.5">Employee</th>
                     <th className="px-3 sm:px-4 py-3.5">Job Title & Dept</th>
-                    <th className="px-3 sm:px-4 py-3.5">Salary / Hours</th>
+                    <th className="px-3 sm:px-4 py-3.5">Hire Date</th>
+                    <th className="px-3 sm:px-4 py-3.5">Start Date</th>
                     <th className="px-3 sm:px-4 py-3.5">Sponsored</th>
                     <th className="px-3 sm:px-4 py-3.5">Status</th>
                     <th className="px-4 sm:px-5 py-3.5 text-right">Actions</th>
@@ -386,7 +430,7 @@ export default function EmployeeManagement({ departments, onEmployeeUpdated }) {
                 <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800/80">
                   {employees.length === 0 ? (
                     <tr>
-                      <td colSpan={6} className="text-center py-10 text-zinc-500">
+                      <td colSpan={7} className="text-center py-10 text-zinc-500">
                         {loading ? 'Loading employees...' : 'No employees found.'}
                       </td>
                     </tr>
@@ -423,7 +467,7 @@ export default function EmployeeManagement({ departments, onEmployeeUpdated }) {
                         </td>
 
                         <td className="px-3 sm:px-4 py-3.5 sm:py-4">
-                          <p className="font-medium text-zinc-800 dark:text-zinc-200">{emp.jobTitle}</p>
+                          <p className="font-medium text-zinc-800 dark:text-zinc-200">{emp.jobTitle || '—'}</p>
                           <p className="text-[11px] text-zinc-500 flex items-center space-x-1">
                             <Building2 className="w-3 h-3" />
                             <span>{emp.department?.name || 'General'}</span>
@@ -431,15 +475,16 @@ export default function EmployeeManagement({ departments, onEmployeeUpdated }) {
                         </td>
 
                         <td className="px-3 sm:px-4 py-3.5 sm:py-4">
-                          <p className="font-semibold text-zinc-900 dark:text-zinc-100">
-                            £{Number(emp.salary || 0).toLocaleString()}
-                          </p>
-                          <div className="flex items-center space-x-1.5 text-[11px] text-zinc-500">
-                            <span>{emp.weeklyHours || 37.5} hrs/wk</span>
-                            <span>•</span>
-                            <span className="text-emerald-600 dark:text-emerald-400 font-medium">
-                              {emp.holidayAllowance ?? 28}d holiday
-                            </span>
+                          <div className="flex items-center space-x-1.5 text-zinc-800 dark:text-zinc-200 font-medium">
+                            <Calendar className="w-3.5 h-3.5 text-blue-500 shrink-0" />
+                            <span>{emp.hireDate || '—'}</span>
+                          </div>
+                        </td>
+
+                        <td className="px-3 sm:px-4 py-3.5 sm:py-4">
+                          <div className="flex items-center space-x-1.5 text-zinc-800 dark:text-zinc-200 font-medium">
+                            <Calendar className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                            <span>{emp.startDate || '—'}</span>
                           </div>
                         </td>
 
@@ -554,10 +599,11 @@ export default function EmployeeManagement({ departments, onEmployeeUpdated }) {
                   </div>
                   <div>
                     <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-1">
-                      Date Of Birth
+                      Date Of Birth *
                     </label>
                     <input
                       type="date"
+                      required
                       value={formData.dateOfBirth}
                       onChange={(e) => setFormData({ ...formData, dateOfBirth: e.target.value })}
                       className="w-full px-3 py-2 rounded-xl text-xs sm:text-sm bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 focus:ring-2 focus:ring-blue-500"
@@ -580,10 +626,12 @@ export default function EmployeeManagement({ departments, onEmployeeUpdated }) {
                   </div>
                   <div>
                     <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-1">
-                      Phone No
+                      Phone No *
                     </label>
                     <input
                       type="text"
+                      required
+                      placeholder="e.g. +44 7700 900123"
                       value={formData.phone}
                       onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                       className="w-full px-3 py-2 rounded-xl text-xs sm:text-sm bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 focus:ring-2 focus:ring-blue-500"
@@ -654,11 +702,11 @@ export default function EmployeeManagement({ departments, onEmployeeUpdated }) {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 pt-2">
                   <div>
                     <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-1">
-                      Job Title *
+                      Job Title <span className="text-zinc-400 font-normal">(Optional)</span>
                     </label>
                     <input
                       type="text"
-                      required
+                      placeholder="e.g. Software Engineer (Optional)"
                       value={formData.jobTitle}
                       onChange={(e) => setFormData({ ...formData, jobTitle: e.target.value })}
                       className="w-full px-3 py-2 rounded-xl text-xs sm:text-sm bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 focus:ring-2 focus:ring-blue-500"
