@@ -10,7 +10,6 @@ import {
   ArrowRight,
   Sparkles,
   AlertCircle,
-  Loader2,
 } from 'lucide-react';
 
 export default function LoginView({ settings: propSettings }) {
@@ -168,10 +167,7 @@ export default function LoginView({ settings: propSettings }) {
               className="w-full mt-2 py-3 px-4 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-sm shadow-lg shadow-blue-600/30 flex items-center justify-center space-x-2 transition-all active:scale-98 disabled:opacity-60 cursor-pointer"
             >
               {isSubmitting ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  <span>Authenticating...</span>
-                </>
+                <span>Authenticating...</span>
               ) : (
                 <>
                   <span>Sign In</span>

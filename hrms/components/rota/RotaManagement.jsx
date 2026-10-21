@@ -115,13 +115,16 @@ export default function RotaManagement({ employees = [] }) {
   const [loading, setLoading] = useState(false);
   const [statusFilter, setStatusFilter] = useState('ALL');
 
+  // Default to today's local date
+  const todayLocalDate = formatLocalDate(new Date());
+
   // Interactive Shift Modal (View / Add / Update / Delete)
   const [shiftModal, setShiftModal] = useState({
     isOpen: false,
     mode: 'add', // 'add' | 'edit'
     id: null,
     employeeId: '',
-    shiftDate: '',
+    shiftDate: todayLocalDate,
     shiftType: 'Early',
     startTime: '09:00',
     endTime: '17:00',
@@ -132,7 +135,7 @@ export default function RotaManagement({ employees = [] }) {
   // Table Quick-entry form for Rota Shift
   const [shiftForm, setShiftForm] = useState({
     employeeId: '',
-    shiftDate: '',
+    shiftDate: todayLocalDate,
     shiftType: 'Early',
     startTime: '09:00',
     endTime: '17:00',
@@ -143,7 +146,7 @@ export default function RotaManagement({ employees = [] }) {
   // Quick-entry form for Timesheet
   const [timesheetForm, setTimesheetForm] = useState({
     employeeId: '',
-    workDate: '',
+    workDate: todayLocalDate,
     clockIn: '09:00',
     clockOut: '17:00',
     breakMinutes: 60,
@@ -294,9 +297,10 @@ export default function RotaManagement({ employees = [] }) {
 
   const handleCurrentWeek = () => {
     const curMonday = getMonday(new Date());
+    const curToday = formatLocalDate(new Date());
     setWeekCommencing(curMonday);
-    setShiftForm((f) => ({ ...f, shiftDate: curMonday }));
-    setTimesheetForm((f) => ({ ...f, workDate: curMonday }));
+    setShiftForm((f) => ({ ...f, shiftDate: curToday }));
+    setTimesheetForm((f) => ({ ...f, workDate: curToday }));
   };
 
   // Month navigation helpers
@@ -403,7 +407,7 @@ export default function RotaManagement({ employees = [] }) {
   // Open Shift Modal for Add or Edit
   const openShiftModalForAdd = (employeeId, dateStr) => {
     const empId = employeeId || currentSelectedEmpId;
-    const date = dateStr || weekCommencing;
+    const date = dateStr || formatLocalDate(new Date());
     setShiftModal({
       isOpen: true,
       mode: 'add',
@@ -478,17 +482,17 @@ export default function RotaManagement({ employees = [] }) {
 
         // Real-time optimistic update
         setShifts((prev) => {
-          const exists = prev.some((s) => s.id === savedShift.id);
-          if (exists) return prev.map((s) => (s.id === savedShift.id ? savedShift : s));
+          const exists = prev.some((s) => Number(s.id) === Number(savedShift.id));
+          if (exists) return prev.map((s) => (Number(s.id) === Number(savedShift.id) ? savedShift : s));
           return [...prev, savedShift].sort((a, b) =>
-            a.shiftDate.localeCompare(b.shiftDate) || a.startTime.localeCompare(b.startTime)
+            a.shiftDate.localeCompare(b.shiftDate) || (Number(a.id) - Number(b.id))
           );
         });
         setMonthShifts((prev) => {
-          const exists = prev.some((s) => s.id === savedShift.id);
-          if (exists) return prev.map((s) => (s.id === savedShift.id ? savedShift : s));
+          const exists = prev.some((s) => Number(s.id) === Number(savedShift.id));
+          if (exists) return prev.map((s) => (Number(s.id) === Number(savedShift.id) ? savedShift : s));
           return [...prev, savedShift].sort((a, b) =>
-            a.shiftDate.localeCompare(b.shiftDate) || a.startTime.localeCompare(b.startTime)
+            a.shiftDate.localeCompare(b.shiftDate) || (Number(a.id) - Number(b.id))
           );
         });
 
@@ -531,7 +535,7 @@ export default function RotaManagement({ employees = [] }) {
   const handleAddShiftFromTable = async (e) => {
     e.preventDefault();
     const empId = shiftForm.employeeId || defaultEmployeeId;
-    const shiftDate = shiftForm.shiftDate || weekCommencing;
+    const shiftDate = shiftForm.shiftDate || formatLocalDate(new Date());
     if (!empId || !shiftDate) {
       alert('Please select an employee and shift date');
       return;
@@ -553,17 +557,17 @@ export default function RotaManagement({ employees = [] }) {
 
         // Real-time optimistic update
         setShifts((prev) => {
-          const exists = prev.some((s) => s.id === newShift.id);
-          if (exists) return prev.map((s) => (s.id === newShift.id ? newShift : s));
+          const exists = prev.some((s) => Number(s.id) === Number(newShift.id));
+          if (exists) return prev.map((s) => (Number(s.id) === Number(newShift.id) ? newShift : s));
           return [...prev, newShift].sort((a, b) =>
-            a.shiftDate.localeCompare(b.shiftDate) || a.startTime.localeCompare(b.startTime)
+            a.shiftDate.localeCompare(b.shiftDate) || (Number(a.id) - Number(b.id))
           );
         });
         setMonthShifts((prev) => {
-          const exists = prev.some((s) => s.id === newShift.id);
-          if (exists) return prev.map((s) => (s.id === newShift.id ? newShift : s));
+          const exists = prev.some((s) => Number(s.id) === Number(newShift.id));
+          if (exists) return prev.map((s) => (Number(s.id) === Number(newShift.id) ? newShift : s));
           return [...prev, newShift].sort((a, b) =>
-            a.shiftDate.localeCompare(b.shiftDate) || a.startTime.localeCompare(b.startTime)
+            a.shiftDate.localeCompare(b.shiftDate) || (Number(a.id) - Number(b.id))
           );
         });
 
@@ -588,7 +592,7 @@ export default function RotaManagement({ employees = [] }) {
   const handleAddTimesheet = async (e) => {
     e.preventDefault();
     const empId = timesheetForm.employeeId || defaultEmployeeId;
-    const workDate = timesheetForm.workDate || weekCommencing;
+    const workDate = timesheetForm.workDate || formatLocalDate(new Date());
     if (!empId || !workDate) {
       alert('Please select an employee and work date');
       return;
@@ -995,7 +999,7 @@ export default function RotaManagement({ employees = [] }) {
 
                   <button
                     type="button"
-                    onClick={() => openShiftModalForAdd(currentSelectedEmpId, `${activeMonth}-01`)}
+                    onClick={() => openShiftModalForAdd(currentSelectedEmpId, activeMonth === getCurrentMonthString() ? formatLocalDate(new Date()) : `${activeMonth}-01`)}
                     className="px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold transition flex items-center space-x-1 shadow-sm"
                   >
                     <Plus className="w-3.5 h-3.5" />
@@ -1113,7 +1117,7 @@ export default function RotaManagement({ employees = [] }) {
 
                               {/* 7 Days Matrix Columns */}
                               {weekDays.map((day) => {
-                                const dayShift = empShifts.find((s) => s.shiftDate === day.dateStr);
+                                const dayShifts = empShifts.filter((s) => s.shiftDate === day.dateStr);
 
                                 return (
                                   <td
@@ -1122,38 +1126,53 @@ export default function RotaManagement({ employees = [] }) {
                                       day.isToday ? 'bg-blue-50/20 dark:bg-blue-950/10' : ''
                                     }`}
                                   >
-                                    {dayShift ? (
-                                      /* Shift Card */
-                                      <div
-                                        onClick={() => openShiftModalForEdit(dayShift)}
-                                        className={`p-2 rounded-xl border transition cursor-pointer shadow-2xs group/card relative ${getShiftBadgeStyles(
-                                          dayShift.shiftType
-                                        )}`}
-                                        title={dayShift.notes ? `Notes: ${dayShift.notes}` : 'Click to edit shift'}
-                                      >
-                                        <div className="flex items-center justify-between">
-                                          <span className="font-bold text-[10px] tracking-wide uppercase">
-                                            {dayShift.shiftType}
-                                          </span>
-                                          <span className="font-mono font-bold text-[10px]">
-                                            {parseFloat(dayShift.plannedHours).toFixed(1)}h
-                                          </span>
-                                        </div>
+                                    {dayShifts.length > 0 ? (
+                                      <div className="space-y-1.5">
+                                        {dayShifts.map((dayShift) => (
+                                          <div
+                                            key={dayShift.id}
+                                            onClick={() => openShiftModalForEdit(dayShift)}
+                                            className={`p-2 rounded-xl border transition cursor-pointer shadow-2xs group/card relative ${getShiftBadgeStyles(
+                                              dayShift.shiftType
+                                            )}`}
+                                            title={dayShift.notes ? `Notes: ${dayShift.notes}` : 'Click to edit shift'}
+                                          >
+                                            <div className="flex items-center justify-between">
+                                              <span className="font-bold text-[10px] tracking-wide uppercase">
+                                                {dayShift.shiftType}
+                                              </span>
+                                              <span className="font-mono font-bold text-[10px]">
+                                                {parseFloat(dayShift.plannedHours).toFixed(1)}h
+                                              </span>
+                                            </div>
 
-                                        <div className="text-[11px] font-mono font-bold mt-1">
-                                          {dayShift.startTime} - {dayShift.endTime}
-                                        </div>
+                                            <div className="text-[11px] font-mono font-bold mt-1">
+                                              {dayShift.startTime} - {dayShift.endTime}
+                                            </div>
 
-                                        {dayShift.breakMinutes > 0 && (
-                                          <div className="text-[9px] opacity-75 mt-0.5">
-                                            {dayShift.breakMinutes}m break
+                                            {dayShift.breakMinutes > 0 && (
+                                              <div className="text-[9px] opacity-75 mt-0.5">
+                                                {dayShift.breakMinutes}m break
+                                              </div>
+                                            )}
+
+                                            {/* Hover Quick Edit Icon */}
+                                            <div className="absolute top-1 right-1 opacity-0 group-hover/card:opacity-100 transition p-0.5 rounded bg-white/80 dark:bg-black/60 shadow">
+                                              <Edit2 className="w-2.5 h-2.5" />
+                                            </div>
                                           </div>
-                                        )}
+                                        ))}
 
-                                        {/* Hover Quick Edit Icon */}
-                                        <div className="absolute top-1 right-1 opacity-0 group-hover/card:opacity-100 transition p-0.5 rounded bg-white/80 dark:bg-black/60 shadow">
-                                          <Edit2 className="w-2.5 h-2.5" />
-                                        </div>
+                                        {/* Add Another Shift Button on Day */}
+                                        <button
+                                          type="button"
+                                          onClick={() => openShiftModalForAdd(emp.id, day.dateStr)}
+                                          className="w-full py-1 rounded-lg border border-dashed border-zinc-200 dark:border-zinc-700 hover:border-blue-400 hover:bg-blue-50/40 text-[10px] text-zinc-400 hover:text-blue-600 font-semibold flex items-center justify-center space-x-1 transition"
+                                          title={`Add another shift for ${emp.firstName}`}
+                                        >
+                                          <Plus className="w-2.5 h-2.5" />
+                                          <span>Add Shift</span>
+                                        </button>
                                       </div>
                                     ) : (
                                       /* Empty Slot - Click to Add */
@@ -1381,8 +1400,10 @@ export default function RotaManagement({ employees = [] }) {
                     if (val) {
                       const monday = getMonday(val);
                       setWeekCommencing(monday);
-                      setShiftForm((f) => ({ ...f, shiftDate: monday }));
-                      setTimesheetForm((f) => ({ ...f, workDate: monday }));
+                      const curMonday = getMonday(new Date());
+                      const targetDate = monday === curMonday ? formatLocalDate(new Date()) : monday;
+                      setShiftForm((f) => ({ ...f, shiftDate: targetDate }));
+                      setTimesheetForm((f) => ({ ...f, workDate: targetDate }));
                     }
                   }}
                   className="px-2.5 py-1.5 rounded-lg bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-xs font-mono font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none"
@@ -1452,7 +1473,7 @@ export default function RotaManagement({ employees = [] }) {
                     <input
                       type="date"
                       required
-                      value={shiftForm.shiftDate || weekCommencing}
+                      value={shiftForm.shiftDate || formatLocalDate(new Date())}
                       onChange={(e) => setShiftForm({ ...shiftForm, shiftDate: e.target.value })}
                       className="w-full px-2.5 py-1.5 rounded-lg bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-xs font-mono focus:ring-2 focus:ring-blue-500 focus:outline-none"
                     />
@@ -1585,7 +1606,7 @@ export default function RotaManagement({ employees = [] }) {
                     <input
                       type="date"
                       required
-                      value={timesheetForm.workDate || weekCommencing}
+                      value={timesheetForm.workDate || formatLocalDate(new Date())}
                       onChange={(e) => setTimesheetForm({ ...timesheetForm, workDate: e.target.value })}
                       className="w-full px-2.5 py-1.5 rounded-lg bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-xs font-mono focus:ring-2 focus:ring-blue-500 focus:outline-none"
                     />

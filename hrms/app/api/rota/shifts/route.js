@@ -75,7 +75,7 @@ export async function GET(request) {
       ],
       order: [
         ['shiftDate', 'ASC'],
-        ['startTime', 'ASC'],
+        ['id', 'ASC'],
       ],
     });
 

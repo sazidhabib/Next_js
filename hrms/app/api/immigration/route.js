@@ -23,7 +23,7 @@ export async function GET(request) {
         { model: Employee, as: 'employee' },
         { model: VisaType, as: 'visaType' },
       ],
-      order: [['expiryDate', 'ASC']],
+      order: [['id', 'DESC']],
     });
 
     const maxId = await ImmigrationRecord.max('id');

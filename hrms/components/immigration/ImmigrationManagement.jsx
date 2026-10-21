@@ -229,7 +229,10 @@ export default function ImmigrationManagement({ employees = [], visaTypes = [], 
     }
   };
 
-  const filtered = records.filter((r) => {
+  const filtered = records
+    .slice()
+    .sort((a, b) => (Number(b.id) || 0) - (Number(a.id) || 0))
+    .filter((r) => {
     const term = search.toLowerCase();
     const empName = `${r.employee?.firstName || ''} ${r.employee?.lastName || ''}`.toLowerCase();
     const empCode = (r.employee?.employeeCode || '').toLowerCase();
