@@ -60,15 +60,22 @@ const User = sequelize.define('User', {
         type: DataTypes.ENUM('superadmin', 'admin', 'editor'),
         defaultValue: 'editor'
     },
+    roleId: {
+        type: DataTypes.INTEGER,
+        allowNull: true
+    },
     permissions: {
         type: DataTypes.JSON,
         defaultValue: DEFAULT_PERMISSIONS,
         get() {
-            const rawValue = this.getDataValue('permissions');
             if (this.getDataValue('role') === 'superadmin') {
                 return FULL_PERMISSIONS;
             }
+            const rawValue = this.getDataValue('permissions');
             return rawValue || DEFAULT_PERMISSIONS;
+        },
+        set(value) {
+            this.setDataValue('permissions', value || DEFAULT_PERMISSIONS);
         }
     },
     isActive: {
@@ -102,11 +109,14 @@ User.prototype.generateToken = function () {
         {
             userId: this.id,
             email: this.email,
+            username: this.username,
             isAdmin: this.isAdmin,
-            role: this.role
+            role: this.role,
+            roleId: this.roleId,
+            permissions: this.permissions
         },
         process.env.JWT_SECRET_KEY,
-        { expiresIn: "4h" }
+        { expiresIn: "30d" }
     );
 };
 

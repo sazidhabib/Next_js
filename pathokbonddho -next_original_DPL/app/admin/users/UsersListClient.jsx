@@ -6,6 +6,7 @@ import { toast } from 'react-toastify';
 import api from "@/app/lib/api";
 import useSWR, { mutate } from 'swr';
 import { fetcher } from "@/app/lib/swr-config";
+import { useAuth } from "@/app/providers/AuthProvider";
 
 const PERMISSION_SECTIONS = [
     { key: 'dashboard', label: 'Dashboard' }, { key: 'menu', label: 'Menu' },
@@ -23,6 +24,12 @@ PERMISSION_SECTIONS.forEach(s => { DEFAULT_PERMISSIONS[s.key] = { view: false, e
 DEFAULT_PERMISSIONS.dashboard = { view: true, edit: false, delete: false };
 
 const UsersListClient = ({ initialUsers, isAdmin, isSuperAdmin }) => {
+    const { user } = useAuth();
+    const { data: meData } = useSWR(isAdmin ? '/auth/me' : null, fetcher, { revalidateOnFocus: false });
+    const activeUser = meData?.user || user;
+    const canEdit = isSuperAdmin || activeUser?.role === 'superadmin' || !!activeUser?.permissions?.users?.edit;
+    const canDelete = isSuperAdmin || activeUser?.role === 'superadmin' || !!activeUser?.permissions?.users?.delete;
+
     const swrKey = isAdmin ? '/users' : null;
     const { data: swrData, error, isLoading: loading } = useSWR(swrKey, fetcher, {
         fallbackData: { users: initialUsers },
@@ -51,11 +58,13 @@ const UsersListClient = ({ initialUsers, isAdmin, isSuperAdmin }) => {
             if (type === 'create') {
                 const data = { ...payload };
                 if (!data.roleId) delete data.roleId;
+                else data.roleId = Number(data.roleId);
                 await api.post('/users', data);
             }
             else if (type === 'edit') {
                 const data = { ...payload };
                 if (!data.roleId) data.roleId = null;
+                else data.roleId = Number(data.roleId);
                 await api.put(`/users/${selectedUser.id}`, data);
             }
             else if (type === 'reset') await api.put(`/users/${selectedUser.id}/reset-password`, { newPassword: payload });
@@ -74,7 +83,7 @@ const UsersListClient = ({ initialUsers, isAdmin, isSuperAdmin }) => {
         <div className="container mt-4">
             <div className="d-flex justify-content-between align-items-center mb-4">
                 <h4>User Management</h4>
-                <Button variant="success" onClick={() => setModals({ ...modals, create: true })}>+ Create User</Button>
+                {canEdit && <Button variant="success" onClick={() => setModals({ ...modals, create: true })}>+ Create User</Button>}
             </div>
 
             <Card className="shadow-sm">
@@ -97,25 +106,29 @@ const UsersListClient = ({ initialUsers, isAdmin, isSuperAdmin }) => {
                                     <td><Badge bg={u.isActive !== false ? 'success' : 'secondary'}>{u.isActive !== false ? 'Active' : 'Inactive'}</Badge></td>
                                     <td className="text-center">
                                         <div className="btn-group">
-                                            <Button size="sm" variant="outline-primary" onClick={() => { 
-                                                setSelectedUser(u); 
-                                                setForms({ 
-                                                    ...forms, 
-                                                    edit: { 
-                                                        username: u.username, 
-                                                        email: u.email, 
-                                                        phone: u.phone, 
-                                                        role: u.role || 'editor', 
-                                                        roleId: u.roleId || '', 
-                                                        isActive: u.isActive !== false 
-                                                    } 
-                                                }); 
-                                                setModals({ ...modals, edit: true }); 
-                                            }}>Edit</Button>
+                                            {canEdit && (
+                                                <>
+                                                    <Button size="sm" variant="outline-primary" onClick={() => { 
+                                                        setSelectedUser(u); 
+                                                        setForms({ 
+                                                            ...forms, 
+                                                            edit: { 
+                                                                username: u.username, 
+                                                                email: u.email, 
+                                                                phone: u.phone, 
+                                                                role: u.role || 'editor', 
+                                                                roleId: u.roleId ? String(u.roleId) : '', 
+                                                                isActive: u.isActive !== false 
+                                                            } 
+                                                        }); 
+                                                        setModals({ ...modals, edit: true }); 
+                                                    }}>Edit</Button>
+                                                    
+                                                    <Button size="sm" variant="outline-info" onClick={() => { setSelectedUser(u); setForms({ ...forms, reset: '' }); setModals({ ...modals, reset: true }); }}>Key</Button>
+                                                </>
+                                            )}
                                             
-                                            <Button size="sm" variant="outline-info" onClick={() => { setSelectedUser(u); setForms({ ...forms, reset: '' }); setModals({ ...modals, reset: true }); }}>Key</Button>
-                                            
-                                            {isSuperAdmin && (
+                                            {canDelete && (
                                                 <Button size="sm" variant="outline-danger" disabled={u.role === 'superadmin'} onClick={() => { 
                                                     setSelectedUser(u); 
                                                     setModals({ ...modals, delete: true }); 

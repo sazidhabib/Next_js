@@ -17,6 +17,7 @@ const {
     recordClick
 } = require("../controllers/ad-controller");
 const authMiddleware = require("../middlewares/auth-middleware");
+const checkPermission = require("../middlewares/permission-middleware");
 
 // Public routes
 router.get("/", getAllAds);
@@ -74,10 +75,10 @@ router.get("/debug/raw", async (req, res) => {
 router.post("/:id/impression", recordImpression);
 router.post("/:id/click", recordClick);
 
-// Protected routes (require authentication)
-router.post("/", authMiddleware, upload.fields([{ name: "image", maxCount: 1 }, { name: "mobileImage", maxCount: 1 }]), convertToWebp('ads'), createAd);
-router.patch("/:id", authMiddleware, upload.fields([{ name: "image", maxCount: 1 }, { name: "mobileImage", maxCount: 1 }]), convertToWebp('ads'), updateAd);
-router.delete("/:id", authMiddleware, deleteAd);
-router.post("/bulk-delete", authMiddleware, bulkDeleteAds);
+// Protected routes (require authentication & permission)
+router.post("/", authMiddleware, checkPermission('ads', 'edit'), upload.fields([{ name: "image", maxCount: 1 }, { name: "mobileImage", maxCount: 1 }]), convertToWebp('ads'), createAd);
+router.patch("/:id", authMiddleware, checkPermission('ads', 'edit'), upload.fields([{ name: "image", maxCount: 1 }, { name: "mobileImage", maxCount: 1 }]), convertToWebp('ads'), updateAd);
+router.delete("/:id", authMiddleware, checkPermission('ads', 'delete'), deleteAd);
+router.post("/bulk-delete", authMiddleware, checkPermission('ads', 'delete'), bulkDeleteAds);
 
 module.exports = router;

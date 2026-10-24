@@ -49,9 +49,22 @@ const createUser = async (req, res) => {
             return res.status(400).json({ message: "Username, email, phone, and password are required" });
         }
 
-        // Restrict role/permission setup to superadmin
-        if ((roleId !== undefined || permissions !== undefined || role === 'superadmin' || role === 'admin') && (!req.user || req.user.role !== 'superadmin')) {
-            return res.status(403).json({ message: "Only superadmins can assign roles or permissions on user creation" });
+        // Restrict superadmin role creation to superadmin
+        if (role === 'superadmin' && (!req.user || req.user.role !== 'superadmin')) {
+            return res.status(403).json({ message: "Only superadmins can create a superadmin user" });
+        }
+
+        const parsedRoleId = roleId ? Number(roleId) : null;
+        let effectivePermissions = permissions;
+
+        if (!effectivePermissions && parsedRoleId) {
+            const roleObj = await Role.findByPk(parsedRoleId);
+            if (roleObj) {
+                effectivePermissions = roleObj.permissions;
+            }
+        }
+        if (!effectivePermissions) {
+            effectivePermissions = User.DEFAULT_PERMISSIONS;
         }
 
         const newUser = await User.create({
@@ -60,8 +73,8 @@ const createUser = async (req, res) => {
             phone,
             password,
             role: role || 'editor',
-            roleId: roleId || null,
-            permissions: permissions || User.DEFAULT_PERMISSIONS,
+            roleId: parsedRoleId,
+            permissions: effectivePermissions,
             isAdmin: isAdmin !== undefined ? isAdmin : true,
             isActive: true
         });
@@ -91,9 +104,9 @@ const updateUser = async (req, res) => {
 
         const { username, email, phone, role, roleId, permissions, isAdmin, isActive } = req.body;
 
-        // Restrict role/permission modifications to superadmin
-        if ((role !== undefined || roleId !== undefined || permissions !== undefined) && req.user.role !== 'superadmin') {
-            return res.status(403).json({ message: "Only superadmins can modify roles and permissions" });
+        // Restrict promoting to superadmin unless you are a superadmin
+        if (role === 'superadmin' && req.user.role !== 'superadmin') {
+            return res.status(403).json({ message: "Only superadmins can assign superadmin role" });
         }
 
         const updateData = {};
@@ -101,15 +114,32 @@ const updateUser = async (req, res) => {
         if (email !== undefined) updateData.email = email;
         if (phone !== undefined) updateData.phone = phone;
         if (role !== undefined) updateData.role = role;
-        if (roleId !== undefined) updateData.roleId = roleId;
-        if (permissions !== undefined) updateData.permissions = permissions;
         if (isAdmin !== undefined) updateData.isAdmin = isAdmin;
         if (isActive !== undefined) updateData.isActive = isActive;
+
+        if (roleId !== undefined) {
+            const parsedRoleId = roleId ? Number(roleId) : null;
+            updateData.roleId = parsedRoleId;
+
+            // When a role is assigned, automatically apply the role's permissions
+            if (parsedRoleId) {
+                const roleObj = await Role.findByPk(parsedRoleId);
+                if (roleObj) {
+                    updateData.permissions = roleObj.permissions;
+                }
+            } else if (permissions === undefined) {
+                updateData.permissions = User.DEFAULT_PERMISSIONS;
+            }
+        }
+
+        if (permissions !== undefined) {
+            updateData.permissions = permissions;
+        }
 
         await user.update(updateData);
 
         // Explicitly notify Sequelize that permissions JSON has changed to guarantee save
-        if (permissions !== undefined) {
+        if (updateData.permissions !== undefined) {
             user.changed('permissions', true);
             await user.save();
         }

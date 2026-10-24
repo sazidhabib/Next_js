@@ -7,10 +7,17 @@ import api, { STATIC_URL, sanitizeImageUrl } from "@/app/lib/api";
 import NextImage from 'next/image';
 import useSWR from 'swr';
 import { fetcher } from "@/app/lib/swr-config";
+import { useAuth } from "@/app/providers/AuthProvider";
 
 const IMG_URL = STATIC_URL;
 
 const PhotosListClient = ({ initialImages, initialAlbums, initialTotalPages, initialTotalCount, isAdmin }) => {
+    const { user } = useAuth();
+    const { data: meData } = useSWR(isAdmin ? '/auth/me' : null, fetcher, { revalidateOnFocus: false });
+    const activeUser = meData?.user || user;
+    const canEdit = activeUser?.role === 'superadmin' || !!activeUser?.permissions?.gallery?.edit;
+    const canDelete = activeUser?.role === 'superadmin' || !!activeUser?.permissions?.gallery?.delete;
+
     const [showModal, setShowModal] = useState(false);
     const [editPhoto, setEditPhoto] = useState(null);
     const [albums, setAlbums] = useState(initialAlbums || []);
@@ -102,6 +109,12 @@ const PhotosListClient = ({ initialImages, initialAlbums, initialTotalPages, ini
     };
 
     const handleDelete = async () => {
+        if (!canDelete) {
+            toast.error("You do not have permission to delete photos.");
+            setShowConfirm(false);
+            setDeleteFromFS(false);
+            return;
+        }
         try {
             await api.delete(`/registry/${imageToDelete.id}`, { data: { deleteFromFS } });
             toast.success("Deleted successfully");
@@ -166,14 +179,16 @@ const PhotosListClient = ({ initialImages, initialAlbums, initialTotalPages, ini
                     </p>
                 </div>
                 <div className="d-flex align-items-center gap-2">
-                    <Button 
-                        variant="primary" 
-                        onClick={() => handleShowModal()} 
-                        className="d-flex align-items-center gap-2 px-3 py-2 shadow-sm"
-                    >
-                        <i className="fas fa-cloud-upload-alt"></i>
-                        <span>Upload Photo</span>
-                    </Button>
+                    {canEdit && (
+                        <Button 
+                            variant="primary" 
+                            onClick={() => handleShowModal()} 
+                            className="d-flex align-items-center gap-2 px-3 py-2 shadow-sm"
+                        >
+                            <i className="fas fa-cloud-upload-alt"></i>
+                            <span>Upload Photo</span>
+                        </Button>
+                    )}
                 </div>
             </div>
 
@@ -345,7 +360,7 @@ const PhotosListClient = ({ initialImages, initialAlbums, initialTotalPages, ini
 
                                     {/* Action Bar Footer */}
                                     <div className="card-footer bg-light p-2 border-top d-flex gap-1 justify-content-end">
-                                        {img.source === 'other' && (
+                                        {canEdit && img.source === 'other' && (
                                             <Button 
                                                 variant="outline-success" 
                                                 size="sm" 
@@ -357,7 +372,7 @@ const PhotosListClient = ({ initialImages, initialAlbums, initialTotalPages, ini
                                                 <i className="fas fa-plus-circle me-1"></i>To Gallery
                                             </Button>
                                         )}
-                                        {img.source === 'photo' && (
+                                        {canEdit && img.source === 'photo' && (
                                             <Button 
                                                 variant="outline-warning" 
                                                 size="sm" 
@@ -369,16 +384,18 @@ const PhotosListClient = ({ initialImages, initialAlbums, initialTotalPages, ini
                                                 <i className="fas fa-edit me-1"></i>Edit
                                             </Button>
                                         )}
-                                        <Button 
-                                            variant="outline-danger" 
-                                            size="sm" 
-                                            className="px-2 py-1"
-                                            style={{ fontSize: '0.75rem' }}
-                                            onClick={() => { setImageToDelete(img); setShowConfirm(true); }}
-                                            title="Delete Image"
-                                        >
-                                            <i className="fas fa-trash-alt"></i>
-                                        </Button>
+                                        {canDelete && (
+                                            <Button 
+                                                variant="outline-danger" 
+                                                size="sm" 
+                                                className="px-2 py-1"
+                                                style={{ fontSize: '0.75rem' }}
+                                                onClick={() => { setImageToDelete(img); setShowConfirm(true); }}
+                                                title="Delete Image"
+                                            >
+                                                <i className="fas fa-trash-alt"></i>
+                                            </Button>
+                                        )}
                                     </div>
                                 </Card>
                             </Col>

@@ -5,8 +5,17 @@ import { Table, Form, Button, Card, Spinner, Pagination, Badge, Row, Col, InputG
 import { toast } from 'react-toastify';
 import Link from 'next/link';
 import api from "@/app/lib/api";
+import { useAuth } from "@/app/providers/AuthProvider";
+import useSWR from 'swr';
+import { fetcher } from "@/app/lib/swr-config";
 
 const NewsListClient = ({ initialNews, initialTotalPages, isAdmin }) => {
+    const { user } = useAuth();
+    const { data: meData } = useSWR(isAdmin ? '/auth/me' : null, fetcher, { revalidateOnFocus: false });
+    const activeUser = meData?.user || user;
+    const canEdit = activeUser?.role === 'superadmin' || !!activeUser?.permissions?.news?.edit;
+    const canDelete = activeUser?.role === 'superadmin' || !!activeUser?.permissions?.news?.delete;
+
     const [news, setNews] = useState(initialNews || []);
     const [loading, setLoading] = useState(false);
     const [page, setPage] = useState(1);
@@ -61,7 +70,13 @@ const NewsListClient = ({ initialNews, initialTotalPages, isAdmin }) => {
 
     const handleBulk = async () => {
         if (!bulkAction || selected.length === 0) return;
-        if (bulkAction === 'delete' && !confirm(`Delete ${selected.length} items?`)) return;
+        if (bulkAction === 'delete') {
+            if (!canDelete) {
+                toast.error("You do not have permission to delete news.");
+                return;
+            }
+            if (!confirm(`Delete ${selected.length} items?`)) return;
+        }
 
         try {
             if (bulkAction === 'delete') {
@@ -75,6 +90,10 @@ const NewsListClient = ({ initialNews, initialTotalPages, isAdmin }) => {
     };
 
     const handleDelete = async (id) => {
+        if (!canDelete) {
+            toast.error("You do not have permission to delete news.");
+            return;
+        }
         if (!confirm("Delete this news post?")) return;
         try {
             await api.delete(`/news/${id}`);
@@ -98,7 +117,7 @@ const NewsListClient = ({ initialNews, initialTotalPages, isAdmin }) => {
         <div className="container-fluid mt-4">
             <div className="d-flex justify-content-between align-items-center mb-4">
                 <h4>News Management</h4>
-                <Link href="/admin/news/create" className="btn btn-primary">+ Create News</Link>
+                {canEdit && <Link href="/admin/news/create" className="btn btn-primary">+ Create News</Link>}
             </div>
 
             <Row className="mb-3 g-2">
@@ -115,7 +134,7 @@ const NewsListClient = ({ initialNews, initialTotalPages, isAdmin }) => {
                     <InputGroup>
                         <Form.Select value={bulkAction} onChange={e => setBulkAction(e.target.value)}>
                             <option value="">Bulk Actions</option>
-                            <option value="delete">Delete Selected</option>
+                            {canDelete && <option value="delete">Delete Selected</option>}
                         </Form.Select>
                         <Button variant="outline-primary" onClick={handleBulk} disabled={!bulkAction || selected.length === 0}>Apply</Button>
                     </InputGroup>
@@ -143,8 +162,12 @@ const NewsListClient = ({ initialNews, initialTotalPages, isAdmin }) => {
                                         <td>{new Date(n.createdAt).toLocaleDateString()}</td>
                                         <td className="text-center">
                                             <div className="btn-group">
-                                                <Link href={n.newsType === 'photo' ? `/admin/photo-news/edit/${n.id}` : n.newsType === 'video' ? `/admin/video-news/edit/${n.id}` : `/admin/news/edit/${n.id}`} className="btn btn-sm btn-outline-primary">Edit</Link>
-                                                <Button variant="outline-danger" size="sm" onClick={() => handleDelete(n.id)}>Del</Button>
+                                                {canEdit && (
+                                                    <Link href={n.newsType === 'photo' ? `/admin/photo-news/edit/${n.id}` : n.newsType === 'video' ? `/admin/video-news/edit/${n.id}` : `/admin/news/edit/${n.id}`} className="btn btn-sm btn-outline-primary">Edit</Link>
+                                                )}
+                                                {canDelete && (
+                                                    <Button variant="outline-danger" size="sm" onClick={() => handleDelete(n.id)}>Del</Button>
+                                                )}
                                                 <Link href={`/news/${n.slug}`} target="_blank" className="btn btn-sm btn-outline-info">View</Link>
                                             </div>
                                         </td>

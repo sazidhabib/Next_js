@@ -22,6 +22,7 @@ export const AuthProvider = ({ children }) => {
             const decoded = jwtDecode(token);
             const userData = {
                 userId: decoded.userId,
+                username: decoded.username,
                 email: decoded.email,
                 isAdmin: decoded.isAdmin,
                 role: decoded.role,
@@ -63,6 +64,7 @@ export const AuthProvider = ({ children }) => {
                         // Restore user if not set but token is valid
                         const userData = {
                             userId: decoded.userId,
+                            username: decoded.username,
                             email: decoded.email,
                             isAdmin: decoded.isAdmin,
                             role: decoded.role,

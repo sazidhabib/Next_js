@@ -11,6 +11,7 @@ const {
     bulkDeleteTags
 } = require("../controllers/tag-controller");
 const authMiddleware = require("../middlewares/auth-middleware");
+const checkPermission = require("../middlewares/permission-middleware");
 
 // Add debug middleware to see what's being received
 const debugMiddleware = (req, res, next) => {
@@ -29,10 +30,10 @@ const debugMiddleware = (req, res, next) => {
 router.get("/", getAllTags);
 router.get("/:id", getTag);
 
-// Protected routes (require authentication)
-router.post("/", authMiddleware, debugMiddleware, upload.single("image"), convertToWebp(), createTag);
-router.patch("/:id", authMiddleware, debugMiddleware, upload.single("image"), convertToWebp(), updateTag);
-router.delete("/:id", authMiddleware, deleteTag);
-router.post("/bulk-delete", authMiddleware, bulkDeleteTags);
+// Protected routes (require authentication & permission)
+router.post("/", authMiddleware, checkPermission('tags', 'edit'), debugMiddleware, upload.single("image"), convertToWebp(), createTag);
+router.patch("/:id", authMiddleware, checkPermission('tags', 'edit'), debugMiddleware, upload.single("image"), convertToWebp(), updateTag);
+router.delete("/:id", authMiddleware, checkPermission('tags', 'delete'), deleteTag);
+router.post("/bulk-delete", authMiddleware, checkPermission('tags', 'delete'), bulkDeleteTags);
 
 module.exports = router;

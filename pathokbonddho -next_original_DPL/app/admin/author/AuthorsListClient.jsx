@@ -7,6 +7,7 @@ import api, { STATIC_URL } from "@/app/lib/api";
 import NextImage from 'next/image';
 import useSWR, { mutate } from 'swr';
 import { fetcher } from "@/app/lib/swr-config";
+import { useAuth } from "@/app/providers/AuthProvider";
 
 const IMG_URL = `${STATIC_URL}/uploads`;
 
@@ -28,6 +29,12 @@ const getFullImageUrl = (imgPath) => {
 };
 
 const AuthorsListClient = ({ initialAuthors, initialPagination, isAdmin }) => {
+    const { user } = useAuth();
+    const { data: meData } = useSWR(isAdmin ? '/auth/me' : null, fetcher, { revalidateOnFocus: false });
+    const activeUser = meData?.user || user;
+    const canEdit = activeUser?.role === 'superadmin' || !!activeUser?.permissions?.authors?.edit;
+    const canDelete = activeUser?.role === 'superadmin' || !!activeUser?.permissions?.authors?.delete;
+
     const [showModal, setShowModal] = useState(false);
     const [editingAuthor, setEditingAuthor] = useState(null);
     const [selectedAuthors, setSelectedAuthors] = useState([]);
@@ -115,6 +122,10 @@ const AuthorsListClient = ({ initialAuthors, initialPagination, isAdmin }) => {
     };
 
     const handleDelete = async (id) => {
+        if (!canDelete) {
+            toast.error('You do not have permission to delete authors.');
+            return;
+        }
         if (!window.confirm('Delete this author?')) return;
         try {
             await api.delete(`/authors/${id}`);
@@ -131,9 +142,11 @@ const AuthorsListClient = ({ initialAuthors, initialPagination, isAdmin }) => {
         <div className="container mt-4">
             <div className="d-flex justify-content-between align-items-center mb-4">
                 <h4 className="mb-0">✍️ Authors Management</h4>
-                <Button variant="primary" onClick={() => { resetForm(); setShowModal(true); }} className="shadow-sm">
-                    <i className="fas fa-plus me-2"></i>Add Author
-                </Button>
+                {canEdit && (
+                    <Button variant="primary" onClick={() => { resetForm(); setShowModal(true); }} className="shadow-sm">
+                        <i className="fas fa-plus me-2"></i>Add Author
+                    </Button>
+                )}
             </div>
 
             <Card className="mb-4 shadow-sm border-0 bg-light">
@@ -150,7 +163,7 @@ const AuthorsListClient = ({ initialAuthors, initialPagination, isAdmin }) => {
                             </Form.Select>
                         </Col>
                         <Col md={4} className="text-end">
-                            {selectedAuthors.length > 0 && <Button variant="danger" className="shadow-sm" onClick={() => {/* bulk delete logic if exists */ }}>Delete Selected ({selectedAuthors.length})</Button>}
+                            {canDelete && selectedAuthors.length > 0 && <Button variant="danger" className="shadow-sm" onClick={() => {/* bulk delete logic if exists */ }}>Delete Selected ({selectedAuthors.length})</Button>}
                         </Col>
                     </Row>
                 </Card.Body>
@@ -192,13 +205,17 @@ const AuthorsListClient = ({ initialAuthors, initialPagination, isAdmin }) => {
                                     <td><Badge bg={author.isSpecialAuthor ? "success" : "info"}>{author.isSpecialAuthor ? 'Special' : 'Regular'}</Badge></td>
                                     <td className="text-center">
                                         <div className="btn-group">
-                                            <Button variant="outline-primary" size="sm" onClick={() => {
-                                                setEditingAuthor(author);
-                                                setFormData({ name: author.name, description: author.description || '', websiteLink: author.websiteLink || '', isSpecialAuthor: author.isSpecialAuthor });
-                                                setImagePreview(getFullImageUrl(author.image));
-                                                setShowModal(true);
-                                            }}>Edit</Button>
-                                            <Button variant="outline-danger" size="sm" onClick={() => handleDelete(author.id)}>Del</Button>
+                                            {canEdit && (
+                                                <Button variant="outline-primary" size="sm" onClick={() => {
+                                                    setEditingAuthor(author);
+                                                    setFormData({ name: author.name, description: author.description || '', websiteLink: author.websiteLink || '', isSpecialAuthor: author.isSpecialAuthor });
+                                                    setImagePreview(getFullImageUrl(author.image));
+                                                    setShowModal(true);
+                                                }}>Edit</Button>
+                                            )}
+                                            {canDelete && (
+                                                <Button variant="outline-danger" size="sm" onClick={() => handleDelete(author.id)}>Del</Button>
+                                            )}
                                         </div>
                                     </td>
                                 </tr>

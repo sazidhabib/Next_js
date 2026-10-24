@@ -18,12 +18,20 @@ export async function POST(request) {
         const isPasswordValid = await userExist.comparePassword(password);
 
         if (isPasswordValid) {
+            if (!userExist.isActive) {
+                return NextResponse.json(
+                    { msg: "Unauthorized: Account is deactivated" },
+                    { status: 403 }
+                );
+            }
+
             return NextResponse.json({
                 msg: "Login success",
                 token: userExist.generateToken(),
                 userId: userExist.id,
                 isAdmin: userExist.isAdmin,
                 role: userExist.role,
+                roleId: userExist.roleId,
                 username: userExist.username,
                 permissions: userExist.permissions
             }, { status: 200 });

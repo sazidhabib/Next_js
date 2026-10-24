@@ -7,6 +7,7 @@ import api, { STATIC_URL } from "@/app/lib/api";
 import NextImage from 'next/image';
 import useSWR, { mutate } from 'swr';
 import { fetcher } from "@/app/lib/swr-config";
+import { useAuth } from "@/app/providers/AuthProvider";
 
 const IMG_URL = `${STATIC_URL}/uploads/ads`;
 
@@ -379,6 +380,12 @@ const AdForm = ({ ad, onClose, onSuccess, categories = [] }) => {
 };
 
 const AdsListClient = ({ initialAds, initialTotalCount, isAdmin }) => {
+    const { user } = useAuth();
+    const { data: meData } = useSWR(isAdmin ? '/auth/me' : null, fetcher, { revalidateOnFocus: false });
+    const activeUser = meData?.user || user;
+    const canEdit = activeUser?.role === 'superadmin' || !!activeUser?.permissions?.ads?.edit;
+    const canDelete = activeUser?.role === 'superadmin' || !!activeUser?.permissions?.ads?.delete;
+
     const [showForm, setShowForm] = useState(false);
     const [editingAd, setEditingAd] = useState(null);
     const [selectedAds, setSelectedAds] = useState([]);
@@ -410,6 +417,10 @@ const AdsListClient = ({ initialAds, initialTotalCount, isAdmin }) => {
     const refreshData = () => mutate(swrKey);
 
     const handleDelete = async (id) => {
+        if (!canDelete) {
+            toast.error('You do not have permission to delete ads.');
+            return;
+        }
         if (!window.confirm('Delete this ad?')) return;
         try {
             await api.delete(`/ads/${id}`);
@@ -419,6 +430,10 @@ const AdsListClient = ({ initialAds, initialTotalCount, isAdmin }) => {
     };
 
     const handleBulkDelete = async () => {
+        if (!canDelete) {
+            toast.error('You do not have permission to delete ads.');
+            return;
+        }
         if (!window.confirm(`Delete ${selectedAds.length} ads?`)) return;
         try {
             await api.post('/ads/bulk-delete', { adIds: selectedAds });
@@ -434,7 +449,7 @@ const AdsListClient = ({ initialAds, initialTotalCount, isAdmin }) => {
         <div className="container mt-4">
             <div className="d-flex justify-content-between align-items-center mb-4">
                 <h4>Ads Management</h4>
-                {!showForm && <Button onClick={() => { setEditingAd(null); setShowForm(true); }}>+ Create Ad</Button>}
+                {!showForm && canEdit && <Button onClick={() => { setEditingAd(null); setShowForm(true); }}>+ Create Ad</Button>}
             </div>
 
             {showForm ? (
@@ -449,7 +464,7 @@ const AdsListClient = ({ initialAds, initialTotalCount, isAdmin }) => {
                 <Card className="shadow-sm">
                     <Card.Body>
                         <AdFilters filters={filters} onFilterChange={setFilters} loading={loading} />
-                        {selectedAds.length > 0 && <Button variant="danger" size="sm" className="mb-3" onClick={handleBulkDelete}>Delete Selected ({selectedAds.length})</Button>}
+                        {canDelete && selectedAds.length > 0 && <Button variant="danger" size="sm" className="mb-3" onClick={handleBulkDelete}>Delete Selected ({selectedAds.length})</Button>}
                         <div className="table-responsive">
                             <Table hover className="mb-0">
                                 <thead className="table-dark">
@@ -498,8 +513,8 @@ const AdsListClient = ({ initialAds, initialTotalCount, isAdmin }) => {
 
                                             <td className="text-center">
                                                 <div className="btn-group">
-                                                    <Button variant="outline-primary" size="sm" onClick={() => { setEditingAd(ad); setShowForm(true); }}>Edit</Button>
-                                                    <Button variant="outline-danger" size="sm" onClick={() => handleDelete(ad.id)}>Del</Button>
+                                                    {canEdit && <Button variant="outline-primary" size="sm" onClick={() => { setEditingAd(ad); setShowForm(true); }}>Edit</Button>}
+                                                    {canDelete && <Button variant="outline-danger" size="sm" onClick={() => handleDelete(ad.id)}>Del</Button>}
                                                 </div>
                                             </td>
                                         </tr>

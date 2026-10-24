@@ -133,11 +133,37 @@ const User = sequelize.define('User', {
                 const salt = await bcrypt.genSalt(10);
                 user.password = await bcrypt.hash(user.password, salt);
             }
+            if (user.roleId) {
+                try {
+                    const Role = require('./role-model');
+                    const roleRecord = await Role.findByPk(user.roleId);
+                    if (roleRecord && roleRecord.permissions) {
+                        user.permissions = roleRecord.permissions;
+                    }
+                } catch (e) {
+                    console.error("beforeCreate role sync error:", e);
+                }
+            }
         },
         beforeUpdate: async (user) => {
             if (user.changed('password')) {
                 const salt = await bcrypt.genSalt(10);
                 user.password = await bcrypt.hash(user.password, salt);
+            }
+            if (user.changed('roleId')) {
+                if (user.roleId) {
+                    try {
+                        const Role = require('./role-model');
+                        const roleRecord = await Role.findByPk(user.roleId);
+                        if (roleRecord && roleRecord.permissions) {
+                            user.permissions = roleRecord.permissions;
+                        }
+                    } catch (e) {
+                        console.error("beforeUpdate role sync error:", e);
+                    }
+                } else {
+                    user.permissions = DEFAULT_PERMISSIONS;
+                }
             }
         }
     }
@@ -149,18 +175,39 @@ User.prototype.comparePassword = async function (password) {
 };
 
 // Instance method for generating token
-User.prototype.generateToken = function () {
+User.prototype.generateToken = async function () {
+    let permissions = this.permissions;
+
+    if (this.role === 'superadmin') {
+        permissions = FULL_PERMISSIONS;
+    } else if (this.roleId) {
+        if (this.roleRelation && this.roleRelation.permissions) {
+            permissions = this.roleRelation.permissions;
+        } else {
+            try {
+                const Role = require('./role-model');
+                const roleRecord = await Role.findByPk(this.roleId);
+                if (roleRecord && roleRecord.permissions) {
+                    permissions = roleRecord.permissions;
+                }
+            } catch (err) {
+                console.error("Error loading role in generateToken:", err);
+            }
+        }
+    }
+
     return jwt.sign(
         {
             userId: this.id,
             email: this.email,
+            username: this.username,
             isAdmin: this.isAdmin,
             role: this.role,
             roleId: this.roleId,
-            permissions: this.permissions
+            permissions: permissions
         },
         process.env.JWT_SECRET_KEY,
-        { expiresIn: "4h" }
+        { expiresIn: "30d" }
     );
 };
 

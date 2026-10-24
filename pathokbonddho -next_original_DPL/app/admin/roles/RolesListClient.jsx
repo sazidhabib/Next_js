@@ -74,18 +74,55 @@ const RolesListClient = ({ initialRoles, isSuperAdmin }) => {
     const handlePermissionChange = (formType, sectionKey, actionKey) => {
         const currentForm = forms[formType];
         const currentSecPerm = currentForm.permissions[sectionKey] || { view: false, edit: false, delete: false };
-        
+        const nextValue = !currentSecPerm[actionKey];
+
+        const newSecPerm = {
+            ...currentSecPerm,
+            [actionKey]: nextValue
+        };
+
+        // If checking edit or delete, automatically enable view
+        if ((actionKey === 'edit' || actionKey === 'delete') && nextValue) {
+            newSecPerm.view = true;
+        }
+        // If unchecking view, automatically disable edit and delete
+        if (actionKey === 'view' && !nextValue) {
+            newSecPerm.edit = false;
+            newSecPerm.delete = false;
+        }
+
         setForms({
             ...forms,
             [formType]: {
                 ...currentForm,
                 permissions: {
                     ...currentForm.permissions,
-                    [sectionKey]: {
-                        ...currentSecPerm,
-                        [actionKey]: !currentSecPerm[actionKey]
-                    }
+                    [sectionKey]: newSecPerm
                 }
+            }
+        });
+    };
+
+    const setAllPermissions = (formType, type) => {
+        const currentForm = forms[formType];
+        const updatedPerms = {};
+        PERMISSION_SECTIONS.forEach(s => {
+            if (type === 'all_view') {
+                updatedPerms[s.key] = { view: true, edit: false, delete: false };
+            } else if (type === 'all_full') {
+                updatedPerms[s.key] = { view: true, edit: true, delete: true };
+            } else if (type === 'none') {
+                updatedPerms[s.key] = { view: false, edit: false, delete: false };
+            }
+        });
+        if (type !== 'none') {
+            updatedPerms.dashboard = { view: true, edit: false, delete: false };
+        }
+        setForms({
+            ...forms,
+            [formType]: {
+                ...currentForm,
+                permissions: updatedPerms
             }
         });
     };
@@ -168,7 +205,14 @@ const RolesListClient = ({ initialRoles, isSuperAdmin }) => {
                         />
                     </Form.Group>
                     
-                    <Form.Label className="fw-semibold mb-2">Configure Section Permissions</Form.Label>
+                    <div className="d-flex justify-content-between align-items-center mb-2">
+                        <Form.Label className="fw-semibold mb-0">Configure Section Permissions</Form.Label>
+                        <div className="btn-group btn-group-sm">
+                            <button type="button" className="btn btn-outline-secondary btn-sm" onClick={() => setAllPermissions('create', 'all_view')}>All View</button>
+                            <button type="button" className="btn btn-outline-primary btn-sm" onClick={() => setAllPermissions('create', 'all_full')}>Full Access</button>
+                            <button type="button" className="btn btn-outline-danger btn-sm" onClick={() => setAllPermissions('create', 'none')}>Clear</button>
+                        </div>
+                    </div>
                     <Table bordered size="sm" className="mb-0">
                         <thead className="table-light">
                             <tr>
@@ -227,7 +271,14 @@ const RolesListClient = ({ initialRoles, isSuperAdmin }) => {
                         />
                     </Form.Group>
                     
-                    <Form.Label className="fw-semibold mb-2">Configure Section Permissions</Form.Label>
+                    <div className="d-flex justify-content-between align-items-center mb-2">
+                        <Form.Label className="fw-semibold mb-0">Configure Section Permissions</Form.Label>
+                        <div className="btn-group btn-group-sm">
+                            <button type="button" className="btn btn-outline-secondary btn-sm" onClick={() => setAllPermissions('edit', 'all_view')}>All View</button>
+                            <button type="button" className="btn btn-outline-primary btn-sm" onClick={() => setAllPermissions('edit', 'all_full')}>Full Access</button>
+                            <button type="button" className="btn btn-outline-danger btn-sm" onClick={() => setAllPermissions('edit', 'none')}>Clear</button>
+                        </div>
+                    </div>
                     <Table bordered size="sm" className="mb-0">
                         <thead className="table-light">
                             <tr>

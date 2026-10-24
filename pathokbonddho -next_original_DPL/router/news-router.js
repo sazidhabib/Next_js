@@ -18,6 +18,7 @@ const {
     getCategories
 } = require("../controllers/news-controller");
 const authMiddleware = require("../middlewares/auth-middleware");
+const checkPermission = require("../middlewares/permission-middleware");
 
 // Configure multer for multiple files
 const newsUpload = upload.fields([
@@ -32,11 +33,11 @@ router.get("/:id", getNews);
 router.get("/slug/:slug", getNewsBySlug);
 router.get("/categories/list", getCategories);
 
-// Protected routes (require authentication)
-router.post("/", authMiddleware, newsUpload, convertToWebp('post_image'), createNews);
-router.patch("/:id", authMiddleware, newsUpload, convertToWebp('post_image'), updateNews);
-router.delete("/:id", authMiddleware, deleteNews);
-router.post("/bulk-delete", authMiddleware, bulkDeleteNews);
+// Protected routes (require authentication & permission)
+router.post("/", authMiddleware, checkPermission('news', 'edit'), newsUpload, convertToWebp('post_image'), createNews);
+router.patch("/:id", authMiddleware, checkPermission('news', 'edit'), newsUpload, convertToWebp('post_image'), updateNews);
+router.delete("/:id", authMiddleware, checkPermission('news', 'delete'), deleteNews);
+router.post("/bulk-delete", authMiddleware, checkPermission('news', 'delete'), bulkDeleteNews);
 
 
 

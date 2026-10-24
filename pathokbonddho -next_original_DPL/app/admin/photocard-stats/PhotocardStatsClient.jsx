@@ -6,8 +6,14 @@ import useSWR, { mutate } from 'swr';
 import { fetcher } from "@/app/lib/swr-config";
 import { toast } from 'react-toastify';
 import api, { STATIC_URL } from '@/app/lib/api';
+import { useAuth } from "@/app/providers/AuthProvider";
 
 export default function PhotocardStatsClient({ initialStats, isAdmin }) {
+    const { user } = useAuth();
+    const { data: meData } = useSWR(isAdmin ? '/auth/me' : null, fetcher, { revalidateOnFocus: false });
+    const activeUser = meData?.user || user;
+    const canDelete = activeUser?.role === 'superadmin' || !!activeUser?.permissions?.gallery?.delete;
+
     const swrKey = isAdmin ? '/photocards/stats' : null;
 
     const [page, setPage] = useState(1);
@@ -55,6 +61,10 @@ export default function PhotocardStatsClient({ initialStats, isAdmin }) {
     };
 
     const handleDeleteImage = async (id) => {
+        if (!canDelete) {
+            toast.error("You do not have permission to delete photocard images.");
+            return;
+        }
         if (!window.confirm("Are you sure you want to delete this photocard photo? This will delete both the database record and the file from disk.")) return;
         try {
             await api.delete(`/photocards/images/${id}`);
@@ -283,14 +293,16 @@ export default function PhotocardStatsClient({ initialStats, isAdmin }) {
                                                         >
                                                             <i className="fas fa-eye me-1"></i> View
                                                         </Button>
-                                                        <Button 
-                                                            variant="danger" 
-                                                            size="sm" 
-                                                            className="fw-semibold"
-                                                            onClick={() => handleDeleteImage(img.id)}
-                                                        >
-                                                            <i className="fas fa-trash-alt me-1"></i> Delete
-                                                        </Button>
+                                                        {canDelete && (
+                                                            <Button 
+                                                                variant="danger" 
+                                                                size="sm" 
+                                                                className="fw-semibold"
+                                                                onClick={() => handleDeleteImage(img.id)}
+                                                            >
+                                                                <i className="fas fa-trash-alt me-1"></i> Delete
+                                                            </Button>
+                                                        )}
                                                     </div>
                                                 </div>
                                                 <Card.Body className="p-2 p-sm-3" style={{ fontSize: '0.85rem' }}>

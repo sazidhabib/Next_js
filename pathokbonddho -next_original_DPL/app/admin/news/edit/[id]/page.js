@@ -19,6 +19,7 @@ const NewsEdit = () => {
     const { id } = useParams();
     const { user } = useAuth();
     const isAdmin = user?.role === 'admin' || user?.role === 'superadmin' || user?.isAdmin;
+    const canEdit = user?.role === 'superadmin' || !!user?.permissions?.news?.edit;
 
     const [loading, setLoading] = useState(false);
     const [fetching, setFetching] = useState(true);
@@ -309,6 +310,10 @@ const NewsEdit = () => {
     };
 
 
+
+    if (!isAdmin || !canEdit) {
+        return <div className="p-4 text-center"><h4>Access Denied: You do not have permission to edit news.</h4></div>;
+    }
 
     return (
         <Container fluid className="py-4">

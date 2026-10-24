@@ -3,14 +3,25 @@
 import { useState, useEffect } from 'react';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import useSWR from 'swr';
+import { fetcher } from '@/app/lib/swr-config';
 import { useAuth } from '@/app/providers/AuthProvider';
 import ThemeToggle from '@/app/components/ThemeToggle';
 
-export default function AdminLayoutClient({ children, user }) {
-    const { loading, logout } = useAuth();
+export default function AdminLayoutClient({ children, user: initialUser }) {
+    const { loading, logout, user: authUser } = useAuth();
     const router = useRouter();
     const pathname = usePathname();
     const searchParams = useSearchParams();
+
+    // Dynamically fetch live profile and permissions from DB
+    const { data: profileData } = useSWR('/auth/me', fetcher, {
+        revalidateOnFocus: true,
+        revalidateOnMount: true,
+        dedupingInterval: 3000
+    });
+
+    const activeUser = profileData?.user || initialUser || authUser;
 
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [isGalleryOpen, setIsGalleryOpen] = useState(false);
@@ -67,19 +78,19 @@ export default function AdminLayoutClient({ children, user }) {
         return normalizedPathname === normalizedTargetPath;
     };
 
-    const isAdminUser = user?.role === 'admin' || user?.role === 'superadmin' || user?.isAdmin;
+    const isAdminUser = activeUser?.role === 'admin' || activeUser?.role === 'superadmin' || activeUser?.isAdmin;
 
     const hasViewPermission = (section) => {
-        if (user?.role === 'superadmin') return true;
-        if (!user?.permissions) return false;
-        return !!user.permissions[section]?.view;
+        if (activeUser?.role === 'superadmin') return true;
+        if (!activeUser?.permissions) return false;
+        return !!activeUser.permissions[section]?.view;
     };
 
     useEffect(() => {
-        if (!loading && (!user || !isAdminUser)) {
+        if (!loading && (!activeUser || !isAdminUser)) {
             router.push('/login');
         }
-    }, [user, loading, router, isAdminUser]);
+    }, [activeUser, loading, router, isAdminUser]);
 
     if (loading) {
         return (
@@ -91,7 +102,7 @@ export default function AdminLayoutClient({ children, user }) {
         );
     }
 
-    if (!user || !isAdminUser) {
+    if (!activeUser || !isAdminUser) {
         return null;
     }
 
@@ -174,11 +185,13 @@ export default function AdminLayoutClient({ children, user }) {
                     {/* User Profile Widget */}
                     <div className="px-4 py-4 border-bottom border-zinc-800/30 mb-2 d-flex align-items-center gap-3">
                         <div className="rounded-circle bg-teal-500/10 border border-teal-500/20 d-flex justify-content-center align-items-center font-bold text-teal-400 shadow-sm" style={{ width: '40px', height: '40px', minWidth: '40px' }}>
-                            {user?.username ? user.username[0].toUpperCase() : 'A'}
+                            {activeUser?.username ? activeUser.username[0].toUpperCase() : 'A'}
                         </div>
                         <div className="overflow-hidden">
-                            <h6 className="mb-0 text-white text-truncate font-semibold" style={{ fontSize: '0.875rem', color: '#ffffff' }}>{user?.username || 'Admin User'}</h6>
-                            <span className="text-uppercase text-teal-400 font-bold" style={{ fontSize: '0.65rem', letterSpacing: '0.05em' }}>{user?.role || 'Administrator'}</span>
+                            <h6 className="mb-0 text-white text-truncate font-semibold" style={{ fontSize: '0.875rem', color: '#ffffff' }}>{activeUser?.username || 'Admin User'}</h6>
+                            <span className="text-uppercase text-teal-400 font-bold" style={{ fontSize: '0.65rem', letterSpacing: '0.05em' }}>
+                                {activeUser?.roleName || activeUser?.role || 'Administrator'}
+                            </span>
                         </div>
                     </div>
 
@@ -194,7 +207,7 @@ export default function AdminLayoutClient({ children, user }) {
                             </>
                         )}
 
-                        {(hasViewPermission('news') || hasViewPermission('gallery') || hasViewPermission('tags') || hasViewPermission('authors') || hasViewPermission('heroSection') || hasViewPermission('ads')) && (
+                        {(hasViewPermission('news') || hasViewPermission('gallery') || hasViewPermission('tags') || hasViewPermission('authors') || hasViewPermission('heroSection') || hasViewPermission('ads') || hasViewPermission('videos') || hasViewPermission('articles') || hasViewPermission('sections') || hasViewPermission('blog') || hasViewPermission('songs')) && (
                             <>
                                 <div className="sidebar-category-header">Content Management</div>
                                 
@@ -358,7 +371,7 @@ export default function AdminLayoutClient({ children, user }) {
                             </>
                         )}
 
-                        {(hasViewPermission('users') || user?.role === 'superadmin') && (
+                        {(hasViewPermission('users') || activeUser?.role === 'superadmin') && (
                             <>
                                 <div className="sidebar-category-header">System</div>
                                 {hasViewPermission('users') && (
@@ -368,14 +381,14 @@ export default function AdminLayoutClient({ children, user }) {
                                         </Link>
                                     </li>
                                 )}
-                                {user?.role === 'superadmin' && (
+                                {activeUser?.role === 'superadmin' && (
                                     <li className="nav-item">
                                         <Link href="/admin/roles" className={`sidebar-link ${isActiveRoute('/admin/roles') ? 'sidebar-link-active' : ''}`}>
                                             <i className="fas fa-user-shield me-2"></i> Roles
                                         </Link>
                                     </li>
                                 )}
-                                {user?.role === 'superadmin' && (
+                                {activeUser?.role === 'superadmin' && (
                                     <li className="nav-item">
                                         <Link href="/admin/settings" className={`sidebar-link ${isActiveRoute('/admin/settings') ? 'sidebar-link-active' : ''}`}>
                                             <i className="fas fa-cog me-2"></i> Settings

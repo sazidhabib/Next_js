@@ -153,15 +153,31 @@ export default function AdminDashboardClient({ initialStats, user }) {
                 <div className="card-body p-4">
                     <h5 className="fw-bold text-slate-800 mb-3" style={{ fontSize: '1.1rem' }}>Quick Actions</h5>
                     <div className="d-flex gap-3 flex-wrap">
-                        <Link href="/admin/news/create" className="btn btn-primary d-flex align-items-center gap-2 py-2">
-                            <i className="fas fa-plus"></i> Write Article
-                        </Link>
-                        <Link href="/admin/menu" className="btn btn-outline-primary d-flex align-items-center gap-2 py-2">
-                            <i className="fas fa-compass"></i> Manage Navigation
-                        </Link>
-                        <Link href="/admin/settings" className="btn btn-outline-secondary d-flex align-items-center gap-2 py-2">
-                            <i className="fas fa-cog"></i> System Settings
-                        </Link>
+                        {(user?.role === 'superadmin' || user?.permissions?.news?.view) && (
+                            <Link href="/admin/news/create" className="btn btn-primary d-flex align-items-center gap-2 py-2">
+                                <i className="fas fa-plus"></i> Write Article
+                            </Link>
+                        )}
+                        {(user?.role === 'superadmin' || user?.permissions?.menu?.view) && (
+                            <Link href="/admin/menu" className="btn btn-outline-primary d-flex align-items-center gap-2 py-2">
+                                <i className="fas fa-compass"></i> Manage Navigation
+                            </Link>
+                        )}
+                        {user?.role === 'superadmin' && (
+                            <Link href="/admin/settings" className="btn btn-outline-secondary d-flex align-items-center gap-2 py-2">
+                                <i className="fas fa-cog"></i> System Settings
+                            </Link>
+                        )}
+                        {(user?.role === 'superadmin' || user?.permissions?.tags?.view) && (
+                            <Link href="/admin/tags" className="btn btn-outline-secondary d-flex align-items-center gap-2 py-2">
+                                <i className="fas fa-tags"></i> Tags
+                            </Link>
+                        )}
+                        {(user?.role === 'superadmin' || user?.permissions?.gallery?.view) && (
+                            <Link href="/admin/photos" className="btn btn-outline-secondary d-flex align-items-center gap-2 py-2">
+                                <i className="fas fa-images"></i> Media Photos
+                            </Link>
+                        )}
                     </div>
                 </div>
             </div>

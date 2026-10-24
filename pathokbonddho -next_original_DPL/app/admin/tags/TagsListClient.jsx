@@ -7,6 +7,7 @@ import api, { STATIC_URL } from "@/app/lib/api";
 import NextImage from 'next/image';
 import useSWR, { mutate } from 'swr';
 import { fetcher } from "@/app/lib/swr-config";
+import { useAuth } from "@/app/providers/AuthProvider";
 
 const IMG_URL = `${STATIC_URL}/uploads`;
 
@@ -166,6 +167,12 @@ const TagForm = ({ tag, onSubmit, onCancel, isSubmitting }) => {
 };
 
 const TagsListClient = ({ initialTags, isAdmin }) => {
+    const { user } = useAuth();
+    const { data: meData } = useSWR(isAdmin ? '/auth/me' : null, fetcher, { revalidateOnFocus: false });
+    const activeUser = meData?.user || user;
+    const canEdit = activeUser?.role === 'superadmin' || !!activeUser?.permissions?.tags?.edit;
+    const canDelete = activeUser?.role === 'superadmin' || !!activeUser?.permissions?.tags?.delete;
+
     const [editingTag, setEditingTag] = useState(null);
     const [showForm, setShowForm] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -201,6 +208,10 @@ const TagsListClient = ({ initialTags, isAdmin }) => {
     };
 
     const handleDelete = async (tagId) => {
+        if (!canDelete) {
+            toast.error('You do not have permission to delete tags.');
+            return;
+        }
         if (window.confirm('Delete this tag?')) {
             try {
                 await api.delete(`/tags/${tagId}`);
@@ -218,7 +229,7 @@ const TagsListClient = ({ initialTags, isAdmin }) => {
         <div className="container mt-4">
             <div className="d-flex justify-content-between align-items-center mb-4">
                 <h4>Tags Dashboard</h4>
-                <Button onClick={() => setShowForm(true)} disabled={showForm}>+ Add Tag</Button>
+                {canEdit && <Button onClick={() => setShowForm(true)} disabled={showForm}>+ Add Tag</Button>}
             </div>
 
             {showForm && (
@@ -270,8 +281,8 @@ const TagsListClient = ({ initialTags, isAdmin }) => {
                                         <td>{tag.image ? <Badge bg="success">Yes</Badge> : <Badge bg="secondary">No</Badge>}</td>
                                         <td className="text-center">
                                             <div className="btn-group">
-                                                <Button variant="outline-primary" size="sm" onClick={() => { setEditingTag(tag); setShowForm(true); }}>Edit</Button>
-                                                <Button variant="outline-danger" size="sm" onClick={() => handleDelete(tag.id)}>Delete</Button>
+                                                {canEdit && <Button variant="outline-primary" size="sm" onClick={() => { setEditingTag(tag); setShowForm(true); }}>Edit</Button>}
+                                                {canDelete && <Button variant="outline-danger" size="sm" onClick={() => handleDelete(tag.id)}>Delete</Button>}
                                             </div>
                                         </td>
                                     </tr>

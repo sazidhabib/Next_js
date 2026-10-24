@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const PhotocardStatistic = require("../models/photocard-statistic-model");
 const authMiddleware = require("../middlewares/auth-middleware");
+const checkPermission = require("../middlewares/permission-middleware");
 
 // Track download or share count (Public)
 router.post("/track", async (req, res) => {
@@ -133,7 +134,7 @@ router.get("/images", authMiddleware, async (req, res) => {
 });
 
 // Delete a stored photocard image and its file (Protected)
-router.delete("/images/:id", authMiddleware, async (req, res) => {
+router.delete("/images/:id", authMiddleware, checkPermission('gallery', 'delete'), async (req, res) => {
     try {
         const PhotocardImage = require("../models/photocard-image-model");
         const img = await PhotocardImage.findByPk(req.params.id);

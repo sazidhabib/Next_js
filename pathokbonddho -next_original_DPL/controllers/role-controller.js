@@ -1,4 +1,4 @@
-const { Role } = require("../models");
+const { Role, User } = require("../models");
 
 // GET /api/roles — List all roles
 const getAllRoles = async (req, res) => {
@@ -32,18 +32,20 @@ const createRole = async (req, res) => {
     try {
         const { name, permissions } = req.body;
 
-        if (!name) {
+        if (!name || !name.trim()) {
             return res.status(400).json({ message: "Role name is required" });
         }
 
+        const trimmedName = name.trim();
+
         // Check if role name already exists
-        const existingRole = await Role.findOne({ where: { name } });
+        const existingRole = await Role.findOne({ where: { name: trimmedName } });
         if (existingRole) {
             return res.status(400).json({ message: "Role name already exists" });
         }
 
         const newRole = await Role.create({
-            name,
+            name: trimmedName,
             permissions: permissions || Role.DEFAULT_PERMISSIONS
         });
 
@@ -64,13 +66,29 @@ const updateRole = async (req, res) => {
 
         const { name, permissions } = req.body;
 
-        if (name !== undefined) role.name = name;
+        if (name !== undefined && name.trim()) {
+            const trimmedName = name.trim();
+            const existing = await Role.findOne({ where: { name: trimmedName } });
+            if (existing && existing.id !== role.id) {
+                return res.status(400).json({ message: "Another role with this name already exists" });
+            }
+            role.name = trimmedName;
+        }
+
         if (permissions !== undefined) {
             role.permissions = permissions;
             role.changed('permissions', true);
         }
 
         await role.save();
+
+        // Synchronize updated role permissions to all users assigned to this role
+        if (permissions !== undefined) {
+            await User.update(
+                { permissions: role.permissions },
+                { where: { roleId: role.id } }
+            );
+        }
 
         // Fetch updated role
         const updatedRole = await Role.findByPk(req.params.id);
@@ -90,14 +108,11 @@ const deleteRole = async (req, res) => {
             return res.status(404).json({ message: "Role not found" });
         }
 
-        // Optional: Check if any users are assigned to this role before deleting
-        // If they are, prevent delete or prompt to re-assign.
-        // For simplicity, we can set their roleId to null or return an error.
-        const User = require("../models/user-model");
-        const assignedUsersCount = await User.count({ where: { roleId: role.id } });
-        if (assignedUsersCount > 0) {
-            return res.status(400).json({ message: `Cannot delete role. It is assigned to ${assignedUsersCount} user(s).` });
-        }
+        // Unassign all users assigned to this role and reset their permissions to default
+        await User.update(
+            { roleId: null, permissions: User.DEFAULT_PERMISSIONS },
+            { where: { roleId: role.id } }
+        );
 
         await role.destroy();
         res.status(200).json({ message: "Role deleted successfully" });

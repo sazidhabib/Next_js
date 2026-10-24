@@ -6,6 +6,7 @@ const {
     upsertAbout,
 } = require("../controllers/about-controller");
 const authMiddleware = require("../middlewares/auth-middleware");
+const checkPermission = require("../middlewares/permission-middleware");
 const validate = require('../middlewares/validate-middleware');
 const { z } = require('zod');
 
@@ -43,6 +44,7 @@ router.get("/", getAbout);
 router.post(
     "/",
     authMiddleware,
+    checkPermission('heroSection', 'edit'),
     upload.single("image"),
     convertToWebp(),
     validate(aboutSchema),

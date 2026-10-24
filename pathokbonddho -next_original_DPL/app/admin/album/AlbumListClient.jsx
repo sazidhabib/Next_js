@@ -4,8 +4,17 @@ import React, { useState } from 'react';
 import { Table, Form, Button, Card, Spinner, Pagination, Modal, Badge } from 'react-bootstrap';
 import { toast } from 'react-toastify';
 import api from "@/app/lib/api";
+import { useAuth } from "@/app/providers/AuthProvider";
+import useSWR from 'swr';
+import { fetcher } from "@/app/lib/swr-config";
 
 const AlbumListClient = ({ initialAlbums, initialTotalPages, isAdmin }) => {
+    const { user } = useAuth();
+    const { data: meData } = useSWR(isAdmin ? '/auth/me' : null, fetcher, { revalidateOnFocus: false });
+    const activeUser = meData?.user || user;
+    const canEdit = activeUser?.role === 'superadmin' || !!activeUser?.permissions?.gallery?.edit;
+    const canDelete = activeUser?.role === 'superadmin' || !!activeUser?.permissions?.gallery?.delete;
+
     const [albums, setAlbums] = useState(initialAlbums || []);
     const [loading, setLoading] = useState(false);
     const [showModal, setShowModal] = useState(false);
@@ -70,6 +79,12 @@ const AlbumListClient = ({ initialAlbums, initialTotalPages, isAdmin }) => {
     };
 
     const handleDelete = async () => {
+        if (!canDelete) {
+            toast.error("You do not have permission to delete albums.");
+            setShowConfirm(false);
+            setDeleteId(null);
+            return;
+        }
         try {
             await api.delete(`/albums/${deleteId}`);
             toast.success("Album deleted");
@@ -84,9 +99,11 @@ const AlbumListClient = ({ initialAlbums, initialTotalPages, isAdmin }) => {
         <div className="container mt-4">
             <div className="d-flex justify-content-between align-items-center mb-4">
                 <h4 className="mb-0">📁 Photo Albums</h4>
-                <Button variant="primary" onClick={() => handleShowModal()} className="shadow-sm">
-                    <i className="fas fa-plus me-2"></i>Create Album
-                </Button>
+                {canEdit && (
+                    <Button variant="primary" onClick={() => handleShowModal()} className="shadow-sm">
+                        <i className="fas fa-plus me-2"></i>Create Album
+                    </Button>
+                )}
             </div>
 
             <Card className="shadow-sm border-0">
@@ -110,8 +127,8 @@ const AlbumListClient = ({ initialAlbums, initialTotalPages, isAdmin }) => {
                                         <td><Badge bg={album.status === 'active' ? 'success' : 'secondary'}>{album.status}</Badge></td>
                                         <td className="text-center">
                                             <div className="btn-group">
-                                                <Button variant="outline-primary" size="sm" onClick={() => handleShowModal(album)}>Edit</Button>
-                                                <Button variant="outline-danger" size="sm" onClick={() => { setDeleteId(album._id); setShowConfirm(true); }}>Del</Button>
+                                                {canEdit && <Button variant="outline-primary" size="sm" onClick={() => handleShowModal(album)}>Edit</Button>}
+                                                {canDelete && <Button variant="outline-danger" size="sm" onClick={() => { setDeleteId(album.id || album._id); setShowConfirm(true); }}>Del</Button>}
                                             </div>
                                         </td>
                                     </tr>

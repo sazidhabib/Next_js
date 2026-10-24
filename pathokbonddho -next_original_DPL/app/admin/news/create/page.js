@@ -18,6 +18,7 @@ const NewsCreate = () => {
     const router = useRouter();
     const { user } = useAuth();
     const isAdmin = user?.role === 'admin' || user?.role === 'superadmin' || user?.isAdmin;
+    const canEdit = user?.role === 'superadmin' || !!user?.permissions?.news?.edit;
 
     const [loading, setLoading] = useState(false);
     const [uploading, setUploading] = useState(false);
@@ -297,6 +298,10 @@ const NewsCreate = () => {
         }
         return null;
     };
+
+    if (!isAdmin || !canEdit) {
+        return <div className="p-4 text-center"><h4>Access Denied: You do not have permission to create news.</h4></div>;
+    }
 
     return (
         <Container fluid className="py-4">

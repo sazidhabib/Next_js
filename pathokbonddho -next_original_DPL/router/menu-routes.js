@@ -14,6 +14,7 @@ const {
     debugMiddleware
 } = require('../controllers/menu-controller');
 const authMiddleware = require('../middlewares/auth-middleware');
+const checkPermission = require('../middlewares/permission-middleware');
 
 console.log('📋 Menu routes file loaded');
 console.log('getMenus function:', typeof getMenus);
@@ -124,9 +125,9 @@ router.get('/parents', getParentMenus);
 router.get('/:id', getMenuById);
 
 // Protected Admin Routes
-router.post('/', authMiddleware, createMenu);
-router.patch('/:id', authMiddleware, updateMenu);
-router.delete('/:id', authMiddleware, deleteMenu);
-router.post('/update-order', authMiddleware, updateMenuOrder);
+router.post('/', authMiddleware, checkPermission('menu', 'edit'), createMenu);
+router.patch('/:id', authMiddleware, checkPermission('menu', 'edit'), updateMenu);
+router.delete('/:id', authMiddleware, checkPermission('menu', 'delete'), deleteMenu);
+router.post('/update-order', authMiddleware, checkPermission('menu', 'edit'), updateMenuOrder);
 
 module.exports = router;

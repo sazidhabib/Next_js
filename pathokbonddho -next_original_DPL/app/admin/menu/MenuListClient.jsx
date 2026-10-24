@@ -5,6 +5,9 @@ import { Button, Table, Spinner, Badge, Dropdown, Form, Modal, Row, Col, Accordi
 import { toast } from "react-toastify";
 import { useForm } from "react-hook-form";
 import api from "@/app/lib/api";
+import { useAuth } from "@/app/providers/AuthProvider";
+import useSWR from 'swr';
+import { fetcher } from "@/app/lib/swr-config";
 
 const MenuFormModal = ({ show, onHide, onSubmit, editMenu, parentMenus }) => {
     const {
@@ -244,6 +247,12 @@ const ConfirmationModal = ({ show, onHide, onConfirm, title = "Confirm", body = 
 );
 
 const MenuListClient = ({ initialMenus, initialParents, isAdmin }) => {
+    const { user } = useAuth();
+    const { data: meData } = useSWR(isAdmin ? '/auth/me' : null, fetcher, { revalidateOnFocus: false });
+    const activeUser = meData?.user || user;
+    const canEdit = activeUser?.role === 'superadmin' || !!activeUser?.permissions?.menu?.edit;
+    const canDelete = activeUser?.role === 'superadmin' || !!activeUser?.permissions?.menu?.delete;
+
     const [menus, setMenus] = useState(initialMenus || []);
     const [parentMenus, setParentMenus] = useState(initialParents || []);
     const [loading, setLoading] = useState(false);
@@ -297,6 +306,10 @@ const MenuListClient = ({ initialMenus, initialParents, isAdmin }) => {
     };
 
     const handleDelete = async () => {
+        if (!canDelete) {
+            toast.error("You do not have permission to delete menu items.");
+            return;
+        }
         try {
             await api.delete(`/menus/${menuToDelete}`);
             toast.success("Menu deleted");
@@ -330,11 +343,17 @@ const MenuListClient = ({ initialMenus, initialParents, isAdmin }) => {
                     <td><small className="text-muted">Level {menu.level}</small></td>
                     <td className="text-center">
                         <div className="btn-group">
-                            <Button variant="outline-primary" size="sm" onClick={() => { setEditMenu(menu); setModalShow(true); }}>Edit</Button>
-                            <Button variant={menu.isActive ? "outline-warning" : "outline-success"} size="sm" onClick={() => toggleMenuStatus(menu.id, menu.isActive)}>
-                                <i className={`fas fa-${menu.isActive ? 'pause' : 'play'}`}></i>
-                            </Button>
-                            <Button variant="outline-danger" size="sm" onClick={() => { setMenuToDelete(menu.id); setConfirmModalShow(true); }}>Del</Button>
+                            {canEdit && (
+                                <>
+                                    <Button variant="outline-primary" size="sm" onClick={() => { setEditMenu(menu); setModalShow(true); }}>Edit</Button>
+                                    <Button variant={menu.isActive ? "outline-warning" : "outline-success"} size="sm" onClick={() => toggleMenuStatus(menu.id, menu.isActive)}>
+                                        <i className={`fas fa-${menu.isActive ? 'pause' : 'play'}`}></i>
+                                    </Button>
+                                </>
+                            )}
+                            {canDelete && (
+                                <Button variant="outline-danger" size="sm" onClick={() => { setMenuToDelete(menu.id); setConfirmModalShow(true); }}>Del</Button>
+                            )}
                         </div>
                     </td>
                 </tr>
@@ -349,9 +368,11 @@ const MenuListClient = ({ initialMenus, initialParents, isAdmin }) => {
         <div className="container mt-4">
             <div className="d-flex justify-content-between align-items-center mb-4">
                 <h4 className="mb-0">📂 Menu Architecture</h4>
-                <Button variant="primary" onClick={() => { setEditMenu(null); setModalShow(true); }} className="shadow-sm">
-                    <i className="fas fa-plus me-2"></i>New Menu Item
-                </Button>
+                {canEdit && (
+                    <Button variant="primary" onClick={() => { setEditMenu(null); setModalShow(true); }} className="shadow-sm">
+                        <i className="fas fa-plus me-2"></i>New Menu Item
+                    </Button>
+                )}
             </div>
 
             <Card className="mb-4 shadow-sm border-0 bg-light">
@@ -404,11 +425,17 @@ const MenuListClient = ({ initialMenus, initialParents, isAdmin }) => {
                                         <td><small className="text-muted">Level {menu.level}</small></td>
                                         <td className="text-center">
                                             <div className="btn-group">
-                                                <Button variant="outline-primary" size="sm" onClick={() => { setEditMenu(menu); setModalShow(true); }}>Edit</Button>
-                                                <Button variant={menu.isActive ? "outline-warning" : "outline-success"} size="sm" onClick={() => toggleMenuStatus(menu.id, menu.isActive)}>
-                                                    {menu.isActive ? "Pause" : "Play"}
-                                                </Button>
-                                                <Button variant="outline-danger" size="sm" onClick={() => { setMenuToDelete(menu.id); setConfirmModalShow(true); }}>Del</Button>
+                                                {canEdit && (
+                                                    <>
+                                                        <Button variant="outline-primary" size="sm" onClick={() => { setEditMenu(menu); setModalShow(true); }}>Edit</Button>
+                                                        <Button variant={menu.isActive ? "outline-warning" : "outline-success"} size="sm" onClick={() => toggleMenuStatus(menu.id, menu.isActive)}>
+                                                            {menu.isActive ? "Pause" : "Play"}
+                                                        </Button>
+                                                    </>
+                                                )}
+                                                {canDelete && (
+                                                    <Button variant="outline-danger" size="sm" onClick={() => { setMenuToDelete(menu.id); setConfirmModalShow(true); }}>Del</Button>
+                                                )}
                                             </div>
                                         </td>
                                     </tr>
