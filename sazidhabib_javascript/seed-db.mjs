@@ -137,122 +137,438 @@ async function run() {
     ];
 
     const initialProjects = [
+  {
+    "name": "Pathokbonddho",
+    "description": "Pathokbonddho is a full-stack dynamic News Portal and Content Management System (CMS) built to manage and publish news content efficiently. The platform is far more advanced than a traditional static news website, featuring a powerful backend system for managing articles, authors, categories, advertisements, galleries, and fully customizable homepage layouts.\\n    One of the core highlights of the project is its Dynamic Layout Builder, where administrators can create and control pages, sections, rows, and columns directly from the admin dashboard without modifying code. The system is optimized for SEO, fast content delivery, image optimization, and scalable content management, making it ideal for modern digital news platforms.",
+    "image": "/src/assets/pathakbondhu.webp",
+    "media": [
       {
-        name: 'Pathokbonddho',
-        description: 'Pathokbonddho is a full-stack dynamic News Portal and Content Management System (CMS) built to manage and publish news content efficiently. The platform features articles, authors, categories, advertisements, galleries, and a fully customizable Dynamic Layout Builder controlled from the admin panel.',
-        image: '/src/assets/pathakbondhu.webp',
-        tags: [
-          { name: 'Next.js', color: 'blue-text-gradient' },
-          { name: 'React', color: 'blue-text-gradient' },
-          { name: 'javascript', color: 'blue-text-gradient' },
-          { name: 'Node.js', color: 'blue-text-gradient' },
-          { name: 'Express.js', color: 'blue-text-gradient' },
-          { name: 'Bootstrap', color: 'green-text-gradient' },
-          { name: 'Tailwind', color: 'pink-text-gradient' },
-          { name: 'MySQL', color: 'blue-text-gradient' }
-        ],
-        features: [
-          'Dynamic News Management system with full CRUD operations',
-          'Advanced Admin Dashboard for complete content control',
-          'Dynamic Homepage Layout Builder (Pages, Sections, Rows & Columns)',
-          'SEO-Optimized News Rendering with Server-Side Rendering (SSR)',
-          'Role-based Authentication & Secure JWT Authorization',
-          'Image Upload, Compression & WebP Optimization',
-          'Rich Text Editor Integration for article publishing',
-          'Advertisement & Banner Management System'
-        ],
-        sourceCodeLink: '',
-        liveLink: 'https://pathakbondhu.com/',
-        sortOrder: 0
+        "type": "image",
+        "src": "/src/assets/pathakbondhu.webp"
       },
       {
-        name: 'nextideasolution',
-        description: 'Next Idea Solutions is a full-stack web application developed for a digital marketing and web development agency. The platform serves as both a professional corporate website and a powerful admin management system for handling portfolio projects, services, case studies, blogs, client information, team members, and business settings.',
-        image: '/src/assets/nextidea.webp',
-        tags: [
-          { name: 'Next.js', color: 'blue-text-gradient' },
-          { name: 'React', color: 'blue-text-gradient' },
-          { name: 'Node.js', color: 'blue-text-gradient' },
-          { name: 'Express.js', color: 'blue-text-gradient' },
-          { name: 'Tailwind', color: 'pink-text-gradient' },
-          { name: 'MySQL', color: 'blue-text-gradient' }
-        ],
-        features: [
-          'Dynamic Service Management system',
-          'Custom Admin Dashboard with Full CRUD Operations',
-          'Case Study & Blog Publishing Platform',
-          'SEO-Optimized Server-Side Rendering (SSR)',
-          'JWT Authentication with Secure Cookie-Based Sessions',
-          'Role-Based Access Control & User Management',
-          'Image Upload & Optimization using Sharp'
-        ],
-        sourceCodeLink: '',
-        liveLink: 'https://nextideasolution.com/',
-        sortOrder: 1
-      },
-      {
-        name: 'kamrulhasan',
-        description: 'This project is a dynamic personal website developed for journalist Kamrul Hasan. It serves as an interactive platform to showcase his writings, reflections, experiences, and published reports. Fully dynamic and customizable from the admin panel.',
-        image: '/src/assets/kamrulHasanWeb.webp',
-        tags: [
-          { name: 'React', color: 'blue-text-gradient' },
-          { name: 'JavaScript', color: 'green-text-gradient' },
-          { name: 'Tailwind', color: 'pink-text-gradient' },
-          { name: 'MERN', color: 'blue-text-gradient' }
-        ],
-        features: [
-          'Dynamic content management system with full CRUD operations',
-          'Bengali-language platform for targeted local audience',
-          'Customizable admin panel for seamless content management',
-          'Article and multimedia publishing with rich text editor',
-          'SEO-optimized layout with meta tag management'
-        ],
-        sourceCodeLink: 'https://github.com/sazidhabib/React_Js/tree/main/MERN_project',
-        liveLink: 'https://kamrulhasan.com',
-        sortOrder: 2
-      },
-      {
-        name: 'PharmaSphere',
-        description: 'A pharmacy-based e-commerce platform offering a seamless shopping experience for medicines and healthcare products. Built using the MERN stack, featuring secure Stripe checkout, dynamic inventory dashboard, and real-time product search.',
-        image: '/src/assets/pharmasphere.webp',
-        tags: [
-          { name: 'React', color: 'blue-text-gradient' },
-          { name: 'JavaScript', color: 'green-text-gradient' },
-          { name: 'Tailwind', color: 'pink-text-gradient' },
-          { name: 'MERN', color: 'blue-text-gradient' }
-        ],
-        features: [
-          'Secure payment integration with Stripe checkout',
-          'Dynamic admin panel for inventory and order management',
-          'Advanced search with real-time filtering and sorting',
-          'Responsive pharmacy catalog with category browsing',
-          'User authentication with profile and order history'
-        ],
-        sourceCodeLink: 'https://github.com/shafquatulbari/mern-e-commerce',
-        liveLink: '',
-        sortOrder: 3
-      },
-      {
-        name: 'SnapShop',
-        description: 'A responsive e-commerce platform built with TypeScript, React, and Tailwind CSS. It features product management, user authentication, wishlist, and shopping cart with persistent state.',
-        image: '/src/assets/snapshop.webp',
-        tags: [
-          { name: 'React', color: 'blue-text-gradient' },
-          { name: 'TypeScript', color: 'green-text-gradient' },
-          { name: 'REST APIs', color: 'pink-text-gradient' }
-        ],
-        features: [
-          'TypeScript-powered architecture for type-safe development',
-          'User authentication with JWT token management',
-          'Product management dashboard with CRUD operations',
-          'Wishlist and shopping cart with persistent state',
-          'Responsive Tailwind design with dark theme support'
-        ],
-        sourceCodeLink: 'https://github.com/sazidhabib/SnapShop_e-commerce',
-        liveLink: '',
-        sortOrder: 4
+        "type": "image",
+        "src": "/src/assets/pathokbonddhufullpage.webp"
       }
-    ];
+    ],
+    "tags": [
+      {
+        "name": "Next.js",
+        "color": "blue-text-gradient"
+      },
+      {
+        "name": "React",
+        "color": "blue-text-gradient"
+      },
+      {
+        "name": "javascript",
+        "color": "blue-text-gradient"
+      },
+      {
+        "name": "Node.js",
+        "color": "blue-text-gradient"
+      },
+      {
+        "name": "Express.js",
+        "color": "blue-text-gradient"
+      },
+      {
+        "name": "Bootstrap",
+        "color": "green-text-gradient"
+      },
+      {
+        "name": "Tailwind",
+        "color": "pink-text-gradient"
+      },
+      {
+        "name": "MySQL",
+        "color": "blue-text-gradient"
+      },
+      {
+        "name": "SWR",
+        "color": "pink-text-gradient"
+      },
+      {
+        "name": "React Hook Form",
+        "color": "pink-text-gradient"
+      },
+      {
+        "name": "Zod",
+        "color": "pink-text-gradient"
+      },
+      {
+        "name": "JWT",
+        "color": "pink-text-gradient"
+      },
+      {
+        "name": "Bcryptjs",
+        "color": "pink-text-gradient"
+      },
+      {
+        "name": "Multer",
+        "color": "pink-text-gradient"
+      },
+      {
+        "name": "Sharp",
+        "color": "pink-text-gradient"
+      },
+      {
+        "name": "Open Graph",
+        "color": "pink-text-gradient"
+      }
+    ],
+    "features": [
+      "Dynamic News Management system with full CRUD operations",
+      "Advanced Admin Dashboard for complete content control",
+      "Dynamic Homepage Layout Builder (Pages, Sections, Rows & Columns)",
+      "SEO-Optimized News Rendering with Server-Side Rendering (SSR)",
+      "Role-based Authentication & Secure JWT Authorization",
+      "Image Upload, Compression & WebP Optimization",
+      "Rich Text Editor Integration for article publishing",
+      "Advertisement & Banner Management System",
+      "Category, Author & Tag Management",
+      "Responsive and Mobile-Friendly UI",
+      "Fast Client-Side Data Fetching using SWR",
+      "Custom API Architecture with Express.js & Next.js Integration"
+    ],
+    "sourceCodeLink": "",
+    "liveLink": "https://pathakbondhu.com/",
+    "sortOrder": 0
+  },
+  {
+    "name": "nextideasolution",
+    "description": "Next Idea Solutions is a full-stack web application developed for a digital marketing and web development agency. The platform serves as both a professional corporate website and a powerful admin management system for handling portfolio projects, services, case studies, blogs, client information, team members, and business settings. The project combines a modern frontend experience with a scalable backend architecture, allowing administrators to dynamically manage content, analytics, categories, and site-wide configurations through a centralized dashboard. The application is designed with performance, SEO optimization, scalability, and responsive user experience in mind.",
+    "image": "/src/assets/nextidea.webp",
+    "media": [
+      {
+        "type": "image",
+        "src": "/src/assets/nextidea.webp"
+      },
+      {
+        "type": "image",
+        "src": "/src/assets/nextideafullpage.webp"
+      }
+    ],
+    "tags": [
+      {
+        "name": "Next.js",
+        "color": "blue-text-gradient"
+      },
+      {
+        "name": "React",
+        "color": "blue-text-gradient"
+      },
+      {
+        "name": "javascript",
+        "color": "blue-text-gradient"
+      },
+      {
+        "name": "Node.js",
+        "color": "blue-text-gradient"
+      },
+      {
+        "name": "Express.js",
+        "color": "blue-text-gradient"
+      },
+      {
+        "name": "Tailwind",
+        "color": "pink-text-gradient"
+      },
+      {
+        "name": "MySQL",
+        "color": "blue-text-gradient"
+      },
+      {
+        "name": "SWR",
+        "color": "pink-text-gradient"
+      },
+      {
+        "name": "React Hook Form",
+        "color": "pink-text-gradient"
+      },
+      {
+        "name": "Zod",
+        "color": "pink-text-gradient"
+      },
+      {
+        "name": "JWT",
+        "color": "pink-text-gradient"
+      },
+      {
+        "name": "Bcryptjs",
+        "color": "pink-text-gradient"
+      },
+      {
+        "name": "Multer",
+        "color": "pink-text-gradient"
+      },
+      {
+        "name": "Sharp",
+        "color": "pink-text-gradient"
+      }
+    ],
+    "features": [
+      "Dynamic Service Management system",
+      "Custom Admin Dashboard with Full CRUD Operations",
+      "Case Study & Blog Publishing Platform",
+      "SEO-Optimized Server-Side Rendering (SSR)",
+      "JWT Authentication with Secure Cookie-Based Sessions",
+      "Role-Based Access Control & User Management",
+      "Client & Team Member Management",
+      "Image Upload & Optimization using Sharp",
+      "Contact Form & Email Integration with Nodemailer",
+      "Analytics & Business Settings Management",
+      "Responsive and Mobile-Friendly UI",
+      "RESTful API Architecture with Express.js",
+      "Rate Limiting & Security Middleware Integration"
+    ],
+    "sourceCodeLink": "",
+    "liveLink": "https://nextideasolution.com/",
+    "sortOrder": 1
+  },
+  {
+    "name": "kamrulhasan",
+    "description": "This project is a dynamic personal website developed for journalist Kamrul Hasan. It serves as an interactive platform to showcase his writings, reflections, experiences, and published reports, offering readers valuable insights into various topics. The website is primarily in Bengali, targeting Bengali-speaking audiences, and is designed with a focus on readability, user engagement, and content accessibility. From top to bottom, every section of the website is fully dynamic and customizable through its powerful admin panel, allowing seamless management of content, including articles, reports, multimedia, and even the website's menu structure.",
+    "image": "/src/assets/kamrulHasanWeb.webp",
+    "media": [
+      {
+        "type": "image",
+        "src": "/src/assets/kamrulHasanWeb.webp"
+      },
+      {
+        "type": "image",
+        "src": "/src/assets/kamrulhasan_fullpage.webp"
+      },
+      {
+        "type": "video",
+        "src": "/src/assets/kamrulhasan.mp4"
+      }
+    ],
+    "tags": [
+      {
+        "name": "React",
+        "color": "blue-text-gradient"
+      },
+      {
+        "name": "JavaScript",
+        "color": "green-text-gradient"
+      },
+      {
+        "name": "Tailwind",
+        "color": "pink-text-gradient"
+      },
+      {
+        "name": "MERN",
+        "color": "blue-text-gradient"
+      },
+      {
+        "name": "e-commerce",
+        "color": "pink-text-gradient"
+      }
+    ],
+    "features": [
+      "Dynamic content management system with full CRUD operations",
+      "Bengali-language platform for targeted local audience",
+      "Customizable admin panel for seamless content management",
+      "Article and multimedia publishing with rich text editor",
+      "SEO-optimized layout with meta tag management"
+    ],
+    "sourceCodeLink": "https://github.com/sazidhabib/React_Js/tree/main/MERN_project",
+    "liveLink": "https://kamrulhasan.com",
+    "sortOrder": 2
+  },
+  {
+    "name": "PharmaSphere",
+    "description": "A pharmacy-based e-commerce platform offering a seamless shopping experience for medicines and healthcare products. Built using the MERN stack, PharmaSphere features a secure payment system with Stripe, a dynamic admin panel for inventory management, and a user-friendly interface with advanced search and sorting capabilities.",
+    "image": "/src/assets/pharmasphere.webp",
+    "media": [
+      {
+        "type": "image",
+        "src": "/src/assets/pharmasphere.webp"
+      }
+    ],
+    "tags": [
+      {
+        "name": "React",
+        "color": "blue-text-gradient"
+      },
+      {
+        "name": "JavaScript",
+        "color": "green-text-gradient"
+      },
+      {
+        "name": "Tailwind",
+        "color": "pink-text-gradient"
+      },
+      {
+        "name": "MERN",
+        "color": "blue-text-gradient"
+      },
+      {
+        "name": "e-commerce",
+        "color": "pink-text-gradient"
+      }
+    ],
+    "features": [
+      "Secure payment integration with Stripe checkout",
+      "Dynamic admin panel for inventory and order management",
+      "Advanced search with real-time filtering and sorting",
+      "Responsive pharmacy catalog with category browsing",
+      "User authentication with profile and order history"
+    ],
+    "sourceCodeLink": "https://github.com/shafquatulbari/mern-e-commerce",
+    "liveLink": "",
+    "sortOrder": 3
+  },
+  {
+    "name": "SnapShop",
+    "description": "This is a responsive e-commerce platform built with TypeScript, React, and Tailwind CSS. It features product management, user authentication, user information and user-specific functionalities such as a wishlist and shopping cart.",
+    "image": "/src/assets/snapshop.webp",
+    "media": [
+      {
+        "type": "image",
+        "src": "/src/assets/snapshop.webp"
+      }
+    ],
+    "tags": [
+      {
+        "name": "React",
+        "color": "blue-text-gradient"
+      },
+      {
+        "name": "TypeScript",
+        "color": "green-text-gradient"
+      },
+      {
+        "name": "REST APIs",
+        "color": "pink-text-gradient"
+      },
+      {
+        "name": "e-commerce",
+        "color": "green-text-gradient"
+      }
+    ],
+    "features": [
+      "TypeScript-powered architecture for type-safe development",
+      "User authentication with JWT token management",
+      "Product management dashboard with CRUD operations",
+      "Wishlist and shopping cart with persistent state",
+      "Responsive Tailwind design with dark theme support"
+    ],
+    "sourceCodeLink": "https://github.com/sazidhabib/SnapShop_e-commerce",
+    "liveLink": "",
+    "sortOrder": 4
+  },
+  {
+    "name": "Movie List Website",
+    "description": "A simple and user-friendly website to explore movies and TV shows, built using React and styled with styled-components or Tailwind CSS. This project allows users to keep track of their favorite movies and provides features for managing a personal watchlist.",
+    "image": "/src/assets/movie.webp",
+    "media": [
+      {
+        "type": "image",
+        "src": "/src/assets/movie.webp"
+      }
+    ],
+    "tags": [
+      {
+        "name": "React",
+        "color": "blue-text-gradient"
+      },
+      {
+        "name": "JavaScript",
+        "color": "green-text-gradient"
+      },
+      {
+        "name": "useContext",
+        "color": "pink-text-gradient"
+      }
+    ],
+    "features": [
+      "Browse trending movies and TV shows with live data",
+      "Personal watchlist with add/remove functionality",
+      "Search and filter across extensive media catalog",
+      "State management using React useContext hook",
+      "Responsive card layout with hover animations"
+    ],
+    "sourceCodeLink": "https://github.com/sazidhabib/MovieListingWebsite",
+    "liveLink": "",
+    "sortOrder": 5
+  },
+  {
+    "name": "Product Detail & Add to Cart",
+    "description": "This project is a responsive product detail page built with React, JavaScript, and useContext. The page allows users to select product options such as color, size, and quantity while dynamically updating the product image, price, and cart details.",
+    "image": "/src/assets/shopCard.webp",
+    "media": [
+      {
+        "type": "image",
+        "src": "/src/assets/shopCard.webp"
+      }
+    ],
+    "tags": [
+      {
+        "name": "React",
+        "color": "blue-text-gradient"
+      },
+      {
+        "name": "JavaScript",
+        "color": "green-text-gradient"
+      },
+      {
+        "name": "UseContext",
+        "color": "pink-text-gradient"
+      }
+    ],
+    "features": [
+      "Dynamic product option selection (color, size, quantity)",
+      "Real-time price calculation and image updates",
+      "Interactive color and size picker with visual feedback",
+      "Cart management with useContext state pattern",
+      "Responsive product gallery with zoom preview"
+    ],
+    "sourceCodeLink": "https://github.com/sazidhabib/shopcardreact/tree/master",
+    "liveLink": "",
+    "sortOrder": 6
+  },
+  {
+    "name": "Food Ordering App",
+    "description": "A food ordering application built with React and Redux for state management. Users can browse menu items, add them to the cart, and manage quantities — all powered by a centralized Redux store for predictable state updates across the application.",
+    "image": "/src/assets/FoodOrder.webp",
+    "media": [
+      {
+        "type": "image",
+        "src": "/src/assets/FoodOrder.webp"
+      }
+    ],
+    "tags": [
+      {
+        "name": "React",
+        "color": "blue-text-gradient"
+      },
+      {
+        "name": "JavaScript",
+        "color": "green-text-gradient"
+      },
+      {
+        "name": "Redux",
+        "color": "pink-text-gradient"
+      },
+      {
+        "name": "Router",
+        "color": "green-text-gradient"
+      }
+    ],
+    "features": [
+      "Redux-powered centralized state management",
+      "Add/remove cart items with quantity controls",
+      "Dynamic price calculation and order summary",
+      "Clean food catalog with category organization",
+      "Mobile-first responsive design for on-the-go ordering"
+    ],
+    "sourceCodeLink": "https://github.com/sazidhabib/FoodCardApp_React_Redux",
+    "liveLink": "",
+    "sortOrder": 7
+  }
+];
 
     console.log('Seeding skills, experiences, and projects...');
     await Skill.bulkCreate(initialSkills);
