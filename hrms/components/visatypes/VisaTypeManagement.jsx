@@ -1,10 +1,15 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { FileBadge, Plus, Edit, Trash2, Search, ShieldCheck } from 'lucide-react';
+import { FileBadge, Plus, Edit, Trash2, Search, ShieldCheck, Eye } from 'lucide-react';
 import { Card, Modal, Badge } from '../ui';
+import { useAuth } from '@/context/AuthContext';
 
 export default function VisaTypeManagement({ visaTypes = [], onUpdated }) {
+  const { canEdit, canDelete } = useAuth();
+  const canEditVisa = canEdit('visatypes');
+  const canDeleteVisa = canDelete('visatypes');
+
   const [list, setList] = useState(visaTypes);
   const [loading, setLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -60,6 +65,10 @@ export default function VisaTypeManagement({ visaTypes = [], onUpdated }) {
 
   const handleSave = async (e) => {
     e.preventDefault();
+    if (!canEditVisa) {
+      alert('You do not have permission to add or edit visa types.');
+      return;
+    }
     if (!form.name.trim()) {
       alert('Please enter a Visa Name');
       return;
@@ -95,6 +104,10 @@ export default function VisaTypeManagement({ visaTypes = [], onUpdated }) {
   };
 
   const handleDelete = async (id, name) => {
+    if (!canDeleteVisa) {
+      alert('You do not have permission to delete visa types.');
+      return;
+    }
     if (!confirm(`Are you sure you want to delete Visa Type "${name}"?`)) return;
     try {
       const res = await fetch(`/api/visatypes/${id}`, { method: 'DELETE' });
@@ -132,13 +145,15 @@ export default function VisaTypeManagement({ visaTypes = [], onUpdated }) {
             Configure Home Office visa categories, Certificate of Sponsorship requirement flags, and notes
           </p>
         </div>
-        <button
-          onClick={openAdd}
-          className="self-start sm:self-auto px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-md shadow-indigo-600/20 transition flex items-center space-x-2"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Add Visa Type</span>
-        </button>
+        {canEditVisa && (
+          <button
+            onClick={openAdd}
+            className="self-start sm:self-auto px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-md shadow-indigo-600/20 transition flex items-center space-x-2"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Add Visa Type</span>
+          </button>
+        )}
       </div>
 
       {/* Main Table Card */}
@@ -200,17 +215,19 @@ export default function VisaTypeManagement({ visaTypes = [], onUpdated }) {
                       <button
                         onClick={() => openEdit(v)}
                         className="p-1.5 rounded-lg text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-950/50 transition"
-                        title="Edit Visa Type"
+                        title={canEditVisa ? 'Edit Visa Type' : 'View Visa Details'}
                       >
-                        <Edit className="w-4 h-4" />
+                        {canEditVisa ? <Edit className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                       </button>
-                      <button
-                        onClick={() => handleDelete(v.id, v.name)}
-                        className="p-1.5 rounded-lg text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/50 transition"
-                        title="Delete Visa Type"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                      {canDeleteVisa && (
+                        <button
+                          onClick={() => handleDelete(v.id, v.name)}
+                          className="p-1.5 rounded-lg text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/50 transition"
+                          title="Delete Visa Type"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      )}
                     </td>
                   </tr>
                 ))
@@ -224,7 +241,13 @@ export default function VisaTypeManagement({ visaTypes = [], onUpdated }) {
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title={editingVisa ? 'Edit Visa Type' : 'Add Visa Type'}
+        title={
+          !canEditVisa
+            ? 'Visa Type Details'
+            : editingVisa
+            ? 'Edit Visa Type'
+            : 'Add Visa Type'
+        }
       >
         <form onSubmit={handleSave} className="space-y-4 text-xs">
           <div>
@@ -234,10 +257,11 @@ export default function VisaTypeManagement({ visaTypes = [], onUpdated }) {
             <input
               type="text"
               required
+              disabled={!canEditVisa}
               placeholder="e.g. Skilled Worker"
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
-              className="w-full px-3 py-2 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full px-3 py-2 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-75 disabled:cursor-not-allowed"
             />
           </div>
 
@@ -245,9 +269,10 @@ export default function VisaTypeManagement({ visaTypes = [], onUpdated }) {
             <input
               type="checkbox"
               id="modalReqSponsor"
+              disabled={!canEditVisa}
               checked={form.requiresSponsorship}
               onChange={(e) => setForm({ ...form, requiresSponsorship: e.target.checked })}
-              className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-zinc-300 dark:border-zinc-700 cursor-pointer"
+              className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-zinc-300 dark:border-zinc-700 cursor-pointer disabled:cursor-not-allowed"
             />
             <label
               htmlFor="modalReqSponsor"
@@ -263,10 +288,11 @@ export default function VisaTypeManagement({ visaTypes = [], onUpdated }) {
             </label>
             <textarea
               rows={4}
+              disabled={!canEditVisa}
               placeholder="Enter visa notes, conditions, or sponsorship requirements..."
               value={form.notes}
               onChange={(e) => setForm({ ...form, notes: e.target.value })}
-              className="w-full px-3 py-2 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full px-3 py-2 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-75 disabled:cursor-not-allowed"
             />
           </div>
 
@@ -276,14 +302,16 @@ export default function VisaTypeManagement({ visaTypes = [], onUpdated }) {
               onClick={() => setIsModalOpen(false)}
               className="px-4 py-2 rounded-xl border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition"
             >
-              Cancel
+              {!canEditVisa ? 'Close' : 'Cancel'}
             </button>
-            <button
-              type="submit"
-              className="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold shadow-md shadow-indigo-600/20 transition"
-            >
-              {editingVisa ? 'Update Visa Type' : 'Save Visa Type'}
-            </button>
+            {canEditVisa && (
+              <button
+                type="submit"
+                className="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold shadow-md shadow-indigo-600/20 transition"
+              >
+                {editingVisa ? 'Update Visa Type' : 'Save Visa Type'}
+              </button>
+            )}
           </div>
         </form>
       </Modal>

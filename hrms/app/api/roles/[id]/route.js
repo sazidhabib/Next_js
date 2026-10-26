@@ -1,8 +1,12 @@
 import { NextResponse } from 'next/server';
 import { initDb, Role, User } from '@/lib/db/models/index';
+import { requirePermission } from '@/lib/auth/rbac';
 
 export async function PUT(request, { params }) {
   try {
+    const auth = await requirePermission(request, { section: 'roles', action: 'EDIT' });
+    if (!auth.authorized) return auth.response;
+
     await initDb();
     const { id } = await params;
     const body = await request.json();
@@ -17,6 +21,9 @@ export async function PUT(request, { params }) {
 
 export async function DELETE(request, { params }) {
   try {
+    const auth = await requirePermission(request, { section: 'roles', action: 'DELETE' });
+    if (!auth.authorized) return auth.response;
+
     await initDb();
     const { id } = await params;
     const role = await Role.findByPk(id);

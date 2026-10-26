@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { Badge, Card } from '../ui';
 import MediaPickerModal from '../media/MediaPickerModal';
+import { useAuth } from '@/context/AuthContext';
 
 export const generateNextEmployeeCode = (existingEmployees = []) => {
   let maxNum = 0;
@@ -43,6 +44,10 @@ export const generateNextEmployeeCode = (existingEmployees = []) => {
 };
 
 export default function EmployeeManagement({ departments, onEmployeeUpdated }) {
+  const { canEdit, canDelete } = useAuth();
+  const canEditEmp = canEdit('employees');
+  const canDeleteEmp = canDelete('employees');
+
   const [activeSubTab, setActiveSubTab] = useState('list'); // 'list' | 'add' | 'edit'
   const [employees, setEmployees] = useState([]);
   const [serverNextCode, setServerNextCode] = useState('');
@@ -173,6 +178,11 @@ export default function EmployeeManagement({ departments, onEmployeeUpdated }) {
   const handleSave = async (e) => {
     e.preventDefault();
 
+    if (!canEditEmp) {
+      alert('You do not have permission to edit or add employee records.');
+      return;
+    }
+
     // Check mandatory fields
     if (!formData.firstName?.trim()) {
       alert('First Name is required.');
@@ -238,6 +248,10 @@ export default function EmployeeManagement({ departments, onEmployeeUpdated }) {
   };
 
   const handleDelete = async () => {
+    if (!canDeleteEmp) {
+      alert('You do not have permission to delete employee records.');
+      return;
+    }
     if (!selectedEmployee?.id) return;
     if (!confirm(`Are you sure you want to delete employee ${selectedEmployee.firstName} ${selectedEmployee.lastName}?`)) {
       return;
@@ -326,24 +340,28 @@ export default function EmployeeManagement({ departments, onEmployeeUpdated }) {
             <span>Employees ({employees.length})</span>
           </button>
 
-          <button
-            onClick={handleOpenAdd}
-            className={`px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl font-bold text-xs sm:text-sm transition flex items-center space-x-2 whitespace-nowrap shrink-0 ${
-              activeSubTab === 'add'
-                ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20'
-                : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200'
-            }`}
-          >
-            <Plus className="w-4 h-4" />
-            <span>Add Employee</span>
-          </button>
+          {canEditEmp && (
+            <button
+              onClick={handleOpenAdd}
+              className={`px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl font-bold text-xs sm:text-sm transition flex items-center space-x-2 whitespace-nowrap shrink-0 ${
+                activeSubTab === 'add'
+                  ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20'
+                  : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200'
+              }`}
+            >
+              <Plus className="w-4 h-4" />
+              <span>Add Employee</span>
+            </button>
+          )}
 
           {activeSubTab === 'edit' && (
             <button
               className="px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl font-bold text-xs sm:text-sm bg-blue-600 text-white shadow-md shadow-blue-600/20 flex items-center space-x-2 whitespace-nowrap shrink-0"
             >
               <Edit className="w-4 h-4" />
-              <span>Edit ({selectedEmployee?.employeeCode})</span>
+              <span>
+                {canEditEmp ? 'Edit' : 'View'} ({selectedEmployee?.employeeCode})
+              </span>
             </button>
           )}
         </div>
@@ -518,7 +536,7 @@ export default function EmployeeManagement({ departments, onEmployeeUpdated }) {
                             onClick={() => handleOpenEdit(emp)}
                             className="px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs font-semibold bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 hover:bg-blue-100 transition"
                           >
-                            Edit
+                            {canEditEmp ? 'Edit' : 'View'}
                           </button>
                         </td>
                       </tr>
@@ -534,8 +552,18 @@ export default function EmployeeManagement({ departments, onEmployeeUpdated }) {
       {/* ======================= TAB 2 & 3: FORM (ADD / EDIT) ======================= */}
       {(activeSubTab === 'add' || activeSubTab === 'edit') && (
         <Card
-          title={activeSubTab === 'edit' ? `Edit Employee (${formData.employeeCode || 'ID'})` : 'Add New Employee'}
-          subtitle="Complete master employee record with personal, job and compliance parameters"
+          title={
+            activeSubTab === 'edit'
+              ? canEditEmp
+                ? `Edit Employee (${formData.employeeCode || 'ID'})`
+                : `View Employee (${formData.employeeCode || 'ID'})`
+              : 'Add New Employee'
+          }
+          subtitle={
+            canEditEmp
+              ? 'Complete master employee record with personal, job and compliance parameters'
+              : 'Employee record details (Read-only view)'
+          }
           action={
             <button
               onClick={() => setActiveSubTab('list')}
@@ -547,6 +575,7 @@ export default function EmployeeManagement({ departments, onEmployeeUpdated }) {
           }
         >
           <form onSubmit={handleSave} className="space-y-6">
+            <fieldset disabled={!canEditEmp} className="contents disabled:opacity-85">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
               {/* LEFT COLUMN: Personal Info & Address */}
               <div className="lg:col-span-7 space-y-4">
@@ -943,15 +972,17 @@ export default function EmployeeManagement({ departments, onEmployeeUpdated }) {
 
                 {/* ACTION BUTTONS matching legacy screenshot */}
                 <div className="pt-4 space-y-2.5">
-                  <button
-                    type="submit"
-                    className="w-full py-2.5 sm:py-3 px-4 rounded-xl font-bold text-xs sm:text-sm bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-600/30 transition flex items-center justify-center space-x-2"
-                  >
-                    <Save className="w-4 h-4" />
-                    <span>{activeSubTab === 'edit' ? 'Update Details' : 'Save Employee Details'}</span>
-                  </button>
+                  {canEditEmp && (
+                    <button
+                      type="submit"
+                      className="w-full py-2.5 sm:py-3 px-4 rounded-xl font-bold text-xs sm:text-sm bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-600/30 transition flex items-center justify-center space-x-2"
+                    >
+                      <Save className="w-4 h-4" />
+                      <span>{activeSubTab === 'edit' ? 'Update Details' : 'Save Employee Details'}</span>
+                    </button>
+                  )}
 
-                  {activeSubTab === 'edit' && (
+                  {activeSubTab === 'edit' && canDeleteEmp && (
                     <button
                       type="button"
                       onClick={handleDelete}
@@ -972,6 +1003,7 @@ export default function EmployeeManagement({ departments, onEmployeeUpdated }) {
                 </div>
               </div>
             </div>
+            </fieldset>
           </form>
         </Card>
       )}

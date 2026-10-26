@@ -14,43 +14,29 @@ import {
 } from './models/index.js';
 import bcrypt from 'bcryptjs';
 
+import { STANDARD_ROLE_PRESETS, expandPermissions } from '../auth/permissions.js';
+
 export async function seedDatabase() {
   await initDb();
   await sequelize.sync({ force: false });
 
-  // 1. Seed Roles - Ensure all standard roles exist
-  const standardRoles = [
-    {
-      name: 'Manager',
-      description: 'Store and kitchen manager with approval authority',
-      permissions: ['MANAGE_EMPLOYEES', 'APPROVE_LEAVES'],
-    },
-    {
-      name: 'Admin',
-      description: 'System administrator with full operations control',
-      permissions: ['ALL'],
-    },
-    {
-      name: 'Restaurant Owner',
-      description: 'Business owner with compliance and executive oversight',
-      permissions: ['ALL'],
-    },
-    {
-      name: 'HR Manager',
-      description: 'Manage employees, RTW checks, visas, and leaves',
-      permissions: ['MANAGE_EMPLOYEES', 'MANAGE_COMPLIANCE', 'APPROVE_LEAVES'],
-    },
-    {
-      name: 'Employee',
-      description: 'Self-service portal for profile and leave applications',
-      permissions: ['VIEW_OWN_PROFILE', 'REQUEST_LEAVE'],
-    },
-  ];
+  // 1. Seed Roles - Ensure all standard roles exist and have up-to-date granular permissions
+  const standardRoles = Object.values(STANDARD_ROLE_PRESETS);
 
   for (const roleData of standardRoles) {
     const existingRole = await Role.findOne({ where: { name: roleData.name } });
     if (!existingRole) {
       await Role.create(roleData);
+    } else {
+      // Auto-upgrade legacy permissions if needed
+      const currentPerms = existingRole.permissions || [];
+      let expanded = expandPermissions(currentPerms);
+      if (expanded.length === 0 && roleData.permissions.length > 0) {
+        expanded = roleData.permissions;
+      }
+      if (expanded.length !== currentPerms.length || JSON.stringify(expanded) !== JSON.stringify(currentPerms)) {
+        await existingRole.update({ permissions: expanded });
+      }
     }
   }
 

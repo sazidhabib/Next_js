@@ -43,6 +43,16 @@ PostDelivery.init(
       type: DataTypes.DATE,
       allowNull: true,
     },
+    custom_text: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+      comment: "Platform-specific customized text override",
+    },
+    custom_media_url: {
+      type: DataTypes.STRING(2048),
+      allowNull: true,
+      comment: "Platform-specific customized media URL override",
+    },
   },
   {
     sequelize,

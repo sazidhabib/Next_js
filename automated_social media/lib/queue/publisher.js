@@ -88,16 +88,25 @@ export async function processSingleDelivery(delivery, post) {
 
     const { accessToken } = account.getDecryptedTokens();
 
+    // Determine platform-specific customized overrides if present
+    const customConfig = post.platform_customizations?.[delivery.provider];
+    const effectiveText = delivery.custom_text || customConfig?.text || post.content_text;
+    const effectiveMediaUrl = (delivery.custom_media_url !== undefined && delivery.custom_media_url !== null)
+      ? delivery.custom_media_url
+      : (customConfig && customConfig.mediaUrl !== undefined
+        ? customConfig.mediaUrl
+        : post.media_url);
+
     // 2. Validate platform constraints
-    const validation = adapter.validate(post.content_text, post.media_url);
+    const validation = adapter.validate(effectiveText, effectiveMediaUrl);
     if (!validation.isValid) {
       throw new Error(validation.error);
     }
 
-    // 3. Publish to platform API
+    // 3. Publish to platform API with effective content
     const publishResult = await adapter.publish({
-      text: post.content_text,
-      mediaUrl: post.media_url,
+      text: effectiveText,
+      mediaUrl: effectiveMediaUrl,
       accessToken,
       socialAccount: account,
     });

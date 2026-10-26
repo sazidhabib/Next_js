@@ -21,8 +21,10 @@ import {
   Building2,
   Search,
   Check,
+  Eye,
 } from 'lucide-react';
 import { Badge, Card } from '../ui';
+import { useAuth } from '@/context/AuthContext';
 
 const LEAVE_TYPES = [
   'Annual Leave',
@@ -37,6 +39,12 @@ const LEAVE_TYPES = [
 const LEAVE_STATUSES = ['Pending', 'Approved', 'Rejected', 'Cancelled'];
 
 export default function LeaveManagement({ employees = [], onUpdated }) {
+  const { user, canEdit, canDelete, hasPermission } = useAuth();
+  const canEditLeave = canEdit('leave');
+  const canDeleteLeave = canDelete('leave');
+  const canRequestLeave = hasPermission('REQUEST_LEAVE') || canEditLeave;
+  const canApproveLeave = hasPermission('APPROVE_LEAVES') || canEditLeave;
+
   const [leaves, setLeaves] = useState([]);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -159,7 +167,7 @@ export default function LeaveManagement({ employees = [], onUpdated }) {
 
   const openAddTab = (preselectedEmpId = '') => {
     setEditingLeave(null);
-    const defaultEmp = preselectedEmpId || employees?.[0]?.id || '';
+    const defaultEmp = preselectedEmpId || (!canEditLeave && user?.employeeId ? user.employeeId : (employees?.[0]?.id || ''));
     const today = new Date().toISOString().split('T')[0];
     const defaultApprover = users?.[0]?.name || 'Bishnu Hari';
 
@@ -202,6 +210,10 @@ export default function LeaveManagement({ employees = [], onUpdated }) {
 
   const handleSave = async (e) => {
     e.preventDefault();
+    if (!canRequestLeave && !canEditLeave) {
+      alert('You do not have permission to submit or edit leave requests.');
+      return;
+    }
     if (dateConflicts.isBlocked) {
       alert(
         `Booking Blocked: 2 employees already have approved leave during this date period (${form.startDate} to ${form.endDate}):\n` +
@@ -223,7 +235,7 @@ export default function LeaveManagement({ employees = [], onUpdated }) {
         endDate: form.endDate,
         totalDays: parseFloat(form.days) || 1,
         reason: form.reason,
-        status: form.status,
+        status: canApproveLeave ? form.status : 'Pending',
         approvedBy: form.approvedBy,
       };
 
@@ -248,6 +260,10 @@ export default function LeaveManagement({ employees = [], onUpdated }) {
   };
 
   const handleQuickStatus = async (id, status) => {
+    if (!canApproveLeave) {
+      alert('You do not have permission to approve or reject leave requests.');
+      return;
+    }
     if ((status || '').toUpperCase() === 'APPROVED') {
       const targetLeave = leaves.find((l) => String(l.id) === String(id));
       if (targetLeave) {
@@ -301,6 +317,10 @@ export default function LeaveManagement({ employees = [], onUpdated }) {
   };
 
   const handleDelete = async (id) => {
+    if (!canDeleteLeave) {
+      alert('You do not have permission to delete leave requests.');
+      return;
+    }
     if (!confirm('Cancel this leave request?')) return;
     try {
       const res = await fetch(`/api/leave/${id}`, { method: 'DELETE' });
@@ -439,39 +459,30 @@ export default function LeaveManagement({ employees = [], onUpdated }) {
             <span>Holiday Balances ({employees.length})</span>
           </button>
 
-          <button
-            type="button"
-            onClick={() => openAddTab()}
-            className={`px-4 py-2 rounded-xl text-xs font-semibold transition flex items-center space-x-2 ${
-              activeSubTab === 'add'
-                ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20'
-                : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700'
-            }`}
-          >
-            <Plus className="w-4 h-4" />
-            <span>Add Leave Request</span>
-          </button>
+          {canRequestLeave && (
+            <button
+              type="button"
+              onClick={() => openAddTab()}
+              className={`px-4 py-2 rounded-xl text-xs font-semibold transition flex items-center space-x-2 ${
+                activeSubTab === 'add'
+                  ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20'
+                  : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700'
+              }`}
+            >
+              <Plus className="w-4 h-4" />
+              <span>{canEditLeave ? 'Add Leave Request' : 'Request Leave'}</span>
+            </button>
+          )}
 
-          <button
-            type="button"
-            onClick={() => {
-              if (!editingLeave && leaves.length > 0) {
-                openEditTab(leaves[0]);
-              } else if (editingLeave) {
-                setActiveSubTab('edit');
-              } else {
-                alert('Please select a leave request from the list to edit');
-              }
-            }}
-            className={`px-4 py-2 rounded-xl text-xs font-semibold transition flex items-center space-x-2 ${
-              activeSubTab === 'edit'
-                ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20'
-                : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700'
-            }`}
-          >
-            <Edit className="w-4 h-4" />
-            <span>Edit Leave Request</span>
-          </button>
+          {activeSubTab === 'edit' && (
+            <button
+              type="button"
+              className="px-4 py-2 rounded-xl text-xs font-semibold bg-blue-600 text-white shadow-md shadow-blue-600/20 flex items-center space-x-2"
+            >
+              <Edit className="w-4 h-4" />
+              <span>{canEditLeave ? 'Edit Leave Request' : 'View Leave Details'}</span>
+            </button>
+          )}
         </div>
       </div>
 
@@ -591,11 +602,11 @@ export default function LeaveManagement({ employees = [], onUpdated }) {
                           <button
                             onClick={() => openEditTab(l)}
                             className="p-1.5 rounded-lg text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/50 transition"
-                            title="Edit"
+                            title={canEditLeave ? 'Edit Leave' : 'View Leave Details'}
                           >
-                            <Edit className="w-4 h-4" />
+                            {canEditLeave ? <Edit className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                           </button>
-                          {st === 'PENDING' && (
+                          {st === 'PENDING' && canApproveLeave && (
                             <>
                               <button
                                 onClick={() => handleQuickStatus(l.id, 'Approved')}
@@ -611,13 +622,15 @@ export default function LeaveManagement({ employees = [], onUpdated }) {
                               </button>
                             </>
                           )}
-                          <button
-                            onClick={() => handleDelete(l.id)}
-                            className="p-1.5 rounded-lg text-zinc-400 hover:text-rose-600 transition"
-                            title="Delete"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
+                          {canDeleteLeave && (
+                            <button
+                              onClick={() => handleDelete(l.id)}
+                              className="p-1.5 rounded-lg text-zinc-400 hover:text-rose-600 transition"
+                              title="Delete"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          )}
                         </td>
                       </tr>
                     );

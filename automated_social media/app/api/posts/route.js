@@ -80,7 +80,7 @@ export async function GET() {
 export async function POST(req) {
   try {
     const body = await req.json();
-    const { contentText, mediaUrl, targetAccounts } = body;
+    const { contentText, mediaUrl, targetAccounts, platformCustomizations } = body;
 
     if (!contentText || contentText.trim().length === 0) {
       return NextResponse.json({ success: false, error: "Post text is required." }, { status: 400 });
@@ -102,21 +102,28 @@ export async function POST(req) {
         defaults: { name: "Demo User", password_hash: "demo_hash" },
       });
 
-      // Create master Post
+      // Create master Post with universal text + platform customizations
       const post = await Post.create({
         user_id: user.id,
         content_text: contentText,
         media_url: mediaUrl || null,
+        platform_customizations: platformCustomizations || {},
         status: "processing",
       });
 
-      // Create PostDeliveries
+      // Create PostDeliveries with platform-specific overrides if customized
       const deliveries = await Promise.all(
         targetAccounts.map(async (acc) => {
+          const customConfig = platformCustomizations?.[acc.provider];
+          const hasCustomText = customConfig?.isCustomized && customConfig?.text !== undefined;
+          const hasCustomMedia = customConfig?.isCustomized && customConfig?.mediaUrl !== undefined;
+
           return await PostDelivery.create({
             post_id: post.id,
             social_account_id: acc.id,
             provider: acc.provider,
+            custom_text: hasCustomText ? customConfig.text : null,
+            custom_media_url: hasCustomMedia ? customConfig.mediaUrl : null,
             status: "pending",
           });
         })
@@ -136,21 +143,30 @@ export async function POST(req) {
       });
     }
 
-    // In-Memory Simulation Fallback (runs realistic simulated deliveries)
+    // In-Memory Simulation Fallback (runs realistic simulated deliveries with platform customization support)
     const newPostId = "post_" + Date.now();
-    const initialDeliveries = targetAccounts.map((acc, idx) => ({
-      id: `del_${newPostId}_${idx}`,
-      provider: acc.provider,
-      status: "in_progress",
-      external_post_id: null,
-      error_message: null,
-      published_at: null,
-    }));
+    const initialDeliveries = targetAccounts.map((acc, idx) => {
+      const customConfig = platformCustomizations?.[acc.provider];
+      const hasCustomText = customConfig?.isCustomized && customConfig?.text !== undefined;
+      const hasCustomMedia = customConfig?.isCustomized && customConfig?.mediaUrl !== undefined;
+
+      return {
+        id: `del_${newPostId}_${idx}`,
+        provider: acc.provider,
+        status: "in_progress",
+        custom_text: hasCustomText ? customConfig.text : null,
+        custom_media_url: hasCustomMedia ? customConfig.mediaUrl : null,
+        external_post_id: null,
+        error_message: null,
+        published_at: null,
+      };
+    });
 
     const mockPost = {
       id: newPostId,
       content_text: contentText,
       media_url: mediaUrl || null,
+      platform_customizations: platformCustomizations || {},
       status: "processing",
       createdAt: new Date().toISOString(),
       deliveries: initialDeliveries,
@@ -158,13 +174,21 @@ export async function POST(req) {
 
     mockPosts.unshift(mockPost);
 
-    // Simulate async publishing completion across channels
+    // Simulate async publishing completion across channels with customized content validation
     setTimeout(() => {
       let anyFailed = false;
       mockPost.deliveries.forEach((del) => {
-        // Validate with platform adapter
+        const customConfig = platformCustomizations?.[del.provider];
+        const effectiveText = (customConfig?.isCustomized && customConfig?.text)
+          ? customConfig.text
+          : contentText;
+        const effectiveMediaUrl = (customConfig?.isCustomized && customConfig?.mediaUrl !== undefined)
+          ? customConfig.mediaUrl
+          : mediaUrl;
+
+        // Validate with platform adapter using effective customized text & media
         const adapter = getAdapter(del.provider);
-        const validation = adapter.validate(contentText, mediaUrl);
+        const validation = adapter.validate(effectiveText, effectiveMediaUrl);
 
         if (!validation.isValid) {
           del.status = "failed";

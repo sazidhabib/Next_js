@@ -4,6 +4,7 @@ import {
   Department,
   Employee,
 } from '@/lib/db/models/index';
+import { requirePermission } from '@/lib/auth/rbac';
 
 export async function GET() {
   try {
@@ -24,6 +25,9 @@ export async function GET() {
 
 export async function POST(request) {
   try {
+    const auth = await requirePermission(request, { section: 'departments', action: 'EDIT' });
+    if (!auth.authorized) return auth.response;
+
     await initDb();
     const body = await request.json();
 

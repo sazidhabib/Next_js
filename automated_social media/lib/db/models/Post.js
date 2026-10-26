@@ -30,6 +30,11 @@ Post.init(
       type: DataTypes.ENUM("draft", "processing", "completed", "partial_failure", "failed"),
       defaultValue: "processing",
     },
+    platform_customizations: {
+      type: DataTypes.JSON,
+      allowNull: true,
+      defaultValue: {},
+    },
   },
   {
     sequelize,

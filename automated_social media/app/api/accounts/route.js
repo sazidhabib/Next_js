@@ -1,11 +1,12 @@
 import { NextResponse } from "next/server";
 import { initDB, SocialAccount, User } from "@/lib/db";
 import { getSupportedProviders } from "@/lib/social/registry";
+import { encryptToken } from "@/lib/security/encryption";
 
-// In-memory demo fallback store if MySQL is not configured yet
+// Demo accounts with standard UUIDs
 let mockAccounts = [
   {
-    id: "acc_li_1",
+    id: "a0000000-0000-4000-a000-000000000001",
     provider: "linkedin",
     account_name: "John Doe (LinkedIn)",
     account_id: "urn:li:person:johndoe",
@@ -17,7 +18,7 @@ let mockAccounts = [
     createdAt: new Date().toISOString(),
   },
   {
-    id: "acc_meta_fb",
+    id: "a0000000-0000-4000-a000-000000000002",
     provider: "facebook",
     account_name: "TechPulse Page (Facebook)",
     account_id: "109823471829",
@@ -29,7 +30,7 @@ let mockAccounts = [
     createdAt: new Date().toISOString(),
   },
   {
-    id: "acc_meta_ig",
+    id: "a0000000-0000-4000-a000-000000000003",
     provider: "instagram",
     account_name: "TechPulse Official (Instagram)",
     account_id: "1784140582928",
@@ -41,7 +42,7 @@ let mockAccounts = [
     createdAt: new Date().toISOString(),
   },
   {
-    id: "acc_tw_1",
+    id: "a0000000-0000-4000-a000-000000000004",
     provider: "twitter",
     account_name: "@TechPulseHQ (X)",
     account_id: "tw_98234129",
@@ -53,7 +54,7 @@ let mockAccounts = [
     createdAt: new Date().toISOString(),
   },
   {
-    id: "acc_yt_1",
+    id: "a0000000-0000-4000-a000-000000000005",
     provider: "youtube",
     account_name: "TechPulse Media (YouTube)",
     account_id: "UC_x98234091823",
@@ -72,16 +73,45 @@ export async function GET() {
 
   if (dbStatus.isConnected) {
     try {
-      const accounts = await SocialAccount.findAll({
+      let accounts = await SocialAccount.findAll({
         attributes: ["id", "provider", "account_name", "account_id", "is_active", "metadata", "created_at"],
         order: [["created_at", "DESC"]],
       });
+
+      // Auto-seed demo accounts into database if empty
+      if (accounts.length === 0) {
+        let [defaultUser] = await User.findOrCreate({
+          where: { email: "demo@antigravity.dev" },
+          defaults: { name: "Demo User", password_hash: "demo_hash" },
+        });
+
+        for (const ma of mockAccounts) {
+          await SocialAccount.findOrCreate({
+            where: { id: ma.id },
+            defaults: {
+              id: ma.id,
+              user_id: defaultUser.id,
+              provider: ma.provider,
+              account_name: ma.account_name,
+              account_id: ma.account_id,
+              encrypted_access_token: encryptToken("mock_token_" + ma.provider),
+              is_active: true,
+              metadata: ma.metadata,
+            },
+          });
+        }
+
+        accounts = await SocialAccount.findAll({
+          attributes: ["id", "provider", "account_name", "account_id", "is_active", "metadata", "created_at"],
+          order: [["created_at", "DESC"]],
+        });
+      }
 
       return NextResponse.json({
         success: true,
         databaseConnected: true,
         supportedProviders,
-        accounts: accounts.length > 0 ? accounts : mockAccounts,
+        accounts,
       });
     } catch (err) {
       console.warn("DB accounts query fallback:", err.message);

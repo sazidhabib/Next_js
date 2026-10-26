@@ -14,8 +14,10 @@ import {
   ExternalLink,
   Edit,
   FileText,
+  Eye,
 } from 'lucide-react';
 import { Badge, Card } from '../ui';
+import { useAuth } from '@/context/AuthContext';
 
 const CHECK_METHODS = [
   'Online Share Code Check',
@@ -44,6 +46,10 @@ const OUTCOME_OPTIONS = [
 ];
 
 export default function RightToWorkManagement({ employees = [], onUpdated }) {
+  const { canEdit, canDelete } = useAuth();
+  const canEditRtw = canEdit('rtw');
+  const canDeleteRtw = canDelete('rtw');
+
   const [records, setRecords] = useState([]);
   const [serverNextId, setServerNextId] = useState(null);
   const [users, setUsers] = useState([]);
@@ -154,6 +160,11 @@ export default function RightToWorkManagement({ employees = [], onUpdated }) {
   const handleSave = async (e) => {
     e.preventDefault();
 
+    if (!canEditRtw) {
+      alert('You do not have permission to add or edit Right to Work records.');
+      return;
+    }
+
     if (!form.employeeId) {
       alert('Please select an Employee (Mandatory).');
       return;
@@ -204,6 +215,10 @@ export default function RightToWorkManagement({ employees = [], onUpdated }) {
   };
 
   const handleDelete = async (id) => {
+    if (!canDeleteRtw) {
+      alert('You do not have permission to delete Right to Work records.');
+      return;
+    }
     if (!confirm('Delete this RTW audit record?')) return;
     try {
       const res = await fetch(`/api/rtw/${id}`, { method: 'DELETE' });
@@ -256,39 +271,30 @@ export default function RightToWorkManagement({ employees = [], onUpdated }) {
             <span>Right To Work</span>
           </button>
 
-          <button
-            type="button"
-            onClick={openAddTab}
-            className={`px-4 py-2 rounded-xl text-xs font-semibold transition flex items-center space-x-2 ${
-              activeSubTab === 'add'
-                ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20'
-                : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700'
-            }`}
-          >
-            <Plus className="w-4 h-4" />
-            <span>Add Check</span>
-          </button>
+          {canEditRtw && (
+            <button
+              type="button"
+              onClick={openAddTab}
+              className={`px-4 py-2 rounded-xl text-xs font-semibold transition flex items-center space-x-2 ${
+                activeSubTab === 'add'
+                  ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20'
+                  : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700'
+              }`}
+            >
+              <Plus className="w-4 h-4" />
+              <span>Add Check</span>
+            </button>
+          )}
 
-          <button
-            type="button"
-            onClick={() => {
-              if (!editingRecord && records.length > 0) {
-                openEditTab(records[0]);
-              } else if (editingRecord) {
-                setActiveSubTab('edit');
-              } else {
-                alert('Please select a check record from the table to edit');
-              }
-            }}
-            className={`px-4 py-2 rounded-xl text-xs font-semibold transition flex items-center space-x-2 ${
-              activeSubTab === 'edit'
-                ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20'
-                : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700'
-            }`}
-          >
-            <Edit className="w-4 h-4" />
-            <span>Edit Check</span>
-          </button>
+          {activeSubTab === 'edit' && (
+            <button
+              type="button"
+              className="px-4 py-2 rounded-xl text-xs font-semibold bg-blue-600 text-white shadow-md shadow-blue-600/20 flex items-center space-x-2"
+            >
+              <Edit className="w-4 h-4" />
+              <span>{canEditRtw ? 'Edit Check' : 'View Check Details'}</span>
+            </button>
+          )}
         </div>
       </div>
 
@@ -380,17 +386,19 @@ export default function RightToWorkManagement({ employees = [], onUpdated }) {
                         <button
                           onClick={() => openEditTab(rec)}
                           className="p-1.5 rounded-lg text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/50 transition"
-                          title="Edit Check"
+                          title={canEditRtw ? 'Edit Check' : 'View Check Details'}
                         >
-                          <Edit className="w-4 h-4" />
+                          {canEditRtw ? <Edit className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                         </button>
-                        <button
-                          onClick={() => handleDelete(rec.id)}
-                          className="p-1.5 rounded-lg text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/50 transition"
-                          title="Delete Check"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
+                        {canDeleteRtw && (
+                          <button
+                            onClick={() => handleDelete(rec.id)}
+                            className="p-1.5 rounded-lg text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/50 transition"
+                            title="Delete Check"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        )}
                       </td>
                     </tr>
                   ))
@@ -406,14 +414,21 @@ export default function RightToWorkManagement({ employees = [], onUpdated }) {
         <Card>
           <div className="border-b border-zinc-100 dark:border-zinc-800 pb-3 mb-5">
             <h3 className="text-base sm:text-lg font-bold text-zinc-900 dark:text-zinc-100">
-              {activeSubTab === 'edit' ? `Edit Right To Work Check #${form.id}` : 'Create Right To Work Check'}
+              {activeSubTab === 'edit'
+                ? canEditRtw
+                  ? `Edit Right To Work Check #${form.id}`
+                  : `View Right To Work Check #${form.id}`
+                : 'Create Right To Work Check'}
             </h3>
             <p className="text-xs text-zinc-500">
-              Record statutory excuse validation, document reference, conducting officer and follow-up schedules.
+              {canEditRtw
+                ? 'Record statutory excuse validation, document reference, conducting officer and follow-up schedules.'
+                : 'Statutory excuse validation and check details (Read-only view).'}
             </p>
           </div>
 
           <form onSubmit={handleSave} className="space-y-5 text-xs">
+            <fieldset disabled={!canEditRtw} className="contents disabled:opacity-85">
             {/* 2-Column Responsive Layout matching reference screenshot */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
               
@@ -621,6 +636,7 @@ export default function RightToWorkManagement({ employees = [], onUpdated }) {
               </div>
 
             </div>
+            </fieldset>
 
             {/* Bottom Form Actions */}
             <div className="flex flex-wrap items-center justify-end gap-3 pt-4 border-t border-zinc-100 dark:border-zinc-800">
@@ -629,16 +645,18 @@ export default function RightToWorkManagement({ employees = [], onUpdated }) {
                 onClick={() => setActiveSubTab('rtw')}
                 className="px-4 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition font-medium text-xs"
               >
-                Cancel
+                {!canEditRtw ? 'Back to List' : 'Cancel'}
               </button>
 
-              <button
-                type="submit"
-                className="px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-md shadow-blue-600/20 transition flex items-center space-x-2"
-              >
-                <CheckCircle2 className="w-4 h-4" />
-                <span>{activeSubTab === 'edit' ? 'Update Check' : 'Add Check'}</span>
-              </button>
+              {canEditRtw && (
+                <button
+                  type="submit"
+                  className="px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-md shadow-blue-600/20 transition flex items-center space-x-2"
+                >
+                  <CheckCircle2 className="w-4 h-4" />
+                  <span>{activeSubTab === 'edit' ? 'Update Check' : 'Add Check'}</span>
+                </button>
+              )}
             </div>
           </form>
         </Card>

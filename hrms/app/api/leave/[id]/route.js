@@ -6,6 +6,8 @@ import {
   Employee,
 } from '@/lib/db/models/index';
 
+import { requirePermission, hasSessionPermission } from '@/lib/auth/rbac';
+
 export async function GET(request, { params }) {
   try {
     await initDb();
@@ -26,6 +28,13 @@ export async function GET(request, { params }) {
 
 export async function PUT(request, { params }) {
   try {
+    const auth = await requirePermission(request, [
+      { section: 'leave', action: 'EDIT' },
+      'APPROVE_LEAVES',
+      'REQUEST_LEAVE',
+    ]);
+    if (!auth.authorized) return auth.response;
+
     await initDb();
     const { id } = await params;
     const body = await request.json();
@@ -33,6 +42,18 @@ export async function PUT(request, { params }) {
     const leave = await LeaveRequest.findByPk(id);
     if (!leave) {
       return NextResponse.json({ success: false, error: 'Leave request not found' }, { status: 404 });
+    }
+
+    // If changing status, must have APPROVE_LEAVES or EDIT_LEAVE
+    const canApprove = hasSessionPermission(auth.session, [
+      { section: 'leave', action: 'EDIT' },
+      'APPROVE_LEAVES',
+    ]);
+    if (body.status !== undefined && body.status !== leave.status && !canApprove) {
+      return NextResponse.json(
+        { success: false, error: 'Forbidden: You do not have permission to approve/reject leaves' },
+        { status: 403 }
+      );
     }
 
     const targetStatus = body.status !== undefined ? body.status : leave.status;
@@ -98,11 +119,30 @@ export async function PUT(request, { params }) {
 
 export async function DELETE(request, { params }) {
   try {
+    const auth = await requirePermission(request, [
+      { section: 'leave', action: 'DELETE' },
+      'REQUEST_LEAVE',
+    ]);
+    if (!auth.authorized) return auth.response;
+
     await initDb();
     const { id } = await params;
     const leave = await LeaveRequest.findByPk(id);
     if (!leave) {
       return NextResponse.json({ success: false, error: 'Leave request not found' }, { status: 404 });
+    }
+
+    const hasDeletePerm = hasSessionPermission(auth.session, { section: 'leave', action: 'DELETE' });
+    const isOwnPendingLeave =
+      auth.session.employeeId &&
+      String(leave.employeeId) === String(auth.session.employeeId) &&
+      (leave.status || '').toUpperCase() === 'PENDING';
+
+    if (!hasDeletePerm && !isOwnPendingLeave) {
+      return NextResponse.json(
+        { success: false, error: 'Forbidden: You do not have permission to delete this leave request' },
+        { status: 403 }
+      );
     }
 
     await leave.destroy();

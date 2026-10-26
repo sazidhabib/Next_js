@@ -1,6 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { expandPermissions, getPermissionCode } from '@/lib/auth/permissions';
 
 const AuthContext = createContext(null);
 
@@ -18,17 +19,19 @@ export const getUserPermissions = (user) => {
   if (!user) return [];
   let perms = user.permissions;
   if (!perms && user.role?.permissions) perms = user.role.permissions;
-  if (Array.isArray(perms)) return perms;
-  if (typeof perms === 'string') {
+  let rawList = [];
+  if (Array.isArray(perms)) {
+    rawList = perms;
+  } else if (typeof perms === 'string') {
     try {
       const parsed = JSON.parse(perms);
-      if (Array.isArray(parsed)) return parsed;
-      return [perms];
+      if (Array.isArray(parsed)) rawList = parsed;
+      else rawList = [perms];
     } catch {
-      return perms.split(',').map((p) => p.trim()).filter(Boolean);
+      rawList = perms.split(',').map((p) => p.trim()).filter(Boolean);
     }
   }
-  return [];
+  return expandPermissions(rawList);
 };
 
 export function AuthProvider({ children }) {
@@ -113,69 +116,6 @@ export function AuthProvider({ children }) {
     }
   };
 
-  const canAccessTab = useCallback(
-    (tabId) => {
-      if (!user) return false;
-      const role = user.roleName || user.role?.name || '';
-      if (role === 'Admin' || role === 'Super Admin' || role === 'Restaurant Owner') return true;
-
-      const perms = getUserPermissions(user);
-      if (perms.includes('ALL')) return true;
-
-      switch (tabId) {
-        case 'dashboard':
-          return (
-            perms.includes('VIEW_DASHBOARD') ||
-            perms.includes('VIEW_OWN_PROFILE') ||
-            perms.includes('MANAGE_EMPLOYEES') ||
-            perms.length > 0
-          );
-
-        case 'employees':
-          return perms.includes('MANAGE_EMPLOYEES');
-
-        case 'leave':
-          return perms.includes('REQUEST_LEAVE') || perms.includes('APPROVE_LEAVES');
-
-        case 'rota':
-          return (
-            perms.includes('MANAGE_ROTA') ||
-            perms.includes('VIEW_ROTA') ||
-            ((role === 'Manager' || role === 'HR Manager' || role === 'Department Head') && perms.includes('MANAGE_EMPLOYEES'))
-          );
-
-        case 'immigration':
-          return perms.includes('MANAGE_IMMIGRATION') || perms.includes('MANAGE_COMPLIANCE');
-
-        case 'rtw':
-          return perms.includes('MANAGE_RTW') || perms.includes('MANAGE_COMPLIANCE');
-
-        case 'departments':
-          return perms.includes('VIEW_DEPARTMENT') || perms.includes('MANAGE_EMPLOYEES');
-
-        case 'roles':
-        case 'users':
-          return perms.includes('MANAGE_USERS');
-
-        case 'visatypes':
-          return perms.includes('MANAGE_COMPLIANCE') || perms.includes('MANAGE_IMMIGRATION');
-
-        case 'media':
-          return (
-            perms.includes('MANAGE_MEDIA') ||
-            ((role === 'Manager' || role === 'HR Manager') && perms.includes('MANAGE_EMPLOYEES'))
-          );
-
-        case 'settings':
-          return perms.includes('MANAGE_SETTINGS');
-
-        default:
-          return false;
-      }
-    },
-    [user]
-  );
-
   const hasPermission = useCallback(
     (permissionCode) => {
       if (!user) return false;
@@ -185,6 +125,51 @@ export function AuthProvider({ children }) {
       return perms.includes('ALL') || perms.includes(permissionCode);
     },
     [user]
+  );
+
+  const canPerform = useCallback(
+    (section, action) => {
+      if (!user) return false;
+      const role = user.roleName || user.role?.name || '';
+      if (role === 'Admin' || role === 'Super Admin' || role === 'Restaurant Owner') return true;
+
+      const perms = getUserPermissions(user);
+      if (perms.includes('ALL')) return true;
+
+      const targetPerm = getPermissionCode(section, action);
+      if (targetPerm && perms.includes(targetPerm)) return true;
+
+      // Special action mappings:
+      if (action.toUpperCase() === 'VIEW') {
+        // If user can edit or delete, they naturally can view
+        const editPerm = getPermissionCode(section, 'EDIT');
+        const deletePerm = getPermissionCode(section, 'DELETE');
+        if (editPerm && perms.includes(editPerm)) return true;
+        if (deletePerm && perms.includes(deletePerm)) return true;
+
+        if (section === 'dashboard') {
+          return perms.includes('VIEW_DASHBOARD') || perms.includes('VIEW_OWN_PROFILE') || perms.length > 0;
+        }
+        if (section === 'leave') {
+          return perms.includes('REQUEST_LEAVE') || perms.includes('APPROVE_LEAVES') || perms.includes('VIEW_LEAVE');
+        }
+      }
+
+      return false;
+    },
+    [user]
+  );
+
+  const canView = useCallback((section) => canPerform(section, 'VIEW'), [canPerform]);
+  const canEdit = useCallback((section) => canPerform(section, 'EDIT'), [canPerform]);
+  const canDelete = useCallback((section) => canPerform(section, 'DELETE'), [canPerform]);
+
+  const canAccessTab = useCallback(
+    (tabId) => {
+      if (!user) return false;
+      return canView(tabId);
+    },
+    [user, canView]
   );
 
   const value = {
@@ -197,6 +182,10 @@ export function AuthProvider({ children }) {
     logout,
     canAccessTab,
     hasPermission,
+    canPerform,
+    canView,
+    canEdit,
+    canDelete,
     checkSession,
     refreshUserSession: checkSession,
   };

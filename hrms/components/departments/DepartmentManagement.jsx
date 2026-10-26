@@ -1,28 +1,37 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Building2, Plus, Edit, Trash2, Users } from 'lucide-react';
+import { Building2, Plus, Edit, Trash2, Users, Eye } from 'lucide-react';
 import { Card, Modal } from '../ui';
+import { useAuth } from '@/context/AuthContext';
 
 export default function DepartmentManagement({ departments, onUpdated }) {
+  const { canEdit, canDelete } = useAuth();
+  const canEditDept = canEdit('departments');
+  const canDeleteDept = canDelete('departments');
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingDept, setEditingDept] = useState(null);
+  const [isReadOnly, setIsReadOnly] = useState(false);
   const [form, setForm] = useState({ name: '', description: '' });
 
   const openAdd = () => {
     setEditingDept(null);
+    setIsReadOnly(false);
     setForm({ name: '', description: '' });
     setIsModalOpen(true);
   };
 
   const openEdit = (dept) => {
     setEditingDept(dept);
+    setIsReadOnly(!canEditDept);
     setForm({ name: dept.name, description: dept.description || '' });
     setIsModalOpen(true);
   };
 
   const handleSave = async (e) => {
     e.preventDefault();
+    if (isReadOnly) return;
     try {
       const url = editingDept ? `/api/departments/${editingDept.id}` : '/api/departments';
       const method = editingDept ? 'PUT' : 'POST';
@@ -45,6 +54,7 @@ export default function DepartmentManagement({ departments, onUpdated }) {
   };
 
   const handleDelete = async (id) => {
+    if (!canDeleteDept) return;
     if (!confirm('Delete department?')) return;
     try {
       const res = await fetch(`/api/departments/${id}`, { method: 'DELETE' });
@@ -67,13 +77,15 @@ export default function DepartmentManagement({ departments, onUpdated }) {
           </h3>
           <p className="text-xs text-zinc-500">Manage business departments and team divisions</p>
         </div>
-        <button
-          onClick={openAdd}
-          className="self-start sm:self-auto px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold shadow-md shadow-purple-600/20 flex items-center space-x-2"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Add Department</span>
-        </button>
+        {canEditDept && (
+          <button
+            onClick={openAdd}
+            className="self-start sm:self-auto px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold shadow-md shadow-purple-600/20 flex items-center space-x-2"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Add Department</span>
+          </button>
+        )}
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-4">
@@ -85,12 +97,22 @@ export default function DepartmentManagement({ departments, onUpdated }) {
                 <p className="text-xs text-zinc-500 mt-1 line-clamp-2">{dept.description || 'No description'}</p>
               </div>
               <div className="flex items-center space-x-1 opacity-80 group-hover:opacity-100 transition">
-                <button onClick={() => openEdit(dept)} className="p-1.5 text-zinc-500 hover:text-purple-600">
-                  <Edit className="w-4 h-4" />
+                <button
+                  onClick={() => openEdit(dept)}
+                  className="p-1.5 text-zinc-500 hover:text-purple-600 transition"
+                  title={canEditDept ? 'Edit Department' : 'View Department'}
+                >
+                  {canEditDept ? <Edit className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
-                <button onClick={() => handleDelete(dept.id)} className="p-1.5 text-zinc-500 hover:text-rose-600">
-                  <Trash2 className="w-4 h-4" />
-                </button>
+                {canDeleteDept && (
+                  <button
+                    onClick={() => handleDelete(dept.id)}
+                    className="p-1.5 text-zinc-500 hover:text-rose-600 transition"
+                    title="Delete Department"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                )}
               </div>
             </div>
 
@@ -104,34 +126,55 @@ export default function DepartmentManagement({ departments, onUpdated }) {
         ))}
       </div>
 
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={editingDept ? 'Edit Department' : 'Add Department'}>
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title={
+          isReadOnly
+            ? 'Department Details'
+            : editingDept
+            ? 'Edit Department'
+            : 'Add Department'
+        }
+      >
         <form onSubmit={handleSave} className="space-y-4 text-xs">
           <div>
             <label className="block font-semibold mb-1">Department Name *</label>
             <input
               type="text"
               required
+              disabled={isReadOnly}
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
-              className="w-full px-3 py-2 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700"
+              className="w-full px-3 py-2 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 disabled:opacity-75 disabled:cursor-not-allowed"
             />
           </div>
           <div>
             <label className="block font-semibold mb-1">Description</label>
             <textarea
               rows={2}
+              disabled={isReadOnly}
               value={form.description}
               onChange={(e) => setForm({ ...form, description: e.target.value })}
-              className="w-full px-3 py-2 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700"
+              className="w-full px-3 py-2 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 disabled:opacity-75 disabled:cursor-not-allowed"
             />
           </div>
           <div className="flex justify-end space-x-2 pt-2">
-            <button type="button" onClick={() => setIsModalOpen(false)} className="px-4 py-2 border rounded-xl">
-              Cancel
+            <button
+              type="button"
+              onClick={() => setIsModalOpen(false)}
+              className="px-4 py-2 border rounded-xl"
+            >
+              {isReadOnly ? 'Close' : 'Cancel'}
             </button>
-            <button type="submit" className="px-5 py-2 bg-purple-600 text-white rounded-xl font-bold hover:bg-purple-700">
-              Save Department
-            </button>
+            {!isReadOnly && (
+              <button
+                type="submit"
+                className="px-5 py-2 bg-purple-600 text-white rounded-xl font-bold hover:bg-purple-700 transition"
+              >
+                Save Department
+              </button>
+            )}
           </div>
         </form>
       </Modal>

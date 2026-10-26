@@ -8,6 +8,7 @@ import {
   VisaType,
 } from '@/lib/db/models/index';
 import { Op } from 'sequelize';
+import { requirePermission } from '@/lib/auth/rbac';
 
 export async function GET(request) {
   try {
@@ -79,6 +80,9 @@ export async function GET(request) {
 
 export async function POST(request) {
   try {
+    const auth = await requirePermission(request, { section: 'employees', action: 'EDIT' });
+    if (!auth.authorized) return auth.response;
+
     await initDb();
     const body = await request.json();
 
