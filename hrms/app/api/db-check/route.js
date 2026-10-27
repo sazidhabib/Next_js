@@ -1,13 +1,28 @@
 import { NextResponse } from 'next/server';
 import sequelize from '@/lib/db/sequelize';
+import { getAuthSession } from '@/lib/auth/rbac';
 
-export async function GET() {
+export async function GET(request) {
+  const session = await getAuthSession(request);
+  const isSuperAdmin =
+    session?.id === 'system-superadmin' || session?.roleName === 'Super Admin' || session?.isSuperAdmin;
+
+  if (!isSuperAdmin) {
+    return NextResponse.json(
+      { success: false, error: 'Unauthorized: Diagnostic tool restricted to Super Administrator.' },
+      { status: 403 }
+    );
+  }
+
+  const isProd = process.env.NODE_ENV === 'production';
   const dbInfo = {
     dialect: process.env.DB_DIALECT || 'mysql',
-    host: process.env.DB_HOST || '127.0.0.1',
-    port: process.env.DB_PORT || '3306',
     database: process.env.DB_NAME || 'hrms_db',
-    user: process.env.DB_USER || 'root',
+    ...(isProd ? {} : {
+      host: process.env.DB_HOST || '127.0.0.1',
+      port: process.env.DB_PORT || '3306',
+      user: process.env.DB_USER || 'root',
+    }),
     hasPassword: Boolean(process.env.DB_PASSWORD),
   };
 
@@ -23,8 +38,8 @@ export async function GET() {
       success: false,
       status: 'Database connection failed',
       error: error.message,
-      stack: error.stack,
+      ...(isProd ? {} : { stack: error.stack }),
       config: dbInfo,
-    }, { status: 200 });
+    }, { status: 500 });
   }
 }

@@ -2,9 +2,13 @@ import { NextResponse } from 'next/server';
 import { initDb, MediaFile } from '@/lib/db/models/index';
 import fs from 'fs/promises';
 import path from 'path';
+import { requirePermission } from '@/lib/auth/rbac';
 
 export async function DELETE(request, { params }) {
   try {
+    const auth = await requirePermission(request, { section: 'media', action: 'DELETE' });
+    if (!auth.authorized) return auth.response;
+
     await initDb();
     const { id } = await params;
     const media = await MediaFile.findByPk(id);

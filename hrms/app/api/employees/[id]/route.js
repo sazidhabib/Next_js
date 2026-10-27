@@ -13,6 +13,9 @@ import { requirePermission } from '@/lib/auth/rbac';
 
 export async function GET(request, { params }) {
   try {
+    const auth = await requirePermission(request, { section: 'employees', action: 'VIEW' });
+    if (!auth.authorized) return auth.response;
+
     await initDb();
     const { id } = await params;
 

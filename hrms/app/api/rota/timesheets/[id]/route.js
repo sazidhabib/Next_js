@@ -5,6 +5,7 @@ import {
   Employee,
   Department,
 } from '@/lib/db/models/index';
+import { requirePermission } from '@/lib/auth/rbac';
 
 function calculateHours(start, end, breakMin = 0) {
   if (!start || !end) return 0;
@@ -28,6 +29,9 @@ export const revalidate = 0;
 
 export async function PUT(request, { params }) {
   try {
+    const auth = await requirePermission(request, { section: 'rota', action: 'EDIT' });
+    if (!auth.authorized) return auth.response;
+
     await initDb();
     const { id } = await params;
     const body = await request.json();
@@ -91,6 +95,9 @@ export async function PUT(request, { params }) {
 
 export async function DELETE(request, { params }) {
   try {
+    const auth = await requirePermission(request, { section: 'rota', action: 'DELETE' });
+    if (!auth.authorized) return auth.response;
+
     await initDb();
     const { id } = await params;
     const timesheet = await Timesheet.findByPk(id);

@@ -9,13 +9,31 @@ import { requirePermission, hasSessionPermission } from '@/lib/auth/rbac';
 
 export async function GET(request) {
   try {
+    const auth = await requirePermission(request, [
+      { section: 'leave', action: 'VIEW' },
+      'VIEW_LEAVE',
+      'REQUEST_LEAVE',
+    ]);
+    if (!auth.authorized) return auth.response;
+
     await initDb();
     const { searchParams } = new URL(request.url);
     const employeeId = searchParams.get('employeeId');
     const status = searchParams.get('status');
 
+    const canApprove = hasSessionPermission(auth.session, [
+      { section: 'leave', action: 'EDIT' },
+      'APPROVE_LEAVES',
+    ]);
+
     const where = {};
-    if (employeeId) where.employeeId = employeeId;
+    // If not a manager/admin with approve/edit privileges, restrict to own employee record
+    if (!canApprove && auth.session.employeeId) {
+      where.employeeId = auth.session.employeeId;
+    } else if (employeeId) {
+      where.employeeId = employeeId;
+    }
+
     if (status) where.status = status;
 
     const leaveRequests = await LeaveRequest.findAll({
@@ -51,6 +69,10 @@ export async function POST(request) {
     ]);
     if (!canApprove) {
       body.status = 'Pending';
+      // Restrict employee to only booking for themselves
+      if (auth.session.employeeId) {
+        body.employeeId = auth.session.employeeId;
+      }
     }
 
     const { startDate, endDate, employeeId } = body;

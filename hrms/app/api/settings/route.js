@@ -29,20 +29,15 @@ export async function GET() {
   }
 }
 
+import { requirePermission } from '@/lib/auth/rbac';
+
 export async function PUT(request) {
   try {
+    const auth = await requirePermission(request, { section: 'settings', action: 'EDIT' });
+    if (!auth.authorized) return auth.response;
+
     await initDb();
     const body = await request.json();
-
-    // Check user role from headers or body if passed
-    // (If role is provided and not Super Admin / Admin, reject)
-    const requesterRole = request.headers.get('x-user-role') || body.requesterRole;
-    if (requesterRole && !['Super Admin', 'Admin'].includes(requesterRole)) {
-      return NextResponse.json(
-        { success: false, error: 'Unauthorized: Only Super Admin can change system settings' },
-        { status: 403 }
-      );
-    }
 
     let setting = await Setting.findOne();
     if (!setting) {

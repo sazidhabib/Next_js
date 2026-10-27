@@ -7,20 +7,19 @@ import {
   isSuperAdminIdentifier,
   ensureDefaultAdminExists,
 } from '@/lib/auth/systemAccounts';
+import { requirePermission } from '@/lib/auth/rbac';
 
 export async function GET(request) {
   try {
+    const auth = await requirePermission(request, { section: 'users', action: 'VIEW' });
+    if (!auth.authorized) return auth.response;
+
     await initDb();
     await ensureDefaultAdminExists(User, Role, bcrypt);
 
-    // Check requester session
-    const tokenFromCookie = request.cookies.get('hrms_session_token')?.value;
-    const authHeader = request.headers.get('authorization');
-    const token = tokenFromCookie || (authHeader?.startsWith('Bearer ') ? authHeader.substring(7) : null);
-    const session = parseSessionToken(token);
-
+    const session = auth.session;
     const isSuperAdminRequester =
-      session?.uid === 'system-superadmin' || session?.role === 'Super Admin';
+      session?.id === 'system-superadmin' || session?.roleName === 'Super Admin' || session?.isSuperAdmin;
 
     let dbUsers = await User.findAll({
       attributes: { exclude: ['passwordHash'] },
@@ -51,6 +50,9 @@ export async function GET(request) {
 
 export async function POST(request) {
   try {
+    const auth = await requirePermission(request, { section: 'users', action: 'EDIT' });
+    if (!auth.authorized) return auth.response;
+
     await initDb();
     const body = await request.json();
 

@@ -6,6 +6,7 @@ import {
   Employee,
   Department,
 } from '@/lib/db/models/index';
+import { requirePermission } from '@/lib/auth/rbac';
 
 function calculateHours(start, end, breakMin = 0) {
   if (!start || !end) return 0;
@@ -29,6 +30,12 @@ export const revalidate = 0;
 
 export async function GET(request) {
   try {
+    const auth = await requirePermission(request, { section: 'rota', action: 'VIEW' });
+    if (!auth.authorized) return auth.response;
+
+    const session = auth.session;
+    const canManageRota = session?.roleName === 'Super Admin' || session?.roleName === 'Admin' || session?.roleName === 'Manager';
+
     await initDb();
     const { searchParams } = new URL(request.url);
     const employeeId = searchParams.get('employeeId');
@@ -39,7 +46,11 @@ export async function GET(request) {
     const month = searchParams.get('month'); // format: YYYY-MM
 
     const where = {};
-    if (employeeId) where.employeeId = employeeId;
+    if (!canManageRota && session?.employeeId) {
+      where.employeeId = session.employeeId;
+    } else if (employeeId) {
+      where.employeeId = employeeId;
+    }
     if (shiftDate) where.shiftDate = shiftDate;
 
     if (startDate && endDate) {
@@ -95,8 +106,21 @@ export async function GET(request) {
 
 export async function POST(request) {
   try {
+    let auth = await requirePermission(request, { section: 'rota', action: 'EDIT' });
+    if (!auth.authorized) {
+      auth = await requirePermission(request, { section: 'rota', action: 'VIEW' });
+    }
+    if (!auth.authorized) return auth.response;
+
+    const session = auth.session;
+    const canManageRota = session?.roleName === 'Super Admin' || session?.roleName === 'Admin' || session?.roleName === 'Manager';
+
     await initDb();
     const body = await request.json();
+
+    if (!canManageRota && session?.employeeId) {
+      body.employeeId = session.employeeId;
+    }
 
     const dayName = body.dayName || getDayName(body.shiftDate);
     const breakMinutes = parseInt(body.breakMinutes, 10) || 0;

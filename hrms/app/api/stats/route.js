@@ -10,9 +10,13 @@ import {
   LeaveRequest,
 } from '@/lib/db/models/index';
 import { Op } from 'sequelize';
+import { requirePermission } from '@/lib/auth/rbac';
 
-export async function GET() {
+export async function GET(request) {
   try {
+    const auth = await requirePermission(request, { section: 'dashboard', action: 'VIEW' });
+    if (!auth.authorized) return auth.response;
+
     await initDb();
 
     const [

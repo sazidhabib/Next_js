@@ -28,6 +28,7 @@ import {
   CheckCircle,
 } from 'lucide-react';
 import { Card, Badge, Modal } from '../ui';
+import { useAuth } from '@/context/AuthContext';
 
 const SHIFT_PRESETS = {
   Early: { start: '09:00', end: '17:00', breakMin: 60, label: 'Early (09:00 - 17:00)' },
@@ -95,12 +96,34 @@ function getDayName(dateStr) {
 }
 
 export default function RotaManagement({ employees = [] }) {
+  const { user, canEdit, canDelete, hasPermission } = useAuth();
+  const canEditRota = canEdit('rota');
+  const canDeleteRota = canDelete('rota');
+  const isEmployeeUser = user?.roleName === 'Employee' || (!canEditRota && !hasPermission('EDIT_ROTA'));
+  const currentEmployeeId = user?.employeeId;
+
+  const currentEmp = useMemo(
+    () => employees.find((e) => String(e.id) === String(currentEmployeeId)),
+    [employees, currentEmployeeId]
+  );
+
+  const selectableEmployees = useMemo(() => {
+    if (isEmployeeUser && currentEmp) {
+      return [currentEmp];
+    }
+    return employees;
+  }, [employees, isEmployeeUser, currentEmp]);
+
+  const canManageTimesheets = !isEmployeeUser && (canEditRota || hasPermission('EDIT_ROTA'));
+
   // Top Navigation Tab: 'table' (Weekly Rota Table) | 'calendar' (Calendar Rota) | 'timesheets'
   const [activeTab, setActiveTab] = useState('table');
 
   // Calendar Sub-Mode: 'matrix' (Team Weekly Matrix) | 'month' (Individual Employee Month View)
   const [calendarMode, setCalendarMode] = useState('matrix');
-  const [selectedCalendarEmployeeId, setSelectedCalendarEmployeeId] = useState('');
+  const [selectedCalendarEmployeeId, setSelectedCalendarEmployeeId] = useState(
+    (isEmployeeUser && currentEmployeeId) ? currentEmployeeId : ''
+  );
   const [activeMonth, setActiveMonth] = useState(getCurrentMonthString);
 
   // Common dates and filters
@@ -123,7 +146,7 @@ export default function RotaManagement({ employees = [] }) {
     isOpen: false,
     mode: 'add', // 'add' | 'edit'
     id: null,
-    employeeId: '',
+    employeeId: (isEmployeeUser && currentEmployeeId) ? currentEmployeeId : '',
     shiftDate: todayLocalDate,
     shiftType: 'Early',
     startTime: '09:00',
@@ -134,7 +157,7 @@ export default function RotaManagement({ employees = [] }) {
 
   // Table Quick-entry form for Rota Shift
   const [shiftForm, setShiftForm] = useState({
-    employeeId: '',
+    employeeId: (isEmployeeUser && currentEmployeeId) ? currentEmployeeId : '',
     shiftDate: todayLocalDate,
     shiftType: 'Early',
     startTime: '09:00',
@@ -145,7 +168,7 @@ export default function RotaManagement({ employees = [] }) {
 
   // Quick-entry form for Timesheet
   const [timesheetForm, setTimesheetForm] = useState({
-    employeeId: '',
+    employeeId: (isEmployeeUser && currentEmployeeId) ? currentEmployeeId : '',
     workDate: todayLocalDate,
     clockIn: '09:00',
     clockOut: '17:00',
@@ -157,10 +180,26 @@ export default function RotaManagement({ employees = [] }) {
   const [editingTimesheet, setEditingTimesheet] = useState(null);
 
   // Default active employee fallback
-  const defaultEmployeeId = employees[0]?.id || '';
-  const currentSelectedEmpId = selectedCalendarEmployeeId || defaultEmployeeId;
-  const currentShiftEmployeeId = shiftForm.employeeId || defaultEmployeeId;
-  const currentTimesheetEmployeeId = timesheetForm.employeeId || defaultEmployeeId;
+  const defaultEmployeeId = (isEmployeeUser && currentEmployeeId)
+    ? currentEmployeeId
+    : (employees[0]?.id || '');
+  const currentSelectedEmpId = (isEmployeeUser && currentEmployeeId)
+    ? currentEmployeeId
+    : (selectedCalendarEmployeeId || defaultEmployeeId);
+  const currentShiftEmployeeId = (isEmployeeUser && currentEmployeeId)
+    ? currentEmployeeId
+    : (shiftForm.employeeId || defaultEmployeeId);
+  const currentTimesheetEmployeeId = (isEmployeeUser && currentEmployeeId)
+    ? currentEmployeeId
+    : (timesheetForm.employeeId || defaultEmployeeId);
+
+  useEffect(() => {
+    if (isEmployeeUser && currentEmployeeId) {
+      if (selectedCalendarEmployeeId !== currentEmployeeId) setSelectedCalendarEmployeeId(currentEmployeeId);
+      if (shiftForm.employeeId !== currentEmployeeId) setShiftForm((f) => ({ ...f, employeeId: currentEmployeeId }));
+      if (timesheetForm.employeeId !== currentEmployeeId) setTimesheetForm((f) => ({ ...f, employeeId: currentEmployeeId }));
+    }
+  }, [isEmployeeUser, currentEmployeeId]);
 
   // Fetch shifts for the selected week (for table & matrix view)
   const fetchWeekShifts = useCallback(async () => {
@@ -387,7 +426,11 @@ export default function RotaManagement({ employees = [] }) {
 
   // Filter employees for the Team Matrix
   const filteredMatrixEmployees = useMemo(() => {
-    return employees.filter((emp) => {
+    const baseList = (isEmployeeUser && currentEmployeeId)
+      ? employees.filter((e) => String(e.id) === String(currentEmployeeId))
+      : employees;
+
+    return baseList.filter((emp) => {
       const matchesDept =
         matrixDepartmentFilter === 'ALL' ||
         String(emp.departmentId || emp.department_id) === String(matrixDepartmentFilter) ||
@@ -402,11 +445,13 @@ export default function RotaManagement({ employees = [] }) {
 
       return matchesDept && matchesSearch;
     });
-  }, [employees, matrixDepartmentFilter, matrixSearchQuery]);
+  }, [employees, matrixDepartmentFilter, matrixSearchQuery, isEmployeeUser, currentEmployeeId]);
 
   // Open Shift Modal for Add or Edit
   const openShiftModalForAdd = (employeeId, dateStr) => {
-    const empId = employeeId || currentSelectedEmpId;
+    const empId = (isEmployeeUser && currentEmployeeId)
+      ? currentEmployeeId
+      : (employeeId || currentSelectedEmpId);
     const date = dateStr || formatLocalDate(new Date());
     setShiftModal({
       isOpen: true,
@@ -704,18 +749,32 @@ export default function RotaManagement({ employees = [] }) {
     }
   };
 
+  const displayShifts = useMemo(() => {
+    if (isEmployeeUser && currentEmployeeId) {
+      return shifts.filter((s) => String(s.employeeId) === String(currentEmployeeId));
+    }
+    return shifts;
+  }, [shifts, isEmployeeUser, currentEmployeeId]);
+
+  const displayTimesheets = useMemo(() => {
+    if (isEmployeeUser && currentEmployeeId) {
+      return timesheets.filter((t) => String(t.employeeId) === String(currentEmployeeId));
+    }
+    return timesheets;
+  }, [timesheets, isEmployeeUser, currentEmployeeId]);
+
   // KPIs
   const totalPlannedHours = useMemo(() => {
-    return shifts.reduce((acc, s) => acc + (parseFloat(s.plannedHours) || 0), 0);
-  }, [shifts]);
+    return displayShifts.reduce((acc, s) => acc + (parseFloat(s.plannedHours) || 0), 0);
+  }, [displayShifts]);
 
   const totalPaidHours = useMemo(() => {
-    return timesheets.reduce((acc, t) => acc + (parseFloat(t.paidHours) || 0), 0);
-  }, [timesheets]);
+    return displayTimesheets.reduce((acc, t) => acc + (parseFloat(t.paidHours) || 0), 0);
+  }, [displayTimesheets]);
 
   const pendingTimesheetsCount = useMemo(() => {
-    return timesheets.filter((t) => t.approvalStatus === 'Pending').length;
-  }, [timesheets]);
+    return displayTimesheets.filter((t) => t.approvalStatus === 'Pending').length;
+  }, [displayTimesheets]);
 
   const modalPlannedHours = calculateHours(
     shiftModal.startTime,
@@ -764,7 +823,7 @@ export default function RotaManagement({ employees = [] }) {
               <h2 className="text-base sm:text-lg font-bold text-zinc-900 dark:text-zinc-100 flex items-center space-x-2">
                 <span>Employee Rota & Timesheets</span>
                 <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800">
-                  {employees.length} {employees.length === 1 ? 'Employee' : 'Employees'}
+                  {isEmployeeUser && currentEmp ? `${currentEmp.firstName} ${currentEmp.lastName}` : `${employees.length} ${employees.length === 1 ? 'Employee' : 'Employees'}`}
                 </span>
               </h2>
               <p className="text-xs text-zinc-500 mt-0.5">
@@ -787,7 +846,7 @@ export default function RotaManagement({ employees = [] }) {
               <FileText className="w-3.5 h-3.5" />
               <span>Weekly Table</span>
               <span className="ml-1 px-1.5 py-0.2 rounded-full text-[10px] bg-white/20 text-white font-mono">
-                {shifts.length}
+                {displayShifts.length}
               </span>
             </button>
 
@@ -832,7 +891,7 @@ export default function RotaManagement({ employees = [] }) {
           <div className="p-3 rounded-xl bg-blue-50/60 dark:bg-blue-950/20 border border-blue-100 dark:border-blue-900/40">
             <span className="text-zinc-500 text-[11px] font-medium">Scheduled Shifts</span>
             <div className="text-lg font-bold text-blue-700 dark:text-blue-300 mt-0.5">
-              {shifts.length}
+              {displayShifts.length}
             </div>
           </div>
 
@@ -954,9 +1013,10 @@ export default function RotaManagement({ employees = [] }) {
                     <select
                       value={currentSelectedEmpId}
                       onChange={(e) => setSelectedCalendarEmployeeId(e.target.value)}
-                      className="px-3 py-1.5 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-xs font-semibold text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      disabled={isEmployeeUser}
+                      className="px-3 py-1.5 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-xs font-semibold text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-80 disabled:cursor-not-allowed"
                     >
-                      {employees.map((emp) => (
+                      {selectableEmployees.map((emp) => (
                         <option key={emp.id} value={emp.id}>
                           {emp.employeeCode ? `${emp.employeeCode} - ` : ''}{emp.firstName} {emp.lastName}
                         </option>
@@ -1485,11 +1545,12 @@ export default function RotaManagement({ employees = [] }) {
                     </label>
                     <select
                       required
+                      disabled={isEmployeeUser}
                       value={currentShiftEmployeeId}
                       onChange={(e) => setShiftForm({ ...shiftForm, employeeId: e.target.value })}
-                      className="w-full px-2.5 py-1.5 rounded-lg bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-xs font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none truncate"
+                      className="w-full px-2.5 py-1.5 rounded-lg bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-xs font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none truncate disabled:opacity-80 disabled:cursor-not-allowed"
                     >
-                      {employees.map((emp) => (
+                      {selectableEmployees.map((emp) => (
                         <option key={emp.id} value={emp.id}>
                           {emp.employeeCode ? `${emp.employeeCode} - ` : ''}{emp.firstName} {emp.lastName}
                         </option>
@@ -1618,11 +1679,12 @@ export default function RotaManagement({ employees = [] }) {
                     </label>
                     <select
                       required
+                      disabled={isEmployeeUser}
                       value={currentTimesheetEmployeeId}
                       onChange={(e) => setTimesheetForm({ ...timesheetForm, employeeId: e.target.value })}
-                      className="w-full px-2.5 py-1.5 rounded-lg bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-xs font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none truncate"
+                      className="w-full px-2.5 py-1.5 rounded-lg bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-xs font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none truncate disabled:opacity-80 disabled:cursor-not-allowed"
                     >
-                      {employees.map((emp) => (
+                      {selectableEmployees.map((emp) => (
                         <option key={emp.id} value={emp.id}>
                           {emp.employeeCode ? `${emp.employeeCode} - ` : ''}{emp.firstName} {emp.lastName}
                         </option>
@@ -1736,7 +1798,7 @@ export default function RotaManagement({ employees = [] }) {
                         Loading shifts for week commencing {formatDateDisplay(weekCommencing)}...
                       </td>
                     </tr>
-                  ) : shifts.length === 0 ? (
+                  ) : displayShifts.length === 0 ? (
                     <tr>
                       <td colSpan={12} className="text-center py-12 text-zinc-400">
                         <CalendarIcon className="w-8 h-8 mx-auto mb-2 opacity-30" />
@@ -1747,7 +1809,7 @@ export default function RotaManagement({ employees = [] }) {
                       </td>
                     </tr>
                   ) : (
-                    shifts.map((shift) => {
+                    displayShifts.map((shift) => {
                       const emp = shift.employee;
                       return (
                         <tr
@@ -1879,7 +1941,7 @@ export default function RotaManagement({ employees = [] }) {
                         Loading timesheets for week commencing {formatDateDisplay(weekCommencing)}...
                       </td>
                     </tr>
-                  ) : timesheets.length === 0 ? (
+                  ) : displayTimesheets.length === 0 ? (
                     <tr>
                       <td colSpan={12} className="text-center py-12 text-zinc-400">
                         <Clock className="w-8 h-8 mx-auto mb-2 opacity-30" />
@@ -1888,7 +1950,7 @@ export default function RotaManagement({ employees = [] }) {
                       </td>
                     </tr>
                   ) : (
-                    timesheets.map((ts) => {
+                    displayTimesheets.map((ts) => {
                       const emp = ts.employee;
                       return (
                         <tr
@@ -1968,7 +2030,7 @@ export default function RotaManagement({ employees = [] }) {
 
                           <td className="py-3 px-3 text-right whitespace-nowrap">
                             <div className="flex items-center justify-end space-x-1">
-                              {ts.approvalStatus !== 'Approved' && (
+                              {canManageTimesheets && ts.approvalStatus !== 'Approved' && (
                                 <button
                                   type="button"
                                   onClick={() => handleSetApprovalStatus(ts.id, 'Approved')}
@@ -1979,7 +2041,7 @@ export default function RotaManagement({ employees = [] }) {
                                 </button>
                               )}
 
-                              {ts.approvalStatus !== 'Rejected' && (
+                              {canManageTimesheets && ts.approvalStatus !== 'Rejected' && (
                                 <button
                                   type="button"
                                   onClick={() => handleSetApprovalStatus(ts.id, 'Rejected')}
@@ -2089,11 +2151,12 @@ export default function RotaManagement({ employees = [] }) {
                 </label>
                 <select
                   required
+                  disabled={isEmployeeUser}
                   value={shiftModal.employeeId}
                   onChange={(e) => setShiftModal({ ...shiftModal, employeeId: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                  className="w-full px-3 py-2 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none disabled:opacity-80 disabled:cursor-not-allowed"
                 >
-                  {employees.map((emp) => (
+                  {selectableEmployees.map((emp) => (
                     <option key={emp.id} value={emp.id}>
                       {emp.employeeCode ? `${emp.employeeCode} - ` : ''}{emp.firstName} {emp.lastName}
                     </option>
@@ -2228,11 +2291,12 @@ export default function RotaManagement({ employees = [] }) {
                   Employee
                 </label>
                 <select
+                  disabled={isEmployeeUser}
                   value={editingTimesheet.employeeId}
                   onChange={(e) => setEditingTimesheet({ ...editingTimesheet, employeeId: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                  className="w-full px-3 py-2 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none disabled:opacity-80 disabled:cursor-not-allowed"
                 >
-                  {employees.map((emp) => (
+                  {selectableEmployees.map((emp) => (
                     <option key={emp.id} value={emp.id}>
                       {emp.employeeCode ? `${emp.employeeCode} - ` : ''}{emp.firstName} {emp.lastName}
                     </option>

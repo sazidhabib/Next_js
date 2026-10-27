@@ -1,8 +1,16 @@
 import { NextResponse } from 'next/server';
 import { initDb, VisaType, ImmigrationRecord } from '@/lib/db/models/index';
+import { requirePermission } from '@/lib/auth/rbac';
 
-export async function GET() {
+export async function GET(request) {
   try {
+    const auth = await requirePermission(request, [
+      { section: 'visatypes', action: 'VIEW' },
+      { section: 'immigration', action: 'VIEW' },
+      { section: 'employees', action: 'VIEW' },
+    ]);
+    if (!auth.authorized) return auth.response;
+
     await initDb();
     const visaTypes = await VisaType.findAll({
       include: [{ model: ImmigrationRecord, as: 'records', attributes: ['id'] }],
@@ -16,6 +24,9 @@ export async function GET() {
 
 export async function POST(request) {
   try {
+    const auth = await requirePermission(request, { section: 'visatypes', action: 'EDIT' });
+    if (!auth.authorized) return auth.response;
+
     await initDb();
     const body = await request.json();
     const payload = {

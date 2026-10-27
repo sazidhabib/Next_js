@@ -8,6 +8,7 @@ import {
   SUPER_ADMIN_USER_OBJECT,
   DEFAULT_ADMIN_CREDENTIALS,
 } from '@/lib/auth/systemAccounts';
+import { createSessionToken } from '@/lib/auth/jwt';
 
 export async function POST(request) {
   try {
@@ -23,7 +24,7 @@ export async function POST(request) {
       );
     }
 
-    // 1. Virtual Hardcoded Super Admin check
+    // 1. Virtual Super Admin check
     if (isSuperAdminIdentifier(loginIdentifier)) {
       if (!verifySuperAdminPassword(password)) {
         return NextResponse.json(
@@ -35,9 +36,8 @@ export async function POST(request) {
       const sessionPayload = {
         uid: SUPER_ADMIN_USER_OBJECT.id,
         role: SUPER_ADMIN_USER_OBJECT.roleName,
-        time: Date.now(),
       };
-      const sessionToken = Buffer.from(JSON.stringify(sessionPayload)).toString('base64');
+      const sessionToken = createSessionToken(sessionPayload);
 
       const response = NextResponse.json({
         success: true,
@@ -47,7 +47,7 @@ export async function POST(request) {
       });
 
       response.cookies.set('hrms_session_token', sessionToken, {
-        httpOnly: false,
+        httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
         path: '/',
@@ -186,9 +186,8 @@ export async function POST(request) {
     const sessionPayload = {
       uid: user.id,
       role: roleName,
-      time: Date.now(),
     };
-    const sessionToken = Buffer.from(JSON.stringify(sessionPayload)).toString('base64');
+    const sessionToken = createSessionToken(sessionPayload);
 
     const response = NextResponse.json({
       success: true,
@@ -198,7 +197,7 @@ export async function POST(request) {
     });
 
     response.cookies.set('hrms_session_token', sessionToken, {
-      httpOnly: false,
+      httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       path: '/',

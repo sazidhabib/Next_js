@@ -54,27 +54,13 @@ export function AuthProvider({ children }) {
         localStorage.removeItem('hrms_current_user');
         return;
       }
-      // If server session check fails (network error), check local storage cache fallback
-      const cached = localStorage.getItem('hrms_current_user');
-      if (cached) {
-        try {
-          setUser(JSON.parse(cached));
-        } catch (e) {
-          setUser(null);
-        }
-      } else {
-        setUser(null);
-      }
+      // If server session check fails or returns unauthenticated, clear session
+      setUser(null);
+      localStorage.removeItem('hrms_current_user');
     } catch (error) {
       console.warn('Session verification notice:', error);
-      const cached = localStorage.getItem('hrms_current_user');
-      if (cached) {
-        try {
-          setUser(JSON.parse(cached));
-        } catch (e) {
-          setUser(null);
-        }
-      }
+      setUser(null);
+      localStorage.removeItem('hrms_current_user');
     } finally {
       setIsLoading(false);
     }

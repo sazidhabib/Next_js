@@ -1,8 +1,12 @@
 import { NextResponse } from 'next/server';
 import { initDb, VisaType, ImmigrationRecord } from '@/lib/db/models/index';
+import { requirePermission } from '@/lib/auth/rbac';
 
 export async function PUT(request, { params }) {
   try {
+    const auth = await requirePermission(request, { section: 'visatypes', action: 'EDIT' });
+    if (!auth.authorized) return auth.response;
+
     await initDb();
     const { id } = await params;
     const body = await request.json();
@@ -22,6 +26,9 @@ export async function PUT(request, { params }) {
 
 export async function DELETE(request, { params }) {
   try {
+    const auth = await requirePermission(request, { section: 'visatypes', action: 'DELETE' });
+    if (!auth.authorized) return auth.response;
+
     await initDb();
     const { id } = await params;
     const visaType = await VisaType.findByPk(id);

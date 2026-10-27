@@ -45,6 +45,19 @@ export default function LeaveManagement({ employees = [], onUpdated }) {
   const canRequestLeave = hasPermission('REQUEST_LEAVE') || canEditLeave;
   const canApproveLeave = hasPermission('APPROVE_LEAVES') || canEditLeave;
 
+  const isEmployeeUser = user?.roleName === 'Employee' || (!canApproveLeave && !canEditLeave);
+  const currentEmployeeId = user?.employeeId;
+  const currentEmp = useMemo(
+    () => employees.find((e) => String(e.id) === String(currentEmployeeId)),
+    [employees, currentEmployeeId]
+  );
+  const selectableEmployees = useMemo(() => {
+    if (isEmployeeUser && currentEmp) {
+      return [currentEmp];
+    }
+    return employees;
+  }, [employees, isEmployeeUser, currentEmp]);
+
   const [leaves, setLeaves] = useState([]);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -76,6 +89,12 @@ export default function LeaveManagement({ employees = [], onUpdated }) {
   };
 
   const [form, setForm] = useState(initialFormState);
+
+  useEffect(() => {
+    if (isEmployeeUser && currentEmployeeId && !form.employeeId) {
+      setForm((prev) => ({ ...prev, employeeId: currentEmployeeId }));
+    }
+  }, [isEmployeeUser, currentEmployeeId, form.employeeId]);
 
   const fetchUsers = async () => {
     try {
@@ -147,14 +166,18 @@ export default function LeaveManagement({ employees = [], onUpdated }) {
     return { allowance, used, remaining, pendingDays, pendingCount: pendingLeaves.length, percentUsed };
   };
 
-  // Aggregate stats across all employees
+  // Aggregate stats across visible employees (or only the logged-in employee if role is Employee)
   const aggregateStats = useMemo(() => {
     let totalAllowance = 0;
     let totalUsed = 0;
     let totalRemaining = 0;
     let lowBalanceCount = 0;
 
-    employees.forEach((emp) => {
+    const targetList = isEmployeeUser && currentEmployeeId
+      ? employees.filter((e) => String(e.id) === String(currentEmployeeId))
+      : employees;
+
+    targetList.forEach((emp) => {
       const { allowance, used, remaining } = getEmployeeHolidayStats(emp.id, emp.holidayAllowance);
       totalAllowance += allowance;
       totalUsed += used;
@@ -162,12 +185,21 @@ export default function LeaveManagement({ employees = [], onUpdated }) {
       if (remaining <= 5) lowBalanceCount += 1;
     });
 
-    return { totalAllowance, totalUsed, totalRemaining, lowBalanceCount };
-  }, [employees, leaves]);
+    return { totalAllowance, totalUsed, totalRemaining, lowBalanceCount, count: targetList.length };
+  }, [employees, leaves, isEmployeeUser, currentEmployeeId]);
+
+  const displayLeaves = useMemo(() => {
+    if (isEmployeeUser && currentEmployeeId) {
+      return leaves.filter((l) => String(l.employeeId) === String(currentEmployeeId));
+    }
+    return leaves;
+  }, [leaves, isEmployeeUser, currentEmployeeId]);
 
   const openAddTab = (preselectedEmpId = '') => {
     setEditingLeave(null);
-    const defaultEmp = preselectedEmpId || (!canEditLeave && user?.employeeId ? user.employeeId : (employees?.[0]?.id || ''));
+    const defaultEmp = (isEmployeeUser && currentEmployeeId)
+      ? currentEmployeeId
+      : (preselectedEmpId || employees?.[0]?.id || '');
     const today = new Date().toISOString().split('T')[0];
     const defaultApprover = users?.[0]?.name || 'Bishnu Hari';
 
@@ -393,7 +425,11 @@ export default function LeaveManagement({ employees = [], onUpdated }) {
 
   // Filtered employees for Balances tab
   const filteredEmployeesForBalances = useMemo(() => {
-    return employees.filter((emp) => {
+    let baseList = employees;
+    if (isEmployeeUser && currentEmployeeId) {
+      baseList = employees.filter((emp) => String(emp.id) === String(currentEmployeeId));
+    }
+    return baseList.filter((emp) => {
       const query = balanceSearch.toLowerCase().trim();
       const matchSearch =
         !query ||
@@ -408,7 +444,7 @@ export default function LeaveManagement({ employees = [], onUpdated }) {
 
       return matchSearch && matchDept;
     });
-  }, [employees, balanceSearch, balanceDeptFilter]);
+  }, [employees, balanceSearch, balanceDeptFilter, isEmployeeUser, currentEmployeeId]);
 
   return (
     <div className="space-y-4">
@@ -496,14 +532,14 @@ export default function LeaveManagement({ employees = [], onUpdated }) {
                 onChange={(e) => setStatusFilter(e.target.value)}
                 className="px-3 py-1.5 rounded-xl text-xs bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
-                <option value="">All Statuses ({leaves.length})</option>
+                <option value="">All Statuses ({displayLeaves.length})</option>
                 <option value="Pending">Pending Only ({pendingCount})</option>
                 <option value="Approved">Approved</option>
                 <option value="Rejected">Rejected</option>
                 <option value="Cancelled">Cancelled</option>
               </select>
             </div>
-            <span className="text-xs text-zinc-500">{leaves.length} Total Requests</span>
+            <span className="text-xs text-zinc-500">{displayLeaves.length} Total Requests</span>
           </div>
 
           <div className="overflow-x-auto">
@@ -521,14 +557,14 @@ export default function LeaveManagement({ employees = [], onUpdated }) {
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800/80">
-                {leaves.length === 0 ? (
+                {displayLeaves.length === 0 ? (
                   <tr>
                     <td colSpan={8} className="text-center py-10 text-zinc-500 text-xs">
                       {loading ? 'Loading requests...' : 'No leave requests found.'}
                     </td>
                   </tr>
                 ) : (
-                  leaves.map((l) => {
+                  displayLeaves.map((l) => {
                     const st = (l.status || 'Pending').toUpperCase();
                     const stats = getEmployeeHolidayStats(l.employeeId, l.employee?.holidayAllowance);
 
@@ -649,7 +685,9 @@ export default function LeaveManagement({ employees = [], onUpdated }) {
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             <div className="p-4 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-xs">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-semibold text-zinc-500">Total Org Allowance</span>
+                <span className="text-xs font-semibold text-zinc-500">
+                  {isEmployeeUser ? 'My Holiday Allowance' : 'Total Org Allowance'}
+                </span>
                 <div className="p-2 rounded-xl bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400">
                   <Palmtree className="w-4 h-4" />
                 </div>
@@ -657,12 +695,16 @@ export default function LeaveManagement({ employees = [], onUpdated }) {
               <div className="text-xl sm:text-2xl font-black text-zinc-900 dark:text-zinc-100">
                 {aggregateStats.totalAllowance} <span className="text-xs font-normal text-zinc-500">days</span>
               </div>
-              <p className="text-[11px] text-zinc-400 mt-1">Across {employees.length} employees</p>
+              <p className="text-[11px] text-zinc-400 mt-1">
+                {isEmployeeUser ? 'Personal annual entitlement' : `Across ${employees.length} employees`}
+              </p>
             </div>
 
             <div className="p-4 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-xs">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-semibold text-zinc-500">Total Holidays Used</span>
+                <span className="text-xs font-semibold text-zinc-500">
+                  {isEmployeeUser ? 'My Holidays Used' : 'Total Holidays Used'}
+                </span>
                 <div className="p-2 rounded-xl bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400">
                   <Clock className="w-4 h-4" />
                 </div>
@@ -670,12 +712,16 @@ export default function LeaveManagement({ employees = [], onUpdated }) {
               <div className="text-xl sm:text-2xl font-black text-amber-600 dark:text-amber-400">
                 {aggregateStats.totalUsed} <span className="text-xs font-normal text-zinc-500">days</span>
               </div>
-              <p className="text-[11px] text-zinc-400 mt-1">Approved holiday bookings</p>
+              <p className="text-[11px] text-zinc-400 mt-1">
+                {isEmployeeUser ? 'Approved personal bookings' : 'Approved holiday bookings'}
+              </p>
             </div>
 
             <div className="p-4 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-xs">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-semibold text-zinc-500">Total Remaining</span>
+                <span className="text-xs font-semibold text-zinc-500">
+                  {isEmployeeUser ? 'My Balance Remaining' : 'Total Remaining'}
+                </span>
                 <div className="p-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400">
                   <Calendar className="w-4 h-4" />
                 </div>
@@ -683,20 +729,36 @@ export default function LeaveManagement({ employees = [], onUpdated }) {
               <div className="text-xl sm:text-2xl font-black text-emerald-600 dark:text-emerald-400">
                 {aggregateStats.totalRemaining} <span className="text-xs font-normal text-zinc-500">days</span>
               </div>
-              <p className="text-[11px] text-zinc-400 mt-1">Available company entitlement</p>
+              <p className="text-[11px] text-zinc-400 mt-1">
+                {isEmployeeUser ? 'Available personal balance' : 'Available company entitlement'}
+              </p>
             </div>
 
             <div className="p-4 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-xs">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-semibold text-zinc-500">Low Balance Staff</span>
+                <span className="text-xs font-semibold text-zinc-500">
+                  {isEmployeeUser ? 'Balance Health' : 'Low Balance Staff'}
+                </span>
                 <div className="p-2 rounded-xl bg-rose-50 dark:bg-rose-950/50 text-rose-600 dark:text-rose-400">
                   <AlertCircle className="w-4 h-4" />
                 </div>
               </div>
               <div className="text-xl sm:text-2xl font-black text-zinc-900 dark:text-zinc-100">
-                {aggregateStats.lowBalanceCount} <span className="text-xs font-normal text-zinc-500">staff</span>
+                {isEmployeeUser ? (
+                  aggregateStats.totalRemaining <= 5 ? (
+                    <span className="text-rose-600 dark:text-rose-400 text-lg sm:text-xl">Low ({aggregateStats.totalRemaining}d)</span>
+                  ) : (
+                    <span className="text-emerald-600 dark:text-emerald-400 text-lg sm:text-xl">Good ({aggregateStats.totalRemaining}d)</span>
+                  )
+                ) : (
+                  <>
+                    {aggregateStats.lowBalanceCount} <span className="text-xs font-normal text-zinc-500">staff</span>
+                  </>
+                )}
               </div>
-              <p className="text-[11px] text-zinc-400 mt-1">≤ 5 days remaining</p>
+              <p className="text-[11px] text-zinc-400 mt-1">
+                {isEmployeeUser ? 'Personal annual status' : '≤ 5 days remaining'}
+              </p>
             </div>
           </div>
 
@@ -885,12 +947,13 @@ export default function LeaveManagement({ employees = [], onUpdated }) {
               </label>
               <select
                 required
+                disabled={isEmployeeUser}
                 value={form.employeeId}
                 onChange={(e) => setForm({ ...form, employeeId: e.target.value })}
-                className="w-full px-3.5 py-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                className="w-full px-3.5 py-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 focus:ring-2 focus:ring-blue-500 focus:outline-none disabled:opacity-80 disabled:cursor-not-allowed"
               >
-                <option value="">Select Employee</option>
-                {employees?.map((emp) => (
+                {!isEmployeeUser && <option value="">Select Employee</option>}
+                {selectableEmployees?.map((emp) => (
                   <option key={emp.id} value={emp.id}>
                     {emp.firstName} {emp.lastName} ({emp.employeeCode || `ID-${emp.id}`}) — Allw: {emp.holidayAllowance ?? 28}d
                   </option>

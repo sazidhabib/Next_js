@@ -34,17 +34,19 @@ export function getMimeType(filename) {
 }
 
 export function findUploadedFile(relativePath) {
+  // Strip any leading slashes or traversal sequences
+  const sanitized = path.basename(relativePath);
   const cleanPath = path.normalize(relativePath).replace(/^(\.\.[\/\\])+/, '');
+  
   const candidateDirs = [
-    path.join(process.cwd(), 'public', 'uploads'),
-    path.join(process.cwd(), 'uploads'),
-    path.join(process.cwd(), 'public'),
-    path.resolve(process.cwd(), '..', 'public', 'uploads'),
+    path.resolve(process.cwd(), 'public', 'uploads'),
+    path.resolve(process.cwd(), 'uploads'),
   ];
 
   for (const dir of candidateDirs) {
-    const fullPath = path.join(dir, cleanPath);
-    if (existsSync(fullPath)) {
+    const fullPath = path.resolve(dir, cleanPath);
+    // Boundary check: ensure target path stays strictly inside candidate upload directory
+    if (fullPath.startsWith(dir) && existsSync(fullPath)) {
       return fullPath;
     }
   }

@@ -3,6 +3,7 @@ import { initDb, MediaFile } from '@/lib/db/models/index';
 import fs from 'fs/promises';
 import path from 'path';
 import { getUploadsDir } from '@/lib/uploads';
+import { requirePermission } from '@/lib/auth/rbac';
 
 const INITIAL_MEDIA = [
   {
@@ -57,6 +58,9 @@ const INITIAL_MEDIA = [
 
 export async function GET(request) {
   try {
+    const auth = await requirePermission(request, { section: 'media', action: 'VIEW' });
+    if (!auth.authorized) return auth.response;
+
     await initDb();
     await MediaFile.sync();
 
@@ -93,6 +97,9 @@ export async function GET(request) {
 
 export async function POST(request) {
   try {
+    const auth = await requirePermission(request, { section: 'media', action: 'EDIT' });
+    if (!auth.authorized) return auth.response;
+
     await initDb();
     await MediaFile.sync();
 
@@ -108,13 +115,22 @@ export async function POST(request) {
         return NextResponse.json({ success: false, error: 'No file provided' }, { status: 400 });
       }
 
+      if (file.size > 10 * 1024 * 1024) {
+        return NextResponse.json({ success: false, error: 'File size exceeds maximum allowed limit (10MB)' }, { status: 400 });
+      }
+
+      const originalExt = (path.extname(file.name) || '').toLowerCase();
+      const allowedExts = ['.jpg', '.jpeg', '.png', '.webp', '.pdf'];
+      if (!allowedExts.includes(originalExt)) {
+        return NextResponse.json({ success: false, error: 'File type not allowed. Supported formats: JPG, PNG, WebP, PDF.' }, { status: 400 });
+      }
+
       const bytes = await file.arrayBuffer();
       const buffer = Buffer.from(bytes);
 
       const uploadsDir = getUploadsDir();
       await fs.mkdir(uploadsDir, { recursive: true });
 
-      const originalExt = path.extname(file.name) || '.png';
       const safeBase = path.basename(file.name, originalExt).replace(/[^a-zA-Z0-9_-]/g, '_') || 'image';
 
       let finalBuffer = buffer;

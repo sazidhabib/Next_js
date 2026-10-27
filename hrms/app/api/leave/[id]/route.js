@@ -49,6 +49,22 @@ export async function PUT(request, { params }) {
       { section: 'leave', action: 'EDIT' },
       'APPROVE_LEAVES',
     ]);
+
+    if (!canApprove) {
+      if (auth.session.employeeId && String(leave.employeeId) !== String(auth.session.employeeId)) {
+        return NextResponse.json(
+          { success: false, error: 'Forbidden: You can only edit your own leave requests' },
+          { status: 403 }
+        );
+      }
+      if ((leave.status || '').toUpperCase() !== 'PENDING') {
+        return NextResponse.json(
+          { success: false, error: 'Forbidden: Cannot edit a leave request that has already been processed' },
+          { status: 403 }
+        );
+      }
+    }
+
     if (body.status !== undefined && body.status !== leave.status && !canApprove) {
       return NextResponse.json(
         { success: false, error: 'Forbidden: You do not have permission to approve/reject leaves' },
@@ -56,7 +72,7 @@ export async function PUT(request, { params }) {
       );
     }
 
-    const targetStatus = body.status !== undefined ? body.status : leave.status;
+    const targetStatus = canApprove && body.status !== undefined ? body.status : leave.status;
     const isApproved = ['Approved', 'APPROVED', 'approved'].includes(targetStatus);
 
     const targetStartDate = body.startDate || leave.startDate;

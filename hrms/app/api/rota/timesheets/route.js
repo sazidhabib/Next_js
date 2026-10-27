@@ -6,6 +6,7 @@ import {
   Employee,
   Department,
 } from '@/lib/db/models/index';
+import { requirePermission, hasSessionPermission } from '@/lib/auth/rbac';
 
 function calculateHours(start, end, breakMin = 0) {
   if (!start || !end) return 0;
@@ -29,6 +30,9 @@ export const revalidate = 0;
 
 export async function GET(request) {
   try {
+    const auth = await requirePermission(request, { section: 'rota', action: 'VIEW' });
+    if (!auth.authorized) return auth.response;
+
     await initDb();
     const { searchParams } = new URL(request.url);
     const employeeId = searchParams.get('employeeId');
@@ -36,8 +40,14 @@ export async function GET(request) {
     const workDate = searchParams.get('date');
     const status = searchParams.get('status');
 
+    const canManageRota = hasSessionPermission(auth.session, { section: 'rota', action: 'EDIT' });
+
     const where = {};
-    if (employeeId) where.employeeId = employeeId;
+    if (!canManageRota && auth.session.employeeId) {
+      where.employeeId = auth.session.employeeId;
+    } else if (employeeId) {
+      where.employeeId = employeeId;
+    }
     if (workDate) where.workDate = workDate;
     if (status && status !== 'ALL') where.approvalStatus = status;
 
@@ -82,8 +92,24 @@ export async function GET(request) {
 
 export async function POST(request) {
   try {
+    const auth = await requirePermission(request, [
+      { section: 'rota', action: 'EDIT' },
+      { section: 'rota', action: 'VIEW' },
+    ]);
+    if (!auth.authorized) return auth.response;
+
     await initDb();
     const body = await request.json();
+
+    const canManageRota = hasSessionPermission(auth.session, { section: 'rota', action: 'EDIT' });
+    if (!canManageRota) {
+      if (auth.session.employeeId) {
+        body.employeeId = auth.session.employeeId;
+      }
+      body.approvalStatus = 'Pending';
+      body.approvedBy = null;
+      body.approvedAt = null;
+    }
 
     const dayName = body.dayName || getDayName(body.workDate);
     const breakMinutes = parseInt(body.breakMinutes, 10) || 0;

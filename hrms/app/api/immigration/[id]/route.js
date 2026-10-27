@@ -5,9 +5,13 @@ import {
   Employee,
   VisaType,
 } from '@/lib/db/models/index';
+import { requirePermission } from '@/lib/auth/rbac';
 
 export async function GET(request, { params }) {
   try {
+    const auth = await requirePermission(request, { section: 'immigration', action: 'VIEW' });
+    if (!auth.authorized) return auth.response;
+
     await initDb();
     const { id } = await params;
     const record = await ImmigrationRecord.findByPk(id, {
@@ -29,6 +33,9 @@ export async function GET(request, { params }) {
 
 export async function PUT(request, { params }) {
   try {
+    const auth = await requirePermission(request, { section: 'immigration', action: 'EDIT' });
+    if (!auth.authorized) return auth.response;
+
     await initDb();
     const { id } = await params;
     const body = await request.json();
@@ -89,6 +96,9 @@ export async function PUT(request, { params }) {
 
 export async function DELETE(request, { params }) {
   try {
+    const auth = await requirePermission(request, { section: 'immigration', action: 'DELETE' });
+    if (!auth.authorized) return auth.response;
+
     await initDb();
     const { id } = await params;
     const record = await ImmigrationRecord.findByPk(id);

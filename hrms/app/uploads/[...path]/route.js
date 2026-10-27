@@ -27,12 +27,21 @@ export async function GET(request, context) {
     const fileBuffer = await fs.readFile(fullPath);
     const mimeType = getMimeType(fullPath);
 
+    const headers = {
+      'Content-Type': mimeType,
+      'Cache-Control': 'public, max-age=31536000, immutable',
+      'X-Content-Type-Options': 'nosniff',
+    };
+
+    // Sandbox SVGs to prevent executing embedded JavaScript
+    if (mimeType === 'image/svg+xml') {
+      headers['Content-Security-Policy'] = "default-src 'none'; style-src 'unsafe-inline'";
+      headers['Content-Disposition'] = 'inline; filename="image.svg"';
+    }
+
     return new NextResponse(fileBuffer, {
       status: 200,
-      headers: {
-        'Content-Type': mimeType,
-        'Cache-Control': 'public, max-age=31536000, immutable',
-      },
+      headers,
     });
   } catch (error) {
     console.error('Error serving uploaded file:', error);

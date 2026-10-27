@@ -2,6 +2,7 @@
 const nextConfig = {
   output: 'standalone',
   reactCompiler: true,
+  poweredByHeader: false,
   serverExternalPackages: ['sequelize', 'mysql2', 'bcryptjs'],
 };
 

@@ -45,14 +45,11 @@ export function verifySuperAdminPassword(password) {
   return password === SUPER_ADMIN_CREDENTIALS.password;
 }
 
+import { verifySessionToken } from './jwt.js';
+
 export function parseSessionToken(token) {
   if (!token) return null;
-  try {
-    const decodedString = Buffer.from(token, 'base64').toString('utf-8');
-    return JSON.parse(decodedString);
-  } catch (e) {
-    return null;
-  }
+  return verifySessionToken(token);
 }
 
 export async function ensureDefaultAdminExists(User, Role, bcrypt) {

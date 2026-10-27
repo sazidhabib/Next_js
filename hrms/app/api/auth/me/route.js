@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { initDb, User, Role, Employee, Department } from '@/lib/db/models/index';
 import { SUPER_ADMIN_USER_OBJECT } from '@/lib/auth/systemAccounts';
 
+import { verifySessionToken } from '@/lib/auth/jwt';
+
 export async function GET(request) {
   try {
     await initDb();
@@ -19,20 +21,10 @@ export async function GET(request) {
       );
     }
 
-    let decoded;
-    try {
-      const decodedString = Buffer.from(token, 'base64').toString('utf-8');
-      decoded = JSON.parse(decodedString);
-    } catch (e) {
+    const decoded = verifySessionToken(token);
+    if (!decoded || !decoded.uid) {
       return NextResponse.json(
-        { success: true, authenticated: false, user: null, message: 'Invalid token format' },
-        { status: 200 }
-      );
-    }
-
-    if (!decoded?.uid) {
-      return NextResponse.json(
-        { success: true, authenticated: false, user: null, message: 'Invalid session payload' },
+        { success: true, authenticated: false, user: null, message: 'Invalid or expired session' },
         { status: 200 }
       );
     }

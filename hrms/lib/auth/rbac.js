@@ -18,7 +18,7 @@ export async function getAuthSession(request) {
     const decoded = parseSessionToken(token);
     if (!decoded?.uid) return null;
 
-    if (decoded.uid === 'system-superadmin' || decoded.role === 'Super Admin') {
+    if (decoded.uid === 'system-superadmin') {
       return {
         ...SUPER_ADMIN_USER_OBJECT,
         permissions: ['ALL'],
