@@ -21,25 +21,38 @@ export async function GET(request) {
     const employeeId = searchParams.get('employeeId');
     const status = searchParams.get('status');
 
-    const canApprove = hasSessionPermission(auth.session, [
+    const canViewAll = hasSessionPermission(auth.session, [
+      { section: 'leave', action: 'VIEW' },
       { section: 'leave', action: 'EDIT' },
+      'VIEW_LEAVE',
       'APPROVE_LEAVES',
     ]);
 
     const where = {};
-    // If not a manager/admin with approve/edit privileges, restrict to own employee record
-    if (!canApprove && auth.session.employeeId) {
-      where.employeeId = auth.session.employeeId;
-    } else if (employeeId) {
+    if (employeeId && employeeId !== 'ALL') {
       where.employeeId = employeeId;
+    } else if (!canViewAll && auth.session.employeeId) {
+      // If user has no view permission and only self-service request permission, limit to own records
+      where.employeeId = auth.session.employeeId;
     }
 
-    if (status) where.status = status;
+    if (status && status !== 'ALL') where.status = status;
+
+    const isManager = hasSessionPermission(auth.session, [
+      { section: 'leave', action: 'EDIT' },
+      'APPROVE_LEAVES',
+    ]);
 
     const leaveRequests = await LeaveRequest.findAll({
       where,
       include: [
-        { model: Employee, as: 'employee' },
+        {
+          model: Employee,
+          as: 'employee',
+          attributes: isManager
+            ? undefined
+            : ['id', 'employeeCode', 'firstName', 'lastName', 'email', 'jobTitle', 'departmentId', 'photoUrl', 'status'],
+        },
       ],
       order: [['createdAt', 'DESC']],
     });

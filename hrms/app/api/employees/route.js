@@ -8,11 +8,15 @@ import {
   VisaType,
 } from '@/lib/db/models/index';
 import { Op } from 'sequelize';
-import { requirePermission } from '@/lib/auth/rbac';
+import { requirePermission, hasSessionPermission } from '@/lib/auth/rbac';
 
 export async function GET(request) {
   try {
-    const auth = await requirePermission(request, { section: 'employees', action: 'VIEW' });
+    const auth = await requirePermission(request, [
+      { section: 'employees', action: 'VIEW' },
+      { section: 'rota', action: 'VIEW' },
+      { section: 'leave', action: 'VIEW' },
+    ]);
     if (!auth.authorized) return auth.response;
 
     await initDb();
@@ -21,6 +25,8 @@ export async function GET(request) {
     const departmentId = searchParams.get('departmentId');
     const status = searchParams.get('status');
     const isSponsored = searchParams.get('isSponsored');
+
+    const hasFullEmployeePerm = hasSessionPermission(auth.session, { section: 'employees', action: 'VIEW' });
 
     const where = {};
 
@@ -46,33 +52,73 @@ export async function GET(request) {
       where.isSponsoredWorker = isSponsored === 'true';
     }
 
-    const employees = await Employee.findAll({
-      where,
-      include: [
-        { model: Department, as: 'department', attributes: ['id', 'name', 'code'] },
-        {
-          model: ImmigrationRecord,
-          as: 'immigrationRecords',
-          include: [{ model: VisaType, as: 'visaType' }],
-        },
-        { model: RightToWork, as: 'rtwChecks' },
-      ],
-      order: [['createdAt', 'DESC']],
-    });
+    let employees;
+    let nextEmployeeCode = null;
 
-    // Calculate next employee code
-    const allEmps = await Employee.findAll({ attributes: ['employeeCode', 'id'] });
-    let maxNum = 0;
-    for (const emp of allEmps) {
-      const match = emp.employeeCode?.match(/EMP-(\d+)/i) || emp.employeeCode?.match(/(\d+)/);
-      if (match) {
-        const n = parseInt(match[1], 10);
-        if (!isNaN(n) && n > maxNum) maxNum = n;
-      } else if (emp.id && !isNaN(emp.id) && emp.id > maxNum) {
-        maxNum = emp.id;
+    if (hasFullEmployeePerm) {
+      employees = await Employee.findAll({
+        where,
+        include: [
+          { model: Department, as: 'department', attributes: ['id', 'name', 'code'] },
+          {
+            model: ImmigrationRecord,
+            as: 'immigrationRecords',
+            include: [{ model: VisaType, as: 'visaType' }],
+          },
+          { model: RightToWork, as: 'rtwChecks' },
+        ],
+        order: [['createdAt', 'DESC']],
+      });
+
+      // Calculate next employee code for employee managers
+      const allEmps = await Employee.findAll({ attributes: ['employeeCode', 'id'] });
+      let maxNum = 0;
+      for (const emp of allEmps) {
+        const match = emp.employeeCode?.match(/EMP-(\d+)/i) || emp.employeeCode?.match(/(\d+)/);
+        if (match) {
+          const n = parseInt(match[1], 10);
+          if (!isNaN(n) && n > maxNum) maxNum = n;
+        } else if (emp.id && !isNaN(emp.id) && emp.id > maxNum) {
+          maxNum = emp.id;
+        }
       }
+      nextEmployeeCode = `EMP-${String(maxNum + 1).padStart(3, '0')}`;
+    } else {
+      // Safe view for Rota / Leave / Staff scheduling views
+      const rawEmployees = await Employee.findAll({
+        where,
+        attributes: [
+          'id',
+          'employeeCode',
+          'firstName',
+          'lastName',
+          'email',
+          'phone',
+          'jobTitle',
+          'departmentId',
+          'photoUrl',
+          'status',
+          'createdAt',
+          'holidayAllowance',
+        ],
+        include: [
+          { model: Department, as: 'department', attributes: ['id', 'name', 'code'] },
+        ],
+        order: [
+          ['firstName', 'ASC'],
+          ['lastName', 'ASC'],
+        ],
+      });
+
+      // Redact other employees' holidayAllowance for non-manager roles
+      employees = rawEmployees.map((e) => {
+        const json = e.toJSON ? e.toJSON() : { ...e };
+        if (!auth.session.employeeId || String(json.id) !== String(auth.session.employeeId)) {
+          delete json.holidayAllowance;
+        }
+        return json;
+      });
     }
-    const nextEmployeeCode = `EMP-${String(maxNum + 1).padStart(3, '0')}`;
 
     return NextResponse.json({ success: true, employees, nextEmployeeCode });
   } catch (error) {

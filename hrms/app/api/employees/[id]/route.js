@@ -9,15 +9,34 @@ import {
   LeaveRequest,
   User,
 } from '@/lib/db/models/index';
-import { requirePermission } from '@/lib/auth/rbac';
+import { requirePermission, hasSessionPermission } from '@/lib/auth/rbac';
 
 export async function GET(request, { params }) {
   try {
-    const auth = await requirePermission(request, { section: 'employees', action: 'VIEW' });
+    const { id } = await params;
+    const auth = await requirePermission(request, [
+      { section: 'employees', action: 'VIEW' },
+      'VIEW_EMPLOYEES',
+      'VIEW_OWN_PROFILE',
+    ]);
     if (!auth.authorized) return auth.response;
 
+    const canViewAll = hasSessionPermission(auth.session, [
+      { section: 'employees', action: 'VIEW' },
+      'VIEW_EMPLOYEES',
+    ]);
+
+    // An employee without full employee view permission can only view their own employee record
+    if (!canViewAll) {
+      if (!auth.session.employeeId || String(auth.session.employeeId) !== String(id)) {
+        return NextResponse.json(
+          { success: false, error: 'Forbidden: You can only view your own profile' },
+          { status: 403 }
+        );
+      }
+    }
+
     await initDb();
-    const { id } = await params;
 
     const employee = await Employee.findByPk(id, {
       include: [

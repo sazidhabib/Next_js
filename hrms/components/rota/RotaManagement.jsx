@@ -103,15 +103,6 @@ export default function RotaManagement({ employees = [] }) {
   const isEmployeeUser = user?.roleName === 'Employee' || (!canEditRota && !hasPermission('EDIT_ROTA'));
   const currentEmployeeId = user?.employeeId;
 
-  const currentEmp = useMemo(
-    () => employees.find((e) => String(e.id) === String(currentEmployeeId)),
-    [employees, currentEmployeeId]
-  );
-
-  const selectableEmployees = useMemo(() => {
-    return employees;
-  }, [employees]);
-
   const canManageTimesheets = !isEmployeeUser && (canEditRota || hasPermission('EDIT_ROTA'));
 
   // Top Navigation Tab: 'table' (Weekly Rota Table) | 'calendar' (Calendar Rota) | 'timesheets'
@@ -120,7 +111,7 @@ export default function RotaManagement({ employees = [] }) {
   // Calendar Sub-Mode: 'matrix' (Team Weekly Matrix) | 'month' (Individual Employee Month View)
   const [calendarMode, setCalendarMode] = useState('matrix');
   const [selectedCalendarEmployeeId, setSelectedCalendarEmployeeId] = useState(
-    (isEmployeeUser && currentEmployeeId) ? currentEmployeeId : ''
+    (isEmployeeUser && currentEmployeeId) ? String(currentEmployeeId) : 'ALL'
   );
   const [activeMonth, setActiveMonth] = useState(getCurrentMonthString);
 
@@ -128,6 +119,11 @@ export default function RotaManagement({ employees = [] }) {
   const [weekCommencing, setWeekCommencing] = useState(() => getMonday(new Date()));
   const [matrixDepartmentFilter, setMatrixDepartmentFilter] = useState('ALL');
   const [matrixSearchQuery, setMatrixSearchQuery] = useState('');
+
+  // Timesheets filtering & preview
+  const [timesheetSearchQuery, setTimesheetSearchQuery] = useState('');
+  const [timesheetEmployeeFilter, setTimesheetEmployeeFilter] = useState('ALL');
+  const [previewTimesheet, setPreviewTimesheet] = useState(null);
 
   // Data states
   const [shifts, setShifts] = useState([]);
@@ -142,7 +138,7 @@ export default function RotaManagement({ employees = [] }) {
   // Interactive Shift Modal (View / Add / Update / Delete)
   const [shiftModal, setShiftModal] = useState({
     isOpen: false,
-    mode: 'add', // 'add' | 'edit'
+    mode: 'add', // 'add' | 'edit' | 'view'
     id: null,
     employeeId: (isEmployeeUser && currentEmployeeId) ? currentEmployeeId : '',
     shiftDate: todayLocalDate,
@@ -177,17 +173,60 @@ export default function RotaManagement({ employees = [] }) {
   // Edit Timesheet Modal
   const [editingTimesheet, setEditingTimesheet] = useState(null);
 
+  // Master employee list combining employees prop with any employee embedded in shifts or timesheets
+  const allEmployees = useMemo(() => {
+    const map = new Map();
+    // 1. Employees from props
+    (employees || []).forEach((e) => {
+      if (e?.id) map.set(String(e.id), e);
+    });
+    // 2. Employees from loaded shifts
+    (shifts || []).forEach((s) => {
+      if (s?.employee?.id && !map.has(String(s.employee.id))) {
+        map.set(String(s.employee.id), s.employee);
+      }
+    });
+    // 3. Employees from loaded month shifts
+    (monthShifts || []).forEach((s) => {
+      if (s?.employee?.id && !map.has(String(s.employee.id))) {
+        map.set(String(s.employee.id), s.employee);
+      }
+    });
+    // 4. Employees from loaded timesheets
+    (timesheets || []).forEach((t) => {
+      if (t?.employee?.id && !map.has(String(t.employee.id))) {
+        map.set(String(t.employee.id), t.employee);
+      }
+    });
+    return Array.from(map.values()).sort((a, b) =>
+      `${a.firstName || ''} ${a.lastName || ''}`.localeCompare(`${b.firstName || ''} ${b.lastName || ''}`)
+    );
+  }, [employees, shifts, monthShifts, timesheets]);
+
+  const currentEmp = useMemo(
+    () => allEmployees.find((e) => String(e.id) === String(currentEmployeeId)),
+    [allEmployees, currentEmployeeId]
+  );
+
+  const selectableEmployees = useMemo(() => {
+    return allEmployees;
+  }, [allEmployees]);
+
   // Default active employee fallback
-  const defaultEmployeeId = employees[0]?.id || '';
-  const currentSelectedEmpId = selectedCalendarEmployeeId || defaultEmployeeId;
+  const defaultEmployeeId = allEmployees[0]?.id || '';
+  const currentSelectedEmpId = selectedCalendarEmployeeId || defaultEmployeeId || 'ALL';
   const currentShiftEmployeeId = shiftForm.employeeId || defaultEmployeeId;
   const currentTimesheetEmployeeId = timesheetForm.employeeId || defaultEmployeeId;
 
   useEffect(() => {
-    if (!selectedCalendarEmployeeId && employees.length > 0) {
-      setSelectedCalendarEmployeeId(employees[0].id);
+    if (!selectedCalendarEmployeeId) {
+      if (isEmployeeUser && currentEmployeeId) {
+        setSelectedCalendarEmployeeId(String(currentEmployeeId));
+      } else {
+        setSelectedCalendarEmployeeId('ALL');
+      }
     }
-  }, [employees, selectedCalendarEmployeeId]);
+  }, [allEmployees, selectedCalendarEmployeeId, isEmployeeUser, currentEmployeeId]);
 
   // Fetch shifts for the selected week (for table & matrix view)
   const fetchWeekShifts = useCallback(async () => {
@@ -205,11 +244,14 @@ export default function RotaManagement({ employees = [] }) {
     }
   }, [weekCommencing]);
 
-  // Fetch shifts for month view (for individual employee month calendar)
+  // Fetch shifts for month view (for individual employee or team-wide month calendar)
   const fetchMonthShifts = useCallback(async () => {
-    if (!currentSelectedEmpId) return;
     try {
-      const res = await fetch(`/api/rota/shifts?month=${activeMonth}&employeeId=${currentSelectedEmpId}&_t=${Date.now()}`, {
+      let url = `/api/rota/shifts?month=${activeMonth}&_t=${Date.now()}`;
+      if (currentSelectedEmpId && currentSelectedEmpId !== 'ALL') {
+        url += `&employeeId=${currentSelectedEmpId}`;
+      }
+      const res = await fetch(url, {
         cache: 'no-store',
         headers: { 'Cache-Control': 'no-cache' },
       });
@@ -262,9 +304,13 @@ export default function RotaManagement({ employees = [] }) {
       );
     }
 
-    if (activeTab === 'calendar' && calendarMode === 'month' && currentSelectedEmpId) {
+    if (activeTab === 'calendar' && calendarMode === 'month') {
+      let url = `/api/rota/shifts?month=${activeMonth}&_t=${timestamp}`;
+      if (currentSelectedEmpId && currentSelectedEmpId !== 'ALL') {
+        url += `&employeeId=${currentSelectedEmpId}`;
+      }
       promises.push(
-        fetch(`/api/rota/shifts?month=${activeMonth}&employeeId=${currentSelectedEmpId}&_t=${timestamp}`, {
+        fetch(url, {
           cache: 'no-store',
           headers: { 'Cache-Control': 'no-cache' },
         })
@@ -414,13 +460,13 @@ export default function RotaManagement({ employees = [] }) {
 
   // Filter employees for the Team Matrix
   const filteredMatrixEmployees = useMemo(() => {
-    return employees.filter((emp) => {
+    return allEmployees.filter((emp) => {
       const matchesDept =
         matrixDepartmentFilter === 'ALL' ||
         String(emp.departmentId || emp.department_id) === String(matrixDepartmentFilter) ||
         emp.department?.name?.toLowerCase().includes(matrixDepartmentFilter.toLowerCase());
 
-      const fullName = `${emp.firstName} ${emp.lastName}`.toLowerCase();
+      const fullName = `${emp.firstName || ''} ${emp.lastName || ''}`.toLowerCase();
       const code = (emp.employeeCode || '').toLowerCase();
       const matchesSearch =
         !matrixSearchQuery.trim() ||
@@ -429,7 +475,7 @@ export default function RotaManagement({ employees = [] }) {
 
       return matchesDept && matchesSearch;
     });
-  }, [employees, matrixDepartmentFilter, matrixSearchQuery]);
+  }, [allEmployees, matrixDepartmentFilter, matrixSearchQuery]);
 
   // Open Shift Modal for Add or Edit or View
   const openShiftModalForAdd = (employeeId, dateStr) => {
@@ -760,8 +806,23 @@ export default function RotaManagement({ employees = [] }) {
   }, [shifts]);
 
   const displayTimesheets = useMemo(() => {
-    return timesheets;
-  }, [timesheets]);
+    return timesheets.filter((ts) => {
+      // Employee filter
+      if (timesheetEmployeeFilter !== 'ALL' && String(ts.employeeId) !== String(timesheetEmployeeFilter)) {
+        return false;
+      }
+      // Search query filter (employee name, employee code, notes)
+      if (timesheetSearchQuery.trim()) {
+        const q = timesheetSearchQuery.toLowerCase();
+        const empName = `${ts.employee?.firstName || ''} ${ts.employee?.lastName || ''}`.toLowerCase();
+        const empCode = (ts.employee?.employeeCode || `EMP${String(ts.employeeId).padStart(3, '0')}`).toLowerCase();
+        const notes = (ts.notes || '').toLowerCase();
+        const match = empName.includes(q) || empCode.includes(q) || notes.includes(q);
+        if (!match) return false;
+      }
+      return true;
+    });
+  }, [timesheets, timesheetEmployeeFilter, timesheetSearchQuery]);
 
   // KPIs
   const totalPlannedHours = useMemo(() => {
@@ -1017,9 +1078,11 @@ export default function RotaManagement({ employees = [] }) {
                       onChange={(e) => setSelectedCalendarEmployeeId(e.target.value)}
                       className="px-3 py-1.5 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-xs font-semibold text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
+                      <option value="ALL">All Employees (Team Overview)</option>
                       {selectableEmployees.map((emp) => (
                         <option key={emp.id} value={emp.id}>
                           {emp.employeeCode ? `${emp.employeeCode} - ` : ''}{emp.firstName} {emp.lastName}
+                          {String(emp.id) === String(currentEmployeeId) ? ' (You)' : ''}
                         </option>
                       ))}
                     </select>
@@ -1318,21 +1381,60 @@ export default function RotaManagement({ employees = [] }) {
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-zinc-100 dark:border-zinc-800 text-xs">
                   <div className="flex items-center space-x-3">
                     {(() => {
-                      const emp = employees.find((e) => Number(e.id) === Number(currentSelectedEmpId));
+                      if (currentSelectedEmpId === 'ALL' || !currentSelectedEmpId) {
+                        return (
+                          <>
+                            <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 font-bold text-xs flex items-center justify-center">
+                              <Users className="w-4 h-4" />
+                            </div>
+                            <div>
+                              <div className="flex items-center space-x-2">
+                                <span className="font-bold text-sm text-zinc-900 dark:text-zinc-100">
+                                  All Employees
+                                </span>
+                                <span className="px-2 py-0.2 rounded-full text-[10px] font-bold bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800">
+                                  Team Rota
+                                </span>
+                              </div>
+                              <span className="text-zinc-400 text-[11px] block mt-0.5">
+                                Showing full organization schedule for {activeMonthDisplay}
+                              </span>
+                            </div>
+                          </>
+                        );
+                      }
+                      const emp = selectableEmployees.find((e) => String(e.id) === String(currentSelectedEmpId));
                       return (
                         <>
-                          <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 font-bold text-xs flex items-center justify-center">
-                            {emp?.firstName?.[0] || 'E'}
-                          </div>
+                          {emp?.photoUrl ? (
+                            <img
+                              src={emp.photoUrl}
+                              alt=""
+                              className="w-8 h-8 rounded-full object-cover border border-zinc-200 dark:border-zinc-700"
+                            />
+                          ) : (
+                            <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 font-bold text-xs flex items-center justify-center">
+                              {emp?.firstName?.[0] || 'E'}
+                            </div>
+                          )}
                           <div>
-                            <span className="font-bold text-sm text-zinc-900 dark:text-zinc-100">
-                              {emp ? `${emp.firstName} ${emp.lastName}` : 'Employee'}
-                            </span>
-                            <span className="ml-2 font-mono text-xs text-blue-600 dark:text-blue-400">
-                              {emp?.employeeCode}
-                            </span>
-                            <span className="text-zinc-400 text-[11px] block">
-                              Schedule for {activeMonthDisplay}
+                            <div className="flex items-center space-x-2">
+                              <span className="font-bold text-sm text-zinc-900 dark:text-zinc-100">
+                                {emp ? `${emp.firstName} ${emp.lastName}` : 'Employee'}
+                              </span>
+                              {emp?.employeeCode && (
+                                <span className="font-mono text-xs text-blue-600 dark:text-blue-400">
+                                  {emp.employeeCode}
+                                </span>
+                              )}
+                              {String(emp?.id) === String(currentEmployeeId) && (
+                                <span className="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800">
+                                  You
+                                </span>
+                              )}
+                            </div>
+                            <span className="text-zinc-400 text-[11px] block mt-0.5">
+                              Individual Schedule for {activeMonthDisplay}
                             </span>
                           </div>
                         </>
@@ -1343,7 +1445,7 @@ export default function RotaManagement({ employees = [] }) {
                   <div className="flex items-center space-x-3 text-xs">
                     <span className="text-zinc-500">
                       Total Shifts:{' '}
-                      <strong className="text-zinc-800 dark:text-zinc-200">{monthShifts.length}</strong>
+                      <strong className="text-zinc-800 dark:text-zinc-200 font-mono font-bold">{monthShifts.length}</strong>
                     </span>
                     <span className="text-zinc-500">
                       Monthly Planned Hours:{' '}
@@ -1375,7 +1477,7 @@ export default function RotaManagement({ employees = [] }) {
                         key={day.dateStr}
                         onClick={() => {
                           if (canEditRota && !isEmployeeUser && dayShifts.length === 0) {
-                            openShiftModalForAdd(currentSelectedEmpId, day.dateStr);
+                            openShiftModalForAdd(currentSelectedEmpId === 'ALL' ? '' : currentSelectedEmpId, day.dateStr);
                           }
                         }}
                         className={`min-h-[105px] p-2 rounded-xl border transition flex flex-col justify-between group relative ${dayShifts.length === 0 && (!canEditRota || isEmployeeUser) ? 'cursor-default' : 'cursor-pointer'} ${
@@ -1404,7 +1506,7 @@ export default function RotaManagement({ employees = [] }) {
                               type="button"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                openShiftModalForAdd(currentSelectedEmpId, day.dateStr);
+                                openShiftModalForAdd(currentSelectedEmpId === 'ALL' ? '' : currentSelectedEmpId, day.dateStr);
                               }}
                               className="p-1 rounded-lg opacity-0 group-hover:opacity-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-500 transition"
                               title="Add shift on this date"
@@ -1426,14 +1528,24 @@ export default function RotaManagement({ employees = [] }) {
                               className={`p-1.5 rounded-lg border text-[10px] font-medium transition cursor-pointer shadow-2xs hover:scale-101 ${getShiftBadgeStyles(
                                 shift.shiftType
                               )}`}
-                              title={canEditRota && !isEmployeeUser ? 'Click to edit or delete' : 'Click to view shift details'}
+                              title={
+                                (canEditRota && !isEmployeeUser ? 'Click to edit or delete' : 'Click to view shift details') +
+                                (shift.employee ? ` • ${shift.employee.firstName} ${shift.employee.lastName}` : '')
+                              }
                             >
                               <div className="flex items-center justify-between font-bold">
-                                <span>{shift.shiftType}</span>
+                                <span className="truncate max-w-[95px]">
+                                  {(currentSelectedEmpId === 'ALL' || !currentSelectedEmpId) && shift.employee
+                                    ? `${shift.employee.firstName} ${shift.employee.lastName?.[0] || ''}.`
+                                    : shift.shiftType}
+                                </span>
                                 <span className="font-mono">{parseFloat(shift.plannedHours).toFixed(1)}h</span>
                               </div>
-                              <div className="font-mono text-[9px] mt-0.5">
-                                {shift.startTime} - {shift.endTime}
+                              <div className="font-mono text-[9px] mt-0.5 flex items-center justify-between">
+                                <span>{shift.startTime} - {shift.endTime}</span>
+                                {(currentSelectedEmpId === 'ALL' || !currentSelectedEmpId) && (
+                                  <span className="text-[8px] opacity-75 font-sans font-medium">{shift.shiftType}</span>
+                                )}
                               </div>
                             </div>
                           ))}
@@ -1519,20 +1631,52 @@ export default function RotaManagement({ employees = [] }) {
                 </button>
               </div>
 
-              {/* Status Filter for timesheet tab */}
+              {/* Enhanced Filters for timesheets tab */}
               {activeTab === 'timesheets' && (
-                <div className="flex items-center space-x-2">
-                  <span className="text-zinc-500">Status:</span>
-                  <select
-                    value={statusFilter}
-                    onChange={(e) => setStatusFilter(e.target.value)}
-                    className="px-2.5 py-1.5 rounded-lg bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-xs font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                  >
-                    <option value="ALL">All Statuses</option>
-                    <option value="Pending">Pending Approval</option>
-                    <option value="Approved">Approved</option>
-                    <option value="Rejected">Rejected</option>
-                  </select>
+                <div className="flex flex-wrap items-center gap-2.5">
+                  {/* Search bar */}
+                  <div className="relative w-44 sm:w-52">
+                    <Search className="w-3.5 h-3.5 text-zinc-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
+                    <input
+                      type="text"
+                      placeholder="Search timesheet / emp..."
+                      value={timesheetSearchQuery}
+                      onChange={(e) => setTimesheetSearchQuery(e.target.value)}
+                      className="w-full pl-8 pr-2.5 py-1.5 rounded-lg bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                    />
+                  </div>
+
+                  {/* Filter by Employee */}
+                  <div className="flex items-center space-x-1.5">
+                    <span className="text-zinc-500 text-xs">Employee:</span>
+                    <select
+                      value={timesheetEmployeeFilter}
+                      onChange={(e) => setTimesheetEmployeeFilter(e.target.value)}
+                      className="px-2.5 py-1.5 rounded-lg bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-xs font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none max-w-[170px] truncate"
+                    >
+                      <option value="ALL">All Employees</option>
+                      {selectableEmployees.map((emp) => (
+                        <option key={emp.id} value={emp.id}>
+                          {emp.firstName} {emp.lastName} {String(emp.id) === String(currentEmployeeId) ? '(You)' : ''}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Status Filter */}
+                  <div className="flex items-center space-x-1.5">
+                    <span className="text-zinc-500 text-xs">Status:</span>
+                    <select
+                      value={statusFilter}
+                      onChange={(e) => setStatusFilter(e.target.value)}
+                      className="px-2.5 py-1.5 rounded-lg bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-xs font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                    >
+                      <option value="ALL">All Statuses</option>
+                      <option value="Pending">Pending Approval</option>
+                      <option value="Approved">Approved</option>
+                      <option value="Rejected">Rejected</option>
+                    </select>
+                  </div>
                 </div>
               )}
             </div>
@@ -1983,7 +2127,8 @@ export default function RotaManagement({ employees = [] }) {
                       return (
                         <tr
                           key={ts.id}
-                          className="hover:bg-blue-50/40 dark:hover:bg-blue-950/20 transition group"
+                          onClick={() => setPreviewTimesheet(ts)}
+                          className="hover:bg-blue-50/40 dark:hover:bg-blue-950/20 transition group cursor-pointer"
                         >
                           <td className="py-3 px-3 font-mono text-zinc-500 dark:text-zinc-400">
                             #{ts.id}
@@ -2056,52 +2201,62 @@ export default function RotaManagement({ employees = [] }) {
                             {ts.notes || '—'}
                           </td>
 
-                          <td className="py-3 px-3 text-right whitespace-nowrap">
-                            {canManageTimesheets ? (
-                              <div className="flex items-center justify-end space-x-1">
-                                {ts.approvalStatus !== 'Approved' && (
+                          <td className="py-3 px-3 text-right whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
+                            <div className="flex items-center justify-end space-x-1">
+                              {/* Preview Timesheet Button (Available for all roles including Employee) */}
+                              <button
+                                type="button"
+                                onClick={() => setPreviewTimesheet(ts)}
+                                className="p-1 text-zinc-500 hover:text-blue-600 dark:hover:text-blue-400 rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-800 transition"
+                                title="Preview timesheet details"
+                              >
+                                <Eye className="w-3.5 h-3.5" />
+                              </button>
+
+                              {canManageTimesheets && (
+                                <>
+                                  {ts.approvalStatus !== 'Approved' && (
+                                    <button
+                                      type="button"
+                                      onClick={() => handleSetApprovalStatus(ts.id, 'Approved')}
+                                      className="p-1 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 rounded transition"
+                                      title="Approve Timesheet"
+                                    >
+                                      <Check className="w-3.5 h-3.5" />
+                                    </button>
+                                  )}
+
+                                  {ts.approvalStatus !== 'Rejected' && (
+                                    <button
+                                      type="button"
+                                      onClick={() => handleSetApprovalStatus(ts.id, 'Rejected')}
+                                      className="p-1 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded transition"
+                                      title="Reject Timesheet"
+                                    >
+                                      <X className="w-3.5 h-3.5" />
+                                    </button>
+                                  )}
+
                                   <button
                                     type="button"
-                                    onClick={() => handleSetApprovalStatus(ts.id, 'Approved')}
-                                    className="p-1 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 rounded transition"
-                                    title="Approve Timesheet"
+                                    onClick={() => setEditingTimesheet(ts)}
+                                    className="p-1 text-zinc-500 hover:text-blue-600 dark:hover:text-blue-400 rounded hover:bg-zinc-100 dark:hover:bg-zinc-800 transition"
+                                    title="Edit timesheet"
                                   >
-                                    <Check className="w-3.5 h-3.5" />
+                                    <Edit2 className="w-3.5 h-3.5" />
                                   </button>
-                                )}
 
-                                {ts.approvalStatus !== 'Rejected' && (
                                   <button
                                     type="button"
-                                    onClick={() => handleSetApprovalStatus(ts.id, 'Rejected')}
-                                    className="p-1 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded transition"
-                                    title="Reject Timesheet"
+                                    onClick={() => handleDeleteTimesheet(ts.id)}
+                                    className="p-1 text-zinc-500 hover:text-rose-600 dark:hover:text-rose-400 rounded hover:bg-zinc-100 dark:hover:bg-zinc-800 transition"
+                                    title="Delete timesheet"
                                   >
-                                    <X className="w-3.5 h-3.5" />
+                                    <Trash2 className="w-3.5 h-3.5" />
                                   </button>
-                                )}
-
-                                <button
-                                  type="button"
-                                  onClick={() => setEditingTimesheet(ts)}
-                                  className="p-1 text-zinc-500 hover:text-blue-600 dark:hover:text-blue-400 rounded hover:bg-zinc-100 dark:hover:bg-zinc-800 transition"
-                                  title="Edit timesheet"
-                                >
-                                  <Edit2 className="w-3.5 h-3.5" />
-                                </button>
-
-                                <button
-                                  type="button"
-                                  onClick={() => handleDeleteTimesheet(ts.id)}
-                                  className="p-1 text-zinc-500 hover:text-rose-600 dark:hover:text-rose-400 rounded hover:bg-zinc-100 dark:hover:bg-zinc-800 transition"
-                                  title="Delete timesheet"
-                                >
-                                  <Trash2 className="w-3.5 h-3.5" />
-                                </button>
-                              </div>
-                            ) : (
-                              <span className="text-zinc-400 text-[11px]">—</span>
-                            )}
+                                </>
+                              )}
+                            </div>
                           </td>
                         </tr>
                       );
@@ -2445,6 +2600,196 @@ export default function RotaManagement({ employees = [] }) {
               </button>
             </div>
           </form>
+        </Modal>
+      )}
+
+      {/* ========================================================================= */}
+      {/* 7. PREVIEW TIMESHEET MODAL (READONLY PREVIEW FOR EMPLOYEES & MANAGERS)    */}
+      {/* ========================================================================= */}
+      {previewTimesheet && (
+        <Modal
+          isOpen={!!previewTimesheet}
+          onClose={() => setPreviewTimesheet(null)}
+          title={`Timesheet Preview #${previewTimesheet.id}`}
+        >
+          <div className="space-y-4 text-xs">
+            {/* Employee Profile Header */}
+            <div className="p-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700/60 flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                {previewTimesheet.employee?.photoUrl ? (
+                  <img
+                    src={previewTimesheet.employee.photoUrl}
+                    alt=""
+                    className="w-10 h-10 rounded-full object-cover border border-zinc-200 dark:border-zinc-700"
+                  />
+                ) : (
+                  <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 font-bold text-sm flex items-center justify-center">
+                    {previewTimesheet.employee?.firstName?.[0] || 'E'}
+                  </div>
+                )}
+                <div>
+                  <h4 className="font-bold text-sm text-zinc-900 dark:text-zinc-100">
+                    {previewTimesheet.employee
+                      ? `${previewTimesheet.employee.firstName} ${previewTimesheet.employee.lastName}`
+                      : `Employee #${previewTimesheet.employeeId}`}
+                  </h4>
+                  <div className="flex items-center space-x-2 text-[11px] text-zinc-500 mt-0.5">
+                    <span className="font-mono font-semibold text-blue-600 dark:text-blue-400">
+                      {previewTimesheet.employee?.employeeCode || `EMP${String(previewTimesheet.employeeId).padStart(3, '0')}`}
+                    </span>
+                    {previewTimesheet.employee?.department?.name && (
+                      <>
+                        <span>•</span>
+                        <span>{previewTimesheet.employee.department.name}</span>
+                      </>
+                    )}
+                    {previewTimesheet.employee?.jobTitle && (
+                      <>
+                        <span>•</span>
+                        <span>{previewTimesheet.employee.jobTitle}</span>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Status Badge */}
+              <span
+                className={`px-3 py-1 rounded-full text-xs font-bold ${
+                  previewTimesheet.approvalStatus === 'Approved'
+                    ? 'bg-emerald-100 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800'
+                    : previewTimesheet.approvalStatus === 'Rejected'
+                    ? 'bg-rose-100 dark:bg-rose-950/80 text-rose-700 dark:text-rose-300 border border-rose-300 dark:border-rose-800'
+                    : 'bg-amber-100 dark:bg-amber-950/80 text-amber-700 dark:text-amber-300 border border-amber-300 dark:border-amber-800'
+                }`}
+              >
+                {previewTimesheet.approvalStatus}
+              </span>
+            </div>
+
+            {/* Time & Shift Cards */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+              <div className="p-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200/80 dark:border-zinc-700/60">
+                <span className="text-zinc-400 text-[10px] uppercase font-bold tracking-wider">Work Date</span>
+                <div className="font-mono font-bold text-zinc-800 dark:text-zinc-200 mt-1">
+                  {formatDateDisplay(previewTimesheet.workDate)}
+                </div>
+                <div className="text-[10px] text-zinc-500 font-semibold mt-0.5">
+                  {previewTimesheet.dayName || getDayName(previewTimesheet.workDate)}
+                </div>
+              </div>
+
+              <div className="p-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200/80 dark:border-zinc-700/60">
+                <span className="text-zinc-400 text-[10px] uppercase font-bold tracking-wider">Clock In</span>
+                <div className="font-mono font-bold text-emerald-600 dark:text-emerald-400 text-sm mt-1">
+                  {previewTimesheet.clockIn}
+                </div>
+                <div className="text-[10px] text-zinc-400 mt-0.5">Start time</div>
+              </div>
+
+              <div className="p-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200/80 dark:border-zinc-700/60">
+                <span className="text-zinc-400 text-[10px] uppercase font-bold tracking-wider">Clock Out</span>
+                <div className="font-mono font-bold text-rose-600 dark:text-rose-400 text-sm mt-1">
+                  {previewTimesheet.clockOut}
+                </div>
+                <div className="text-[10px] text-zinc-400 mt-0.5">Finish time</div>
+              </div>
+
+              <div className="p-2.5 rounded-xl bg-emerald-50/60 dark:bg-emerald-950/20 border border-emerald-200/80 dark:border-emerald-800/50">
+                <span className="text-emerald-700 dark:text-emerald-400 text-[10px] uppercase font-bold tracking-wider">Paid Hours</span>
+                <div className="font-mono font-bold text-emerald-700 dark:text-emerald-300 text-sm mt-1">
+                  {parseFloat(previewTimesheet.paidHours).toFixed(2)}h
+                </div>
+                <div className="text-[10px] text-zinc-500 mt-0.5">
+                  Break: {previewTimesheet.breakMinutes || 0}m
+                </div>
+              </div>
+            </div>
+
+            {/* Notes Section */}
+            <div>
+              <label className="block font-semibold text-zinc-700 dark:text-zinc-300 mb-1">
+                Timesheet Notes
+              </label>
+              <div className="p-3 rounded-xl bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700/60 text-zinc-700 dark:text-zinc-300 min-h-[50px]">
+                {previewTimesheet.notes ? (
+                  <p className="whitespace-pre-wrap">{previewTimesheet.notes}</p>
+                ) : (
+                  <span className="text-zinc-400 italic">No notes recorded for this timesheet.</span>
+                )}
+              </div>
+            </div>
+
+            {/* Approval audit details */}
+            {previewTimesheet.approvedAt && (
+              <div className="text-[11px] text-zinc-500 flex items-center justify-between pt-2 border-t border-zinc-100 dark:border-zinc-800">
+                <span>
+                  Approved at: <strong className="font-mono text-zinc-700 dark:text-zinc-300">{new Date(previewTimesheet.approvedAt).toLocaleString()}</strong>
+                </span>
+                {previewTimesheet.approvedBy && (
+                  <span>
+                    Approved by: <strong className="text-zinc-700 dark:text-zinc-300">{previewTimesheet.approvedBy}</strong>
+                  </span>
+                )}
+              </div>
+            )}
+
+            {/* Modal Actions */}
+            <div className="flex items-center justify-between pt-3 border-t border-zinc-100 dark:border-zinc-800">
+              <div className="flex items-center space-x-2">
+                {canManageTimesheets && (
+                  <>
+                    {previewTimesheet.approvalStatus !== 'Approved' && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          handleSetApprovalStatus(previewTimesheet.id, 'Approved');
+                          setPreviewTimesheet((prev) => prev ? { ...prev, approvalStatus: 'Approved' } : null);
+                        }}
+                        className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition flex items-center space-x-1"
+                      >
+                        <Check className="w-3.5 h-3.5" />
+                        <span>Approve</span>
+                      </button>
+                    )}
+                    {previewTimesheet.approvalStatus !== 'Rejected' && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          handleSetApprovalStatus(previewTimesheet.id, 'Rejected');
+                          setPreviewTimesheet((prev) => prev ? { ...prev, approvalStatus: 'Rejected' } : null);
+                        }}
+                        className="px-3 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs transition flex items-center space-x-1"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                        <span>Reject</span>
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const tsToEdit = previewTimesheet;
+                        setPreviewTimesheet(null);
+                        setEditingTimesheet(tsToEdit);
+                      }}
+                      className="px-3 py-1.5 rounded-xl border border-zinc-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 font-semibold text-xs transition flex items-center space-x-1"
+                    >
+                      <Edit2 className="w-3.5 h-3.5" />
+                      <span>Edit</span>
+                    </button>
+                  </>
+                )}
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setPreviewTimesheet(null)}
+                className="px-4 py-2 rounded-xl bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 font-semibold transition"
+              >
+                Close Preview
+              </button>
+            </div>
+          </div>
         </Modal>
       )}
     </div>

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { initDb, User, Role, Employee, Department } from '@/lib/db/models/index';
+import { initDb, User, Role, Employee, Department, ImmigrationRecord, VisaType, RightToWork } from '@/lib/db/models/index';
 import { SUPER_ADMIN_USER_OBJECT } from '@/lib/auth/systemAccounts';
 
 import { verifySessionToken } from '@/lib/auth/jwt';
@@ -54,6 +54,15 @@ export async function GET(request) {
               as: 'department',
               attributes: ['id', 'name', 'code'],
             },
+            {
+              model: ImmigrationRecord,
+              as: 'immigrationRecords',
+              include: [{ model: VisaType, as: 'visaType' }],
+            },
+            {
+              model: RightToWork,
+              as: 'rtwChecks',
+            },
           ],
         },
       ],
@@ -80,7 +89,18 @@ export async function GET(request) {
     if (!linkedEmp && user.email) {
       linkedEmp = await Employee.findOne({
         where: { email: user.email },
-        include: [{ model: Department, as: 'department', attributes: ['id', 'name', 'code'] }],
+        include: [
+          { model: Department, as: 'department', attributes: ['id', 'name', 'code'] },
+          {
+            model: ImmigrationRecord,
+            as: 'immigrationRecords',
+            include: [{ model: VisaType, as: 'visaType' }],
+          },
+          {
+            model: RightToWork,
+            as: 'rtwChecks',
+          },
+        ],
       });
       if (linkedEmp && !user.employeeId) {
         user.update({ employeeId: linkedEmp.id }).catch(() => {});
@@ -102,12 +122,30 @@ export async function GET(request) {
             employeeCode: linkedEmp.employeeCode,
             firstName: linkedEmp.firstName,
             lastName: linkedEmp.lastName,
+            email: linkedEmp.email,
+            phone: linkedEmp.phone,
             jobTitle: linkedEmp.jobTitle,
             department: linkedEmp.department?.name,
             departmentId: linkedEmp.departmentId,
             photoUrl: linkedEmp.photoUrl,
             weeklyHours: linkedEmp.weeklyHours,
+            holidayAllowance: linkedEmp.holidayAllowance,
             isSponsoredWorker: linkedEmp.isSponsoredWorker,
+            dateOfBirth: linkedEmp.dateOfBirth,
+            hireDate: linkedEmp.hireDate,
+            startDate: linkedEmp.startDate,
+            endDate: linkedEmp.endDate,
+            gender: linkedEmp.gender,
+            addressLine1: linkedEmp.addressLine1,
+            addressLine2: linkedEmp.addressLine2,
+            city: linkedEmp.city,
+            postcode: linkedEmp.postcode,
+            country: linkedEmp.country,
+            emergencyContact: linkedEmp.emergencyContact,
+            nextOfKin: linkedEmp.nextOfKin,
+            status: linkedEmp.status,
+            immigrationRecords: linkedEmp.immigrationRecords || [],
+            rtwChecks: linkedEmp.rtwChecks || [],
           }
         : null,
     };

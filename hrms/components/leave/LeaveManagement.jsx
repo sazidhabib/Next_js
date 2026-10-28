@@ -22,8 +22,9 @@ import {
   Search,
   Check,
   Eye,
+  X,
 } from 'lucide-react';
-import { Badge, Card } from '../ui';
+import { Badge, Card, Modal } from '../ui';
 import { useAuth } from '@/context/AuthContext';
 
 const LEAVE_TYPES = [
@@ -66,6 +67,9 @@ export default function LeaveManagement({ employees = [], onUpdated }) {
   const [balanceSearch, setBalanceSearch] = useState('');
   const [balanceDeptFilter, setBalanceDeptFilter] = useState('');
   const [editingLeave, setEditingLeave] = useState(null);
+  const [previewLeave, setPreviewLeave] = useState(null);
+  const [leaveEmployeeFilter, setLeaveEmployeeFilter] = useState('ALL');
+  const [leaveSearchQuery, setLeaveSearchQuery] = useState('');
 
   const calculateDays = (start, end) => {
     if (!start || !end) return 1;
@@ -189,11 +193,29 @@ export default function LeaveManagement({ employees = [], onUpdated }) {
   }, [employees, leaves, isEmployeeUser, currentEmployeeId]);
 
   const displayLeaves = useMemo(() => {
-    if (isEmployeeUser && currentEmployeeId) {
-      return leaves.filter((l) => String(l.employeeId) === String(currentEmployeeId));
-    }
-    return leaves;
-  }, [leaves, isEmployeeUser, currentEmployeeId]);
+    return leaves.filter((l) => {
+      // Employee filter: 'ALL', 'MY', or specific employee ID
+      if (leaveEmployeeFilter === 'MY' && currentEmployeeId) {
+        if (String(l.employeeId) !== String(currentEmployeeId)) return false;
+      } else if (leaveEmployeeFilter !== 'ALL' && String(l.employeeId) !== String(leaveEmployeeFilter)) {
+        return false;
+      }
+
+      // Search query (filter by employee name, employee code, reason, or leave type)
+      if (leaveSearchQuery.trim()) {
+        const q = leaveSearchQuery.toLowerCase();
+        const empName = `${l.employee?.firstName || ''} ${l.employee?.lastName || ''}`.toLowerCase();
+        const empCode = (l.employee?.employeeCode || `EMP-${l.employeeId}`).toLowerCase();
+        const reason = (l.reason || '').toLowerCase();
+        const type = (l.leaveType || '').toLowerCase();
+        if (!empName.includes(q) && !empCode.includes(q) && !reason.includes(q) && !type.includes(q)) {
+          return false;
+        }
+      }
+
+      return true;
+    });
+  }, [leaves, leaveEmployeeFilter, leaveSearchQuery, currentEmployeeId]);
 
   const openAddTab = (preselectedEmpId = '') => {
     setEditingLeave(null);
@@ -215,6 +237,10 @@ export default function LeaveManagement({ employees = [], onUpdated }) {
   };
 
   const openEditTab = (leave) => {
+    if (!canEditLeave) {
+      setPreviewLeave(leave);
+      return;
+    }
     setEditingLeave(leave);
     setForm({
       id: leave.id || '',
@@ -423,17 +449,19 @@ export default function LeaveManagement({ employees = [], onUpdated }) {
     };
   }, [form.startDate, form.endDate, form.employeeId, form.id, leaves, employees]);
 
-  // Filtered employees for Balances tab
+  // Filtered employees for Balances tab (Scoped strictly to own employee record for Employee role)
   const filteredEmployeesForBalances = useMemo(() => {
-    let baseList = employees;
-    if (isEmployeeUser && currentEmployeeId) {
-      baseList = employees.filter((emp) => String(emp.id) === String(currentEmployeeId));
-    }
+    const baseList = isEmployeeUser
+      ? (currentEmployeeId && employees.filter((e) => String(e.id) === String(currentEmployeeId)).length > 0
+          ? employees.filter((e) => String(e.id) === String(currentEmployeeId))
+          : (user?.employee ? [user.employee] : []))
+      : employees;
+
     return baseList.filter((emp) => {
       const query = balanceSearch.toLowerCase().trim();
       const matchSearch =
         !query ||
-        `${emp.firstName} ${emp.lastName}`.toLowerCase().includes(query) ||
+        `${emp.firstName || ''} ${emp.lastName || ''}`.toLowerCase().includes(query) ||
         (emp.employeeCode || '').toLowerCase().includes(query) ||
         (emp.jobTitle || '').toLowerCase().includes(query);
 
@@ -444,7 +472,7 @@ export default function LeaveManagement({ employees = [], onUpdated }) {
 
       return matchSearch && matchDept;
     });
-  }, [employees, balanceSearch, balanceDeptFilter, isEmployeeUser, currentEmployeeId]);
+  }, [employees, balanceSearch, balanceDeptFilter, isEmployeeUser, currentEmployeeId, user?.employee]);
 
   return (
     <div className="space-y-4">
@@ -492,7 +520,7 @@ export default function LeaveManagement({ employees = [], onUpdated }) {
             }`}
           >
             <Palmtree className="w-4 h-4 text-emerald-500" />
-            <span>Holiday Balances ({employees.length})</span>
+            <span>{isEmployeeUser ? 'My Holiday Balance' : `Holiday Balances (${employees.length})`}</span>
           </button>
 
           {canRequestLeave && (
@@ -525,28 +553,65 @@ export default function LeaveManagement({ employees = [], onUpdated }) {
       {/* Sub-Tab 1: Requests Table */}
       {activeSubTab === 'requests' && (
         <Card>
-          <div className="mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-            <div className="flex items-center space-x-2">
-              <select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                className="px-3 py-1.5 rounded-xl text-xs bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">All Statuses ({displayLeaves.length})</option>
-                <option value="Pending">Pending Only ({pendingCount})</option>
-                <option value="Approved">Approved</option>
-                <option value="Rejected">Rejected</option>
-                <option value="Cancelled">Cancelled</option>
-              </select>
+          <div className="mb-4 flex flex-col md:flex-row md:items-center justify-between gap-3">
+            <div className="flex flex-wrap items-center gap-2.5">
+              {/* Search bar */}
+              <div className="relative w-48 sm:w-60">
+                <Search className="w-3.5 h-3.5 text-zinc-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  placeholder="Search leave / employee..."
+                  value={leaveSearchQuery}
+                  onChange={(e) => setLeaveSearchQuery(e.target.value)}
+                  className="w-full pl-9 pr-3 py-1.5 rounded-xl text-xs bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              {/* Filter by Employee */}
+              <div className="flex items-center space-x-1.5">
+                <span className="text-zinc-500 text-xs">Employee:</span>
+                <select
+                  value={leaveEmployeeFilter}
+                  onChange={(e) => setLeaveEmployeeFilter(e.target.value)}
+                  className="px-2.5 py-1.5 rounded-xl text-xs bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 focus:outline-none focus:ring-2 focus:ring-blue-500 max-w-[170px] truncate"
+                >
+                  <option value="ALL">All Employees</option>
+                  {currentEmployeeId && <option value="MY">My Requests Only</option>}
+                  {employees.map((emp) => (
+                    <option key={emp.id} value={emp.id}>
+                      {emp.firstName} {emp.lastName} {String(emp.id) === String(currentEmployeeId) ? '(You)' : ''}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Status Filter */}
+              <div className="flex items-center space-x-1.5">
+                <span className="text-zinc-500 text-xs">Status:</span>
+                <select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  className="px-2.5 py-1.5 rounded-xl text-xs bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">All Statuses</option>
+                  <option value="Pending">Pending Only ({pendingCount})</option>
+                  <option value="Approved">Approved</option>
+                  <option value="Rejected">Rejected</option>
+                  <option value="Cancelled">Cancelled</option>
+                </select>
+              </div>
             </div>
-            <span className="text-xs text-zinc-500">{displayLeaves.length} Total Requests</span>
+
+            <span className="text-xs text-zinc-500 font-medium">
+              Showing {displayLeaves.length} of {leaves.length} requests
+            </span>
           </div>
 
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs sm:text-sm min-w-[750px]">
               <thead className="bg-zinc-50 dark:bg-zinc-800/80 text-zinc-600 dark:text-zinc-400 font-semibold text-[11px] sm:text-xs uppercase tracking-wider border-b border-zinc-200 dark:border-zinc-800">
                 <tr>
-                  <th className="px-3 sm:px-4 py-3">Employee & Balances</th>
+                  <th className="px-3 sm:px-4 py-3">{isEmployeeUser ? 'Employee' : 'Employee & Balances'}</th>
                   <th className="px-3 sm:px-4 py-3">Leave Type</th>
                   <th className="px-3 sm:px-4 py-3">Duration & Dates</th>
                   <th className="px-3 sm:px-4 py-3">Days</th>
@@ -560,42 +625,51 @@ export default function LeaveManagement({ employees = [], onUpdated }) {
                 {displayLeaves.length === 0 ? (
                   <tr>
                     <td colSpan={8} className="text-center py-10 text-zinc-500 text-xs">
-                      {loading ? 'Loading requests...' : 'No leave requests found.'}
+                      {loading ? 'Loading requests...' : 'No leave requests found matching filter.'}
                     </td>
                   </tr>
                 ) : (
                   displayLeaves.map((l) => {
                     const st = (l.status || 'Pending').toUpperCase();
-                    const stats = getEmployeeHolidayStats(l.employeeId, l.employee?.holidayAllowance);
+                    const isOwnRecord = currentEmployeeId && String(l.employeeId) === String(currentEmployeeId);
+                    const canViewBalance = !isEmployeeUser || isOwnRecord;
+                    const stats = canViewBalance ? getEmployeeHolidayStats(l.employeeId, l.employee?.holidayAllowance) : null;
 
                     return (
-                      <tr key={l.id} className="hover:bg-zinc-50/80 dark:hover:bg-zinc-800/40 transition">
+                      <tr
+                        key={l.id}
+                        onClick={() => setPreviewLeave(l)}
+                        className="hover:bg-blue-50/40 dark:hover:bg-blue-950/20 transition cursor-pointer group"
+                      >
                         <td className="px-3 sm:px-4 py-3">
                           <div className="font-bold text-zinc-900 dark:text-zinc-100 text-xs truncate max-w-[150px]">
                             {l.employee?.firstName} {l.employee?.lastName}
+                            {isOwnRecord && <span className="text-blue-600 dark:text-blue-400 font-normal ml-1">(You)</span>}
                           </div>
                           <span className="text-[10px] text-zinc-400 font-mono block">
                             {l.employee?.employeeCode || `EMP-${l.employeeId}`}
                           </span>
-                          {/* Live 3 Holiday Fields Preview per Row */}
-                          <div className="mt-1 flex items-center space-x-1.5 text-[10px] font-mono">
-                            <span className="px-1.5 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400" title="Holiday Allowance">
-                              Allw: {stats.allowance}d
-                            </span>
-                            <span className="px-1.5 py-0.5 rounded bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-400 font-semibold" title="Holiday Used">
-                              Used: {stats.used}d
-                            </span>
-                            <span
-                              className={`px-1.5 py-0.5 rounded font-bold ${
-                                stats.remaining <= 5
-                                  ? 'bg-rose-50 text-rose-700 dark:bg-rose-950/60 dark:text-rose-400'
-                                  : 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400'
-                              }`}
-                              title="Holiday Remaining"
-                            >
-                              Rem: {stats.remaining}d
-                            </span>
-                          </div>
+                          {/* Live 3 Holiday Fields Preview per Row (Shown for own record or for managers) */}
+                          {canViewBalance && stats && (
+                            <div className="mt-1 flex items-center space-x-1.5 text-[10px] font-mono">
+                              <span className="px-1.5 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400" title="Holiday Allowance">
+                                Allw: {stats.allowance}d
+                              </span>
+                              <span className="px-1.5 py-0.5 rounded bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-400 font-semibold" title="Holiday Used">
+                                Used: {stats.used}d
+                              </span>
+                              <span
+                                className={`px-1.5 py-0.5 rounded font-bold ${
+                                  stats.remaining <= 5
+                                    ? 'bg-rose-50 text-rose-700 dark:bg-rose-950/60 dark:text-rose-400'
+                                    : 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400'
+                                }`}
+                                title="Holiday Remaining"
+                              >
+                                Rem: {stats.remaining}d
+                              </span>
+                            </div>
+                          )}
                         </td>
 
                         <td className="px-3 sm:px-4 py-3 text-xs font-semibold">
@@ -612,7 +686,7 @@ export default function LeaveManagement({ employees = [], onUpdated }) {
 
                         <td className="px-3 sm:px-4 py-3 text-xs font-bold">{l.totalDays || l.days || 1} d</td>
 
-                        <td className="px-3 sm:px-4 py-3 text-xs text-zinc-500 max-w-[150px] truncate">
+                        <td className="px-3 sm:px-4 py-3 text-xs text-zinc-500 max-w-[150px] truncate" title={l.reason}>
                           {l.reason || '-'}
                         </td>
 
@@ -634,14 +708,23 @@ export default function LeaveManagement({ employees = [], onUpdated }) {
                           {l.approvedBy || '-'}
                         </td>
 
-                        <td className="px-3 sm:px-4 py-3 text-right space-x-1">
+                        <td className="px-3 sm:px-4 py-3 text-right space-x-1" onClick={(e) => e.stopPropagation()}>
                           <button
-                            onClick={() => openEditTab(l)}
+                            onClick={() => setPreviewLeave(l)}
                             className="p-1.5 rounded-lg text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/50 transition"
-                            title={canEditLeave ? 'Edit Leave' : 'View Leave Details'}
+                            title="Preview Leave Details"
                           >
-                            {canEditLeave ? <Edit className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                            <Eye className="w-4 h-4" />
                           </button>
+                          {canEditLeave && (
+                            <button
+                              onClick={() => openEditTab(l)}
+                              className="p-1.5 rounded-lg text-zinc-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/50 transition"
+                              title="Edit Leave"
+                            >
+                              <Edit className="w-4 h-4" />
+                            </button>
+                          )}
                           {st === 'PENDING' && canApproveLeave && (
                             <>
                               <button
@@ -766,20 +849,30 @@ export default function LeaveManagement({ employees = [], onUpdated }) {
           <Card>
             <div className="mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div className="flex-1 flex items-center space-x-2">
-                <div className="relative flex-1 max-w-sm">
-                  <Search className="w-3.5 h-3.5 text-zinc-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                  <input
-                    type="text"
-                    placeholder="Search employee by name, ID or role..."
-                    value={balanceSearch}
-                    onChange={(e) => setBalanceSearch(e.target.value)}
-                    className="w-full pl-9 pr-3 py-1.5 rounded-xl text-xs bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
+                {!isEmployeeUser ? (
+                  <div className="relative flex-1 max-w-sm">
+                    <Search className="w-3.5 h-3.5 text-zinc-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                    <input
+                      type="text"
+                      placeholder="Search employee by name, ID or role..."
+                      value={balanceSearch}
+                      onChange={(e) => setBalanceSearch(e.target.value)}
+                      className="w-full pl-9 pr-3 py-1.5 rounded-xl text-xs bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                ) : (
+                  <div className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                    My Annual Holiday Entitlement & Usage
+                  </div>
+                )}
               </div>
 
               <div className="text-xs text-zinc-500">
-                Showing {filteredEmployeesForBalances.length} of {employees.length} employees
+                {isEmployeeUser ? (
+                  <span>Showing personal entitlement</span>
+                ) : (
+                  <span>Showing {filteredEmployeesForBalances.length} of {employees.length} employees</span>
+                )}
               </div>
             </div>
 
@@ -907,14 +1000,30 @@ export default function LeaveManagement({ employees = [], onUpdated }) {
 
                           {/* Quick Action */}
                           <td className="px-4 py-3.5 text-right">
-                            <button
-                              type="button"
-                              onClick={() => openAddTab(emp.id)}
-                              className="px-3 py-1.5 rounded-xl text-xs font-bold bg-blue-50 text-blue-700 hover:bg-blue-100 dark:bg-blue-950/60 dark:text-blue-300 transition shadow-2xs flex items-center space-x-1 ml-auto"
-                            >
-                              <Plus className="w-3.5 h-3.5" />
-                              <span>Book Leave</span>
-                            </button>
+                            <div className="flex items-center justify-end space-x-1.5">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setLeaveEmployeeFilter(String(emp.id));
+                                  setActiveSubTab('requests');
+                                }}
+                                className="px-2.5 py-1.5 rounded-xl text-xs font-medium text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition flex items-center space-x-1"
+                                title="View requests for this employee"
+                              >
+                                <Eye className="w-3.5 h-3.5 text-blue-500" />
+                                <span>Requests</span>
+                              </button>
+                              {(!isEmployeeUser || String(emp.id) === String(currentEmployeeId)) && (
+                                <button
+                                  type="button"
+                                  onClick={() => openAddTab(emp.id)}
+                                  className="px-3 py-1.5 rounded-xl text-xs font-bold bg-blue-50 text-blue-700 hover:bg-blue-100 dark:bg-blue-950/60 dark:text-blue-300 transition shadow-2xs flex items-center space-x-1"
+                                >
+                                  <Plus className="w-3.5 h-3.5" />
+                                  <span>Book</span>
+                                </button>
+                              )}
+                            </div>
                           </td>
                         </tr>
                       );
@@ -1225,6 +1334,176 @@ export default function LeaveManagement({ employees = [], onUpdated }) {
             </div>
           </form>
         </Card>
+      )}
+
+      {/* ========================================================================= */}
+      {/* PREVIEW LEAVE MODAL (READONLY DETAILS FOR EMPLOYEES & MANAGERS)          */}
+      {/* ========================================================================= */}
+      {previewLeave && (
+        <Modal
+          isOpen={!!previewLeave}
+          onClose={() => setPreviewLeave(null)}
+          title={`Leave Request #${previewLeave.id}`}
+        >
+          {(() => {
+            const emp = previewLeave.employee || employees.find((e) => String(e.id) === String(previewLeave.employeeId));
+            const empName = emp ? `${emp.firstName || ''} ${emp.lastName || ''}`.trim() : `Employee #${previewLeave.employeeId}`;
+            const stats = getEmployeeHolidayStats(previewLeave.employeeId, emp?.holidayAllowance);
+            const st = (previewLeave.status || 'Pending').toUpperCase();
+
+            return (
+              <div className="space-y-4 text-xs">
+                {/* Employee Header */}
+                <div className="p-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700/60 flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    {emp?.photoUrl ? (
+                      <img
+                        src={emp.photoUrl}
+                        alt=""
+                        className="w-10 h-10 rounded-full object-cover border border-zinc-200 dark:border-zinc-700"
+                      />
+                    ) : (
+                      <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 font-bold flex items-center justify-center text-sm">
+                        {empName ? empName.charAt(0) : 'U'}
+                      </div>
+                    )}
+                    <div>
+                      <div className="font-bold text-sm text-zinc-900 dark:text-zinc-100">
+                        {empName}
+                      </div>
+                      <div className="text-[11px] text-zinc-500 flex items-center space-x-2 mt-0.5">
+                        {emp?.employeeCode && (
+                          <span className="font-mono bg-zinc-200/70 dark:bg-zinc-700/70 px-1.5 py-0.5 rounded text-[10px]">
+                            {emp.employeeCode}
+                          </span>
+                        )}
+                        <span>{emp?.jobTitle || 'Employee'}</span>
+                        {emp?.department?.name && (
+                          <span>• {emp.department.name}</span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  <Badge
+                    variant={
+                      st === 'APPROVED'
+                        ? 'success'
+                        : st === 'PENDING'
+                        ? 'warning'
+                        : 'danger'
+                    }
+                  >
+                    {previewLeave.status || 'Pending'}
+                  </Badge>
+                </div>
+
+                {/* Holiday Stats Balance Card (Only visible to managers or when viewing user's own request) */}
+                {(!isEmployeeUser || (currentEmployeeId && String(previewLeave.employeeId) === String(currentEmployeeId))) && (
+                  <div className="grid grid-cols-3 gap-2 p-3 bg-zinc-50 dark:bg-zinc-800/40 rounded-xl border border-zinc-200 dark:border-zinc-700/50 text-center">
+                    <div>
+                      <span className="text-[10px] text-zinc-400 uppercase tracking-wider block">Total Allowance</span>
+                      <span className="text-sm font-bold text-zinc-800 dark:text-zinc-200">{stats.allowance} days</span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] text-zinc-400 uppercase tracking-wider block">Taken / Used</span>
+                      <span className="text-sm font-bold text-amber-600 dark:text-amber-400">{stats.used} days</span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] text-zinc-400 uppercase tracking-wider block">Remaining</span>
+                      <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400">{stats.remaining} days</span>
+                    </div>
+                  </div>
+                )}
+
+                {/* Leave Details Grid */}
+                <div className="grid grid-cols-2 gap-3 p-3.5 bg-zinc-50 dark:bg-zinc-800/40 rounded-xl border border-zinc-200 dark:border-zinc-700/50">
+                  <div>
+                    <span className="text-zinc-400 text-[10px] uppercase font-bold block">Leave Type</span>
+                    <span className="font-semibold text-zinc-900 dark:text-zinc-100 text-xs mt-0.5 block">
+                      {previewLeave.leaveType || 'Annual Leave'}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-zinc-400 text-[10px] uppercase font-bold block">Total Days</span>
+                    <span className="font-semibold text-zinc-900 dark:text-zinc-100 text-xs mt-0.5 block">
+                      {previewLeave.totalDays || previewLeave.days || 1} day(s)
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-zinc-400 text-[10px] uppercase font-bold block">Start Date</span>
+                    <span className="font-medium text-zinc-800 dark:text-zinc-200 text-xs mt-0.5 block">
+                      {previewLeave.startDate || '-'}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-zinc-400 text-[10px] uppercase font-bold block">End Date</span>
+                    <span className="font-medium text-zinc-800 dark:text-zinc-200 text-xs mt-0.5 block">
+                      {previewLeave.endDate || '-'}
+                    </span>
+                  </div>
+                  <div className="col-span-2">
+                    <span className="text-zinc-400 text-[10px] uppercase font-bold block">Reason / Details</span>
+                    <p className="mt-1 text-xs text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-900 p-2.5 rounded-lg border border-zinc-200 dark:border-zinc-700/60 whitespace-pre-wrap">
+                      {previewLeave.reason || 'No additional notes provided.'}
+                    </p>
+                  </div>
+                  <div>
+                    <span className="text-zinc-400 text-[10px] uppercase font-bold block">Approved / Handled By</span>
+                    <span className="text-zinc-700 dark:text-zinc-300 text-xs mt-0.5 block">
+                      {previewLeave.approvedBy || 'Pending decision'}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Footer Actions */}
+                <div className="pt-3 border-t border-zinc-200 dark:border-zinc-800 flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    {st === 'PENDING' && canApproveLeave && (
+                      <>
+                        <button
+                          onClick={() => {
+                            handleQuickStatus(previewLeave.id, 'Approved');
+                            setPreviewLeave(null);
+                          }}
+                          className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm transition"
+                        >
+                          Approve Request
+                        </button>
+                        <button
+                          onClick={() => {
+                            handleQuickStatus(previewLeave.id, 'Rejected');
+                            setPreviewLeave(null);
+                          }}
+                          className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-rose-600 hover:bg-rose-700 text-white shadow-sm transition"
+                        >
+                          Reject Request
+                        </button>
+                      </>
+                    )}
+                    {canEditLeave && (
+                      <button
+                        onClick={() => {
+                          const target = previewLeave;
+                          setPreviewLeave(null);
+                          openEditTab(target);
+                        }}
+                        className="px-3 py-1.5 rounded-lg text-xs font-medium border border-zinc-300 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300 transition"
+                      >
+                        Edit Leave
+                      </button>
+                    )}
+                  </div>
+                  <button
+                    onClick={() => setPreviewLeave(null)}
+                    className="px-4 py-1.5 rounded-lg text-xs font-medium bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 transition"
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
+            );
+          })()}
+        </Modal>
       )}
     </div>
   );

@@ -29,11 +29,15 @@ import {
 
 export default function EmployeeDashboardView({ onNavigate }) {
   const { user, canAccessTab, hasPermission } = useAuth();
-  const [employeeData, setEmployeeData] = useState(null);
+  const [employeeData, setEmployeeData] = useState(() => user?.employee || null);
   const [leaves, setLeaves] = useState([]);
   const [allOrgLeaves, setAllOrgLeaves] = useState([]);
-  const [immigrationRecord, setImmigrationRecord] = useState(null);
-  const [rtwRecord, setRtwRecord] = useState(null);
+  const [immigrationRecord, setImmigrationRecord] = useState(
+    () => user?.employee?.immigrationRecords?.[0] || null
+  );
+  const [rtwRecord, setRtwRecord] = useState(
+    () => user?.employee?.rtwChecks?.[0] || null
+  );
   const [isLoading, setIsLoading] = useState(true);
   const [showLeaveModal, setShowLeaveModal] = useState(false);
   const [newLeave, setNewLeave] = useState({
@@ -44,7 +48,7 @@ export default function EmployeeDashboardView({ onNavigate }) {
   });
   const [isSubmittingLeave, setIsSubmittingLeave] = useState(false);
 
-  const canAccessLeave = canAccessTab('leave') || hasPermission('REQUEST_LEAVE') || hasPermission('APPROVE_LEAVES');
+  const canAccessLeave = canAccessTab('leave') || hasPermission('VIEW_LEAVE') || hasPermission('REQUEST_LEAVE') || hasPermission('APPROVE_LEAVES');
   const employeeId = user?.employeeId || user?.employee?.id;
 
   const fetchEmployeeData = async () => {
@@ -69,7 +73,15 @@ export default function EmployeeDashboardView({ onNavigate }) {
 
       if (empRes && empRes.ok) {
         const d = await empRes.json();
-        if (d.success) setEmployeeData(d.employee);
+        if (d.success && d.employee) {
+          setEmployeeData(d.employee);
+          if (Array.isArray(d.employee.immigrationRecords) && d.employee.immigrationRecords.length > 0) {
+            setImmigrationRecord(d.employee.immigrationRecords[0]);
+          }
+          if (Array.isArray(d.employee.rtwChecks) && d.employee.rtwChecks.length > 0) {
+            setRtwRecord(d.employee.rtwChecks[0]);
+          }
+        }
       }
 
       if (canAccessLeave) {
@@ -90,8 +102,8 @@ export default function EmployeeDashboardView({ onNavigate }) {
       if (immRes && immRes.ok) {
         const d = await immRes.json();
         if (d.success && Array.isArray(d.records)) {
-          const myImm = d.records.find((r) => r.employeeId === employeeId || r.employee_id === employeeId);
-          setImmigrationRecord(myImm);
+          const myImm = d.records.find((r) => String(r.employeeId) === String(employeeId) || String(r.employee_id) === String(employeeId));
+          if (myImm) setImmigrationRecord(myImm);
         }
       }
 
@@ -100,8 +112,8 @@ export default function EmployeeDashboardView({ onNavigate }) {
       if (rtwRes && rtwRes.ok) {
         const d = await rtwRes.json();
         if (d.success && Array.isArray(d.records)) {
-          const myRtw = d.records.find((r) => r.employeeId === employeeId || r.employee_id === employeeId);
-          setRtwRecord(myRtw);
+          const myRtw = d.records.find((r) => String(r.employeeId) === String(employeeId) || String(r.employee_id) === String(employeeId));
+          if (myRtw) setRtwRecord(myRtw);
         }
       }
     } catch (e) {
@@ -210,16 +222,17 @@ export default function EmployeeDashboardView({ onNavigate }) {
 
   // Leave calculations
   const totalEntitlement = parseFloat(emp?.holidayAllowance) || 28;
-  const approvedLeaves = leaves.filter((l) => l.status === 'APPROVED');
-  const usedDays = approvedLeaves.reduce((acc, curr) => acc + (parseFloat(curr.totalDays) || 0), 0);
+  const approvedLeaves = leaves.filter((l) => (l.status || '').toUpperCase() === 'APPROVED');
+  const usedDays = approvedLeaves.reduce((acc, curr) => acc + (parseFloat(curr.totalDays || curr.days) || 0), 0);
   const remainingDays = Math.max(0, totalEntitlement - usedDays);
-  const pendingLeaves = leaves.filter((l) => l.status === 'PENDING');
+  const pendingLeaves = leaves.filter((l) => (l.status || '').toUpperCase() === 'PENDING');
 
   // Days until visa expiry
+  const visaExp = immigrationRecord?.expiryDate || immigrationRecord?.visaExpiryDate || immigrationRecord?.visa_expiry_date;
   let daysUntilExpiry = null;
-  if (immigrationRecord?.expiryDate) {
+  if (visaExp) {
     const today = new Date();
-    const exp = new Date(immigrationRecord.expiryDate);
+    const exp = new Date(visaExp);
     const diffTime = exp.getTime() - today.getTime();
     daysUntilExpiry = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
   }
@@ -337,16 +350,37 @@ export default function EmployeeDashboardView({ onNavigate }) {
             </div>
 
             {/* Pending Requests */}
-            <div className="p-5 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-xs space-y-3">
+            <div
+              onClick={() => {
+                const el = document.getElementById('my-leave-applications');
+                if (el) el.scrollIntoView({ behavior: 'smooth' });
+                else if (onNavigate) onNavigate('leave');
+              }}
+              className="p-5 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-xs space-y-3 cursor-pointer hover:border-amber-300 dark:hover:border-amber-700/60 transition group"
+              title="Click to view your pending leave applications"
+            >
               <div className="flex items-center justify-between">
                 <span className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">Pending Requests</span>
-                <div className="p-2 rounded-xl bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400">
+                <div className="p-2 rounded-xl bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 group-hover:scale-105 transition">
                   <Clock className="w-4 h-4" />
                 </div>
               </div>
               <div>
-                <div className="text-2xl font-black text-zinc-900 dark:text-zinc-100">{pendingLeaves.length}</div>
-                <p className="text-xs text-zinc-500 mt-1">Awaiting Manager sign-off</p>
+                <div className="text-2xl font-black text-zinc-900 dark:text-zinc-100 flex items-center space-x-2">
+                  <span>{pendingLeaves.length}</span>
+                  {pendingLeaves.length > 0 && (
+                    <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 dark:bg-amber-950/70 dark:text-amber-300 font-normal">
+                      Awaiting Sign-off
+                    </span>
+                  )}
+                </div>
+                <p className="text-xs text-zinc-500 mt-1">
+                  {pendingLeaves.length === 1
+                    ? '1 leave booking awaiting manager approval'
+                    : pendingLeaves.length > 1
+                    ? `${pendingLeaves.length} leave bookings awaiting manager approval`
+                    : 'All submitted requests are resolved'}
+                </p>
               </div>
             </div>
 
@@ -462,7 +496,7 @@ export default function EmployeeDashboardView({ onNavigate }) {
               </div>
               <div className="p-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-800/50 space-y-1">
                 <span className="text-[11px] font-semibold text-zinc-400">Date of Birth</span>
-                <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">{emp?.dateOfBirth || '—'}</p>
+                <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">{emp?.dateOfBirth || emp?.dob || '—'}</p>
               </div>
               <div className="p-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-800/50 space-y-1">
                 <span className="text-[11px] font-semibold text-zinc-400">Gender</span>
@@ -536,13 +570,13 @@ export default function EmployeeDashboardView({ onNavigate }) {
               <div className="p-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-800/50 space-y-1">
                 <span className="text-[11px] font-semibold text-zinc-400">Emergency Contact</span>
                 <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
-                  {emp?.emergencyContact || 'Not recorded on file'}
+                  {emp?.emergencyContact || emp?.emergency_contact || 'Not recorded on file'}
                 </p>
               </div>
               <div className="p-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-800/50 space-y-1">
                 <span className="text-[11px] font-semibold text-zinc-400">Next of Kin</span>
                 <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
-                  {emp?.nextOfKin || 'Not recorded on file'}
+                  {emp?.nextOfKin || emp?.next_of_kin || 'Not recorded on file'}
                 </p>
               </div>
             </div>
@@ -578,12 +612,12 @@ export default function EmployeeDashboardView({ onNavigate }) {
 
               <div className="p-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-800/50 space-y-1">
                 <span className="text-[11px] font-semibold text-zinc-400">Hire Date</span>
-                <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">{emp?.hireDate || '—'}</p>
+                <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">{emp?.hireDate || emp?.hire_date || '—'}</p>
               </div>
 
               <div className="p-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-800/50 space-y-1">
                 <span className="text-[11px] font-semibold text-zinc-400">Start Date</span>
-                <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">{emp?.startDate || '—'}</p>
+                <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">{emp?.startDate || emp?.start_date || '—'}</p>
               </div>
 
               <div className="p-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-800/50 space-y-1">
@@ -601,7 +635,7 @@ export default function EmployeeDashboardView({ onNavigate }) {
           </div>
 
           {/* Right to Work & Visa Verification (Shown for all employees or sponsored workers) */}
-          {(emp?.isSponsoredWorker || immigrationRecord || rtwRecord) && (
+          {(emp?.isSponsoredWorker || immigrationRecord || rtwRecord || user?.employee?.isSponsoredWorker) && (
             <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl p-6 shadow-xs space-y-4">
               <div className="flex items-center justify-between pb-3 border-b border-zinc-100 dark:border-zinc-800">
                 <div className="flex items-center space-x-3">
@@ -629,21 +663,21 @@ export default function EmployeeDashboardView({ onNavigate }) {
                 <div className="p-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-800/50 space-y-1">
                   <span className="text-[11px] font-semibold text-zinc-400">Visa Expiry Date</span>
                   <p className="text-sm font-bold text-amber-600 dark:text-amber-400">
-                    {immigrationRecord?.expiryDate || 'Statutory Verified'}
+                    {immigrationRecord?.expiryDate || immigrationRecord?.visaExpiryDate || immigrationRecord?.visa_expiry_date || 'Statutory Verified'}
                   </p>
                 </div>
 
                 <div className="p-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-800/50 space-y-1">
                   <span className="text-[11px] font-semibold text-zinc-400">BRP / eVisa Ref</span>
                   <p className="text-sm font-mono font-medium text-zinc-800 dark:text-zinc-200">
-                    {immigrationRecord?.brpOrEvisaNumber || 'On file with HR'}
+                    {immigrationRecord?.brpOrEvisaNumber || immigrationRecord?.brp_or_evisa_number || 'On file with HR'}
                   </p>
                 </div>
 
                 <div className="p-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-800/50 space-y-1">
                   <span className="text-[11px] font-semibold text-zinc-400">Share Code</span>
                   <p className="text-sm font-mono font-medium text-zinc-800 dark:text-zinc-200">
-                    {immigrationRecord?.shareCode || 'Verified online'}
+                    {immigrationRecord?.shareCode || immigrationRecord?.share_code || 'Verified online'}
                   </p>
                 </div>
               </div>
@@ -652,7 +686,7 @@ export default function EmployeeDashboardView({ onNavigate }) {
 
           {/* Leave Section - Only visible if canAccessLeave is true */}
           {canAccessLeave && (
-            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl p-6 shadow-xs">
+            <div id="my-leave-applications" className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl p-6 shadow-xs scroll-mt-20">
               <div className="flex items-center justify-between pb-4 border-b border-zinc-100 dark:border-zinc-800">
                 <div className="flex items-center space-x-3">
                   <div className="p-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400">
@@ -686,8 +720,8 @@ export default function EmployeeDashboardView({ onNavigate }) {
                   </div>
                 ) : (
                   leaves.map((leave) => {
-                    const isApproved = leave.status === 'APPROVED';
-                    const isPending = leave.status === 'PENDING';
+                    const isApproved = (leave.status || '').toUpperCase() === 'APPROVED';
+                    const isPending = (leave.status || '').toUpperCase() === 'PENDING';
                     return (
                       <div key={leave.id} className="py-3.5 flex items-center justify-between">
                         <div className="space-y-1">
@@ -695,7 +729,7 @@ export default function EmployeeDashboardView({ onNavigate }) {
                             <span className="text-xs font-bold text-zinc-900 dark:text-zinc-100">
                               {leave.leaveType || 'Annual'} Leave
                             </span>
-                            <span className="text-[11px] text-zinc-500 font-mono">({leave.totalDays || 1} days)</span>
+                            <span className="text-[11px] text-zinc-500 font-mono">({leave.totalDays || leave.days || 1} days)</span>
                           </div>
                           <p className="text-xs text-zinc-500">
                             {leave.startDate} to {leave.endDate}
@@ -714,7 +748,7 @@ export default function EmployeeDashboardView({ onNavigate }) {
                               : 'bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300'
                           }`}
                         >
-                          {leave.status}
+                          {leave.status || 'Pending'}
                         </span>
                       </div>
                     );
