@@ -40,12 +40,8 @@ export async function GET(request) {
     const workDate = searchParams.get('date');
     const status = searchParams.get('status');
 
-    const canManageRota = hasSessionPermission(auth.session, { section: 'rota', action: 'EDIT' });
-
     const where = {};
-    if (!canManageRota && auth.session.employeeId) {
-      where.employeeId = auth.session.employeeId;
-    } else if (employeeId) {
+    if (employeeId) {
       where.employeeId = employeeId;
     }
     if (workDate) where.workDate = workDate;
@@ -92,24 +88,11 @@ export async function GET(request) {
 
 export async function POST(request) {
   try {
-    const auth = await requirePermission(request, [
-      { section: 'rota', action: 'EDIT' },
-      { section: 'rota', action: 'VIEW' },
-    ]);
+    const auth = await requirePermission(request, { section: 'rota', action: 'EDIT' });
     if (!auth.authorized) return auth.response;
 
     await initDb();
     const body = await request.json();
-
-    const canManageRota = hasSessionPermission(auth.session, { section: 'rota', action: 'EDIT' });
-    if (!canManageRota) {
-      if (auth.session.employeeId) {
-        body.employeeId = auth.session.employeeId;
-      }
-      body.approvalStatus = 'Pending';
-      body.approvedBy = null;
-      body.approvedAt = null;
-    }
 
     const dayName = body.dayName || getDayName(body.workDate);
     const breakMinutes = parseInt(body.breakMinutes, 10) || 0;

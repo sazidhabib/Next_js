@@ -1,0 +1,99 @@
+import { NextResponse } from 'next/server';
+import {
+  initDb,
+  RightToWork,
+  Employee,
+} from '@/lib/db/models/index';
+import { requirePermission } from '@/lib/auth/rbac';
+
+export async function GET(request, { params }) {
+  try {
+    const auth = await requirePermission(request, { section: 'rtw', action: 'VIEW' });
+    if (!auth.authorized) return auth.response;
+
+    await initDb();
+    const { id } = await params;
+    const record = await RightToWork.findByPk(id, {
+      include: [{ model: Employee, as: 'employee' }],
+    });
+
+    if (!record) {
+      return NextResponse.json({ success: false, error: 'RTW record not found' }, { status: 404 });
+    }
+
+    return NextResponse.json({ success: true, record });
+  } catch (error) {
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  }
+}
+
+export async function PUT(request, { params }) {
+  try {
+    const auth = await requirePermission(request, { section: 'rtw', action: 'EDIT' });
+    if (!auth.authorized) return auth.response;
+
+    await initDb();
+    const { id } = await params;
+    const body = await request.json();
+
+    const record = await RightToWork.findByPk(id);
+    if (!record) {
+      return NextResponse.json({ success: false, error: 'RTW record not found' }, { status: 404 });
+    }
+
+    if (!body.employeeId && !record.employeeId) {
+      return NextResponse.json({ success: false, error: 'Employee is mandatory.' }, { status: 400 });
+    }
+    const checkDate = body.checkDate || record.checkDate;
+    if (!checkDate) {
+      return NextResponse.json({ success: false, error: 'Check Date is mandatory.' }, { status: 400 });
+    }
+
+    const payload = {
+      employeeId: body.employeeId ? parseInt(body.employeeId, 10) : record.employeeId,
+      checkDate: checkDate,
+      checkMethod: body.checkMethod || body.checkType || record.checkMethod,
+      checkType: body.checkType || body.checkMethod || record.checkType,
+      documentType: body.documentType || record.documentType,
+      documentRef: body.documentRef !== undefined ? (body.documentRef?.trim() || null) : record.documentRef,
+      documentRefNumber: body.documentRefNumber !== undefined ? (body.documentRefNumber?.trim() || null) : record.documentRefNumber,
+      performedByUserId: body.performedByUserId !== undefined ? (body.performedByUserId?.trim() || null) : record.performedByUserId,
+      verifiedBy: body.verifiedBy !== undefined ? (body.verifiedBy?.trim() || null) : record.verifiedBy,
+      outcome: body.outcome || record.outcome,
+      followUpRequired: body.followUpRequired !== undefined ? Boolean(body.followUpRequired) : record.followUpRequired,
+      followUpDate: body.followUpRequired ? (body.followUpDate || null) : null,
+      nextReviewDate: body.followUpRequired ? (body.nextReviewDate || body.followUpDate || null) : null,
+      notes: body.notes !== undefined ? (body.notes?.trim() || null) : record.notes,
+      statutoryExcuseGranted: (body.outcome || record.outcome) !== 'No Right to Work',
+      status: body.status || record.status || 'VERIFIED',
+    };
+
+    await record.update(payload);
+    const updated = await RightToWork.findByPk(id, {
+      include: [{ model: Employee, as: 'employee' }],
+    });
+
+    return NextResponse.json({ success: true, record: updated });
+  } catch (error) {
+    return NextResponse.json({ success: false, error: error.message }, { status: 400 });
+  }
+}
+
+export async function DELETE(request, { params }) {
+  try {
+    const auth = await requirePermission(request, { section: 'rtw', action: 'DELETE' });
+    if (!auth.authorized) return auth.response;
+
+    await initDb();
+    const { id } = await params;
+    const record = await RightToWork.findByPk(id);
+    if (!record) {
+      return NextResponse.json({ success: false, error: 'RTW record not found' }, { status: 404 });
+    }
+
+    await record.destroy();
+    return NextResponse.json({ success: true, message: 'RTW record deleted' });
+  } catch (error) {
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  }
+}

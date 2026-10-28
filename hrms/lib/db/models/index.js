@@ -125,6 +125,29 @@ export async function initDb() {
       // Ignored if column already exists
     }
 
+    // Ensure Employee role in database contains REQUEST_LEAVE and VIEW_OWN_PROFILE
+    try {
+      const empRole = await Role.findOne({ where: { name: 'Employee' } });
+      if (empRole) {
+        let perms = empRole.permissions || [];
+        if (typeof perms === 'string') {
+          try {
+            perms = JSON.parse(perms);
+          } catch {
+            perms = perms.split(',').map((p) => p.trim());
+          }
+        }
+        if (Array.isArray(perms) && !perms.includes('REQUEST_LEAVE')) {
+          const updated = Array.from(
+            new Set([...perms, 'VIEW_DASHBOARD', 'VIEW_OWN_PROFILE', 'REQUEST_LEAVE', 'VIEW_LEAVE', 'VIEW_ROTA'])
+          );
+          await empRole.update({ permissions: updated });
+        }
+      }
+    } catch {
+      // Ignored if roles table not yet synced
+    }
+
     isInitialized = true;
     global._hrmsDbInitialized = true;
   } catch (error) {

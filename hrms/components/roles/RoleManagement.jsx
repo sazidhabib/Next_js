@@ -348,10 +348,10 @@ export default function RoleManagement({ onUpdated }) {
       >
         <form onSubmit={handleSave} className="space-y-5 text-xs">
           {/* Preset Buttons for Quick Setup */}
-          {!editingRole && (
+          {true && (
             <div className="p-3 rounded-xl bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700">
               <span className="block text-[11px] font-semibold text-zinc-500 mb-2">
-                Quick Setup: Choose a Role Template
+                {editingRole ? 'Quick Template: Apply Standard Role Preset' : 'Quick Setup: Choose a Role Template'}
               </span>
               <div className="flex flex-wrap gap-2">
                 <button
@@ -555,7 +555,7 @@ export default function RoleManagement({ onUpdated }) {
                     return (
                       <label
                         key={wp.code}
-                        onClick={() => togglePermission(wp.code)}
+
                         className={`flex items-start space-x-2.5 p-2.5 rounded-xl border cursor-pointer transition select-none ${
                           isChecked
                             ? 'bg-emerald-50/80 dark:bg-emerald-950/40 border-emerald-300 dark:border-emerald-800'
@@ -565,8 +565,8 @@ export default function RoleManagement({ onUpdated }) {
                         <input
                           type="checkbox"
                           checked={isChecked}
-                          readOnly
-                          className="mt-0.5 w-4 h-4 text-emerald-600 rounded border-zinc-300 focus:ring-emerald-500 pointer-events-none"
+                          onChange={() => togglePermission(wp.code)}
+                          className="mt-0.5 w-4 h-4 text-emerald-600 rounded border-zinc-300 focus:ring-emerald-500 cursor-pointer"
                         />
                         <div className="min-w-0">
                           <span className="font-bold text-zinc-900 dark:text-zinc-100 block text-[11px]">

@@ -26,6 +26,7 @@ import {
   User,
   Search,
   CheckCircle,
+  Eye,
 } from 'lucide-react';
 import { Card, Badge, Modal } from '../ui';
 import { useAuth } from '@/context/AuthContext';
@@ -108,11 +109,8 @@ export default function RotaManagement({ employees = [] }) {
   );
 
   const selectableEmployees = useMemo(() => {
-    if (isEmployeeUser && currentEmp) {
-      return [currentEmp];
-    }
     return employees;
-  }, [employees, isEmployeeUser, currentEmp]);
+  }, [employees]);
 
   const canManageTimesheets = !isEmployeeUser && (canEditRota || hasPermission('EDIT_ROTA'));
 
@@ -180,26 +178,16 @@ export default function RotaManagement({ employees = [] }) {
   const [editingTimesheet, setEditingTimesheet] = useState(null);
 
   // Default active employee fallback
-  const defaultEmployeeId = (isEmployeeUser && currentEmployeeId)
-    ? currentEmployeeId
-    : (employees[0]?.id || '');
-  const currentSelectedEmpId = (isEmployeeUser && currentEmployeeId)
-    ? currentEmployeeId
-    : (selectedCalendarEmployeeId || defaultEmployeeId);
-  const currentShiftEmployeeId = (isEmployeeUser && currentEmployeeId)
-    ? currentEmployeeId
-    : (shiftForm.employeeId || defaultEmployeeId);
-  const currentTimesheetEmployeeId = (isEmployeeUser && currentEmployeeId)
-    ? currentEmployeeId
-    : (timesheetForm.employeeId || defaultEmployeeId);
+  const defaultEmployeeId = employees[0]?.id || '';
+  const currentSelectedEmpId = selectedCalendarEmployeeId || defaultEmployeeId;
+  const currentShiftEmployeeId = shiftForm.employeeId || defaultEmployeeId;
+  const currentTimesheetEmployeeId = timesheetForm.employeeId || defaultEmployeeId;
 
   useEffect(() => {
-    if (isEmployeeUser && currentEmployeeId) {
-      if (selectedCalendarEmployeeId !== currentEmployeeId) setSelectedCalendarEmployeeId(currentEmployeeId);
-      if (shiftForm.employeeId !== currentEmployeeId) setShiftForm((f) => ({ ...f, employeeId: currentEmployeeId }));
-      if (timesheetForm.employeeId !== currentEmployeeId) setTimesheetForm((f) => ({ ...f, employeeId: currentEmployeeId }));
+    if (!selectedCalendarEmployeeId && employees.length > 0) {
+      setSelectedCalendarEmployeeId(employees[0].id);
     }
-  }, [isEmployeeUser, currentEmployeeId]);
+  }, [employees, selectedCalendarEmployeeId]);
 
   // Fetch shifts for the selected week (for table & matrix view)
   const fetchWeekShifts = useCallback(async () => {
@@ -426,11 +414,7 @@ export default function RotaManagement({ employees = [] }) {
 
   // Filter employees for the Team Matrix
   const filteredMatrixEmployees = useMemo(() => {
-    const baseList = (isEmployeeUser && currentEmployeeId)
-      ? employees.filter((e) => String(e.id) === String(currentEmployeeId))
-      : employees;
-
-    return baseList.filter((emp) => {
+    return employees.filter((emp) => {
       const matchesDept =
         matrixDepartmentFilter === 'ALL' ||
         String(emp.departmentId || emp.department_id) === String(matrixDepartmentFilter) ||
@@ -445,13 +429,12 @@ export default function RotaManagement({ employees = [] }) {
 
       return matchesDept && matchesSearch;
     });
-  }, [employees, matrixDepartmentFilter, matrixSearchQuery, isEmployeeUser, currentEmployeeId]);
+  }, [employees, matrixDepartmentFilter, matrixSearchQuery]);
 
-  // Open Shift Modal for Add or Edit
+  // Open Shift Modal for Add or Edit or View
   const openShiftModalForAdd = (employeeId, dateStr) => {
-    const empId = (isEmployeeUser && currentEmployeeId)
-      ? currentEmployeeId
-      : (employeeId || currentSelectedEmpId);
+    if (!canEditRota || isEmployeeUser) return;
+    const empId = employeeId || currentSelectedEmpId;
     const date = dateStr || formatLocalDate(new Date());
     setShiftModal({
       isOpen: true,
@@ -470,7 +453,7 @@ export default function RotaManagement({ employees = [] }) {
   const openShiftModalForEdit = (shift) => {
     setShiftModal({
       isOpen: true,
-      mode: 'edit',
+      mode: (canEditRota && !isEmployeeUser) ? 'edit' : 'view',
       id: shift.id,
       employeeId: shift.employeeId,
       shiftDate: shift.shiftDate,
@@ -496,6 +479,10 @@ export default function RotaManagement({ employees = [] }) {
   // Submit Shift Modal (Create or Update)
   const handleSaveShiftModal = async (e) => {
     e.preventDefault();
+    if (shiftModal.mode === 'view' || !canEditRota || isEmployeeUser) {
+      setShiftModal((prev) => ({ ...prev, isOpen: false }));
+      return;
+    }
     if (!shiftModal.employeeId || !shiftModal.shiftDate) {
       alert('Please specify employee and shift date');
       return;
@@ -560,6 +547,10 @@ export default function RotaManagement({ employees = [] }) {
 
   // Delete shift from modal or grid
   const handleDeleteShift = async (id) => {
+    if (!canDeleteRota || isEmployeeUser) {
+      alert('You do not have permission to delete shifts.');
+      return;
+    }
     if (!confirm('Are you sure you want to remove this shift from the rota?')) return;
     try {
       const res = await fetch(`/api/rota/shifts/${id}`, { method: 'DELETE' });
@@ -579,6 +570,10 @@ export default function RotaManagement({ employees = [] }) {
   // Table Add Shift Handler
   const handleAddShiftFromTable = async (e) => {
     e.preventDefault();
+    if (!canEditRota || isEmployeeUser) {
+      alert('You do not have permission to schedule shifts.');
+      return;
+    }
     const empId = shiftForm.employeeId || defaultEmployeeId;
     const shiftDate = shiftForm.shiftDate || formatLocalDate(new Date());
     if (!empId || !shiftDate) {
@@ -636,6 +631,10 @@ export default function RotaManagement({ employees = [] }) {
   // Add Timesheet Handler
   const handleAddTimesheet = async (e) => {
     e.preventDefault();
+    if (!canEditRota || isEmployeeUser) {
+      alert('You do not have permission to add timesheets.');
+      return;
+    }
     const empId = timesheetForm.employeeId || defaultEmployeeId;
     const workDate = timesheetForm.workDate || formatLocalDate(new Date());
     if (!empId || !workDate) {
@@ -710,6 +709,10 @@ export default function RotaManagement({ employees = [] }) {
   };
 
   const handleDeleteTimesheet = async (id) => {
+    if (!canManageTimesheets || isEmployeeUser) {
+      alert('You do not have permission to delete timesheets.');
+      return;
+    }
     if (!confirm('Are you sure you want to delete this timesheet entry?')) return;
     try {
       const res = await fetch(`/api/rota/timesheets/${id}`, { method: 'DELETE' });
@@ -726,7 +729,10 @@ export default function RotaManagement({ employees = [] }) {
 
   const handleUpdateTimesheet = async (e) => {
     e.preventDefault();
-    if (!editingTimesheet) return;
+    if (!editingTimesheet || !canManageTimesheets || isEmployeeUser) {
+      setEditingTimesheet(null);
+      return;
+    }
     try {
       const res = await fetch(`/api/rota/timesheets/${editingTimesheet.id}`, {
         method: 'PUT',
@@ -750,18 +756,12 @@ export default function RotaManagement({ employees = [] }) {
   };
 
   const displayShifts = useMemo(() => {
-    if (isEmployeeUser && currentEmployeeId) {
-      return shifts.filter((s) => String(s.employeeId) === String(currentEmployeeId));
-    }
     return shifts;
-  }, [shifts, isEmployeeUser, currentEmployeeId]);
+  }, [shifts]);
 
   const displayTimesheets = useMemo(() => {
-    if (isEmployeeUser && currentEmployeeId) {
-      return timesheets.filter((t) => String(t.employeeId) === String(currentEmployeeId));
-    }
     return timesheets;
-  }, [timesheets, isEmployeeUser, currentEmployeeId]);
+  }, [timesheets]);
 
   // KPIs
   const totalPlannedHours = useMemo(() => {
@@ -823,7 +823,7 @@ export default function RotaManagement({ employees = [] }) {
               <h2 className="text-base sm:text-lg font-bold text-zinc-900 dark:text-zinc-100 flex items-center space-x-2">
                 <span>Employee Rota & Timesheets</span>
                 <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800">
-                  {isEmployeeUser && currentEmp ? `${currentEmp.firstName} ${currentEmp.lastName}` : `${employees.length} ${employees.length === 1 ? 'Employee' : 'Employees'}`}
+                  {`${employees.length} ${employees.length === 1 ? 'Employee' : 'Employees'}`}
                 </span>
               </h2>
               <p className="text-xs text-zinc-500 mt-0.5">
@@ -995,14 +995,16 @@ export default function RotaManagement({ employees = [] }) {
                   </button>
 
                   {/* Add Shift Button */}
-                  <button
-                    type="button"
-                    onClick={() => openShiftModalForAdd()}
-                    className="px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold transition flex items-center space-x-1 shadow-sm"
-                  >
-                    <Plus className="w-3.5 h-3.5" />
-                    <span>New Shift</span>
-                  </button>
+                  {canEditRota && !isEmployeeUser && (
+                    <button
+                      type="button"
+                      onClick={() => openShiftModalForAdd()}
+                      className="px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold transition flex items-center space-x-1 shadow-sm"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      <span>New Shift</span>
+                    </button>
+                  )}
                 </div>
               ) : (
                 /* Month Navigation: Employee Selector & Prev / Next Month */
@@ -1013,8 +1015,7 @@ export default function RotaManagement({ employees = [] }) {
                     <select
                       value={currentSelectedEmpId}
                       onChange={(e) => setSelectedCalendarEmployeeId(e.target.value)}
-                      disabled={isEmployeeUser}
-                      className="px-3 py-1.5 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-xs font-semibold text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-80 disabled:cursor-not-allowed"
+                      className="px-3 py-1.5 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-xs font-semibold text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
                       {selectableEmployees.map((emp) => (
                         <option key={emp.id} value={emp.id}>
@@ -1057,14 +1058,16 @@ export default function RotaManagement({ employees = [] }) {
                     This Month
                   </button>
 
-                  <button
-                    type="button"
-                    onClick={() => openShiftModalForAdd(currentSelectedEmpId, activeMonth === getCurrentMonthString() ? formatLocalDate(new Date()) : `${activeMonth}-01`)}
-                    className="px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold transition flex items-center space-x-1 shadow-sm"
-                  >
-                    <Plus className="w-3.5 h-3.5" />
-                    <span>Schedule Shift</span>
-                  </button>
+                  {canEditRota && !isEmployeeUser && (
+                    <button
+                      type="button"
+                      onClick={() => openShiftModalForAdd(currentSelectedEmpId, activeMonth === getCurrentMonthString() ? formatLocalDate(new Date()) : `${activeMonth}-01`)}
+                      className="px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold transition flex items-center space-x-1 shadow-sm"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      <span>Schedule Shift</span>
+                    </button>
+                  )}
                 </div>
               )}
             </div>
@@ -1195,7 +1198,7 @@ export default function RotaManagement({ employees = [] }) {
                                             className={`p-2 rounded-xl border transition cursor-pointer shadow-2xs group/card relative ${getShiftBadgeStyles(
                                               dayShift.shiftType
                                             )}`}
-                                            title={dayShift.notes ? `Notes: ${dayShift.notes}` : 'Click to edit shift'}
+                                            title={dayShift.notes ? `Notes: ${dayShift.notes}` : canEditRota && !isEmployeeUser ? 'Click to edit shift' : 'Click to view shift details'}
                                           >
                                             <div className="flex items-center justify-between">
                                               <span className="font-bold text-[10px] tracking-wide uppercase">
@@ -1217,35 +1220,45 @@ export default function RotaManagement({ employees = [] }) {
                                             )}
 
                                             {/* Hover Quick Edit Icon */}
-                                            <div className="absolute top-1 right-1 opacity-0 group-hover/card:opacity-100 transition p-0.5 rounded bg-white/80 dark:bg-black/60 shadow">
-                                              <Edit2 className="w-2.5 h-2.5" />
-                                            </div>
+                                            {canEditRota && !isEmployeeUser && (
+                                              <div className="absolute top-1 right-1 opacity-0 group-hover/card:opacity-100 transition p-0.5 rounded bg-white/80 dark:bg-black/60 shadow">
+                                                <Edit2 className="w-2.5 h-2.5" />
+                                              </div>
+                                            )}
                                           </div>
                                         ))}
 
                                         {/* Add Another Shift Button on Day */}
-                                        <button
-                                          type="button"
-                                          onClick={() => openShiftModalForAdd(emp.id, day.dateStr)}
-                                          className="w-full py-1 rounded-lg border border-dashed border-zinc-200 dark:border-zinc-700 hover:border-blue-400 hover:bg-blue-50/40 text-[10px] text-zinc-400 hover:text-blue-600 font-semibold flex items-center justify-center space-x-1 transition"
-                                          title={`Add another shift for ${emp.firstName}`}
-                                        >
-                                          <Plus className="w-2.5 h-2.5" />
-                                          <span>Add Shift</span>
-                                        </button>
+                                        {canEditRota && !isEmployeeUser && (
+                                          <button
+                                            type="button"
+                                            onClick={() => openShiftModalForAdd(emp.id, day.dateStr)}
+                                            className="w-full py-1 rounded-lg border border-dashed border-zinc-200 dark:border-zinc-700 hover:border-blue-400 hover:bg-blue-50/40 text-[10px] text-zinc-400 hover:text-blue-600 font-semibold flex items-center justify-center space-x-1 transition"
+                                            title={`Add another shift for ${emp.firstName}`}
+                                          >
+                                            <Plus className="w-2.5 h-2.5" />
+                                            <span>Add Shift</span>
+                                          </button>
+                                        )}
                                       </div>
                                     ) : (
-                                      /* Empty Slot - Click to Add */
-                                      <div
-                                        onClick={() => openShiftModalForAdd(emp.id, day.dateStr)}
-                                        className="h-16 rounded-xl border border-dashed border-transparent hover:border-blue-300 dark:hover:border-blue-700 hover:bg-blue-50/30 dark:hover:bg-blue-950/20 transition flex items-center justify-center cursor-pointer group/add"
-                                        title={`Schedule shift for ${emp.firstName} on ${day.dayName}`}
-                                      >
-                                        <span className="text-[11px] text-zinc-400 opacity-0 group-hover/add:opacity-100 transition font-semibold flex items-center space-x-1">
-                                          <Plus className="w-3.5 h-3.5 text-blue-600" />
-                                          <span className="text-blue-600 font-bold">Add</span>
-                                        </span>
-                                      </div>
+                                      /* Empty Slot */
+                                      canEditRota && !isEmployeeUser ? (
+                                        <div
+                                          onClick={() => openShiftModalForAdd(emp.id, day.dateStr)}
+                                          className="h-16 rounded-xl border border-dashed border-transparent hover:border-blue-300 dark:hover:border-blue-700 hover:bg-blue-50/30 dark:hover:bg-blue-950/20 transition flex items-center justify-center cursor-pointer group/add"
+                                          title={`Schedule shift for ${emp.firstName} on ${day.dayName}`}
+                                        >
+                                          <span className="text-[11px] text-zinc-400 opacity-0 group-hover/add:opacity-100 transition font-semibold flex items-center space-x-1">
+                                            <Plus className="w-3.5 h-3.5 text-blue-600" />
+                                            <span className="text-blue-600 font-bold">Add</span>
+                                          </span>
+                                        </div>
+                                      ) : (
+                                        <div className="h-16 flex items-center justify-center text-zinc-300 dark:text-zinc-700 text-[10px]">
+                                          —
+                                        </div>
+                                      )
                                     )}
                                   </td>
                                 );
@@ -1361,11 +1374,11 @@ export default function RotaManagement({ employees = [] }) {
                       <div
                         key={day.dateStr}
                         onClick={() => {
-                          if (dayShifts.length === 0) {
+                          if (canEditRota && !isEmployeeUser && dayShifts.length === 0) {
                             openShiftModalForAdd(currentSelectedEmpId, day.dateStr);
                           }
                         }}
-                        className={`min-h-[105px] p-2 rounded-xl border transition flex flex-col justify-between group relative cursor-pointer ${
+                        className={`min-h-[105px] p-2 rounded-xl border transition flex flex-col justify-between group relative ${dayShifts.length === 0 && (!canEditRota || isEmployeeUser) ? 'cursor-default' : 'cursor-pointer'} ${
                           day.isToday
                             ? 'border-blue-500/80 bg-blue-50/30 dark:bg-blue-950/20 ring-1 ring-blue-500/50'
                             : day.isCurrentMonth
@@ -1386,17 +1399,19 @@ export default function RotaManagement({ employees = [] }) {
                           </span>
 
                           {/* Quick Add icon on hover */}
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              openShiftModalForAdd(currentSelectedEmpId, day.dateStr);
-                            }}
-                            className="p-1 rounded-lg opacity-0 group-hover:opacity-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-500 transition"
-                            title="Add shift on this date"
-                          >
-                            <Plus className="w-3 h-3 text-blue-600" />
-                          </button>
+                          {canEditRota && !isEmployeeUser && (
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                openShiftModalForAdd(currentSelectedEmpId, day.dateStr);
+                              }}
+                              className="p-1 rounded-lg opacity-0 group-hover:opacity-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-500 transition"
+                              title="Add shift on this date"
+                            >
+                              <Plus className="w-3.5 h-3.5 text-blue-600" />
+                            </button>
+                          )}
                         </div>
 
                         {/* Middle: Shift Cards for this day */}
@@ -1411,7 +1426,7 @@ export default function RotaManagement({ employees = [] }) {
                               className={`p-1.5 rounded-lg border text-[10px] font-medium transition cursor-pointer shadow-2xs hover:scale-101 ${getShiftBadgeStyles(
                                 shift.shiftType
                               )}`}
-                              title="Click to edit or delete"
+                              title={canEditRota && !isEmployeeUser ? 'Click to edit or delete' : 'Click to view shift details'}
                             >
                               <div className="flex items-center justify-between font-bold">
                                 <span>{shift.shiftType}</span>
@@ -1523,7 +1538,7 @@ export default function RotaManagement({ employees = [] }) {
             </div>
 
             {/* Quick-Entry Form 1: Weekly Rota (Table Mode) */}
-            {activeTab === 'table' && (
+            {canEditRota && !isEmployeeUser && activeTab === 'table' && (
               <form onSubmit={handleAddShiftFromTable} className="text-xs">
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-8 gap-2.5 items-end">
                   <div className="lg:col-span-1">
@@ -1657,7 +1672,7 @@ export default function RotaManagement({ employees = [] }) {
             )}
 
             {/* Quick-Entry Form 2: Timesheets */}
-            {activeTab === 'timesheets' && (
+            {canEditRota && !isEmployeeUser && activeTab === 'timesheets' && (
               <form onSubmit={handleAddTimesheet} className="text-xs">
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-8 gap-2.5 items-end">
                   <div className="lg:col-span-1">
@@ -1890,24 +1905,37 @@ export default function RotaManagement({ employees = [] }) {
                           </td>
 
                           <td className="py-3 px-3 text-right whitespace-nowrap">
-                            <div className="flex items-center justify-end space-x-1 opacity-80 group-hover:opacity-100 transition">
-                              <button
-                                type="button"
-                                onClick={() => openShiftModalForEdit(shift)}
-                                className="p-1 text-zinc-500 hover:text-blue-600 dark:hover:text-blue-400 rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-800 transition"
-                                title="Edit shift"
-                              >
-                                <Edit2 className="w-3.5 h-3.5" />
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => handleDeleteShift(shift.id)}
-                                className="p-1 text-zinc-500 hover:text-rose-600 dark:hover:text-rose-400 rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-800 transition"
-                                title="Delete shift"
-                              >
-                                <Trash2 className="w-3.5 h-3.5" />
-                              </button>
-                            </div>
+                            {canEditRota && !isEmployeeUser ? (
+                              <div className="flex items-center justify-end space-x-1 opacity-80 group-hover:opacity-100 transition">
+                                <button
+                                  type="button"
+                                  onClick={() => openShiftModalForEdit(shift)}
+                                  className="p-1 text-zinc-500 hover:text-blue-600 dark:hover:text-blue-400 rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-800 transition"
+                                  title="Edit shift"
+                                >
+                                  <Edit2 className="w-3.5 h-3.5" />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeleteShift(shift.id)}
+                                  className="p-1 text-zinc-500 hover:text-rose-600 dark:hover:text-rose-400 rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-800 transition"
+                                  title="Delete shift"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+                            ) : (
+                              <div className="flex items-center justify-end space-x-1">
+                                <button
+                                  type="button"
+                                  onClick={() => openShiftModalForEdit(shift)}
+                                  className="p-1 text-zinc-500 hover:text-blue-600 dark:hover:text-blue-400 rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-800 transition"
+                                  title="View shift details"
+                                >
+                                  <Eye className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+                            )}
                           </td>
                         </tr>
                       );
@@ -2029,47 +2057,51 @@ export default function RotaManagement({ employees = [] }) {
                           </td>
 
                           <td className="py-3 px-3 text-right whitespace-nowrap">
-                            <div className="flex items-center justify-end space-x-1">
-                              {canManageTimesheets && ts.approvalStatus !== 'Approved' && (
+                            {canManageTimesheets ? (
+                              <div className="flex items-center justify-end space-x-1">
+                                {ts.approvalStatus !== 'Approved' && (
+                                  <button
+                                    type="button"
+                                    onClick={() => handleSetApprovalStatus(ts.id, 'Approved')}
+                                    className="p-1 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 rounded transition"
+                                    title="Approve Timesheet"
+                                  >
+                                    <Check className="w-3.5 h-3.5" />
+                                  </button>
+                                )}
+
+                                {ts.approvalStatus !== 'Rejected' && (
+                                  <button
+                                    type="button"
+                                    onClick={() => handleSetApprovalStatus(ts.id, 'Rejected')}
+                                    className="p-1 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded transition"
+                                    title="Reject Timesheet"
+                                  >
+                                    <X className="w-3.5 h-3.5" />
+                                  </button>
+                                )}
+
                                 <button
                                   type="button"
-                                  onClick={() => handleSetApprovalStatus(ts.id, 'Approved')}
-                                  className="p-1 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 rounded transition"
-                                  title="Approve Timesheet"
+                                  onClick={() => setEditingTimesheet(ts)}
+                                  className="p-1 text-zinc-500 hover:text-blue-600 dark:hover:text-blue-400 rounded hover:bg-zinc-100 dark:hover:bg-zinc-800 transition"
+                                  title="Edit timesheet"
                                 >
-                                  <Check className="w-3.5 h-3.5" />
+                                  <Edit2 className="w-3.5 h-3.5" />
                                 </button>
-                              )}
 
-                              {canManageTimesheets && ts.approvalStatus !== 'Rejected' && (
                                 <button
                                   type="button"
-                                  onClick={() => handleSetApprovalStatus(ts.id, 'Rejected')}
-                                  className="p-1 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded transition"
-                                  title="Reject Timesheet"
+                                  onClick={() => handleDeleteTimesheet(ts.id)}
+                                  className="p-1 text-zinc-500 hover:text-rose-600 dark:hover:text-rose-400 rounded hover:bg-zinc-100 dark:hover:bg-zinc-800 transition"
+                                  title="Delete timesheet"
                                 >
-                                  <X className="w-3.5 h-3.5" />
+                                  <Trash2 className="w-3.5 h-3.5" />
                                 </button>
-                              )}
-
-                              <button
-                                type="button"
-                                onClick={() => setEditingTimesheet(ts)}
-                                className="p-1 text-zinc-500 hover:text-blue-600 dark:hover:text-blue-400 rounded hover:bg-zinc-100 dark:hover:bg-zinc-800 transition"
-                                title="Edit timesheet"
-                              >
-                                <Edit2 className="w-3.5 h-3.5" />
-                              </button>
-
-                              <button
-                                type="button"
-                                onClick={() => handleDeleteTimesheet(ts.id)}
-                                className="p-1 text-zinc-500 hover:text-rose-600 dark:hover:text-rose-400 rounded hover:bg-zinc-100 dark:hover:bg-zinc-800 transition"
-                                title="Delete timesheet"
-                              >
-                                <Trash2 className="w-3.5 h-3.5" />
-                              </button>
-                            </div>
+                              </div>
+                            ) : (
+                              <span className="text-zinc-400 text-[11px]">—</span>
+                            )}
                           </td>
                         </tr>
                       );
@@ -2115,34 +2147,42 @@ export default function RotaManagement({ employees = [] }) {
         <Modal
           isOpen={shiftModal.isOpen}
           onClose={() => setShiftModal((prev) => ({ ...prev, isOpen: false }))}
-          title={shiftModal.mode === 'edit' ? `Edit Shift #${shiftModal.id}` : 'Schedule Employee Shift'}
+          title={
+            shiftModal.mode === 'view'
+              ? 'Shift Details'
+              : shiftModal.mode === 'edit'
+              ? `Edit Shift #${shiftModal.id}`
+              : 'Schedule Employee Shift'
+          }
         >
           <form onSubmit={handleSaveShiftModal} className="space-y-4 text-xs">
             {/* Quick Presets Bar */}
-            <div>
-              <label className="block font-semibold text-zinc-700 dark:text-zinc-300 mb-1.5">
-                Quick Shift Presets:
-              </label>
-              <div className="flex flex-wrap gap-1.5">
-                {Object.keys(SHIFT_PRESETS).map((key) => {
-                  const isPresetActive = shiftModal.shiftType === key;
-                  return (
-                    <button
-                      key={key}
-                      type="button"
-                      onClick={() => handlePresetSelectInModal(key)}
-                      className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition ${
-                        isPresetActive
-                          ? 'bg-blue-600 text-white shadow-xs'
-                          : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700'
-                      }`}
-                    >
-                      {key} ({SHIFT_PRESETS[key].start}-{SHIFT_PRESETS[key].end})
-                    </button>
-                  );
-                })}
+            {shiftModal.mode !== 'view' && (
+              <div>
+                <label className="block font-semibold text-zinc-700 dark:text-zinc-300 mb-1.5">
+                  Quick Shift Presets:
+                </label>
+                <div className="flex flex-wrap gap-1.5">
+                  {Object.keys(SHIFT_PRESETS).map((key) => {
+                    const isPresetActive = shiftModal.shiftType === key;
+                    return (
+                      <button
+                        key={key}
+                        type="button"
+                        onClick={() => handlePresetSelectInModal(key)}
+                        className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition ${
+                          isPresetActive
+                            ? 'bg-blue-600 text-white shadow-xs'
+                            : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700'
+                        }`}
+                      >
+                        {key} ({SHIFT_PRESETS[key].start}-{SHIFT_PRESETS[key].end})
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
+            )}
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
@@ -2151,7 +2191,7 @@ export default function RotaManagement({ employees = [] }) {
                 </label>
                 <select
                   required
-                  disabled={isEmployeeUser}
+                  disabled={shiftModal.mode === 'view' || isEmployeeUser}
                   value={shiftModal.employeeId}
                   onChange={(e) => setShiftModal({ ...shiftModal, employeeId: e.target.value })}
                   className="w-full px-3 py-2 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none disabled:opacity-80 disabled:cursor-not-allowed"
@@ -2171,9 +2211,10 @@ export default function RotaManagement({ employees = [] }) {
                 <input
                   type="date"
                   required
+                  disabled={shiftModal.mode === 'view'}
                   value={shiftModal.shiftDate}
                   onChange={(e) => setShiftModal({ ...shiftModal, shiftDate: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 font-mono focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                  className="w-full px-3 py-2 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 font-mono focus:ring-2 focus:ring-blue-500 focus:outline-none disabled:opacity-80 disabled:cursor-not-allowed"
                 />
               </div>
 
@@ -2184,9 +2225,10 @@ export default function RotaManagement({ employees = [] }) {
                 <input
                   type="time"
                   required
+                  disabled={shiftModal.mode === 'view'}
                   value={shiftModal.startTime}
                   onChange={(e) => setShiftModal({ ...shiftModal, startTime: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 font-mono focus:ring-2 focus:ring-blue-500 focus:outline-none text-center"
+                  className="w-full px-3 py-2 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 font-mono focus:ring-2 focus:ring-blue-500 focus:outline-none text-center disabled:opacity-80 disabled:cursor-not-allowed"
                 />
               </div>
 
@@ -2197,9 +2239,10 @@ export default function RotaManagement({ employees = [] }) {
                 <input
                   type="time"
                   required
+                  disabled={shiftModal.mode === 'view'}
                   value={shiftModal.endTime}
                   onChange={(e) => setShiftModal({ ...shiftModal, endTime: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 font-mono focus:ring-2 focus:ring-blue-500 focus:outline-none text-center"
+                  className="w-full px-3 py-2 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 font-mono focus:ring-2 focus:ring-blue-500 focus:outline-none text-center disabled:opacity-80 disabled:cursor-not-allowed"
                 />
               </div>
 
@@ -2211,9 +2254,10 @@ export default function RotaManagement({ employees = [] }) {
                   type="number"
                   min="0"
                   step="5"
+                  disabled={shiftModal.mode === 'view'}
                   value={shiftModal.breakMinutes}
                   onChange={(e) => setShiftModal({ ...shiftModal, breakMinutes: parseInt(e.target.value, 10) || 0 })}
-                  className="w-full px-3 py-2 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 font-mono focus:ring-2 focus:ring-blue-500 focus:outline-none text-center"
+                  className="w-full px-3 py-2 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 font-mono focus:ring-2 focus:ring-blue-500 focus:outline-none text-center disabled:opacity-80 disabled:cursor-not-allowed"
                 />
               </div>
 
@@ -2233,16 +2277,17 @@ export default function RotaManagement({ employees = [] }) {
               </label>
               <textarea
                 rows={2}
+                disabled={shiftModal.mode === 'view'}
                 placeholder="Optional shift notes (station, prep, front of house)..."
                 value={shiftModal.notes || ''}
                 onChange={(e) => setShiftModal({ ...shiftModal, notes: e.target.value })}
-                className="w-full px-3 py-2 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                className="w-full px-3 py-2 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 focus:ring-2 focus:ring-blue-500 focus:outline-none disabled:opacity-80 disabled:cursor-not-allowed"
               />
             </div>
 
             {/* Actions */}
             <div className="flex items-center justify-between pt-3 border-t border-zinc-100 dark:border-zinc-800">
-              {shiftModal.mode === 'edit' ? (
+              {shiftModal.mode === 'edit' && canDeleteRota && !isEmployeeUser ? (
                 <button
                   type="button"
                   onClick={() => handleDeleteShift(shiftModal.id)}
@@ -2261,14 +2306,16 @@ export default function RotaManagement({ employees = [] }) {
                   onClick={() => setShiftModal((prev) => ({ ...prev, isOpen: false }))}
                   className="px-4 py-2 rounded-xl border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition"
                 >
-                  Cancel
+                  {shiftModal.mode === 'view' ? 'Close' : 'Cancel'}
                 </button>
-                <button
-                  type="submit"
-                  className="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold transition shadow-md shadow-blue-600/20"
-                >
-                  {shiftModal.mode === 'edit' ? 'Save Changes' : 'Schedule Shift'}
-                </button>
+                {shiftModal.mode !== 'view' && (
+                  <button
+                    type="submit"
+                    className="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold transition shadow-md shadow-blue-600/20"
+                  >
+                    {shiftModal.mode === 'edit' ? 'Save Changes' : 'Schedule Shift'}
+                  </button>
+                )}
               </div>
             </div>
           </form>

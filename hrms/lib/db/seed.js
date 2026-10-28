@@ -34,8 +34,9 @@ export async function seedDatabase() {
       if (expanded.length === 0 && roleData.permissions.length > 0) {
         expanded = roleData.permissions;
       }
-      if (expanded.length !== currentPerms.length || JSON.stringify(expanded) !== JSON.stringify(currentPerms)) {
-        await existingRole.update({ permissions: expanded });
+      const mergedPerms = Array.from(new Set([...expanded, ...roleData.permissions]));
+      if (mergedPerms.length !== currentPerms.length || JSON.stringify(mergedPerms) !== JSON.stringify(currentPerms)) {
+        await existingRole.update({ permissions: mergedPerms });
       }
     }
   }
