@@ -98,15 +98,15 @@ export async function POST(request) {
   {
     "name": "Pathokbonddho",
     "description": "Pathokbonddho is a full-stack dynamic News Portal and Content Management System (CMS) built to manage and publish news content efficiently. The platform is far more advanced than a traditional static news website, featuring a powerful backend system for managing articles, authors, categories, advertisements, galleries, and fully customizable homepage layouts.\\n    One of the core highlights of the project is its Dynamic Layout Builder, where administrators can create and control pages, sections, rows, and columns directly from the admin dashboard without modifying code. The system is optimized for SEO, fast content delivery, image optimization, and scalable content management, making it ideal for modern digital news platforms.",
-    "image": "/src/assets/pathakbondhu.webp",
+    "image": "/src/assets/pathokbonddhufullpage.webp",
     "media": [
       {
         "type": "image",
-        "src": "/src/assets/pathakbondhu.webp"
+        "src": "/src/assets/pathokbonddhufullpage.webp"
       },
       {
         "type": "image",
-        "src": "/src/assets/pathokbonddhufullpage.webp"
+        "src": "/src/assets/pathakbondhu.webp"
       }
     ],
     "tags": [

@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *, .dark, .dark *));
+
 @layer base {
   :root, [data-theme="dark"] {
     color-scheme: dark;
@@ -7,7 +9,7 @@
     --color-secondary: #94a3b8;
     --color-tertiary: #0c0c16;
     --color-surface: #111122;
-    --color-surface-translucent: rgba(17, 17, 34, 0.65);
+    --color-surface-translucent: rgba(17, 17, 34, 0.75);
     --color-glass: rgba(12, 12, 22, 0.75);
     --color-accent: #38bdf8;
     --color-accent-dark: #0284c7;
@@ -16,7 +18,8 @@
     --color-border: rgba(255, 255, 255, 0.08);
     --color-pill-bg: rgba(255, 255, 255, 0.05);
     --color-pill-hover: rgba(255, 255, 255, 0.1);
-    --shadow-card: 0 8px 32px rgba(0, 0, 0, 0.35);
+    --shadow-card: 0 15px 35px rgba(0, 0, 0, 0.45);
+    --shadow-card-hover: 0 20px 45px rgba(56, 189, 248, 0.15), 0 0 25px rgba(56, 189, 248, 0.1);
   }
 
   [data-theme="light"] {
@@ -25,16 +28,17 @@
     --color-secondary: #475569;
     --color-tertiary: #f1f5f9;
     --color-surface: #ffffff;
-    --color-surface-translucent: rgba(255, 255, 255, 0.88);
-    --color-glass: rgba(255, 255, 255, 0.85);
+    --color-surface-translucent: rgba(255, 255, 255, 0.94);
+    --color-glass: rgba(255, 255, 255, 0.88);
     --color-accent: #0284c7;
     --color-accent-dark: #0369a1;
     --color-text: #0f172a;
-    --color-text-muted: #64748b;
+    --color-text-muted: #475569;
     --color-border: rgba(15, 23, 42, 0.08);
     --color-pill-bg: rgba(15, 23, 42, 0.04);
-    --color-pill-hover: rgba(15, 23, 42, 0.08);
+    --color-pill-hover: rgba(2, 132, 199, 0.08);
     --shadow-card: 0 10px 30px -5px rgba(0, 0, 0, 0.06), 0 4px 12px -2px rgba(0, 0, 0, 0.03);
+    --shadow-card-hover: 0 20px 35px -5px rgba(0, 0, 0, 0.09), 0 8px 16px -2px rgba(0, 0, 0, 0.04);
   }
 
   * {
@@ -84,6 +88,29 @@
   transition: background-color 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
 }
 
+.glass-card:hover {
+  box-shadow: var(--shadow-card-hover);
+}
+
+[data-theme="light"] .glass-card:hover {
+  border-color: rgba(2, 132, 199, 0.25);
+  box-shadow: var(--shadow-card-hover);
+}
+
+[data-theme="dark"] .glass-card:hover {
+  border-color: rgba(56, 189, 248, 0.4);
+  box-shadow: var(--shadow-card-hover);
+}
+
+.card-shadow {
+  box-shadow: var(--shadow-card);
+  transition: box-shadow 0.4s ease, border-color 0.4s ease;
+}
+
+.card-shadow:hover {
+  box-shadow: var(--shadow-card-hover);
+}
+
 .glow-border {
   position: relative;
 }
@@ -104,7 +131,7 @@
 }
 
 [data-theme="light"] .glow-border::before {
-  background: linear-gradient(135deg, rgba(2, 132, 199, 0.25), transparent 50%);
+  background: linear-gradient(135deg, rgba(2, 132, 199, 0.35), transparent 50%);
 }
 
 .home__img {
@@ -251,24 +278,4 @@
       -2.5em 0em 0 0em rgba(255, 255, 255, 0.2),
       -1.8em -1.8em 0 0em #ffffff;
   }
-}
-
-/* Light Theme Timeline Overrides */
-[data-theme="light"] .vertical-timeline-element-content {
-  background: var(--color-surface-translucent) !important;
-  color: var(--color-text) !important;
-  border: 1px solid var(--color-border) !important;
-  box-shadow: var(--shadow-card) !important;
-}
-
-[data-theme="light"] .vertical-timeline-element-content-arrow {
-  border-right: 7px solid rgba(15, 23, 42, 0.12) !important;
-}
-
-[data-theme="light"] .vertical-timeline::before {
-  background: rgba(15, 23, 42, 0.1) !important;
-}
-
-[data-theme="light"] .vertical-timeline-element-date {
-  color: var(--color-text-muted) !important;
 }

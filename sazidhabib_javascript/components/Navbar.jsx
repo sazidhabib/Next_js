@@ -29,7 +29,7 @@ const Navbar = () => {
       <div
         className={`w-full flex justify-between items-center max-w-7xl mx-auto transition-all duration-500 ${
           scrolled
-            ? "py-3 px-6 sm:px-8 rounded-full glass shadow-lg"
+            ? "py-3 px-6 sm:px-8 rounded-full glass-card"
             : "py-3 px-4 sm:px-8 bg-transparent"
         }`}
       >
@@ -131,7 +131,7 @@ const Navbar = () => {
           <div
             className={`${
               !toggle ? "hidden" : "flex"
-            } p-6 glass absolute top-16 right-0 mx-4 my-2 min-w-[180px] z-10 rounded-2xl shadow-xl flex-col gap-4 border border-[var(--color-border)]`}
+            } p-6 glass-card absolute top-16 right-0 mx-4 my-2 min-w-[180px] z-10 rounded-2xl flex-col gap-4 border border-[var(--color-border)]`}
           >
             <ul className="list-none flex justify-end items-start flex-1 flex-col gap-4">
               {navLinks.map((nav) => (

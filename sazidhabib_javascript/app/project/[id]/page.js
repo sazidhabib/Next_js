@@ -126,7 +126,7 @@ export default function ProjectDetailsPage({ params }) {
           transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
           className="w-full flex justify-center fixed top-0 z-50 py-6 sm:py-8 px-4 sm:px-8"
         >
-          <div className="w-full flex justify-between items-center max-w-7xl mx-auto py-3 px-4 sm:px-8 rounded-full glass shadow-lg">
+          <div className="w-full flex justify-between items-center max-w-7xl mx-auto py-3 px-4 sm:px-8 rounded-full glass-card">
             <button
               onClick={() => router.back()}
               className="flex items-center gap-2 text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors group cursor-pointer"
@@ -169,7 +169,7 @@ export default function ProjectDetailsPage({ params }) {
               variants={fadeIn("up", "spring", 0.1, 0.75)}
               initial="hidden"
               animate="show"
-              className="relative w-full aspect-video rounded-2xl overflow-hidden glass-card glow-border group shadow-2xl"
+              className="relative w-full aspect-video rounded-2xl overflow-hidden glass-card glow-border group"
             >
               <Swiper
                 modules={[Autoplay, Navigation, Pagination]}

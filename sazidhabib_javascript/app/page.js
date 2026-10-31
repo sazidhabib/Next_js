@@ -6,7 +6,7 @@ import Tech from "@/components/Tech";
 import Skills from "@/components/Skills";
 import Works from "@/components/Works";
 import Contact from "@/components/Contact";
-import { StarsCanvas } from "@/components/canvas";
+import { StarsCanvas, ParticleField } from "@/components/canvas";
 
 export default function Home() {
   return (
@@ -22,6 +22,7 @@ export default function Home() {
       <Works />
       <div className="relative z-0">
         <Contact />
+        <ParticleField />
         <StarsCanvas />
       </div>
     </main>
