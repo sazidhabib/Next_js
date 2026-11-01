@@ -2,22 +2,24 @@
 
 import { useState, useEffect } from 'react';
 import { skills as fallbackSkills, experiences as fallbackExperiences } from '../constants/Constants';
-import { projects as fallbackProjects } from '../constants/index';
+import { projects as fallbackProjects, technologies as fallbackTechnologies } from '../constants/index';
 
 export const usePortfolioData = () => {
   const [skills, setSkills] = useState(fallbackSkills);
   const [experiences, setExperiences] = useState(fallbackExperiences);
   const [projects, setProjects] = useState(fallbackProjects);
+  const [technologies, setTechnologies] = useState(fallbackTechnologies);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchAllData = async () => {
       try {
         setLoading(true);
-        const [skillsRes, expRes, projRes] = await Promise.allSettled([
+        const [skillsRes, expRes, projRes, techRes] = await Promise.allSettled([
           fetch('/api/skills'),
           fetch('/api/experiences'),
-          fetch('/api/projects')
+          fetch('/api/projects'),
+          fetch('/api/technologies')
         ]);
 
         if (skillsRes.status === 'fulfilled' && skillsRes.value.ok) {
@@ -40,6 +42,13 @@ export const usePortfolioData = () => {
             setProjects(projData);
           }
         }
+
+        if (techRes.status === 'fulfilled' && techRes.value.ok) {
+          const techData = await techRes.value.json();
+          if (Array.isArray(techData) && techData.length > 0) {
+            setTechnologies(techData);
+          }
+        }
       } catch (err) {
         console.warn('API error loading portfolio data:', err);
       } finally {
@@ -50,7 +59,7 @@ export const usePortfolioData = () => {
     fetchAllData();
   }, []);
 
-  return { skills, experiences, projects, loading };
+  return { skills, experiences, projects, technologies, loading };
 };
 
 export default usePortfolioData;

@@ -130,12 +130,11 @@ const Hero = () => {
             WebkitMaskImage: "linear-gradient(to top, rgba(0,0,0,1) 15%, transparent 90%)",
           }}
         />
-        <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-sky-400/60 to-transparent" />
       </motion.div>
 
       {/* ── Main Content Container ── */}
       <div className="max-w-7xl w-full mx-auto px-6 relative z-10 flex flex-col-reverse lg:flex-row items-center justify-between gap-12 lg:gap-8">
-        
+
         {/* ── Left Column: Futuristic Typography & Action Buttons ── */}
         <motion.div
           className="flex-1 max-w-2xl text-center lg:text-left"
@@ -162,14 +161,11 @@ const Hero = () => {
             initial={{ opacity: 0, y: 25 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-            className="text-[var(--color-text)] font-extrabold text-[clamp(34px,5.5vw,64px)] leading-[1.1] tracking-tight"
+            className="text-[var(--color-text)] font-extrabold text-[clamp(26px,3.6vw,50px)] leading-[1.2] sm:leading-[1.18] tracking-tight"
           >
-            Engineering Next-Gen Web With{" "}
-            <span className="relative inline-block mt-1">
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-600 via-blue-600 to-indigo-600 dark:from-sky-400 dark:via-blue-500 dark:to-indigo-400 drop-shadow-[0_0_25px_rgba(56,189,248,0.25)]">
-                Modern 3D & Depth
-              </span>
-              <span className="absolute -bottom-1 left-0 w-full h-[2px] bg-gradient-to-r from-sky-500 via-blue-500 to-indigo-500 opacity-70" />
+            Engineering Scalable Web Apps{" "}
+            <span className="block mt-1 sm:mt-1.5 text-transparent bg-clip-text bg-gradient-to-r from-sky-600 via-blue-600 to-indigo-600 dark:from-sky-400 dark:via-blue-500 dark:to-indigo-400 drop-shadow-[0_0_25px_rgba(56,189,248,0.25)]">
+              With Interactive 3D Experiences
             </span>
           </motion.h1>
 
@@ -178,10 +174,9 @@ const Hero = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.35, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-            className="text-[var(--color-text-muted)] text-[16px] sm:text-[17px] leading-relaxed mt-6 max-w-[560px] mx-auto lg:mx-0 font-normal"
+            className="text-[var(--color-text-muted)] text-[15px] sm:text-[16px] leading-relaxed mt-5 max-w-[540px] mx-auto lg:mx-0 font-normal"
           >
-            Hi, I&apos;m <span className="font-semibold text-[var(--color-text)]">Mahbub Sazid Habib</span>.
-            I craft ultra-responsive web experiences, interactive 3D interfaces, and scalable full-stack architectures.
+            Hi, I&apos;m <span className="font-semibold text-[var(--color-text)]">Mahbub Sazid Habib</span> — a Full-Stack Engineer specializing in Next.js, robust backend systems, and modern interactive digital experiences.
           </motion.p>
 
           {/* Futuristic Buttons with Glowing Effects */}
@@ -268,7 +263,7 @@ const Hero = () => {
 
             {/* Cyber Container Frame */}
             <div className="relative w-[280px] h-[320px] sm:w-[340px] sm:h-[390px] rounded-3xl p-2.5 glass-card overflow-hidden">
-              
+
               {/* Futuristic Corner Brackets HUD */}
               <div className="absolute top-3 left-3 w-3.5 h-3.5 border-t-2 border-l-2 border-sky-500 dark:border-sky-400 pointer-events-none" />
               <div className="absolute top-3 right-3 w-3.5 h-3.5 border-t-2 border-r-2 border-sky-500 dark:border-sky-400 pointer-events-none" />

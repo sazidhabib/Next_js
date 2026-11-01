@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import AdminAuth from './AdminAuth';
 import AdminLayout from './AdminLayout';
 import SkillsManager from './SkillsManager';
+import TechnologiesManager from './TechnologiesManager';
 import ExperienceManager from './ExperienceManager';
 import ProjectsManager from './ProjectsManager';
 import MessagesView from './MessagesView';
@@ -12,7 +13,7 @@ import MediaLibrary from './MediaLibrary';
 const AdminPanel = () => {
   const [token, setToken] = useState('');
   const [activeTab, setActiveTab] = useState('dashboard');
-  const [stats, setStats] = useState({ skills: 0, experiences: 0, projects: 0, messages: 0 });
+  const [stats, setStats] = useState({ skills: 0, technologies: 0, experiences: 0, projects: 0, messages: 0 });
   const [loadingStats, setLoadingStats] = useState(false);
   const [seeding, setSeeding] = useState(false);
   const [seedResult, setSeedResult] = useState('');
@@ -34,20 +35,23 @@ const AdminPanel = () => {
     try {
       setLoadingStats(true);
       
-      const [skillsRes, expRes, projRes, msgRes] = await Promise.all([
+      const [skillsRes, techRes, expRes, projRes, msgRes] = await Promise.all([
         fetch('/api/admin/skills'),
+        fetch('/api/admin/technologies', { headers: { 'Authorization': `Bearer ${token}` } }),
         fetch('/api/admin/experiences'),
         fetch('/api/admin/projects'),
         fetch('/api/admin/messages', { headers: { 'Authorization': `Bearer ${token}` } })
       ]);
 
       const skills = skillsRes.ok ? await skillsRes.json() : [];
+      const technologies = techRes.ok ? await techRes.json() : [];
       const experiences = expRes.ok ? await expRes.json() : [];
       const projects = projRes.ok ? await projRes.json() : [];
       const messages = msgRes.ok ? await msgRes.json() : [];
 
       setStats({
         skills: skills.length,
+        technologies: technologies.length,
         experiences: experiences.length,
         projects: projects.length,
         messages: messages.length
@@ -65,7 +69,7 @@ const AdminPanel = () => {
   };
 
   const handleSeedDatabase = async () => {
-    if (!window.confirm('This will seed initial portfolio data into the database. Are you sure?')) return;
+    if (!window.confirm('This will seed initial portfolio data (Skills, Tech Stack, Experiences, Projects) into the database. Are you sure?')) return;
     setSeeding(true);
     setSeedResult('');
 
@@ -105,7 +109,7 @@ const AdminPanel = () => {
           </div>
 
           {/* Stats Cards Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-5">
             <div className="glass-card p-6 rounded-xl flex items-center justify-between border border-white/5 shadow-card">
               <div>
                 <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider block">Total Skills</span>
@@ -116,6 +120,20 @@ const AdminPanel = () => {
               <div className="p-3 bg-accent/10 border border-accent/20 text-accent rounded-xl">
                 <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                </svg>
+              </div>
+            </div>
+
+            <div className="glass-card p-6 rounded-xl flex items-center justify-between border border-white/5 shadow-card">
+              <div>
+                <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider block">Tech Stack</span>
+                <span className="text-3xl font-extrabold text-white mt-1 block">
+                  {loadingStats ? '...' : stats.technologies}
+                </span>
+              </div>
+              <div className="p-3 bg-accent/10 border border-accent/20 text-accent rounded-xl">
+                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                 </svg>
               </div>
             </div>
@@ -167,7 +185,7 @@ const AdminPanel = () => {
           <div className="glass-card p-6 rounded-xl border border-white/5 mt-4 max-w-xl">
             <h3 className="text-lg font-bold text-white mb-2">Initial Setup & Migration</h3>
             <p className="text-slate-400 text-sm mb-5 leading-relaxed">
-              If your database tables (Skills, Experiences, Projects) are currently empty, you can seed them with the default hardcoded data from the Constants files. This will clear existing tables and import default ones.
+              If your database tables (Skills, Tech Stack, Experiences, Projects) are currently empty, you can seed them with the default hardcoded data from the Constants files. This will clear existing tables and import default ones.
             </p>
             
             {seedResult && (
@@ -191,6 +209,7 @@ const AdminPanel = () => {
       )}
 
       {activeTab === 'skills' && <SkillsManager token={token} />}
+      {activeTab === 'technologies' && <TechnologiesManager token={token} />}
       {activeTab === 'experience' && <ExperienceManager token={token} />}
       {activeTab === 'projects' && <ProjectsManager token={token} />}
       {activeTab === 'media' && <MediaLibrary token={token} />}

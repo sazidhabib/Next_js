@@ -13,12 +13,13 @@ const categoryIcons = {
   Frontend: FiLayers,
   Backend: FiDatabase,
   "Tools & Others": FiTool,
+  Others: FiTool,
   DevOps: FiCode,
 };
 
-const SkillCard = ({ skill, index }) => {
+const SkillCard = ({ skill, index, totalSkills }) => {
   const IconComponent = categoryIcons[skill.title] || FiCode;
-  const isEven = index % 2 === 0;
+  const isLastOdd = totalSkills % 2 !== 0 && index === totalSkills - 1;
 
   return (
     <motion.div
@@ -26,7 +27,9 @@ const SkillCard = ({ skill, index }) => {
       whileInView={{ opacity: 1, y: 0, scale: 1 }}
       viewport={{ once: true, amount: 0.15 }}
       transition={{ duration: 0.55, delay: index * 0.12, ease: [0.16, 1, 0.3, 1] }}
-      className="w-full flex-1 min-w-[260px] max-w-[560px]"
+      className={`w-full min-w-0 ${
+        isLastOdd ? "col-span-2 lg:col-span-1" : "col-span-1"
+      }`}
     >
       <Tilt
         tiltMaxAngleX={8}
@@ -44,7 +47,7 @@ const SkillCard = ({ skill, index }) => {
         {/* Card Body - Matches Contact glass-card styling and shadow exactly */}
         <div
           style={{ transformStyle: "preserve-3d" }}
-          className="relative h-full glass-card rounded-2xl sm:rounded-3xl p-4 sm:p-7 overflow-hidden flex flex-col justify-between"
+          className="relative h-full glass-card rounded-2xl sm:rounded-3xl p-3 xs:p-3.5 sm:p-7 overflow-hidden flex flex-col justify-start"
         >
           {/* Subtle Grid Texture in Card */}
           <div
@@ -59,56 +62,56 @@ const SkillCard = ({ skill, index }) => {
             {/* Top Category Telemetry Header */}
             <div
               style={{ transform: "translateZ(15px)" }}
-              className="flex items-center justify-between pb-3 sm:pb-4 mb-4 sm:mb-5 border-b border-[var(--color-border)] text-[10px] sm:text-[11px] font-mono text-[var(--color-text-muted)]"
+              className="flex items-center justify-between pb-2.5 sm:pb-4 mb-3 sm:mb-5 border-b border-[var(--color-border)] text-[9px] xs:text-[10px] sm:text-[11px] font-mono text-[var(--color-text-muted)]"
             >
               <div className="flex items-center gap-1.5 sm:gap-2">
                 <span className="w-1.5 h-1.5 rounded-full bg-sky-500 dark:bg-sky-400 animate-pulse" />
-                <span className="text-sky-600 dark:text-sky-400 font-semibold tracking-wider uppercase">
-                  SKILL_MODULE // 0{index + 1}
+                <span className="text-sky-600 dark:text-sky-400 font-semibold tracking-wider uppercase text-[8.5px] xs:text-[9.5px] sm:text-[11px]">
+                  MODULE // 0{index + 1}
                 </span>
               </div>
-              <span className="px-2 py-0.5 rounded bg-[var(--color-pill-bg)] border border-[var(--color-border)] text-[10px] sm:text-xs font-mono">
+              <span className="px-1.5 py-0.5 rounded bg-[var(--color-pill-bg)] border border-[var(--color-border)] text-[8px] xs:text-[9px] sm:text-xs font-mono shrink-0">
                 {skill.skills?.length || 0} NODES
               </span>
             </div>
 
             {/* Category Title with Icon */}
-            <div style={{ transform: "translateZ(25px)" }} className="flex items-center gap-3 mb-4 sm:mb-6">
-              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-sky-500/10 border border-sky-500/20 dark:border-sky-400/30 flex items-center justify-center text-sky-600 dark:text-sky-400 text-base sm:text-lg shadow-sm shrink-0">
+            <div style={{ transform: "translateZ(25px)" }} className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-6">
+              <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-sky-500/10 border border-sky-500/20 dark:border-sky-400/30 flex items-center justify-center text-sky-600 dark:text-sky-400 text-sm sm:text-lg shadow-sm shrink-0">
                 <IconComponent />
               </div>
-              <div>
-                <h3 className="text-base sm:text-xl font-bold text-[var(--color-text)] tracking-tight">
+              <div className="min-w-0">
+                <h3 className="text-sm xs:text-base sm:text-xl font-bold text-[var(--color-text)] tracking-tight truncate">
                   {skill.title}
                 </h3>
-                <p className="text-[11px] sm:text-[12px] font-mono text-[var(--color-text-muted)]">
+                <p className="text-[9px] xs:text-[10.5px] sm:text-[12px] font-mono text-[var(--color-text-muted)] truncate">
                   Production-Ready Stack
                 </p>
               </div>
             </div>
           </div>
 
-          {/* Skill Micro-Pills Grid - Compact on mobile so skills wrap in multi-column rows like third card */}
+          {/* Skill Micro-Pills Grid */}
           <div
             style={{ transform: "translateZ(35px)" }}
-            className="flex flex-wrap gap-1.5 sm:gap-2.5 items-center mt-1"
+            className="flex flex-wrap gap-1 xs:gap-1.5 sm:gap-2.5 items-center mt-1"
           >
             {skill.skills.map((item, itemIndex) => (
               <motion.div
                 key={`skill-item-${itemIndex}`}
                 whileHover={{ scale: 1.05, y: -2 }}
                 transition={{ duration: 0.2 }}
-                className="group/item inline-flex items-center gap-1.5 sm:gap-2 bg-[var(--color-pill-bg)] border border-[var(--color-border)] hover:border-sky-500/40 dark:hover:border-sky-400/50 hover:bg-sky-500/10 rounded-lg sm:rounded-xl px-2.5 py-1.5 sm:px-3 sm:py-1.5 transition-all duration-300 shadow-sm cursor-default"
+                className="group/item inline-flex items-center gap-1 sm:gap-2 bg-[var(--color-pill-bg)] border border-[var(--color-border)] hover:border-sky-500/40 dark:hover:border-sky-400/50 hover:bg-sky-500/10 rounded-lg sm:rounded-xl px-1.5 py-1 xs:px-2 xs:py-1 sm:px-3 sm:py-1.5 transition-all duration-300 shadow-sm cursor-default"
               >
                 <img
                   src={item.image}
                   alt={item.name}
-                  className="w-3.5 h-3.5 sm:w-4.5 sm:h-4.5 object-contain filter drop-shadow-sm group-hover/item:scale-110 transition-transform shrink-0"
+                  className="w-3 h-3 xs:w-3.5 xs:h-3.5 sm:w-4.5 sm:h-4.5 object-contain filter drop-shadow-sm group-hover/item:scale-110 transition-transform shrink-0"
                   onError={(e) => {
                     e.currentTarget.src = "https://www.svgrepo.com/show/354262/react-router.svg";
                   }}
                 />
-                <span className="text-[var(--color-text)] text-[11px] sm:text-[12.5px] font-medium group-hover/item:text-sky-600 dark:group-hover/item:text-sky-400 transition-colors whitespace-nowrap">
+                <span className="text-[var(--color-text)] text-[9.5px] xs:text-[10.5px] sm:text-[12.5px] font-medium group-hover/item:text-sky-600 dark:group-hover/item:text-sky-400 transition-colors whitespace-nowrap">
                   {item.name}
                 </span>
               </motion.div>
@@ -137,11 +140,16 @@ const Skills = () => {
         Comprehensive technology matrix applied across high-scale frontends, secure backend APIs, and distributed data systems.
       </motion.p>
 
-      {/* Cyber Skills Grid */}
+      {/* Cyber Skills Grid: 2 cards in one line on mobile with the 3rd card below, 3 cards in one row on desktop */}
       <section id="skills" className="mt-12 sm:mt-16 pb-4">
-        <div className="flex flex-wrap gap-4 sm:gap-6 lg:gap-8 justify-center items-stretch max-w-6xl mx-auto">
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6 lg:gap-8 max-w-6xl mx-auto items-stretch">
           {skills.map((skill, index) => (
-            <SkillCard key={`skill-${index}`} skill={skill} index={index} />
+            <SkillCard
+              key={`skill-${index}`}
+              skill={skill}
+              index={index}
+              totalSkills={skills.length}
+            />
           ))}
         </div>
       </section>

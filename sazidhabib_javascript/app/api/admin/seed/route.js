@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { checkAuthHeader } from '@/lib/auth';
-import { Skill, Experience, Project, initDb } from '@/lib/models';
+import { Skill, Experience, Project, Technology, initDb } from '@/lib/models';
 
 export async function POST(request) {
   if (!checkAuthHeader(request)) {
@@ -97,7 +97,7 @@ export async function POST(request) {
     const initialProjects = [
   {
     "name": "Pathokbonddho",
-    "description": "Pathokbonddho is a full-stack dynamic News Portal and Content Management System (CMS) built to manage and publish news content efficiently. The platform is far more advanced than a traditional static news website, featuring a powerful backend system for managing articles, authors, categories, advertisements, galleries, and fully customizable homepage layouts.\\n    One of the core highlights of the project is its Dynamic Layout Builder, where administrators can create and control pages, sections, rows, and columns directly from the admin dashboard without modifying code. The system is optimized for SEO, fast content delivery, image optimization, and scalable content management, making it ideal for modern digital news platforms.",
+    "description": "Pathokbonddho is a full-stack dynamic News Portal and Content Management System (CMS) built to manage and publish news content efficiently. The platform is far more advanced than a traditional static news website, featuring a powerful backend system for managing articles, authors, categories, advertisements, galleries, and fully customizable homepage layouts.\n    One of the core highlights of the project is its Dynamic Layout Builder, where administrators can create and control pages, sections, rows, and columns directly from the admin dashboard without modifying code. The system is optimized for SEO, fast content delivery, image optimization, and scalable content management, making it ideal for modern digital news platforms.",
     "image": "/src/assets/pathokbonddhufullpage.webp",
     "media": [
       {
@@ -528,13 +528,31 @@ export async function POST(request) {
   }
 ];
 
+    const initialTechnologies = [
+      { name: "HTML 5", icon: "/src/assets/tech/html.png", sortOrder: 0 },
+      { name: "CSS 3", icon: "/src/assets/tech/css.png", sortOrder: 1 },
+      { name: "JavaScript", icon: "/src/assets/tech/javascript.png", sortOrder: 2 },
+      { name: "TypeScript", icon: "/src/assets/tech/typescript.png", sortOrder: 3 },
+      { name: "React JS", icon: "/src/assets/tech/reactjs.png", sortOrder: 4 },
+      { name: "Redux Toolkit", icon: "/src/assets/tech/redux.png", sortOrder: 5 },
+      { name: "Tailwind CSS", icon: "/src/assets/tech/tailwind.png", sortOrder: 6 },
+      { name: "Node JS", icon: "/src/assets/tech/nodejs.png", sortOrder: 7 },
+      { name: "MongoDB", icon: "/src/assets/tech/mongodb.png", sortOrder: 8 },
+      { name: "Three JS", icon: "/src/assets/tech/threejs.png", sortOrder: 9 },
+      { name: "git", icon: "/src/assets/tech/git.png", sortOrder: 10 },
+      { name: "figma", icon: "/src/assets/tech/figma.png", sortOrder: 11 },
+      { name: "docker", icon: "/src/assets/tech/docker.png", sortOrder: 12 },
+    ];
+
     await Skill.destroy({ where: {} });
     await Experience.destroy({ where: {} });
     await Project.destroy({ where: {} });
+    await Technology.destroy({ where: {} });
 
     await Skill.bulkCreate(initialSkills);
     await Experience.bulkCreate(initialExperiences);
     await Project.bulkCreate(initialProjects);
+    await Technology.bulkCreate(initialTechnologies);
 
     return NextResponse.json({
       success: true,

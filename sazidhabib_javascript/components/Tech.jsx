@@ -2,7 +2,8 @@
 
 import { motion } from "framer-motion";
 import SectionWrapper from "../hoc/SectionWrapper";
-import { technologies } from "../constants";
+import { technologies as fallbackTechnologies } from "../constants";
+import { usePortfolioData } from "../hooks/usePortfolioData";
 import { styles } from "../styles";
 import { textVariant, fadeIn } from "../utils/motion";
 
@@ -87,6 +88,11 @@ const TechCard = ({ technology, index }) => {
 };
 
 const Tech = () => {
+  const { technologies: dynamicTechnologies } = usePortfolioData();
+  const techList = dynamicTechnologies && dynamicTechnologies.length > 0
+    ? dynamicTechnologies
+    : fallbackTechnologies;
+
   return (
     <>
       <motion.div variants={textVariant()}>
@@ -95,8 +101,8 @@ const Tech = () => {
       </motion.div>
 
       <div className="mt-14 flex flex-wrap justify-center gap-8 sm:gap-10">
-        {technologies.map((technology, index) => (
-          <TechCard key={technology.name} technology={technology} index={index} />
+        {techList.map((technology, index) => (
+          <TechCard key={technology.id || technology.name} technology={technology} index={index} />
         ))}
       </div>
     </>
