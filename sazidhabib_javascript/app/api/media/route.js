@@ -62,6 +62,7 @@ export async function GET(request) {
             mp4: 'video/mp4',
             webm: 'video/webm',
             ogg: 'video/ogg',
+            pdf: 'application/pdf',
           };
           const contentType = mimeMap[ext] || 'application/octet-stream';
 
@@ -101,6 +102,7 @@ export async function GET(request) {
             mp4: 'video/mp4',
             webm: 'video/webm',
             ogg: 'video/ogg',
+            pdf: 'application/pdf',
           };
           const contentType = mimeMap[ext] || 'application/octet-stream';
 

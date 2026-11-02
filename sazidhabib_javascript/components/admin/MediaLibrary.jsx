@@ -112,6 +112,18 @@ const MediaLibrary = ({ token, isSelectMode = false, onSelect = null }) => {
           const cleanName = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
           const ext = file.name.split('.').pop();
           finalFileName = `${cleanName.replace(/\s+/g, '_').toLowerCase()}.${ext}`;
+        } else if (file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf') || !file.type.startsWith('image/')) {
+          const reader = new FileReader();
+          const base64Promise = new Promise((resolve, reject) => {
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = error => reject(error);
+          });
+          finalData = await base64Promise;
+          
+          const cleanName = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
+          const ext = file.name.split('.').pop();
+          finalFileName = `${cleanName.replace(/\s+/g, '_').toLowerCase()}.${ext}`;
         } else {
           finalData = await processToWebP(file);
           const cleanName = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
@@ -377,6 +389,13 @@ const MediaLibrary = ({ token, isSelectMode = false, onSelect = null }) => {
                         e.target.currentTime = 0;
                       }}
                     />
+                  ) : media.type === 'document' || media.name.match(/\.(pdf|doc|docx)$/i) ? (
+                    <div className="flex flex-col items-center justify-center gap-1.5 p-2 text-accent">
+                      <svg className="w-9 h-9" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                      <span className="text-[9px] font-mono uppercase bg-accent/15 px-1.5 py-0.5 rounded text-accent">PDF DOC</span>
+                    </div>
                   ) : (
                     <img
                       src={url}

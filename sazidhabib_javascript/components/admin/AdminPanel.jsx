@@ -7,6 +7,7 @@ import SkillsManager from './SkillsManager';
 import TechnologiesManager from './TechnologiesManager';
 import ExperienceManager from './ExperienceManager';
 import ProjectsManager from './ProjectsManager';
+import ResumeManager from './ResumeManager';
 import MessagesView from './MessagesView';
 import MediaLibrary from './MediaLibrary';
 
@@ -181,6 +182,32 @@ const AdminPanel = () => {
             </div>
           </div>
 
+          {/* Quick Actions & Resume Banner */}
+          <div className="glass-card p-6 rounded-2xl border border-white/5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-xl bg-accent/15 border border-accent/25 text-accent flex items-center justify-center shrink-0">
+                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+              </div>
+              <div>
+                <h3 className="text-white font-bold text-sm">Portfolio Resume</h3>
+                <p className="text-slate-400 text-xs mt-0.5">
+                  Update the resume PDF linked to the "Download Resume" button on your portfolio hero section.
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={() => setActiveTab('resume')}
+              className="py-2.5 px-4 bg-accent hover:bg-accent-dark text-white rounded-xl text-xs font-semibold transition-all flex items-center gap-2 shrink-0 active:scale-[0.98]"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+              </svg>
+              Manage Resume
+            </button>
+          </div>
+
           {/* Migration Tools */}
           <div className="glass-card p-6 rounded-xl border border-white/5 mt-4 max-w-xl">
             <h3 className="text-lg font-bold text-white mb-2">Initial Setup & Migration</h3>
@@ -212,6 +239,7 @@ const AdminPanel = () => {
       {activeTab === 'technologies' && <TechnologiesManager token={token} />}
       {activeTab === 'experience' && <ExperienceManager token={token} />}
       {activeTab === 'projects' && <ProjectsManager token={token} />}
+      {activeTab === 'resume' && <ResumeManager token={token} />}
       {activeTab === 'media' && <MediaLibrary token={token} />}
       {activeTab === 'messages' && <MessagesView token={token} />}
     </AdminLayout>

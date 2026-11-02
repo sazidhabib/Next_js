@@ -12,9 +12,10 @@ function scanLocalAssets() {
     { dir: path.join(publicDir, 'src', 'assets'), prefix: '/src/assets', category: 'Projects & UI' },
     { dir: path.join(publicDir, 'src', 'assets', 'tech'), prefix: '/src/assets/tech', category: 'Tech Icons' },
     { dir: path.join(publicDir, 'planet'), prefix: '/planet', category: '3D & Other' },
+    { dir: publicDir, prefix: '', category: 'Documents & Resumes' },
   ];
 
-  const allowedExtensions = ['.png', '.jpg', '.jpeg', '.webp', '.svg', '.gif', '.mp4', '.webm'];
+  const allowedExtensions = ['.png', '.jpg', '.jpeg', '.webp', '.svg', '.gif', '.mp4', '.webm', '.pdf'];
 
   for (const item of scanDirs) {
     if (fs.existsSync(item.dir)) {
@@ -26,11 +27,13 @@ function scanLocalAssets() {
           const ext = path.extname(file).toLowerCase();
           if (allowedExtensions.includes(ext)) {
             const isVideo = ['.mp4', '.webm', '.ogg'].includes(ext);
+            const isDoc = ext === '.pdf';
+            const urlPath = item.prefix ? `${item.prefix}/${file}` : `/${file}`;
             assets.push({
-              id: `local_${Buffer.from(`${item.prefix}/${file}`).toString('base64').replace(/=/g, '')}`,
+              id: `local_${Buffer.from(urlPath).toString('base64').replace(/=/g, '')}`,
               name: file,
-              url: `${item.prefix}/${file}`,
-              type: isVideo ? 'video' : 'image',
+              url: urlPath,
+              type: isVideo ? 'video' : (isDoc ? 'document' : 'image'),
               category: item.category,
               isLocal: true,
               sizeBytes: stat.size,
@@ -62,11 +65,12 @@ export async function GET(request) {
     const dbItems = dbMediaList.map(item => {
       const ext = path.extname(item.name || '').toLowerCase();
       const isVideo = ['.mp4', '.webm', '.ogg'].includes(ext);
+      const isDoc = ext === '.pdf';
       return {
         id: item.id,
         name: item.name,
         url: `/api/media?id=${item.id}&name=${encodeURIComponent(item.name)}`,
-        type: isVideo ? 'video' : 'image',
+        type: isVideo ? 'video' : (isDoc ? 'document' : 'image'),
         category: 'Custom Uploads',
         isLocal: false,
         createdAt: item.createdAt,
@@ -106,12 +110,13 @@ export async function POST(request) {
 
     const ext = path.extname(newMedia.name || '').toLowerCase();
     const isVideo = ['.mp4', '.webm', '.ogg'].includes(ext);
+    const isDoc = ext === '.pdf';
 
     return NextResponse.json({
       id: newMedia.id,
       name: newMedia.name,
       url: `/api/media?id=${newMedia.id}&name=${encodeURIComponent(newMedia.name)}`,
-      type: isVideo ? 'video' : 'image',
+      type: isVideo ? 'video' : (isDoc ? 'document' : 'image'),
       category: 'Custom Uploads',
       isLocal: false,
       createdAt: newMedia.createdAt,

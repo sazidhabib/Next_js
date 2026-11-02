@@ -10,9 +10,11 @@ import {
 } from "framer-motion";
 import { FiDownload, FiArrowRight, FiCode, FiCpu, FiCheckCircle } from "react-icons/fi";
 import ParticleField from "./canvas/ParticleField";
+import usePortfolioData from "../hooks/usePortfolioData";
 
 const Hero = () => {
   const containerRef = useRef(null);
+  const { resumeUrl, resumeFilename } = usePortfolioData();
 
   // --- Normalized Mouse Coordinates (-0.5 to +0.5) ---
   const mouseX = useMotionValue(0);
@@ -188,8 +190,10 @@ const Hero = () => {
           >
             {/* Primary Action Button */}
             <a
-              href="/Mahbub_Sazid_Habib_Resume.pdf"
-              download="Mahbub_Sazid_Habib_Resume.pdf"
+              href={resumeUrl || "/Mahbub_Sazid_Habib_Resume.pdf"}
+              download={resumeFilename || "Mahbub_Sazid_Habib_Resume.pdf"}
+              target="_blank"
+              rel="noopener noreferrer"
               className="group relative inline-flex items-center gap-2.5 px-7 py-3.5 rounded-xl font-semibold text-sm text-white bg-gradient-to-r from-sky-500 via-blue-600 to-indigo-600 shadow-[0_0_25px_rgba(56,189,248,0.35)] hover:shadow-[0_0_35px_rgba(56,189,248,0.55)] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] overflow-hidden"
             >
               <span className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out" />

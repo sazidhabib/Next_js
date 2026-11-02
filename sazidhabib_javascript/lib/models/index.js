@@ -5,6 +5,7 @@ import Experience from './Experience.js';
 import Project from './Project.js';
 import Media from './Media.js';
 import Technology from './Technology.js';
+import Setting from './Setting.js';
 
 let isSynced = false;
 
@@ -28,6 +29,7 @@ export {
   Project,
   Media,
   Technology,
+  Setting,
 };
 
 export function cleanImageUrl(url) {

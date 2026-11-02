@@ -4,22 +4,28 @@ import { useState, useEffect } from 'react';
 import { skills as fallbackSkills, experiences as fallbackExperiences } from '../constants/Constants';
 import { projects as fallbackProjects, technologies as fallbackTechnologies } from '../constants/index';
 
+const DEFAULT_RESUME_URL = '/Mahbub_Sazid_Habib_Resume.pdf';
+const DEFAULT_RESUME_FILENAME = 'Mahbub_Sazid_Habib_Resume.pdf';
+
 export const usePortfolioData = () => {
   const [skills, setSkills] = useState(fallbackSkills);
   const [experiences, setExperiences] = useState(fallbackExperiences);
   const [projects, setProjects] = useState(fallbackProjects);
   const [technologies, setTechnologies] = useState(fallbackTechnologies);
+  const [resumeUrl, setResumeUrl] = useState(DEFAULT_RESUME_URL);
+  const [resumeFilename, setResumeFilename] = useState(DEFAULT_RESUME_FILENAME);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchAllData = async () => {
       try {
         setLoading(true);
-        const [skillsRes, expRes, projRes, techRes] = await Promise.allSettled([
+        const [skillsRes, expRes, projRes, techRes, resumeRes] = await Promise.allSettled([
           fetch('/api/skills'),
           fetch('/api/experiences'),
           fetch('/api/projects'),
-          fetch('/api/technologies')
+          fetch('/api/technologies'),
+          fetch('/api/resume')
         ]);
 
         if (skillsRes.status === 'fulfilled' && skillsRes.value.ok) {
@@ -49,6 +55,16 @@ export const usePortfolioData = () => {
             setTechnologies(techData);
           }
         }
+
+        if (resumeRes.status === 'fulfilled' && resumeRes.value.ok) {
+          const resumeData = await resumeRes.value.json();
+          if (resumeData?.resumeUrl) {
+            setResumeUrl(resumeData.resumeUrl);
+          }
+          if (resumeData?.resumeFilename) {
+            setResumeFilename(resumeData.resumeFilename);
+          }
+        }
       } catch (err) {
         console.warn('API error loading portfolio data:', err);
       } finally {
@@ -59,7 +75,7 @@ export const usePortfolioData = () => {
     fetchAllData();
   }, []);
 
-  return { skills, experiences, projects, technologies, loading };
+  return { skills, experiences, projects, technologies, resumeUrl, resumeFilename, loading };
 };
 
 export default usePortfolioData;
