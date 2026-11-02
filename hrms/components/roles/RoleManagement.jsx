@@ -54,7 +54,10 @@ export default function RoleManagement({ onUpdated }) {
     try {
       const res = await fetch('/api/roles');
       const data = await res.json();
-      if (data.success) setRoles(data.roles);
+      if (data.success) {
+        // Super Admin is a system-managed role and should not appear in the RBAC editor
+        setRoles(data.roles.filter((r) => r.name !== 'Super Admin'));
+      }
     } catch (err) {
       console.error(err);
     }
