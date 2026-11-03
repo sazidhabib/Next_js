@@ -1,8 +1,7 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
-# dependencies
-/node_modules
-/.pnp
+# Dependencies
+node_modules/
+**/node_modules/
+.pnp
 .pnp.*
 .yarn/*
 !.yarn/patches
@@ -10,39 +9,48 @@
 !.yarn/releases
 !.yarn/versions
 
-# testing
+# Large binaries & native node addons (Blocks 100MB+ files)
+*.node
+*.exe
+*.dll
+*.dylib
+*.so
+*.wasm
+*.zip
+*.tar.gz
+
+# Build outputs
+dist/
+**/dist/
+build/
+**/build/
+.next/
+**/.next/
+out/
+**/out/
+.vite/
+**/.vite/
+.turbo/
+
+# Cache & Testing
 /coverage
+.cache/
+**/.cache/
 
-# next.js
-/.next/
-/out/
+# Environment files
+.env*
+!.env.example
 
-# production
-/build
-
-# misc
-.DS_Store
-*.pem
-
-# debug
+# Logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
+*.log
 
-# env files (can opt-in for committing if needed)
-.env*
-
-# vercel
-.vercel
-
-# typescript
-*.tsbuildinfo
-next-env.d.ts
-
-# archives and design files
-*.zip
-*.ai
-
-# markdown files
-*.md
+# Operating System & IDE
+.DS_Store
+Thumbs.db
+.cursor/
+.windsurf/
+.vscode/

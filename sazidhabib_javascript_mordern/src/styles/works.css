@@ -1,0 +1,162 @@
+/* =========================================================
+   SELECTED WORKS SHOWCASE & 3D PERSPECTIVE TILT STYLES
+   ========================================================= */
+
+.work-section {
+  position: relative;
+  width: 100%;
+  padding: 6rem 0;
+}
+
+.works-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2rem;
+  margin-top: 3.5rem;
+}
+
+@media (max-width: 900px) {
+  .works-grid {
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+  }
+}
+
+/* 3D Perspective Card Wrapper */
+.work-card-wrapper {
+  perspective: 1000px;
+}
+
+.work-card {
+  position: relative;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  overflow: hidden;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.25s var(--ease), border-color 0.25s var(--ease), box-shadow 0.25s var(--ease);
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+/* Dynamic Specular Sheen Overlay */
+.work-card::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: 24px;
+  padding: 1px;
+  background: radial-gradient(
+    500px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+    rgba(255, 255, 255, 0.2),
+    transparent 60%
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.work-card:hover::before {
+  opacity: 1;
+}
+
+.work-card:hover {
+  border-color: rgba(255, 255, 255, 0.16);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6);
+}
+
+/* Card Mockup Frame */
+.work-card-visual {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  background: #0D0D12;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  margin-bottom: 20px;
+  transform: translateZ(20px);
+}
+
+.work-card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s var(--ease);
+}
+
+.work-card:hover .work-card-img {
+  transform: scale(1.04);
+}
+
+/* Project Badge Pill */
+.work-badge {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  z-index: 2;
+  padding: 4px 10px;
+  background: rgba(7, 7, 10, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(8px);
+  border-radius: 999px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--fg);
+}
+
+/* Card Meta Content */
+.work-card-content {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transform: translateZ(30px);
+}
+
+.work-card-tags {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.work-tag {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--muted);
+  padding: 2px 8px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 6px;
+}
+
+.work-card-title {
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.work-card-title svg {
+  color: var(--muted);
+  transition: transform 0.2s var(--ease), color 0.2s;
+}
+
+.work-card:hover .work-card-title svg {
+  transform: translate(3px, -3px);
+  color: var(--blue);
+}
+
+.work-card-desc {
+  font-size: 0.925rem;
+  color: var(--soft);
+  line-height: 1.5;
+}
+

@@ -1,9 +1,60 @@
-*.png
-nextidea-javascript/public/clients/com2.jpg
-nextidea-javascript/public/clients/com3.jpg
-nextidea-javascript/public/clients/com4.jpg
-nextidea-javascript/public/clients/com5.jpg
-nextidea-javascript/public/clients/com6.jpg
-nextidea-javascript/public/clients/com7.jpg
-nextidea-javascript/public/clients/com8.jpg
-nextidea-javascript/public/clients/com9.jpg
+# Ignore all node_modules across every project
+**/node_modules/
+node_modules/
+
+# Ignore compiled binaries, native addons, and large archives (>100MB blockers)
+*.node
+*.exe
+*.dll
+*.so
+*.dylib
+*.wasm
+*.zip
+*.tar.gz
+*.7z
+*.rar
+*.bin
+*.iso
+*.dmg
+
+# Ignore LibreOffice and heavy bin tools
+**/bin/
+bin/
+
+# Ignore all duplicate / copy folders
+* - Copy/
+*- Copy/
+*Copy*/
+*_copy/
+*_Copy/
+
+# Build outputs
+**/dist/
+dist/
+**/.next/
+.next/
+**/build/
+build/
+**/out/
+out/
+**/.vite/
+.vite/
+
+# Cache & logs
+**/.cache/
+.cache/
+*.log
+npm-debug.log*
+yarn-debug.log*
+.pnpm-debug.log*
+
+# Environment & secrets
+**/.env*
+.env*
+*.pem
+*.key
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
