@@ -1,0 +1,1273 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sazid — Portfolio Admin & Media Studio</title>
+<link rel="icon" href="favicon.ico" sizes="32x32">
+<style>
+:root{
+  --bg:#07070A;--card:#101017;--card-alt:#161622;--card-hover:#1D1D2C;
+  --border:rgba(255,255,255,.09);--border-focus:rgba(13,153,255,.6);
+  --text:#F4F4F2;--muted:#8E8E9B;--dim:#5A5A66;
+  --blue:#0D99FF;--blue-glow:rgba(13,153,255,.2);
+  --green:#0ACF83;--green-glow:rgba(10,207,131,.2);
+  --purple:#7B4DFF;--purple-glow:rgba(123,77,255,.2);
+  --warm:#FF6E28;--red:#FF4A4A;
+  --font:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  --mono:"Geist Mono","SF Mono",Menlo,Monaco,Consolas,monospace;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased;min-height:100vh}
+button,input,textarea,select{font:inherit;color:inherit;background:transparent;border:none}
+a{color:inherit;text-decoration:none}
+.mono{font-family:var(--mono)}
+
+/* Top Navigation Bar */
+header.top-bar{position:sticky;top:0;z-index:100;background:rgba(16,16,23,.88);backdrop-filter:blur(18px);border-bottom:1px solid var(--border);padding:0 24px;height:64px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.brand{display:flex;align-items:center;gap:12px;font-weight:600;font-size:15px;letter-spacing:-.01em}
+.brand .tag{padding:3px 8px;border-radius:6px;background:rgba(13,153,255,.12);border:1px solid rgba(13,153,255,.3);color:var(--blue);font-size:11px}
+.nav-tabs{display:flex;align-items:center;gap:4px;background:rgba(255,255,255,.03);padding:4px;border-radius:10px;border:1px solid var(--border);overflow-x:auto}
+.nav-tab{padding:6px 13px;border-radius:7px;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;transition:all .2s ease;display:flex;align-items:center;gap:7px;white-space:nowrap}
+.nav-tab:hover{color:var(--text);background:rgba(255,255,255,.04)}
+.nav-tab.active{color:#fff;background:var(--card-alt);border:1px solid var(--border);box-shadow:0 2px 8px rgba(0,0,0,.4)}
+.actions{display:flex;align-items:center;gap:10px}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;gap:7px;padding:8px 15px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s cubic-bezier(.16,1,.3,1);white-space:nowrap}
+.btn-primary{background:var(--blue);color:#fff;box-shadow:0 0 16px var(--blue-glow)}
+.btn-primary:hover{background:#1ea2ff;transform:translateY(-1px);box-shadow:0 0 24px rgba(13,153,255,.4)}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.btn-secondary{background:rgba(255,255,255,.05);border:1px solid var(--border);color:var(--text)}
+.btn-secondary:hover{background:rgba(255,255,255,.09);color:#fff}
+.btn-danger{background:rgba(255,74,74,.12);border:1px solid rgba(255,74,74,.3);color:var(--red)}
+.btn-danger:hover{background:rgba(255,74,74,.2)}
+.btn-success{background:rgba(10,207,131,.12);border:1px solid rgba(10,207,131,.3);color:var(--green)}
+.btn-sm{padding:5px 10px;font-size:12px;border-radius:6px}
+
+/* Main Layout */
+main.container{max-width:1180px;margin:0 auto;padding:32px 24px 100px}
+.tab-pane{display:none}
+.tab-pane.active{display:block;animation:fadein .25s ease}
+@keyframes fadein{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+
+/* Section Titles & Cards */
+.pane-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:14px}
+.pane-head h2{font-size:22px;font-weight:700;letter-spacing:-.02em}
+.pane-head p{color:var(--muted);font-size:13px;margin-top:2px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:24px;margin-bottom:20px;position:relative}
+.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;padding-bottom:12px;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:10px}
+.card-header h3{font-size:15px;font-weight:600}
+
+/* Form Controls */
+.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:18px}
+.form-group{display:flex;flex-direction:column;gap:6px}
+.form-group.full{grid-column:1 / -1}
+label{font-size:11.5px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+input[type="text"],input[type="email"],input[type="password"],textarea,select{background:rgba(0,0,0,.35);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-size:13.5px;transition:border-color .2s,box-shadow .2s;width:100%}
+input:focus,textarea:focus,select:focus{outline:none;border-color:var(--border-focus);box-shadow:0 0 0 3px var(--blue-glow)}
+textarea{resize:vertical;min-height:85px;line-height:1.6}
+
+/* File Upload Dropzone */
+.dropzone{border:1.5px dashed var(--border);border-radius:10px;padding:18px;text-align:center;cursor:pointer;transition:all .2s ease;background:rgba(255,255,255,.015);display:flex;flex-direction:column;align-items:center;gap:6px}
+.dropzone:hover,.dropzone.dragover{border-color:var(--blue);background:rgba(13,153,255,.04)}
+.dropzone input[type="file"]{display:none}
+.dropzone svg{width:26px;height:26px;color:var(--muted)}
+.dropzone p{font-size:12px;color:var(--muted)}
+.dropzone strong{color:var(--blue)}
+.dropzone .tag-badge{font-size:10px;padding:2px 6px;border-radius:4px;background:rgba(13,153,255,.15);color:var(--blue)}
+
+/* File Preview */
+.file-preview{display:flex;align-items:center;gap:12px;padding:10px;border-radius:8px;background:rgba(255,255,255,.03);border:1px solid var(--border);margin-top:8px}
+.file-preview img,.file-preview video{width:56px;height:38px;object-fit:cover;border-radius:5px;border:1px solid var(--border)}
+.file-preview .meta{flex:1;overflow:hidden}
+.file-preview .meta b{display:block;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.file-preview .meta small{font-size:11px;color:var(--muted)}
+
+/* Chips & Tags */
+.chip-box{display:flex;flex-wrap:wrap;gap:6px;background:rgba(0,0,0,.35);border:1px solid var(--border);border-radius:8px;padding:8px}
+.chip{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:5px;padding:3px 8px;font-size:12px;color:#d5d5dd}
+.chip button{cursor:pointer;color:var(--muted);display:flex;align-items:center}
+.chip button:hover{color:#fff}
+
+/* Item Cards */
+.item-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px;transition:border-color .2s}
+.item-card:hover{border-color:rgba(255,255,255,.16)}
+.item-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px}
+.item-title{display:flex;align-items:center;gap:10px;font-weight:600;font-size:15px}
+.item-badge{font-size:11px;padding:3px 8px;border-radius:5px;background:rgba(255,255,255,.06);color:var(--muted)}
+
+/* Status / Switch */
+.switch-label{display:inline-flex;align-items:center;gap:10px;cursor:pointer;user-select:none}
+.switch{position:relative;width:40px;height:22px;background:rgba(255,255,255,.14);border-radius:999px;transition:background .2s}
+.switch::after{content:"";position:absolute;left:2px;top:2px;width:18px;height:18px;border-radius:50%;background:#fff;transition:transform .2s}
+input:checked + .switch{background:var(--green)}
+input:checked + .switch::after{transform:translateX(18px)}
+
+/* Media Library Grid */
+.media-filter-bar{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:18px;flex-wrap:wrap}
+.media-pills{display:flex;gap:6px;flex-wrap:wrap}
+.media-pill{padding:5px 12px;border-radius:6px;font-size:12px;cursor:pointer;background:rgba(255,255,255,.04);border:1px solid var(--border);color:var(--muted);transition:all .2s}
+.media-pill:hover{color:var(--text);background:rgba(255,255,255,.08)}
+.media-pill.active{color:#fff;background:var(--blue);border-color:var(--blue);box-shadow:0 0 10px var(--blue-glow)}
+.media-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px}
+.media-card{background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;transition:all .2s;position:relative;display:flex;flex-direction:column}
+.media-card:hover{border-color:rgba(13,153,255,.5);transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.5)}
+.media-thumb{height:120px;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
+.media-thumb img{width:100%;height:100%;object-fit:cover;transition:transform .3s ease}
+.media-card:hover .media-thumb img{transform:scale(1.05)}
+.media-thumb video{width:100%;height:100%;object-fit:cover}
+.media-thumb .doc-icon{width:42px;height:42px;color:var(--warm)}
+.media-info{padding:10px 12px;flex:1;display:flex;flex-direction:column;justify-content:space-between;gap:6px}
+.media-info b{font-size:12px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.media-info .meta-row{display:flex;align-items:center;justify-content:space-between;font-size:11px;color:var(--muted)}
+.media-actions{display:flex;gap:6px;margin-top:6px}
+
+/* Modal Overlay */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);backdrop-filter:blur(20px);z-index:9999;display:grid;place-items:center;padding:20px}
+.modal-box{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:28px;width:100%;max-width:880px;max-height:85vh;display:flex;flex-direction:column;box-shadow:0 24px 60px rgba(0,0,0,.8);position:relative}
+.modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.modal-head h3{font-size:18px;font-weight:700}
+.modal-body{flex:1;overflow-y:auto;padding-right:4px}
+.login-box{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:36px;width:100%;max-width:380px;box-shadow:0 24px 60px rgba(0,0,0,.7);text-align:center}
+.login-box svg{width:40px;height:40px;color:var(--blue);margin-bottom:16px}
+.login-box h2{font-size:20px;font-weight:700;margin-bottom:8px}
+.login-box p{color:var(--muted);font-size:13px;margin-bottom:24px}
+.login-box input{margin-bottom:16px}
+
+/* Toast */
+#toast{position:fixed;bottom:24px;right:24px;background:var(--card-alt);border:1px solid var(--blue);color:#fff;padding:12px 20px;border-radius:10px;box-shadow:0 12px 36px rgba(0,0,0,.6),0 0 20px var(--blue-glow);font-size:13px;font-weight:500;display:flex;align-items:center;gap:10px;z-index:99999;opacity:0;transform:translateY(16px);transition:all .3s cubic-bezier(.16,1,.3,1);pointer-events:none}
+#toast.show{opacity:1;transform:none}
+#toast svg{width:18px;height:18px;color:var(--green)}
+</style>
+</head>
+<body>
+
+<!-- Login Gate -->
+<div id="loginModal" class="modal-overlay">
+  <div class="login-box">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+    <h2>Admin Authentication</h2>
+    <p>Enter your authorization password to access portfolio content and media.</p>
+    <form id="loginForm">
+      <input type="password" id="adminPass" placeholder="Admin Password" required autofocus autocomplete="current-password">
+      <button type="submit" class="btn btn-primary" style="width:100%;margin-top:10px">Sign In <i>→</i></button>
+    </form>
+    <div id="loginError" style="color:var(--red);font-size:12px;margin-top:12px;display:none"></div>
+  </div>
+</div>
+
+<!-- Universal Media Picker Modal -->
+<div id="mediaPickerModal" class="modal-overlay" style="display:none">
+  <div class="modal-box">
+    <div class="modal-head">
+      <div>
+        <h3>Select from Media Library</h3>
+        <p style="font-size:12px;color:var(--muted)">Click any file to select it, or drag new media into the dropzone.</p>
+      </div>
+      <button type="button" class="btn btn-secondary btn-sm" onclick="closeMediaPicker()">✕ Close</button>
+    </div>
+    <div class="media-filter-bar">
+      <div class="media-pills" id="pickerPills">
+        <span class="media-pill active" data-type="all">All Media</span>
+        <span class="media-pill" data-type="projects">Projects</span>
+        <span class="media-pill" data-type="experience">Experience</span>
+        <span class="media-pill" data-type="testimonials">Testimonials</span>
+        <span class="media-pill" data-type="icons">Icons</span>
+        <span class="media-pill" data-type="resumes">Resumes</span>
+      </div>
+      <input type="text" id="pickerSearch" placeholder="Search media by name..." style="max-width:240px;padding:6px 10px;font-size:12px">
+    </div>
+    <div class="modal-body">
+      <div class="dropzone" id="pickerDropzone" data-type="general" style="margin-bottom:16px;padding:12px">
+        <p><strong>Upload new media here</strong> (Auto-converted to WebP)</p>
+        <input type="file" accept="image/*,video/*,.pdf">
+      </div>
+      <div class="media-grid" id="pickerGrid">
+        <!-- Rendered via JS -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Header -->
+<header class="top-bar">
+  <div class="brand">
+    <span class="mono">⌗ Sazid Admin</span>
+    <span class="tag">Studio CMS</span>
+  </div>
+
+  <nav class="nav-tabs" role="tablist">
+    <div class="nav-tab active" data-tab="hero"><span>🚀</span> Hero & Resume</div>
+    <div class="nav-tab" data-tab="work"><span>💼</span> Selected Work</div>
+    <div class="nav-tab" data-tab="experience"><span>✈️</span> Experience</div>
+    <div class="nav-tab" data-tab="about"><span>👤</span> About & Stack</div>
+    <div class="nav-tab" data-tab="testimonials"><span>💬</span> Testimonials</div>
+    <div class="nav-tab" data-tab="media"><span>📁</span> Media Library</div>
+  </nav>
+
+  <div class="actions">
+    <a href="/" target="_blank" class="btn btn-secondary btn-sm">Preview Live ↗</a>
+    <button type="button" class="btn btn-primary btn-sm" id="btnSave">Publish Changes</button>
+    <button type="button" class="btn btn-secondary btn-sm" id="btnLogout" title="Sign Out">✕</button>
+  </div>
+</header>
+
+<!-- Main Container -->
+<main class="container">
+
+  <!-- ================= TAB 1: HERO & RESUME ================= -->
+  <section class="tab-pane active" id="pane-hero">
+    <div class="pane-head">
+      <div>
+        <h2>Hero Section & Resume</h2>
+        <p>Manage your hero tagline, work availability status, resume PDF, and contact links.</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h3>Hero Tagline & Work Availability</h3>
+      </div>
+      <div class="form-grid">
+        <div class="form-group full">
+          <label>Hero Tagline / Primary Description</label>
+          <textarea id="heroTagline" rows="3" placeholder="Full-Stack Software Engineer building scalable cloud architectures..."></textarea>
+        </div>
+        <div class="form-group">
+          <label>Work Status</label>
+          <label class="switch-label">
+            <input type="checkbox" id="statusOpen" style="display:none">
+            <span class="switch"></span>
+            <span id="statusText">Open to work</span>
+          </label>
+        </div>
+        <div class="form-group">
+          <label>Open Badge Label</label>
+          <input type="text" id="statusOpenLabel" value="Open to work">
+        </div>
+        <div class="form-group">
+          <label>Busy Badge Label</label>
+          <input type="text" id="statusBusyLabel" value="Booked for now">
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h3>Resume Document (.PDF)</h3>
+      </div>
+      <div class="form-grid">
+        <div class="form-group full">
+          <label>Current Resume URL or Relative Path</label>
+          <div style="display:flex;gap:8px">
+            <input type="text" id="resumeUrl" placeholder="/uploads/resumes/resume.pdf">
+            <button type="button" class="btn btn-secondary btn-sm" onclick="openMediaPickerFor('resumeUrl', 'resumes')">📁 Pick from Library</button>
+          </div>
+        </div>
+        <div class="form-group full">
+          <label>Upload New Resume PDF</label>
+          <div class="dropzone" id="dzResume" data-type="resumes" data-target="resumeUrl">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+            <p>Drag and drop your <strong>resume.pdf</strong> here, or click to browse</p>
+            <input type="file" accept=".pdf">
+          </div>
+          <div id="prevResume" class="file-preview" style="display:none">
+            <div class="meta"><b id="prevResumeName">resume.pdf</b><small id="prevResumeSize">—</small></div>
+            <a id="prevResumeLink" href="#" target="_blank" class="btn btn-secondary btn-sm">View ↗</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h3>Contact & Social Coordinates</h3>
+      </div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Email Address</label>
+          <input type="email" id="contactEmail" placeholder="sazidcraft@gmail.com">
+        </div>
+        <div class="form-group">
+          <label>WhatsApp Number</label>
+          <input type="text" id="contactWhatsapp" placeholder="8801315303931">
+        </div>
+        <div class="form-group">
+          <label>GitHub URL</label>
+          <input type="text" id="linkGithub" placeholder="https://github.com/sazidhabib">
+        </div>
+        <div class="form-group">
+          <label>LinkedIn URL</label>
+          <input type="text" id="linkLinkedin" placeholder="https://linkedin.com/in/sazidcraft">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= TAB 2: SELECTED WORK (PROJECTS) ================= -->
+  <section class="tab-pane" id="pane-work">
+    <div class="pane-head">
+      <div>
+        <h2>Selected Work (Projects)</h2>
+        <p>Add, edit, reorder projects, upload screenshots (auto-WebP) and demo preview videos.</p>
+      </div>
+      <button type="button" class="btn btn-primary" id="btnAddProject">+ Add Project</button>
+    </div>
+
+    <div id="projectsList">
+      <!-- Injected via JavaScript -->
+    </div>
+  </section>
+
+  <!-- ================= TAB 3: EXPERIENCE (DEPARTURES BOARD & DOSSIER) ================= -->
+  <section class="tab-pane" id="pane-experience">
+    <div class="pane-head">
+      <div>
+        <h2>Experience (Departures Board & Flight Telemetry)</h2>
+        <p>Manage career stops, split-flap metrics, company logos (auto-WebP/SVG), short descriptions, deliverables, and tech stack tags.</p>
+      </div>
+      <button type="button" class="btn btn-primary" id="btnAddExp">+ Add Experience</button>
+    </div>
+
+    <div id="expList">
+      <!-- Injected via JavaScript -->
+    </div>
+  </section>
+
+  <!-- ================= TAB 4: ABOUT & STACK ================= -->
+  <section class="tab-pane" id="pane-about">
+    <div class="pane-head">
+      <div>
+        <h2>About Section & Tech Stack</h2>
+        <p>Edit narrative cards (Who / How / Where), headlines, bios, and core tech stack skills.</p>
+      </div>
+    </div>
+
+    <div id="aboutList">
+      <!-- Injected via JavaScript -->
+    </div>
+  </section>
+
+  <!-- ================= TAB 5: TESTIMONIALS ================= -->
+  <section class="tab-pane" id="pane-testimonials">
+    <div class="pane-head">
+      <div>
+        <h2>Client Testimonials</h2>
+        <p>Manage client endorsements, client roles, and avatar headshots (auto-WebP conversion).</p>
+      </div>
+      <button type="button" class="btn btn-primary" id="btnAddTesti">+ Add Testimonial</button>
+    </div>
+
+    <div id="testiList">
+      <!-- Injected via JavaScript -->
+    </div>
+  </section>
+
+  <!-- ================= TAB 6: CENTRALIZED MEDIA LIBRARY ================= -->
+  <section class="tab-pane" id="pane-media">
+    <div class="pane-head">
+      <div>
+        <h2>Centralized Media Library</h2>
+        <p>Upload, organize, preview, copy URLs, and manage all images (converted to WebP), videos, PDFs, and icons.</p>
+      </div>
+      <button type="button" class="btn btn-secondary btn-sm" onclick="fetchAndRenderMedia()">🔄 Refresh Library</button>
+    </div>
+
+    <!-- Media Upload Zone -->
+    <div class="card">
+      <div class="card-header">
+        <h3>Upload New Assets</h3>
+        <span class="tag-badge">⚡ Instant Client-Side WebP Compression (0ms Server Overhead)</span>
+      </div>
+      <div class="dropzone" id="dzMainMedia" data-type="general" style="padding:28px">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        <p>Drag and drop images, videos, or PDFs here — <strong>Images convert to compressed WebP automatically</strong></p>
+        <input type="file" multiple accept="image/*,video/*,.pdf">
+      </div>
+    </div>
+
+    <!-- Media Filter and Search Bar -->
+    <div class="media-filter-bar">
+      <div class="media-pills" id="mediaPills">
+        <span class="media-pill active" data-type="all">All Files (<span id="countAll">0</span>)</span>
+        <span class="media-pill" data-type="projects">Projects (<span id="countProjects">0</span>)</span>
+        <span class="media-pill" data-type="experience">Experience (<span id="countExp">0</span>)</span>
+        <span class="media-pill" data-type="testimonials">Testimonials (<span id="countTesti">0</span>)</span>
+        <span class="media-pill" data-type="icons">Icons (<span id="countIcons">0</span>)</span>
+        <span class="media-pill" data-type="resumes">Resumes (<span id="countResumes">0</span>)</span>
+        <span class="media-pill" data-type="general">General (<span id="countGeneral">0</span>)</span>
+      </div>
+      <input type="text" id="mediaSearch" placeholder="Search assets..." style="max-width:240px;padding:7px 12px;font-size:12.5px">
+    </div>
+
+    <!-- Media Grid -->
+    <div class="media-grid" id="mainMediaGrid">
+      <!-- Injected via JavaScript -->
+    </div>
+  </section>
+
+</main>
+
+<div id="toast">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+  <span id="toastMsg">Changes published successfully!</span>
+</div>
+
+<script>
+let C = null; // Active content model in memory
+let allMediaFiles = []; // All media items from server
+let activeFilter = 'all';
+let pickerCallback = null;
+let token = sessionStorage.getItem('sazid_admin_token') || localStorage.getItem('sazid_admin_token');
+
+// Elements
+const modal = document.getElementById('loginModal');
+const loginForm = document.getElementById('loginForm');
+const loginError = document.getElementById('loginError');
+const toast = document.getElementById('toast');
+const toastMsg = document.getElementById('toastMsg');
+const btnSave = document.getElementById('btnSave');
+const btnLogout = document.getElementById('btnLogout');
+const mediaPickerModal = document.getElementById('mediaPickerModal');
+
+function showToast(msg) {
+  toastMsg.textContent = msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 3200);
+}
+
+// ================= 1. CLIENT-SIDE AUTO-WEBP CONVERTER =================
+// Converts PNG, JPG, JPEG instantly using off-screen HTML5 Canvas.
+// Zero backend server latency; cuts file size by 70%-90% without losing visual clarity.
+async function processImageFile(file, quality = 0.85) {
+  // If not a raster image (e.g. PDF, MP4, WebM) or already SVG, return original
+  if (!file.type.startsWith('image/') || file.type === 'image/svg+xml' || file.name.endsWith('.webp')) {
+    return file;
+  }
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.naturalWidth;
+        canvas.height = img.naturalHeight;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0);
+        canvas.toBlob((blob) => {
+          if (!blob) {
+            resolve(file);
+            return;
+          }
+          const baseName = file.name.replace(/\.[^/.]+$/, '');
+          const webpFile = new File([blob], `${baseName}.webp`, { type: 'image/webp' });
+          console.log(`[Auto-WebP] Converted "${file.name}" (${(file.size/1024).toFixed(1)}KB) -> "${webpFile.name}" (${(blob.size/1024).toFixed(1)}KB)`);
+          resolve(webpFile);
+        }, 'image/webp', quality);
+      };
+      img.onerror = () => resolve(file);
+      img.src = e.target.result;
+    };
+    reader.onerror = () => resolve(file);
+    reader.readAsDataURL(file);
+  });
+}
+
+// ================= 2. AUTHENTICATION =================
+async function checkAuth() {
+  if (token) {
+    try {
+      const res = await fetch('/api/admin/content', { headers: { 'Authorization': `Bearer ${token}` } });
+      if (res.ok) {
+        C = await res.json();
+        modal.style.display = 'none';
+        renderAll();
+        fetchAndRenderMedia();
+        return;
+      }
+    } catch (e) {}
+  }
+  modal.style.display = 'grid';
+}
+
+loginForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const password = document.getElementById('adminPass').value;
+  try {
+    const res = await fetch('/api/admin/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password })
+    });
+    const data = await res.json();
+    if (res.ok && data.ok) {
+      token = data.token;
+      sessionStorage.setItem('sazid_admin_token', token);
+      modal.style.display = 'none';
+      loginError.style.display = 'none';
+      // Load content
+      const cRes = await fetch('/api/admin/content', { headers: { 'Authorization': `Bearer ${token}` } });
+      C = await cRes.json();
+      renderAll();
+      fetchAndRenderMedia();
+    } else {
+      loginError.textContent = data.error || 'Incorrect password';
+      loginError.style.display = 'block';
+    }
+  } catch (err) {
+    loginError.textContent = 'Server error. Ensure Vite is running.';
+    loginError.style.display = 'block';
+  }
+});
+
+btnLogout.addEventListener('click', () => {
+  sessionStorage.removeItem('sazid_admin_token');
+  localStorage.removeItem('sazid_admin_token');
+  location.reload();
+});
+
+// ================= 3. NAVIGATION TABS =================
+document.querySelectorAll('.nav-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('pane-' + tab.dataset.tab).classList.add('active');
+    if (tab.dataset.tab === 'media') fetchAndRenderMedia();
+  });
+});
+
+// ================= 4. RENDERERS =================
+function renderAll() {
+  if (!C) return;
+  renderHero();
+  renderProjects();
+  renderExperience();
+  renderAbout();
+  renderTestimonials();
+  setupDropzones();
+}
+
+// TAB 1: Hero & Resume
+function renderHero() {
+  document.getElementById('heroTagline').value = C.hero?.tagline || '';
+  document.getElementById('statusOpen').checked = !!C.status?.open;
+  document.getElementById('statusOpenLabel').value = C.status?.openLabel || 'Open to work';
+  document.getElementById('statusBusyLabel').value = C.status?.busyLabel || 'Booked for now';
+  document.getElementById('statusText').textContent = C.status?.open ? C.status?.openLabel : C.status?.busyLabel;
+  document.getElementById('resumeUrl').value = C.hero?.resumeUrl || '/resume.pdf';
+
+  document.getElementById('contactEmail').value = C.contact?.email || '';
+  document.getElementById('contactWhatsapp').value = C.contact?.whatsapp || '';
+
+  const gh = C.contact?.links?.find(l => l.type === 'github') || { value: '' };
+  const li = C.contact?.links?.find(l => l.type === 'linkedin') || { value: '' };
+  document.getElementById('linkGithub').value = gh.value || 'https://github.com/sazidhabib';
+  document.getElementById('linkLinkedin').value = li.value || '';
+}
+
+// TAB 2: Projects
+function renderProjects() {
+  const list = document.getElementById('projectsList');
+  list.innerHTML = '';
+  if (!Array.isArray(C.work)) C.work = [];
+
+  C.work.forEach((p, idx) => {
+    const card = document.createElement('div');
+    card.className = 'item-card';
+    card.innerHTML = `
+      <div class="item-head">
+        <div class="item-title">
+          <span class="mono" style="color:var(--blue)">PRJ // 0${idx + 1}</span>
+          <b>${p.n || 'Untitled Project'}</b>
+          ${p.video ? '<span class="item-badge" style="color:var(--warm)">VIDEO PREVIEW</span>' : ''}
+        </div>
+        <div style="display:flex;gap:6px">
+          ${idx > 0 ? `<button type="button" class="btn btn-secondary btn-sm" onclick="moveProject(${idx}, -1)">↑</button>` : ''}
+          ${idx < C.work.length - 1 ? `<button type="button" class="btn btn-secondary btn-sm" onclick="moveProject(${idx}, 1)">↓</button>` : ''}
+          <button type="button" class="btn btn-danger btn-sm" onclick="deleteProject(${idx})">Delete</button>
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Project Name</label>
+          <input type="text" value="${p.n || ''}" oninput="C.work[${idx}].n = this.value">
+        </div>
+        <div class="form-group">
+          <label>Live URL</label>
+          <input type="text" value="${p.live || ''}" placeholder="https://..." oninput="C.work[${idx}].live = this.value">
+        </div>
+        <div class="form-group">
+          <label>GitHub Source URL</label>
+          <input type="text" value="${p.source || ''}" placeholder="https://github.com/..." oninput="C.work[${idx}].source = this.value">
+        </div>
+        <div class="form-group">
+          <label>Case Study Link / Anchor</label>
+          <input type="text" value="${p.case || ''}" placeholder="#/project/..." oninput="C.work[${idx}].case = this.value">
+        </div>
+        <div class="form-group full">
+          <label>Short Description</label>
+          <textarea rows="2" oninput="C.work[${idx}].d = this.value">${p.d || ''}</textarea>
+        </div>
+        <div class="form-group">
+          <label>Thumbnail Screenshot (.webp / .png)</label>
+          <div style="display:flex;gap:8px;margin-bottom:6px">
+            <input type="text" value="${p.img || ''}" id="img-input-${idx}" oninput="C.work[${idx}].img = this.value">
+            <button type="button" class="btn btn-secondary btn-sm" onclick="openMediaPickerFor('img-input-${idx}', 'projects', ${idx}, 'img')">📁 Pick</button>
+          </div>
+          <div class="dropzone" data-type="projects" data-target="img-input-${idx}" data-idx="${idx}" data-field="img">
+            <p>Upload project image (Auto-WebP)</p>
+            <input type="file" accept="image/*">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Optional Demo Video (.mp4 / .webm)</label>
+          <div style="display:flex;gap:8px;margin-bottom:6px">
+            <input type="text" value="${p.video || ''}" id="video-input-${idx}" placeholder="/uploads/projects/demo.mp4" oninput="C.work[${idx}].video = this.value">
+            <button type="button" class="btn btn-secondary btn-sm" onclick="openMediaPickerFor('video-input-${idx}', 'projects', ${idx}, 'video')">📁 Pick</button>
+          </div>
+          <div class="dropzone" data-type="projects" data-target="video-input-${idx}" data-idx="${idx}" data-field="video">
+            <p>Upload short video</p>
+            <input type="file" accept="video/mp4,video/webm">
+          </div>
+        </div>
+        <div class="form-group full">
+          <label>Tech Stack Tags (Comma-separated)</label>
+          <input type="text" value="${(p.tags || []).join(', ')}" onchange="C.work[${idx}].tags = this.value.split(',').map(s=>s.trim()).filter(Boolean)">
+        </div>
+      </div>
+    `;
+    list.appendChild(card);
+  });
+}
+
+window.moveProject = (idx, dir) => {
+  const target = idx + dir;
+  if (target < 0 || target >= C.work.length) return;
+  const temp = C.work[idx];
+  C.work[idx] = C.work[target];
+  C.work[target] = temp;
+  renderProjects();
+  setupDropzones();
+};
+
+window.deleteProject = (idx) => {
+  if (confirm(`Delete "${C.work[idx].n}"?`)) {
+    C.work.splice(idx, 1);
+    renderProjects();
+    setupDropzones();
+  }
+};
+
+document.getElementById('btnAddProject').addEventListener('click', () => {
+  C.work.push({
+    n: 'New Project',
+    d: 'Project summary and architectural overview.',
+    img: '/src/assets/nextidea.webp',
+    video: '',
+    live: 'https://',
+    source: 'https://github.com/sazidhabib',
+    case: '#/project/new',
+    tags: ['Next.js', 'React', 'TypeScript']
+  });
+  renderProjects();
+  setupDropzones();
+});
+
+// TAB 3: Experience (Departures Board & Flight Telemetry Dossier)
+function renderExperience() {
+  const list = document.getElementById('expList');
+  list.innerHTML = '';
+  if (!Array.isArray(C.experience)) C.experience = [];
+
+  C.experience.forEach((e, idx) => {
+    // Ensure details object exists
+    e.details = e.details || {};
+    e.details.company = e.details.company || e.base?.[1] || '';
+    e.details.role = e.details.role || e.base?.[2] || '';
+    e.details.period = e.details.period || (e.base?.[0] ? `${e.base[0]} — Present · Full-Time` : '');
+    e.details.location = e.details.location || 'DHAKA · REMOTE';
+    e.details.color = e.details.color || (idx === 0 ? '#0D99FF' : idx === 1 ? '#7B4DFF' : '#0ACF83');
+    e.details.status = e.details.status || e.base?.[3] || 'DONE';
+    e.details.desc = e.details.desc || '';
+    e.details.dels = Array.isArray(e.details.dels) ? e.details.dels : [];
+    e.details.stack = Array.isArray(e.details.stack) ? e.details.stack : [];
+    e.details.logo = e.details.logo || '';
+
+    const card = document.createElement('div');
+    card.className = 'item-card';
+    card.innerHTML = `
+      <div class="item-head">
+        <div class="item-title">
+          <span class="mono" style="color:${e.details.color}">FLIGHT // 0${idx + 1}</span>
+          <b>${e.base?.[1] || 'Company'} — ${e.base?.[2] || 'Role'}</b>
+          <span class="item-badge" style="color:${e.base?.[3] === 'NOW' ? 'var(--green)' : 'var(--muted)'}">${e.base?.[3] || 'DONE'}</span>
+        </div>
+        <div style="display:flex;gap:6px">
+          ${idx > 0 ? `<button type="button" class="btn btn-secondary btn-sm" onclick="moveExp(${idx}, -1)">↑</button>` : ''}
+          ${idx < C.experience.length - 1 ? `<button type="button" class="btn btn-secondary btn-sm" onclick="moveExp(${idx}, 1)">↓</button>` : ''}
+          <button type="button" class="btn btn-danger btn-sm" onclick="deleteExp(${idx})">Delete</button>
+        </div>
+      </div>
+
+      <div style="margin-bottom:14px;padding:12px;background:rgba(255,255,255,.02);border-radius:8px;border:1px solid var(--border)">
+        <b style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:8px">1. Split-Flap Board Columns</b>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Year</label>
+            <input type="text" value="${e.base?.[0] || '2026'}" oninput="C.experience[${idx}].base[0] = this.value">
+          </div>
+          <div class="form-group">
+            <label>Studio Name (FLAP 1)</label>
+            <input type="text" value="${e.base?.[1] || ''}" oninput="C.experience[${idx}].base[1] = this.value; C.experience[${idx}].alt[1] = this.value; C.experience[${idx}].details.company = this.value">
+          </div>
+          <div class="form-group">
+            <label>Role (FLAP 2)</label>
+            <input type="text" value="${e.base?.[2] || ''}" oninput="C.experience[${idx}].base[2] = this.value; C.experience[${idx}].details.role = this.value">
+          </div>
+          <div class="form-group">
+            <label>Status</label>
+            <select onchange="C.experience[${idx}].base[3] = this.value; C.experience[${idx}].alt[3] = this.value; C.experience[${idx}].details.status = this.value">
+              <option value="NOW" ${e.base?.[3] === 'NOW' ? 'selected' : ''}>NOW (Active)</option>
+              <option value="DONE" ${e.base?.[3] === 'DONE' ? 'selected' : ''}>DONE (Completed)</option>
+            </select>
+          </div>
+          <div class="form-group full">
+            <label>Flap Hover Metric Text (e.g. 60+ PROJECTS SHIPPED, +27% CHECKOUT RATE)</label>
+            <input type="text" value="${e.alt?.[2] || ''}" oninput="C.experience[${idx}].alt[2] = this.value">
+          </div>
+        </div>
+      </div>
+
+      <div style="padding:12px;background:rgba(255,255,255,.02);border-radius:8px;border:1px solid var(--border)">
+        <b style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:8px">2. Flight Telemetry Dossier Drawer (Expanded on Click / Scroll)</b>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Period & Work Type</label>
+            <input type="text" value="${e.details.period || ''}" placeholder="2024 — 2025 · Hybrid" oninput="C.experience[${idx}].details.period = this.value">
+          </div>
+          <div class="form-group">
+            <label>Location Coordinate</label>
+            <input type="text" value="${e.details.location || 'DHAKA · REMOTE'}" oninput="C.experience[${idx}].details.location = this.value">
+          </div>
+          <div class="form-group">
+            <label>Beacon Accent Color</label>
+            <div style="display:flex;gap:6px;align-items:center">
+              <input type="color" value="${e.details.color || '#0D99FF'}" style="width:40px;height:38px;padding:2px;cursor:pointer" onchange="C.experience[${idx}].details.color = this.value; renderExperience()">
+              <input type="text" value="${e.details.color || '#0D99FF'}" oninput="C.experience[${idx}].details.color = this.value">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Company Logo (.webp / SVG / image)</label>
+            <div style="display:flex;gap:6px">
+              <input type="text" id="exp-logo-${idx}" value="${e.details.logo || ''}" placeholder="/uploads/experience/logo.webp or <svg..." oninput="C.experience[${idx}].details.logo = this.value">
+              <button type="button" class="btn btn-secondary btn-sm" onclick="openMediaPickerFor('exp-logo-${idx}', 'experience', ${idx}, 'logo', 'exp')">📁 Pick</button>
+            </div>
+            <div class="dropzone" data-type="experience" data-target="exp-logo-${idx}" data-idx="${idx}" data-field="logo" data-section="exp" style="padding:10px;margin-top:4px">
+              <p>Upload Company Logo (Auto-WebP)</p>
+              <input type="file" accept="image/*">
+            </div>
+          </div>
+          <div class="form-group full">
+            <label>Short Role Description</label>
+            <textarea rows="2" placeholder="Engineered responsive client web apps and high-performance interactive interfaces..." oninput="C.experience[${idx}].details.desc = this.value">${e.details.desc || ''}</textarea>
+          </div>
+          <div class="form-group full">
+            <label>Key Deliverable Bullets (One per line)</label>
+            <textarea rows="3" placeholder="Shipped 60+ modular web components&#10;Reduced initial bundle load time by 35%" onchange="C.experience[${idx}].details.dels = this.value.split('\n').map(s=>s.trim()).filter(Boolean)">${e.details.dels.join('\n')}</textarea>
+          </div>
+          <div class="form-group full">
+            <label>Core Tech Stack Tags (Comma-separated)</label>
+            <input type="text" value="${e.details.stack.join(', ')}" onchange="C.experience[${idx}].details.stack = this.value.split(',').map(s=>s.trim()).filter(Boolean)">
+          </div>
+        </div>
+      </div>
+    `;
+    list.appendChild(card);
+  });
+}
+
+window.moveExp = (idx, dir) => {
+  const target = idx + dir;
+  if (target < 0 || target >= C.experience.length) return;
+  const temp = C.experience[idx];
+  C.experience[idx] = C.experience[target];
+  C.experience[target] = temp;
+  renderExperience();
+  setupDropzones();
+};
+
+window.deleteExp = (idx) => {
+  if (confirm(`Delete role "${C.experience[idx].base?.[1]}"?`)) {
+    C.experience.splice(idx, 1);
+    renderExperience();
+    setupDropzones();
+  }
+};
+
+document.getElementById('btnAddExp').addEventListener('click', () => {
+  C.experience.push({
+    base: ['2027', 'Studio Name', 'Senior Full Stack Dev', 'NOW'],
+    alt: ['2027', 'Studio Name', '10+ PRODUCTS SHIPPED', 'NOW'],
+    details: {
+      company: 'Studio Name',
+      role: 'Senior Full Stack Dev',
+      period: '2027 — Present · Full-Time',
+      location: 'DHAKA · REMOTE',
+      status: 'NOW',
+      statusClass: 'now',
+      badgeClass: 'hud-pixalean',
+      color: '#0D99FF',
+      logo: '',
+      desc: 'Architecting scalable web applications and distributed backend microservices.',
+      dels: ['Engineered high-scale web platforms with 99.99% uptime', 'Optimized database response times by 30%'],
+      stack: ['Next.js', 'TypeScript', 'Node.js', 'PostgreSQL']
+    }
+  });
+  renderExperience();
+  setupDropzones();
+});
+
+// TAB 4: About & Tech Stack
+function renderAbout() {
+  const list = document.getElementById('aboutList');
+  list.innerHTML = '';
+  if (!Array.isArray(C.about)) C.about = [];
+
+  C.about.forEach((a, idx) => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `
+      <div class="card-header">
+        <h3>Card 0${idx + 1} — ${a.t || 'Section'}</h3>
+        <span class="mono item-badge">${a.st || 'Stack Category'}</span>
+      </div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Headline Line 1</label>
+          <input type="text" value="${a.h?.[0] || ''}" oninput="C.about[${idx}].h[0] = this.value">
+        </div>
+        <div class="form-group">
+          <label>Headline Line 2</label>
+          <input type="text" value="${a.h?.[1] || ''}" oninput="C.about[${idx}].h[1] = this.value">
+        </div>
+        <div class="form-group full">
+          <label>Narrative Bio Paragraph (Supports HTML &lt;b&gt; bold tags)</label>
+          <textarea rows="3" oninput="C.about[${idx}].p = this.value">${a.p || ''}</textarea>
+        </div>
+        <div class="form-group">
+          <label>Category Title</label>
+          <input type="text" value="${a.st || ''}" oninput="C.about[${idx}].st = this.value">
+        </div>
+        <div class="form-group full">
+          <label>Tech Stack Items (Comma-separated)</label>
+          <input type="text" value="${(a.stack || []).join(', ')}" onchange="C.about[${idx}].stack = this.value.split(',').map(s=>s.trim()).filter(Boolean)">
+        </div>
+      </div>
+    `;
+    list.appendChild(card);
+  });
+}
+
+// TAB 5: Testimonials
+function renderTestimonials() {
+  const list = document.getElementById('testiList');
+  list.innerHTML = '';
+  if (!Array.isArray(C.testimonials)) C.testimonials = [];
+
+  C.testimonials.forEach((t, idx) => {
+    const card = document.createElement('div');
+    card.className = 'item-card';
+    card.innerHTML = `
+      <div class="item-head">
+        <div class="item-title">
+          <b>${t.n || 'Client Name'}</b>
+          <span class="item-badge">${t.r || 'Role, Company'}</span>
+        </div>
+        <button type="button" class="btn btn-danger btn-sm" onclick="deleteTesti(${idx})">Delete</button>
+      </div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Client Name</label>
+          <input type="text" value="${t.n || ''}" oninput="C.testimonials[${idx}].n = this.value">
+        </div>
+        <div class="form-group">
+          <label>Role & Company</label>
+          <input type="text" value="${t.r || ''}" oninput="C.testimonials[${idx}].r = this.value">
+        </div>
+        <div class="form-group full">
+          <label>Client Avatar Image (Upload WebP / Pick / Unsplash ID)</label>
+          <div style="display:flex;gap:8px;margin-bottom:6px">
+            <input type="text" value="${t.img || ''}" id="testi-img-${idx}" oninput="C.testimonials[${idx}].img = this.value">
+            <button type="button" class="btn btn-secondary btn-sm" onclick="openMediaPickerFor('testi-img-${idx}', 'testimonials', ${idx}, 'img', 'testi')">📁 Pick</button>
+          </div>
+          <div class="dropzone" data-type="testimonials" data-target="testi-img-${idx}" data-idx="${idx}" data-field="img" data-section="testi" style="padding:10px">
+            <p>Upload Client Avatar (Auto-WebP)</p>
+            <input type="file" accept="image/*">
+          </div>
+        </div>
+        <div class="form-group full">
+          <label>Client Testimonial Quote</label>
+          <textarea rows="2" oninput="C.testimonials[${idx}].q = this.value">${t.q || ''}</textarea>
+        </div>
+      </div>
+    `;
+    list.appendChild(card);
+  });
+}
+
+window.deleteTesti = (idx) => {
+  if (confirm(`Delete endorsement from "${C.testimonials[idx].n}"?`)) {
+    C.testimonials.splice(idx, 1);
+    renderTestimonials();
+    setupDropzones();
+  }
+};
+
+document.getElementById('btnAddTesti').addEventListener('click', () => {
+  C.testimonials.push({
+    n: 'Client Name',
+    r: 'CTO, Tech Co',
+    img: '1507003211169-0a1dd7228f2d',
+    q: 'Sazid delivered high-performance code ahead of schedule.'
+  });
+  renderTestimonials();
+  setupDropzones();
+});
+
+// ================= 5. CENTRALIZED MEDIA LIBRARY & PICKER =================
+async function fetchAndRenderMedia() {
+  try {
+    const res = await fetch('/api/admin/media', { headers: { 'Authorization': `Bearer ${token}` } });
+    const data = await res.json();
+    if (res.ok && data.ok) {
+      allMediaFiles = data.files || [];
+      updateMediaCounts();
+      renderMediaGrid('mainMediaGrid', activeFilter, document.getElementById('mediaSearch')?.value);
+    }
+  } catch (err) {
+    console.error('Failed to load media files:', err);
+  }
+}
+
+function updateMediaCounts() {
+  const getCount = (t) => t === 'all' ? allMediaFiles.length : allMediaFiles.filter(f => f.type === t).length;
+  if (document.getElementById('countAll')) document.getElementById('countAll').textContent = getCount('all');
+  if (document.getElementById('countProjects')) document.getElementById('countProjects').textContent = getCount('projects');
+  if (document.getElementById('countExp')) document.getElementById('countExp').textContent = getCount('experience');
+  if (document.getElementById('countTesti')) document.getElementById('countTesti').textContent = getCount('testimonials');
+  if (document.getElementById('countIcons')) document.getElementById('countIcons').textContent = getCount('icons');
+  if (document.getElementById('countResumes')) document.getElementById('countResumes').textContent = getCount('resumes');
+  if (document.getElementById('countGeneral')) document.getElementById('countGeneral').textContent = getCount('general');
+}
+
+function renderMediaGrid(gridId, filter = 'all', searchQuery = '', isPicker = false) {
+  const grid = document.getElementById(gridId);
+  if (!grid) return;
+  grid.innerHTML = '';
+
+  const q = (searchQuery || '').toLowerCase().trim();
+  const filtered = allMediaFiles.filter(f => {
+    const matchType = filter === 'all' || f.type === filter;
+    const matchQuery = !q || f.name.toLowerCase().includes(q) || f.url.toLowerCase().includes(q);
+    return matchType && matchQuery;
+  });
+
+  if (!filtered.length) {
+    grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted)">No media assets found matching the criteria.</div>`;
+    return;
+  }
+
+  filtered.forEach(file => {
+    const isImg = /\.(webp|png|jpe?g|svg|gif)$/i.test(file.name);
+    const isVid = /\.(mp4|webm)$/i.test(file.name);
+    const isPdf = /\.pdf$/i.test(file.name);
+    const sizeStr = file.size > 1048576 ? (file.size / 1048576).toFixed(1) + ' MB' : (file.size / 1024).toFixed(1) + ' KB';
+
+    const card = document.createElement('div');
+    card.className = 'media-card';
+    if (isPicker) card.style.cursor = 'pointer';
+
+    let thumbHtml = '';
+    if (isImg) {
+      thumbHtml = `<img src="${file.url}" alt="${file.name}" loading="lazy">`;
+    } else if (isVid) {
+      thumbHtml = `<video src="${file.url}" muted playsinline></video>`;
+    } else {
+      thumbHtml = `<svg class="doc-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`;
+    }
+
+    card.innerHTML = `
+      <div class="media-thumb">${thumbHtml}</div>
+      <div class="media-info">
+        <b title="${file.name}">${file.name}</b>
+        <div class="meta-row">
+          <span class="mono" style="color:var(--blue)">${file.type}</span>
+          <span class="mono">${sizeStr}</span>
+        </div>
+        <div class="media-actions">
+          ${isPicker
+            ? `<button type="button" class="btn btn-primary btn-sm" style="width:100%">Select</button>`
+            : `<button type="button" class="btn btn-secondary btn-sm" onclick="copyUrl('${file.url}', this)" style="flex:1">📋 Copy</button>
+               <button type="button" class="btn btn-danger btn-sm" onclick="deleteMediaFile('${file.url}')">🗑️</button>`
+          }
+        </div>
+      </div>
+    `;
+
+    if (isPicker) {
+      card.onclick = () => {
+        if (pickerCallback) pickerCallback(file.url);
+        closeMediaPicker();
+      };
+    }
+
+    grid.appendChild(card);
+  });
+}
+
+window.copyUrl = (url, btn) => {
+  navigator.clipboard.writeText(url).then(() => {
+    const orig = btn.innerHTML;
+    btn.innerHTML = '✓ Copied!';
+    btn.style.color = 'var(--green)';
+    setTimeout(() => {
+      btn.innerHTML = orig;
+      btn.style.color = '';
+    }, 1800);
+    showToast(`Copied: ${url}`);
+  });
+};
+
+window.deleteMediaFile = async (fileUrl) => {
+  if (!confirm(`Permanently delete "${fileUrl}"?`)) return;
+  try {
+    const res = await fetch('/api/admin/media', {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ url: fileUrl })
+    });
+    const data = await res.json();
+    if (res.ok && data.ok) {
+      showToast('Asset deleted successfully');
+      fetchAndRenderMedia();
+    } else {
+      alert(data.error || 'Failed to delete file');
+    }
+  } catch (err) {
+    alert('Delete error: ' + err.message);
+  }
+};
+
+// Media filter pill clicks
+document.querySelectorAll('#mediaPills .media-pill').forEach(pill => {
+  pill.addEventListener('click', () => {
+    document.querySelectorAll('#mediaPills .media-pill').forEach(p => p.classList.remove('active'));
+    pill.classList.add('active');
+    activeFilter = pill.dataset.type;
+    renderMediaGrid('mainMediaGrid', activeFilter, document.getElementById('mediaSearch')?.value);
+  });
+});
+
+document.getElementById('mediaSearch')?.addEventListener('input', (e) => {
+  renderMediaGrid('mainMediaGrid', activeFilter, e.target.value);
+});
+
+// Universal Media Picker Modal functions
+function openMediaPicker(callback, defaultFilter = 'all') {
+  pickerCallback = callback;
+  mediaPickerModal.style.display = 'grid';
+
+  // Set picker pills
+  document.querySelectorAll('#pickerPills .media-pill').forEach(p => {
+    p.classList.toggle('active', p.dataset.type === defaultFilter);
+  });
+
+  renderMediaGrid('pickerGrid', defaultFilter, '', true);
+}
+
+function closeMediaPicker() {
+  mediaPickerModal.style.display = 'none';
+  pickerCallback = null;
+}
+
+window.openMediaPickerFor = (targetInputId, type = 'all', idx = undefined, field = undefined, section = undefined) => {
+  openMediaPicker((selectedUrl) => {
+    const input = document.getElementById(targetInputId);
+    if (input) input.value = selectedUrl;
+
+    if (section === 'exp' && idx !== undefined && C.experience?.[idx]) {
+      C.experience[idx].details = C.experience[idx].details || {};
+      C.experience[idx].details[field] = selectedUrl;
+    } else if (section === 'testi' && idx !== undefined && C.testimonials?.[idx]) {
+      C.testimonials[idx][field] = selectedUrl;
+    } else if (idx !== undefined && field && C.work?.[idx]) {
+      C.work[idx][field] = selectedUrl;
+    }
+    showToast(`Selected asset: ${selectedUrl}`);
+  }, type);
+};
+
+// Picker filter and search
+document.querySelectorAll('#pickerPills .media-pill').forEach(pill => {
+  pill.addEventListener('click', () => {
+    document.querySelectorAll('#pickerPills .media-pill').forEach(p => p.classList.remove('active'));
+    pill.classList.add('active');
+    renderMediaGrid('pickerGrid', pill.dataset.type, document.getElementById('pickerSearch')?.value, true);
+  });
+});
+
+document.getElementById('pickerSearch')?.addEventListener('input', (e) => {
+  const activePill = document.querySelector('#pickerPills .media-pill.active')?.dataset.type || 'all';
+  renderMediaGrid('pickerGrid', activePill, e.target.value, true);
+});
+
+// ================= 6. DROPZONES & FILE UPLOAD HANDLING =================
+function setupDropzones() {
+  document.querySelectorAll('.dropzone').forEach(dz => {
+    const input = dz.querySelector('input[type="file"]');
+    if (!input) return;
+
+    dz.onclick = (e) => {
+      if (e.target.tagName !== 'INPUT') input.click();
+    };
+
+    dz.ondragover = (e) => { e.preventDefault(); dz.classList.add('dragover'); };
+    dz.ondragleave = () => dz.classList.remove('dragover');
+    dz.ondrop = (e) => {
+      e.preventDefault();
+      dz.classList.remove('dragover');
+      if (e.dataTransfer.files?.length) {
+        handleFiles(e.dataTransfer.files, dz);
+      }
+    };
+
+    input.onchange = () => {
+      if (input.files?.length) {
+        handleFiles(input.files, dz);
+      }
+    };
+  });
+}
+
+async function handleFiles(fileList, dz) {
+  for (let i = 0; i < fileList.length; i++) {
+    await handleFileUpload(fileList[i], dz);
+  }
+}
+
+async function handleFileUpload(rawFile, dz) {
+  const type = dz.dataset.type || 'general';
+  const targetId = dz.dataset.target;
+  const idx = dz.dataset.idx;
+  const field = dz.dataset.field;
+  const section = dz.dataset.section;
+
+  // Process raster images into WebP client-side
+  const file = await processImageFile(rawFile, 0.85);
+
+  const reader = new FileReader();
+  reader.readAsDataURL(file);
+  reader.onload = async () => {
+    try {
+      showToast(`Uploading ${file.name}...`);
+      const res = await fetch('/api/admin/upload', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          name: file.name,
+          type,
+          base64: reader.result
+        })
+      });
+      const data = await res.json();
+      if (res.ok && data.ok) {
+        showToast(`⚡ Uploaded: ${data.name}`);
+        if (targetId) {
+          const target = document.getElementById(targetId);
+          if (target) target.value = data.url;
+        }
+
+        if (section === 'exp' && idx !== undefined && C.experience?.[idx]) {
+          C.experience[idx].details = C.experience[idx].details || {};
+          C.experience[idx].details[field] = data.url;
+        } else if (section === 'testi' && idx !== undefined && C.testimonials?.[idx]) {
+          C.testimonials[idx][field] = data.url;
+        } else if (idx !== undefined && field && C.work?.[idx]) {
+          C.work[idx][field] = data.url;
+        }
+
+        if (type === 'resumes') {
+          document.getElementById('resumeUrl').value = data.url;
+          if (C.hero) C.hero.resumeUrl = data.url;
+          document.getElementById('prevResume').style.display = 'flex';
+          document.getElementById('prevResumeName').textContent = file.name;
+          document.getElementById('prevResumeSize').textContent = (file.size / 1024).toFixed(1) + ' KB';
+          document.getElementById('prevResumeLink').href = data.url;
+        }
+
+        // Refresh Media Library in background
+        fetchAndRenderMedia();
+      } else {
+        alert(data.error || 'Upload failed');
+      }
+    } catch (err) {
+      alert('Upload error: ' + err.message);
+    }
+  };
+}
+
+// ================= 7. SAVE & PUBLISH =================
+btnSave.addEventListener('click', async () => {
+  btnSave.disabled = true;
+  btnSave.textContent = 'Publishing...';
+
+  // Gather top-level edits
+  C.hero = C.hero || {};
+  C.hero.tagline = document.getElementById('heroTagline').value;
+  C.hero.resumeUrl = document.getElementById('resumeUrl').value;
+
+  C.status = C.status || {};
+  C.status.open = document.getElementById('statusOpen').checked;
+  C.status.openLabel = document.getElementById('statusOpenLabel').value;
+  C.status.busyLabel = document.getElementById('statusBusyLabel').value;
+
+  C.contact = C.contact || {};
+  C.contact.email = document.getElementById('contactEmail').value;
+  C.contact.whatsapp = document.getElementById('contactWhatsapp').value;
+
+  try {
+    const res = await fetch('/api/admin/content', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify(C)
+    });
+    const data = await res.json();
+    if (res.ok && data.ok) {
+      showToast('🎉 Content published & pre-hydrated successfully!');
+    } else {
+      alert(data.error || 'Failed to publish');
+    }
+  } catch (err) {
+    alert('Save error: ' + err.message);
+  } finally {
+    btnSave.disabled = false;
+    btnSave.textContent = 'Publish Changes';
+  }
+});
+
+// Run auth check on load
+checkAuth();
+</script>
+</body>
+</html>

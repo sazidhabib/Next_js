@@ -660,7 +660,8 @@ html.tm .tm-cv{display:block}
 .mark{width:56px;height:56px;border-radius:16px;display:grid;place-items:center;font-weight:700;font-size:20px;color:#fff;background:linear-gradient(135deg,var(--blue2),var(--warm));box-shadow:0 10px 40px rgba(61,107,255,.35)}
 
 /* ================= EXPERIENCE (timeline layout) ================= */
-.exp{position:relative;container-type:inline-size;padding-bottom:calc(100cqw / 1440 * 150)}
+.exp{position:relative;container-type:inline-size;min-height:160vh;padding-bottom:calc(100cqw / 1440 * 150)}
+.exp .sec-top{position:sticky;top:0;z-index:20;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);background:linear-gradient(180deg,rgba(7,7,10,.88) 75%,transparent);padding-bottom:18px}
 .tl{--u:calc(100cqw / 1440);position:relative;padding-top:calc(var(--u) * 230)}
 .tl-head{position:absolute;z-index:20;top:calc(var(--u) * 64);right:max(calc(var(--u) * 32),20px);display:flex;flex-direction:column;align-items:flex-end;gap:18px;text-align:right}
 .tl-head .h-decode{font-size:max(calc(var(--u) * 64),34px);display:flex;flex-direction:column;align-items:flex-end}
@@ -1785,8 +1786,8 @@ html{scrollbar-width:thin;scrollbar-color:rgba(13,153,255,.45) transparent}
 .fx-tag .hi{width:12px;height:12px}
 .fx-tag em{font-style:normal;color:#55555F}
 [data-fx]:hover > .fx-tag{opacity:1;transform:none}
-.dep-wrap[data-fx]::before{inset:calc(var(--u) * 70 - 7px) calc(max(calc(var(--u) * 32),20px) - 7px) calc(var(--u) * 150 - 7px);border-radius:0}
-.dep-wrap > .fx-tag{left:calc(max(calc(var(--u) * 32),20px) - 7px);top:calc(var(--u) * 70 - 30px)}
+.dep[data-fx]::before{inset:-7px;border-radius:26px}
+.dep > .fx-tag{left:0;top:-32px}
 
 /* services: each symbol reads as a Figma component instance */
 .sn-cmp{position:absolute;z-index:3;pointer-events:none;border:1px dashed rgba(167,139,250,.0);transition:border-color .5s}
@@ -2312,8 +2313,8 @@ html.pr-dragging,html.pr-dragging *{cursor:grabbing!important;user-select:none!i
       <h2 class="sr">Five years, three studios</h2></div>
     <div class="sv-stats"><div><b class="acc-dn" data-v="05">05</b><span>Years</span></div><div><b class="acc-dn" data-v="03">03</b><span>Studios</span></div><div><b class="acc-dn" data-v="80+">80+</b><span>Projects</span></div></div>
   </div>
-  <div class="dep-wrap" data-fx="Departures board">
-    <div class="dep" id="dep">
+  <div class="dep-wrap">
+    <div class="dep" id="dep" data-fx="Departures board">
       <div class="dep-top">
         <span class="dep-ttl"><svg class="hi" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M2.00031 20H18.0003" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"/><path d="M3.82527 12.1661C3.55027 11.9661 3.30027 11.7161 3.00028 10.8411C2.91891 10.6241 2.61139 9.53619 2.35028 8.54109C2.13003 7.7017 1.93377 6.93555 2.02528 6.74109C2.10029 6.54109 2.20027 6.39109 2.52527 6.19109C2.72527 6.06802 3.75027 5.81609 3.95027 5.76609C4.15027 5.71609 4.42526 5.69109 4.65027 5.76609C5.07527 5.84109 5.95027 7.11609 6.17527 7.26609C6.27526 7.36609 6.60027 7.657 6.97527 7.69109C7.25027 7.71609 7.52527 7.64109 7.82528 7.51609C8.10027 7.40151 13.5253 4.76609 14.0253 4.54109C18.1003 2.84109 21.0603 5.63609 21.5103 6.23609C21.9753 6.81609 22.0753 6.99109 21.9503 7.49109C21.7887 8.01609 21.3503 8.11609 21.1003 8.19109C20.8503 8.26609 17.4003 9.19109 16.0503 9.56609C15.7554 9.6621 15.6114 9.85492 15.5753 9.89109C15.4003 10.1411 14.6053 11.8411 14.3803 12.2161C14.2253 12.6161 13.8003 13.1161 13.2503 13.3161C12.6753 13.5161 11.6753 13.7411 11.4503 13.8161C11.2253 13.8911 10.7003 14.0411 10.5253 13.9911C10.3003 13.9411 10.0853 13.7161 10.1853 13.3661C10.2853 13.0161 10.4753 12.0411 10.5003 11.8911C10.5253 11.7411 10.7753 11.1161 10.5003 11.0911C10.4503 11.0161 9.92527 11.2411 9.15027 11.4161C8.57449 11.5782 7.9715 11.7386 7.55027 11.8411C5.92527 12.3161 5.04521 12.4411 4.85027 12.4411C4.47527 12.4411 4.20027 12.3911 3.82527 12.1661Z" stroke="currentColor" stroke-width="1.5"/></svg>Departures</span>
         <span class="mono muted dep-gate">Gate 03 · Dhaka</span>
@@ -2891,12 +2892,36 @@ window.pathFlat = (d, step = 3) => {
 
     const pad = (t, n) => (t.toUpperCase() + ' '.repeat(n)).slice(0, n);
 
-    box.innerHTML = R.map((r, k) => `
+    box.innerHTML = R.map((r, k) => {
+      const d = r.details || EXP_DETAILS[k] || {
+        company: r.base?.[1] || 'Studio',
+        role: r.base?.[2] || 'Developer',
+        period: 'Remote',
+        location: 'DHAKA · REMOTE',
+        status: r.base?.[3] || 'DONE',
+        statusClass: (r.base?.[3] || 'DONE').toLowerCase(),
+        badgeClass: 'hud-pixalean',
+        color: '#0D99FF',
+        logo: '',
+        desc: '',
+        dels: [],
+        stack: []
+      };
+      const logoHtml = d.logo && (d.logo.startsWith('/') || d.logo.startsWith('http') || d.logo.startsWith('data:'))
+        ? `<img src="${d.logo}" alt="${d.company}" style="width:40px;height:40px;border-radius:10px;object-fit:cover;border:1px solid rgba(255,255,255,.1)">`
+        : (d.logo || '<svg viewBox="0 0 40 40" fill="none"><rect width="40" height="40" rx="10" fill="#0C1929" stroke="rgba(13,153,255,0.3)"/><path d="M12 28V12l16 8-16 8z" fill="#0D99FF"/><circle cx="28" cy="20" r="3" fill="#60A5FA"/></svg>');
+      const color = d.color || '#0D99FF';
+      const statusClass = (d.status || r.base?.[3] || 'DONE').toLowerCase() === 'now' ? 'now' : 'done';
+      const statusText = d.status || r.base?.[3] || 'DONE';
+      const dels = Array.isArray(d.dels) ? d.dels : [];
+      const stack = Array.isArray(d.stack) ? d.stack : [];
+
+      return `
       <div class="dep-item${k === 0 ? ' active' : ''}" data-idx="${k}">
-        <div class="dep-row${k === 2 ? ' cur' : ''}" role="listitem" tabindex="0" aria-label="${r.base.slice(0, 3).join(', ')}">
-          ${COLS.map((w, j) => `<span class="fl${j === 0 ? ' yr' : j === 3 ? ' st' + (k === 2 ? ' now' : '') : ''}" aria-hidden="true">${'<i></i>'.repeat(w)}</span>`).join('')}
+        <div class="dep-row${statusClass === 'now' ? ' cur' : ''}" role="listitem" tabindex="0" aria-label="${r.base.slice(0, 3).join(', ')}">
+          ${COLS.map((w, j) => `<span class="fl${j === 0 ? ' yr' : j === 3 ? ' st' + (statusClass === 'now' ? ' now' : '') : ''}" aria-hidden="true">${'<i></i>'.repeat(w)}</span>`).join('')}
         </div>
-        <div class="dep-card ${EXP_DETAILS[k].badgeClass}" id="depCard${k}">
+        <div class="dep-card ${d.badgeClass || 'hud-pixalean'}" id="depCard${k}">
           <div class="dep-card-wrap">
             <div class="dep-card-track" aria-hidden="true">
               <div class="dep-card-trail"></div>
@@ -2908,29 +2933,29 @@ window.pathFlat = (d, step = 3) => {
             </div>
             <div class="dep-card-in">
               <div class="dep-hud-bar">
-                <div class="dep-hud-tag"><span class="dep-hud-beacon" style="background:${EXP_DETAILS[k].color};box-shadow:0 0 10px ${EXP_DETAILS[k].color}"></span><span>// FLIGHT TELEMETRY [0${k + 1} / 03]</span></div>
-                <span class="mono dep-hud-loc">DHAKA · REMOTE</span>
-                <span class="dep-hud-status ${EXP_DETAILS[k].statusClass}">${EXP_DETAILS[k].status}</span>
+                <div class="dep-hud-tag"><span class="dep-hud-beacon" style="background:${color};box-shadow:0 0 10px ${color}"></span><span>// FLIGHT TELEMETRY [0${k + 1} / 0${R.length}]</span></div>
+                <span class="mono dep-hud-loc">${d.location || 'DHAKA · REMOTE'}</span>
+                <span class="dep-hud-status ${statusClass}">${statusText}</span>
               </div>
               <div class="dep-hud-body">
                 <div class="dep-hud-company">
-                  <div class="dep-hud-logo">${EXP_DETAILS[k].logo}</div>
+                  <div class="dep-hud-logo">${logoHtml}</div>
                   <div class="dep-hud-names">
-                    <h4 class="dep-hud-title">${EXP_DETAILS[k].company}</h4>
-                    <span class="dep-hud-role">${EXP_DETAILS[k].role}</span>
-                    <span class="dep-hud-period">${EXP_DETAILS[k].period}</span>
+                    <h4 class="dep-hud-title">${d.company || r.base?.[1] || 'Company'}</h4>
+                    <span class="dep-hud-role">${d.role || r.base?.[2] || 'Role'}</span>
+                    <span class="dep-hud-period">${d.period || ''}</span>
                   </div>
                 </div>
                 <div class="dep-hud-info">
-                  <p class="dep-hud-desc">${EXP_DETAILS[k].desc}</p>
+                  <p class="dep-hud-desc">${d.desc || ''}</p>
                   <ul class="dep-hud-dels">
-                    ${EXP_DETAILS[k].dels.map(del => `<li>${del}</li>`).join('')}
+                    ${dels.map(del => `<li>${del}</li>`).join('')}
                   </ul>
                 </div>
                 <div class="dep-hud-stack">
                   <span class="dep-hud-stack-hd">// CORE TECH STACK:</span>
                   <div class="dep-hud-stack-list">
-                    ${EXP_DETAILS[k].stack.map(st => `<span class="dep-hud-pill">${st}</span>`).join('')}
+                    ${stack.map(st => `<span class="dep-hud-pill">${st}</span>`).join('')}
                   </div>
                 </div>
               </div>
@@ -2938,7 +2963,8 @@ window.pathFlat = (d, step = 3) => {
           </div>
         </div>
       </div>
-    `).join('');
+      `;
+    }).join('');
 
     const items = $$('.dep-item', box);
     const rows = $$('.dep-row', box);
@@ -3055,17 +3081,14 @@ window.pathFlat = (d, step = 3) => {
       // Scroll-driven sequential preview across all 3 companies with flight telemetry & moving airplane
       if (!userInteracting && played) {
         // Natural progress as the Departures board moves through the viewport
-        const startY = vh * 0.85;
-        const endY = -r.height * 0.35;
+        const startY = vh * 0.75;
+        const endY = 0;
         const p = clamp((startY - r.top) / Math.max(1, startY - endY));
 
-        // 3 companies cleanly partitioned:
-        // 0.00 to 0.33: Pixalean (01 / 03)
-        // 0.33 to 0.66: Onix Lab (02 / 03)
-        // 0.66 to 1.00: Design Monks (03 / 03)
-        const scrollIdx = Math.min(2, Math.max(0, Math.floor(p * 3)));
-        const segStart = scrollIdx / 3;
-        const segEnd = (scrollIdx + 1) / 3;
+        const n = R.length || 3;
+        const scrollIdx = Math.min(n - 1, Math.max(0, Math.floor(p * n)));
+        const segStart = scrollIdx / n;
+        const segEnd = (scrollIdx + 1) / n;
         const localFlightProgress = clamp((p - segStart) / (segEnd - segStart));
 
         if (scrollIdx !== activeIdx) {
