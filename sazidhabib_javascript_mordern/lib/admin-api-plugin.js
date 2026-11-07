@@ -4,6 +4,7 @@ import path from 'path';
 export function adminApiPlugin() {
   const contentPath = path.resolve(process.cwd(), 'data/portfolio-content.json');
   const indexPath = path.resolve(process.cwd(), 'index.html');
+  const publicDir = path.resolve(process.cwd(), 'public');
   const uploadsDir = path.resolve(process.cwd(), 'public/uploads');
 
   const getAdminPassword = () => {
@@ -84,7 +85,40 @@ export function adminApiPlugin() {
           try {
             const types = ['projects', 'resumes', 'testimonials', 'icons', 'experience', 'general'];
             const allFiles = [];
+            const seenUrls = new Set();
+            const allowedExts = ['.png', '.jpg', '.jpeg', '.webp', '.svg', '.gif', '.mp4', '.webm', '.pdf'];
 
+            // 3.1. Scan files directly in uploadsDir (public/uploads)
+            if (fs.existsSync(uploadsDir)) {
+              const rootFiles = fs.readdirSync(uploadsDir);
+              rootFiles.forEach(file => {
+                try {
+                  const filePath = path.join(uploadsDir, file);
+                  const stat = fs.statSync(filePath);
+                  if (stat.isFile()) {
+                    const ext = path.extname(file).toLowerCase();
+                    if (allowedExts.includes(ext)) {
+                      let type = 'projects';
+                      if (file.toLowerCase().includes('resume')) type = 'resumes';
+                      else if (file.toLowerCase().includes('icon') || file.toLowerCase().includes('logo')) type = 'icons';
+                      const fileUrl = `/uploads/${file}`;
+                      if (!seenUrls.has(fileUrl)) {
+                        seenUrls.add(fileUrl);
+                        allFiles.push({
+                          name: file,
+                          type,
+                          url: fileUrl,
+                          size: stat.size,
+                          mtime: stat.mtime
+                        });
+                      }
+                    }
+                  }
+                } catch (err) {}
+              });
+            }
+
+            // 3.2. Scan subdirectories in uploadsDir (public/uploads/<type>)
             types.forEach(type => {
               const typeDir = path.join(uploadsDir, type);
               if (fs.existsSync(typeDir)) {
@@ -94,18 +128,87 @@ export function adminApiPlugin() {
                     const filePath = path.join(typeDir, file);
                     const stat = fs.statSync(filePath);
                     if (stat.isFile()) {
-                      allFiles.push({
-                        name: file,
-                        type,
-                        url: `/uploads/${type}/${file}`,
-                        size: stat.size,
-                        mtime: stat.mtime
-                      });
+                      const ext = path.extname(file).toLowerCase();
+                      if (allowedExts.includes(ext)) {
+                        const fileUrl = `/uploads/${type}/${file}`;
+                        if (!seenUrls.has(fileUrl)) {
+                          seenUrls.add(fileUrl);
+                          allFiles.push({
+                            name: file,
+                            type,
+                            url: fileUrl,
+                            size: stat.size,
+                            mtime: stat.mtime
+                          });
+                        }
+                      }
                     }
                   } catch (err) {}
                 });
               }
             });
+
+            // 3.3. Scan public/src/assets for existing portfolio media & icons
+            const srcAssetsDir = path.resolve(process.cwd(), 'public/src/assets');
+            if (fs.existsSync(srcAssetsDir)) {
+              const scanFolder = (dir, subPath = '') => {
+                const entries = fs.readdirSync(dir);
+                entries.forEach(entry => {
+                  const full = path.join(dir, entry);
+                  const stat = fs.statSync(full);
+                  if (stat.isFile()) {
+                    const ext = path.extname(entry).toLowerCase();
+                    if (allowedExts.includes(ext)) {
+                      let t = 'projects';
+                      if (subPath.includes('tech') || subPath.includes('company')) t = 'icons';
+                      else if (entry.toLowerCase().includes('resume')) t = 'resumes';
+                      const fileUrl = `/src/assets/${subPath ? subPath + '/' : ''}${entry}`;
+                      if (!seenUrls.has(fileUrl)) {
+                        seenUrls.add(fileUrl);
+                        allFiles.push({
+                          name: entry,
+                          type: t,
+                          url: fileUrl,
+                          size: stat.size,
+                          mtime: stat.mtime
+                        });
+                      }
+                    }
+                  } else if (stat.isDirectory() && entry !== 'node_modules') {
+                    scanFolder(full, subPath ? `${subPath}/${entry}` : entry);
+                  }
+                });
+              };
+              scanFolder(srcAssetsDir);
+            }
+
+            // 3.4. Scan root public directory for resumes and key assets
+            if (fs.existsSync(publicDir)) {
+              const rootEntries = fs.readdirSync(publicDir);
+              rootEntries.forEach(entry => {
+                const full = path.join(publicDir, entry);
+                const stat = fs.statSync(full);
+                if (stat.isFile()) {
+                  const ext = path.extname(entry).toLowerCase();
+                  if (allowedExts.includes(ext)) {
+                    let t = 'general';
+                    if (entry.toLowerCase().includes('resume')) t = 'resumes';
+                    else if (entry.toLowerCase().includes('logo') || ext === '.svg' || ext === '.ico') t = 'icons';
+                    const fileUrl = `/${entry}`;
+                    if (!seenUrls.has(fileUrl)) {
+                      seenUrls.add(fileUrl);
+                      allFiles.push({
+                        name: entry,
+                        type: t,
+                        url: fileUrl,
+                        size: stat.size,
+                        mtime: stat.mtime
+                      });
+                    }
+                  }
+                }
+              });
+            }
 
             // Sort newest first
             allFiles.sort((a, b) => new Date(b.mtime) - new Date(a.mtime));
@@ -124,16 +227,22 @@ export function adminApiPlugin() {
           try {
             const body = await parseBody();
             const { url: fileUrl } = body;
-            if (!fileUrl || !fileUrl.startsWith('/uploads/')) {
+            if (!fileUrl) {
               res.statusCode = 400;
               return res.end(JSON.stringify({ ok: false, error: 'Invalid file URL' }));
             }
 
-            const relativePath = fileUrl.replace(/^\/uploads\//, '');
-            const targetPath = path.join(uploadsDir, relativePath);
+            let targetPath = null;
+            if (fileUrl.startsWith('/uploads/')) {
+              targetPath = path.join(uploadsDir, fileUrl.replace(/^\/uploads\//, ''));
+            } else if (fileUrl.startsWith('/src/assets/')) {
+              targetPath = path.join(publicDir, fileUrl.replace(/^\//, ''));
+            } else if (fileUrl.startsWith('/')) {
+              targetPath = path.join(publicDir, fileUrl.replace(/^\//, ''));
+            }
 
             // Security check against directory traversal
-            if (!targetPath.startsWith(uploadsDir)) {
+            if (!targetPath || !targetPath.startsWith(publicDir)) {
               res.statusCode = 403;
               return res.end(JSON.stringify({ ok: false, error: 'Access denied' }));
             }
