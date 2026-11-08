@@ -179,6 +179,8 @@ export async function POST(request) {
             photoUrl: linkedEmp.photoUrl,
             weeklyHours: linkedEmp.weeklyHours,
             isSponsoredWorker: linkedEmp.isSponsoredWorker,
+            shareCode: linkedEmp.shareCode,
+            shareCodeExpiryDate: linkedEmp.shareCodeExpiryDate,
           }
         : null,
     };

@@ -8148,42 +8148,73 @@
       .abx-l {
         left: 14px;
         right: 14px;
-        bottom: 64px;
+        bottom: 68px;
       }
 
       .abx-ch {
         height: auto;
-        min-height: 280px;
+        min-height: 250px;
+      }
+
+      .abx-c {
+        gap: 8px;
+      }
+
+      .abx-c .tag {
+        font-size: 10px;
+        letter-spacing: .08em;
       }
 
       .abx-c h3 {
-        font-size: clamp(23px, 6.5vw, 30px);
+        font-size: clamp(21px, 6vw, 27px);
         line-height: 1.15;
       }
 
       .abx-c .body {
-        font-size: 14px;
-        line-height: 1.5;
+        font-size: 13px;
+        line-height: 1.42;
+        padding-left: 10px;
+      }
+
+      .abx-c .facts {
+        gap: 5px;
+        margin-top: 1px;
+      }
+
+      .abx-c .facts .pillchip {
+        padding: 2.5px 7.5px;
+        font-size: 10px;
       }
 
       .abx-stack {
-        gap: 6px;
-        margin-top: 2px;
+        gap: 4px;
+        margin-top: 1px;
+      }
+
+      .abx-stack-hd {
+        font-size: 9.5px;
       }
 
       .abx-stack-list {
-        gap: 6px;
+        gap: 4.5px;
       }
 
       .abx-stack-pill {
-        padding: 3px 8px;
-        font-size: 11px;
+        padding: 2px 7px;
+        font-size: 10px;
+        gap: 4.5px;
+      }
+
+      .abx-stack-pill img,
+      .abx-stack-pill svg {
+        width: 11px;
+        height: 11px;
       }
 
       .abx-end {
         left: 14px;
         right: 14px;
-        bottom: 14px;
+        bottom: 12px;
         display: flex;
         flex-direction: row;
         align-items: center;
@@ -8193,27 +8224,28 @@
       }
 
       .abx-end .chbtn {
-        height: 38px;
-        font-size: clamp(10px, 2.7vw, 11px);
-        letter-spacing: 0.02em;
-        padding: 0 10px 0 12px;
-        gap: 8px;
+        height: 30px;
+        font-size: 9.5px;
+        letter-spacing: 0.035em;
+        padding: 0 8px 0 10px;
+        gap: 6px;
         white-space: nowrap;
         flex: 0 1 auto;
       }
 
       .abx-end .chbtn .ar,
       .abx-end .chbtn.chbtn-dl .dl-ar {
-        width: 13px;
-        height: 13px;
-        flex: 0 0 13px;
+        width: 10px;
+        height: 10px;
+        flex: 0 0 10px;
       }
 
       .abx-end .chbtn .btn-ext {
-        font-size: 8.5px;
-        padding: 1px 4px;
-        margin-left: 4px;
+        font-size: 7.5px;
+        padding: 1px 3.5px;
+        margin-left: 3px;
         letter-spacing: 0.02em;
+        border-radius: 3px;
       }
     }
 
@@ -8363,8 +8395,6 @@
       gap: clamp(16px, 2.2vh, 26px);
       padding: clamp(80px, 10vh, 105px) max(calc(var(--u) * 32), 20px) clamp(24px, 3.5vh, 40px);
       width: 100%;
-      max-width: 1440px;
-      margin: 0 auto;
       box-sizing: border-box;
     }
 
@@ -8439,7 +8469,6 @@
       align-items: center;
       justify-content: center;
       width: 100%;
-      max-width: 1440px;
       box-sizing: border-box;
       padding: 0;
       min-height: 0;
@@ -8488,7 +8517,7 @@
 
     .dep {
       position: relative;
-      border-radius: 22px;
+      border-radius: max(calc(var(--u) * 22), 16px);
       padding: calc(var(--u) * 20) calc(var(--u) * 24) 0;
       overflow: hidden;
       background: radial-gradient(ellipse 60% 80% at 50% -10%, rgba(13, 110, 255, .12), transparent 60%), linear-gradient(180deg, #101017, #09090D);
@@ -8525,17 +8554,17 @@
     .dep-ttl {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: calc(var(--u) * 12);
       font-family: var(--title);
       font-weight: 700;
-      font-size: 20px;
+      font-size: max(calc(var(--u) * 20), 16px);
       letter-spacing: -.02em;
       color: #FFD15C
     }
 
     .dep-ttl svg {
-      width: 22px;
-      height: 22px
+      width: max(calc(var(--u) * 22), 18px);
+      height: max(calc(var(--u) * 22), 18px)
     }
 
     .dep-gate {
@@ -8550,14 +8579,14 @@
 
     .dep-row {
       display: grid;
-      grid-template-columns: auto auto auto auto;
+      grid-template-columns: max-content max-content minmax(0, 1fr) max-content;
       justify-content: space-between;
       align-items: center;
-      gap: calc(var(--u) * 20);
-      padding: calc(var(--u) * 12) 10px;
+      gap: max(calc(var(--u) * 18), 10px);
+      padding: calc(var(--u) * 12) calc(var(--u) * 10);
       border-bottom: 1px solid rgba(255, 255, 255, .05);
       position: relative;
-      border-radius: 8px;
+      border-radius: max(calc(var(--u) * 8), 6px);
       transition: background .25s ease, box-shadow .25s ease
     }
 
@@ -8567,7 +8596,7 @@
       left: 0;
       top: 14%;
       bottom: 14%;
-      width: 3px;
+      width: max(calc(var(--u) * 3), 2.5px);
       border-radius: 2px;
       background: linear-gradient(var(--blue), var(--violet), var(--warm));
       transform: scaleY(0);
@@ -8586,37 +8615,51 @@
 
     .dep-row.th {
       padding-top: calc(var(--u) * 20);
-      padding-bottom: 12px;
+      padding-bottom: calc(var(--u) * 12);
       border-bottom: 0
     }
 
     .dep-row.th span {
       font-family: var(--mono);
-      font-size: 11px;
+      font-size: max(calc(var(--u) * 11), 10px);
       letter-spacing: .14em;
       text-transform: uppercase;
       color: #55555F
     }
 
+    .dep-row.th span:last-child {
+      justify-self: end;
+      text-align: right
+    }
+
+    .dep-row>.fl:last-child {
+      justify-self: end
+    }
+
     .fl {
       display: flex;
-      gap: 3px
+      gap: max(calc(var(--u) * 2.8), 2px)
     }
 
     .fl i {
       position: relative;
       display: grid;
       place-items: center;
-      width: max(calc(var(--u) * 24), 17px);
-      height: max(calc(var(--u) * 40), 28px);
-      border-radius: 5px;
+      width: max(calc(var(--u) * 23.5), 14px);
+      height: max(calc(var(--u) * 39), 24px);
+      border-radius: max(calc(var(--u) * 5), 3px);
       font-style: normal;
       font-family: var(--mono);
       font-weight: 600;
-      font-size: max(calc(var(--u) * 21), 14px);
+      font-size: max(calc(var(--u) * 20.5), 12px);
       color: #F4F4F2;
       background: linear-gradient(180deg, #1C1C24 0 49.6%, #15151C 50.4% 100%);
       box-shadow: inset 0 1px 0 rgba(255, 255, 255, .07), inset 0 -1px 0 rgba(0, 0, 0, .6), 0 4px 10px rgba(0, 0, 0, .55)
+    }
+
+    .fl.st {
+      flex-shrink: 0;
+      min-width: max-content
     }
 
     .fl i::after {
@@ -8706,23 +8749,23 @@
     }
 
     .dep-tick {
-      margin: calc(var(--u) * 18) calc(var(--u) * -30) 0;
+      margin: calc(var(--u) * 18) calc(var(--u) * -24) 0;
       border-top: 1px solid rgba(255, 255, 255, .07);
       background: rgba(255, 209, 92, .04);
       overflow: hidden;
-      padding: 12px 0
+      padding: calc(var(--u) * 12) 0
     }
 
     .dep-tick div {
       display: flex;
-      gap: 48px;
+      gap: calc(var(--u) * 48);
       width: max-content;
       animation: deptick 26s linear infinite
     }
 
     .dep-tick span {
       font-family: var(--mono);
-      font-size: 12px;
+      font-size: max(calc(var(--u) * 12), 10.5px);
       letter-spacing: .14em;
       text-transform: uppercase;
       color: #FFD15C;
@@ -8967,7 +9010,7 @@
 
     .dep-hud-body {
       display: grid;
-      grid-template-columns: minmax(200px, 260px) 1.2fr minmax(190px, 240px);
+      grid-template-columns: minmax(calc(var(--u) * 200), calc(var(--u) * 280)) 1.2fr minmax(calc(var(--u) * 190), calc(var(--u) * 260));
       gap: calc(var(--u) * 20);
       align-items: center
     }
@@ -8975,14 +9018,14 @@
     .dep-hud-company {
       display: flex;
       align-items: center;
-      gap: 14px
+      gap: calc(var(--u) * 14)
     }
 
     .dep-hud-logo {
-      width: 44px;
-      height: 44px;
+      width: max(calc(var(--u) * 44), 36px);
+      height: max(calc(var(--u) * 44), 36px);
       flex-shrink: 0;
-      border-radius: 10px;
+      border-radius: max(calc(var(--u) * 10), 8px);
       overflow: hidden;
       display: grid;
       place-items: center
@@ -13863,7 +13906,7 @@
       function tlTick() { }
       defer(() => {
         const box = $('#depRows'), dep = $('#dep'), GL = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789+-%/·';
-        const COLS = [4, 12, 21, 6];
+        const COLS = [4, 12, 21, 4];
         const R = CMS('experience', [
           { base: ['2022', 'Pixalean', 'Junior Full Stack Dev', 'DONE'], alt: ['2024', 'Pixalean', '60+ projects shipped', 'DONE'] },
           { base: ['2024', 'Onix Lab', 'Full Stack Engineer', 'DONE'], alt: ['2025', 'Onix Lab', '+27% checkout rate', 'DONE'] },
@@ -14138,10 +14181,16 @@
             }
 
             const n = R.length || 3;
-            const scrollIdx = Math.min(n - 1, Math.max(0, Math.floor(p * n)));
+            // Complete telemetry flight progression comfortably within 80% of runway
+            // so the 3rd experience's airplane safely reaches 100% (destination) before the section transitions
+            const flightWindow = 0.80;
+            const pNorm = clamp(p / flightWindow);
+            const scrollIdx = Math.min(n - 1, Math.max(0, Math.floor(pNorm * n)));
             const segStart = scrollIdx / n;
             const segEnd = (scrollIdx + 1) / n;
-            const localFlightProgress = clamp((p - segStart) / (segEnd - segStart));
+            const localFlightProgress = p >= flightWindow && scrollIdx === n - 1
+              ? 1
+              : clamp((pNorm - segStart) / (segEnd - segStart));
 
             if (scrollIdx !== activeIdx) {
               setActiveExp(scrollIdx, false);

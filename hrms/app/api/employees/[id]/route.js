@@ -105,8 +105,18 @@ export async function PUT(request, { params }) {
     body.salary = body.salary !== '' && body.salary != null ? parseFloat(body.salary) : 0;
     body.weeklyHours = body.weeklyHours !== '' && body.weeklyHours != null ? parseFloat(body.weeklyHours) : 37.5;
     body.holidayAllowance = body.holidayAllowance !== '' && body.holidayAllowance != null ? parseFloat(body.holidayAllowance) : 28.0;
+    body.shareCode = body.shareCode ? body.shareCode.trim().toUpperCase() : null;
+    body.shareCodeExpiryDate = body.shareCodeExpiryDate || null;
 
     await employee.update(body);
+
+    // Keep linked immigration record in sync if shareCode is modified
+    if (body.shareCode) {
+      await ImmigrationRecord.update(
+        { shareCode: body.shareCode },
+        { where: { employeeId: id } }
+      ).catch(() => {});
+    }
 
     const updated = await Employee.findByPk(id, {
       include: [

@@ -124,21 +124,76 @@ export default function DashboardView({ stats, alerts, onNavigate }) {
               </button>
             }
           >
-            {alerts?.immigration?.length === 0 && alerts?.rtw?.length === 0 ? (
+            {alerts?.immigration?.length === 0 && alerts?.rtw?.length === 0 && (!alerts?.shareCodes || alerts.shareCodes.length === 0) ? (
               <div className="py-8 text-center flex flex-col items-center justify-center">
                 <CheckCircle2 className="w-10 h-10 sm:w-12 sm:h-12 text-emerald-500 mb-2" />
                 <h4 className="text-sm sm:text-base font-semibold text-zinc-900 dark:text-zinc-100">100% Compliant</h4>
                 <p className="text-xs text-zinc-500 max-w-sm mt-1 px-4">
-                  All employee right to work checks and visa expiration dates are currently up to date.
+                  All employee right to work checks, share codes, and visa expiration dates are currently up to date.
                 </p>
               </div>
             ) : (
               <div className="space-y-3">
+                {/* Expiring Share Codes */}
+                {alerts?.shareCodes?.map((sc) => {
+                  const today = new Date();
+                  const expDate = new Date(sc.shareCodeExpiryDate);
+                  const diffDays = Math.ceil((expDate - today) / (1000 * 60 * 60 * 24));
+                  const isCritical = diffDays <= 7 || diffDays < 0;
+
+                  return (
+                    <div
+                      key={`sc-${sc.id}`}
+                      className={`p-3 sm:p-3.5 rounded-xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition ${
+                        isCritical
+                          ? 'bg-rose-50/70 border-rose-200 dark:bg-rose-950/30 dark:border-rose-900/60'
+                          : 'bg-amber-50/70 border-amber-200 dark:bg-amber-950/30 dark:border-amber-900/60'
+                      }`}
+                    >
+                      <div className="flex items-start sm:items-center space-x-3">
+                        <div
+                          className={`p-2 rounded-xl shrink-0 mt-0.5 sm:mt-0 ${
+                            isCritical ? 'bg-rose-500 text-white' : 'bg-amber-500 text-white'
+                          }`}
+                        >
+                          <AlertTriangle className="w-4 h-4 sm:w-5 sm:h-5" />
+                        </div>
+                        <div>
+                          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                            <h5 className="font-bold text-xs sm:text-sm text-zinc-900 dark:text-zinc-100">
+                              {sc.firstName} {sc.lastName}
+                            </h5>
+                            <span className="text-[11px] text-zinc-500 font-mono">({sc.employeeCode})</span>
+                            <Badge variant={isCritical ? 'danger' : 'warning'}>
+                              {diffDays < 0 ? 'EXPIRED' : `Share Code: ${diffDays}d left`}
+                            </Badge>
+                          </div>
+                          <p className="text-[11px] sm:text-xs text-zinc-600 dark:text-zinc-400 mt-0.5">
+                            <span className="font-medium">Home Office Share Code:</span>{' '}
+                            <code className="bg-white/80 dark:bg-zinc-800 px-1 py-0.5 rounded font-mono text-[10px] sm:text-[11px]">
+                              {sc.shareCode || 'On file'}
+                            </code>{' '}
+                            • Expires on {sc.shareCodeExpiryDate}
+                          </p>
+                        </div>
+                      </div>
+
+                      <button
+                        onClick={() => onNavigate('employees')}
+                        className="self-end sm:self-auto px-3 py-1.5 rounded-lg text-xs font-semibold bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-50 text-zinc-800 dark:text-zinc-200 shadow-2xs"
+                      >
+                        Update Employee
+                      </button>
+                    </div>
+                  );
+                })}
+
+                {/* Expiring Visas */}
                 {alerts?.immigration?.map((rec) => {
                   const today = new Date();
                   const expDate = new Date(rec.expiryDate);
                   const diffDays = Math.ceil((expDate - today) / (1000 * 60 * 60 * 24));
-                  const isCritical = diffDays <= 30;
+                  const isCritical = diffDays <= 30 || diffDays < 0;
 
                   return (
                     <div

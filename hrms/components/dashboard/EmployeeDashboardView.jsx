@@ -25,6 +25,8 @@ import {
   HeartPulse,
   BadgeCheck,
   IdCard,
+  Copy,
+  Check,
 } from 'lucide-react';
 
 export default function EmployeeDashboardView({ onNavigate }) {
@@ -47,6 +49,14 @@ export default function EmployeeDashboardView({ onNavigate }) {
     reason: '',
   });
   const [isSubmittingLeave, setIsSubmittingLeave] = useState(false);
+  const [copiedShareCode, setCopiedShareCode] = useState(false);
+
+  const handleCopyShareCode = (code) => {
+    if (!code) return;
+    navigator.clipboard?.writeText(code);
+    setCopiedShareCode(true);
+    setTimeout(() => setCopiedShareCode(false), 2000);
+  };
 
   const canAccessLeave = canAccessTab('leave') || hasPermission('VIEW_LEAVE') || hasPermission('REQUEST_LEAVE') || hasPermission('APPROVE_LEAVES');
   const employeeId = user?.employeeId || user?.employee?.id;
@@ -237,6 +247,20 @@ export default function EmployeeDashboardView({ onNavigate }) {
     daysUntilExpiry = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
   }
 
+  // Days until Share Code expiry
+  const shareCodeVal = emp?.shareCode || immigrationRecord?.shareCode;
+  const shareCodeExp = emp?.shareCodeExpiryDate;
+  let daysUntilShareCodeExpiry = null;
+  if (shareCodeExp) {
+    const today = new Date();
+    const exp = new Date(shareCodeExp);
+    const diffTime = exp.getTime() - today.getTime();
+    daysUntilShareCodeExpiry = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  }
+
+  const isVisaExpiringSoon = daysUntilExpiry !== null && daysUntilExpiry <= 30;
+  const isShareCodeExpiringSoon = daysUntilShareCodeExpiry !== null && daysUntilShareCodeExpiry <= 30;
+
   const formatAddress = () => {
     const parts = [
       emp?.addressLine1,
@@ -312,24 +336,51 @@ export default function EmployeeDashboardView({ onNavigate }) {
                 <div className="text-lg font-bold text-zinc-900 dark:text-zinc-100">
                   {immigrationRecord?.visaType?.name || (emp?.isSponsoredWorker ? 'Skilled Worker' : 'Standard RTW')}
                 </div>
-                {daysUntilExpiry !== null ? (
-                  <div
-                    className={`mt-1.5 inline-flex items-center space-x-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold ${
-                      daysUntilExpiry <= 60
-                        ? 'bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300'
-                        : 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300'
-                    }`}
-                  >
-                    {daysUntilExpiry <= 60 ? (
-                      <AlertTriangle className="w-3.5 h-3.5" />
-                    ) : (
-                      <CheckCircle2 className="w-3.5 h-3.5" />
-                    )}
-                    <span>{daysUntilExpiry > 0 ? `${daysUntilExpiry} days remaining` : 'Expired'}</span>
-                  </div>
-                ) : (
-                  <span className="text-xs text-zinc-500">Verified Statutory RTW</span>
-                )}
+                <div className="flex flex-wrap gap-1.5 mt-1.5">
+                  {daysUntilExpiry !== null && (
+                    <div
+                      className={`inline-flex items-center space-x-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold ${
+                        daysUntilExpiry <= 30
+                          ? 'bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300'
+                          : daysUntilExpiry <= 60
+                          ? 'bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300'
+                          : 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300'
+                      }`}
+                    >
+                      {daysUntilExpiry <= 60 ? (
+                        <AlertTriangle className="w-3.5 h-3.5" />
+                      ) : (
+                        <CheckCircle2 className="w-3.5 h-3.5" />
+                      )}
+                      <span>{daysUntilExpiry > 0 ? `Visa: ${daysUntilExpiry}d left` : 'Visa Expired'}</span>
+                    </div>
+                  )}
+
+                  {daysUntilShareCodeExpiry !== null && (
+                    <div
+                      className={`inline-flex items-center space-x-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold ${
+                        daysUntilShareCodeExpiry <= 30
+                          ? 'bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300'
+                          : 'bg-blue-100 text-blue-800 dark:bg-blue-950/60 dark:text-blue-300'
+                      }`}
+                    >
+                      {daysUntilShareCodeExpiry <= 30 ? (
+                        <AlertTriangle className="w-3.5 h-3.5" />
+                      ) : (
+                        <CheckCircle2 className="w-3.5 h-3.5" />
+                      )}
+                      <span>
+                        {daysUntilShareCodeExpiry > 0
+                          ? `Share Code: ${daysUntilShareCodeExpiry}d left`
+                          : 'Share Code Expired'}
+                      </span>
+                    </div>
+                  )}
+
+                  {daysUntilExpiry === null && daysUntilShareCodeExpiry === null && (
+                    <span className="text-xs text-zinc-500">Verified Statutory RTW</span>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -635,7 +686,7 @@ export default function EmployeeDashboardView({ onNavigate }) {
           </div>
 
           {/* Right to Work & Visa Verification (Shown for all employees or sponsored workers) */}
-          {(emp?.isSponsoredWorker || immigrationRecord || rtwRecord || user?.employee?.isSponsoredWorker) && (
+          {(emp?.isSponsoredWorker || immigrationRecord || rtwRecord || user?.employee?.isSponsoredWorker || emp?.shareCode) && (
             <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl p-6 shadow-xs space-y-4">
               <div className="flex items-center justify-between pb-3 border-b border-zinc-100 dark:border-zinc-800">
                 <div className="flex items-center space-x-3">
@@ -652,33 +703,165 @@ export default function EmployeeDashboardView({ onNavigate }) {
                 </span>
               </div>
 
+              {/* Visa & Share Code Expiry Warning Banner (Amber / Yellow) */}
+              {(isVisaExpiringSoon || isShareCodeExpiringSoon) && (
+                <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-950 dark:text-amber-200 flex items-start space-x-3 text-xs animate-in fade-in duration-200">
+                  <AlertTriangle className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                  <div className="space-y-1.5 flex-1">
+                    <div className="flex items-center justify-between">
+                      <p className="font-bold text-sm text-amber-900 dark:text-amber-100 flex items-center gap-1.5">
+                        <span>Compliance Action Required</span>
+                        <span className="px-2 py-0.5 rounded-full bg-amber-200/80 dark:bg-amber-900/60 text-amber-900 dark:text-amber-200 text-[10px] font-bold">
+                          Expiring Soon
+                        </span>
+                      </p>
+                    </div>
+                    <p className="text-xs text-amber-900/90 dark:text-amber-200/90 leading-relaxed">
+                      {isShareCodeExpiringSoon && (
+                        <span>
+                          Your <strong>Home Office Share Code</strong>{' '}
+                          {daysUntilShareCodeExpiry < 0
+                            ? 'has EXPIRED'
+                            : `expires in ${daysUntilShareCodeExpiry} day${daysUntilShareCodeExpiry === 1 ? '' : 's'}`}{' '}
+                          ({shareCodeExp}).{' '}
+                        </span>
+                      )}
+                      {isVisaExpiringSoon && (
+                        <span>
+                          Your <strong>Visa Status</strong>{' '}
+                          {daysUntilExpiry < 0
+                            ? 'has EXPIRED'
+                            : `expires in ${daysUntilExpiry} day${daysUntilExpiry === 1 ? '' : 's'}`}{' '}
+                          ({visaExp}).{' '}
+                        </span>
+                      )}
+                      Under UK Home Office regulations, please obtain a fresh share code or updated documentation and supply it to HR management.
+                    </p>
+                    <div className="pt-1">
+                      <a
+                        href="https://www.gov.uk/prove-right-to-work"
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center space-x-1 px-3 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-bold text-[11px] transition shadow-xs"
+                      >
+                        <span>Generate New Share Code (GOV.UK)</span>
+                        <ExternalLink className="w-3.5 h-3.5" />
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Grid of Right to Work & Share Code Details */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                {/* 1. Visa Category */}
                 <div className="p-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-800/50 space-y-1">
                   <span className="text-[11px] font-semibold text-zinc-400">Visa Category</span>
                   <p className="text-sm font-bold text-zinc-900 dark:text-zinc-100">
                     {immigrationRecord?.visaType?.name || (emp?.isSponsoredWorker ? 'Skilled Worker Visa' : 'Settled / UK National')}
                   </p>
+                  <p className="text-[10px] text-zinc-400">UKVI Sponsor Compliance Record</p>
                 </div>
 
+                {/* 2. Visa Expiry Date */}
                 <div className="p-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-800/50 space-y-1">
-                  <span className="text-[11px] font-semibold text-zinc-400">Visa Expiry Date</span>
-                  <p className="text-sm font-bold text-amber-600 dark:text-amber-400">
-                    {immigrationRecord?.expiryDate || immigrationRecord?.visaExpiryDate || immigrationRecord?.visa_expiry_date || 'Statutory Verified'}
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-semibold text-zinc-400">Visa Expiry Date</span>
+                    {daysUntilExpiry !== null && (
+                      <span
+                        className={`text-[10px] font-bold px-1.5 py-0.2 rounded-full ${
+                          daysUntilExpiry <= 30
+                            ? 'bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300'
+                            : daysUntilExpiry <= 60
+                            ? 'bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300'
+                            : 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300'
+                        }`}
+                      >
+                        {daysUntilExpiry > 0 ? `${daysUntilExpiry}d left` : 'Expired'}
+                      </span>
+                    )}
+                  </div>
+                  <p className={`text-sm font-bold ${daysUntilExpiry !== null && daysUntilExpiry <= 30 ? 'text-amber-600 dark:text-amber-400' : 'text-zinc-900 dark:text-zinc-100'}`}>
+                    {visaExp || 'Statutory Verified'}
                   </p>
+                  <p className="text-[10px] text-zinc-400">Statutory work authorization limit</p>
                 </div>
 
+                {/* 3. BRP / eVisa Ref */}
                 <div className="p-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-800/50 space-y-1">
                   <span className="text-[11px] font-semibold text-zinc-400">BRP / eVisa Ref</span>
                   <p className="text-sm font-mono font-medium text-zinc-800 dark:text-zinc-200">
                     {immigrationRecord?.brpOrEvisaNumber || immigrationRecord?.brp_or_evisa_number || 'On file with HR'}
                   </p>
+                  <p className="text-[10px] text-zinc-400">Digital Status Reference</p>
                 </div>
 
+                {/* 4. Share Code (with Copy Button) */}
                 <div className="p-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-800/50 space-y-1">
-                  <span className="text-[11px] font-semibold text-zinc-400">Share Code</span>
-                  <p className="text-sm font-mono font-medium text-zinc-800 dark:text-zinc-200">
-                    {immigrationRecord?.shareCode || immigrationRecord?.share_code || 'Verified online'}
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-semibold text-zinc-400">Share Code</span>
+                    {shareCodeVal && (
+                      <button
+                        onClick={() => handleCopyShareCode(shareCodeVal)}
+                        className="inline-flex items-center space-x-1 px-1.5 py-0.5 rounded text-[10px] font-semibold text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/50 transition cursor-pointer"
+                        title="Copy Share Code"
+                      >
+                        {copiedShareCode ? (
+                          <>
+                            <Check className="w-3 h-3 text-emerald-500" />
+                            <span className="text-emerald-600 dark:text-emerald-400">Copied</span>
+                          </>
+                        ) : (
+                          <>
+                            <Copy className="w-3 h-3" />
+                            <span>Copy</span>
+                          </>
+                        )}
+                      </button>
+                    )}
+                  </div>
+                  <p className="text-sm font-mono font-bold text-blue-600 dark:text-blue-400 tracking-wider">
+                    {shareCodeVal || 'Verified online'}
                   </p>
+                  <p className="text-[10px] text-zinc-400">Home Office Online Right to Work Code</p>
+                </div>
+
+                {/* 5. Share Code Expiry Date */}
+                <div className="p-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-800/50 space-y-1">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-semibold text-zinc-400">Share Code Expiry Date</span>
+                    {daysUntilShareCodeExpiry !== null && (
+                      <span
+                        className={`text-[10px] font-bold px-1.5 py-0.2 rounded-full ${
+                          daysUntilShareCodeExpiry <= 30
+                            ? 'bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300'
+                            : 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300'
+                        }`}
+                      >
+                        {daysUntilShareCodeExpiry > 0 ? `${daysUntilShareCodeExpiry}d left` : 'Expired'}
+                      </span>
+                    )}
+                  </div>
+                  <p
+                    className={`text-sm font-bold ${
+                      daysUntilShareCodeExpiry !== null && daysUntilShareCodeExpiry <= 30
+                        ? 'text-amber-600 dark:text-amber-400'
+                        : 'text-zinc-900 dark:text-zinc-100'
+                    }`}
+                  >
+                    {shareCodeExp || 'Recorded on file'}
+                  </p>
+                  <p className="text-[10px] text-zinc-400">Check validity renewal deadline</p>
+                </div>
+
+                {/* 6. RTW Statutory Excuse Status */}
+                <div className="p-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-800/50 space-y-1">
+                  <span className="text-[11px] font-semibold text-zinc-400">Statutory Excuse</span>
+                  <div className="flex items-center space-x-1.5 text-emerald-600 dark:text-emerald-400 font-bold text-sm">
+                    <ShieldCheck className="w-4 h-4 shrink-0" />
+                    <span>Continuous RTW Established</span>
+                  </div>
+                  <p className="text-[10px] text-zinc-400">Home Office Audit Defense Valid</p>
                 </div>
               </div>
             </div>

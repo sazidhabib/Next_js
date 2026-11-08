@@ -494,13 +494,22 @@ async function checkAuth() {
 loginForm.addEventListener('submit', async (e) => {
   e.preventDefault();
   const password = document.getElementById('adminPass').value;
+  loginError.style.display = 'none';
   try {
     const res = await fetch('/api/admin/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ password })
     });
-    const data = await res.json();
+    let data;
+    try {
+      data = await res.json();
+    } catch (parseErr) {
+      const text = await res.text();
+      loginError.textContent = `Server error (${res.status}). Ensure /api/ handler is uploaded.`;
+      loginError.style.display = 'block';
+      return;
+    }
     if (res.ok && data.ok) {
       token = data.token;
       sessionStorage.setItem('sazid_admin_token', token);
@@ -516,7 +525,7 @@ loginForm.addEventListener('submit', async (e) => {
       loginError.style.display = 'block';
     }
   } catch (err) {
-    loginError.textContent = 'Server error. Ensure Vite is running.';
+    loginError.textContent = err.message || 'Connection failed. Ensure server is running.';
     loginError.style.display = 'block';
   }
 });

@@ -76,6 +76,17 @@ export async function GET(request) {
       order: [['nextReviewDate', 'ASC']],
     });
 
+    const expiringShareCodes = await Employee.findAll({
+      where: {
+        shareCodeExpiryDate: {
+          [Op.ne]: null,
+          [Op.lte]: in90DaysStr,
+        },
+      },
+      attributes: ['id', 'employeeCode', 'firstName', 'lastName', 'jobTitle', 'photoUrl', 'shareCode', 'shareCodeExpiryDate'],
+      order: [['shareCodeExpiryDate', 'ASC']],
+    });
+
     return NextResponse.json({
       success: true,
       stats: {
@@ -84,12 +95,14 @@ export async function GET(request) {
         totalDepartments,
         totalPositions,
         expiringVisasCount: upcomingImmigration.length,
+        expiringShareCodesCount: expiringShareCodes.length,
         pendingLeavesCount: pendingLeaves,
         pendingRTWCount: pendingRTW.length,
       },
       alerts: {
         immigration: upcomingImmigration,
         rtw: pendingRTW,
+        shareCodes: expiringShareCodes,
       },
     });
   } catch (error) {

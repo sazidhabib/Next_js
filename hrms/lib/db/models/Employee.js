@@ -115,6 +115,16 @@ const Employee = sequelize.define('Employee', {
     defaultValue: false,
     field: 'is_sponsored_worker',
   },
+  shareCode: {
+    type: DataTypes.STRING(50),
+    allowNull: true,
+    field: 'share_code',
+  },
+  shareCodeExpiryDate: {
+    type: DataTypes.DATEONLY,
+    allowNull: true,
+    field: 'share_code_expiry_date',
+  },
   emergencyContact: {
     type: DataTypes.STRING(150),
     allowNull: true,

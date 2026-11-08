@@ -181,6 +181,8 @@ export async function POST(request) {
     body.salary = body.salary !== '' && body.salary != null ? parseFloat(body.salary) : 0;
     body.weeklyHours = body.weeklyHours !== '' && body.weeklyHours != null ? parseFloat(body.weeklyHours) : 37.5;
     body.holidayAllowance = body.holidayAllowance !== '' && body.holidayAllowance != null ? parseFloat(body.holidayAllowance) : 28.0;
+    body.shareCode = body.shareCode ? body.shareCode.trim().toUpperCase() : null;
+    body.shareCodeExpiryDate = body.shareCodeExpiryDate || null;
 
     const newEmployee = await Employee.create(body);
 

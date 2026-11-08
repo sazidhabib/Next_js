@@ -151,6 +151,10 @@ export async function seedDatabase() {
     const hrDept = depts.find(d => d.code === 'HR') || depts[0];
     const opsDept = depts.find(d => d.code === 'OPS') || depts[0];
 
+    const todayDate = new Date();
+    const seedExpiry25Days = new Date(todayDate.getTime() + 25 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+    const seedExpiry180Days = new Date(todayDate.getTime() + 180 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+
     employees = await Employee.bulkCreate([
       {
         employeeCode: 'EMP-001',
@@ -172,6 +176,8 @@ export async function seedDatabase() {
         salary: 42000.00,
         weeklyHours: 40.0,
         isSponsoredWorker: true,
+        shareCode: 'W87-29A-L90',
+        shareCodeExpiryDate: seedExpiry25Days,
         emergencyContact: 'Amina Ahmed (+44 7700 900124) - Spouse',
         nextOfKin: 'Amina Ahmed',
         photoUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
@@ -197,6 +203,8 @@ export async function seedDatabase() {
         salary: 58000.00,
         weeklyHours: 37.5,
         isSponsoredWorker: true,
+        shareCode: 'K91-88M-22Z',
+        shareCodeExpiryDate: seedExpiry180Days,
         emergencyContact: 'Dmitri Rostov (+44 7700 900457) - Father',
         nextOfKin: 'Dmitri Rostov',
         photoUrl: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150&auto=format&fit=crop&q=80',
