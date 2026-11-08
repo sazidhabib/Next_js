@@ -42,8 +42,10 @@ export async function GET(request) {
     // Compute Visa alerts (within next 90 days)
     const today = new Date();
     const in90Days = new Date(today.getTime() + 90 * 24 * 60 * 60 * 1000);
+    const in30Days = new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000);
     const todayStr = today.toISOString().split('T')[0];
     const in90DaysStr = in90Days.toISOString().split('T')[0];
+    const in30DaysStr = in30Days.toISOString().split('T')[0];
 
     const upcomingImmigration = await ImmigrationRecord.findAll({
       where: {
@@ -80,7 +82,7 @@ export async function GET(request) {
       where: {
         shareCodeExpiryDate: {
           [Op.ne]: null,
-          [Op.lte]: in90DaysStr,
+          [Op.lte]: in30DaysStr,
         },
       },
       attributes: ['id', 'employeeCode', 'firstName', 'lastName', 'jobTitle', 'photoUrl', 'shareCode', 'shareCodeExpiryDate'],

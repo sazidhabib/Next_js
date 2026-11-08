@@ -137,6 +137,13 @@ export async function initDb() {
       // Ignored if column already exists
     }
 
+    // Ensure immigration_records.share_code_expiry_date exists in existing database tables
+    try {
+      await sequelize.query('ALTER TABLE immigration_records ADD COLUMN share_code_expiry_date DATE NULL DEFAULT NULL;');
+    } catch {
+      // Ignored if column already exists
+    }
+
     // Ensure Employee role in database contains REQUEST_LEAVE and VIEW_OWN_PROFILE
     try {
       const empRole = await Role.findOne({ where: { name: 'Employee' } });

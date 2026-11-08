@@ -103,6 +103,11 @@ const ImmigrationRecord = sequelize.define('ImmigrationRecord', {
     allowNull: true,
     field: 'share_code',
   },
+  shareCodeExpiryDate: {
+    type: DataTypes.DATEONLY,
+    allowNull: true,
+    field: 'share_code_expiry_date',
+  },
   passportPhoto: {
     type: DataTypes.TEXT,
     allowNull: true,

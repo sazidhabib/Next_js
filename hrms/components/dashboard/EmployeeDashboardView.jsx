@@ -249,7 +249,7 @@ export default function EmployeeDashboardView({ onNavigate }) {
 
   // Days until Share Code expiry
   const shareCodeVal = emp?.shareCode || immigrationRecord?.shareCode;
-  const shareCodeExp = emp?.shareCodeExpiryDate;
+  const shareCodeExp = emp?.shareCodeExpiryDate || immigrationRecord?.shareCodeExpiryDate;
   let daysUntilShareCodeExpiry = null;
   if (shareCodeExp) {
     const today = new Date();

@@ -179,10 +179,10 @@ export default function DashboardView({ stats, alerts, onNavigate }) {
                       </div>
 
                       <button
-                        onClick={() => onNavigate('employees')}
+                        onClick={() => onNavigate('immigration')}
                         className="self-end sm:self-auto px-3 py-1.5 rounded-lg text-xs font-semibold bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-50 text-zinc-800 dark:text-zinc-200 shadow-2xs"
                       >
-                        Update Employee
+                        Update in Immigration
                       </button>
                     </div>
                   );

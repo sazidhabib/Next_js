@@ -144,6 +144,8 @@ export async function GET(request) {
             emergencyContact: linkedEmp.emergencyContact,
             nextOfKin: linkedEmp.nextOfKin,
             status: linkedEmp.status,
+            shareCode: linkedEmp.shareCode || linkedEmp.immigrationRecords?.[0]?.shareCode || null,
+            shareCodeExpiryDate: linkedEmp.shareCodeExpiryDate || linkedEmp.immigrationRecords?.[0]?.shareCodeExpiryDate || null,
             immigrationRecords: linkedEmp.immigrationRecords || [],
             rtwChecks: linkedEmp.rtwChecks || [],
           }

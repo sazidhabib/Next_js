@@ -55,8 +55,10 @@ export default function Header({
     const today = new Date();
 
     // Check ShareCode Expiry (30 days threshold)
-    if (emp?.shareCodeExpiryDate) {
-      const exp = new Date(emp.shareCodeExpiryDate);
+    const scExp = emp?.shareCodeExpiryDate || emp?.immigrationRecords?.[0]?.shareCodeExpiryDate;
+    const scVal = emp?.shareCode || emp?.immigrationRecords?.[0]?.shareCode;
+    if (scExp) {
+      const exp = new Date(scExp);
       const diffDays = Math.ceil((exp - today) / (1000 * 60 * 60 * 24));
       if (diffDays <= 30) {
         list.push({
@@ -64,8 +66,8 @@ export default function Header({
           type: 'share_code',
           title: 'Share Code Expiry Warning',
           message: diffDays < 0
-            ? `Your Home Office Share Code expired on ${emp.shareCodeExpiryDate}. Please generate a new code immediately.`
-            : `Your Home Office Share Code expires in ${diffDays} day${diffDays === 1 ? '' : 's'} (${emp.shareCodeExpiryDate}).`,
+            ? `Your Home Office Share Code (${scVal || 'on file'}) expired on ${scExp}. Please generate a new code immediately.`
+            : `Your Home Office Share Code (${scVal || 'on file'}) expires in ${diffDays} day${diffDays === 1 ? '' : 's'} (${scExp}).`,
           daysLeft: diffDays,
           isCritical: diffDays <= 7 || diffDays < 0,
         });

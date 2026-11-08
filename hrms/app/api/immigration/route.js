@@ -75,6 +75,8 @@ export async function POST(request) {
       offeredSalary: body.offeredSalary !== '' && body.offeredSalary != null ? parseFloat(body.offeredSalary) : 0,
       salaryMeetsThreshold: Boolean(body.salaryMeetsThreshold),
       rightToWorkStatus: body.rightToWorkStatus || 'Valid',
+      shareCode: body.shareCode ? body.shareCode.trim().toUpperCase() : null,
+      shareCodeExpiryDate: body.shareCodeExpiryDate || null,
       notes: body.notes?.trim() || null,
       lastVerifiedDate: body.lastVerifiedDate || null,
       nextReviewDate: body.nextReviewDate || null,
@@ -84,6 +86,14 @@ export async function POST(request) {
     };
 
     const record = await ImmigrationRecord.create(payload);
+
+    // Keep corresponding Employee record in sync with share code and expiry date
+    if (payload.employeeId && (body.shareCode !== undefined || body.shareCodeExpiryDate !== undefined)) {
+      const empUpdate = {};
+      if (body.shareCode !== undefined) empUpdate.shareCode = payload.shareCode;
+      if (body.shareCodeExpiryDate !== undefined) empUpdate.shareCodeExpiryDate = payload.shareCodeExpiryDate;
+      await Employee.update(empUpdate, { where: { id: payload.employeeId } });
+    }
     const fetched = await ImmigrationRecord.findByPk(record.id, {
       include: [
         { model: Employee, as: 'employee' },

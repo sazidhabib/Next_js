@@ -267,6 +267,7 @@ export async function seedDatabase() {
 
     // Tariq - Skilled Worker expiring in 45 days (Amber warning)
     const today = new Date();
+    const expiry25Days = new Date(today.getTime() + 25 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
     const expiry45Days = new Date(today.getTime() + 45 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
     const expiry180Days = new Date(today.getTime() + 180 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
 
@@ -279,6 +280,7 @@ export async function seedDatabase() {
         issueDate: '2023-01-01',
         expiryDate: expiry45Days,
         shareCode: 'W87-29A-L90',
+        shareCodeExpiryDate: expiry25Days,
         sponsorCosNumber: 'COS-UK-2023-8910',
         documentUrl: '/docs/tariq_visa.pdf',
         status: 'EXPIRING_SOON',
@@ -292,6 +294,7 @@ export async function seedDatabase() {
         issueDate: '2023-07-01',
         expiryDate: expiry180Days,
         shareCode: 'K91-88M-22Z',
+        shareCodeExpiryDate: expiry180Days,
         sponsorCosNumber: 'COS-UK-2023-4412',
         documentUrl: '/docs/elena_visa.pdf',
         status: 'VALID',

@@ -42,6 +42,8 @@ export default function ImmigrationManagement({ employees = [], visaTypes = [], 
     brpNumber: '',
     visaStartDate: '',
     visaExpiryDate: '',
+    shareCode: '',
+    shareCodeExpiryDate: '',
     sponsorLicenceNo: '0W01ABC89',
     cosNumber: '',
     isSkilledWorkerEligible: false,
@@ -98,6 +100,8 @@ export default function ImmigrationManagement({ employees = [], visaTypes = [], 
       employeeId: empId,
       nationality: prev.nationality || (selectedEmp?.country || 'United Kingdom'),
       offeredSalary: prev.offeredSalary || (selectedEmp?.salary ? String(selectedEmp.salary) : ''),
+      shareCode: prev.shareCode || selectedEmp?.shareCode || '',
+      shareCodeExpiryDate: prev.shareCodeExpiryDate || selectedEmp?.shareCodeExpiryDate || '',
     }));
   };
 
@@ -107,6 +111,7 @@ export default function ImmigrationManagement({ employees = [], visaTypes = [], 
     const defaultVisa = visaTypes?.[0]?.id || '';
     const today = new Date().toISOString().split('T')[0];
     const nextId = getNextRecordId();
+    const selectedEmp = employees?.find((e) => String(e.id) === String(defaultEmp));
     
     setForm({
       ...initialFormState,
@@ -114,6 +119,8 @@ export default function ImmigrationManagement({ employees = [], visaTypes = [], 
       employeeId: defaultEmp,
       visaTypeId: defaultVisa,
       lastVerifiedDate: today,
+      shareCode: selectedEmp?.shareCode || '',
+      shareCodeExpiryDate: selectedEmp?.shareCodeExpiryDate || '',
     });
     setActiveSubTab('add');
   };
@@ -131,6 +138,8 @@ export default function ImmigrationManagement({ employees = [], visaTypes = [], 
       brpNumber: rec.brpNumber || rec.brpOrEvisaNumber || '',
       visaStartDate: rec.visaStartDate || rec.issueDate || '',
       visaExpiryDate: rec.visaExpiryDate || rec.expiryDate || '',
+      shareCode: rec.shareCode || rec.employee?.shareCode || '',
+      shareCodeExpiryDate: rec.shareCodeExpiryDate || rec.employee?.shareCodeExpiryDate || '',
       sponsorLicenceNo: rec.sponsorLicenceNo || '0W01ABC89',
       cosNumber: rec.cosNumber || rec.sponsorCosNumber || '',
       isSkilledWorkerEligible: Boolean(rec.isSkilledWorkerEligible),
@@ -186,6 +195,8 @@ export default function ImmigrationManagement({ employees = [], visaTypes = [], 
         visaExpiryDate: form.visaExpiryDate || form.expiryDate || null,
         issueDate: form.visaStartDate || form.issueDate || null,
         expiryDate: form.visaExpiryDate || form.expiryDate || null,
+        shareCode: form.shareCode ? form.shareCode.trim().toUpperCase() : null,
+        shareCodeExpiryDate: form.shareCodeExpiryDate || null,
         sponsorLicenceNo: form.sponsorLicenceNo?.trim() || null,
         sponsorCosNumber: form.cosNumber?.trim() || form.sponsorCosNumber?.trim() || null,
         cosNumber: form.cosNumber?.trim() || form.sponsorCosNumber?.trim() || null,
@@ -238,11 +249,13 @@ export default function ImmigrationManagement({ employees = [], visaTypes = [], 
     const empCode = (r.employee?.employeeCode || '').toLowerCase();
     const pass = (r.passportNumber || '').toLowerCase();
     const cos = (r.cosNumber || r.sponsorCosNumber || '').toLowerCase();
+    const sc = (r.shareCode || r.employee?.shareCode || '').toLowerCase();
     return (
       empName.includes(term) ||
       empCode.includes(term) ||
       pass.includes(term) ||
       cos.includes(term) ||
+      sc.includes(term) ||
       (r.visaType?.name && r.visaType.name.toLowerCase().includes(term))
     );
   });
@@ -385,9 +398,15 @@ export default function ImmigrationManagement({ employees = [], visaTypes = [], 
                         <td className="px-3 sm:px-4 py-3 text-xs font-mono">
                           <div>{rec.passportNumber || '-'}</div>
                           {(rec.brpNumber || rec.brpOrEvisaNumber) && (
-                            <span className="text-[10px] text-zinc-400">
+                            <span className="text-[10px] text-zinc-400 block">
                               BRP: {rec.brpNumber || rec.brpOrEvisaNumber}
                             </span>
+                          )}
+                          {(rec.shareCode || rec.employee?.shareCode) && (
+                            <div className="flex items-center space-x-1 text-[10px] font-mono text-zinc-600 dark:text-zinc-300 mt-0.5">
+                              <span className="font-bold text-blue-600 dark:text-blue-400">SC:</span>
+                              <span>{rec.shareCode || rec.employee?.shareCode}</span>
+                            </div>
                           )}
                         </td>
 
@@ -614,6 +633,78 @@ export default function ImmigrationManagement({ employees = [], visaTypes = [], 
                       onChange={(e) => setForm({ ...form, visaExpiryDate: e.target.value })}
                       className="w-full px-3 py-2 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                     />
+                  </div>
+                </div>
+
+                {/* Home Office Share Code & Verification */}
+                <div className="p-3.5 sm:p-4 rounded-2xl bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700/80 space-y-3">
+                  <div className="flex items-center justify-between pb-2 border-b border-zinc-200/70 dark:border-zinc-700/60">
+                    <div className="flex items-center space-x-2">
+                      <ShieldCheck className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                      <span className="text-xs font-bold text-zinc-900 dark:text-zinc-100">Home Office Share Code & Verification</span>
+                    </div>
+                    <span className="text-[10px] font-semibold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 px-2 py-0.5 rounded-md">
+                      RTW Verification
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                    <div>
+                      <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-1">
+                        ShareCode
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="E.G. W87-29A-L90"
+                        value={form.shareCode || ''}
+                        onChange={(e) => setForm({ ...form, shareCode: e.target.value.toUpperCase() })}
+                        className="w-full px-3 py-2 rounded-xl text-xs sm:text-sm font-mono uppercase bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                      />
+                      <p className="text-[10px] text-zinc-500 dark:text-zinc-400 mt-1">
+                        Home Office online right to work check share code
+                      </p>
+                    </div>
+
+                    <div>
+                      <div className="flex items-center justify-between mb-1">
+                        <label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                          ShareCode Expiry Date
+                        </label>
+                        {(() => {
+                          if (!form.shareCodeExpiryDate) return null;
+                          const diff = Math.ceil((new Date(form.shareCodeExpiryDate) - new Date()) / (1000 * 60 * 60 * 24));
+                          if (diff < 0) {
+                            return <span className="text-[10px] font-bold text-rose-600 dark:text-rose-400">Expired</span>;
+                          }
+                          if (diff <= 30) {
+                            return (
+                              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 flex items-center gap-1">
+                                <AlertTriangle className="w-3 h-3" />
+                                {diff}d left
+                              </span>
+                            );
+                          }
+                          return <span className="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">Valid</span>;
+                        })()}
+                      </div>
+                      <input
+                        type="date"
+                        value={form.shareCodeExpiryDate || ''}
+                        onChange={(e) => setForm({ ...form, shareCodeExpiryDate: e.target.value })}
+                        className={`w-full px-3 py-2 rounded-xl text-xs sm:text-sm bg-white dark:bg-zinc-900 border ${
+                          (() => {
+                            if (!form.shareCodeExpiryDate) return 'border-zinc-200 dark:border-zinc-700';
+                            const diff = Math.ceil((new Date(form.shareCodeExpiryDate) - new Date()) / (1000 * 60 * 60 * 24));
+                            if (diff < 0) return 'border-rose-400 dark:border-rose-600 ring-1 ring-rose-400';
+                            if (diff <= 30) return 'border-amber-400 dark:border-amber-500 ring-1 ring-amber-400';
+                            return 'border-zinc-200 dark:border-zinc-700';
+                          })()
+                        } focus:ring-2 focus:ring-blue-500 focus:outline-none`}
+                      />
+                      <p className="text-[10px] text-zinc-500 dark:text-zinc-400 mt-1">
+                        Alert notifications trigger 30 days prior to expiration
+                      </p>
+                    </div>
                   </div>
                 </div>
 

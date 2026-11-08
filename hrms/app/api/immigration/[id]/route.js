@@ -73,6 +73,8 @@ export async function PUT(request, { params }) {
       offeredSalary: body.offeredSalary !== undefined && body.offeredSalary !== '' && body.offeredSalary != null ? parseFloat(body.offeredSalary) : 0,
       salaryMeetsThreshold: body.salaryMeetsThreshold !== undefined ? Boolean(body.salaryMeetsThreshold) : record.salaryMeetsThreshold,
       rightToWorkStatus: body.rightToWorkStatus || record.rightToWorkStatus || 'Valid',
+      shareCode: body.shareCode !== undefined ? (body.shareCode ? body.shareCode.trim().toUpperCase() : null) : record.shareCode,
+      shareCodeExpiryDate: body.shareCodeExpiryDate !== undefined ? (body.shareCodeExpiryDate || null) : record.shareCodeExpiryDate,
       notes: body.notes !== undefined ? (body.notes?.trim() || null) : record.notes,
       lastVerifiedDate: body.lastVerifiedDate || null,
       nextReviewDate: body.nextReviewDate || null,
@@ -81,6 +83,15 @@ export async function PUT(request, { params }) {
     };
 
     await record.update(payload);
+
+    // Keep corresponding Employee record in sync with share code and expiry date
+    const targetEmpId = payload.employeeId || record.employeeId;
+    if (targetEmpId && (body.shareCode !== undefined || body.shareCodeExpiryDate !== undefined)) {
+      const empUpdate = {};
+      if (body.shareCode !== undefined) empUpdate.shareCode = payload.shareCode;
+      if (body.shareCodeExpiryDate !== undefined) empUpdate.shareCodeExpiryDate = payload.shareCodeExpiryDate;
+      await Employee.update(empUpdate, { where: { id: targetEmpId } });
+    }
     const updated = await ImmigrationRecord.findByPk(id, {
       include: [
         { model: Employee, as: 'employee' },
