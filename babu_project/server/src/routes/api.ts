@@ -31,7 +31,23 @@ router.post('/admin/deposits/:id/reject', authenticateJWT, requireRole('super_ad
 router.post('/admin/withdrawals/:id/approve', authenticateJWT, requireRole('super_admin', 'agent'), AdminController.approveWithdrawal);
 router.post('/admin/withdrawals/:id/reject', authenticateJWT, requireRole('super_admin', 'agent'), AdminController.rejectWithdrawal);
 router.get('/admin/users', authenticateJWT, requireRole('super_admin'), AdminController.getUsers);
+router.post('/admin/users/:id/toggle-status', authenticateJWT, requireRole('super_admin'), AdminController.toggleUserStatus);
 router.post('/admin/users/balance-adjust', authenticateJWT, requireRole('super_admin'), AdminController.adjustBalance);
+
+// Extended Admin CMS & Operation routes
+router.get('/admin/bets', authenticateJWT, requireRole('super_admin', 'agent'), AdminController.getLiveBets);
+router.get('/admin/gateways', authenticateJWT, requireRole('super_admin', 'agent'), AdminController.getGateways);
+router.post('/admin/gateways/:id/toggle', authenticateJWT, requireRole('super_admin'), AdminController.toggleGateway);
+router.get('/admin/announcements', authenticateJWT, requireRole('super_admin', 'agent'), AdminController.getAnnouncements);
+router.post('/admin/announcements', authenticateJWT, requireRole('super_admin'), AdminController.createAnnouncement);
+router.get('/admin/settings', authenticateJWT, requireRole('super_admin', 'agent'), AdminController.getSettings);
+router.post('/admin/settings', authenticateJWT, requireRole('super_admin'), AdminController.updateSettings);
+router.get('/admin/lotteries', authenticateJWT, requireRole('super_admin', 'agent'), AdminController.getLotteries);
+router.post('/admin/lotteries/:id/draw', authenticateJWT, requireRole('super_admin'), AdminController.drawLottery);
+router.get('/admin/rewards', authenticateJWT, requireRole('super_admin', 'agent'), AdminController.getRewards);
+router.post('/admin/profile/security', authenticateJWT, requireRole('super_admin'), AdminController.updateAdminProfile);
+router.get('/admin/games-catalog', authenticateJWT, requireRole('super_admin'), AdminController.getGamesList);
+router.post('/admin/games-catalog/:id/toggle', authenticateJWT, requireRole('super_admin'), AdminController.toggleGameStatus);
 
 // --- Universal Seamless Wallet Callbacks ---
 router.post('/callback/seamless/balance', CallbackController.getBalance);
@@ -43,4 +59,3 @@ router.post('/callback/seamless/rollback', CallbackController.rollback);
 router.get('/provider/mock/launcher', MockProvider.renderGameClient);
 
 export default router;
-

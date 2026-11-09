@@ -61,22 +61,22 @@ export default function AuthModal({ isOpen, initialMode = 'login', onClose, onLo
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="bg-slate-900 border border-slate-800 rounded-3xl max-w-md w-full overflow-hidden shadow-2xl">
+    <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4">
+      <div className="bg-white border border-gray-200 rounded-3xl max-w-md w-full overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-150">
         
         {/* Header */}
-        <div className="p-6 border-b border-slate-800 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-400 border border-amber-500/30 flex items-center justify-center font-bold text-base">
+        <div className="p-6 border-b border-gray-100 flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <span className="w-9 h-9 rounded-xl bg-amber-100 text-amber-700 border border-amber-300 flex items-center justify-center font-black text-lg">
               ♠
             </span>
-            <h2 className="text-xl font-black text-slate-100">
+            <h2 className="text-xl font-black text-gray-950">
               {mode === 'login' ? 'Player Login' : 'Create Casino Account'}
             </h2>
           </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center text-sm font-bold"
+            className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-900 flex items-center justify-center text-sm font-bold cursor-pointer"
           >
             ✕
           </button>
@@ -84,14 +84,14 @@ export default function AuthModal({ isOpen, initialMode = 'login', onClose, onLo
 
         {/* Quick Demo Helper */}
         {mode === 'login' && (
-          <div className="bg-amber-950/40 border-b border-amber-900/40 px-6 py-2.5 flex items-center justify-between">
-            <span className="text-[11px] text-amber-300 font-semibold">
+          <div className="bg-amber-50 border-b border-amber-200 px-6 py-2.5 flex items-center justify-between">
+            <span className="text-[11px] text-amber-900 font-semibold">
               Want to test instantly?
             </span>
             <button
               type="button"
               onClick={fillDemoCredentials}
-              className="text-[11px] font-black text-amber-400 hover:text-amber-200 underline"
+              className="text-[11px] font-black text-amber-700 hover:text-amber-900 underline cursor-pointer"
             >
               Fill Demo Player Info
             </button>
@@ -101,7 +101,7 @@ export default function AuthModal({ isOpen, initialMode = 'login', onClose, onLo
         {/* Form Body */}
         <div className="p-6">
           {error && (
-            <div className="mb-4 p-3 bg-rose-950/60 border border-rose-800/60 rounded-xl text-rose-400 text-xs font-semibold">
+            <div className="mb-4 p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-700 text-xs font-semibold">
               {error}
             </div>
           )}
@@ -109,7 +109,7 @@ export default function AuthModal({ isOpen, initialMode = 'login', onClose, onLo
           {mode === 'login' ? (
             <form onSubmit={handleLogin} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-slate-400 uppercase mb-1">
+                <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
                   Email or Username
                 </label>
                 <input
@@ -117,13 +117,13 @@ export default function AuthModal({ isOpen, initialMode = 'login', onClose, onLo
                   placeholder="demoplayer@gmail.com"
                   value={emailOrUsername}
                   onChange={(e) => setEmailOrUsername(e.target.value)}
-                  className="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 text-sm focus:outline-none focus:border-amber-400"
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 text-sm focus:outline-none focus:border-amber-500 focus:bg-white"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-400 uppercase mb-1">
+                <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
                   Password
                 </label>
                 <input
@@ -131,7 +131,7 @@ export default function AuthModal({ isOpen, initialMode = 'login', onClose, onLo
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 text-sm focus:outline-none focus:border-amber-400"
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 text-sm focus:outline-none focus:border-amber-500 focus:bg-white"
                   required
                 />
               </div>
@@ -139,17 +139,17 @@ export default function AuthModal({ isOpen, initialMode = 'login', onClose, onLo
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3.5 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-500 hover:brightness-110 text-slate-950 font-black text-sm transition-all shadow-lg shadow-amber-500/20 disabled:opacity-50"
+                className="w-full py-3.5 rounded-xl bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-400 hover:from-amber-500 hover:to-yellow-500 text-slate-950 font-black text-sm transition-all shadow-md shadow-amber-400/25 disabled:opacity-50 cursor-pointer"
               >
                 {loading ? 'Authenticating...' : 'Sign In'}
               </button>
 
               <div className="text-center pt-2">
-                <span className="text-xs text-slate-400">Don't have an account? </span>
+                <span className="text-xs text-gray-600">Don't have an account? </span>
                 <button
                   type="button"
                   onClick={() => { setMode('register'); setError(null); }}
-                  className="text-xs font-bold text-amber-400 hover:underline"
+                  className="text-xs font-bold text-amber-700 hover:underline cursor-pointer"
                 >
                   Register here
                 </button>
@@ -158,48 +158,48 @@ export default function AuthModal({ isOpen, initialMode = 'login', onClose, onLo
           ) : (
             <form onSubmit={handleRegister} className="space-y-3">
               <div>
-                <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Username</label>
+                <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Username</label>
                 <input
                   type="text"
                   placeholder="luckyplayer"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 text-sm focus:outline-none focus:border-amber-400"
+                  className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 text-sm focus:outline-none focus:border-amber-500 focus:bg-white"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Email</label>
+                <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Email</label>
                 <input
                   type="email"
                   placeholder="player@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 text-sm focus:outline-none focus:border-amber-400"
+                  className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 text-sm focus:outline-none focus:border-amber-500 focus:bg-white"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Phone (Optional)</label>
+                <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Mobile Phone (bKash / Nagad)</label>
                 <input
                   type="tel"
-                  placeholder="+123456789"
+                  placeholder="01712345678"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
-                  className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 text-sm focus:outline-none focus:border-amber-400"
+                  className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 text-sm focus:outline-none focus:border-amber-500 focus:bg-white"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Password</label>
+                <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Password</label>
                 <input
                   type="password"
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 text-sm focus:outline-none focus:border-amber-400"
+                  className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 text-sm focus:outline-none focus:border-amber-500 focus:bg-white"
                   required
                 />
               </div>
@@ -207,19 +207,19 @@ export default function AuthModal({ isOpen, initialMode = 'login', onClose, onLo
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3.5 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-500 hover:brightness-110 text-slate-950 font-black text-sm transition-all shadow-lg shadow-amber-500/20 disabled:opacity-50 mt-2"
+                className="w-full py-3.5 rounded-xl bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-400 hover:from-amber-500 hover:to-yellow-500 text-slate-950 font-black text-sm transition-all shadow-md shadow-amber-400/25 disabled:opacity-50 cursor-pointer"
               >
                 {loading ? 'Creating Account...' : 'Complete Registration'}
               </button>
 
               <div className="text-center pt-2">
-                <span className="text-xs text-slate-400">Already registered? </span>
+                <span className="text-xs text-gray-600">Already have an account? </span>
                 <button
                   type="button"
                   onClick={() => { setMode('login'); setError(null); }}
-                  className="text-xs font-bold text-amber-400 hover:underline"
+                  className="text-xs font-bold text-amber-700 hover:underline cursor-pointer"
                 >
-                  Sign In
+                  Log In
                 </button>
               </div>
             </form>
@@ -229,4 +229,3 @@ export default function AuthModal({ isOpen, initialMode = 'login', onClose, onLo
     </div>
   );
 }
-

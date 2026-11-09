@@ -19,16 +19,16 @@ export interface GameCreationAttributes
   extends Optional<GameAttributes, 'id' | 'is_active'> {}
 
 export class Game extends Model<GameAttributes, GameCreationAttributes> implements GameAttributes {
-  public id!: string;
-  public name!: string;
-  public provider!: string;
-  public category!: GameCategory;
-  public game_code!: string;
-  public thumbnail_url!: string;
-  public is_active!: boolean;
+  declare id: string;
+  declare name: string;
+  declare provider: string;
+  declare category: GameCategory;
+  declare game_code: string;
+  declare thumbnail_url: string;
+  declare is_active: boolean;
 
-  public readonly created_at!: Date;
-  public readonly updated_at!: Date;
+  declare readonly created_at: Date;
+  declare readonly updated_at: Date;
 }
 
 Game.init(

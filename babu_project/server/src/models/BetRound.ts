@@ -21,18 +21,18 @@ export interface BetRoundCreationAttributes
   extends Optional<BetRoundAttributes, 'id' | 'game_id' | 'win_amount' | 'status' | 'raw_payload'> {}
 
 export class BetRound extends Model<BetRoundAttributes, BetRoundCreationAttributes> implements BetRoundAttributes {
-  public id!: string;
-  public user_id!: string;
-  public game_id?: string;
-  public provider_round_id!: string;
-  public provider_transaction_id!: string;
-  public bet_amount!: number;
-  public win_amount!: number;
-  public status!: BetRoundStatus;
-  public raw_payload?: string;
+  declare id: string;
+  declare user_id: string;
+  declare game_id?: string;
+  declare provider_round_id: string;
+  declare provider_transaction_id: string;
+  declare bet_amount: number;
+  declare win_amount: number;
+  declare status: BetRoundStatus;
+  declare raw_payload?: string;
 
-  public readonly created_at!: Date;
-  public readonly updated_at!: Date;
+  declare readonly created_at: Date;
+  declare readonly updated_at: Date;
 }
 
 BetRound.init(

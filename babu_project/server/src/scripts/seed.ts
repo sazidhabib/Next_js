@@ -21,7 +21,7 @@ async function seed() {
         security_pin_hash: adminPinHash,
         role: 'super_admin',
         status: 'active',
-        currency: 'USD',
+        currency: 'BDT',
       },
     });
     console.log('✅ Super Admin verified/seeded: admin@betluxa.com');
@@ -34,28 +34,30 @@ async function seed() {
       defaults: {
         username: 'demoplayer',
         email: 'demoplayer@gmail.com',
-        phone: '+1234567890',
+        phone: '+8801712345678',
         password_hash: playerPasswordHash,
         role: 'player',
         status: 'active',
-        currency: 'USD',
+        currency: 'BDT',
       },
     });
 
+    const demoPlayerId = demoPlayer.getDataValue('id') || demoPlayer.id;
+
     // Ensure Demo Player has $1000 balance
     const [playerWallet] = await Wallet.findOrCreate({
-      where: { user_id: demoPlayer.id },
+      where: { user_id: demoPlayerId },
       defaults: {
-        user_id: demoPlayer.id,
+        user_id: demoPlayerId,
         balance: 1000.0,
         bonus_balance: 50.0,
         locked_balance: 0.0,
-        currency: 'USD',
+        currency: 'BDT',
       },
     });
     console.log(`✅ Demo Player verified/seeded: demoplayer@gmail.com (Balance: $${playerWallet.balance})`);
 
-    // 3. Seed Default Casino Games
+    // 3. Seed Default Casino Games (matching the reference site catalog)
     const defaultGames = [
       {
         name: 'Gates of Olympus',
@@ -74,23 +76,23 @@ async function seed() {
         is_active: true,
       },
       {
-        name: 'Lightning Roulette',
-        provider: 'Evolution Gaming',
-        category: 'live_casino' as const,
-        game_code: 'evo_lightning_roulette',
-        thumbnail_url: 'https://images.unsplash.com/photo-1606167668584-78701c57f13d?auto=format&fit=crop&w=600&q=80',
+        name: 'Big Bass Splash',
+        provider: 'Pragmatic Play',
+        category: 'slots' as const,
+        game_code: 'vs10txbigbass',
+        thumbnail_url: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=600&q=80',
         is_active: true,
       },
       {
-        name: 'Live Blackjack VIP',
-        provider: 'Evolution Gaming',
-        category: 'live_casino' as const,
-        game_code: 'evo_blackjack_vip',
-        thumbnail_url: 'https://images.unsplash.com/photo-1511193311914-0346f16efe90?auto=format&fit=crop&w=600&q=80',
+        name: 'Alien Fruits 2',
+        provider: 'BGaming',
+        category: 'slots' as const,
+        game_code: 'bgaming_alienfruits',
+        thumbnail_url: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=600&q=80',
         is_active: true,
       },
       {
-        name: 'Aviator (Crash)',
+        name: 'Aviator',
         provider: 'Spribe',
         category: 'crash' as const,
         game_code: 'spribe_aviator',
@@ -106,19 +108,67 @@ async function seed() {
         is_active: true,
       },
       {
+        name: 'Cricket X',
+        provider: 'SmartSoft',
+        category: 'crash' as const,
+        game_code: 'smartsoft_cricketx',
+        thumbnail_url: 'https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?auto=format&fit=crop&w=600&q=80',
+        is_active: true,
+      },
+      {
+        name: 'Lightning Roulette',
+        provider: 'Evolution Gaming',
+        category: 'live_casino' as const,
+        game_code: 'evo_lightning_roulette',
+        thumbnail_url: 'https://images.unsplash.com/photo-1606167668584-78701c57f13d?auto=format&fit=crop&w=600&q=80',
+        is_active: true,
+      },
+      {
+        name: 'Crazy Time Live',
+        provider: 'Evolution Gaming',
+        category: 'live_casino' as const,
+        game_code: 'evo_crazy_time',
+        thumbnail_url: 'https://images.unsplash.com/photo-1518609878373-06d740f60d8b?auto=format&fit=crop&w=600&q=80',
+        is_active: true,
+      },
+      {
+        name: 'Live Blackjack VIP',
+        provider: 'Evolution Gaming',
+        category: 'live_casino' as const,
+        game_code: 'evo_blackjack_vip',
+        thumbnail_url: 'https://images.unsplash.com/photo-1511193311914-0346f16efe90?auto=format&fit=crop&w=600&q=80',
+        is_active: true,
+      },
+      {
+        name: '7 Up 7 Down',
+        provider: 'JILI Games',
+        category: 'table' as const,
+        game_code: 'jili_7up7down',
+        thumbnail_url: 'https://images.unsplash.com/photo-1596838132731-3301c3fd4317?auto=format&fit=crop&w=600&q=80',
+        is_active: true,
+      },
+      {
+        name: 'Andar Bahar Pro',
+        provider: 'Ezugi',
+        category: 'table' as const,
+        game_code: 'ezugi_andar_bahar',
+        thumbnail_url: 'https://images.unsplash.com/photo-1518609878373-06d740f60d8b?auto=format&fit=crop&w=600&q=80',
+        is_active: true,
+      },
+      {
+        name: 'Mega Fishing',
+        provider: 'JILI Games',
+        category: 'table' as const,
+        game_code: 'jili_megafishing',
+        thumbnail_url: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=600&q=80',
+        is_active: true,
+      },
+      {
         name: 'European Roulette Pro',
         provider: 'NetEnt',
         category: 'table' as const,
         game_code: 'netent_roulette_pro',
         thumbnail_url: 'https://images.unsplash.com/photo-1596838132731-3301c3fd4317?auto=format&fit=crop&w=600&q=80',
-        is_active: true,
-      },
-      {
-        name: 'Classic Baccarat',
-        provider: 'Pragmatic Play',
-        category: 'table' as const,
-        game_code: 'prag_baccarat',
-        thumbnail_url: 'https://images.unsplash.com/photo-1518609878373-06d740f60d8b?auto=format&fit=crop&w=600&q=80',
         is_active: true,
       },
     ];
@@ -140,4 +190,3 @@ async function seed() {
 }
 
 seed();
-

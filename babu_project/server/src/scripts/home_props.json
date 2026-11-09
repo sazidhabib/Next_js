@@ -1,0 +1,19 @@
+{
+  "component": "Welcome",
+  "props": {
+    "errors": {},
+    "auth": {
+      "user": null,
+      "session_timeout_minutes": 120
+    },
+    "session_expired_message": null,
+    "canLogin": true,
+    "canRegister": true,
+    "laravelVersion": "12.70.2",
+    "phpVersion": "8.3.36"
+  },
+  "url": "/",
+  "version": "95e701d167f1941c352d6e5089f83b89",
+  "clearHistory": false,
+  "encryptHistory": false
+}

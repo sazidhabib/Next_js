@@ -22,18 +22,18 @@ export interface UserCreationAttributes
   extends Optional<UserAttributes, 'id' | 'phone' | 'security_pin_hash' | 'status' | 'currency'> {}
 
 export class User extends Model<UserAttributes, UserCreationAttributes> implements UserAttributes {
-  public id!: string;
-  public username!: string;
-  public email!: string;
-  public phone?: string;
-  public password_hash!: string;
-  public security_pin_hash?: string;
-  public role!: UserRole;
-  public status!: UserStatus;
-  public currency!: string;
+  declare id: string;
+  declare username: string;
+  declare email: string;
+  declare phone?: string;
+  declare password_hash: string;
+  declare security_pin_hash?: string;
+  declare role: UserRole;
+  declare status: UserStatus;
+  declare currency: string;
 
-  public readonly created_at!: Date;
-  public readonly updated_at!: Date;
+  declare readonly created_at: Date;
+  declare readonly updated_at: Date;
 }
 
 User.init(

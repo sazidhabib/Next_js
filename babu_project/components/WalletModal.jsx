@@ -11,7 +11,7 @@ export default function WalletModal({ isOpen, initialTab = 'deposit', onClose, u
   const [error, setError] = useState(null);
 
   // Deposit Form State
-  const [depositMethod, setDepositMethod] = useState('bKash');
+  const [depositMethod, setDepositMethod] = useState('bKash Agent');
   const [depositAmount, setDepositAmount] = useState('');
   const [trxId, setTrxId] = useState('');
 
@@ -125,41 +125,41 @@ export default function WalletModal({ isOpen, initialTab = 'deposit', onClose, u
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="bg-slate-900 border border-slate-800 rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4">
+      <div className="bg-white border border-gray-200 rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl flex flex-col max-h-[90vh] animate-in fade-in zoom-in-95 duration-150 font-sans">
         
         {/* Modal Header */}
-        <div className="p-5 border-b border-slate-800 flex items-center justify-between">
+        <div className="p-5 border-b border-gray-100 flex items-center justify-between">
           <div>
-            <h2 className="text-xl font-black text-slate-100">Casino Cashier & Wallet</h2>
+            <h2 className="text-xl font-black text-gray-950">Casino Cashier & Wallet</h2>
             <div className="flex items-center gap-2 mt-1">
-              <span className="text-xs text-slate-400 font-semibold">Playable:</span>
-              <span className="text-xs font-black text-emerald-400">
+              <span className="text-xs text-gray-500 font-semibold">Playable:</span>
+              <span className="text-xs font-black text-emerald-600">
                 ${Number(user?.wallet?.balance || 0).toFixed(2)}
               </span>
-              <span className="text-xs text-slate-600">&bull;</span>
-              <span className="text-xs text-slate-400 font-semibold">In Payout Hold:</span>
-              <span className="text-xs font-bold text-amber-400">
+              <span className="text-xs text-gray-300">&bull;</span>
+              <span className="text-xs text-gray-500 font-semibold">In Payout Hold:</span>
+              <span className="text-xs font-bold text-amber-700">
                 ${Number(user?.wallet?.locked_balance || 0).toFixed(2)}
               </span>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center text-sm font-bold"
+            className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-900 flex items-center justify-center text-sm font-bold cursor-pointer"
           >
             ✕
           </button>
         </div>
 
         {/* Tab Switcher */}
-        <div className="grid grid-cols-3 bg-slate-950 p-1.5 border-b border-slate-800">
+        <div className="grid grid-cols-3 bg-gray-100 p-1.5 border-b border-gray-200">
           <button
             onClick={() => { setActiveTab('deposit'); setMessage(null); setError(null); }}
-            className={`py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
+            className={`py-2 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
               activeTab === 'deposit'
-                ? 'bg-amber-500 text-slate-950 shadow-md shadow-amber-500/20'
-                : 'text-slate-400 hover:text-white'
+                ? 'bg-amber-400 text-slate-950 shadow-sm'
+                : 'text-gray-600 hover:text-gray-950'
             }`}
           >
             <ArrowDownLeftIcon className="w-3.5 h-3.5" />
@@ -168,10 +168,10 @@ export default function WalletModal({ isOpen, initialTab = 'deposit', onClose, u
 
           <button
             onClick={() => { setActiveTab('withdraw'); setMessage(null); setError(null); }}
-            className={`py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
+            className={`py-2 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
               activeTab === 'withdraw'
-                ? 'bg-amber-500 text-slate-950 shadow-md shadow-amber-500/20'
-                : 'text-slate-400 hover:text-white'
+                ? 'bg-amber-400 text-slate-950 shadow-sm'
+                : 'text-gray-600 hover:text-gray-950'
             }`}
           >
             <ArrowUpRightIcon className="w-3.5 h-3.5" />
@@ -180,10 +180,10 @@ export default function WalletModal({ isOpen, initialTab = 'deposit', onClose, u
 
           <button
             onClick={() => { setActiveTab('history'); setMessage(null); setError(null); }}
-            className={`py-2 rounded-xl text-xs font-bold transition-all ${
+            className={`py-2 rounded-xl text-xs font-black transition-all cursor-pointer ${
               activeTab === 'history'
-                ? 'bg-amber-500 text-slate-950 shadow-md shadow-amber-500/20'
-                : 'text-slate-400 hover:text-white'
+                ? 'bg-amber-400 text-slate-950 shadow-sm'
+                : 'text-gray-600 hover:text-gray-950'
             }`}
           >
             Transactions
@@ -193,15 +193,15 @@ export default function WalletModal({ isOpen, initialTab = 'deposit', onClose, u
         {/* Modal Body */}
         <div className="p-6 overflow-y-auto flex-1">
           {message && (
-            <div className="mb-4 p-3 bg-emerald-950/60 border border-emerald-800/60 rounded-xl text-emerald-400 text-xs font-semibold flex items-center gap-2">
-              <CheckCircleIcon className="w-4 h-4 shrink-0" />
+            <div className="mb-4 p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 text-xs font-semibold flex items-center gap-2">
+              <CheckCircleIcon className="w-4 h-4 shrink-0 text-emerald-600" />
               <span>{message}</span>
             </div>
           )}
 
           {error && (
-            <div className="mb-4 p-3 bg-rose-950/60 border border-rose-800/60 rounded-xl text-rose-400 text-xs font-semibold flex items-center gap-2">
-              <XCircleIcon className="w-4 h-4 shrink-0" />
+            <div className="mb-4 p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-700 text-xs font-semibold flex items-center gap-2">
+              <XCircleIcon className="w-4 h-4 shrink-0 text-rose-600" />
               <span>{error}</span>
             </div>
           )}
@@ -210,7 +210,7 @@ export default function WalletModal({ isOpen, initialTab = 'deposit', onClose, u
           {activeTab === 'deposit' && (
             <form onSubmit={handleDeposit} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-slate-300 uppercase mb-2">
+                <label className="block text-xs font-bold text-gray-700 uppercase mb-2">
                   Select Payment Method
                 </label>
                 <div className="grid grid-cols-2 gap-2">
@@ -219,10 +219,10 @@ export default function WalletModal({ isOpen, initialTab = 'deposit', onClose, u
                       type="button"
                       key={method}
                       onClick={() => setDepositMethod(method)}
-                      className={`p-3 rounded-xl border text-xs font-bold text-left transition-all ${
+                      className={`p-3 rounded-xl border text-xs font-bold text-left transition-all cursor-pointer ${
                         depositMethod === method
-                          ? 'border-amber-400 bg-amber-500/10 text-amber-300'
-                          : 'border-slate-800 bg-slate-950 text-slate-400 hover:border-slate-700'
+                          ? 'border-amber-500 bg-amber-50 text-amber-950 font-black shadow-xs'
+                          : 'border-gray-200 bg-gray-50 text-gray-700 hover:bg-gray-100'
                       }`}
                     >
                       {method}
@@ -232,21 +232,21 @@ export default function WalletModal({ isOpen, initialTab = 'deposit', onClose, u
               </div>
 
               {/* Agent Details Box */}
-              <div className="bg-slate-950 border border-slate-800 p-4 rounded-xl text-xs">
-                <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1">
+              <div className="bg-amber-50/70 border border-amber-200 p-4 rounded-xl text-xs">
+                <span className="text-[10px] uppercase font-black text-amber-900 block mb-1">
                   Agent Transfer Instructions:
                 </span>
-                <p className="text-slate-300 mb-2">
-                  Send funds to official agent number: <strong className="text-amber-400 font-mono">+880 1711-888888</strong> (or TRC20: <strong className="text-amber-400 font-mono">TLuX...8888</strong>).
+                <p className="text-gray-800 mb-2">
+                  Send funds to official agent number: <strong className="text-amber-800 font-mono font-black">+880 1711-888888</strong> (or TRC20: <strong className="text-amber-800 font-mono font-black">TLuX...8888</strong>).
                 </p>
-                <p className="text-slate-500 text-[11px]">
+                <p className="text-gray-600 text-[11px]">
                   After sending, enter the exact Amount and Transaction ID (TrxID) below to submit for instant admin credit.
                 </p>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-300 uppercase mb-1">
-                  Deposit Amount ($)
+                <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
+                  Deposit Amount ($ / ৳)
                 </label>
                 <input
                   type="number"
@@ -255,13 +255,13 @@ export default function WalletModal({ isOpen, initialTab = 'deposit', onClose, u
                   placeholder="e.g. 50"
                   value={depositAmount}
                   onChange={(e) => setDepositAmount(e.target.value)}
-                  className="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 text-sm focus:outline-none focus:border-amber-400"
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 text-sm focus:outline-none focus:border-amber-500 focus:bg-white"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-300 uppercase mb-1">
+                <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
                   Transaction Reference / TrxID
                 </label>
                 <input
@@ -269,7 +269,7 @@ export default function WalletModal({ isOpen, initialTab = 'deposit', onClose, u
                   placeholder="e.g. 9J4K829L0"
                   value={trxId}
                   onChange={(e) => setTrxId(e.target.value)}
-                  className="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 text-sm focus:outline-none focus:border-amber-400"
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 text-sm focus:outline-none focus:border-amber-500 focus:bg-white"
                   required
                 />
               </div>
@@ -277,7 +277,7 @@ export default function WalletModal({ isOpen, initialTab = 'deposit', onClose, u
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3.5 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-500 hover:brightness-110 text-slate-950 font-black text-sm transition-all shadow-lg shadow-amber-500/20 disabled:opacity-50"
+                className="w-full py-3.5 rounded-xl bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-400 hover:from-amber-500 hover:to-yellow-500 text-slate-950 font-black text-sm transition-all shadow-md shadow-amber-400/25 disabled:opacity-50 cursor-pointer"
               >
                 {loading ? 'Submitting...' : 'Submit Deposit Slip'}
               </button>
@@ -288,7 +288,7 @@ export default function WalletModal({ isOpen, initialTab = 'deposit', onClose, u
           {activeTab === 'withdraw' && (
             <form onSubmit={handleWithdraw} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-slate-300 uppercase mb-2">
+                <label className="block text-xs font-bold text-gray-700 uppercase mb-2">
                   Payout Method
                 </label>
                 <div className="grid grid-cols-2 gap-2">
@@ -297,10 +297,10 @@ export default function WalletModal({ isOpen, initialTab = 'deposit', onClose, u
                       type="button"
                       key={method}
                       onClick={() => setWithdrawMethod(method)}
-                      className={`p-3 rounded-xl border text-xs font-bold text-left transition-all ${
+                      className={`p-3 rounded-xl border text-xs font-bold text-left transition-all cursor-pointer ${
                         withdrawMethod === method
-                          ? 'border-amber-400 bg-amber-500/10 text-amber-300'
-                          : 'border-slate-800 bg-slate-950 text-slate-400 hover:border-slate-700'
+                          ? 'border-amber-500 bg-amber-50 text-amber-950 font-black shadow-xs'
+                          : 'border-gray-200 bg-gray-50 text-gray-700 hover:bg-gray-100'
                       }`}
                     >
                       {method}
@@ -310,8 +310,8 @@ export default function WalletModal({ isOpen, initialTab = 'deposit', onClose, u
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-300 uppercase mb-1">
-                  Withdrawal Amount ($)
+                <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
+                  Withdrawal Amount ($ / ৳)
                 </label>
                 <input
                   type="number"
@@ -321,13 +321,13 @@ export default function WalletModal({ isOpen, initialTab = 'deposit', onClose, u
                   placeholder="Min $10"
                   value={withdrawAmount}
                   onChange={(e) => setWithdrawAmount(e.target.value)}
-                  className="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 text-sm focus:outline-none focus:border-amber-400"
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 text-sm focus:outline-none focus:border-amber-500 focus:bg-white"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-300 uppercase mb-1">
+                <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
                   Account Number / Wallet Address
                 </label>
                 <input
@@ -335,19 +335,19 @@ export default function WalletModal({ isOpen, initialTab = 'deposit', onClose, u
                   placeholder="Enter phone number, bank IBAN, or USDT address"
                   value={withdrawAccount}
                   onChange={(e) => setWithdrawAccount(e.target.value)}
-                  className="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 text-sm focus:outline-none focus:border-amber-400"
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 text-sm focus:outline-none focus:border-amber-500 focus:bg-white"
                   required
                 />
               </div>
 
-              <div className="p-3 bg-slate-950 border border-slate-800/80 rounded-xl text-xs text-slate-400">
+              <div className="p-3 bg-gray-50 border border-gray-200 rounded-xl text-xs text-gray-600">
                 Notice: When you request a payout, the requested funds are safely moved to <strong>Hold Balance</strong> so you cannot accidentally gamble them while pending cashier dispatch.
               </div>
 
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-black text-sm transition-all disabled:opacity-50"
+                className="w-full py-3.5 rounded-xl bg-gray-900 hover:bg-black text-white font-black text-sm transition-all disabled:opacity-50 cursor-pointer shadow-md"
               >
                 {loading ? 'Processing...' : 'Request Payout'}
               </button>
@@ -357,31 +357,31 @@ export default function WalletModal({ isOpen, initialTab = 'deposit', onClose, u
           {/* TAB 3: HISTORY */}
           {activeTab === 'history' && (
             <div className="space-y-3">
-              {loading && <p className="text-center text-xs text-slate-500 py-6">Loading transactions...</p>}
+              {loading && <p className="text-center text-xs text-gray-500 py-6">Loading transactions...</p>}
               {!loading && transactions.length === 0 && (
-                <p className="text-center text-xs text-slate-500 py-6">No transactions recorded yet.</p>
+                <p className="text-center text-xs text-gray-500 py-6">No transactions recorded yet.</p>
               )}
 
               {transactions.map((tx) => (
                 <div
                   key={tx.id}
-                  className="p-3.5 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-between text-xs"
+                  className="p-3.5 rounded-xl bg-gray-50 border border-gray-200 flex items-center justify-between text-xs"
                 >
                   <div className="flex items-center gap-3">
                     <span
                       className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold ${
                         tx.type === 'deposit'
-                          ? 'bg-emerald-950/80 text-emerald-400 border border-emerald-800/40'
-                          : 'bg-rose-950/80 text-rose-400 border border-rose-800/40'
+                          ? 'bg-emerald-100 text-emerald-700 border border-emerald-300'
+                          : 'bg-rose-100 text-rose-700 border border-rose-300'
                       }`}
                     >
                       {tx.type === 'deposit' ? '↓' : '↑'}
                     </span>
                     <div>
-                      <span className="font-bold text-slate-200 uppercase block">
+                      <span className="font-bold text-gray-900 uppercase block">
                         {tx.type} ({tx.payment_method})
                       </span>
-                      <span className="text-[10px] text-slate-400">
+                      <span className="text-[10px] text-gray-500">
                         Ref: {tx.transaction_ref || 'N/A'} &bull; {new Date(tx.created_at).toLocaleDateString()}
                       </span>
                     </div>
@@ -390,7 +390,7 @@ export default function WalletModal({ isOpen, initialTab = 'deposit', onClose, u
                   <div className="text-right">
                     <span
                       className={`font-black block text-sm ${
-                        tx.type === 'deposit' ? 'text-emerald-400' : 'text-slate-200'
+                        tx.type === 'deposit' ? 'text-emerald-600' : 'text-gray-900'
                       }`}
                     >
                       {tx.type === 'deposit' ? '+' : '-'}${Number(tx.amount).toFixed(2)}
@@ -398,10 +398,10 @@ export default function WalletModal({ isOpen, initialTab = 'deposit', onClose, u
                     <span
                       className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full inline-block ${
                         tx.status === 'approved'
-                          ? 'bg-emerald-950 text-emerald-400 border border-emerald-800/60'
+                          ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
                           : tx.status === 'pending'
-                          ? 'bg-amber-950 text-amber-400 border border-amber-800/60'
-                          : 'bg-rose-950 text-rose-400 border border-rose-800/60'
+                          ? 'bg-amber-100 text-amber-800 border border-amber-300'
+                          : 'bg-rose-100 text-rose-800 border border-rose-300'
                       }`}
                     >
                       {tx.status}
@@ -416,4 +416,3 @@ export default function WalletModal({ isOpen, initialTab = 'deposit', onClose, u
     </div>
   );
 }
-

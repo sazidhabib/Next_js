@@ -23,19 +23,19 @@ export interface TransactionCreationAttributes
   extends Optional<TransactionAttributes, 'id' | 'status' | 'transaction_ref' | 'proof_image_url' | 'reviewed_by' | 'notes'> {}
 
 export class Transaction extends Model<TransactionAttributes, TransactionCreationAttributes> implements TransactionAttributes {
-  public id!: string;
-  public user_id!: string;
-  public type!: TransactionType;
-  public amount!: number;
-  public status!: TransactionStatus;
-  public payment_method!: string;
-  public transaction_ref?: string;
-  public proof_image_url?: string;
-  public reviewed_by?: string;
-  public notes?: string;
+  declare id: string;
+  declare user_id: string;
+  declare type: TransactionType;
+  declare amount: number;
+  declare status: TransactionStatus;
+  declare payment_method: string;
+  declare transaction_ref?: string;
+  declare proof_image_url?: string;
+  declare reviewed_by?: string;
+  declare notes?: string;
 
-  public readonly created_at!: Date;
-  public readonly updated_at!: Date;
+  declare readonly created_at: Date;
+  declare readonly updated_at: Date;
 }
 
 Transaction.init(

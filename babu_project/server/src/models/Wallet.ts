@@ -16,15 +16,15 @@ export interface WalletCreationAttributes
   extends Optional<WalletAttributes, 'id' | 'balance' | 'bonus_balance' | 'locked_balance' | 'currency'> {}
 
 export class Wallet extends Model<WalletAttributes, WalletCreationAttributes> implements WalletAttributes {
-  public id!: string;
-  public user_id!: string;
-  public balance!: number;
-  public bonus_balance!: number;
-  public locked_balance!: number;
-  public currency!: string;
+  declare id: string;
+  declare user_id: string;
+  declare balance: number;
+  declare bonus_balance: number;
+  declare locked_balance: number;
+  declare currency: string;
 
-  public readonly created_at!: Date;
-  public readonly updated_at!: Date;
+  declare readonly created_at: Date;
+  declare readonly updated_at: Date;
 }
 
 Wallet.init(

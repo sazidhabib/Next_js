@@ -7,7 +7,7 @@ services:
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: rootpassword
-      MYSQL_DATABASE: casino_db
+      MYSQL_DATABASE: babu
     ports:
       - '3306:3306'
     volumes:
@@ -23,10 +23,10 @@ services:
       PORT: 5000
       DB_HOST: mysql
       DB_PORT: 3306
-      DB_NAME: casino_db
+      DB_NAME: babu
       DB_USER: root
       DB_PASSWORD: rootpassword
-      JWT_SECRET: super_secret_jwt_casino_key_2026
+      JWT_SECRET: 3258ba7df65f430c483d712476608fe1fad598b5f98dc2879c6b8a07671508f3
       CLIENT_URL: http://localhost:3000
     ports:
       - '5000:5000'

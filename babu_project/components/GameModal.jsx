@@ -4,18 +4,18 @@ export default function GameModal({ game, launchUrl, onClose, userBalance, onRef
   if (!game || !launchUrl) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-950/95 backdrop-blur-md flex flex-col">
+    <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex flex-col font-sans">
       {/* Header Bar */}
-      <div className="h-14 px-4 bg-slate-900 border-b border-slate-800 flex items-center justify-between">
+      <div className="h-14 px-4 bg-white border-b border-gray-200 flex items-center justify-between shadow-sm">
         <div className="flex items-center gap-3">
-          <span className="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-400 border border-amber-500/30 flex items-center justify-center font-bold text-sm">
+          <span className="w-8 h-8 rounded-lg bg-amber-100 text-amber-800 border border-amber-300 flex items-center justify-center font-bold text-sm">
             ♠
           </span>
           <div>
-            <h3 className="font-extrabold text-sm text-slate-100 leading-tight">
+            <h3 className="font-extrabold text-sm text-gray-950 leading-tight">
               {game.name}
             </h3>
-            <span className="text-[10px] text-slate-400 font-semibold uppercase">
+            <span className="text-[10px] text-gray-500 font-semibold uppercase">
               {game.provider}
             </span>
           </div>
@@ -23,9 +23,9 @@ export default function GameModal({ game, launchUrl, onClose, userBalance, onRef
 
         {/* Center / Balance */}
         <div className="flex items-center gap-3">
-          <div className="px-3 py-1 rounded-lg bg-slate-950 border border-slate-800 text-xs">
-            <span className="text-slate-400 mr-1.5 font-bold">Balance:</span>
-            <span className="font-extrabold text-emerald-400">
+          <div className="px-3 py-1 rounded-lg bg-gray-50 border border-gray-200 text-xs shadow-2xs">
+            <span className="text-gray-500 mr-1.5 font-bold">Balance:</span>
+            <span className="font-black text-emerald-600">
               ${Number(userBalance || 0).toFixed(2)}
             </span>
           </div>
@@ -33,7 +33,7 @@ export default function GameModal({ game, launchUrl, onClose, userBalance, onRef
           <button
             onClick={() => onRefreshBalance && onRefreshBalance()}
             title="Refresh Balance"
-            className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs"
+            className="p-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs cursor-pointer"
           >
             ↻
           </button>
@@ -42,7 +42,7 @@ export default function GameModal({ game, launchUrl, onClose, userBalance, onRef
         {/* Exit Button */}
         <button
           onClick={onClose}
-          className="px-3.5 py-1.5 rounded-xl bg-rose-950/60 hover:bg-rose-900 text-rose-300 font-bold text-xs border border-rose-800/40 transition-colors"
+          className="px-3.5 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-xs border border-rose-200 transition-colors cursor-pointer"
         >
           Exit Game ✕
         </button>
@@ -60,4 +60,3 @@ export default function GameModal({ game, launchUrl, onClose, userBalance, onRef
     </div>
   );
 }
-
