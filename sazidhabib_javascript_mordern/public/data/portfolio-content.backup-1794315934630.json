@@ -1,0 +1,585 @@
+{
+  "seo": {
+    "title": "Sazid — Senior Full-Stack Engineer",
+    "description": "Sazid is a Senior Full-Stack Engineer at Design Monks, Dhaka. 5+ years and 80+ projects engineering Next.js web applications, Node.js microservices, PostgreSQL databases and resilient cloud architectures.",
+    "shareTitle": "Sazid, Senior Full-Stack Engineer",
+    "shareDescription": "5+ years and 80+ projects engineering Next.js web applications, Node.js microservices and distributed cloud systems. Now at Design Monks.",
+    "ogImage": "assets/og-image.png",
+    "verify": ""
+  },
+  "hero": {
+    "tagline": "Full-Stack Software Engineer building scalable cloud architectures, high-performance web applications, and resilient distributed systems with 120 FPS creative engineering."
+  },
+  "stats": [
+    {
+      "v": "05",
+      "l": "Years"
+    },
+    {
+      "v": "03",
+      "l": "Studios"
+    },
+    {
+      "v": "80+",
+      "l": "Projects"
+    }
+  ],
+  "status": {
+    "open": true,
+    "openLabel": "Open to work",
+    "busyLabel": "Booked for now"
+  },
+  "footer": {
+    "role": "Senior Full-Stack Engineer",
+    "company": "Design Monks",
+    "path": [
+      "Pixalean",
+      "Onix Lab",
+      "Design Monks"
+    ]
+  },
+  "contact": {
+    "email": "sazidcraft@gmail.com",
+    "whatsapp": "8801315303931",
+    "links": [
+      {
+        "type": "email",
+        "label": "Email",
+        "value": "sazidcraft@gmail.com",
+        "handle": ""
+      },
+      {
+        "type": "dribbble",
+        "label": "Dribbble",
+        "value": "https://dribbble.com/sazidcraft",
+        "handle": "@sazidcraft"
+      },
+      {
+        "type": "linkedin",
+        "label": "LinkedIn",
+        "value": "https://www.linkedin.com/in/sazidcraft/",
+        "handle": "in/sazidcraft"
+      },
+      {
+        "type": "behance",
+        "label": "Behance",
+        "value": "https://www.behance.net/sazidcraft",
+        "handle": "@sazidcraft"
+      }
+    ]
+  },
+  "work": [
+    {
+      "n": "Pathokbonddho",
+      "d": "Pathokbonddho is a full-stack dynamic News Portal and Content Management System (CMS) built to manage and publish news content efficiently.",
+      "img": "/src/assets/pathakbondhu.webp",
+      "live": "https://pathakbondhu.com/",
+      "source": "https://github.com/sazidhabib",
+      "case": "#/project/Pathokbonddho",
+      "tags": [
+        "Next.js",
+        "React",
+        "javascript"
+      ]
+    },
+    {
+      "n": "nextideasolution",
+      "d": "Next Idea Solutions is a full-stack web application developed for a digital marketing and web development agency.",
+      "img": "/src/assets/nextidea.webp",
+      "live": "https://nextideasolution.com/",
+      "source": "https://github.com/sazidhabib",
+      "case": "#/project/nextideasolution",
+      "tags": [
+        "Next.js",
+        "React",
+        "javascript"
+      ]
+    },
+    {
+      "n": "kamrulhasan",
+      "d": "This project is a dynamic personal website developed for journalist Kamrul Hasan. It serves as an informative platform.",
+      "img": "/src/assets/kamrulHasanWeb.webp",
+      "live": "https://kamrulhasan.com",
+      "source": "https://github.com/sazidhabib/React_Js/tree/main/MERN_project",
+      "case": "#/project/kamrulhasan",
+      "tags": [
+        "React",
+        "JavaScript",
+        "Tailwind"
+      ]
+    },
+    {
+      "n": "PharmaSphere",
+      "d": "A pharmacy-based e-commerce platform offering a seamless shopping experience for medicines and healthcare products.",
+      "img": "/src/assets/pharmasphere.webp",
+      "live": "",
+      "source": "https://github.com/shafquatulbari/mern-e-commerce",
+      "case": "#/project/pharmasphere",
+      "tags": [
+        "React",
+        "JavaScript",
+        "Tailwind"
+      ]
+    },
+    {
+      "n": "SnapShop",
+      "d": "This is a responsive e-commerce platform built with TypeScript, React, and Tailwind CSS with custom shopping cart.",
+      "img": "/src/assets/snapshop.webp",
+      "live": "",
+      "source": "https://github.com/sazidhabib/SnapShop_e-commerce",
+      "case": "#/project/snapshop",
+      "tags": [
+        "React",
+        "TypeScript",
+        "REST APIs"
+      ]
+    },
+    {
+      "n": "Movie List Website",
+      "d": "A simple and user-friendly website to explore movies and TV shows, built using React and modern styled components.",
+      "img": "/src/assets/movie.webp",
+      "live": "",
+      "source": "https://github.com/sazidhabib/MovieListingWebsite",
+      "case": "#/project/movie-list",
+      "tags": [
+        "React",
+        "JavaScript",
+        "useContext"
+      ]
+    }
+  ],
+  "about": [
+    {
+      "t": "01 — Who",
+      "h": [
+        "Full-Stack Engineer",
+        "from Dhaka, BD"
+      ],
+      "p": "Five years engineering scalable cloud systems and reactive interfaces. Specialized in <b>TypeScript</b>, <b>Node.js</b>, <b>Next.js</b> and <b>distributed backend pipelines</b>.",
+      "f": [
+        "5+ years",
+        "Full-Stack Dev"
+      ],
+      "st": "FRONTEND CORE",
+      "stack": [
+        "Next.js 15",
+        "React 19",
+        "TypeScript",
+        "Tailwind CSS",
+        "Redux",
+        "Canvas 2D"
+      ]
+    },
+    {
+      "t": "02 — How",
+      "h": [
+        "Clean code,",
+        "sub-ms latency."
+      ],
+      "p": "Architecture first, then <b>modular microservices</b>, <b>type-safe APIs</b>, and <b>120 FPS creative experiences</b> built for resilience and zero-downtime scale.",
+      "f": [
+        "80+ projects",
+        "Node · Next · Postgres"
+      ],
+      "st": "BACKEND & ARCHITECTURE",
+      "stack": [
+        "Node.js",
+        "Express.js",
+        "PostgreSQL",
+        "MongoDB",
+        "Redis Cache",
+        "REST & GraphQL"
+      ]
+    },
+    {
+      "t": "03 — Where",
+      "h": [
+        "Remote,",
+        "worldwide."
+      ],
+      "p": "Building distributed systems for global <b>SaaS</b>, <b>fintech</b> and <b>high-throughput cloud</b> teams across the US, UK, and worldwide.",
+      "f": [
+        "45+ clients",
+        "Dhaka · GMT+6"
+      ],
+      "st": "DEVOPS & DISTRIBUTED",
+      "stack": [
+        "Docker",
+        "AWS / Vercel",
+        "Git & CI/CD",
+        "Linux / Nginx",
+        "WebSockets",
+        "Postman"
+      ]
+    }
+  ],
+  "experience": [
+    {
+      "base": [
+        "2022",
+        "Pixalean",
+        "Junior Full Stack Dev",
+        "DONE"
+      ],
+      "alt": [
+        "2024",
+        "Pixalean",
+        "60+ projects shipped",
+        "DONE"
+      ],
+      "details": {
+        "company": "Pixalean",
+        "role": "Junior Full Stack Developer",
+        "period": "2022 — 2024 · Remote",
+        "location": "DHAKA · REMOTE",
+        "status": "DONE",
+        "statusClass": "done",
+        "badgeClass": "hud-pixalean",
+        "color": "#0D99FF",
+        "logo": "<svg viewBox=\"0 0 40 40\" fill=\"none\"><rect width=\"40\" height=\"40\" rx=\"10\" fill=\"#0C1929\" stroke=\"rgba(13,153,255,0.3)\"/><path d=\"M12 28V12l16 8-16 8z\" fill=\"#0D99FF\"/><circle cx=\"28\" cy=\"20\" r=\"3\" fill=\"#60A5FA\"/></svg>",
+        "desc": "Engineered responsive client web apps, modular front-end architectures, and high-performance interactive interfaces for early-stage SaaS startups.",
+        "dels": [
+          "Shipped 60+ modular web components with optimized Web Vitals",
+          "Reduced initial bundle load time by 35% via code splitting & memoization"
+        ],
+        "stack": [
+          "React",
+          "JavaScript",
+          "Tailwind CSS",
+          "REST APIs",
+          "Redux"
+        ]
+      }
+    },
+    {
+      "base": [
+        "2024",
+        "Onix Lab",
+        "Full Stack Engineer",
+        "DONE"
+      ],
+      "alt": [
+        "2025",
+        "Onix Lab",
+        "+27% checkout rate",
+        "DONE"
+      ],
+      "details": {
+        "company": "Onix Lab",
+        "role": "Full Stack Engineer",
+        "period": "2024 — 2025 · Hybrid",
+        "location": "DHAKA · REMOTE",
+        "status": "DONE",
+        "statusClass": "done",
+        "badgeClass": "hud-onix",
+        "color": "#7B4DFF",
+        "logo": "<svg viewBox=\"0 0 40 40\" fill=\"none\"><rect width=\"40\" height=\"40\" rx=\"10\" fill=\"#171026\" stroke=\"rgba(123,77,255,0.3)\"/><path d=\"M16 12h8v4l6 10a2 2 0 0 1-1.7 3H11.7a2 2 0 0 1-1.7-3l6-10v-4z\" stroke=\"#7B4DFF\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><circle cx=\"20\" cy=\"23\" r=\"2\" fill=\"#A78BFA\"/></svg>",
+        "desc": "Architected full-stack e-commerce platforms, transactional checkout microservices, and resilient server-side APIs handling high-concurrency peak traffic.",
+        "dels": [
+          "Lifted checkout conversion rates by +27% with zero-friction Stripe integration",
+          "Designed scalable PostgreSQL schemas and low-latency Redis caching layers"
+        ],
+        "stack": [
+          "Next.js",
+          "TypeScript",
+          "Node.js",
+          "PostgreSQL",
+          "Redis Cache"
+        ]
+      }
+    },
+    {
+      "base": [
+        "2026",
+        "Design Monks",
+        "Senior Full Stack Dev",
+        "NOW"
+      ],
+      "alt": [
+        "2026",
+        "Design Monks",
+        "18 products led",
+        "NOW"
+      ],
+      "details": {
+        "company": "Design Monks",
+        "role": "Senior Full Stack Developer",
+        "period": "2025 — Present · Full-Time",
+        "location": "DHAKA · ONSITE / HYBRID",
+        "status": "NOW",
+        "statusClass": "now",
+        "badgeClass": "hud-monks",
+        "color": "#0ACF83",
+        "logo": "<svg viewBox=\"0 0 40 40\" fill=\"none\"><rect width=\"40\" height=\"40\" rx=\"10\" fill=\"#0E2319\" stroke=\"rgba(10,207,131,0.3)\"/><path d=\"M20 10L10 28h20L20 10z\" stroke=\"#0ACF83\" stroke-width=\"2\" stroke-linejoin=\"round\"/><circle cx=\"20\" cy=\"22\" r=\"3\" fill=\"#FFD15C\"/></svg>",
+        "desc": "Leading end-to-end full-stack web engineering, distributed cloud systems, and real-time interactive canvas platforms across global enterprise clients.",
+        "dels": [
+          "Led architectural delivery of 18+ high-scale enterprise SaaS web apps",
+          "Reduced p99 database query response latency by 42% via advanced indexing"
+        ],
+        "stack": [
+          "Next.js 15",
+          "TypeScript",
+          "Node.js",
+          "PostgreSQL",
+          "Docker",
+          "AWS"
+        ]
+      }
+    }
+  ],
+  "services": [
+    {
+      "n": "01",
+      "t": "Full-Stack Web & SaaS",
+      "w": "4–8 weeks",
+      "d": "Production-ready web applications architected with Next.js App Router, React 19, TypeScript, server actions, and resilient state machines.",
+      "del": [
+        "Next.js",
+        "React",
+        "TypeScript",
+        "Tailwind",
+        "SaaS"
+      ]
+    },
+    {
+      "n": "02",
+      "t": "Backend & API Microservices",
+      "w": "3–6 weeks",
+      "d": "High-throughput RESTful, GraphQL, and WebSocket APIs in Node.js/TypeScript with auth/RBAC, microservice buses, and Stripe integration.",
+      "del": [
+        "Node.js",
+        "REST / GraphQL",
+        "WebSockets",
+        "Stripe",
+        "Microservices"
+      ]
+    },
+    {
+      "n": "03",
+      "t": "Database & Redis Systems",
+      "w": "2–5 weeks",
+      "d": "Normalized PostgreSQL relational schemas, Prisma/Drizzle ORM, ACID transactions, indexing strategies, and sub-millisecond Redis caching layers.",
+      "del": [
+        "PostgreSQL",
+        "Redis",
+        "Prisma",
+        "Indexing",
+        "Docker"
+      ]
+    },
+    {
+      "n": "04",
+      "t": "Performance & Security Hardening",
+      "w": "1–3 weeks",
+      "d": "Deep audits, 100/100 Core Web Vitals, server-side payload compression, strict rate limiting, and OWASP Top 10 vulnerability protection.",
+      "del": [
+        "Core Web Vitals",
+        "OWASP Top 10",
+        "Rate Limiting",
+        "Security Audit"
+      ]
+    }
+  ],
+  "process": [
+    {
+      "n": "01",
+      "t": "Architecture & Spec",
+      "wk": "DAY 1–3",
+      "d": "System requirements, entity-relationship diagrams (ERD), API contract specifications, and tech stack validation.",
+      "del": [
+        "System RFC",
+        "ERD Schema",
+        "API Contracts"
+      ]
+    },
+    {
+      "n": "02",
+      "t": "Database & API Core",
+      "wk": "DAY 4–8",
+      "d": "PostgreSQL schema migrations, Prisma/Drizzle models, authentication/RBAC middleware, and core API routes.",
+      "del": [
+        "Migrations",
+        "Auth / RBAC",
+        "API Endpoints"
+      ]
+    },
+    {
+      "n": "03",
+      "t": "Full-Stack Sprints",
+      "wk": "WK 2–3",
+      "d": "Next.js App Router client-server integration, server actions, optimistic UI, state management, and real-time updates.",
+      "del": [
+        "Next.js App",
+        "State Logic",
+        "Live Integrations"
+      ]
+    },
+    {
+      "n": "04",
+      "t": "Testing, Audit & Launch",
+      "wk": "WK 4",
+      "d": "End-to-end integration testing, Core Web Vitals 100/100 tuning, OWASP security audit, and zero-downtime deployment.",
+      "del": [
+        "Load Tests",
+        "Security Audit",
+        "CI/CD Deploy"
+      ]
+    }
+  ],
+  "testimonials": [
+    {
+      "n": "Sarah Malik",
+      "r": "Product Lead, Paylite",
+      "img": "1494790108377-be9c29b29330",
+      "q": "Sazid turned a messy feature list into an app our users actually enjoy. Onboarding completion jumped in the first month."
+    },
+    {
+      "n": "Daniel Reyes",
+      "r": "CTO, Orbit Analytics",
+      "img": "1507003211169-0a1dd7228f2d",
+      "q": "Fast, thoughtful and obsessed with detail. His Figma files are the cleanest our developers have ever worked with."
+    },
+    {
+      "n": "Ayesha Rahman",
+      "r": "Founder, Kaya Store",
+      "img": "1544005313-94ddf0286df2",
+      "q": "He doesn’t just make screens look good. He asks the right questions first, and our conversion numbers prove it."
+    },
+    {
+      "n": "Leo Tanaka",
+      "r": "Head of Product, Fieldnote",
+      "img": "1500648767791-00dcc994a43e",
+      "q": "Our design system finally feels like one product. New screens take hours now, not days."
+    },
+    {
+      "n": "Maya Chen",
+      "r": "Founder, Brightside",
+      "img": "1534528741775-53994a69daeb",
+      "q": "Clear communication, sharp ideas and zero ego. Exactly the designer an early startup needs."
+    },
+    {
+      "n": "Omar Faruk",
+      "r": "CEO, Shopnest",
+      "img": "1472099645785-5658abf4ff4e",
+      "q": "The checkout redesign paid for itself within weeks. We have already booked the next project."
+    }
+  ],
+  "pricing": [
+    {
+      "n": "Full-Stack Web & SaaS",
+      "sh": "Full-Stack SaaS",
+      "p": 4200,
+      "w": [
+        4,
+        8
+      ],
+      "ic": "app",
+      "k": "#0D99FF",
+      "out": "Production Next.js codebase + CI/CD",
+      "best": "Startups, SaaS platforms, and modern web products requiring high performance and responsive UI.",
+      "inc": [
+        "Next.js App Router & React 19 architecture",
+        "TypeScript type-safe domain models",
+        "Server actions & responsive UI components",
+        "Authentication & session management",
+        "Responsive multi-device layout",
+        "Automated CI/CD deployment pipeline"
+      ],
+      "tags": [
+        "Next.js",
+        "React",
+        "TypeScript",
+        "SaaS",
+        "CI/CD",
+        "Production"
+      ]
+    },
+    {
+      "n": "Backend & API Microservices",
+      "sh": "Backend & APIs",
+      "p": 3200,
+      "w": [
+        3,
+        6
+      ],
+      "ic": "api",
+      "k": "#7B4DFF",
+      "out": "Documented API server + Swagger specs",
+      "best": "High-throughput platforms needing scalable REST/GraphQL/WebSocket services and payment gateways.",
+      "inc": [
+        "Node.js & Express / Fastify server architecture",
+        "RESTful, GraphQL, and WebSocket endpoints",
+        "OpenAPI / Swagger interactive documentation",
+        "Stripe & third-party webhook integrations",
+        "Role-based access control (RBAC) middleware",
+        "Asynchronous task workers & rate limiters"
+      ],
+      "tags": [
+        "Node.js",
+        "APIs",
+        "WebSockets",
+        "Stripe",
+        "RBAC",
+        "Swagger"
+      ]
+    },
+    {
+      "n": "Database & Redis Systems",
+      "sh": "Database & Cache",
+      "p": 2400,
+      "w": [
+        2,
+        5
+      ],
+      "ic": "db",
+      "k": "#0ACF83",
+      "out": "Optimized schema + migration scripts",
+      "best": "Applications experiencing database bottlenecks, heavy read traffic, or needing bulletproof ACID schemas.",
+      "inc": [
+        "PostgreSQL normalized schema design",
+        "Prisma or Drizzle ORM configuration",
+        "Redis sub-millisecond caching layer",
+        "Index optimization & slow query tuning",
+        "Automated migration & rollback scripts",
+        "Docker Compose environment setup"
+      ],
+      "tags": [
+        "PostgreSQL",
+        "Redis",
+        "Prisma",
+        "Indexing",
+        "ACID",
+        "Docker"
+      ]
+    },
+    {
+      "n": "Performance & Security Hardening",
+      "sh": "Speed & Security",
+      "p": 1800,
+      "w": [
+        1,
+        3
+      ],
+      "ic": "sec",
+      "k": "#FF6E28",
+      "out": "Audit report + hardened production build",
+      "best": "Existing codebases requiring 100/100 Core Web Vitals, enterprise security compliance, and vulnerability patching.",
+      "inc": [
+        "Lighthouse 100/100 Core Web Vitals optimization",
+        "OWASP Top 10 security audit & patching",
+        "Bundle splitting & payload compression",
+        "CSRF, XSS, and SQL injection sanitization",
+        "Strict HTTP security headers & rate limiting",
+        "Final before/after benchmark dossier"
+      ],
+      "tags": [
+        "Web Vitals",
+        "Security",
+        "OWASP",
+        "Headers",
+        "Hardening",
+        "Audit"
+      ]
+    }
+  ]
+}
