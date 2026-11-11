@@ -130,6 +130,13 @@ const server = http.createServer(async (req, res) => {
         if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
         fs.writeFileSync(CONTENT_FILE, JSON.stringify(body, null, 2), 'utf8');
 
+        const publicContentFile = path.join(__dirname, 'public/data/portfolio-content.json');
+        try {
+          if (fs.existsSync(path.dirname(publicContentFile))) {
+            fs.writeFileSync(publicContentFile, JSON.stringify(body, null, 2), 'utf8');
+          }
+        } catch (e) {}
+
         // Pre-hydrate dist/index.html
         const distIndex = path.join(DIST_DIR, 'index.html');
         if (fs.existsSync(distIndex)) {

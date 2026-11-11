@@ -8,7 +8,8 @@
     "verify": ""
   },
   "hero": {
-    "tagline": "Full-Stack Software Engineer building scalable cloud architectures, high-performance web applications, and resilient distributed systems with 120 FPS creative engineering."
+    "tagline": "Full-Stack Software Engineer building scalable cloud architectures, high-performance web applications, and resilient distributed systems with 120 FPS creative engineering.",
+    "resumeUrl": "/resume.pdf"
   },
   "stats": [
     {
@@ -137,7 +138,7 @@
     {
       "n": "Movie List Website",
       "d": "A simple and user-friendly website to explore movies and TV shows, built using React and modern styled components.",
-      "img": "/src/assets/movie.webp",
+      "img": "/src/assets/productcurt.webp",
       "live": "",
       "source": "https://github.com/sazidhabib/MovieListingWebsite",
       "case": "#/project/movie-list",
@@ -145,6 +146,20 @@
         "React",
         "JavaScript",
         "useContext"
+      ]
+    },
+    {
+      "n": "New Project",
+      "d": "Project summary and architectural overview.",
+      "img": "",
+      "video": "/uploads/general/Hridoy-_-Senior-UI-Designer__1_-989485.mp4",
+      "live": "https://",
+      "source": "https://github.com/sazidhabib",
+      "case": "#/project/new",
+      "tags": [
+        "Next.js",
+        "React",
+        "TypeScript"
       ]
     }
   ],

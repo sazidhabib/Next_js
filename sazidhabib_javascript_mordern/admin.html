@@ -582,7 +582,13 @@ function renderProjects() {
   list.innerHTML = '';
   if (!Array.isArray(C.work)) C.work = [];
 
+  const isVid = u => /\.(mp4|webm|mov|ogg)(\?.*)?$/i.test(String(u || '').trim());
   C.work.forEach((p, idx) => {
+    if (!p.video && isVid(p.img)) {
+      p.video = p.img;
+      p.img = '';
+    }
+
     const card = document.createElement('div');
     card.className = 'item-card';
     card.innerHTML = `
@@ -622,24 +628,38 @@ function renderProjects() {
         <div class="form-group">
           <label>Thumbnail Screenshot (.webp / .png)</label>
           <div style="display:flex;gap:8px;margin-bottom:6px">
-            <input type="text" value="${p.img || ''}" id="img-input-${idx}" oninput="C.work[${idx}].img = this.value">
+            <input type="text" value="${p.img || ''}" id="img-input-${idx}" oninput="C.work[${idx}].img = this.value" onchange="renderProjects()">
             <button type="button" class="btn btn-secondary btn-sm" onclick="openMediaPickerFor('img-input-${idx}', 'projects', ${idx}, 'img')">📁 Pick</button>
           </div>
           <div class="dropzone" data-type="projects" data-target="img-input-${idx}" data-idx="${idx}" data-field="img">
             <p>Upload project image (Auto-WebP)</p>
             <input type="file" accept="image/*">
           </div>
+          ${p.img && !isVid(p.img) ? `
+            <div class="file-preview" style="margin-top:6px">
+              <img src="${p.img}" alt="" onerror="this.parentElement.style.display='none'">
+              <div class="meta"><b>Thumbnail Preview</b><small>${p.img}</small></div>
+              <button type="button" class="btn btn-secondary btn-sm" onclick="C.work[${idx}].img=''; renderProjects();">✕</button>
+            </div>
+          ` : ''}
         </div>
         <div class="form-group">
           <label>Optional Demo Video (.mp4 / .webm)</label>
           <div style="display:flex;gap:8px;margin-bottom:6px">
-            <input type="text" value="${p.video || ''}" id="video-input-${idx}" placeholder="/uploads/projects/demo.mp4" oninput="C.work[${idx}].video = this.value">
+            <input type="text" value="${p.video || ''}" id="video-input-${idx}" placeholder="/uploads/projects/demo.mp4" oninput="C.work[${idx}].video = this.value" onchange="renderProjects()">
             <button type="button" class="btn btn-secondary btn-sm" onclick="openMediaPickerFor('video-input-${idx}', 'projects', ${idx}, 'video')">📁 Pick</button>
           </div>
           <div class="dropzone" data-type="projects" data-target="video-input-${idx}" data-idx="${idx}" data-field="video">
             <p>Upload short video</p>
             <input type="file" accept="video/mp4,video/webm">
           </div>
+          ${p.video ? `
+            <div class="file-preview" style="margin-top:6px">
+              <video src="${p.video}" muted controls style="width:68px;height:42px;object-fit:cover"></video>
+              <div class="meta"><b>Demo Video</b><small>${p.video}</small></div>
+              <button type="button" class="btn btn-secondary btn-sm" onclick="C.work[${idx}].video=''; renderProjects();">✕</button>
+            </div>
+          ` : ''}
         </div>
         <div class="form-group full">
           <label>Tech Stack Tags (Comma-separated)</label>
@@ -1106,6 +1126,16 @@ function closeMediaPicker() {
 
 window.openMediaPickerFor = (targetInputId, type = 'all', idx = undefined, field = undefined, section = undefined) => {
   openMediaPicker((selectedUrl) => {
+    const isVideo = /\.(mp4|webm|mov|ogg)(\?.*)?$/i.test(selectedUrl);
+    // If user picked a video while targeting project thumbnail
+    if (idx !== undefined && field === 'img' && isVideo && C.work?.[idx]) {
+      C.work[idx].video = selectedUrl;
+      if (C.work[idx].img === selectedUrl) C.work[idx].img = '';
+      showToast(`🎬 Video detected! Set as project demo video.`);
+      renderProjects();
+      return;
+    }
+
     const input = document.getElementById(targetInputId);
     if (input) input.value = selectedUrl;
 
@@ -1116,6 +1146,7 @@ window.openMediaPickerFor = (targetInputId, type = 'all', idx = undefined, field
       C.testimonials[idx][field] = selectedUrl;
     } else if (idx !== undefined && field && C.work?.[idx]) {
       C.work[idx][field] = selectedUrl;
+      renderProjects();
     }
     showToast(`Selected asset: ${selectedUrl}`);
   }, type);
@@ -1199,6 +1230,17 @@ async function handleFileUpload(rawFile, dz) {
       const data = await res.json();
       if (res.ok && data.ok) {
         showToast(`⚡ Uploaded: ${data.name}`);
+
+        const isVideo = /\.(mp4|webm|mov|ogg)(\?.*)?$/i.test(data.url);
+        if (idx !== undefined && field === 'img' && isVideo && C.work?.[idx]) {
+          C.work[idx].video = data.url;
+          if (C.work[idx].img === data.url) C.work[idx].img = '';
+          showToast(`🎬 Video detected! Set as project demo video.`);
+          renderProjects();
+          fetchAndRenderMedia();
+          return;
+        }
+
         if (targetId) {
           const target = document.getElementById(targetId);
           if (target) target.value = data.url;
@@ -1211,6 +1253,7 @@ async function handleFileUpload(rawFile, dz) {
           C.testimonials[idx][field] = data.url;
         } else if (idx !== undefined && field && C.work?.[idx]) {
           C.work[idx][field] = data.url;
+          renderProjects();
         }
 
         if (type === 'resumes') {

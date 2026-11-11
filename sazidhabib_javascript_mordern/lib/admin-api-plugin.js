@@ -266,6 +266,13 @@ export function adminApiPlugin() {
             const body = await parseBody();
             fs.writeFileSync(contentPath, JSON.stringify(body, null, 2), 'utf8');
 
+            const publicContentPath = path.resolve(process.cwd(), 'public/data/portfolio-content.json');
+            try {
+              if (fs.existsSync(path.dirname(publicContentPath))) {
+                fs.writeFileSync(publicContentPath, JSON.stringify(body, null, 2), 'utf8');
+              }
+            } catch (err) {}
+
             // Sync index.html window.__C pre-hydration
             if (fs.existsSync(indexPath)) {
               let html = fs.readFileSync(indexPath, 'utf8');
