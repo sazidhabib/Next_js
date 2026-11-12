@@ -11,6 +11,11 @@
     "tagline": "Full-Stack Software Engineer building scalable cloud architectures, high-performance web applications, and resilient distributed systems with 120 FPS creative engineering.",
     "resumeUrl": "/resume.pdf"
   },
+  "experienceHeader": {
+    "dim": "Five years,",
+    "bright": "three studios.",
+    "full": "Five years, three studios"
+  },
   "stats": [
     {
       "v": "05",
@@ -18,7 +23,7 @@
     },
     {
       "v": "03",
-      "l": "Studios"
+      "l": "Companies"
     },
     {
       "v": "80+",
@@ -71,9 +76,23 @@
   },
   "work": [
     {
+      "n": "New Project",
+      "d": "Project summary and architectural overview.",
+      "img": "",
+      "video": "/uploads/general/Hridoy-_-Senior-UI-Designer__1_-989485.mp4",
+      "live": "https://www.ajkerpatrika.com/football-worldcup-2026",
+      "source": "https://github.com/sazidhabib",
+      "case": "#/project/new",
+      "tags": [
+        "Next.js",
+        "React",
+        "TypeScript"
+      ]
+    },
+    {
       "n": "Pathokbonddho",
       "d": "Pathokbonddho is a full-stack dynamic News Portal and Content Management System (CMS) built to manage and publish news content efficiently.",
-      "img": "/src/assets/pathakbondhu.webp",
+      "img": "",
       "live": "https://pathakbondhu.com/",
       "source": "https://github.com/sazidhabib",
       "case": "#/project/Pathokbonddho",
@@ -81,7 +100,8 @@
         "Next.js",
         "React",
         "javascript"
-      ]
+      ],
+      "video": "/uploads/general/Sazid-Habib-_-Senior-Full-Stack-Next-js-Engineer-920699.mp4"
     },
     {
       "n": "nextideasolution",
@@ -133,20 +153,6 @@
         "React",
         "TypeScript",
         "REST APIs"
-      ]
-    },
-    {
-      "n": "New Project",
-      "d": "Project summary and architectural overview.",
-      "img": "",
-      "video": "/uploads/general/Hridoy-_-Senior-UI-Designer__1_-989485.mp4",
-      "live": "https://www.ajkerpatrika.com/football-worldcup-2026",
-      "source": "https://github.com/sazidhabib",
-      "case": "#/project/new",
-      "tags": [
-        "Next.js",
-        "React",
-        "TypeScript"
       ]
     },
     {

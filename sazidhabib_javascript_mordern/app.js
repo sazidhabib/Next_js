@@ -189,14 +189,46 @@ const server = http.createServer(async (req, res) => {
   if (fs.existsSync(safePath) && fs.statSync(safePath).isFile()) {
     const ext = path.extname(safePath).toLowerCase();
     const mime = MIME_TYPES[ext] || 'application/octet-stream';
-    res.writeHead(200, { 'Content-Type': mime });
-    return fs.createReadStream(safePath).pipe(res);
+    const stat = fs.statSync(safePath);
+    const fileSize = stat.size;
+    const range = req.headers.range;
+
+    if (range && (ext === '.mp4' || ext === '.webm')) {
+      const parts = range.replace(/bytes=/, '').split('-');
+      const start = parseInt(parts[0], 10);
+      const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1;
+      const chunksize = (end - start) + 1;
+      const file = fs.createReadStream(safePath, { start, end });
+      const head = {
+        'Content-Range': `bytes ${start}-${end}/${fileSize}`,
+        'Accept-Ranges': 'bytes',
+        'Content-Length': chunksize,
+        'Content-Type': mime,
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+      };
+      res.writeHead(206, head);
+      return file.pipe(res);
+    } else {
+      const head = {
+        'Content-Length': fileSize,
+        'Content-Type': mime,
+        'Accept-Ranges': 'bytes',
+      };
+      if (ext === '.html') {
+        head['Cache-Control'] = 'no-cache, no-store, must-revalidate';
+      }
+      res.writeHead(200, head);
+      return fs.createReadStream(safePath).pipe(res);
+    }
   }
 
   // Fallback to index.html for SPA routes
   const fallbackIndex = path.join(DIST_DIR, 'index.html');
   if (fs.existsSync(fallbackIndex)) {
-    res.writeHead(200, { 'Content-Type': 'text/html; charset=UTF-8' });
+    res.writeHead(200, {
+      'Content-Type': 'text/html; charset=UTF-8',
+      'Cache-Control': 'no-cache, no-store, must-revalidate'
+    });
     return fs.createReadStream(fallbackIndex).pipe(res);
   }
 
