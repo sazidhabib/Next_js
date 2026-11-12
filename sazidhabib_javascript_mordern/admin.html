@@ -548,6 +548,8 @@ document.querySelectorAll('.nav-tab').forEach(tab => {
 });
 
 // ================= 4. RENDERERS =================
+const esc = s => String(s || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
 function renderAll() {
   if (!C) return;
   renderHero();
@@ -669,6 +671,7 @@ function renderProjects() {
     `;
     list.appendChild(card);
   });
+  setupDropzones();
 }
 
 window.moveProject = (idx, dir) => {
@@ -723,12 +726,37 @@ function renderExperience() {
     e.details.dels = Array.isArray(e.details.dels) ? e.details.dels : [];
     e.details.stack = Array.isArray(e.details.stack) ? e.details.stack : [];
     e.details.logo = e.details.logo || '';
+    const trimmedLogo = String(e.details.logo || '').trim();
+    const isSvgLogo = trimmedLogo.startsWith('<svg');
+    const logoPreviewHtml = trimmedLogo ? `
+      <div class="file-preview" style="margin-top:8px">
+        <div style="width:42px;height:42px;border-radius:8px;background:rgba(255,255,255,.05);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0">
+          ${isSvgLogo 
+            ? `<div style="width:34px;height:34px;display:flex;align-items:center;justify-content:center">${trimmedLogo}</div>` 
+            : `<img src="${trimmedLogo}" alt="" style="width:100%;height:100%;object-fit:contain;border:none;border-radius:0" onerror="this.parentElement.style.display='none'">`
+          }
+        </div>
+        <div class="meta">
+          <b>Company Logo Preview</b>
+          <small>${isSvgLogo ? 'Custom SVG Vector' : trimmedLogo}</small>
+        </div>
+        <button type="button" class="btn btn-secondary btn-sm" onclick="C.experience[${idx}].details.logo=''; renderExperience();">✕ Remove</button>
+      </div>
+    ` : '';
 
     const card = document.createElement('div');
     card.className = 'item-card';
     card.innerHTML = `
       <div class="item-head">
-        <div class="item-title">
+        <div class="item-title" style="display:flex;align-items:center;gap:10px">
+          ${trimmedLogo ? `
+            <div style="width:28px;height:28px;border-radius:6px;background:rgba(255,255,255,.05);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0">
+              ${isSvgLogo 
+                ? `<div style="width:20px;height:20px;display:flex;align-items:center;justify-content:center">${trimmedLogo}</div>` 
+                : `<img src="${trimmedLogo}" alt="" style="width:100%;height:100%;object-fit:contain;border:none;border-radius:0">`
+              }
+            </div>
+          ` : ''}
           <span class="mono" style="color:${e.details.color}">FLIGHT // 0${idx + 1}</span>
           <b>${e.base?.[1] || 'Company'} — ${e.base?.[2] || 'Role'}</b>
           <span class="item-badge" style="color:${e.base?.[3] === 'NOW' ? 'var(--green)' : 'var(--muted)'}">${e.base?.[3] || 'DONE'}</span>
@@ -790,13 +818,14 @@ function renderExperience() {
           <div class="form-group">
             <label>Company Logo (.webp / SVG / image)</label>
             <div style="display:flex;gap:6px">
-              <input type="text" id="exp-logo-${idx}" value="${e.details.logo || ''}" placeholder="/uploads/experience/logo.webp or <svg..." oninput="C.experience[${idx}].details.logo = this.value">
+              <input type="text" id="exp-logo-${idx}" value="${esc(e.details.logo || '')}" placeholder="/uploads/experience/logo.webp or <svg..." oninput="C.experience[${idx}].details.logo = this.value" onchange="renderExperience()">
               <button type="button" class="btn btn-secondary btn-sm" onclick="openMediaPickerFor('exp-logo-${idx}', 'experience', ${idx}, 'logo', 'exp')">📁 Pick</button>
             </div>
             <div class="dropzone" data-type="experience" data-target="exp-logo-${idx}" data-idx="${idx}" data-field="logo" data-section="exp" style="padding:10px;margin-top:4px">
               <p>Upload Company Logo (Auto-WebP)</p>
               <input type="file" accept="image/*">
             </div>
+            ${logoPreviewHtml}
           </div>
           <div class="form-group full">
             <label>Short Role Description</label>
@@ -815,6 +844,7 @@ function renderExperience() {
     `;
     list.appendChild(card);
   });
+  setupDropzones();
 }
 
 window.moveExp = (idx, dir) => {
@@ -897,6 +927,7 @@ function renderAbout() {
     `;
     list.appendChild(card);
   });
+  setupDropzones();
 }
 
 // TAB 5: Testimonials
@@ -928,13 +959,22 @@ function renderTestimonials() {
         <div class="form-group full">
           <label>Client Avatar Image (Upload WebP / Pick / Unsplash ID)</label>
           <div style="display:flex;gap:8px;margin-bottom:6px">
-            <input type="text" value="${t.img || ''}" id="testi-img-${idx}" oninput="C.testimonials[${idx}].img = this.value">
+            <input type="text" value="${esc(t.img || '')}" id="testi-img-${idx}" oninput="C.testimonials[${idx}].img = this.value" onchange="renderTestimonials()">
             <button type="button" class="btn btn-secondary btn-sm" onclick="openMediaPickerFor('testi-img-${idx}', 'testimonials', ${idx}, 'img', 'testi')">📁 Pick</button>
           </div>
           <div class="dropzone" data-type="testimonials" data-target="testi-img-${idx}" data-idx="${idx}" data-field="img" data-section="testi" style="padding:10px">
             <p>Upload Client Avatar (Auto-WebP)</p>
             <input type="file" accept="image/*">
           </div>
+          ${t.img ? `
+            <div class="file-preview" style="margin-top:6px">
+              <div style="width:40px;height:40px;border-radius:50%;overflow:hidden;border:1px solid var(--border);flex-shrink:0">
+                <img src="${t.img.startsWith('http') || t.img.startsWith('/') ? t.img : 'https://images.unsplash.com/' + t.img + '?auto=format&fit=crop&w=120&q=80'}" alt="" style="width:100%;height:100%;object-fit:cover;border:none;border-radius:0" onerror="this.parentElement.style.display='none'">
+              </div>
+              <div class="meta"><b>Avatar Preview</b><small>${t.img}</small></div>
+              <button type="button" class="btn btn-secondary btn-sm" onclick="C.testimonials[${idx}].img=''; renderTestimonials();">✕</button>
+            </div>
+          ` : ''}
         </div>
         <div class="form-group full">
           <label>Client Testimonial Quote</label>
@@ -944,6 +984,7 @@ function renderTestimonials() {
     `;
     list.appendChild(card);
   });
+  setupDropzones();
 }
 
 window.deleteTesti = (idx) => {
@@ -1142,8 +1183,10 @@ window.openMediaPickerFor = (targetInputId, type = 'all', idx = undefined, field
     if (section === 'exp' && idx !== undefined && C.experience?.[idx]) {
       C.experience[idx].details = C.experience[idx].details || {};
       C.experience[idx].details[field] = selectedUrl;
+      renderExperience();
     } else if (section === 'testi' && idx !== undefined && C.testimonials?.[idx]) {
       C.testimonials[idx][field] = selectedUrl;
+      renderTestimonials();
     } else if (idx !== undefined && field && C.work?.[idx]) {
       C.work[idx][field] = selectedUrl;
       renderProjects();
@@ -1249,8 +1292,10 @@ async function handleFileUpload(rawFile, dz) {
         if (section === 'exp' && idx !== undefined && C.experience?.[idx]) {
           C.experience[idx].details = C.experience[idx].details || {};
           C.experience[idx].details[field] = data.url;
+          renderExperience();
         } else if (section === 'testi' && idx !== undefined && C.testimonials?.[idx]) {
           C.testimonials[idx][field] = data.url;
+          renderTestimonials();
         } else if (idx !== undefined && field && C.work?.[idx]) {
           C.work[idx][field] = data.url;
           renderProjects();

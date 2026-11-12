@@ -136,6 +136,20 @@
       ]
     },
     {
+      "n": "New Project",
+      "d": "Project summary and architectural overview.",
+      "img": "",
+      "video": "/uploads/general/Hridoy-_-Senior-UI-Designer__1_-989485.mp4",
+      "live": "https://www.ajkerpatrika.com/football-worldcup-2026",
+      "source": "https://github.com/sazidhabib",
+      "case": "#/project/new",
+      "tags": [
+        "Next.js",
+        "React",
+        "TypeScript"
+      ]
+    },
+    {
       "n": "Movie List Website",
       "d": "A simple and user-friendly website to explore movies and TV shows, built using React and modern styled components.",
       "img": "/src/assets/productcurt.webp",
@@ -146,20 +160,6 @@
         "React",
         "JavaScript",
         "useContext"
-      ]
-    },
-    {
-      "n": "New Project",
-      "d": "Project summary and architectural overview.",
-      "img": "",
-      "video": "/uploads/general/Hridoy-_-Senior-UI-Designer__1_-989485.mp4",
-      "live": "https://",
-      "source": "https://github.com/sazidhabib",
-      "case": "#/project/new",
-      "tags": [
-        "Next.js",
-        "React",
-        "TypeScript"
       ]
     }
   ],
@@ -251,7 +251,7 @@
         "statusClass": "done",
         "badgeClass": "hud-pixalean",
         "color": "#0D99FF",
-        "logo": "<svg viewBox=\"0 0 40 40\" fill=\"none\"><rect width=\"40\" height=\"40\" rx=\"10\" fill=\"#0C1929\" stroke=\"rgba(13,153,255,0.3)\"/><path d=\"M12 28V12l16 8-16 8z\" fill=\"#0D99FF\"/><circle cx=\"28\" cy=\"20\" r=\"3\" fill=\"#60A5FA\"/></svg>",
+        "logo": "/src/assets/company/starbucks.png",
         "desc": "Engineered responsive client web apps, modular front-end architectures, and high-performance interactive interfaces for early-stage SaaS startups.",
         "dels": [
           "Shipped 60+ modular web components with optimized Web Vitals",
@@ -288,7 +288,7 @@
         "statusClass": "done",
         "badgeClass": "hud-onix",
         "color": "#7B4DFF",
-        "logo": "<svg viewBox=\"0 0 40 40\" fill=\"none\"><rect width=\"40\" height=\"40\" rx=\"10\" fill=\"#171026\" stroke=\"rgba(123,77,255,0.3)\"/><path d=\"M16 12h8v4l6 10a2 2 0 0 1-1.7 3H11.7a2 2 0 0 1-1.7-3l6-10v-4z\" stroke=\"#7B4DFF\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><circle cx=\"20\" cy=\"23\" r=\"2\" fill=\"#A78BFA\"/></svg>",
+        "logo": "/src/assets/company/meta.png",
         "desc": "Architected full-stack e-commerce platforms, transactional checkout microservices, and resilient server-side APIs handling high-concurrency peak traffic.",
         "dels": [
           "Lifted checkout conversion rates by +27% with zero-friction Stripe integration",
@@ -325,7 +325,7 @@
         "statusClass": "now",
         "badgeClass": "hud-monks",
         "color": "#0ACF83",
-        "logo": "<svg viewBox=\"0 0 40 40\" fill=\"none\"><rect width=\"40\" height=\"40\" rx=\"10\" fill=\"#0E2319\" stroke=\"rgba(10,207,131,0.3)\"/><path d=\"M20 10L10 28h20L20 10z\" stroke=\"#0ACF83\" stroke-width=\"2\" stroke-linejoin=\"round\"/><circle cx=\"20\" cy=\"22\" r=\"3\" fill=\"#FFD15C\"/></svg>",
+        "logo": "/src/assets/company/shopify.png",
         "desc": "Leading end-to-end full-stack web engineering, distributed cloud systems, and real-time interactive canvas platforms across global enterprise clients.",
         "dels": [
           "Led architectural delivery of 18+ high-scale enterprise SaaS web apps",
