@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PhotoCard</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+  <main class="app-shell">
+    <section class="workspace" aria-label="PhotoCard editor">
+      <aside class="panel controls-panel">
+        <div class="brand-row">
+          <div>
+            <p class="eyebrow">PhotoCard</p>
+            <h1>Image card maker</h1>
+          </div>
+          <button class="icon-button" id="resetButton" type="button" title="Reset card" aria-label="Reset card">
+            <span aria-hidden="true">R</span>
+          </button>
+        </div>
+
+        <!-- Template Selector -->
+        <div class="control-group">
+          <label>Template</label>
+          <div class="template-grid" role="radiogroup" aria-label="Template choices">
+            <button class="template-option is-active" type="button" data-template="editorial" aria-pressed="true">
+              <span class="template-swatch editorial"></span>
+              Editorial
+            </button>
+            <button class="template-option" type="button" data-template="polaroid" aria-pressed="false">
+              <span class="template-swatch polaroid"></span>
+              Polaroid
+            </button>
+            <button class="template-option" type="button" data-template="poster" aria-pressed="false">
+              <span class="template-swatch poster"></span>
+              Poster
+            </button>
+            <button class="template-option" type="button" data-template="custom" aria-pressed="false">
+              <span class="template-swatch custom"></span>
+              Custom
+            </button>
+          </div>
+        </div>
+
+        <!-- Custom controls if custom template selected -->
+        <div class="control-group custom-controls" id="customControls">
+          <label for="templateInput">Custom template image</label>
+          <input id="templateInput" type="file" accept="image/*">
+          <div class="mini-grid">
+            <label>
+              <span>Photo X</span>
+              <input id="photoXInput" type="range" min="0" max="60" value="12" step="1">
+            </label>
+            <label>
+              <span>Photo Y</span>
+              <input id="photoYInput" type="range" min="0" max="60" value="14" step="1">
+            </label>
+            <label>
+              <span>Photo size</span>
+              <input id="photoSizeInput" type="range" min="25" max="95" value="76" step="1">
+            </label>
+            <label>
+              <span>Text Y</span>
+              <input id="textYInput" type="range" min="10" max="88" value="70" step="1">
+            </label>
+          </div>
+        </div>
+
+        <!-- SECTION: MAIN PHOTO / VIDEO -->
+        <div class="control-section">
+          <h3><i class="fa-solid fa-image"></i> MAIN PHOTO / VIDEO</h3>
+          <div class="section-content">
+            <!-- Drag & Drop Container -->
+            <div class="drag-drop-zone" id="dropZone">
+              <div class="cloud-icon"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+              <button class="drag-drop-button" type="button" id="browseBtn">DRAG & DROP</button>
+              <p class="drag-drop-text">your files, or <span class="browse-link">Browse</span></p>
+              <input id="photoInput" type="file" accept="image/*,video/*" style="display: none;">
+            </div>
+            <button class="remove-media-btn" id="removeMediaBtn" type="button">Remove Main Media</button>
+
+            <div class="control-row">
+              <label for="fitModeSelect">Fit Mode</label>
+              <select id="fitModeSelect">
+                <option value="cover" selected>Cover (fill)</option>
+                <option value="contain">Contain (fit)</option>
+              </select>
+            </div>
+
+            <div class="control-row">
+              <label for="boxHeightInput">
+                <span>Box Height (px)</span>
+                <input id="boxHeightInput" type="range" min="200" max="800" value="541" step="1">
+              </label>
+              <span class="value-display" id="boxHeightVal">541px</span>
+            </div>
+
+            <div class="control-row">
+              <label for="zoomInput">
+                <span>Image Zoom</span>
+                <input id="zoomInput" type="range" min="1" max="3" value="1.14" step="0.01">
+              </label>
+              <span class="value-display" id="zoomVal">1.14x</span>
+            </div>
+
+            <div class="control-row">
+              <label for="positionXInput">
+                <span>Position X %</span>
+                <input id="positionXInput" type="range" min="0" max="100" value="50" step="1">
+              </label>
+              <span class="value-display" id="positionXVal">50%</span>
+            </div>
+
+            <div class="control-row">
+              <label for="positionYInput">
+                <span>Position Y %</span>
+                <input id="positionYInput" type="range" min="0" max="100" value="50" step="1">
+              </label>
+              <span class="value-display" id="positionYVal">50%</span>
+            </div>
+
+            <div class="control-row checkbox-row">
+              <input id="autoBlurInput" type="checkbox">
+              <label for="autoBlurInput">Auto-Blur Fill</label>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION: HEADLINE -->
+        <div class="control-section">
+          <h3><i class="fa-solid fa-heading"></i> HEADLINE</h3>
+          <div class="section-content">
+            <div class="control-row">
+              <label for="titleInput">Headline Text</label>
+              <textarea id="titleInput" rows="3">চাঁদা একটি রাজনৈতিক অধিকার</textarea>
+            </div>
+
+            <div class="control-row">
+              <label for="titleSizeInput">
+                <span>Font Size</span>
+                <input id="titleSizeInput" type="range" min="24" max="120" value="80" step="1">
+              </label>
+              <span class="value-display" id="titleSizeVal">80px</span>
+            </div>
+
+            <div class="control-row">
+              <label>Style</label>
+              <div class="style-toggles">
+                <button class="style-btn" id="titleBoldBtn" title="Bold"><i class="fa-solid fa-bold"></i></button>
+                <button class="style-btn" id="titleItalicBtn" title="Italic"><i class="fa-solid fa-italic"></i></button>
+                <button class="style-btn" id="titleUnderlineBtn" title="Underline"><i
+                    class="fa-solid fa-underline"></i></button>
+              </div>
+            </div>
+
+            <div class="control-row color-picker-row">
+              <label for="titleColorInput">Text Color</label>
+              <input id="titleColorInput" type="color" value="#ffffff">
+            </div>
+
+            <div class="control-row">
+              <label for="tagInput">Tag / Category Text</label>
+              <input id="tagInput" type="text" value="বাংলাদেশ">
+            </div>
+
+            <div class="control-row">
+              <label for="tagSizeInput">
+                <span>Tag Font Size</span>
+                <input id="tagSizeInput" type="range" min="14" max="80" value="28" step="1">
+              </label>
+              <span class="value-display" id="tagSizeVal">28px</span>
+            </div>
+
+            <div class="control-row color-picker-row">
+              <label for="tagColorInput">Tag Color</label>
+              <input id="tagColorInput" type="color" value="#ffffff">
+            </div>
+
+            <div class="control-row">
+              <label>Tag Style</label>
+              <div class="style-toggles">
+                <button class="style-btn" id="tagBoldBtn" title="Bold"><i class="fa-solid fa-bold"></i></button>
+                <button class="style-btn" id="tagItalicBtn" title="Italic"><i class="fa-solid fa-italic"></i></button>
+                <button class="style-btn" id="tagUnderlineBtn" title="Underline"><i class="fa-solid fa-underline"></i></button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION: SUBTITLE -->
+        <div class="control-section">
+          <h3><i class="fa-solid fa-paragraph"></i> SUBTITLE</h3>
+          <div class="section-content">
+            <div class="control-row">
+              <label for="authorInput">Subtitle Text</label>
+              <input id="authorInput" type="text" value="স্বরাষ্ট্রমন্ত্রী সায়েদ আল জোহান">
+            </div>
+
+            <div class="control-row">
+              <label for="subtitleAlignSelect">Alignment</label>
+              <select id="subtitleAlignSelect">
+                <option value="left">Left</option>
+                <option value="center" selected>Center</option>
+                <option value="right">Right</option>
+              </select>
+            </div>
+
+            <div class="control-row">
+              <label for="subtitleSizeInput">
+                <span>Font Size</span>
+                <input id="subtitleSizeInput" type="range" min="12" max="60" value="38" step="1">
+              </label>
+              <span class="value-display" id="subtitleSizeVal">38px</span>
+            </div>
+
+            <div class="control-row">
+              <label>Style</label>
+              <div class="style-toggles">
+                <button class="style-btn" id="subtitleBoldBtn" title="Bold"><i class="fa-solid fa-bold"></i></button>
+                <button class="style-btn" id="subtitleItalicBtn" title="Italic"><i
+                    class="fa-solid fa-italic"></i></button>
+                <button class="style-btn" id="subtitleUnderlineBtn" title="Underline"><i
+                    class="fa-solid fa-underline"></i></button>
+              </div>
+            </div>
+
+            <div class="control-row color-picker-row">
+              <label for="subtitleColorInput">Color</label>
+              <input id="subtitleColorInput" type="color" value="#ffffff">
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION: NEWS DATE -->
+        <div class="control-section">
+          <h3><i class="fa-solid fa-calendar-days"></i> NEWS DATE</h3>
+          <div class="section-content">
+            <div class="control-row">
+              <label for="dateInput">News Date</label>
+              <input id="dateInput" type="text" value="">
+            </div>
+
+            <div class="control-row">
+              <label for="dateSizeInput">
+                <span>Font Size</span>
+                <input id="dateSizeInput" type="range" min="10" max="40" value="38" step="1">
+              </label>
+              <span class="value-display" id="dateSizeVal">38px</span>
+            </div>
+
+            <div class="control-row">
+              <label>Style</label>
+              <div class="style-toggles">
+                <button class="style-btn" id="dateBoldBtn" title="Bold"><i class="fa-solid fa-bold"></i></button>
+                <button class="style-btn" id="dateItalicBtn" title="Italic"><i class="fa-solid fa-italic"></i></button>
+                <button class="style-btn" id="dateUnderlineBtn" title="Underline"><i
+                    class="fa-solid fa-underline"></i></button>
+              </div>
+            </div>
+
+            <div class="control-row color-picker-row">
+              <label for="dateColorInput">Color</label>
+              <input id="dateColorInput" type="color" value="#ffffff">
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION: WATERMARK -->
+        <div class="control-section">
+          <h3><i class="fa-solid fa-droplet"></i> WATERMARK</h3>
+          <div class="section-content">
+            <div class="control-row">
+              <label for="watermarkInput">Watermark Text</label>
+              <input id="watermarkInput" type="text" value="Januna">
+            </div>
+
+            <div class="control-row">
+              <label for="watermarkOpacityInput">
+                <span>Watermark Opacity</span>
+                <input id="watermarkOpacityInput" type="range" min="0" max="100" value="0" step="1">
+              </label>
+              <span class="value-display" id="watermarkOpacityVal">0%</span>
+            </div>
+
+            <div class="control-row">
+              <label for="watermarkSizeInput">
+                <span>Watermark Size</span>
+                <input id="watermarkSizeInput" type="range" min="100" max="600" value="300" step="1">
+              </label>
+              <span class="value-display" id="watermarkSizeVal">300px</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION: BACKGROUND -->
+        <div class="control-section">
+          <h3><i class="fa-solid fa-palette"></i> BACKGROUND</h3>
+          <div class="section-content">
+            <div class="control-row color-picker-row">
+              <label for="bgColorInput">BG Color</label>
+              <input id="bgColorInput" type="color" value="#d10000">
+            </div>
+
+            <div class="control-row color-picker-row">
+              <label>Gradient Bar</label>
+              <div class="gradient-inputs">
+                <input id="gradientStartInput" type="color" value="#d10000">
+                <span class="arrow-sep">→</span>
+                <input id="gradientEndInput" type="color" value="#990000">
+              </div>
+            </div>
+
+            <div class="control-row">
+              <label for="dottedOverlayInput">
+                <span>Dotted Overlay</span>
+                <input id="dottedOverlayInput" type="range" min="0" max="100" value="60" step="1">
+              </label>
+              <span class="value-display" id="dottedOverlayVal">60%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION: ADVERTISEMENT -->
+        <div class="control-section">
+          <h3><i class="fa-solid fa-bullhorn"></i> ADVERTISEMENT</h3>
+          <div class="section-content">
+            <div class="control-row checkbox-row">
+              <input id="hideAdBarInput" type="checkbox" checked>
+              <label for="hideAdBarInput">Hide Ad Bar</label>
+            </div>
+
+            <div class="control-row">
+              <label for="adModeSelect">Ad Mode</label>
+              <select id="adModeSelect">
+                <option value="text" selected>Text Only</option>
+                <option value="text-icon">Text + Icon</option>
+              </select>
+            </div>
+
+            <p class="info-note">Click the ad bar on the card to edit text directly.</p>
+
+            <div class="control-row">
+              <label for="marqueeInput">Ad text</label>
+              <input id="marqueeInput" type="text" value="সস্তা বিজ্ঞাপন লাগান- ছবি ও টেক্সট দুইটাই হবে।">
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION: SLOGAN -->
+        <div class="control-section">
+          <h3><i class="fa-solid fa-quote-left"></i> SLOGAN</h3>
+          <div class="section-content">
+            <div class="control-row checkbox-row">
+              <input id="hideSloganBarInput" type="checkbox">
+              <label for="hideSloganBarInput">Hide Slogan Bar</label>
+            </div>
+
+            <p class="info-note">Click the slogan bar on the card to edit text directly.</p>
+
+            <div class="control-row">
+              <label for="sloganInput">Slogan text</label>
+              <input id="sloganInput" type="text" value="খবর যেভাবে, জানুন সেভাবে">
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION: TV BRANDING -->
+        <div class="control-section">
+          <h3 id="tvBrandingToggle" style="cursor: pointer; display: flex; justify-content: space-between;">
+            <span><i class="fa-solid fa-tv"></i> TV BRANDING</span>
+            <i class="fa-solid fa-chevron-down" id="tvBrandingChevron"></i>
+          </h3>
+          <div class="section-content" id="tvBrandingContent" style="display: none;">
+            <div class="control-row">
+              <label for="brandingAlignSelect">Alignment</label>
+              <select id="brandingAlignSelect">
+                <option value="distributed" selected>Distributed (Default)</option>
+                <option value="left">Left</option>
+                <option value="center">Center</option>
+                <option value="right">Right</option>
+              </select>
+            </div>
+
+            <div class="control-row">
+              <label for="tvNameInput">TV Name</label>
+              <input id="tvNameInput" type="text" placeholder="TV name" value="">
+            </div>
+
+            <div class="control-row">
+              <label for="tvLabelInput">TV Label</label>
+              <input id="tvLabelInput" type="text" value="tv">
+            </div>
+
+            <div class="control-row">
+              <label for="websiteInput">Website URL</label>
+              <input id="websiteInput" type="text" value="www.januna.tv">
+            </div>
+
+            <div class="control-row">
+              <label for="facebookInput">Facebook</label>
+              <input id="facebookInput" type="text" value="janunatelevision">
+            </div>
+
+            <div class="control-row">
+              <label for="youtubeInput">YouTube</label>
+              <input id="youtubeInput" type="text" value="janunatvbd">
+            </div>
+
+            <div class="control-row">
+              <label for="extraTextInput">Extra Text</label>
+              <input id="extraTextInput" type="text" placeholder="e.g. additional text" value="">
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION: VISIBILITY -->
+        <div class="control-section">
+          <h3><i class="fa-solid fa-eye"></i> VISIBILITY</h3>
+          <div class="section-content visibility-toggles">
+            <label class="checkbox-row">
+              <input id="showDividerInput" type="checkbox" checked>
+              <span>Divider graphic</span>
+            </label>
+            <label class="checkbox-row">
+              <input id="showLogoInput" type="checkbox" checked>
+              <span>Earth logo</span>
+            </label>
+            <label class="checkbox-row">
+              <input id="showFacebookInput" type="checkbox" checked>
+              <span>Facebook row</span>
+            </label>
+            <label class="checkbox-row">
+              <input id="showYoutubeInput" type="checkbox" checked>
+              <span>YouTube row</span>
+            </label>
+            <label class="checkbox-row">
+              <input id="showDottedBgInput" type="checkbox" checked>
+              <span>Dotted bg overlay</span>
+            </label>
+            <label class="checkbox-row">
+              <input id="showWatermarkInput" type="checkbox" checked>
+              <span>Channel watermark</span>
+            </label>
+            <label class="checkbox-row">
+              <input id="showFooterInput" type="checkbox">
+              <span>Footer band</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="actions-row">
+          <button class="primary-button" id="downloadButton" type="button">Download PNG</button>
+          <button class="secondary-button" id="sampleButton" type="button">Use sample</button>
+        </div>
+      </aside>
+
+      <section class="preview-stage" aria-label="Card preview">
+        <div class="editor-toolbar">
+          <div class="zoom-controls">
+            <span class="zoom-text">Zoom: <span id="zoomPercentVal">100%</span></span>
+            <button class="icon-btn zoom-btn" id="zoomOutBtn"><i class="fa-solid fa-plus"></i></button>
+            <button class="icon-btn zoom-btn" id="zoomInBtn"><i class="fa-solid fa-minus"></i></button>
+            <button class="icon-btn zoom-btn" id="zoomFitBtn">Fit</button>
+          </div>
+          <div class="action-controls">
+            <button class="toolbar-btn outline-btn" id="topResetBtn"><i class="fa-solid fa-rotate-left"></i>
+              Reset</button>
+            <button class="icon-btn toolbar-icon" title="Undo"><i class="fa-solid fa-reply"></i></button>
+            <button class="icon-btn toolbar-icon" title="Redo"><i class="fa-solid fa-share"></i></button>
+            <select class="resolution-select">
+              <option value="1080p">1080p</option>
+            </select>
+            <button class="toolbar-btn red-btn"><i class="fa-solid fa-clapperboard"></i> Export Video</button>
+            <button class="toolbar-btn red-btn" id="topExportBtn"><i class="fa-solid fa-download"></i> Export
+              PNG</button>
+          </div>
+        </div>
+        <div class="preview-container" id="previewContainer">
+          <article class="photo-card template-editorial" id="photoCard">
+            <img class="custom-template-image" id="customTemplateImage" alt="">
+
+            <!-- Channel Watermark overlay -->
+            <div class="card-watermark" id="cardWatermark">Januna</div>
+
+            <!-- Editorial Template Elements -->
+            <div class="editorial-top">
+              <div class="image-wrap">
+                <div class="card-upload-overlay">
+                  <div class="cloud-icon-box">
+                    <i class="fa-solid fa-cloud-arrow-up"></i>
+                  </div>
+                  <button class="drag-drop-button" type="button">DRAG & DROP</button>
+                  <p class="drag-drop-text">your files, or <span class="browse-link">Browse</span></p>
+                </div>
+                <img class="blur-bg-image" id="editorialBlurBgImage" alt="">
+                <img id="editorialImage" alt="Selected card photo">
+              </div>
+            </div>
+            <div class="editorial-bottom">
+              <div class="red-banner" id="redBanner">
+                <div class="dot-overlay"></div>
+                <h2 id="editorialTitle">চাঁদা একটি রাজনৈতিক অধিকার</h2>
+                <div class="banner-divider" id="editorialDivider">
+                  <div class="diamond"></div>
+                </div>
+                <div class="meta-row" id="editorialMetaRow">
+                  <span id="cardAuthor">স্বরাষ্ট্রমন্ত্রী সায়েদ আল জোহান</span>
+                  <span id="cardDate">৫ জুলাই ২০২৩</span>
+                </div>
+              </div>
+              <div class="footer-band" id="footerBand">
+                <div class="footer-logo" id="footerLogo">
+                  <img src="public/icon.png" alt="Januna Logo" id="cardLogo">
+                  <span class="logo-divider">|</span>
+                  <span class="logo-tv" id="cardTvLabel">tv</span>
+                  <span class="logo-tv-name" id="cardTvName"></span>
+                </div>
+                <div class="footer-links" id="footerLinks">
+                  <span id="cardExtraText" class="extra-text-link"></span>
+                  <span><i class="fa-solid fa-play"></i> <span id="cardWebsite">www.januna.tv</span></span>
+                  <span id="facebookRow"><i class="fa-brands fa-facebook"></i> <span
+                      id="cardFacebook">janunatelevision</span></span>
+                  <span id="youtubeRow"><i class="fa-brands fa-youtube"></i> <span
+                      id="cardYoutube">janunatvbd</span></span>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Standard layout for Polaroid, Poster, Custom templates -->
+            <div class="image-wrap standard-image-wrap">
+              <div class="card-upload-overlay">
+                <div class="cloud-icon-box">
+                  <i class="fa-solid fa-cloud-arrow-up"></i>
+                </div>
+                <button class="drag-drop-button" type="button">DRAG & DROP</button>
+                <p class="drag-drop-text">your files, or <span class="browse-link">Browse</span></p>
+              </div>
+              <img class="blur-bg-image" id="standardBlurBgImage" alt="">
+              <img id="cardImage" alt="Selected card photo">
+            </div>
+            <div class="card-content">
+              <span class="card-tag" id="cardTag">বাংলাদেশ</span>
+              <h2 id="cardTitle">Golden Hour</h2>
+              <div class="card-meta-row" id="standardMetaRow">
+                <p id="cardSubtitle">স্বরাষ্ট্রমন্ত্রী সায়েদ আল জোহান</p>
+                <p id="cardStandardDate">৫ জুলাই ২০২৩</p>
+              </div>
+            </div>
+
+            <!-- Global Bottom Bands (Slogan & Advertisement) -->
+            <div class="global-bottom-bands" id="globalBottomBands">
+              <div class="slogan-band" id="sloganBand">
+                <img src="public/icon.png" alt="Logo" class="slogan-logo" id="sloganLogo">
+                <span class="logo-divider">|</span>
+                <span id="cardSlogan" contenteditable="true">খবর যেভাবে, জানুন সেভাবে</span>
+              </div>
+              <div class="marquee-band" id="marqueeBand">
+                <i class="fa-solid fa-bullhorn" style="color: #d89f5f;" id="adIcon"></i>
+                <span id="cardMarquee" contenteditable="ture">সস্তা বিজ্ঞাপন লাগান- ছবি ও টেক্সট দুইটাই হবে।</span>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <script src="js/assets.js"></script>
+  <script src="js/app_v2.js"></script>
+</body>
+
+</html>
