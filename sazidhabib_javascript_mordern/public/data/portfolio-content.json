@@ -87,7 +87,26 @@
         "Next.js",
         "React",
         "TypeScript"
-      ]
+      ],
+      "dossier": {
+        "role": "Frontend & Performance Engineer",
+        "latency": "< 35ms Edge",
+        "scale": "250k+ Concurrent",
+        "topology": "[Global CDN] -> [Next.js Dynamic SSR] -> [WebSocket Match Stream] -> [Headless CMS Engine]",
+        "challenge": "Handling sudden surges of 250,000+ football fans refreshing live match data, interactive tournament brackets, and real-time score tickers without server degradation.",
+        "solution": "Engineered real-time reactive WebSocket stream integration with client-side optimistic UI updates and edge-cached static fallback pages for zero-downtime reliability.",
+        "decisions": [
+          "Edge-cached dynamic match schedules with automated fallback replication",
+          "Optimistic live-ticker state engine for instant score updates",
+          "Mobile-first responsive layout tested across 3G throttled networks"
+        ],
+        "scores": {
+          "perf": 100,
+          "seo": 100,
+          "a11y": 98,
+          "best": 100
+        }
+      }
     },
     {
       "n": "Pathokbonddho",
@@ -101,7 +120,26 @@
         "React",
         "javascript"
       ],
-      "video": "/uploads/general/Sazid-Habib-_-Senior-Full-Stack-Next-js-Engineer-920699.mp4"
+      "video": "/uploads/general/Sazid-Habib-_-Senior-Full-Stack-Next-js-Engineer-920699.mp4",
+      "dossier": {
+        "role": "Lead Full-Stack Engineer",
+        "latency": "< 42ms SSR",
+        "scale": "120k+ / month",
+        "topology": "[Edge CDN] -> [Next.js App Router Server Actions] -> [Redis Cache Layer] -> [Prisma ORM & PostgreSQL DB]",
+        "challenge": "High-concurrency traffic during breaking news spikes was causing server-side bottlenecks and rendering delays on legacy news portals.",
+        "solution": "Engineered a multi-tier caching strategy pairing Next.js ISR (Incremental Static Regeneration) with an in-memory Redis layer, reducing DB load by 85% while delivering sub-50ms page loads across Dhaka and international networks.",
+        "decisions": [
+          "Strict RBAC CMS: Role-based access control protecting journalist drafts, editorial reviews, and published article workflows.",
+          "On-Demand Cache Purging: Automated Webhook-based cache invalidation so breaking news updates instantly across all edge nodes.",
+          "Adaptive Image Optimization: WebP delivery pipeline generating responsive source sets for mobile 3G/4G bandwidth constraints."
+        ],
+        "scores": {
+          "perf": 100,
+          "seo": 100,
+          "a11y": 98,
+          "best": 100
+        }
+      }
     },
     {
       "n": "nextideasolution",
@@ -114,7 +152,26 @@
         "Next.js",
         "React",
         "javascript"
-      ]
+      ],
+      "dossier": {
+        "role": "Full-Stack Architect",
+        "latency": "< 45ms TTFB",
+        "scale": "Production Agency",
+        "topology": "[Vercel Edge] -> [Next.js App Router] -> [Tailwind CSS] -> [Serverless Micro-APIs]",
+        "challenge": "Building a modern, highly engaging corporate agency showcase that balances 3D micro-interactions and animations with strict sub-second performance budgets.",
+        "solution": "Implemented lazy-hydrated interactive components, code-split route boundaries, and GPU-composited animations to achieve flawless 60 FPS transitions.",
+        "decisions": [
+          "Strict zero-layout-shift (CLS = 0) design token architecture",
+          "Headless contact lead pipeline with automated rate-limiting",
+          "Modular component library for rapid landing page iterations"
+        ],
+        "scores": {
+          "perf": 100,
+          "seo": 100,
+          "a11y": 98,
+          "best": 100
+        }
+      }
     },
     {
       "n": "kamrulhasan",

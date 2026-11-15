@@ -537,6 +537,94 @@
       transform: translateX(18px)
     }
 
+    /* Technical Architecture Dossier (Option B) */
+    .dossier-box {
+      background: rgba(13, 153, 255, 0.03);
+      border: 1px solid rgba(13, 153, 255, 0.22);
+      border-radius: 10px;
+      padding: 14px 16px;
+      margin-top: 10px;
+      transition: border-color .2s;
+    }
+    .dossier-box[open] {
+      border-color: rgba(13, 153, 255, 0.45);
+      background: rgba(13, 153, 255, 0.05);
+    }
+    .dossier-summary {
+      list-style: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      user-select: none;
+      outline: none;
+    }
+    .dossier-summary::-webkit-details-marker {
+      display: none;
+    }
+    .dossier-tag {
+      background: rgba(13, 153, 255, 0.16);
+      color: #38BDF8;
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 4px;
+      border: 1px solid rgba(13, 153, 255, 0.3);
+    }
+    .dossier-arrow {
+      color: var(--muted);
+      font-size: 14px;
+      transition: transform .2s;
+    }
+    .dossier-box[open] .dossier-arrow {
+      transform: rotate(180deg);
+    }
+    .dossier-content {
+      padding-top: 14px;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      margin-top: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .dossier-row-3 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+    }
+    .dossier-row-4 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+    .score-input {
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 10px;
+      text-align: center;
+    }
+    .score-input span {
+      display: block;
+      font-size: 10px;
+      font-family: var(--mono);
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+    .score-input input {
+      text-align: center;
+      font-weight: 700;
+      color: var(--green);
+      padding: 4px;
+      width: 100%;
+    }
+    @media (max-width: 600px) {
+      .dossier-row-4 {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
     /* Media Library Grid */
     .media-filter-bar {
       display: flex;
@@ -1382,6 +1470,75 @@
           <label>Tech Stack Tags (Comma-separated)</label>
           <input type="text" value="${(p.tags || []).join(', ')}" onchange="C.work[${idx}].tags = this.value.split(',').map(s=>s.trim()).filter(Boolean)">
         </div>
+
+        <details class="dossier-box form-group full" ${p.dossier ? 'open' : ''}>
+          <summary class="dossier-summary">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span class="dossier-tag">OPTION B</span>
+              <span style="font-weight:700;color:var(--text);font-size:13px">Technical Architecture Dossier (Case Study Drawer)</span>
+            </div>
+            <span class="dossier-arrow">▾</span>
+          </summary>
+          <div class="dossier-content">
+            <div class="dossier-row-3">
+              <div class="form-group">
+                <label>Engineering Role</label>
+                <input type="text" value="${p.dossier?.role || ''}" placeholder="Lead Full-Stack Engineer" oninput="C.work[${idx}].dossier = C.work[${idx}].dossier || {}; C.work[${idx}].dossier.role = this.value">
+              </div>
+              <div class="form-group">
+                <label>Latency / SLA Benchmark</label>
+                <input type="text" value="${p.dossier?.latency || ''}" placeholder="< 42ms SSR" oninput="C.work[${idx}].dossier = C.work[${idx}].dossier || {}; C.work[${idx}].dossier.latency = this.value">
+              </div>
+              <div class="form-group">
+                <label>Scale / Traffic Volume</label>
+                <input type="text" value="${p.dossier?.scale || ''}" placeholder="120k+ / month" oninput="C.work[${idx}].dossier = C.work[${idx}].dossier || {}; C.work[${idx}].dossier.scale = this.value">
+              </div>
+            </div>
+
+            <div class="form-group full">
+              <label>System Architecture Topology (Data Flow)</label>
+              <input type="text" value="${p.dossier?.topology || ''}" placeholder="[Edge CDN] -> [Next.js App Router] -> [Redis Cache] -> [PostgreSQL DB]" oninput="C.work[${idx}].dossier = C.work[${idx}].dossier || {}; C.work[${idx}].dossier.topology = this.value">
+              <small style="color:var(--muted);font-size:11px">Describe the data-flow pipeline (e.g. [Edge CDN] ➔ [SSR Edge] ➔ [Redis] ➔ [PostgreSQL])</small>
+            </div>
+
+            <div class="form-group full">
+              <label>The Architectural Challenge</label>
+              <textarea rows="2" placeholder="Describe the scale bottleneck, high-concurrency spike issue, or complex technical requirement..." oninput="C.work[${idx}].dossier = C.work[${idx}].dossier || {}; C.work[${idx}].dossier.challenge = this.value">${p.dossier?.challenge || ''}</textarea>
+            </div>
+
+            <div class="form-group full">
+              <label>Architectural Solution</label>
+              <textarea rows="2" placeholder="How you engineered the multi-tier caching, ISR, state machine, or DB query optimizations..." oninput="C.work[${idx}].dossier = C.work[${idx}].dossier || {}; C.work[${idx}].dossier.solution = this.value">${p.dossier?.solution || ''}</textarea>
+            </div>
+
+            <div class="form-group full">
+              <label>Key Architectural Decisions (One bullet point per line)</label>
+              <textarea rows="3" placeholder="Strict RBAC CMS for journalists, editors, and admins&#10;On-demand webhook cache purging for breaking news&#10;Adaptive WebP image pipeline for mobile bandwidth" oninput="C.work[${idx}].dossier = C.work[${idx}].dossier || {}; C.work[${idx}].dossier.decisions = this.value.split('\n').map(s=>s.trim()).filter(Boolean)">${(p.dossier?.decisions || []).join('\n')}</textarea>
+            </div>
+
+            <div class="form-group full">
+              <label>Lighthouse Audit Benchmark Scores (0 - 100)</label>
+              <div class="dossier-row-4">
+                <div class="score-input">
+                  <span>PERF</span>
+                  <input type="number" min="0" max="100" value="${p.dossier?.scores?.perf ?? 100}" oninput="C.work[${idx}].dossier = C.work[${idx}].dossier || {}; C.work[${idx}].dossier.scores = C.work[${idx}].dossier.scores || {}; C.work[${idx}].dossier.scores.perf = parseInt(this.value, 10) || 0">
+                </div>
+                <div class="score-input">
+                  <span>SEO</span>
+                  <input type="number" min="0" max="100" value="${p.dossier?.scores?.seo ?? 100}" oninput="C.work[${idx}].dossier = C.work[${idx}].dossier || {}; C.work[${idx}].dossier.scores = C.work[${idx}].dossier.scores || {}; C.work[${idx}].dossier.scores.seo = parseInt(this.value, 10) || 0">
+                </div>
+                <div class="score-input">
+                  <span>A11Y</span>
+                  <input type="number" min="0" max="100" value="${p.dossier?.scores?.a11y ?? 98}" oninput="C.work[${idx}].dossier = C.work[${idx}].dossier || {}; C.work[${idx}].dossier.scores = C.work[${idx}].dossier.scores || {}; C.work[${idx}].dossier.scores.a11y = parseInt(this.value, 10) || 0">
+                </div>
+                <div class="score-input">
+                  <span>BEST PRAC</span>
+                  <input type="number" min="0" max="100" value="${p.dossier?.scores?.best ?? 100}" oninput="C.work[${idx}].dossier = C.work[${idx}].dossier || {}; C.work[${idx}].dossier.scores = C.work[${idx}].dossier.scores || {}; C.work[${idx}].dossier.scores.best = parseInt(this.value, 10) || 0">
+                </div>
+              </div>
+            </div>
+          </div>
+        </details>
       </div>
     `;
         list.appendChild(card);
@@ -1417,7 +1574,17 @@
         live: 'https://',
         source: 'https://github.com/sazidhabib',
         case: '#/project/new',
-        tags: ['Next.js', 'React', 'TypeScript']
+        tags: ['Next.js', 'React', 'TypeScript'],
+        dossier: {
+          role: 'Lead Full-Stack Engineer',
+          latency: '< 50ms SSR',
+          scale: '100k+ / month',
+          topology: '[Client] -> [Next.js App Router] -> [Redis Cache] -> [Database]',
+          challenge: '',
+          solution: '',
+          decisions: [],
+          scores: { perf: 100, seo: 100, a11y: 98, best: 100 }
+        }
       });
       renderProjects();
       setupDropzones();
