@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Home } from "lucide-react";
 import { Product, Category, SiteSetting } from "../../../models";
-import { products as mockProducts, categories as mockCategories } from "../../data/mockData";
+import { categories as mockCategories } from "../../data/mockData";
 import ProductGrid from "../../components/ProductGrid";
 import SubCategoryHeader from "../../components/SubCategoryHeader";
 import { findCategoryHierarchy, staticCategories, parseMenuData } from "../../lib/categoryUtils";
@@ -85,8 +85,20 @@ export default async function DynamicCategoryLandingPage({ params }) {
     }
 
     if (!category) {
-      // Check if any product has this category
-      const hasProducts = mockProducts.some((p) => p.category === categorySlug || p.subcategory === categorySlug);
+      // Check if any product has this category in DB
+      let hasProducts = false;
+      try {
+        if (Product) {
+          const { Op } = require("sequelize");
+          const count = await Product.count({
+            where: {
+              [Op.or]: [{ category: categorySlug }, { subcategory: categorySlug }]
+            }
+          });
+          hasProducts = count > 0;
+        }
+      } catch (e) {}
+
       if (!hasProducts) {
         notFound();
       }
@@ -138,23 +150,6 @@ export default async function DynamicCategoryLandingPage({ params }) {
     }
   } catch (error) {
     console.error("DB Products fetch failed:", error);
-  }
-
-  // Fallback to mock data matching filters
-  if (products.length === 0) {
-    products = mockProducts.filter((p) => {
-      const matchCat =
-        p.category === queryCategory ||
-        p.category === categorySlug ||
-        p.subcategory === categorySlug;
-      const matchSub = querySubcategory
-        ? p.subcategory === querySubcategory || p.subcategory === categorySlug
-        : true;
-      const matchSubSub = querySubSubcategory
-        ? p.subSubcategory === querySubSubcategory || p.subSubcategory === categorySlug
-        : true;
-      return matchCat && matchSub && matchSubSub;
-    });
   }
 
   const listingTitle = breadcrumbs.length > 0 ? breadcrumbs[breadcrumbs.length - 1].name : categorySlug;

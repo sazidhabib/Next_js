@@ -1,5 +1,4 @@
 import { Product } from "../../../models";
-import { products as mockProducts } from "../../data/mockData";
 import ProductGrid from "../../components/ProductGrid";
 import { SlidersHorizontal, Home } from "lucide-react";
 import SubCategoryHeader from "../../components/SubCategoryHeader";
@@ -13,11 +12,7 @@ export default async function LaptopsPage() {
       categoryProducts = dbProducts.map((p) => p.toJSON());
     }
   } catch (error) {
-    console.error("DB Fetch failed for laptops, using mock fallback:", error);
-  }
-
-  if (categoryProducts.length === 0) {
-    categoryProducts = mockProducts.filter((p) => p.category === "laptop-notebook");
+    console.error("DB Fetch failed for laptops:", error);
   }
 
   return (

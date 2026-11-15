@@ -288,6 +288,10 @@ const deleteProduct = async (req, res) => {
       if (!product) {
         return res.status(404).json({ success: false, message: 'Product not found' });
       }
+      const { OrderItem } = require('../models');
+      if (OrderItem) {
+        await OrderItem.destroy({ where: { productId: id } }).catch(() => {});
+      }
       await product.destroy();
       return res.json({ success: true, message: 'Product deleted successfully' });
     } catch (dbError) {

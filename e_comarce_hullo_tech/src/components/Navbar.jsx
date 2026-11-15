@@ -25,9 +25,12 @@ export default function Navbar() {
 
   useEffect(() => {
     fetch('/api/settings', { cache: 'no-store' })
-      .then((res) => res.json())
+      .then((res) => {
+        if (!res.ok) return null;
+        return res.json();
+      })
       .then((data) => {
-        if (data.success && data.data && data.data.menuItems) {
+        if (data && data.success && data.data && data.data.menuItems) {
           setCategories(parseMenuData(data.data.menuItems));
         }
       })

@@ -810,12 +810,13 @@
       </div>
       <div class="media-filter-bar">
         <div class="media-pills" id="pickerPills">
-          <span class="media-pill active" data-type="all">All Media</span>
-          <span class="media-pill" data-type="projects">Projects</span>
-          <span class="media-pill" data-type="experience">Experience</span>
-          <span class="media-pill" data-type="testimonials">Testimonials</span>
-          <span class="media-pill" data-type="icons">Icons</span>
-          <span class="media-pill" data-type="resumes">Resumes</span>
+          <span class="media-pill active" data-type="all">All Media (<span id="pickerCountAll">0</span>)</span>
+          <span class="media-pill" data-type="projects">Projects (<span id="pickerCountProjects">0</span>)</span>
+          <span class="media-pill" data-type="experience">Experience (<span id="pickerCountExp">0</span>)</span>
+          <span class="media-pill" data-type="testimonials">Testimonials (<span id="pickerCountTesti">0</span>)</span>
+          <span class="media-pill" data-type="icons">Icons (<span id="pickerCountIcons">0</span>)</span>
+          <span class="media-pill" data-type="resumes">Resumes (<span id="pickerCountResumes">0</span>)</span>
+          <span class="media-pill" data-type="general">General (<span id="pickerCountGeneral">0</span>)</span>
         </div>
         <input type="text" id="pickerSearch" placeholder="Search media by name..."
           style="max-width:240px;padding:6px 10px;font-size:12px">
@@ -1019,7 +1020,7 @@
               <div style="display:flex;gap:8px;margin-top:6px">
                 <input type="text" id="statVal1" placeholder="03"
                   style="width:75px;font-family:var(--mono);font-weight:700;color:var(--blue);text-align:center">
-                <input type="text" id="statLbl1" placeholder="Studios" style="flex:1">
+                <input type="text" id="statLbl1" placeholder="Companies" style="flex:1">
               </div>
             </div>
             <div style="background:rgba(255,255,255,.02);padding:12px;border-radius:8px;border:1px solid var(--border)">
@@ -1521,7 +1522,7 @@
             <input type="text" value="${e.base?.[0] || '2026'}" oninput="C.experience[${idx}].base[0] = this.value">
           </div>
           <div class="form-group">
-            <label>Studio Name (FLAP 1)</label>
+            <label>Company Name (FLAP 1)</label>
             <input type="text" value="${e.base?.[1] || ''}" oninput="C.experience[${idx}].base[1] = this.value; C.experience[${idx}].alt[1] = this.value; C.experience[${idx}].details.company = this.value">
           </div>
           <div class="form-group">
@@ -1754,12 +1755,19 @@
     // ================= 5. CENTRALIZED MEDIA LIBRARY & PICKER =================
     async function fetchAndRenderMedia() {
       try {
-        const res = await fetch('/api/admin/media', { headers: { 'Authorization': `Bearer ${token}` } });
+        const res = await fetch(`/api/admin/media?token=${encodeURIComponent(token)}`, { headers: { 'Authorization': `Bearer ${token}` } });
         const data = await res.json();
         if (res.ok && data.ok) {
           allMediaFiles = data.files || [];
           updateMediaCounts();
           renderMediaGrid('mainMediaGrid', activeFilter, document.getElementById('mediaSearch')?.value);
+          // If modal is open, also refresh pickerGrid
+          if (mediaPickerModal && mediaPickerModal.style.display !== 'none') {
+            const activePill = document.querySelector('#pickerPills .media-pill.active')?.dataset.type || 'all';
+            renderMediaGrid('pickerGrid', activePill, document.getElementById('pickerSearch')?.value, true);
+          }
+        } else {
+          console.error('Failed to load media files:', data.error || res.statusText);
         }
       } catch (err) {
         console.error('Failed to load media files:', err);
@@ -1768,13 +1776,31 @@
 
     function updateMediaCounts() {
       const getCount = (t) => t === 'all' ? allMediaFiles.length : allMediaFiles.filter(f => f.type === t).length;
-      if (document.getElementById('countAll')) document.getElementById('countAll').textContent = getCount('all');
-      if (document.getElementById('countProjects')) document.getElementById('countProjects').textContent = getCount('projects');
-      if (document.getElementById('countExp')) document.getElementById('countExp').textContent = getCount('experience');
-      if (document.getElementById('countTesti')) document.getElementById('countTesti').textContent = getCount('testimonials');
-      if (document.getElementById('countIcons')) document.getElementById('countIcons').textContent = getCount('icons');
-      if (document.getElementById('countResumes')) document.getElementById('countResumes').textContent = getCount('resumes');
-      if (document.getElementById('countGeneral')) document.getElementById('countGeneral').textContent = getCount('general');
+      const countMap = {
+        all: getCount('all'),
+        projects: getCount('projects'),
+        experience: getCount('experience'),
+        testimonials: getCount('testimonials'),
+        icons: getCount('icons'),
+        resumes: getCount('resumes'),
+        general: getCount('general')
+      };
+
+      if (document.getElementById('countAll')) document.getElementById('countAll').textContent = countMap.all;
+      if (document.getElementById('countProjects')) document.getElementById('countProjects').textContent = countMap.projects;
+      if (document.getElementById('countExp')) document.getElementById('countExp').textContent = countMap.experience;
+      if (document.getElementById('countTesti')) document.getElementById('countTesti').textContent = countMap.testimonials;
+      if (document.getElementById('countIcons')) document.getElementById('countIcons').textContent = countMap.icons;
+      if (document.getElementById('countResumes')) document.getElementById('countResumes').textContent = countMap.resumes;
+      if (document.getElementById('countGeneral')) document.getElementById('countGeneral').textContent = countMap.general;
+
+      if (document.getElementById('pickerCountAll')) document.getElementById('pickerCountAll').textContent = countMap.all;
+      if (document.getElementById('pickerCountProjects')) document.getElementById('pickerCountProjects').textContent = countMap.projects;
+      if (document.getElementById('pickerCountExp')) document.getElementById('pickerCountExp').textContent = countMap.experience;
+      if (document.getElementById('pickerCountTesti')) document.getElementById('pickerCountTesti').textContent = countMap.testimonials;
+      if (document.getElementById('pickerCountIcons')) document.getElementById('pickerCountIcons').textContent = countMap.icons;
+      if (document.getElementById('pickerCountResumes')) document.getElementById('pickerCountResumes').textContent = countMap.resumes;
+      if (document.getElementById('pickerCountGeneral')) document.getElementById('pickerCountGeneral').textContent = countMap.general;
     }
 
     function renderMediaGrid(gridId, filter = 'all', searchQuery = '', isPicker = false) {
@@ -1858,7 +1884,7 @@
     window.deleteMediaFile = async (fileUrl) => {
       if (!confirm(`Permanently delete "${fileUrl}"?`)) return;
       try {
-        const res = await fetch('/api/admin/media', {
+        const res = await fetch(`/api/admin/media?token=${encodeURIComponent(token)}`, {
           method: 'DELETE',
           headers: {
             'Content-Type': 'application/json',
@@ -1902,7 +1928,22 @@
         p.classList.toggle('active', p.dataset.type === defaultFilter);
       });
 
+      // Synchronize dropzone upload category with active picker tab
+      const pDropzone = document.getElementById('pickerDropzone');
+      if (pDropzone) {
+        pDropzone.dataset.type = defaultFilter === 'all' ? 'general' : defaultFilter;
+      }
+
+      updateMediaCounts();
       renderMediaGrid('pickerGrid', defaultFilter, '', true);
+
+      // If media files haven't loaded yet, fetch and refresh
+      if (!allMediaFiles || allMediaFiles.length === 0) {
+        fetchAndRenderMedia().then(() => {
+          updateMediaCounts();
+          renderMediaGrid('pickerGrid', defaultFilter, '', true);
+        });
+      }
     }
 
     function closeMediaPicker() {
@@ -1945,6 +1986,10 @@
       pill.addEventListener('click', () => {
         document.querySelectorAll('#pickerPills .media-pill').forEach(p => p.classList.remove('active'));
         pill.classList.add('active');
+        const pDropzone = document.getElementById('pickerDropzone');
+        if (pDropzone) {
+          pDropzone.dataset.type = pill.dataset.type === 'all' ? 'general' : pill.dataset.type;
+        }
         renderMediaGrid('pickerGrid', pill.dataset.type, document.getElementById('pickerSearch')?.value, true);
       });
     });
@@ -2003,7 +2048,7 @@
       reader.onload = async () => {
         try {
           showToast(`Uploading ${file.name}...`);
-          const res = await fetch('/api/admin/upload', {
+          const res = await fetch(`/api/admin/upload?token=${encodeURIComponent(token)}`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -2053,6 +2098,12 @@
               document.getElementById('prevResumeName').textContent = file.name;
               document.getElementById('prevResumeSize').textContent = (file.size / 1024).toFixed(1) + ' KB';
               document.getElementById('prevResumeLink').href = data.url;
+            }
+
+            if (dz.id === 'pickerDropzone' && typeof pickerCallback === 'function') {
+              showToast(`Selected uploaded asset: ${data.url}`);
+              pickerCallback(data.url);
+              closeMediaPicker();
             }
 
             // Refresh Media Library in background
@@ -2106,7 +2157,7 @@
       }
 
       try {
-        const res = await fetch('/api/admin/content', {
+        const res = await fetch(`/api/admin/content?token=${encodeURIComponent(token)}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

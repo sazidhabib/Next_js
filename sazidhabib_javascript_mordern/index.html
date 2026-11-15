@@ -12873,7 +12873,7 @@
             </div>
             <div class="sv-stats">
               <div><b class="acc-dn" data-v="05">05</b><span>Years</span></div>
-              <div><b class="acc-dn" data-v="03">03</b><span>Studios</span></div>
+              <div><b class="acc-dn" data-v="03">03</b><span>Companies</span></div>
               <div><b class="acc-dn" data-v="80+">80+</b><span>Projects</span></div>
             </div>
           </div>
@@ -12894,7 +12894,7 @@
                         id="depClock"></span></span>
                   </div>
                   <div class="dep-row th" aria-hidden="true">
-                    <span>Year</span><span>Studio</span><span>Role</span><span>Status</span>
+                    <span>Year</span><span>Company</span><span>Role</span><span>Status</span>
                   </div>
                   <div id="depRows" role="list" aria-label="Work history"></div>
                   <div class="dep-tick" aria-hidden="true">
@@ -14057,7 +14057,7 @@
 
         box.innerHTML = R.map((r, k) => {
           const d = r.details || EXP_DETAILS[k] || {
-            company: r.base?.[1] || 'Studio',
+            company: r.base?.[1] || 'Company',
             role: r.base?.[2] || 'Developer',
             period: 'Remote',
             location: 'DHAKA · REMOTE',
@@ -14076,8 +14076,8 @@
           const color = d.color || '#0D99FF';
           const statusClass = (d.status || r.base?.[3] || 'DONE').toLowerCase() === 'now' ? 'now' : 'done';
           const statusText = d.status || r.base?.[3] || 'DONE';
-          const dels = Array.isArray(d.dels) ? d.dels : [];
-          const stack = Array.isArray(d.stack) ? d.stack : [];
+          const dels = (Array.isArray(d.dels) ? d.dels : []).map(s => String(s || '').trim()).filter(Boolean);
+          const stack = (Array.isArray(d.stack) ? d.stack : []).map(s => String(s || '').trim()).filter(Boolean);
 
           return `
       <div class="dep-item${k === 0 ? ' active' : ''}" data-idx="${k}">
@@ -14109,18 +14109,21 @@
                     <span class="dep-hud-period">${d.period || ''}</span>
                   </div>
                 </div>
+                ${(d.desc || dels.length) ? `
                 <div class="dep-hud-info">
-                  <p class="dep-hud-desc">${d.desc || ''}</p>
+                  ${d.desc ? `<p class="dep-hud-desc">${d.desc}</p>` : ''}
+                  ${dels.length ? `
                   <ul class="dep-hud-dels">
                     ${dels.map(del => `<li>${del}</li>`).join('')}
-                  </ul>
-                </div>
+                  </ul>` : ''}
+                </div>` : ''}
+                ${stack.length ? `
                 <div class="dep-hud-stack">
                   <span class="dep-hud-stack-hd">// CORE TECH STACK:</span>
                   <div class="dep-hud-stack-list">
                     ${stack.map(st => `<span class="dep-hud-pill">${st}</span>`).join('')}
                   </div>
-                </div>
+                </div>` : ''}
               </div>
             </div>
           </div>

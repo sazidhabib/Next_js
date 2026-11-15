@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Home } from "lucide-react";
 import { useState, useEffect, use } from "react";
-import { products as mockProducts, categories as mockCategories } from "../../../data/mockData";
+import { categories as mockCategories } from "../../../data/mockData";
 import SubCategoryHeader from "../../../components/SubCategoryHeader";
 
 export default function CategoryPage({ params }) {
@@ -19,10 +19,10 @@ export default function CategoryPage({ params }) {
       try {
         // Fetch categories to find the correct one
         const catRes = await fetch("/api/categories");
-        const catData = await catRes.json();
+        const catData = catRes.ok ? await catRes.json() : null;
         let foundCategory = null;
 
-        if (catData.success) {
+        if (catData && catData.success) {
           foundCategory = catData.data.find((c) => c.slug === slug);
         }
 
@@ -41,19 +41,19 @@ export default function CategoryPage({ params }) {
 
         // Fetch products in this category
         const prodRes = await fetch(`/api/products?category=${slug}`);
-        const prodData = await prodRes.json();
+        const prodData = prodRes.ok ? await prodRes.json() : null;
 
-        if (prodData.success && prodData.data.length > 0) {
+        if (prodData && prodData.success && Array.isArray(prodData.data)) {
           setCategoryProducts(prodData.data);
         } else {
-          setCategoryProducts(mockProducts.filter((p) => p.category === slug));
+          setCategoryProducts([]);
         }
       } catch (err) {
-        console.error("Failed to load category page data, using mock fallback:", err);
+        console.error("Failed to load category page data:", err);
         const fallbackCat = mockCategories.find((c) => c.slug === slug);
         if (fallbackCat) {
           setCategory(fallbackCat);
-          setCategoryProducts(mockProducts.filter((p) => p.category === slug));
+          setCategoryProducts([]);
         } else {
           setError(true);
         }

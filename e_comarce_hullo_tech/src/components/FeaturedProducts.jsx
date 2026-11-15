@@ -5,7 +5,6 @@ import { ShoppingCart, Star } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { products as mockProducts } from "../data/mockData";
 import { useCart } from "../lib/CartContext";
 
 const containerVariants = {
@@ -40,14 +39,18 @@ export default function FeaturedProducts() {
     const fetchFeatured = async () => {
       try {
         const res = await fetch("/api/products?featured=true");
+        if (!res.ok) {
+          setFeaturedList([]);
+          return;
+        }
         const data = await res.json();
-        if (data.success && data.data.length > 0) {
+        if (data.success && Array.isArray(data.data)) {
           setFeaturedList(data.data);
         } else {
-          setFeaturedList(mockProducts.filter((p) => p.featured));
+          setFeaturedList([]);
         }
       } catch {
-        setFeaturedList(mockProducts.filter((p) => p.featured));
+        setFeaturedList([]);
       } finally {
         setLoading(false);
       }
@@ -73,6 +76,14 @@ export default function FeaturedProducts() {
           />
         ))}
       </motion.div>
+    );
+  }
+
+  if (featuredList.length === 0) {
+    return (
+      <div className="py-12 text-center text-gray-500">
+        <p>No featured products available.</p>
+      </div>
     );
   }
 

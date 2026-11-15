@@ -13,7 +13,6 @@ import {
   Shield,
   HardDrive,
 } from "lucide-react";
-import { categories as mockCategories } from "../data/mockData";
 
 const iconMap = {
   HardDrive: HardDrive,
@@ -53,14 +52,18 @@ export default function FeaturedCategories() {
     const fetchCategories = async () => {
       try {
         const res = await fetch("/api/categories");
+        if (!res.ok) {
+          setCategoriesList([]);
+          return;
+        }
         const data = await res.json();
-        if (data.success && data.data.length > 0) {
+        if (data.success && Array.isArray(data.data)) {
           setCategoriesList(data.data);
         } else {
-          setCategoriesList(mockCategories);
+          setCategoriesList([]);
         }
       } catch {
-        setCategoriesList(mockCategories);
+        setCategoriesList([]);
       } finally {
         setLoading(false);
       }

@@ -18,13 +18,15 @@ $contentFile = $dataDir . '/portfolio-content.json';
 $uploadsDir = $baseDir . '/uploads';
 $indexFile = $baseDir . '/index.html';
 
-// Ensure directories exist
+// Ensure directories exist with 0755 permissions
 if (!is_dir($uploadsDir)) {
     @mkdir($uploadsDir, 0755, true);
 }
+@chmod($uploadsDir, 0755);
 if (!is_dir($dataDir)) {
     @mkdir($dataDir, 0755, true);
 }
+@chmod($dataDir, 0755);
 
 // Admin Password lookup (.env.local or fallback)
 function getAdminPassword($baseDir) {
@@ -99,13 +101,38 @@ if ($method === 'GET' && $endpoint === 'content') {
 }
 
 // --- AUTH CHECK FOR WRITE / MEDIA ENDPOINTS ---
-$authHeader = isset($_SERVER['HTTP_AUTHORIZATION']) ? $_SERVER['HTTP_AUTHORIZATION'] : '';
-if (empty($authHeader) && function_exists('apache_request_headers')) {
+// Multi-layer inspection: handles Apache FastCGI, LiteSpeed, Nginx, PHP-FPM and proxy setups
+$authHeader = '';
+if (!empty($_SERVER['HTTP_AUTHORIZATION'])) {
+    $authHeader = $_SERVER['HTTP_AUTHORIZATION'];
+} elseif (!empty($_SERVER['REDIRECT_HTTP_AUTHORIZATION'])) {
+    $authHeader = $_SERVER['REDIRECT_HTTP_AUTHORIZATION'];
+} elseif (!empty($_SERVER['REDIRECT_REDIRECT_HTTP_AUTHORIZATION'])) {
+    $authHeader = $_SERVER['REDIRECT_REDIRECT_HTTP_AUTHORIZATION'];
+} elseif (!empty($_SERVER['HTTP_X_AUTHORIZATION'])) {
+    $authHeader = $_SERVER['HTTP_X_AUTHORIZATION'];
+} elseif (function_exists('apache_request_headers')) {
     $headers = apache_request_headers();
-    if (isset($headers['Authorization'])) {
+    if (!empty($headers['Authorization'])) {
         $authHeader = $headers['Authorization'];
-    } elseif (isset($headers['authorization'])) {
+    } elseif (!empty($headers['authorization'])) {
         $authHeader = $headers['authorization'];
+    }
+} elseif (function_exists('getallheaders')) {
+    $headers = getallheaders();
+    if (!empty($headers['Authorization'])) {
+        $authHeader = $headers['Authorization'];
+    } elseif (!empty($headers['authorization'])) {
+        $authHeader = $headers['authorization'];
+    }
+}
+
+// Fallback: also accept token in query string if web server strips Authorization headers
+if (empty($authHeader)) {
+    if (!empty($_GET['token'])) {
+        $authHeader = $_GET['token'];
+    } elseif (!empty($_GET['auth'])) {
+        $authHeader = $_GET['auth'];
     }
 }
 
@@ -124,28 +151,49 @@ if ($method === 'GET' && $endpoint === 'media') {
     $allFiles = [];
     $seen = [];
     $allowedExts = ['png', 'jpg', 'jpeg', 'webp', 'svg', 'gif', 'mp4', 'webm', 'pdf'];
+    $cleanBaseDir = rtrim(str_replace('\\', '/', $baseDir), '/');
 
-    $scan = function($dir, $typePrefix) use (&$scan, &$allFiles, &$seen, $baseDir, $allowedExts) {
+    // Helper: recursively scan a directory
+    $scanDir = function($dir, $defaultType = 'general', $isSrcAssets = false) use (&$scanDir, &$allFiles, &$seen, $cleanBaseDir, $allowedExts) {
         if (!is_dir($dir)) return;
-        $items = scandir($dir);
+        $items = @scandir($dir);
+        if (!$items) return;
+
         foreach ($items as $item) {
-            if ($item === '.' || $item === '..') continue;
-            $fullPath = $dir . '/' . $item;
+            if ($item === '.' || $item === '..' || $item === 'node_modules' || $item === '.git') continue;
+            $fullPath = str_replace('\\', '/', $dir . '/' . $item);
             if (is_dir($fullPath)) {
-                $scan($fullPath, $item);
+                @chmod($fullPath, 0755);
+                $subType = $defaultType;
+                if ($isSrcAssets) {
+                    if ($item === 'tech' || $item === 'company') $subType = 'icons';
+                } else {
+                    $subType = $item; // e.g. uploads/projects -> 'projects'
+                }
+                $scanDir($fullPath, $subType, $isSrcAssets);
             } elseif (is_file($fullPath)) {
+                @chmod($fullPath, 0644);
                 $ext = strtolower(pathinfo($item, PATHINFO_EXTENSION));
                 if (in_array($ext, $allowedExts)) {
-                    $relUrl = str_replace($baseDir, '', $fullPath);
-                    $relUrl = str_replace('\\', '/', $relUrl);
+                    $relUrl = '/' . ltrim(str_replace($cleanBaseDir, '', $fullPath), '/');
                     if (!isset($seen[$relUrl])) {
                         $seen[$relUrl] = true;
+
+                        // Smart type classification
+                        $type = $defaultType;
+                        $lower = strtolower($item);
+                        if (strpos($lower, 'resume') !== false || $ext === 'pdf') {
+                            $type = 'resumes';
+                        } elseif (strpos($lower, 'logo') !== false || strpos($lower, 'icon') !== false || $ext === 'svg' || $ext === 'ico') {
+                            $type = 'icons';
+                        }
+
                         $allFiles[] = [
                             'name' => $item,
-                            'type' => $typePrefix,
+                            'type' => $type,
                             'url' => $relUrl,
-                            'size' => filesize($fullPath),
-                            'mtime' => date('c', filemtime($fullPath))
+                            'size' => @filesize($fullPath) ?: 0,
+                            'mtime' => date('c', @filemtime($fullPath) ?: time())
                         ];
                     }
                 }
@@ -153,7 +201,51 @@ if ($method === 'GET' && $endpoint === 'media') {
         }
     };
 
-    $scan($uploadsDir, 'general');
+    // 1. Scan uploads directory (all subdirectories: projects, resumes, testimonials, icons, experience, general)
+    if (is_dir($uploadsDir)) {
+        $scanDir($uploadsDir, 'general', false);
+    }
+
+    // 2. Scan src/assets directory (existing portfolio assets, screenshots, icons, and videos)
+    $srcAssetsDir = $baseDir . '/src/assets';
+    if (is_dir($srcAssetsDir)) {
+        $scanDir($srcAssetsDir, 'projects', true);
+    }
+
+    // 3. Scan assets directory (icons, favicons, og-image)
+    $assetsDir = $baseDir . '/assets';
+    if (is_dir($assetsDir)) {
+        $scanDir($assetsDir, 'icons', false);
+    }
+
+    // 4. Scan root directory (resumes, key logos, PDFs)
+    $rootItems = @scandir($baseDir);
+    if ($rootItems) {
+        foreach ($rootItems as $item) {
+            if ($item === '.' || $item === '..') continue;
+            $fullPath = str_replace('\\', '/', $baseDir . '/' . $item);
+            if (is_file($fullPath)) {
+                $ext = strtolower(pathinfo($item, PATHINFO_EXTENSION));
+                if (in_array($ext, $allowedExts)) {
+                    $relUrl = '/' . $item;
+                    if (!isset($seen[$relUrl])) {
+                        $seen[$relUrl] = true;
+                        $type = 'general';
+                        $lower = strtolower($item);
+                        if (strpos($lower, 'resume') !== false || $ext === 'pdf') $type = 'resumes';
+                        elseif (strpos($lower, 'logo') !== false || $ext === 'svg' || $ext === 'ico') $type = 'icons';
+                        $allFiles[] = [
+                            'name' => $item,
+                            'type' => $type,
+                            'url' => $relUrl,
+                            'size' => @filesize($fullPath) ?: 0,
+                            'mtime' => date('c', @filemtime($fullPath) ?: time())
+                        ];
+                    }
+                }
+            }
+        }
+    }
 
     // Sort newest first
     usort($allFiles, function($a, $b) {
@@ -237,12 +329,14 @@ if ($method === 'POST' && $endpoint === 'upload') {
 
     // Sanitize type
     $type = preg_replace('/[^a-zA-Z0-9_\-]/', '', $type);
+    if (empty($type)) $type = 'general';
     $targetDir = $uploadsDir . '/' . $type;
     if (!is_dir($targetDir)) {
         @mkdir($targetDir, 0755, true);
     }
+    @chmod($targetDir, 0755);
 
-    $ext = pathinfo($name, PATHINFO_EXTENSION);
+    $ext = strtolower(pathinfo($name, PATHINFO_EXTENSION));
     $rawBase = pathinfo($name, PATHINFO_FILENAME);
     $cleanBase = preg_replace('/[^a-zA-Z0-9_\-]/', '_', $rawBase);
     $cleanName = $cleanBase . '-' . substr(time(), -6) . ($ext ? '.' . $ext : '');
@@ -258,7 +352,15 @@ if ($method === 'POST' && $endpoint === 'upload') {
         exit;
     }
 
-    @file_put_contents($targetPath, $decoded);
+    $written = @file_put_contents($targetPath, $decoded);
+    if ($written === false) {
+        http_response_code(500);
+        echo json_encode(['ok' => false, 'error' => 'Failed to write file to disk. Please verify uploads directory permissions.']);
+        exit;
+    }
+
+    // Set world-readable permissions so Apache / LiteSpeed web server can serve the file directly
+    @chmod($targetPath, 0644);
 
     $publicUrl = '/uploads/' . $type . '/' . $cleanName;
     echo json_encode([

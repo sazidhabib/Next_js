@@ -9,6 +9,7 @@
 <IfModule mod_rewrite.c>
   RewriteEngine On
   RewriteBase /
+  Options -Indexes +FollowSymLinks
 
   # Pass Authorization header to PHP in FastCGI/FPM environments
   RewriteCond %{HTTP:Authorization} .
@@ -21,6 +22,11 @@
   RewriteCond %{REQUEST_FILENAME} -f [OR]
   RewriteCond %{REQUEST_FILENAME} -d
   RewriteRule ^ - [L]
+
+  # Never rewrite uploads, assets, or src to index.html (preserves media access and prevents HTML fallback)
+  RewriteRule ^uploads/ - [L]
+  RewriteRule ^assets/ - [L]
+  RewriteRule ^src/ - [L]
 
   # Route all other URLs to index.html (SPA Fallback)
   RewriteRule ^ index.html [L]

@@ -33,9 +33,12 @@ export default function CheckoutPage() {
   useEffect(() => {
     // Fetch settings
     fetch('/api/settings', { cache: 'no-store' })
-      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) return null;
+        return res.json();
+      })
       .then(data => {
-        if (data.success && data.data) {
+        if (data && data.success && data.data) {
           setShippingConfig({
             deliveryCharge: Number(data.data.deliveryCharge) !== undefined ? Number(data.data.deliveryCharge) : 120,
             freeShippingThreshold: Number(data.data.freeShippingThreshold) !== undefined ? Number(data.data.freeShippingThreshold) : 5000,

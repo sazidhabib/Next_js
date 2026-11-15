@@ -20,6 +20,7 @@ if (sequelize) {
   Order.hasMany(OrderItem, { foreignKey: 'orderId', as: 'items', onDelete: 'CASCADE' });
   OrderItem.belongsTo(Order, { foreignKey: 'orderId' });
   
+  Product.hasMany(OrderItem, { foreignKey: 'productId', as: 'orderItems', onDelete: 'CASCADE' });
   OrderItem.belongsTo(Product, { foreignKey: 'productId', as: 'product' });
 } else {
   console.warn('⚠️  Database not initialized - models will be unavailable');

@@ -18,6 +18,7 @@ export default function Footer() {
     const fetchSettings = async () => {
       try {
         const res = await fetch("/api/settings");
+        if (!res.ok) return;
         const data = await res.json();
         if (data.success && data.data) {
           setSettings({

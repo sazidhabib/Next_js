@@ -31,6 +31,16 @@ const itemVariants = {
 
 export default function ProductGrid({ products, title }) {
   const { addToCart } = useCart();
+
+  if (!products || products.length === 0) {
+    return (
+      <div className="py-16 text-center">
+        {title && <h2 className="text-2xl font-bold mb-4 text-gray-900">{title}</h2>}
+        <p className="text-gray-500 font-medium">No products found in this category.</p>
+      </div>
+    );
+  }
+
   return (
     <div>
       {title && (

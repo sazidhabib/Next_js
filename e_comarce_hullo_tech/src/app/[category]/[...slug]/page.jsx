@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Home } from "lucide-react";
 import { Product, Category, SiteSetting } from "../../../../models";
-import { products as mockProducts, categories as mockCategories } from "../../../data/mockData";
+import { categories as mockCategories } from "../../../data/mockData";
 import ProductDetailContent from "./ProductDetailContent";
 import ProductGrid from "../../../components/ProductGrid";
 import SubCategoryHeader from "../../../components/SubCategoryHeader";
@@ -25,10 +25,6 @@ export async function generateMetadata({ params }) {
     }
   } catch (error) {
     console.error("DB Fetch failed for metadata generation:", error);
-  }
-
-  if (!product) {
-    product = mockProducts.find((p) => p.slug === lastSlug);
   }
 
   if (product) {
@@ -96,10 +92,6 @@ export default async function ProductOrCategoryPage({ params }) {
     console.error("DB Fetch failed for product detail, using fallback:", error);
   }
 
-  if (!product && slug.length === 1) {
-    product = mockProducts.find((p) => p.slug === lastSlug);
-  }
-
   // 2. If it is a Product, render the Product Detail Page with full hierarchical menu path
   if (product) {
     let category = null;
@@ -111,7 +103,7 @@ export default async function ProductOrCategoryPage({ params }) {
         category = dbCategory.toJSON();
       }
     } catch (error) {
-      console.error("DB Fetch failed for category, using fallback:", error);
+      console.error("DB Fetch failed for category:", error);
     }
 
     if (!category) {
@@ -128,10 +120,8 @@ export default async function ProductOrCategoryPage({ params }) {
         .filter((p) => p.id !== product.id)
         .slice(0, 6);
     } catch (error) {
-      console.error("DB Fetch failed for related products, using fallback:", error);
-      relatedProducts = mockProducts
-        .filter((p) => p.category === product.category && p.id !== product.id)
-        .slice(0, 6);
+      console.error("DB Fetch failed for related products:", error);
+      relatedProducts = [];
     }
 
     // Resolve full 3-level breadcrumb path
@@ -320,22 +310,6 @@ export default async function ProductOrCategoryPage({ params }) {
     console.error("DB Products fetch failed for subcategory, using fallback:", error);
   }
 
-  // Fallback to mock data matching filters
-  if (products.length === 0) {
-    products = mockProducts.filter((p) => {
-      const matchCat =
-        p.category === queryCategory ||
-        p.category === categorySlug ||
-        p.subcategory === categorySlug;
-      const matchSub = querySubcategory
-        ? p.subcategory === querySubcategory || p.subcategory === lastSlug
-        : true;
-      const matchSubSub = querySubSubcategory
-        ? p.subSubcategory === querySubSubcategory || p.subSubcategory === lastSlug
-        : true;
-      return matchCat && matchSub && matchSubSub;
-    });
-  }
 
   const listingTitle = breadcrumbs.length > 0 ? breadcrumbs[breadcrumbs.length - 1].name : lastSlug;
 

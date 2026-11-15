@@ -55,8 +55,10 @@ export default function AdminDashboard() {
       const categoriesData = await categoriesRes.json();
 
       // Fetch orders
-      const ordersRes = await fetch('/api/orders');
-      const ordersData = await ordersRes.json();
+      const ordersRes = await fetch('/api/orders', {
+        headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+      });
+      const ordersData = ordersRes.ok ? await ordersRes.json() : { success: false, data: [] };
       
       if (productsData.success && categoriesData.success) {
         const ordersList = ordersData.success ? ordersData.data : [];

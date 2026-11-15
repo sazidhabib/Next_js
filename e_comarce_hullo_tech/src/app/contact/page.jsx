@@ -11,6 +11,7 @@ export default function ContactPage() {
     const fetchSettings = async () => {
       try {
         const res = await fetch('/api/settings', { cache: 'no-store' });
+        if (!res.ok) return;
         const data = await res.json();
         if (data.success) {
           setSettings(data.data);

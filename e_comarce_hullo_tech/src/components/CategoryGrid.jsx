@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Laptop, Monitor, Cpu, Smartphone, Tablet, Camera, Shield, HardDrive } from "lucide-react";
-import { categories as mockCategories } from "../data/mockData";
 
 const iconMap = {
   HardDrive: HardDrive,
@@ -48,15 +47,19 @@ export default function CategoryGrid() {
     const fetchCategories = async () => {
       try {
         const res = await fetch("/api/categories");
+        if (!res.ok) {
+          setCategoriesList([]);
+          return;
+        }
         const data = await res.json();
-        if (data.success && data.data.length > 0) {
+        if (data.success && Array.isArray(data.data)) {
           setCategoriesList(data.data);
         } else {
-          setCategoriesList(mockCategories);
+          setCategoriesList([]);
         }
       } catch (error) {
-        console.error("DB Fetch failed for categories, falling back to mockData:", error);
-        setCategoriesList(mockCategories);
+        console.error("Fetch failed for categories:", error);
+        setCategoriesList([]);
       } finally {
         setLoading(false);
       }

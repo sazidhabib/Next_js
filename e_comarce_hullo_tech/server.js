@@ -130,7 +130,7 @@ const setupExpress = () => {
           "✅ Database synchronized (tables created/updated to match model).",
         );
 
-        // Create default admin user if not exists
+        // Create default admin user and initial seed only if fresh database
         const { User, Category, Product } = require("./models");
         const adminExists = await User.findOne({
           where: { email: "admin@hullotech.com" },
@@ -144,22 +144,22 @@ const setupExpress = () => {
           console.log(
             "✅ Default admin user created (admin@hullotech.com / admin123)",
           );
-        }
 
-        // Seed default categories
-        const categoryCount = await Category.count();
-        if (categoryCount === 0) {
-          const { categories: seedCategories } = require("./db/seedData");
-          await Category.bulkCreate(seedCategories);
-          console.log("✅ Database seeded with default categories.");
-        }
+          // Seed default categories only on initial installation
+          const categoryCount = await Category.count();
+          if (categoryCount === 0) {
+            const { categories: seedCategories } = require("./db/seedData");
+            await Category.bulkCreate(seedCategories);
+            console.log("✅ Database seeded with default categories.");
+          }
 
-        // Seed default products
-        const productCount = await Product.count();
-        if (productCount === 0) {
-          const { products: seedProducts } = require("./db/seedData");
-          await Product.bulkCreate(seedProducts);
-          console.log("✅ Database seeded with default products.");
+          // Seed default products only on initial installation
+          const productCount = await Product.count();
+          if (productCount === 0) {
+            const { products: seedProducts } = require("./db/seedData");
+            await Product.bulkCreate(seedProducts);
+            console.log("✅ Database seeded with default products.");
+          }
         }
       } else {
         console.warn(
@@ -179,7 +179,7 @@ const setupExpress = () => {
       process.env.DISABLE_NEXT === "true" ? 5000 : process.env.PORT || 3000;
 
     try {
-      app.listen(PORT, () =>
+      app.listen(PORT, "0.0.0.0", () =>
         console.log(
           `🚀 ${useNext ? "Unified" : "API"} Server running on port ${PORT}`,
         ),

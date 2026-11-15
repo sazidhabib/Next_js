@@ -5,51 +5,27 @@ const nextConfig = {
   },
   serverExternalPackages: ['mysql2', 'sequelize'],
   async rewrites() {
-    if (process.env.NODE_ENV === 'production') {
-      return [];
-    }
-    return [
-      {
-        source: '/api/auth/:path*',
-        destination: 'http://localhost:5000/api/auth/:path*',
-      },
-      {
-        source: '/api/settings/:path*',
-        destination: 'http://localhost:5000/api/settings/:path*',
-      },
-      {
-        source: '/api/categories/:path*',
-        destination: 'http://localhost:5000/api/categories/:path*',
-      },
-      {
-        source: '/api/products/:path*',
-        destination: 'http://localhost:5000/api/products/:path*',
-      },
-      {
-        source: '/api/orders',
-        destination: 'http://localhost:5000/api/orders',
-      },
-      {
-        source: '/api/orders/:path*',
-        destination: 'http://localhost:5000/api/orders/:path*',
-      },
-      {
-        source: '/api/upload',
-        destination: 'http://localhost:5000/api/upload',
-      },
-      {
-        source: '/api/images',
-        destination: 'http://localhost:5000/api/images',
-      },
-      {
-        source: '/api/images/:path*',
-        destination: 'http://localhost:5000/api/images/:path*',
-      },
-      {
-        source: '/uploads/:path*',
-        destination: 'http://localhost:5000/uploads/:path*',
-      },
-    ];
+    const backendUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://127.0.0.1:5000';
+    return {
+      beforeFiles: [
+        {
+          source: '/uploads/:path*',
+          destination: `${backendUrl}/uploads/:path*`,
+        },
+      ],
+      afterFiles: [
+        {
+          source: '/images/:path*',
+          destination: `${backendUrl}/images/:path*`,
+        },
+      ],
+      fallback: [
+        {
+          source: '/api/:path*',
+          destination: `${backendUrl}/api/:path*`,
+        },
+      ],
+    };
   },
   webpack: (config, { isServer }) => {
     if (!isServer) {
