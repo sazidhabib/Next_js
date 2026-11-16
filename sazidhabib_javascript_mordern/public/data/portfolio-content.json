@@ -37,11 +37,11 @@
   },
   "footer": {
     "role": "Senior Full-Stack Engineer",
-    "company": "Design Monks",
+    "company": "Ajker Patrika",
     "path": [
-      "Pixalean",
-      "Onix Lab",
-      "Design Monks"
+      "Imaginary Workstation",
+      "Brain Station 23",
+      "Ajker Patrika"
     ]
   },
   "contact": {
@@ -500,113 +500,172 @@
   "experience": [
     {
       "base": [
-        "2022",
-        "Pixalean",
-        "Junior Full Stack Dev",
-        "DONE"
-      ],
-      "alt": [
-        "2024",
-        "Pixalean",
-        "60+ projects shipped",
-        "DONE"
-      ],
-      "details": {
-        "company": "Pixalean",
-        "role": "Junior Full Stack Developer",
-        "period": "2022 — 2024 · Remote",
-        "location": "DHAKA · REMOTE",
-        "status": "DONE",
-        "statusClass": "done",
-        "badgeClass": "hud-pixalean",
-        "color": "#0D99FF",
-        "logo": "/src/assets/company/starbucks.png",
-        "desc": "Engineered responsive client web apps, modular front-end architectures, and high-performance interactive interfaces for early-stage SaaS startups.",
-        "dels": [
-          "Shipped 60+ modular web components with optimized Web Vitals",
-          "Reduced initial bundle load time by 35% via code splitting & memoization"
-        ],
-        "stack": [
-          "React",
-          "JavaScript",
-          "Tailwind CSS",
-          "REST APIs",
-          "Redux"
-        ]
-      }
-    },
-    {
-      "base": [
-        "2024",
-        "Onix Lab",
-        "Full Stack Engineer",
-        "DONE"
+        "2025",
+        "AjkerPatrika",
+        "Web Developer",
+        "NOW"
       ],
       "alt": [
         "2025",
-        "Onix Lab",
-        "+27% checkout rate",
-        "DONE"
-      ],
-      "details": {
-        "company": "Onix Lab",
-        "role": "Full Stack Engineer",
-        "period": "2024 — 2025 · Hybrid",
-        "location": "DHAKA · REMOTE",
-        "status": "DONE",
-        "statusClass": "done",
-        "badgeClass": "hud-onix",
-        "color": "#7B4DFF",
-        "logo": "/src/assets/company/meta.png",
-        "desc": "Architected full-stack e-commerce platforms, transactional checkout microservices, and resilient server-side APIs handling high-concurrency peak traffic.",
-        "dels": [
-          "Lifted checkout conversion rates by +27% with zero-friction Stripe integration",
-          "Designed scalable PostgreSQL schemas and low-latency Redis caching layers"
-        ],
-        "stack": [
-          "Next.js",
-          "TypeScript",
-          "Node.js",
-          "PostgreSQL",
-          "Redis Cache"
-        ]
-      }
-    },
-    {
-      "base": [
-        "2026",
-        "Design Monks",
-        "Senior Full Stack Dev",
-        "NOW"
-      ],
-      "alt": [
-        "2026",
-        "Design Monks",
-        "18 products led",
+        "AjkerPatrika",
+        "99.9% UPTIME · EVENTS",
         "NOW"
       ],
       "details": {
-        "company": "Design Monks",
-        "role": "Senior Full Stack Developer",
-        "period": "2025 — Present · Full-Time",
-        "location": "DHAKA · ONSITE / HYBRID",
+        "company": "Ajker Patrika",
+        "role": "Web Developer",
+        "period": "Mar 2025 — Present · Full-Time",
+        "location": "BANASREE · DHAKA",
         "status": "NOW",
         "statusClass": "now",
         "badgeClass": "hud-monks",
         "color": "#0ACF83",
-        "logo": "/src/assets/company/shopify.png",
-        "desc": "Leading end-to-end full-stack web engineering, distributed cloud systems, and real-time interactive canvas platforms across global enterprise clients.",
+        "logo": "/uploads/experience/ajkerpatrika-929770.webp",
+        "desc": "Architected and deployed dynamic event-driven features, customized news pages, and high-performance server-side architectures for a high-traffic news platform serving thousands of daily active users.",
         "dels": [
-          "Led architectural delivery of 18+ high-scale enterprise SaaS web apps",
-          "Reduced p99 database query response latency by 42% via advanced indexing"
+          "Architected and deployed dynamic event-driven features for a high-traffic news platform using Next.js and PostgreSQL, serving thousands of daily active users.",
+          "Optimized ad-delivery workflows by integrating Google Ads and 3rd-party scripts, resulting in improved layout stability and reduced Cumulative Layout Shift (CLS).",
+          "Enhanced system reliability by implementing PM2 process management and server monitoring, achieving 99.9% uptime for internal publishing tools.",
+          "Collaborated with SEO teams to implement Server-Side Rendering (SSR) strategies, increasing organic search visibility for feature sections by 15%.",
+          "Developed and maintained in-house full-stack web applications integrating React, Node.js, Express.js, Laravel, MySQL, and MongoDB."
         ],
         "stack": [
-          "Next.js 15",
-          "TypeScript",
+          "Next.js",
+          "React",
           "Node.js",
+          "Express.js",
           "PostgreSQL",
-          "Docker",
-          "AWS"
+          "MongoDB",
+          "MySQL",
+          "Laravel",
+          "Tailwind CSS",
+          "PM2",
+          "JavaScript",
+          "SEO"
+        ]
+      }
+    },
+    {
+      "base": [
+        "2024",
+        "BrainStation",
+        "Frontend Dev Trainee",
+        "DONE"
+      ],
+      "alt": [
+        "2024",
+        "BrainStation",
+        "-40% STATE BUGS",
+        "DONE"
+      ],
+      "details": {
+        "company": "Brain Station 23",
+        "role": "Frontend Developer Trainee",
+        "period": "Sep 2024 — Feb 2025 · Internship / Trainee",
+        "location": "DHAKA · BANGLADESH",
+        "status": "DONE",
+        "statusClass": "done",
+        "badgeClass": "hud-pixalean",
+        "color": "#0D99FF",
+        "logo": "/uploads/experience/bs-950452.webp",
+        "desc": "Engineered scalable e-commerce frontend architectures and responsive web platforms including PharmaSphere, implementing secure JWT authentication, state management, and reusable UI components.",
+        "dels": [
+          "Developed a scalable e-commerce frontend architecture using React, TypeScript, and Redux, reducing state-related bugs by 40%.",
+          "Engineered reusable UI components with Tailwind CSS, accelerating development velocity for subsequent sprint cycles.",
+          "Integrated secure authentication flows (JWT) and complex filtering logic for product catalogs, improving user conversion rates.",
+          "Built PharmaSphere (MERN stack pharmacy platform) and a dynamic movie-listing web app with REST APIs and Context API."
+        ],
+        "stack": [
+          "React",
+          "TypeScript",
+          "Redux",
+          "Node.js",
+          "Tailwind CSS",
+          "REST APIs",
+          "Context API",
+          "MongoDB",
+          "JavaScript",
+          "JWT"
+        ]
+      }
+    },
+    {
+      "base": [
+        "2023",
+        "Imaginary Wk",
+        "Junior Unity Dev",
+        "DONE"
+      ],
+      "alt": [
+        "2023",
+        "Imaginary Wk",
+        "60 FPS GAME ENGINE",
+        "DONE"
+      ],
+      "details": {
+        "company": "Imaginary Workstation",
+        "role": "Junior Unity Developer",
+        "period": "Aug 2023 — Oct 2024 · Hybrid",
+        "location": "DHAKA · BANGLADESH",
+        "status": "DONE",
+        "statusClass": "done",
+        "badgeClass": "hud-onix",
+        "color": "#7B4DFF",
+        "logo": "/uploads/experience/imaginary_workstation_logo-963220.webp",
+        "desc": "Programmed 2D and 3D game mechanics in C# for Android, creating custom shaders, particle systems, and visual effects optimized for smooth 60 FPS mobile performance.",
+        "dels": [
+          "Programmed 2D/3D game mechanics in C# for Android, optimizing draw calls and memory usage for low-end mobile devices.",
+          "Designed custom shaders, particle systems, and textures using Visual Effect Graph, enhancing visual fidelity while maintaining consistent 60 FPS performance.",
+          "Collaborated within a multidisciplinary team of 6 engineers on mixed-reality games, simulations, and mobile applications."
+        ],
+        "stack": [
+          "Unity",
+          "C#",
+          "Game Development",
+          "VFX Graph",
+          "Particle Systems",
+          "Shaders",
+          "3D/2D Animation",
+          "Android"
+        ]
+      }
+    },
+    {
+      "base": [
+        "2020",
+        "Green Univ",
+        "Joint Treasurer",
+        "DONE"
+      ],
+      "alt": [
+        "2020",
+        "Green Univ",
+        "2-YR CLUB LEADERSHIP",
+        "DONE"
+      ],
+      "details": {
+        "company": "Green University Computer Club",
+        "role": "Joint Treasurer",
+        "period": "Jun 2020 — Jun 2022 · Leadership",
+        "location": "DHAKA · BANGLADESH",
+        "status": "DONE",
+        "statusClass": "done",
+        "badgeClass": "hud-pixalean",
+        "color": "#FF6E28",
+        "logo": "/uploads/experience/images-Picsart-BackgroundRemover-972748.webp",
+        "desc": "Served as an executive committee member managing operational budgeting, sponsorships, and technical event execution for university programming contests, webinars, and workshops.",
+        "dels": [
+          "Maintained financial accounts, budget allocation, and fund logistics across a 2-year tenure for the university's central tech club.",
+          "Organized and managed flagship collegiate technical events including Programming Contests, 3-Minute Tech Presentations, Gaming Tournaments, and developer workshops.",
+          "Fostered technical growth, cross-functional team coordination, and student engagement across multiple university departments."
+        ],
+        "stack": [
+          "Event Management",
+          "Financial Budgeting",
+          "Technical Leadership",
+          "Teamwork",
+          "Public Speaking",
+          "Community Building"
         ]
       }
     }
