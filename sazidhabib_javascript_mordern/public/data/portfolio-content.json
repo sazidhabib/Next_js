@@ -120,7 +120,7 @@
         "React",
         "javascript"
       ],
-      "video": "/uploads/general/Sazid-Habib-_-Senior-Full-Stack-Next-js-Engineer-920699.mp4",
+      "video": "/uploads/projects/New-Tab-477508.mp4",
       "dossier": {
         "role": "Lead Full-Stack Engineer",
         "latency": "< 42ms SSR",
@@ -144,7 +144,7 @@
     {
       "n": "nextideasolution",
       "d": "Next Idea Solutions is a full-stack web application developed for a digital marketing and web development agency.",
-      "img": "/src/assets/nextidea.webp",
+      "img": "",
       "live": "https://nextideasolution.com/",
       "source": "https://github.com/sazidhabib",
       "case": "#/project/nextideasolution",
@@ -171,12 +171,13 @@
           "a11y": 98,
           "best": 100
         }
-      }
+      },
+      "video": "/uploads/projects/nextIdeaSolution-947826.mp4"
     },
     {
       "n": "kamrulhasan",
       "d": "This project is a dynamic personal website developed for journalist Kamrul Hasan. It serves as an informative platform.",
-      "img": "/src/assets/kamrulHasanWeb.webp",
+      "img": "",
       "live": "https://kamrulhasan.com",
       "source": "https://github.com/sazidhabib/React_Js/tree/main/MERN_project",
       "case": "#/project/kamrulhasan",
@@ -184,7 +185,8 @@
         "React",
         "JavaScript",
         "Tailwind"
-      ]
+      ],
+      "video": "/uploads/projects/kamrulhasan-366377.mp4"
     },
     {
       "n": "PharmaSphere",
@@ -202,7 +204,7 @@
     {
       "n": "SnapShop",
       "d": "This is a responsive e-commerce platform built with TypeScript, React, and Tailwind CSS with custom shopping cart.",
-      "img": "/src/assets/snapshop.webp",
+      "img": "",
       "live": "",
       "source": "https://github.com/sazidhabib/SnapShop_e-commerce",
       "case": "#/project/snapshop",
@@ -210,7 +212,8 @@
         "React",
         "TypeScript",
         "REST APIs"
-      ]
+      ],
+      "video": "/uploads/projects/shanpshop-386073.mp4"
     },
     {
       "n": "Movie List Website",
