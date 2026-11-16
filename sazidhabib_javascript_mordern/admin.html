@@ -607,10 +607,13 @@
     }
     .score-input span {
       display: block;
-      font-size: 10px;
+      font-size: 9px;
       font-family: var(--mono);
       color: var(--muted);
       margin-bottom: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     .score-input input {
       text-align: center;
@@ -1244,8 +1247,9 @@
     // Converts PNG, JPG, JPEG instantly using off-screen HTML5 Canvas.
     // Zero backend server latency; cuts file size by 70%-90% without losing visual clarity.
     async function processImageFile(file, quality = 0.85) {
-      // If not a raster image (e.g. PDF, MP4, WebM) or already SVG, return original
-      if (!file.type.startsWith('image/') || file.type === 'image/svg+xml' || file.name.endsWith('.webp')) {
+      // If not a raster image (e.g. PDF, MP4, WebM) or already SVG or animated GIF, return original (canvas strips GIF frames!)
+      const isGif = file.type === 'image/gif' || file.name.toLowerCase().endsWith('.gif');
+      if (!file.type.startsWith('image/') || file.type === 'image/svg+xml' || isGif || file.name.toLowerCase().endsWith('.webp')) {
         return file;
       }
       return new Promise((resolve) => {
@@ -1431,40 +1435,48 @@
           <textarea rows="2" oninput="C.work[${idx}].d = this.value">${p.d || ''}</textarea>
         </div>
         <div class="form-group">
-          <label>Thumbnail Screenshot (.webp / .png)</label>
+          <label>Thumbnail Screenshot / Animated GIF (.webp / .png / .gif)</label>
           <div style="display:flex;gap:8px;margin-bottom:6px">
             <input type="text" value="${p.img || ''}" id="img-input-${idx}" oninput="C.work[${idx}].img = this.value" onchange="renderProjects()">
             <button type="button" class="btn btn-secondary btn-sm" onclick="openMediaPickerFor('img-input-${idx}', 'projects', ${idx}, 'img')">📁 Pick</button>
           </div>
           <div class="dropzone" data-type="projects" data-target="img-input-${idx}" data-idx="${idx}" data-field="img">
-            <p>Upload project image (Auto-WebP)</p>
+            <p>Upload project image or animated GIF</p>
             <input type="file" accept="image/*">
           </div>
           ${p.img && !isVid(p.img) ? `
             <div class="file-preview" style="margin-top:6px">
               <img src="${p.img}" alt="" onerror="this.parentElement.style.display='none'">
-              <div class="meta"><b>Thumbnail Preview</b><small>${p.img}</small></div>
+              <div class="meta"><b>${/\.gif(\?.*)?$/i.test(p.img) ? 'Animated GIF' : 'Thumbnail Preview'}</b><small>${p.img}</small></div>
               <button type="button" class="btn btn-secondary btn-sm" onclick="C.work[${idx}].img=''; renderProjects();">✕</button>
             </div>
           ` : ''}
         </div>
         <div class="form-group">
-          <label>Optional Demo Video (.mp4 / .webm)</label>
+          <label>Optional Demo Video / GIF (.mp4 / .webm / .gif)</label>
           <div style="display:flex;gap:8px;margin-bottom:6px">
-            <input type="text" value="${p.video || ''}" id="video-input-${idx}" placeholder="/uploads/projects/demo.mp4" oninput="C.work[${idx}].video = this.value" onchange="renderProjects()">
+            <input type="text" value="${p.video || ''}" id="video-input-${idx}" placeholder="/uploads/projects/demo.mp4 or .gif" oninput="C.work[${idx}].video = this.value" onchange="renderProjects()">
             <button type="button" class="btn btn-secondary btn-sm" onclick="openMediaPickerFor('video-input-${idx}', 'projects', ${idx}, 'video')">📁 Pick</button>
           </div>
           <div class="dropzone" data-type="projects" data-target="video-input-${idx}" data-idx="${idx}" data-field="video">
-            <p>Upload short video</p>
-            <input type="file" accept="video/mp4,video/webm">
+            <p>Upload short video or animated GIF</p>
+            <input type="file" accept="video/mp4,video/webm,image/gif">
           </div>
-          ${p.video ? `
-            <div class="file-preview" style="margin-top:6px">
-              <video src="${p.video}" muted controls style="width:68px;height:42px;object-fit:cover"></video>
-              <div class="meta"><b>Demo Video</b><small>${p.video}</small></div>
-              <button type="button" class="btn btn-secondary btn-sm" onclick="C.work[${idx}].video=''; renderProjects();">✕</button>
-            </div>
-          ` : ''}
+          ${p.video ? (
+            /\.gif(\?.*)?$/i.test(p.video) ? `
+              <div class="file-preview" style="margin-top:6px">
+                <img src="${p.video}" alt="" style="width:68px;height:42px;object-fit:cover;border-radius:4px">
+                <div class="meta"><b>Demo Animated GIF</b><small>${p.video}</small></div>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="C.work[${idx}].video=''; renderProjects();">✕</button>
+              </div>
+            ` : `
+              <div class="file-preview" style="margin-top:6px">
+                <video src="${p.video}" muted controls style="width:68px;height:42px;object-fit:cover"></video>
+                <div class="meta"><b>Demo Video</b><small>${p.video}</small></div>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="C.work[${idx}].video=''; renderProjects();">✕</button>
+              </div>
+            `
+          ) : ''}
         </div>
         <div class="form-group full">
           <label>Tech Stack Tags (Comma-separated)</label>
@@ -1520,7 +1532,7 @@
               <label>Lighthouse Audit Benchmark Scores (0 - 100)</label>
               <div class="dossier-row-4">
                 <div class="score-input">
-                  <span>PERF</span>
+                  <span>PERFORMANCE</span>
                   <input type="number" min="0" max="100" value="${p.dossier?.scores?.perf ?? 100}" oninput="C.work[${idx}].dossier = C.work[${idx}].dossier || {}; C.work[${idx}].dossier.scores = C.work[${idx}].dossier.scores || {}; C.work[${idx}].dossier.scores.perf = parseInt(this.value, 10) || 0">
                 </div>
                 <div class="score-input">
@@ -1528,11 +1540,11 @@
                   <input type="number" min="0" max="100" value="${p.dossier?.scores?.seo ?? 100}" oninput="C.work[${idx}].dossier = C.work[${idx}].dossier || {}; C.work[${idx}].dossier.scores = C.work[${idx}].dossier.scores || {}; C.work[${idx}].dossier.scores.seo = parseInt(this.value, 10) || 0">
                 </div>
                 <div class="score-input">
-                  <span>A11Y</span>
+                  <span>ACCESSIBILITY</span>
                   <input type="number" min="0" max="100" value="${p.dossier?.scores?.a11y ?? 98}" oninput="C.work[${idx}].dossier = C.work[${idx}].dossier || {}; C.work[${idx}].dossier.scores = C.work[${idx}].dossier.scores || {}; C.work[${idx}].dossier.scores.a11y = parseInt(this.value, 10) || 0">
                 </div>
                 <div class="score-input">
-                  <span>BEST PRAC</span>
+                  <span>BEST PRACTICES</span>
                   <input type="number" min="0" max="100" value="${p.dossier?.scores?.best ?? 100}" oninput="C.work[${idx}].dossier = C.work[${idx}].dossier || {}; C.work[${idx}].dossier.scores = C.work[${idx}].dossier.scores || {}; C.work[${idx}].dossier.scores.best = parseInt(this.value, 10) || 0">
                 </div>
               </div>

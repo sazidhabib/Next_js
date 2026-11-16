@@ -34,7 +34,8 @@ const MIME_TYPES = {
   '.woff': 'font/woff',
   '.ttf': 'font/ttf',
   '.mp4': 'video/mp4',
-  '.webm': 'video/webm'
+  '.webm': 'video/webm',
+  '.gif': 'image/gif'
 };
 
 const getAdminPassword = () => {
@@ -47,6 +48,75 @@ const getAdminPassword = () => {
   } catch (e) {}
   return process.env.ADMIN_PASSWORD || 'sazidadmin123';
 };
+
+// Relocates MP4 moov metadata atom before mdat for instant byte-0 browser streaming (FastStart)
+function optimizeMp4Faststart(buffer) {
+  try {
+    let pos = 0;
+    let ftyp = null, free = null, moov = null;
+    const atoms = [];
+    while (pos < buffer.length) {
+      let size = buffer.readUInt32BE(pos);
+      const type = buffer.slice(pos + 4, pos + 8).toString('ascii');
+      if (size === 1) size = Number(buffer.readBigUInt64BE(pos + 8));
+      else if (size === 0) size = buffer.length - pos;
+      const atom = { type, pos, size };
+      atoms.push(atom);
+      if (type === 'ftyp' && !ftyp) ftyp = atom;
+      else if (type === 'free' && !free && ftyp && pos === ftyp.size) free = atom;
+      else if (type === 'moov') moov = atom;
+      pos += size;
+    }
+
+    if (!moov) return buffer;
+    const firstMdat = atoms.find(a => a.type === 'mdat');
+    if (!firstMdat || moov.pos < firstMdat.pos) return buffer;
+
+    const moovBuf = Buffer.from(buffer.subarray(moov.pos, moov.pos + moov.size));
+    const shift = moov.size;
+
+    function patchStco(buf, start, end) {
+      let p = start;
+      while (p + 8 <= end) {
+        let sz = buf.readUInt32BE(p);
+        const tp = buf.slice(p + 4, p + 8).toString('ascii');
+        if (sz === 1) sz = Number(buf.readBigUInt64BE(p + 8));
+        else if (sz === 0) sz = end - p;
+
+        if (tp === 'stco') {
+          const count = buf.readUInt32BE(p + 12);
+          for (let i = 0; i < count; i++) {
+            const entryPos = p + 16 + i * 4;
+            const oldOffset = buf.readUInt32BE(entryPos);
+            buf.writeUInt32BE(oldOffset + shift, entryPos);
+          }
+        } else if (tp === 'co64') {
+          const count = buf.readUInt32BE(p + 12);
+          for (let i = 0; i < count; i++) {
+            const entryPos = p + 16 + i * 8;
+            const oldOffset = buf.readBigUInt64BE(entryPos);
+            buf.writeBigUInt64BE(oldOffset + BigInt(shift), entryPos);
+          }
+        } else if (['moov', 'trak', 'mdia', 'minf', 'stbl'].includes(tp)) {
+          patchStco(buf, p + 8, p + sz);
+        }
+        p += sz;
+      }
+    }
+
+    patchStco(moovBuf, 8, moovBuf.length);
+
+    const prefixEnd = (free && free.pos === ftyp.size) ? (free.pos + free.size) : ftyp.size;
+    const prefixBuf = buffer.subarray(0, prefixEnd);
+    const mediaBuf = buffer.subarray(prefixEnd, moov.pos);
+    const trailingBuf = buffer.subarray(moov.pos + moov.size);
+
+    return Buffer.concat([prefixBuf, moovBuf, mediaBuf, trailingBuf]);
+  } catch (err) {
+    console.warn('Faststart optimization skipped:', err.message);
+    return buffer;
+  }
+}
 
 const parseJsonBody = (req) => new Promise((resolve) => {
   let body = '';
@@ -165,8 +235,20 @@ const server = http.createServer(async (req, res) => {
         const cleanName = `${baseName}-${Date.now().toString().slice(-6)}${ext}`;
         const targetPath = path.join(targetFolder, cleanName);
 
-        const dataBuffer = Buffer.from(base64.replace(/^data:[^;]+;base64,/, ''), 'base64');
+        let dataBuffer = Buffer.from(base64.replace(/^data:[^;]+;base64,/, ''), 'base64');
+        if (ext.toLowerCase() === '.mp4') {
+          dataBuffer = optimizeMp4Faststart(dataBuffer);
+        }
         fs.writeFileSync(targetPath, dataBuffer);
+
+        // Also sync to public/uploads if running with vite source folder
+        try {
+          const publicFolder = path.join(__dirname, 'public', 'uploads', type);
+          if (fs.existsSync(path.join(__dirname, 'public'))) {
+            if (!fs.existsSync(publicFolder)) fs.mkdirSync(publicFolder, { recursive: true });
+            fs.writeFileSync(path.join(publicFolder, cleanName), dataBuffer);
+          }
+        } catch (e) {}
 
         const publicUrl = `/uploads/${type}/${cleanName}`;
         return sendJson(res, 200, { ok: true, url: publicUrl, name: cleanName, type });
@@ -193,6 +275,8 @@ const server = http.createServer(async (req, res) => {
     const fileSize = stat.size;
     const range = req.headers.range;
 
+    const isMediaOrFont = ['.mp4', '.webm', '.webp', '.png', '.jpg', '.jpeg', '.svg', '.gif', '.woff2', '.woff'].includes(ext);
+
     if (range && (ext === '.mp4' || ext === '.webm')) {
       const parts = range.replace(/bytes=/, '').split('-');
       const start = parseInt(parts[0], 10);
@@ -204,7 +288,7 @@ const server = http.createServer(async (req, res) => {
         'Accept-Ranges': 'bytes',
         'Content-Length': chunksize,
         'Content-Type': mime,
-        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Cache-Control': 'public, max-age=31536000, immutable',
       };
       res.writeHead(206, head);
       return file.pipe(res);
@@ -216,6 +300,8 @@ const server = http.createServer(async (req, res) => {
       };
       if (ext === '.html') {
         head['Cache-Control'] = 'no-cache, no-store, must-revalidate';
+      } else if (isMediaOrFont) {
+        head['Cache-Control'] = 'public, max-age=31536000, immutable';
       }
       res.writeHead(200, head);
       return fs.createReadStream(safePath).pipe(res);
