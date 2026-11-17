@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "social-hub": {
+      "command": "node",
+      "args": [
+        "scripts/social-hub-mcp.js"
+      ],
+      "env": {
+        "APP_URL": "http://localhost:3000"
+      }
+    }
+  }
+}
