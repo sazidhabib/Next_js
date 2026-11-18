@@ -64,6 +64,10 @@ export default function SocialDashboard() {
   const [retryingDeliveryId, setRetryingDeliveryId] = useState(null);
   const [expandedDeliveryPostId, setExpandedDeliveryPostId] = useState(null);
 
+  // AI Content & Image Generation State
+  const [aiTopic, setAiTopic] = useState("");
+  const [isGenerating, setIsGenerating] = useState(false);
+
   // Sample quick media presets
   const sampleMedia = [
     {
@@ -126,6 +130,60 @@ export default function SocialDashboard() {
   const showNotification = (msg, type = "success") => {
     setNotification({ msg, type });
     setTimeout(() => setNotification(null), 4500);
+  };
+
+  const handleGenerateAI = async () => {
+    try {
+      setIsGenerating(true);
+      const res = await fetch("/api/agent/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ topic: aiTopic }),
+      });
+
+      const data = await res.json();
+      if (!data.success) {
+        showNotification(data.error || "Failed to generate AI post.", "error");
+        return;
+      }
+
+      // 1. Populate Universal Base Content & Flux Image
+      setContentText(data.contentText || "");
+      if (data.mediaUrl) {
+        setMediaUrl(data.mediaUrl);
+        setImagePreview(data.mediaUrl);
+      }
+
+      // 2. Populate Platform Customizations for each channel
+      if (data.platformCustomizations) {
+        setPlatformCustomizations((prev) => {
+          const next = { ...prev };
+          for (const [provider, config] of Object.entries(data.platformCustomizations)) {
+            if (next[provider]) {
+              next[provider] = {
+                ...next[provider],
+                isCustomized: true,
+                text: config.text || data.contentText,
+                mediaUrl: config.mediaUrl !== undefined ? config.mediaUrl : (data.mediaUrl || ""),
+                hasNoMedia: false,
+              };
+            }
+          }
+          return next;
+        });
+      }
+
+      // 3. Auto-select active accounts if none are currently selected
+      if (selectedAccountIds.length === 0 && accounts.length > 0) {
+        setSelectedAccountIds(accounts.map((a) => a.id));
+      }
+
+      showNotification(`✨ Generated copy and Flux AI image for "${data.topic}"!`, "success");
+    } catch (err) {
+      showNotification("Error connecting to AI generator: " + err.message, "error");
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   const toggleAccount = (id) => {
@@ -476,6 +534,59 @@ export default function SocialDashboard() {
                   <h2 className="text-lg font-bold text-white tracking-tight">Multi-Channel Post Composer</h2>
                   <p className="text-xs text-neutral-400">Write universally or customize captions and media per network</p>
                 </div>
+              </div>
+            </div>
+
+            {/* AI Assistant Bar */}
+            <div className="mb-6 p-4 rounded-2xl bg-gradient-to-r from-indigo-950/60 via-purple-950/40 to-neutral-900/60 border border-indigo-500/30 shadow-lg">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 rounded-lg bg-indigo-500/20 text-indigo-400">
+                    <Wand2 className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h3 className="text-xs font-bold text-white uppercase tracking-wider">Hermes AI Assistant</h3>
+                    <p className="text-[11px] text-neutral-400">Auto-crafts copy for all channels + generates custom Flux AI image</p>
+                  </div>
+                </div>
+                <span className="text-[10px] font-medium px-2.5 py-0.5 rounded-full bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 flex items-center gap-1">
+                  <Sparkles className="w-3 h-3 text-amber-400" />
+                  Free Llama 3.3 + Flux
+                </span>
+              </div>
+              <div className="flex flex-col sm:flex-row gap-2.5">
+                <input
+                  type="text"
+                  value={aiTopic}
+                  onChange={(e) => setAiTopic(e.target.value)}
+                  placeholder="Topic or idea (e.g. 'Next.js 16 updates' or leave blank for auto)"
+                  className="flex-1 bg-black/50 border border-neutral-700/80 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-indigo-500 transition-colors"
+                  disabled={isGenerating}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      handleGenerateAI();
+                    }
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={handleGenerateAI}
+                  disabled={isGenerating}
+                  className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white text-xs font-semibold shadow-md shadow-indigo-500/25 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
+                >
+                  {isGenerating ? (
+                    <>
+                      <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                      <span>Generating Copy & Image...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="w-3.5 h-3.5" />
+                      <span>Generate with AI</span>
+                    </>
+                  )}
+                </button>
               </div>
             </div>
 

@@ -15,10 +15,35 @@
 const fs = require("fs");
 const path = require("path");
 
+// Automatically load .env if present
+function loadEnv() {
+  const envPath = path.resolve(process.cwd(), ".env");
+  if (fs.existsSync(envPath)) {
+    const lines = fs.readFileSync(envPath, "utf-8").split("\n");
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (!trimmed || trimmed.startsWith("#")) continue;
+      const eqIdx = trimmed.indexOf("=");
+      if (eqIdx !== -1) {
+        const key = trimmed.slice(0, eqIdx).trim();
+        const val = trimmed.slice(eqIdx + 1).trim().replace(/^['"](.*)['"]$/, "$1");
+        if (!process.env[key]) {
+          process.env[key] = val;
+        }
+      }
+    }
+  }
+}
+loadEnv();
+
 const APP_URL = process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 const LLM_API_KEY = process.env.OPENROUTER_API_KEY || process.env.OPENAI_API_KEY || process.env.GROQ_API_KEY || "";
 const LLM_BASE_URL = process.env.LLM_BASE_URL || (process.env.OPENROUTER_API_KEY ? "https://openrouter.ai/api/v1" : "https://api.openai.com/v1");
-const LLM_MODEL = process.env.LLM_MODEL || (process.env.OPENROUTER_API_KEY ? "nousresearch/hermes-3-llama-3.1-70b" : "gpt-4o-mini");
+
+// Support comma-separated model list for automatic fallback
+const rawModels = process.env.LLM_MODELS || process.env.LLM_MODEL || (process.env.OPENROUTER_API_KEY ? "meta-llama/llama-3.3-70b-instruct:free,qwen/qwen-2.5-72b-instruct:free,openrouter/free" : "gpt-4o-mini");
+const MODEL_LIST = rawModels.split(",").map((m) => m.trim()).filter(Boolean);
+const LLM_MODEL = MODEL_LIST[0] || "meta-llama/llama-3.3-70b-instruct:free";
 
 function parseFlags() {
   const args = process.argv.slice(2);
@@ -92,12 +117,12 @@ ${skillMd}
 CRITICAL RULES:
 1. Twitter/X content MUST be <= 280 characters. Include 1-2 hashtags and a strong hook.
 2. LinkedIn content must be structured with 1-2 sentence paragraphs and end with an open question.
-3. Supply an Unsplash image URL (e.g. from https://images.unsplash.com/...) relevant to the tech topic.
+3. Supply an 'imagePrompt': a concise, vivid visual prompt (15-25 words) for Flux AI image generation (e.g. isometric 3D render of AI queues, cyberpunk neon lighting, dark sleek theme).
 4. Output ONLY valid JSON matching this exact structure with no markdown backticks, no markdown code fence, and no extra prose:
 {
   "topic": "<short summary of the topic>",
+  "imagePrompt": "<vivid 3D visual prompt for Flux image generator>",
   "contentText": "<universal summary post>",
-  "mediaUrl": "<unsplash image url>",
   "platformCustomizations": {
     "twitter": { "text": "<max 280 chars tweet>" },
     "linkedin": { "text": "<linkedin formatted post>" },
@@ -128,28 +153,59 @@ CRITICAL RULES:
       },
     };
   } else {
-    const response = await fetch(`${LLM_BASE_URL}/chat/completions`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${LLM_API_KEY}`,
-      },
-      body: JSON.stringify({
-        model: LLM_MODEL,
-        messages: [{ role: "user", content: prompt }],
-        temperature: 0.7,
-      }),
-    });
+    let lastError = null;
+    let successfulModel = null;
 
-    if (!response.ok) {
-      const errText = await response.text();
-      throw new Error(`LLM API returned ${response.status}: ${errText}`);
+    for (let i = 0; i < MODEL_LIST.length; i++) {
+      const candidateModel = MODEL_LIST[i];
+      console.log(`🧠 Attempting generation with: ${candidateModel} (Attempt ${i + 1}/${MODEL_LIST.length})...`);
+
+      try {
+        const response = await fetch(`${LLM_BASE_URL}/chat/completions`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${LLM_API_KEY}`,
+            "HTTP-Referer": "http://localhost:3000",
+            "X-Title": "Social Hub Agent",
+          },
+          body: JSON.stringify({
+            model: candidateModel,
+            models: MODEL_LIST, // OpenRouter native fallback support
+            messages: [{ role: "user", content: prompt }],
+            temperature: 0.7,
+          }),
+        });
+
+        if (!response.ok) {
+          const errText = await response.text();
+          throw new Error(`HTTP ${response.status}: ${errText}`);
+        }
+
+        const json = await response.json();
+        const rawContent = json.choices[0].message.content.trim();
+        const cleaned = rawContent.replace(/^```json/i, "").replace(/^```/i, "").replace(/```$/, "").trim();
+        generatedData = JSON.parse(cleaned);
+        successfulModel = candidateModel;
+        console.log(`✅ Generation succeeded with: ${successfulModel}`);
+        break;
+      } catch (err) {
+        lastError = err;
+        console.warn(`⚠️ Model "${candidateModel}" hit limit or error: ${err.message}`);
+        if (i < MODEL_LIST.length - 1) {
+          console.log(`🔄 Automatically falling back to: ${MODEL_LIST[i + 1]}...`);
+        }
+      }
     }
 
-    const json = await response.json();
-    const rawContent = json.choices[0].message.content.trim();
-    const cleaned = rawContent.replace(/^```json/i, "").replace(/^```/i, "").replace(/```$/, "").trim();
-    generatedData = JSON.parse(cleaned);
+    if (!generatedData) {
+      throw new Error(`All configured models failed. Last error: ${lastError?.message}`);
+    }
+
+    if (!generatedData.mediaUrl && generatedData.imagePrompt) {
+      const promptEncoded = encodeURIComponent(generatedData.imagePrompt);
+      generatedData.mediaUrl = `https://image.pollinations.ai/prompt/${promptEncoded}?width=1200&height=675&nologo=true&model=flux`;
+    }
   }
 
   console.log("\n--- Generated Draft ---");
