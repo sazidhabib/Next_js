@@ -306,6 +306,17 @@ To get hired for senior or high-paying remote roles, you do not need 20 small pr
   * **Concurrency Benchmark Report:** Include an `artillery` or `k6` load testing script in the repo demonstrating the system handling 10,000 requests/sec with zero degradation.
   * **Graceful Degradation:** Automatic failover from WebSockets to Server-Sent Events (SSE) or long-polling when network drops.
   * **Interactive Visuals:** 60 FPS bracket rendering and smooth timeline animations.
+* **Recommended Hosting Architecture & Live Demo Setup:**
+  * **Frontend (Next.js 15 Client & SSR):** Host on **Vercel** (Global Edge CDN distribution, instant sub-30ms TTFB for UI assets and initial SSR page load).
+  * **Real-Time WebSocket Cluster (Node.js/ws):** Host on **Railway**, **Render**, or **Fly.io** (or a **$4–$6/mo DigitalOcean Droplet / Hetzner Cloud** container).  
+    > [!IMPORTANT]
+    > **Architectural Note for Recruiters:** Explain in your README why you decoupled the frontend from the WebSocket server: *Serverless platforms like Vercel impose strict execution timeouts (15–60s) and cannot sustain long-lived persistent TCP/WebSocket connections. A dedicated container on Railway/Render maintains continuous bi-directional sockets for thousands of concurrent fans.*
+  * **Redis Pub/Sub & Caching:** **Upstash Redis** (Serverless Redis with native Pub/Sub) or a managed Redis container on **Railway**.
+  * **Database:** **Neon Serverless PostgreSQL** or **Supabase**.
+  * **Live Public Demo URLs:**
+    * Client Portal: `https://arenapulse.vercel.app`
+    * Health / Telemetry Check: `https://ws-api.arenapulse.live/health`
+    * Demo Controls: Provide a "Simulate Match Event" trigger button on the live UI so recruiters can see live score updates and bracket animations in real-time across multiple open browser tabs.
 
 ---
 
@@ -322,6 +333,27 @@ To get hired for senior or high-paying remote roles, you do not need 20 small pr
   * **Role-Based Access Control (RBAC):** Strongly-typed permission matrices (Admin, Editor, Reporter, Reader).
   * **Clean Architecture:** Strict separation between business logic and database queries.
   * **Full API Documentation:** Auto-generated **Swagger / OpenAPI 3.0** documentation interactive at `/api/docs`.
+* **Recommended Hosting Architecture & Live Demo Setup:**
+  * **Frontend News Reader Portal:** Host on **Vercel** or **Cloudflare Pages** (taking full advantage of On-Demand Incremental Static Regeneration / ISR revalidation webhooks when editors publish articles).
+  * **Headless Backend API & Admin Studio:**
+    * Host the Node.js / Express / Prisma API service on **Render**, **Railway**, or **DigitalOcean App Platform**.
+    * Alternative (Full-Stack Next.js 15): If built as a unified App Router monorepo, host the entire CMS on **Vercel**.
+  * **Database:** **Neon PostgreSQL** (Free tier with instant branching and connection pooling) or **Aiven Cloud MySQL/PostgreSQL**.
+  * **Asset & Media CDN:** **Cloudflare R2** (S3-compatible object storage with **Zero Egress Fees**, connected to a Cloudflare custom domain CDN for caching images globally).
+  * **Live Public Demo URLs:**
+    * Public Portal: `https://omnisedge-news.vercel.app`
+    * Admin Studio: `https://omnisedge-admin.vercel.app` (with pre-filled 1-click test credentials: `editor@omnisedge.com` / `admin@omnisedge.com`).
+    * Interactive API Documentation: `https://api.omnisedge.com/docs` (Swagger UI).
+
+---
+
+### Quick-Reference Hosting & Cloud Architecture Matrix
+
+| Project | Frontend / Edge Layer | Backend / API / Worker Layer | Database & Cache Layer | Media & Assets | Recommended Cost Tier |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **1. PulseStack** (SaaS & Queue) | **Vercel** (Next.js 15 App Router) | **Railway** or **Render** (Node/Express API + BullMQ Worker) | **Neon PostgreSQL** + **Upstash Redis** | Local / Cloudflare R2 | **$0 / month** (100% Free Tiers) |
+| **2. ArenaPulse** (Real-Time Hub) | **Vercel** (Next.js 15 Client & SSR) | **Railway**, **Render**, or **Fly.io** (Persistent WebSocket Cluster) | **Neon PostgreSQL** + **Upstash Redis Pub/Sub** | Inline SVG / Vector maps | **$0 / month** (Free Tiers) or $5/mo VPS |
+| **3. OmnisEdge CMS** (Headless News) | **Vercel** or **Cloudflare Pages** (ISR Caching) | **Render** or **Railway** (Clean Architecture Express/Prisma API) | **Neon PostgreSQL** (Connection Pooled) | **Cloudflare R2** (Zero Egress S3 CDN) | **$0 / month** (100% Free Tiers) |
 
 ---
 

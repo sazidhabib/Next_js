@@ -771,40 +771,40 @@
   ],
   "testimonials": [
     {
-      "n": "Sarah Malik",
-      "r": "Product Lead, Paylite",
-      "img": "1494790108377-be9c29b29330",
-      "q": "Sazid turned a messy feature list into an app our users actually enjoy. Onboarding completion jumped in the first month."
-    },
-    {
-      "n": "Daniel Reyes",
-      "r": "CTO, Orbit Analytics",
-      "img": "1507003211169-0a1dd7228f2d",
-      "q": "Fast, thoughtful and obsessed with detail. His Figma files are the cleanest our developers have ever worked with."
-    },
-    {
-      "n": "Ayesha Rahman",
-      "r": "Founder, Kaya Store",
-      "img": "1544005313-94ddf0286df2",
-      "q": "He doesn’t just make screens look good. He asks the right questions first, and our conversion numbers prove it."
-    },
-    {
-      "n": "Leo Tanaka",
-      "r": "Head of Product, Fieldnote",
-      "img": "1500648767791-00dcc994a43e",
-      "q": "Our design system finally feels like one product. New screens take hours now, not days."
-    },
-    {
-      "n": "Maya Chen",
-      "r": "Founder, Brightside",
+      "n": "Tanvir Hossain",
+      "r": "Editorial Tech Lead, Ajker Patrika",
       "img": "1534528741775-53994a69daeb",
-      "q": "Clear communication, sharp ideas and zero ego. Exactly the designer an early startup needs."
+      "q": "Sazid built our World Cup 2026 Tournament Hub from scratch. The live bracket predictor and real-time match stats handled thousands of concurrent readers with zero lag, and our editorial team could push updates in seconds."
     },
     {
-      "n": "Omar Faruk",
-      "r": "CEO, Shopnest",
+      "n": "Shamsul Arefin",
+      "r": "Project Director, Election Night Coverage",
+      "img": "1507003211169-0a1dd7228f2d",
+      "q": "On election night, our 300-constituency live vector map and real-time tally visualizer served intense traffic spikes without a glitch. Sazid’s edge-cached architecture and zero-DB read strategy saved our server from crashing."
+    },
+    {
+      "n": "Kamrul Hasan",
+      "r": "Managing Editor, Pathokbonddho News",
       "img": "1472099645785-5658abf4ff4e",
-      "q": "The checkout redesign paid for itself within weeks. We have already booked the next project."
+      "q": "Pathokbonddho needed a fast, custom CMS that non-technical reporters could use easily. Sazid developed the modular section builder and media pipeline in record time, speeding up our publishing cycle by over 50%."
+    },
+    {
+      "n": "Sarah Malik",
+      "r": "Head of Operations, President Properties",
+      "img": "1494790108377-be9c29b29330",
+      "q": "Sazid architected the web portal and property CMS for President Properties from the ground up. The interactive showcase, location mapping, and buyer inquiry flow helped us manage 150+ luxury developments effortlessly and doubled our qualified lead conversions."
+    },
+    {
+      "n": "Dr. Tariqul Islam",
+      "r": "Lead Geospatial Analyst, Climate Intelligence",
+      "img": "1500648767791-00dcc994a43e",
+      "q": "The 64-district interactive weather dashboard Sazid built turned heavy geospatial datasets into an intuitive, instant-loading portal. His attention to sub-second API caching and responsive mobile charts was exceptional."
+    },
+    {
+      "n": "Farhan Ahmed",
+      "r": "Founder & CEO, Next Idea Solution",
+      "img": "1544005313-94ddf0286df2",
+      "q": "Next Idea Solution needed a modern agency portal with interactive quotations and case studies. Sazid delivered a clean Next.js architecture with flawless animations that helped us win multiple client contracts within weeks."
     }
   ],
   "pricing": [

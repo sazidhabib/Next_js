@@ -467,11 +467,18 @@
       border-radius: 12px;
       padding: 20px;
       margin-bottom: 16px;
-      transition: border-color .2s
+      transition: border-color .2s, box-shadow .2s;
     }
 
     .item-card:hover {
-      border-color: rgba(255, 255, 255, .16)
+      border-color: rgba(255, 255, 255, .16);
+    }
+
+    /* Accordion / Collapsible Dropdown for Projects & Experience */
+    .item-card.collapsible {
+      padding: 0;
+      overflow: hidden;
+      margin-bottom: 12px;
     }
 
     .item-head {
@@ -479,8 +486,75 @@
       align-items: center;
       justify-content: space-between;
       margin-bottom: 14px;
-      flex-wrap: wrap;
-      gap: 8px
+      gap: 12px;
+      flex-wrap: nowrap;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .item-card.collapsible .item-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: nowrap;
+      padding: 13px 18px;
+      margin-bottom: 0;
+      cursor: pointer;
+      user-select: none;
+      background: rgba(255, 255, 255, .018);
+      transition: background .15s ease, border-color .15s ease;
+      border-radius: 12px;
+      gap: 12px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .item-card.collapsible .item-head:hover {
+      background: rgba(255, 255, 255, .045);
+    }
+
+    .item-card.collapsible.expanded {
+      border-color: rgba(255, 255, 255, .22);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, .28);
+    }
+
+    .item-card.collapsible.expanded .item-head {
+      border-bottom: 1px solid var(--border);
+      border-bottom-left-radius: 0;
+      border-bottom-right-radius: 0;
+      background: rgba(255, 255, 255, .035);
+    }
+
+    .item-card.collapsible .item-body {
+      padding: 20px;
+      display: none;
+    }
+
+    .item-card.collapsible.expanded .item-body {
+      display: block;
+    }
+
+    .item-chevron {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 22px;
+      height: 22px;
+      border-radius: 5px;
+      background: rgba(255, 255, 255, .04);
+      border: 1px solid rgba(255, 255, 255, .08);
+      color: var(--muted);
+      font-size: 11px;
+      margin-right: 4px;
+      transition: all .2s ease;
+      flex-shrink: 0;
+    }
+
+    .item-card.collapsible.expanded .item-chevron {
+      background: rgba(13, 153, 255, .15);
+      border-color: rgba(13, 153, 255, .3);
+      color: var(--blue);
+      transform: rotate(180deg);
     }
 
     .item-title {
@@ -488,7 +562,24 @@
       align-items: center;
       gap: 10px;
       font-weight: 600;
-      font-size: 15px
+      font-size: 15px;
+      min-width: 0;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .item-title b {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .item-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-left: auto;
+      flex-shrink: 0;
     }
 
     .item-badge {
@@ -496,7 +587,9 @@
       padding: 3px 8px;
       border-radius: 5px;
       background: rgba(255, 255, 255, .06);
-      color: var(--muted)
+      color: var(--muted);
+      flex-shrink: 0;
+      white-space: nowrap;
     }
 
     /* Status / Switch */
@@ -1051,7 +1144,7 @@
       <div class="pane-head">
         <div>
           <h2>Selected Work (Projects)</h2>
-          <p>Add, edit, reorder projects, upload screenshots (auto-WebP) and demo preview videos.</p>
+          <p>Add, edit, reorder projects, upload screenshots and demo preview videos. Click any project title to expand or collapse details.</p>
         </div>
         <button type="button" class="btn btn-primary" id="btnAddProject">+ Add Project</button>
       </div>
@@ -1066,8 +1159,7 @@
       <div class="pane-head">
         <div>
           <h2>Experience (Departures Board & Flight Telemetry)</h2>
-          <p>Manage career stops, split-flap metrics, company logos (auto-WebP/SVG), short descriptions, deliverables,
-            and tech stack tags.</p>
+          <p>Manage career stops, split-flap metrics, company logos, and telemetry dossiers. Click any role title to expand or collapse details.</p>
         </div>
         <button type="button" class="btn btn-primary" id="btnAddExp">+ Add Experience</button>
       </div>
@@ -1386,6 +1478,25 @@
     }
 
     // TAB 2: Projects
+    let activeProjectIdx = null;
+
+    window.toggleProjectAccordion = (idx) => {
+      const cards = document.querySelectorAll('#projectsList .item-card');
+      const targetCard = document.getElementById(`project-card-${idx}`);
+      const isCurrentlyExpanded = targetCard?.classList.contains('expanded');
+
+      // Close all project cards
+      cards.forEach(c => c.classList.remove('expanded'));
+
+      // If it wasn't open, open this one; if it was open, it stays closed
+      if (!isCurrentlyExpanded && targetCard) {
+        targetCard.classList.add('expanded');
+        activeProjectIdx = idx;
+      } else {
+        activeProjectIdx = null;
+      }
+    };
+
     function renderProjects() {
       const list = document.getElementById('projectsList');
       list.innerHTML = '';
@@ -1398,159 +1509,164 @@
           p.img = '';
         }
 
+        const isExpanded = (idx === activeProjectIdx);
         const card = document.createElement('div');
-        card.className = 'item-card';
+        card.className = `item-card collapsible ${isExpanded ? 'expanded' : ''}`;
+        card.id = `project-card-${idx}`;
         card.innerHTML = `
-      <div class="item-head">
+      <div class="item-head" onclick="toggleProjectAccordion(${idx})" title="Click to expand / collapse">
         <div class="item-title">
+          <span class="item-chevron">▾</span>
           <span class="mono" style="color:var(--blue)">PRJ // 0${idx + 1}</span>
-          <b>${p.n || 'Untitled Project'}</b>
+          <b id="prj-title-${idx}">${p.n || 'Untitled Project'}</b>
           ${p.video ? '<span class="item-badge" style="color:var(--warm)">VIDEO PREVIEW</span>' : ''}
         </div>
-        <div style="display:flex;gap:6px">
-          ${idx > 0 ? `<button type="button" class="btn btn-secondary btn-sm" onclick="moveProject(${idx}, -1)">↑</button>` : ''}
-          ${idx < C.work.length - 1 ? `<button type="button" class="btn btn-secondary btn-sm" onclick="moveProject(${idx}, 1)">↓</button>` : ''}
-          <button type="button" class="btn btn-danger btn-sm" onclick="deleteProject(${idx})">Delete</button>
+        <div class="item-actions" onclick="event.stopPropagation()">
+          ${idx > 0 ? `<button type="button" class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); moveProject(${idx}, -1)" title="Move Up">↑</button>` : ''}
+          ${idx < C.work.length - 1 ? `<button type="button" class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); moveProject(${idx}, 1)" title="Move Down">↓</button>` : ''}
+          <button type="button" class="btn btn-danger btn-sm" onclick="event.stopPropagation(); deleteProject(${idx})" title="Delete Project">Delete</button>
         </div>
       </div>
-      <div class="form-grid">
-        <div class="form-group">
-          <label>Project Name</label>
-          <input type="text" value="${p.n || ''}" oninput="C.work[${idx}].n = this.value">
-        </div>
-        <div class="form-group">
-          <label>Live URL</label>
-          <input type="text" value="${p.live || ''}" placeholder="https://..." oninput="C.work[${idx}].live = this.value">
-        </div>
-        <div class="form-group">
-          <label>GitHub Source URL</label>
-          <input type="text" value="${p.source || ''}" placeholder="https://github.com/..." oninput="C.work[${idx}].source = this.value">
-        </div>
-        <div class="form-group">
-          <label>Case Study Link / Anchor</label>
-          <input type="text" value="${p.case || ''}" placeholder="#/project/..." oninput="C.work[${idx}].case = this.value">
-        </div>
-        <div class="form-group full">
-          <label>Short Description</label>
-          <textarea rows="2" oninput="C.work[${idx}].d = this.value">${p.d || ''}</textarea>
-        </div>
-        <div class="form-group">
-          <label>Thumbnail Screenshot / Animated GIF (.webp / .png / .gif)</label>
-          <div style="display:flex;gap:8px;margin-bottom:6px">
-            <input type="text" value="${p.img || ''}" id="img-input-${idx}" oninput="C.work[${idx}].img = this.value" onchange="renderProjects()">
-            <button type="button" class="btn btn-secondary btn-sm" onclick="openMediaPickerFor('img-input-${idx}', 'projects', ${idx}, 'img')">📁 Pick</button>
+      <div class="item-body">
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Project Name</label>
+            <input type="text" value="${p.n || ''}" oninput="C.work[${idx}].n = this.value; const t = document.getElementById('prj-title-${idx}'); if (t) t.textContent = this.value || 'Untitled Project';">
           </div>
-          <div class="dropzone" data-type="projects" data-target="img-input-${idx}" data-idx="${idx}" data-field="img">
-            <p>Upload project image or animated GIF</p>
-            <input type="file" accept="image/*">
+          <div class="form-group">
+            <label>Live URL</label>
+            <input type="text" value="${p.live || ''}" placeholder="https://..." oninput="C.work[${idx}].live = this.value">
           </div>
-          ${p.img && !isVid(p.img) ? `
-            <div class="file-preview" style="margin-top:6px">
-              <img src="${p.img}" alt="" onerror="this.parentElement.style.display='none'">
-              <div class="meta"><b>${/\.gif(\?.*)?$/i.test(p.img) ? 'Animated GIF' : 'Thumbnail Preview'}</b><small>${p.img}</small></div>
-              <button type="button" class="btn btn-secondary btn-sm" onclick="C.work[${idx}].img=''; renderProjects();">✕</button>
+          <div class="form-group">
+            <label>GitHub Source URL</label>
+            <input type="text" value="${p.source || ''}" placeholder="https://github.com/..." oninput="C.work[${idx}].source = this.value">
+          </div>
+          <div class="form-group">
+            <label>Case Study Link / Anchor</label>
+            <input type="text" value="${p.case || ''}" placeholder="#/project/..." oninput="C.work[${idx}].case = this.value">
+          </div>
+          <div class="form-group full">
+            <label>Short Description</label>
+            <textarea rows="2" oninput="C.work[${idx}].d = this.value">${p.d || ''}</textarea>
+          </div>
+          <div class="form-group">
+            <label>Thumbnail Screenshot / Animated GIF (.webp / .png / .gif)</label>
+            <div style="display:flex;gap:8px;margin-bottom:6px">
+              <input type="text" value="${p.img || ''}" id="img-input-${idx}" oninput="C.work[${idx}].img = this.value" onchange="renderProjects()">
+              <button type="button" class="btn btn-secondary btn-sm" onclick="openMediaPickerFor('img-input-${idx}', 'projects', ${idx}, 'img')">📁 Pick</button>
             </div>
-          ` : ''}
-        </div>
-        <div class="form-group">
-          <label>Optional Demo Video / GIF (.mp4 / .webm / .gif)</label>
-          <div style="display:flex;gap:8px;margin-bottom:6px">
-            <input type="text" value="${p.video || ''}" id="video-input-${idx}" placeholder="/uploads/projects/demo.mp4 or .gif" oninput="C.work[${idx}].video = this.value" onchange="renderProjects()">
-            <button type="button" class="btn btn-secondary btn-sm" onclick="openMediaPickerFor('video-input-${idx}', 'projects', ${idx}, 'video')">📁 Pick</button>
-          </div>
-          <div class="dropzone" data-type="projects" data-target="video-input-${idx}" data-idx="${idx}" data-field="video">
-            <p>Upload short video or animated GIF</p>
-            <input type="file" accept="video/mp4,video/webm,image/gif">
-          </div>
-          ${p.video ? (
-            /\.gif(\?.*)?$/i.test(p.video) ? `
+            <div class="dropzone" data-type="projects" data-target="img-input-${idx}" data-idx="${idx}" data-field="img">
+              <p>Upload project image or animated GIF</p>
+              <input type="file" accept="image/*">
+            </div>
+            ${p.img && !isVid(p.img) ? `
               <div class="file-preview" style="margin-top:6px">
-                <img src="${p.video}" alt="" style="width:68px;height:42px;object-fit:cover;border-radius:4px">
-                <div class="meta"><b>Demo Animated GIF</b><small>${p.video}</small></div>
-                <button type="button" class="btn btn-secondary btn-sm" onclick="C.work[${idx}].video=''; renderProjects();">✕</button>
+                <img src="${p.img}" alt="" onerror="this.parentElement.style.display='none'">
+                <div class="meta"><b>${/\.gif(\?.*)?$/i.test(p.img) ? 'Animated GIF' : 'Thumbnail Preview'}</b><small>${p.img}</small></div>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="C.work[${idx}].img=''; renderProjects();">✕</button>
               </div>
-            ` : `
-              <div class="file-preview" style="margin-top:6px">
-                <video src="${p.video}" muted controls style="width:68px;height:42px;object-fit:cover"></video>
-                <div class="meta"><b>Demo Video</b><small>${p.video}</small></div>
-                <button type="button" class="btn btn-secondary btn-sm" onclick="C.work[${idx}].video=''; renderProjects();">✕</button>
-              </div>
-            `
-          ) : ''}
-        </div>
-        <div class="form-group full">
-          <label>Tech Stack Tags (Comma-separated)</label>
-          <input type="text" value="${(p.tags || []).join(', ')}" onchange="C.work[${idx}].tags = this.value.split(',').map(s=>s.trim()).filter(Boolean)">
-        </div>
-
-        <details class="dossier-box form-group full" ${p.dossier ? 'open' : ''}>
-          <summary class="dossier-summary">
-            <div style="display:flex;align-items:center;gap:8px;">
-              <span class="dossier-tag">OPTION B</span>
-              <span style="font-weight:700;color:var(--text);font-size:13px">Technical Architecture Dossier (Case Study Drawer)</span>
-            </div>
-            <span class="dossier-arrow">▾</span>
-          </summary>
-          <div class="dossier-content">
-            <div class="dossier-row-3">
-              <div class="form-group">
-                <label>Engineering Role</label>
-                <input type="text" value="${p.dossier?.role || ''}" placeholder="Lead Full-Stack Engineer" oninput="C.work[${idx}].dossier = C.work[${idx}].dossier || {}; C.work[${idx}].dossier.role = this.value">
-              </div>
-              <div class="form-group">
-                <label>Latency / SLA Benchmark</label>
-                <input type="text" value="${p.dossier?.latency || ''}" placeholder="< 42ms SSR" oninput="C.work[${idx}].dossier = C.work[${idx}].dossier || {}; C.work[${idx}].dossier.latency = this.value">
-              </div>
-              <div class="form-group">
-                <label>Scale / Traffic Volume</label>
-                <input type="text" value="${p.dossier?.scale || ''}" placeholder="120k+ / month" oninput="C.work[${idx}].dossier = C.work[${idx}].dossier || {}; C.work[${idx}].dossier.scale = this.value">
-              </div>
-            </div>
-
-            <div class="form-group full">
-              <label>System Architecture Topology (Data Flow)</label>
-              <input type="text" value="${p.dossier?.topology || ''}" placeholder="[Edge CDN] -> [Next.js App Router] -> [Redis Cache] -> [PostgreSQL DB]" oninput="C.work[${idx}].dossier = C.work[${idx}].dossier || {}; C.work[${idx}].dossier.topology = this.value">
-              <small style="color:var(--muted);font-size:11px">Describe the data-flow pipeline (e.g. [Edge CDN] ➔ [SSR Edge] ➔ [Redis] ➔ [PostgreSQL])</small>
-            </div>
-
-            <div class="form-group full">
-              <label>The Architectural Challenge</label>
-              <textarea rows="2" placeholder="Describe the scale bottleneck, high-concurrency spike issue, or complex technical requirement..." oninput="C.work[${idx}].dossier = C.work[${idx}].dossier || {}; C.work[${idx}].dossier.challenge = this.value">${p.dossier?.challenge || ''}</textarea>
-            </div>
-
-            <div class="form-group full">
-              <label>Architectural Solution</label>
-              <textarea rows="2" placeholder="How you engineered the multi-tier caching, ISR, state machine, or DB query optimizations..." oninput="C.work[${idx}].dossier = C.work[${idx}].dossier || {}; C.work[${idx}].dossier.solution = this.value">${p.dossier?.solution || ''}</textarea>
-            </div>
-
-            <div class="form-group full">
-              <label>Key Architectural Decisions (One bullet point per line)</label>
-              <textarea rows="3" placeholder="Strict RBAC CMS for journalists, editors, and admins&#10;On-demand webhook cache purging for breaking news&#10;Adaptive WebP image pipeline for mobile bandwidth" oninput="C.work[${idx}].dossier = C.work[${idx}].dossier || {}; C.work[${idx}].dossier.decisions = this.value.split('\n').map(s=>s.trim()).filter(Boolean)">${(p.dossier?.decisions || []).join('\n')}</textarea>
-            </div>
-
-            <div class="form-group full">
-              <label>Lighthouse Audit Benchmark Scores (0 - 100)</label>
-              <div class="dossier-row-4">
-                <div class="score-input">
-                  <span>PERFORMANCE</span>
-                  <input type="number" min="0" max="100" value="${p.dossier?.scores?.perf ?? 100}" oninput="C.work[${idx}].dossier = C.work[${idx}].dossier || {}; C.work[${idx}].dossier.scores = C.work[${idx}].dossier.scores || {}; C.work[${idx}].dossier.scores.perf = parseInt(this.value, 10) || 0">
-                </div>
-                <div class="score-input">
-                  <span>SEO</span>
-                  <input type="number" min="0" max="100" value="${p.dossier?.scores?.seo ?? 100}" oninput="C.work[${idx}].dossier = C.work[${idx}].dossier || {}; C.work[${idx}].dossier.scores = C.work[${idx}].dossier.scores || {}; C.work[${idx}].dossier.scores.seo = parseInt(this.value, 10) || 0">
-                </div>
-                <div class="score-input">
-                  <span>ACCESSIBILITY</span>
-                  <input type="number" min="0" max="100" value="${p.dossier?.scores?.a11y ?? 98}" oninput="C.work[${idx}].dossier = C.work[${idx}].dossier || {}; C.work[${idx}].dossier.scores = C.work[${idx}].dossier.scores || {}; C.work[${idx}].dossier.scores.a11y = parseInt(this.value, 10) || 0">
-                </div>
-                <div class="score-input">
-                  <span>BEST PRACTICES</span>
-                  <input type="number" min="0" max="100" value="${p.dossier?.scores?.best ?? 100}" oninput="C.work[${idx}].dossier = C.work[${idx}].dossier || {}; C.work[${idx}].dossier.scores = C.work[${idx}].dossier.scores || {}; C.work[${idx}].dossier.scores.best = parseInt(this.value, 10) || 0">
-                </div>
-              </div>
-            </div>
+            ` : ''}
           </div>
-        </details>
+          <div class="form-group">
+            <label>Optional Demo Video / GIF (.mp4 / .webm / .gif)</label>
+            <div style="display:flex;gap:8px;margin-bottom:6px">
+              <input type="text" value="${p.video || ''}" id="video-input-${idx}" placeholder="/uploads/projects/demo.mp4 or .gif" oninput="C.work[${idx}].video = this.value" onchange="renderProjects()">
+              <button type="button" class="btn btn-secondary btn-sm" onclick="openMediaPickerFor('video-input-${idx}', 'projects', ${idx}, 'video')">📁 Pick</button>
+            </div>
+            <div class="dropzone" data-type="projects" data-target="video-input-${idx}" data-idx="${idx}" data-field="video">
+              <p>Upload short video or animated GIF</p>
+              <input type="file" accept="video/mp4,video/webm,image/gif">
+            </div>
+            ${p.video ? (
+              /\.gif(\?.*)?$/i.test(p.video) ? `
+                <div class="file-preview" style="margin-top:6px">
+                  <img src="${p.video}" alt="" style="width:68px;height:42px;object-fit:cover;border-radius:4px">
+                  <div class="meta"><b>Demo Animated GIF</b><small>${p.video}</small></div>
+                  <button type="button" class="btn btn-secondary btn-sm" onclick="C.work[${idx}].video=''; renderProjects();">✕</button>
+                </div>
+              ` : `
+                <div class="file-preview" style="margin-top:6px">
+                  <video src="${p.video}" muted controls style="width:68px;height:42px;object-fit:cover"></video>
+                  <div class="meta"><b>Demo Video</b><small>${p.video}</small></div>
+                  <button type="button" class="btn btn-secondary btn-sm" onclick="C.work[${idx}].video=''; renderProjects();">✕</button>
+                </div>
+              `
+            ) : ''}
+          </div>
+          <div class="form-group full">
+            <label>Tech Stack Tags (Comma-separated)</label>
+            <input type="text" value="${(p.tags || []).join(', ')}" onchange="C.work[${idx}].tags = this.value.split(',').map(s=>s.trim()).filter(Boolean)">
+          </div>
+
+          <details class="dossier-box form-group full" ${p.dossier ? 'open' : ''}>
+            <summary class="dossier-summary">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <span class="dossier-tag">OPTION B</span>
+                <span style="font-weight:700;color:var(--text);font-size:13px">Technical Architecture Dossier (Case Study Drawer)</span>
+              </div>
+              <span class="dossier-arrow">▾</span>
+            </summary>
+            <div class="dossier-content">
+              <div class="dossier-row-3">
+                <div class="form-group">
+                  <label>Engineering Role</label>
+                  <input type="text" value="${p.dossier?.role || ''}" placeholder="Lead Full-Stack Engineer" oninput="C.work[${idx}].dossier = C.work[${idx}].dossier || {}; C.work[${idx}].dossier.role = this.value">
+                </div>
+                <div class="form-group">
+                  <label>Latency / SLA Benchmark</label>
+                  <input type="text" value="${p.dossier?.latency || ''}" placeholder="< 42ms SSR" oninput="C.work[${idx}].dossier = C.work[${idx}].dossier || {}; C.work[${idx}].dossier.latency = this.value">
+                </div>
+                <div class="form-group">
+                  <label>Scale / Traffic Volume</label>
+                  <input type="text" value="${p.dossier?.scale || ''}" placeholder="120k+ / month" oninput="C.work[${idx}].dossier = C.work[${idx}].dossier || {}; C.work[${idx}].dossier.scale = this.value">
+                </div>
+              </div>
+
+              <div class="form-group full">
+                <label>System Architecture Topology (Data Flow)</label>
+                <input type="text" value="${p.dossier?.topology || ''}" placeholder="[Edge CDN] -> [Next.js App Router] -> [Redis Cache] -> [PostgreSQL DB]" oninput="C.work[${idx}].dossier = C.work[${idx}].dossier || {}; C.work[${idx}].dossier.topology = this.value">
+                <small style="color:var(--muted);font-size:11px">Describe the data-flow pipeline (e.g. [Edge CDN] ➔ [SSR Edge] ➔ [Redis] ➔ [PostgreSQL])</small>
+              </div>
+
+              <div class="form-group full">
+                <label>The Architectural Challenge</label>
+                <textarea rows="2" placeholder="Describe the scale bottleneck, high-concurrency spike issue, or complex technical requirement..." oninput="C.work[${idx}].dossier = C.work[${idx}].dossier || {}; C.work[${idx}].dossier.challenge = this.value">${p.dossier?.challenge || ''}</textarea>
+              </div>
+
+              <div class="form-group full">
+                <label>Architectural Solution</label>
+                <textarea rows="2" placeholder="How you engineered the multi-tier caching, ISR, state machine, or DB query optimizations..." oninput="C.work[${idx}].dossier = C.work[${idx}].dossier || {}; C.work[${idx}].dossier.solution = this.value">${p.dossier?.solution || ''}</textarea>
+              </div>
+
+              <div class="form-group full">
+                <label>Key Architectural Decisions (One bullet point per line)</label>
+                <textarea rows="3" placeholder="Strict RBAC CMS for journalists, editors, and admins&#10;On-demand webhook cache purging for breaking news&#10;Adaptive WebP image pipeline for mobile bandwidth" oninput="C.work[${idx}].dossier = C.work[${idx}].dossier || {}; C.work[${idx}].dossier.decisions = this.value.split('\n').map(s=>s.trim()).filter(Boolean)">${(p.dossier?.decisions || []).join('\n')}</textarea>
+              </div>
+
+              <div class="form-group full">
+                <label>Lighthouse Audit Benchmark Scores (0 - 100)</label>
+                <div class="dossier-row-4">
+                  <div class="score-input">
+                    <span>PERFORMANCE</span>
+                    <input type="number" min="0" max="100" value="${p.dossier?.scores?.perf ?? 100}" oninput="C.work[${idx}].dossier = C.work[${idx}].dossier || {}; C.work[${idx}].dossier.scores = C.work[${idx}].dossier.scores || {}; C.work[${idx}].dossier.scores.perf = parseInt(this.value, 10) || 0">
+                  </div>
+                  <div class="score-input">
+                    <span>SEO</span>
+                    <input type="number" min="0" max="100" value="${p.dossier?.scores?.seo ?? 100}" oninput="C.work[${idx}].dossier = C.work[${idx}].dossier || {}; C.work[${idx}].dossier.scores = C.work[${idx}].dossier.scores || {}; C.work[${idx}].dossier.scores.seo = parseInt(this.value, 10) || 0">
+                  </div>
+                  <div class="score-input">
+                    <span>ACCESSIBILITY</span>
+                    <input type="number" min="0" max="100" value="${p.dossier?.scores?.a11y ?? 98}" oninput="C.work[${idx}].dossier = C.work[${idx}].dossier || {}; C.work[${idx}].dossier.scores = C.work[${idx}].dossier.scores || {}; C.work[${idx}].dossier.scores.a11y = parseInt(this.value, 10) || 0">
+                  </div>
+                  <div class="score-input">
+                    <span>BEST PRACTICES</span>
+                    <input type="number" min="0" max="100" value="${p.dossier?.scores?.best ?? 100}" oninput="C.work[${idx}].dossier = C.work[${idx}].dossier || {}; C.work[${idx}].dossier.scores = C.work[${idx}].dossier.scores || {}; C.work[${idx}].dossier.scores.best = parseInt(this.value, 10) || 0">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </details>
+        </div>
       </div>
     `;
         list.appendChild(card);
@@ -1564,6 +1680,11 @@
       const temp = C.work[idx];
       C.work[idx] = C.work[target];
       C.work[target] = temp;
+      if (activeProjectIdx === idx) {
+        activeProjectIdx = target;
+      } else if (activeProjectIdx === target) {
+        activeProjectIdx = idx;
+      }
       renderProjects();
       setupDropzones();
     };
@@ -1571,6 +1692,11 @@
     window.deleteProject = (idx) => {
       if (confirm(`Delete "${C.work[idx].n}"?`)) {
         C.work.splice(idx, 1);
+        if (activeProjectIdx === idx) {
+          activeProjectIdx = null;
+        } else if (activeProjectIdx !== null && activeProjectIdx > idx) {
+          activeProjectIdx--;
+        }
         renderProjects();
         setupDropzones();
       }
@@ -1598,6 +1724,7 @@
           scores: { perf: 100, seo: 100, a11y: 98, best: 100 }
         }
       });
+      activeProjectIdx = 0; // Automatically open the newly added project
       renderProjects();
       setupDropzones();
       const firstCard = document.querySelector('#projectsList .item-card');
@@ -1610,6 +1737,32 @@
     });
 
     // TAB 3: Experience (Departures Board & Flight Telemetry Dossier)
+    let activeExpIdx = null;
+
+    window.toggleExpAccordion = (idx) => {
+      const cards = document.querySelectorAll('#expList .item-card');
+      const targetCard = document.getElementById(`exp-card-${idx}`);
+      const isCurrentlyExpanded = targetCard?.classList.contains('expanded');
+
+      // Close all other experience cards
+      cards.forEach(c => c.classList.remove('expanded'));
+
+      // If it wasn't open, open this one; if it was open, it stays closed
+      if (!isCurrentlyExpanded && targetCard) {
+        targetCard.classList.add('expanded');
+        activeExpIdx = idx;
+      } else {
+        activeExpIdx = null;
+      }
+    };
+
+    window.updateExpTitle = (idx) => {
+      const t = document.getElementById(`exp-title-${idx}`);
+      if (t && C.experience?.[idx]) {
+        t.textContent = `${C.experience[idx].base?.[1] || 'Company'} — ${C.experience[idx].base?.[2] || 'Role'}`;
+      }
+    };
+
     function renderExperience() {
       C.experienceHeader = C.experienceHeader || {};
       const expHeadDimEl = document.getElementById('expHeadDim');
@@ -1669,11 +1822,14 @@
       </div>
     ` : '';
 
+        const isExpanded = (idx === activeExpIdx);
         const card = document.createElement('div');
-        card.className = 'item-card';
+        card.className = `item-card collapsible ${isExpanded ? 'expanded' : ''}`;
+        card.id = `exp-card-${idx}`;
         card.innerHTML = `
-      <div class="item-head">
+      <div class="item-head" onclick="toggleExpAccordion(${idx})" title="Click to expand / collapse">
         <div class="item-title" style="display:flex;align-items:center;gap:10px">
+          <span class="item-chevron">▾</span>
           ${trimmedLogo ? `
             <div style="width:28px;height:28px;border-radius:6px;background:rgba(255,255,255,.05);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0">
               ${isSvgLogo
@@ -1683,86 +1839,88 @@
             </div>
           ` : ''}
           <span class="mono" style="color:${e.details.color}">FLIGHT // 0${idx + 1}</span>
-          <b>${e.base?.[1] || 'Company'} — ${e.base?.[2] || 'Role'}</b>
+          <b id="exp-title-${idx}">${e.base?.[1] || 'Company'} — ${e.base?.[2] || 'Role'}</b>
           <span class="item-badge" style="color:${e.base?.[3] === 'NOW' ? 'var(--green)' : 'var(--muted)'}">${e.base?.[3] || 'DONE'}</span>
         </div>
-        <div style="display:flex;gap:6px">
-          ${idx > 0 ? `<button type="button" class="btn btn-secondary btn-sm" onclick="moveExp(${idx}, -1)">↑</button>` : ''}
-          ${idx < C.experience.length - 1 ? `<button type="button" class="btn btn-secondary btn-sm" onclick="moveExp(${idx}, 1)">↓</button>` : ''}
-          <button type="button" class="btn btn-danger btn-sm" onclick="deleteExp(${idx})">Delete</button>
+        <div class="item-actions" onclick="event.stopPropagation()">
+          ${idx > 0 ? `<button type="button" class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); moveExp(${idx}, -1)" title="Move Up">↑</button>` : ''}
+          ${idx < C.experience.length - 1 ? `<button type="button" class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); moveExp(${idx}, 1)" title="Move Down">↓</button>` : ''}
+          <button type="button" class="btn btn-danger btn-sm" onclick="event.stopPropagation(); deleteExp(${idx})" title="Delete Role">Delete</button>
         </div>
       </div>
 
-      <div style="margin-bottom:14px;padding:12px;background:rgba(255,255,255,.02);border-radius:8px;border:1px solid var(--border)">
-        <b style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:8px">1. Split-Flap Board Columns</b>
-        <div class="form-grid">
-          <div class="form-group">
-            <label>Year</label>
-            <input type="text" value="${e.base?.[0] || '2026'}" oninput="C.experience[${idx}].base[0] = this.value">
-          </div>
-          <div class="form-group">
-            <label>Company Name (FLAP 1)</label>
-            <input type="text" value="${e.base?.[1] || ''}" oninput="C.experience[${idx}].base[1] = this.value; C.experience[${idx}].alt[1] = this.value; C.experience[${idx}].details.company = this.value">
-          </div>
-          <div class="form-group">
-            <label>Role (FLAP 2)</label>
-            <input type="text" value="${e.base?.[2] || ''}" oninput="C.experience[${idx}].base[2] = this.value; C.experience[${idx}].details.role = this.value">
-          </div>
-          <div class="form-group">
-            <label>Status</label>
-            <select onchange="C.experience[${idx}].base[3] = this.value; C.experience[${idx}].alt[3] = this.value; C.experience[${idx}].details.status = this.value">
-              <option value="NOW" ${e.base?.[3] === 'NOW' ? 'selected' : ''}>NOW (Active)</option>
-              <option value="DONE" ${e.base?.[3] === 'DONE' ? 'selected' : ''}>DONE (Completed)</option>
-            </select>
-          </div>
-          <div class="form-group full">
-            <label>Flap Hover Metric Text (e.g. 60+ PROJECTS SHIPPED, +27% CHECKOUT RATE)</label>
-            <input type="text" value="${e.alt?.[2] || ''}" oninput="C.experience[${idx}].alt[2] = this.value">
+      <div class="item-body">
+        <div style="margin-bottom:14px;padding:12px;background:rgba(255,255,255,.02);border-radius:8px;border:1px solid var(--border)">
+          <b style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:8px">1. Split-Flap Board Columns</b>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Year</label>
+              <input type="text" value="${e.base?.[0] || '2026'}" oninput="C.experience[${idx}].base[0] = this.value">
+            </div>
+            <div class="form-group">
+              <label>Company Name (FLAP 1)</label>
+              <input type="text" value="${e.base?.[1] || ''}" oninput="C.experience[${idx}].base[1] = this.value; C.experience[${idx}].alt[1] = this.value; C.experience[${idx}].details.company = this.value; updateExpTitle(${idx});">
+            </div>
+            <div class="form-group">
+              <label>Role (FLAP 2)</label>
+              <input type="text" value="${e.base?.[2] || ''}" oninput="C.experience[${idx}].base[2] = this.value; C.experience[${idx}].details.role = this.value; updateExpTitle(${idx});">
+            </div>
+            <div class="form-group">
+              <label>Status</label>
+              <select onchange="C.experience[${idx}].base[3] = this.value; C.experience[${idx}].alt[3] = this.value; C.experience[${idx}].details.status = this.value; const badge = document.querySelector('#exp-card-${idx} .item-badge'); if(badge){ badge.textContent = this.value; badge.style.color = this.value === 'NOW' ? 'var(--green)' : 'var(--muted)'; }">
+                <option value="NOW" ${e.base?.[3] === 'NOW' ? 'selected' : ''}>NOW (Active)</option>
+                <option value="DONE" ${e.base?.[3] === 'DONE' ? 'selected' : ''}>DONE (Completed)</option>
+              </select>
+            </div>
+            <div class="form-group full">
+              <label>Flap Hover Metric Text (e.g. 60+ PROJECTS SHIPPED, +27% CHECKOUT RATE)</label>
+              <input type="text" value="${e.alt?.[2] || ''}" oninput="C.experience[${idx}].alt[2] = this.value">
+            </div>
           </div>
         </div>
-      </div>
 
-      <div style="padding:12px;background:rgba(255,255,255,.02);border-radius:8px;border:1px solid var(--border)">
-        <b style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:8px">2. Flight Telemetry Dossier Drawer (Expanded on Click / Scroll)</b>
-        <div class="form-grid">
-          <div class="form-group">
-            <label>Period & Work Type</label>
-            <input type="text" value="${e.details.period || ''}" placeholder="2024 — 2025 · Hybrid" oninput="C.experience[${idx}].details.period = this.value">
-          </div>
-          <div class="form-group">
-            <label>Location Coordinate</label>
-            <input type="text" value="${e.details.location || 'DHAKA · REMOTE'}" oninput="C.experience[${idx}].details.location = this.value">
-          </div>
-          <div class="form-group">
-            <label>Beacon Accent Color</label>
-            <div style="display:flex;gap:6px;align-items:center">
-              <input type="color" value="${e.details.color || '#0D99FF'}" style="width:40px;height:38px;padding:2px;cursor:pointer" onchange="C.experience[${idx}].details.color = this.value; renderExperience()">
-              <input type="text" value="${e.details.color || '#0D99FF'}" oninput="C.experience[${idx}].details.color = this.value">
+        <div style="padding:12px;background:rgba(255,255,255,.02);border-radius:8px;border:1px solid var(--border)">
+          <b style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:8px">2. Flight Telemetry Dossier Drawer (Expanded on Click / Scroll)</b>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Period & Work Type</label>
+              <input type="text" value="${e.details.period || ''}" placeholder="2024 — 2025 · Hybrid" oninput="C.experience[${idx}].details.period = this.value">
             </div>
-          </div>
-          <div class="form-group">
-            <label>Company Logo (.webp / SVG / image)</label>
-            <div style="display:flex;gap:6px">
-              <input type="text" id="exp-logo-${idx}" value="${esc(e.details.logo || '')}" placeholder="/uploads/experience/logo.webp or <svg..." oninput="C.experience[${idx}].details.logo = this.value" onchange="renderExperience()">
-              <button type="button" class="btn btn-secondary btn-sm" onclick="openMediaPickerFor('exp-logo-${idx}', 'experience', ${idx}, 'logo', 'exp')">📁 Pick</button>
+            <div class="form-group">
+              <label>Location Coordinate</label>
+              <input type="text" value="${e.details.location || 'DHAKA · REMOTE'}" oninput="C.experience[${idx}].details.location = this.value">
             </div>
-            <div class="dropzone" data-type="experience" data-target="exp-logo-${idx}" data-idx="${idx}" data-field="logo" data-section="exp" style="padding:10px;margin-top:4px">
-              <p>Upload Company Logo (Auto-WebP)</p>
-              <input type="file" accept="image/*">
+            <div class="form-group">
+              <label>Beacon Accent Color</label>
+              <div style="display:flex;gap:6px;align-items:center">
+                <input type="color" value="${e.details.color || '#0D99FF'}" style="width:40px;height:38px;padding:2px;cursor:pointer" onchange="C.experience[${idx}].details.color = this.value; renderExperience()">
+                <input type="text" value="${e.details.color || '#0D99FF'}" oninput="C.experience[${idx}].details.color = this.value">
+              </div>
             </div>
-            ${logoPreviewHtml}
-          </div>
-          <div class="form-group full">
-            <label>Short Role Description</label>
-            <textarea rows="2" placeholder="Engineered responsive client web apps and high-performance interactive interfaces..." oninput="C.experience[${idx}].details.desc = this.value">${e.details.desc || ''}</textarea>
-          </div>
-          <div class="form-group full">
-            <label>Key Deliverable Bullets (One per line)</label>
-            <textarea rows="3" placeholder="Shipped 60+ modular web components&#10;Reduced initial bundle load time by 35%" onchange="C.experience[${idx}].details.dels = this.value.split('\n').map(s=>s.trim()).filter(Boolean)">${e.details.dels.join('\n')}</textarea>
-          </div>
-          <div class="form-group full">
-            <label>Core Tech Stack Tags (Comma-separated)</label>
-            <input type="text" value="${e.details.stack.join(', ')}" onchange="C.experience[${idx}].details.stack = this.value.split(',').map(s=>s.trim()).filter(Boolean)">
+            <div class="form-group">
+              <label>Company Logo (.webp / SVG / image)</label>
+              <div style="display:flex;gap:6px">
+                <input type="text" id="exp-logo-${idx}" value="${esc(e.details.logo || '')}" placeholder="/uploads/experience/logo.webp or <svg..." oninput="C.experience[${idx}].details.logo = this.value" onchange="renderExperience()">
+                <button type="button" class="btn btn-secondary btn-sm" onclick="openMediaPickerFor('exp-logo-${idx}', 'experience', ${idx}, 'logo', 'exp')">📁 Pick</button>
+              </div>
+              <div class="dropzone" data-type="experience" data-target="exp-logo-${idx}" data-idx="${idx}" data-field="logo" data-section="exp" style="padding:10px;margin-top:4px">
+                <p>Upload Company Logo (Auto-WebP)</p>
+                <input type="file" accept="image/*">
+              </div>
+              ${logoPreviewHtml}
+            </div>
+            <div class="form-group full">
+              <label>Short Role Description</label>
+              <textarea rows="2" placeholder="Engineered responsive client web apps and high-performance interactive interfaces..." oninput="C.experience[${idx}].details.desc = this.value">${e.details.desc || ''}</textarea>
+            </div>
+            <div class="form-group full">
+              <label>Key Deliverable Bullets (One per line)</label>
+              <textarea rows="3" placeholder="Shipped 60+ modular web components&#10;Reduced initial bundle load time by 35%" onchange="C.experience[${idx}].details.dels = this.value.split('\n').map(s=>s.trim()).filter(Boolean)">${e.details.dels.join('\n')}</textarea>
+            </div>
+            <div class="form-group full">
+              <label>Core Tech Stack Tags (Comma-separated)</label>
+              <input type="text" value="${e.details.stack.join(', ')}" onchange="C.experience[${idx}].details.stack = this.value.split(',').map(s=>s.trim()).filter(Boolean)">
+            </div>
           </div>
         </div>
       </div>
@@ -1778,6 +1936,11 @@
       const temp = C.experience[idx];
       C.experience[idx] = C.experience[target];
       C.experience[target] = temp;
+      if (activeExpIdx === idx) {
+        activeExpIdx = target;
+      } else if (activeExpIdx === target) {
+        activeExpIdx = idx;
+      }
       renderExperience();
       setupDropzones();
     };
@@ -1785,6 +1948,11 @@
     window.deleteExp = (idx) => {
       if (confirm(`Delete role "${C.experience[idx].base?.[1]}"?`)) {
         C.experience.splice(idx, 1);
+        if (activeExpIdx === idx) {
+          activeExpIdx = null;
+        } else if (activeExpIdx !== null && activeExpIdx > idx) {
+          activeExpIdx--;
+        }
         renderExperience();
         setupDropzones();
       }
@@ -1809,8 +1977,14 @@
           stack: ['Next.js', 'TypeScript', 'Node.js', 'PostgreSQL']
         }
       });
+      activeExpIdx = C.experience.length - 1; // Open newly added role
       renderExperience();
       setupDropzones();
+      const cards = document.querySelectorAll('#expList .item-card');
+      const lastCard = cards[cards.length - 1];
+      if (lastCard) {
+        lastCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
     });
 
     // TAB 4: About & Tech Stack
