@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { toast } from 'sonner';
 import {
   Image as ImageIcon,
   Upload,
@@ -128,12 +129,13 @@ export default function MediaPickerModal({
         } else {
           await fetchMedia(selectedCategory, searchQuery);
         }
+        toast.success('File uploaded');
         setActiveTab('library');
       } else {
-        alert('Upload failed: ' + (data.error || 'Unknown error'));
+        toast.error('Upload failed: ' + (data.error || 'Unknown error'));
       }
     } catch (err) {
-      alert('Upload error: ' + err.message);
+      toast.error('Upload error: ' + err.message);
     } finally {
       setUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
@@ -147,13 +149,14 @@ export default function MediaPickerModal({
       const res = await fetch(`/api/media/${id}`, { method: 'DELETE' });
       const data = await res.json();
       if (data.success) {
+        toast.success('Media file deleted');
         if (selectedFileUrl === files.find((f) => f.id === id)?.url) {
           setSelectedFileUrl('');
         }
         fetchMedia();
       }
     } catch (err) {
-      alert('Delete failed: ' + err.message);
+      toast.error('Delete failed: ' + err.message);
     }
   };
 
@@ -161,14 +164,14 @@ export default function MediaPickerModal({
     let finalUrl = selectedFileUrl;
     if (activeTab === 'url') {
       if (!directUrl.trim()) {
-        alert('Please enter an image URL');
+        toast.error('Please enter an image URL');
         return;
       }
       finalUrl = directUrl.trim();
     }
 
     if (!finalUrl) {
-      alert('Please select an image from the library or upload a new file');
+      toast.error('Please select an image from the library or upload a new file');
       return;
     }
 

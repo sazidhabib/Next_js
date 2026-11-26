@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
+import { toast } from 'sonner';
 import { useAuth } from '@/context/AuthContext';
 import {
   User,
@@ -185,12 +186,12 @@ export default function EmployeeDashboardView({ onNavigate }) {
     if (!employeeId) return;
 
     if (!newLeave.startDate || !newLeave.endDate) {
-      alert('Please select both start and end date');
+      toast.error('Please select both start and end date');
       return;
     }
 
     if (modalConflict.isBlocked) {
-      alert('Leave booking is currently blocked: 2 or more colleagues already have approved leave during this period.');
+      toast.error('Leave booking is currently blocked: 2 or more colleagues already have approved leave during this period.');
       return;
     }
 
@@ -210,6 +211,7 @@ export default function EmployeeDashboardView({ onNavigate }) {
 
       const data = await res.json();
       if (data.success) {
+        toast.success('Leave request submitted successfully');
         setShowLeaveModal(false);
         setNewLeave({
           leaveType: 'ANNUAL',
@@ -219,10 +221,10 @@ export default function EmployeeDashboardView({ onNavigate }) {
         });
         fetchEmployeeData();
       } else {
-        alert(data.error || 'Failed to submit leave request');
+        toast.error(data.error || 'Failed to submit leave request');
       }
     } catch (err) {
-      alert('Error submitting leave: ' + err.message);
+      toast.error('Error submitting leave: ' + err.message);
     } finally {
       setIsSubmittingLeave(false);
     }

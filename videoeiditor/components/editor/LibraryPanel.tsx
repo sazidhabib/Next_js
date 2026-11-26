@@ -2,6 +2,7 @@
 
 import React, { useState, useRef } from 'react';
 import { useEditorStore, editorStore, MediaAsset } from '../../store/editorStore';
+import { probeMediaFile } from '../../lib/media/persistence';
 
 interface LibraryPanelProps {
   activeTab: string;
@@ -13,6 +14,8 @@ export default function LibraryPanel({ activeTab, setActiveTab }: LibraryPanelPr
   const playheadTime = useEditorStore((state) => state.playheadTime);
   const [searchQuery, setSearchQuery] = useState('');
   const [transcribing, setTranscribing] = useState(false);
+  const [transcribeNotice, setTranscribeNotice] = useState<string | null>(null);
+  const [analyzingAssetId, setAnalyzingAssetId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const filteredAssets = mediaAssets.filter((asset) =>
@@ -23,36 +26,42 @@ export default function LibraryPanel({ activeTab, setActiveTab }: LibraryPanelPr
     fileInputRef.current?.click();
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const [importing, setImporting] = useState(false);
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
-      const type = file.type.startsWith('video/')
-        ? 'video'
-        : file.type.startsWith('audio/')
-        ? 'audio'
-        : 'image';
+    setImporting(true);
+    try {
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const fileUrl = URL.createObjectURL(file);
+        const probed = await probeMediaFile(file, fileUrl);
 
-      const fileUrl = URL.createObjectURL(file);
+        const assetId = editorStore.addMediaAsset(
+          {
+            name: file.name,
+            type: probed.type,
+            url: fileUrl,
+            duration: probed.duration,
+            size: `${(file.size / (1024 * 1024)).toFixed(1)} MB`,
+            thumbnail: probed.thumbnail,
+            isLocalFile: true,
+            mimeType: file.type,
+          },
+          file
+        );
 
-      // Setup dummy duration for visual testing (video = 10s, audio = 30s, image = 5s)
-      const duration = type === 'video' ? 10 : type === 'audio' ? 30 : 5;
-
-      editorStore.addMediaAsset({
-        name: file.name,
-        type,
-        url: fileUrl,
-        duration,
-        size: `${(file.size / (1024 * 1024)).toFixed(1)} MB`,
-        thumbnail:
-          type === 'video'
-            ? 'https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?auto=format&fit=crop&w=300&q=80'
-            : type === 'audio'
-            ? 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=300&q=80'
-            : fileUrl,
-      });
+        // Pre-stage local file onto server workspace for FFmpeg rendering
+        const uploadForm = new FormData();
+        uploadForm.append('assetId', assetId);
+        uploadForm.append('file', file, file.name);
+        void fetch('/api/media/upload', { method: 'POST', body: uploadForm }).catch(() => {});
+      }
+    } finally {
+      setImporting(false);
+      e.target.value = '';
     }
   };
 
@@ -66,39 +75,46 @@ export default function LibraryPanel({ activeTab, setActiveTab }: LibraryPanelPr
     e.dataTransfer.effectAllowed = 'copy';
   };
 
-  const handleAutoTranscribe = () => {
+  const handleAutoTranscribe = async () => {
     if (transcribing) return;
     setTranscribing(true);
+    setTranscribeNotice('Running local Whisper speech-to-text...');
 
-    // Simulate speech-to-text processing for 2 seconds
-    setTimeout(() => {
-      // Create subtitles at specific intervals on track V3 (Text)
-      const subTimings = [
-        { time: 1.0, duration: 3.5, text: 'Hey guys! Welcome back to my editing channel.' },
-        { time: 5.5, duration: 4.0, text: 'Today we are looking at this beautiful urban cyber city footage.' },
-        { time: 10.0, duration: 4.5, text: 'Make sure to hit subscribe and check the links below.' },
-      ];
-
-      const subClips = subTimings.map((sub, index) => ({
-        name: `Subtitle ${index + 1}`,
-        type: 'text' as const,
-        startTime: sub.time,
-        duration: sub.duration,
-        text: sub.text,
-        opacity: 100,
-        scale: 100,
-        positionX: 0,
-        positionY: 80, // Put it at the bottom of video preview
-        rotation: 0,
-        color: 'bg-black/60 border border-white/20 text-white px-2 py-0.5 rounded text-center font-bold tracking-tight',
-      }));
-
-      // Add to track v3 or appropriate text/video track
-      editorStore.addCustomClips('v3', subClips);
-
-      editorStore.setPlayheadTime(1.0); // jump playhead to first subtitle
+    try {
+      const selectedId = editorStore.getState().selectedClipId;
+      const result = await editorStore.generateCaptionsFromTimeline(selectedId);
+      if (result.addedCount === 0) {
+        setTranscribeNotice('No spoken words detected in the audio stream.');
+      } else {
+        setTranscribeNotice(
+          `Added ${result.addedCount} synced caption${result.addedCount === 1 ? '' : 's'} (${result.engine || 'Whisper'}).`
+        );
+      }
+    } catch (err) {
+      setTranscribeNotice(err instanceof Error ? err.message : 'Transcription failed');
+    } finally {
       setTranscribing(false);
-    }, 2000);
+    }
+  };
+
+  const handleAnalyzeAsset = async (e: React.MouseEvent, asset: MediaAsset) => {
+    e.stopPropagation();
+    if (analyzingAssetId) return;
+    setAnalyzingAssetId(asset.id);
+    try {
+      await editorStore.analyzeMediaAsset(asset.id, {
+        assetUrl: asset.url,
+        assetName: asset.name,
+        includeTranscript: false,
+        includeScenes: asset.type === 'video',
+        includeSilences: true,
+        includeWaveform: true,
+      });
+    } catch (err) {
+      console.error('Asset analysis failed:', err);
+    } finally {
+      setAnalyzingAssetId(null);
+    }
   };
 
   return (
@@ -159,7 +175,7 @@ export default function LibraryPanel({ activeTab, setActiveTab }: LibraryPanelPr
                   <div className="aspect-video bg-surface-container-highest rounded border border-outline-variant overflow-hidden relative">
                     <img className="w-full h-full object-cover" src={asset.thumbnail} alt={asset.name} />
                     <span className="absolute bottom-1 right-1 px-1 bg-black/70 text-[9px] rounded font-mono-data">
-                      {Math.floor(asset.duration / 60)}:{(asset.duration % 60).toString().padStart(2, '0')}
+                      {Math.floor(asset.duration / 60)}:{Math.floor(asset.duration % 60).toString().padStart(2, '0')}
                     </span>
 
                     {/* Hover Overlay */}
@@ -171,7 +187,30 @@ export default function LibraryPanel({ activeTab, setActiveTab }: LibraryPanelPr
                       >
                         <span className="material-symbols-outlined text-sm block font-bold font-sans">add</span>
                       </button>
+                      {asset.type !== 'image' && (
+                        <button
+                          onClick={(e) => handleAnalyzeAsset(e, asset)}
+                          className="bg-surface text-on-surface w-8 h-8 rounded-full flex items-center justify-center border border-outline-variant hover:border-secondary hover:text-secondary transition-colors cursor-pointer"
+                          title="Analyze silences, scenes & waveform"
+                        >
+                          <span
+                            className={`material-symbols-outlined text-sm block font-sans ${
+                              analyzingAssetId === asset.id ? 'animate-spin' : ''
+                            }`}
+                          >
+                            {analyzingAssetId === asset.id ? 'sync' : 'graphic_eq'}
+                          </span>
+                        </button>
+                      )}
                     </div>
+                    {asset.analysis && (
+                      <span
+                        className="absolute top-1 left-1 px-1 py-0.5 bg-secondary/85 text-on-secondary text-[8px] rounded font-mono-data font-bold"
+                        title={`Silences: ${asset.analysis.silences.length} • Scenes: ${asset.analysis.scenes.length}`}
+                      >
+                        AI
+                      </span>
+                    )}
                   </div>
                   <span className="text-[10px] mt-1 truncate text-on-surface-variant font-medium group-hover:text-primary transition-colors">
                     {asset.name}
@@ -182,8 +221,12 @@ export default function LibraryPanel({ activeTab, setActiveTab }: LibraryPanelPr
               {/* Import placeholder */}
               <div onClick={handleImportClick} className="flex flex-col cursor-pointer">
                 <div className="aspect-video bg-surface-container-high rounded border border-dashed border-outline-variant hover:border-primary flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors">
-                  <span className="material-symbols-outlined block text-lg font-bold font-sans">add</span>
-                  <span className="text-[9px] font-label-caps uppercase mt-1">Import file</span>
+                  <span className="material-symbols-outlined block text-lg font-bold font-sans">
+                    {importing ? 'sync' : 'add'}
+                  </span>
+                  <span className="text-[9px] font-label-caps uppercase mt-1">
+                    {importing ? 'Probing...' : 'Import file'}
+                  </span>
                 </div>
               </div>
               <input
@@ -382,7 +425,7 @@ export default function LibraryPanel({ activeTab, setActiveTab }: LibraryPanelPr
                 <span className="text-xs font-bold uppercase font-label-caps">AI Audio Transcription</span>
               </div>
               <p className="text-[11px] text-on-surface-variant leading-relaxed font-sans">
-                Scan audio tracks A1/A2 and generate automatic synchronized caption subtitles instantly using client speech engines.
+                Runs local Whisper speech recognition on your selected clip (or A1/V1 tracks) via FFmpeg 16kHz PCM extraction and places synced captions on V3.
               </p>
               <button
                 onClick={handleAutoTranscribe}
@@ -396,7 +439,7 @@ export default function LibraryPanel({ activeTab, setActiveTab }: LibraryPanelPr
                 {transcribing ? (
                   <>
                     <span className="material-symbols-outlined text-xs animate-spin block font-sans">sync</span>
-                    <span>Transcribing Audio...</span>
+                    <span>Transcribing Speech...</span>
                   </>
                 ) : (
                   <>
@@ -405,6 +448,11 @@ export default function LibraryPanel({ activeTab, setActiveTab }: LibraryPanelPr
                   </>
                 )}
               </button>
+              {transcribeNotice && (
+                <p className="text-[10px] font-mono-data text-secondary leading-snug">
+                  {transcribeNotice}
+                </p>
+              )}
             </div>
 
             {/* Text elements list */}

@@ -1,7 +1,12 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  serverExternalPackages: [
+    "ffmpeg-static",
+    "ffprobe-static",
+    "@huggingface/transformers",
+    "onnxruntime-node",
+  ],
 };
 
 export default nextConfig;

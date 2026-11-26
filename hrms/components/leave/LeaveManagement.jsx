@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
+import { toast } from 'sonner';
 import {
   CalendarDays,
   CheckCircle,
@@ -269,14 +270,13 @@ export default function LeaveManagement({ employees = [], onUpdated }) {
   const handleSave = async (e) => {
     e.preventDefault();
     if (!canRequestLeave && !canEditLeave) {
-      alert('You do not have permission to submit or edit leave requests.');
+      toast.error('You do not have permission to submit or edit leave requests.');
       return;
     }
     if (dateConflicts.isBlocked) {
-      alert(
-        `Booking Blocked: 2 employees already have approved leave during this date period (${form.startDate} to ${form.endDate}):\n` +
-        dateConflicts.conflictingEmployees.map((c) => `• ${c.employeeName} (${c.startDate} to ${c.endDate})`).join('\n') +
-        '\n\nMaximum 2 concurrent employees allowed. A 3rd leave cannot be booked for these dates.'
+      toast.error(
+        `Booking Blocked: 2 employees already have approved leave during this date period (${form.startDate} to ${form.endDate}): ` +
+        dateConflicts.conflictingEmployees.map((c) => `${c.employeeName} (${c.startDate} to ${c.endDate})`).join(', ')
       );
       return;
     }
@@ -304,22 +304,22 @@ export default function LeaveManagement({ employees = [], onUpdated }) {
       });
       const data = await res.json();
       if (data.success) {
-        alert(isEdit ? 'Leave request updated' : 'Leave request created');
+        toast.success(isEdit ? 'Leave request updated' : 'Leave request created');
         setActiveSubTab('requests');
         setEditingLeave(null);
         fetchLeaves();
         if (onUpdated) onUpdated();
       } else {
-        alert('Error: ' + (data.error || 'Operation failed'));
+        toast.error(data.error || 'Operation failed');
       }
     } catch (err) {
-      alert('Submit failed: ' + err.message);
+      toast.error('Submit failed: ' + err.message);
     }
   };
 
   const handleQuickStatus = async (id, status) => {
     if (!canApproveLeave) {
-      alert('You do not have permission to approve or reject leave requests.');
+      toast.error('You do not have permission to approve or reject leave requests.');
       return;
     }
     if ((status || '').toUpperCase() === 'APPROVED') {
@@ -348,8 +348,8 @@ export default function LeaveManagement({ employees = [], onUpdated }) {
 
         if (distinctMap.size >= 2) {
           const names = Array.from(distinctMap.values()).join(', ');
-          alert(
-            `Approval Blocked!\n\n2 employees already have approved leave during this date period (${targetLeave.startDate} to ${targetLeave.endDate}):\n• ${names}\n\nMaximum 2 concurrent employees allowed per date period.`
+          toast.error(
+            `Approval Blocked: 2 employees (${names}) already have approved leave during ${targetLeave.startDate} to ${targetLeave.endDate}.`
           );
           return;
         }
@@ -364,19 +364,20 @@ export default function LeaveManagement({ employees = [], onUpdated }) {
       });
       const data = await res.json();
       if (data.success) {
+        toast.success(`Leave request ${status.toLowerCase()}`);
         fetchLeaves();
         if (onUpdated) onUpdated();
       } else {
-        alert('Status update failed: ' + (data.error || 'Unknown error'));
+        toast.error('Status update failed: ' + (data.error || 'Unknown error'));
       }
     } catch (err) {
-      alert('Status update failed: ' + err.message);
+      toast.error('Status update failed: ' + err.message);
     }
   };
 
   const handleDelete = async (id) => {
     if (!canDeleteLeave) {
-      alert('You do not have permission to delete leave requests.');
+      toast.error('You do not have permission to delete leave requests.');
       return;
     }
     if (!confirm('Cancel this leave request?')) return;
@@ -384,11 +385,14 @@ export default function LeaveManagement({ employees = [], onUpdated }) {
       const res = await fetch(`/api/leave/${id}`, { method: 'DELETE' });
       const data = await res.json();
       if (data.success) {
+        toast.success('Leave request cancelled');
         fetchLeaves();
         if (onUpdated) onUpdated();
+      } else {
+        toast.error(data.error || 'Delete failed');
       }
     } catch (err) {
-      alert('Delete failed');
+      toast.error('Delete failed');
     }
   };
 

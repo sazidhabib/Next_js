@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { initDb, VisaType, ImmigrationRecord } from '@/lib/db/models/index';
 import { requirePermission } from '@/lib/auth/rbac';
+import { apiErrorResponse } from '@/lib/apiError';
 
 export async function GET(request) {
   try {
@@ -37,7 +38,7 @@ export async function POST(request) {
     const visaType = await VisaType.create(payload);
     return NextResponse.json({ success: true, visaType }, { status: 201 });
   } catch (error) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 400 });
+    return apiErrorResponse(error, { context: 'VisaTypes POST' });
   }
 }
 

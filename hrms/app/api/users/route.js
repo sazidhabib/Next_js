@@ -8,6 +8,7 @@ import {
   ensureDefaultAdminExists,
 } from '@/lib/auth/systemAccounts';
 import { requirePermission } from '@/lib/auth/rbac';
+import { apiErrorResponse } from '@/lib/apiError';
 
 export async function GET(request) {
   try {
@@ -109,6 +110,6 @@ export async function POST(request) {
 
     return NextResponse.json({ success: true, user: created }, { status: 201 });
   } catch (error) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 400 });
+    return apiErrorResponse(error, { context: 'Users POST' });
   }
 }

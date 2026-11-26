@@ -1,40 +1,55 @@
 'use client';
 
-import React, { useRef } from 'react';
-import { useEditorStore, editorStore, getClipFromState } from '../../store/editorStore';
+import React, { useRef, useState } from 'react';
+import { useEditorStore, editorStore, getClipFromState, TimelineClip } from '../../store/editorStore';
 
 export default function InspectorPanel() {
   const selectedClip = useEditorStore((state) => getClipFromState(state, state.selectedClipId));
+  const mediaAssets = useEditorStore((state) => state.mediaAssets);
   const selectedClipId = selectedClip?.id || null;
+  const [aiBusy, setAiBusy] = useState<'analyze' | 'silence' | 'captions' | null>(null);
+  const [aiStatusMsg, setAiStatusMsg] = useState<string | null>(null);
+
+  const selectedAnalysis = selectedClip?.mediaAssetId
+    ? mediaAssets.find((a) => a.id === selectedClip.mediaAssetId)?.analysis
+    : undefined;
 
   const startXRef = useRef(0);
   const startValRef = useRef(0);
 
-  const handleUpdate = (updates: any) => {
+  const handleUpdate = (updates: Partial<TimelineClip>, recordHistory = true) => {
     if (!selectedClipId) return;
-    editorStore.updateClip(selectedClipId, updates);
+    editorStore.updateClip(selectedClipId, updates, { recordHistory });
   };
 
   const handleScrubStart = (e: React.MouseEvent, propName: string, initialVal: number, step = 1) => {
     e.preventDefault();
+    editorStore.pushHistoryCheckpoint();
     startXRef.current = e.clientX;
     startValRef.current = initialVal;
 
     const handleMouseMove = (moveEvent: MouseEvent) => {
       const diff = moveEvent.clientX - startXRef.current;
-      const newVal = parseFloat((startValRef.current + diff * step).toFixed(1));
-      
-      // Clamp specific properties
+      const newVal = parseFloat((startValRef.current + diff * step).toFixed(2));
+
       if (propName === 'opacity') {
-        handleUpdate({ opacity: Math.max(0, Math.min(100, newVal)) });
+        handleUpdate({ opacity: Math.max(0, Math.min(100, Math.round(newVal))) }, false);
       } else if (propName === 'scale') {
-        handleUpdate({ scale: Math.max(10, Math.min(200, newVal)) });
+        handleUpdate({ scale: Math.max(10, Math.min(200, newVal)) }, false);
       } else if (propName === 'volume') {
-        handleUpdate({ volume: Math.max(0, Math.min(100, newVal)) });
+        handleUpdate({ volume: Math.max(0, Math.min(100, Math.round(newVal))) }, false);
       } else if (propName === 'rotation') {
-        handleUpdate({ rotation: newVal % 360 });
+        handleUpdate({ rotation: newVal % 360 }, false);
+      } else if (propName === 'playbackRate') {
+        handleUpdate({ playbackRate: Math.max(0.25, Math.min(4, newVal)) }, false);
+      } else if (propName === 'sourceStart') {
+        handleUpdate({ sourceStart: Math.max(0, newVal) }, false);
+      } else if (propName === 'startTime') {
+        handleUpdate({ startTime: Math.max(0, newVal) }, false);
+      } else if (propName === 'duration') {
+        handleUpdate({ duration: Math.max(0.2, newVal) }, false);
       } else {
-        handleUpdate({ [propName]: newVal });
+        handleUpdate({ [propName]: newVal } as Partial<TimelineClip>, false);
       }
     };
 
@@ -62,6 +77,68 @@ export default function InspectorPanel() {
       handleUpdate({
         appliedEffects: [...currentEffects, 'Chromatic Aberration'],
       });
+    }
+  };
+
+  const handleAnalyzeSelected = async () => {
+    if (!selectedClip || aiBusy) return;
+    setAiBusy('analyze');
+    setAiStatusMsg('Probing silences, scenes & loudness...');
+    try {
+      const assetId = selectedClip.mediaAssetId || selectedClip.id;
+      const analysis = await editorStore.analyzeMediaAsset(assetId, {
+        assetUrl: selectedClip.assetUrl,
+        assetName: selectedClip.name,
+        includeTranscript: false,
+        includeScenes: selectedClip.type === 'video',
+        includeSilences: true,
+        includeWaveform: true,
+      });
+      setAiStatusMsg(
+        `Silences: ${analysis.silences.length} • Scenes: ${analysis.scenes.length}${
+          analysis.loudnessLufs !== undefined ? ` • ${analysis.loudnessLufs} LUFS` : ''
+        }`
+      );
+    } catch (err) {
+      setAiStatusMsg(err instanceof Error ? err.message : 'Analysis failed');
+    } finally {
+      setAiBusy(null);
+    }
+  };
+
+  const handleCutSilences = async () => {
+    if (!selectedClip || aiBusy) return;
+    setAiBusy('silence');
+    setAiStatusMsg('Detecting & cutting dead air...');
+    try {
+      const res = await editorStore.removeSilencesFromClip(selectedClip.id);
+      if (res.removedCount === 0) {
+        setAiStatusMsg('No dead-air gaps (>= 0.5s) found.');
+      } else {
+        setAiStatusMsg(`Removed silences — saved ${res.savedSeconds.toFixed(1)}s.`);
+      }
+    } catch (err) {
+      setAiStatusMsg(err instanceof Error ? err.message : 'Silence removal failed');
+    } finally {
+      setAiBusy(null);
+    }
+  };
+
+  const handleGenerateClipCaptions = async () => {
+    if (!selectedClip || aiBusy) return;
+    setAiBusy('captions');
+    setAiStatusMsg('Running Whisper speech-to-text...');
+    try {
+      const res = await editorStore.generateCaptionsFromTimeline(selectedClip.id);
+      setAiStatusMsg(
+        res.addedCount > 0
+          ? `Generated ${res.addedCount} caption clips on V3.`
+          : 'No speech detected in clip.'
+      );
+    } catch (err) {
+      setAiStatusMsg(err instanceof Error ? err.message : 'Caption generation failed');
+    } finally {
+      setAiBusy(null);
     }
   };
 
@@ -99,13 +176,85 @@ export default function InspectorPanel() {
       <div className="flex-1 overflow-y-auto custom-scrollbar p-3 space-y-6">
         
         {/* Info Clip Card */}
-        <div className="bg-surface-container-low border border-outline-variant rounded-lg p-3">
-          <div className="text-[10px] text-primary uppercase font-bold font-mono-data mb-1">
-            {selectedClip.type} CLIP
+        <div className="bg-surface-container-low border border-outline-variant rounded-lg p-3 space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] text-primary uppercase font-bold font-mono-data">
+              {selectedClip.type} CLIP
+            </span>
+            <span className="text-[10px] font-mono-data text-on-surface-variant">
+              {(selectedClip.playbackRate ?? 1).toFixed(2)}x
+            </span>
           </div>
           <div className="font-semibold text-xs text-on-surface truncate">
             {selectedClip.name}
           </div>
+          <div className="flex gap-2 pt-1">
+            <button
+              onClick={() => editorStore.splitAtPlayhead()}
+              className="flex-1 py-1 px-2 text-[10px] font-label-caps uppercase bg-surface-container-high border border-outline-variant hover:border-primary hover:text-primary rounded cursor-pointer transition-colors"
+              title="Split selected clip at playhead (S)"
+            >
+              Split
+            </button>
+            <button
+              onClick={() => editorStore.rippleDeleteClip(selectedClip.id)}
+              className="flex-1 py-1 px-2 text-[10px] font-label-caps uppercase bg-surface-container-high border border-outline-variant hover:border-error hover:text-error rounded cursor-pointer transition-colors"
+              title="Delete clip and close timeline gap"
+            >
+              Ripple Del
+            </button>
+          </div>
+        </div>
+
+        {/* Timing & Speed */}
+        <div className="space-y-2.5 pt-2 border-t border-outline-variant">
+          <span className="font-label-caps text-[10px] text-on-surface-variant uppercase font-bold block">
+            Timing & Speed
+          </span>
+          <div className="flex items-center justify-between text-xs">
+            <span className="text-on-surface-variant">Timeline Start</span>
+            <span
+              onMouseDown={(e) => handleScrubStart(e, 'startTime', selectedClip.startTime, 0.05)}
+              className="text-primary scrubbable font-mono-data cursor-ew-resize hover:text-[#adc6ff]"
+            >
+              {selectedClip.startTime.toFixed(2)}s
+            </span>
+          </div>
+          <div className="flex items-center justify-between text-xs">
+            <span className="text-on-surface-variant">Duration</span>
+            <span
+              onMouseDown={(e) => handleScrubStart(e, 'duration', selectedClip.duration, 0.05)}
+              className="text-primary scrubbable font-mono-data cursor-ew-resize hover:text-[#adc6ff]"
+            >
+              {selectedClip.duration.toFixed(2)}s
+            </span>
+          </div>
+          {(isVideo || isAudio) && (
+            <>
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-on-surface-variant">Source In</span>
+                <span
+                  onMouseDown={(e) =>
+                    handleScrubStart(e, 'sourceStart', selectedClip.sourceStart ?? 0, 0.05)
+                  }
+                  className="text-primary scrubbable font-mono-data cursor-ew-resize hover:text-[#adc6ff]"
+                >
+                  {(selectedClip.sourceStart ?? 0).toFixed(2)}s
+                </span>
+              </div>
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-on-surface-variant">Speed</span>
+                <span
+                  onMouseDown={(e) =>
+                    handleScrubStart(e, 'playbackRate', selectedClip.playbackRate ?? 1, 0.02)
+                  }
+                  className="text-primary scrubbable font-mono-data cursor-ew-resize hover:text-[#adc6ff]"
+                >
+                  {(selectedClip.playbackRate ?? 1).toFixed(2)}x
+                </span>
+              </div>
+            </>
+          )}
         </div>
 
         {/* Text Input Panel for titles */}
@@ -213,6 +362,24 @@ export default function InspectorPanel() {
               </div>
               
               <div className="flex items-center justify-between text-xs pt-1">
+                <span className="text-on-surface-variant">Transition In</span>
+                <select
+                  value={selectedClip.transitionIn || 'none'}
+                  onChange={(e) =>
+                    handleUpdate({
+                      transitionIn: e.target.value as 'none' | 'fade' | 'dissolve',
+                      transitionDuration: selectedClip.transitionDuration ?? 0.35,
+                    })
+                  }
+                  className="bg-surface-container-high border border-outline-variant px-2 py-0.5 rounded text-[10px] text-on-surface outline-none cursor-pointer"
+                >
+                  <option value="none">None</option>
+                  <option value="fade">Fade In</option>
+                  <option value="dissolve">Dissolve</option>
+                </select>
+              </div>
+
+              <div className="flex items-center justify-between text-xs pt-1">
                 <span className="text-on-surface-variant">Blend Mode</span>
                 <div className="bg-surface-container-high border border-outline-variant px-2 py-0.5 rounded text-[10px] flex items-center gap-1">
                   <span>{selectedClip.blendMode || 'Normal'}</span>
@@ -252,6 +419,71 @@ export default function InspectorPanel() {
                 ></div>
               </div>
             </div>
+          </div>
+        )}
+
+        {/* AI Media Intelligence (video & audio) */}
+        {(isVideo || isAudio) && (
+          <div className="pt-4 border-t border-outline-variant space-y-2.5">
+            <div className="flex items-center justify-between">
+              <span className="font-label-caps text-[10px] text-secondary uppercase font-bold">
+                AI Media Intelligence
+              </span>
+              {selectedAnalysis?.loudnessLufs !== undefined && (
+                <span className="text-[10px] font-mono-data text-on-surface-variant">
+                  {selectedAnalysis.loudnessLufs} LUFS
+                </span>
+              )}
+            </div>
+
+            {selectedAnalysis && (
+              <div className="grid grid-cols-3 gap-1.5 text-center text-[10px] font-mono-data">
+                <div className="bg-surface-container-low border border-outline-variant rounded py-1">
+                  <div className="text-primary font-bold">{selectedAnalysis.silences.length}</div>
+                  <div className="text-[8px] text-outline uppercase">Silences</div>
+                </div>
+                <div className="bg-surface-container-low border border-outline-variant rounded py-1">
+                  <div className="text-secondary font-bold">{selectedAnalysis.scenes.length}</div>
+                  <div className="text-[8px] text-outline uppercase">Scenes</div>
+                </div>
+                <div className="bg-surface-container-low border border-outline-variant rounded py-1">
+                  <div className="text-tertiary font-bold">{selectedAnalysis.words.length}</div>
+                  <div className="text-[8px] text-outline uppercase">Words</div>
+                </div>
+              </div>
+            )}
+
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                onClick={handleAnalyzeSelected}
+                disabled={aiBusy !== null || !selectedClip.assetUrl}
+                className="py-1.5 px-2 text-[10px] font-label-caps uppercase bg-surface-container-high border border-outline-variant hover:border-secondary hover:text-secondary rounded cursor-pointer transition-colors disabled:opacity-50"
+              >
+                {aiBusy === 'analyze' ? 'Analyzing...' : 'Analyze'}
+              </button>
+              <button
+                onClick={handleCutSilences}
+                disabled={aiBusy !== null || !selectedClip.assetUrl}
+                className="py-1.5 px-2 text-[10px] font-label-caps uppercase bg-surface-container-high border border-outline-variant hover:border-primary hover:text-primary rounded cursor-pointer transition-colors disabled:opacity-50"
+                title="Remove silent dead-air gaps using FFmpeg silencedetect"
+              >
+                {aiBusy === 'silence' ? 'Cutting...' : 'Cut Silences'}
+              </button>
+            </div>
+
+            <button
+              onClick={handleGenerateClipCaptions}
+              disabled={aiBusy !== null || !selectedClip.assetUrl}
+              className="w-full py-1.5 px-2 text-[10px] font-label-caps uppercase bg-primary/15 border border-primary/30 text-primary hover:bg-primary hover:text-on-primary rounded cursor-pointer transition-colors font-bold disabled:opacity-50"
+            >
+              {aiBusy === 'captions' ? 'Transcribing...' : 'Auto Captions (Whisper)'}
+            </button>
+
+            {aiStatusMsg && (
+              <div className="text-[10px] font-mono-data text-on-surface-variant leading-snug">
+                {aiStatusMsg}
+              </div>
+            )}
           </div>
         )}
 

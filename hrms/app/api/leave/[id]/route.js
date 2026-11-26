@@ -7,6 +7,7 @@ import {
 } from '@/lib/db/models/index';
 
 import { requirePermission, hasSessionPermission } from '@/lib/auth/rbac';
+import { apiErrorResponse } from '@/lib/apiError';
 
 export async function GET(request, { params }) {
   try {
@@ -129,7 +130,7 @@ export async function PUT(request, { params }) {
 
     return NextResponse.json({ success: true, leaveRequest: updated });
   } catch (error) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 400 });
+    return apiErrorResponse(error, { context: 'Leave PUT' });
   }
 }
 

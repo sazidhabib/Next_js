@@ -7,6 +7,7 @@ import {
   Department,
 } from '@/lib/db/models/index';
 import { requirePermission } from '@/lib/auth/rbac';
+import { apiErrorResponse } from '@/lib/apiError';
 
 function calculateHours(start, end, breakMin = 0) {
   if (!start || !end) return 0;
@@ -107,6 +108,28 @@ export async function POST(request) {
     await initDb();
     const body = await request.json();
 
+    if (!body.employeeId || !body.shiftDate || !body.startTime || !body.endTime) {
+      return NextResponse.json(
+        { success: false, error: 'Employee, Shift Date, Start Time, and End Time are required.' },
+        { status: 400 }
+      );
+    }
+
+    const existingShift = await Shift.findOne({
+      where: {
+        employeeId: body.employeeId,
+        shiftDate: body.shiftDate,
+        startTime: body.startTime,
+        endTime: body.endTime,
+      },
+    });
+    if (existingShift) {
+      return NextResponse.json(
+        { success: false, error: 'Duplicate shift: this employee already has an identical shift scheduled on this date.' },
+        { status: 400 }
+      );
+    }
+
     const dayName = body.dayName || getDayName(body.shiftDate);
     const breakMinutes = parseInt(body.breakMinutes, 10) || 0;
     const plannedHours = body.plannedHours !== undefined
@@ -145,7 +168,6 @@ export async function POST(request) {
       }
     );
   } catch (error) {
-    console.error('Shifts POST error:', error);
-    return NextResponse.json({ success: false, error: error.message }, { status: 400 });
+    return apiErrorResponse(error, { context: 'Shifts POST' });
   }
 }

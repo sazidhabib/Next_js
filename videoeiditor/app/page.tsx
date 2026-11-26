@@ -28,8 +28,10 @@ export default function DashboardPage() {
     editorStore.createNewProject(`${templateName} Project`);
     // Pre-populate some clips for high-fidelity templates
     if (templateName === 'YouTube Intro') {
-      editorStore.addTextClip(2);
-      editorStore.updateClip('c_txt_1', { text: 'YOUTUBE INTRO', startTime: 2, duration: 6 });
+      const clipId = editorStore.addTextClip(2);
+      if (clipId) {
+        editorStore.updateClip(clipId, { text: 'YOUTUBE INTRO', startTime: 2, duration: 6 });
+      }
     }
     router.push('/editor');
   };

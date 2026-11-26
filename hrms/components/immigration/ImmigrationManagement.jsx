@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
+import { toast } from 'sonner';
 import {
   Globe2,
   AlertTriangle,
@@ -169,11 +170,11 @@ export default function ImmigrationManagement({ employees = [], visaTypes = [], 
     e.preventDefault();
 
     if (!form.employeeId) {
-      alert('Please select an Employee (Mandatory).');
+      toast.error('Please select an Employee (Mandatory).');
       return;
     }
     if (!form.visaExpiryDate && !form.expiryDate) {
-      alert('Visa Expiry Date is mandatory.');
+      toast.error('Visa Expiry Date is mandatory.');
       return;
     }
 
@@ -213,16 +214,16 @@ export default function ImmigrationManagement({ employees = [], visaTypes = [], 
       });
       const data = await res.json();
       if (data.success) {
-        alert(isEdit ? 'Immigration record updated successfully' : 'Immigration record created successfully');
+        toast.success(isEdit ? 'Immigration record updated successfully' : 'Immigration record created successfully');
         setActiveSubTab('records');
         setEditingRecord(null);
         fetchRecords();
         if (onUpdated) onUpdated();
       } else {
-        alert('Error: ' + data.error);
+        toast.error(data.error || 'Failed to save immigration record');
       }
     } catch (err) {
-      alert('Save failed: ' + err.message);
+      toast.error('Save failed: ' + err.message);
     }
   };
 
@@ -232,11 +233,14 @@ export default function ImmigrationManagement({ employees = [], visaTypes = [], 
       const res = await fetch(`/api/immigration/${id}`, { method: 'DELETE' });
       const data = await res.json();
       if (data.success) {
+        toast.success('Immigration record deleted');
         fetchRecords();
         if (onUpdated) onUpdated();
+      } else {
+        toast.error(data.error || 'Delete failed');
       }
     } catch (err) {
-      alert('Delete failed');
+      toast.error('Delete failed');
     }
   };
 
@@ -312,7 +316,7 @@ export default function ImmigrationManagement({ employees = [], visaTypes = [], 
               } else if (editingRecord) {
                 setActiveSubTab('edit');
               } else {
-                alert('Please select a record from the list to edit');
+                toast.info('Please select a record from the list to edit');
               }
             }}
             className={`px-4 py-2 rounded-xl text-xs font-semibold transition flex items-center space-x-2 ${

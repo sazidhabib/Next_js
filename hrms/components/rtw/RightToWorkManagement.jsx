@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { toast } from 'sonner';
 import {
   ShieldCheck,
   CheckCircle2,
@@ -161,16 +162,16 @@ export default function RightToWorkManagement({ employees = [], onUpdated }) {
     e.preventDefault();
 
     if (!canEditRtw) {
-      alert('You do not have permission to add or edit Right to Work records.');
+      toast.error('You do not have permission to add or edit Right to Work records.');
       return;
     }
 
     if (!form.employeeId) {
-      alert('Please select an Employee (Mandatory).');
+      toast.error('Please select an Employee (Mandatory).');
       return;
     }
     if (!form.checkDate) {
-      alert('Check Date is mandatory.');
+      toast.error('Check Date is mandatory.');
       return;
     }
 
@@ -201,22 +202,22 @@ export default function RightToWorkManagement({ employees = [], onUpdated }) {
       });
       const data = await res.json();
       if (data.success) {
-        alert(isEdit ? 'RTW Check updated successfully' : 'Right to Work Check added successfully');
+        toast.success(isEdit ? 'RTW Check updated successfully' : 'Right to Work Check added successfully');
         setActiveSubTab('rtw');
         setEditingRecord(null);
         fetchRecords();
         if (onUpdated) onUpdated();
       } else {
-        alert('Error: ' + data.error);
+        toast.error(data.error || 'Failed to save RTW record');
       }
     } catch (err) {
-      alert('Save failed: ' + err.message);
+      toast.error('Save failed: ' + err.message);
     }
   };
 
   const handleDelete = async (id) => {
     if (!canDeleteRtw) {
-      alert('You do not have permission to delete Right to Work records.');
+      toast.error('You do not have permission to delete Right to Work records.');
       return;
     }
     if (!confirm('Delete this RTW audit record?')) return;
@@ -224,11 +225,14 @@ export default function RightToWorkManagement({ employees = [], onUpdated }) {
       const res = await fetch(`/api/rtw/${id}`, { method: 'DELETE' });
       const data = await res.json();
       if (data.success) {
+        toast.success('RTW record deleted');
         fetchRecords();
         if (onUpdated) onUpdated();
+      } else {
+        toast.error(data.error || 'Delete failed');
       }
     } catch (err) {
-      alert('Delete failed');
+      toast.error('Delete failed');
     }
   };
 

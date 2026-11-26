@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { initDb, User, Role, Employee } from '@/lib/db/models/index';
 import bcrypt from 'bcryptjs';
 import { requirePermission } from '@/lib/auth/rbac';
+import { apiErrorResponse } from '@/lib/apiError';
 
 export async function PUT(request, { params }) {
   try {
@@ -59,7 +60,7 @@ export async function PUT(request, { params }) {
 
     return NextResponse.json({ success: true, user: updated });
   } catch (error) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 400 });
+    return apiErrorResponse(error, { context: 'User PUT' });
   }
 }
 

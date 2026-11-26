@@ -1,7 +1,11 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { useEditorStore, editorStore, TimelineClip } from '../../store/editorStore';
+import { AspectRatio } from '../../lib/timeline/types';
+import { computeTimelineDuration, getClipPlaybackRate } from '../../lib/timeline/commands';
+
+const ASPECT_RATIOS: AspectRatio[] = ['16:9', '9:16', '1:1', '4:5'];
 
 export default function PreviewMonitor() {
   const playheadTime = useEditorStore((state) => state.playheadTime);
@@ -9,26 +13,26 @@ export default function PreviewMonitor() {
   const selectedClipId = useEditorStore((state) => state.selectedClipId);
   const tracks = useEditorStore((state) => state.tracks);
   const clipsMap = useEditorStore((state) => state.clips);
+  const aspectRatio = useEditorStore((state) => state.exportConfig.aspectRatio || '16:9');
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const scrubberContainerRef = useRef<HTMLDivElement>(null);
-  const [activeVideoClip, setActiveVideoClip] = useState<TimelineClip | null>(null);
-  const [activeTextClips, setActiveTextClips] = useState<TimelineClip[]>([]);
-  const [activeOverlayClips, setActiveOverlayClips] = useState<TimelineClip[]>([]);
 
   // Keep references to HTML5 audio objects for timeline syncing
   const audioElementsRef = useRef<Record<string, HTMLAudioElement>>({});
 
-  // Find active clips based on playhead time
-  useEffect(() => {
+  const totalDuration = useMemo(() => computeTimelineDuration(clipsMap), [clipsMap]);
+
+  // Compute active clips based on playhead time, skipping muted tracks
+  const { activeVideoClip, activeTextClips, activeOverlayClips } = useMemo(() => {
     let videoClip: TimelineClip | null = null;
-    let textClips: TimelineClip[] = [];
-    let overlayClips: TimelineClip[] = [];
+    const textClips: TimelineClip[] = [];
+    const overlayClips: TimelineClip[] = [];
 
-    const videoTrackIds = tracks.filter((t) => t.type === 'video').map((t) => t.id);
+    const activeVideoTracks = tracks.filter((t) => t.type === 'video' && !t.muted);
 
-    videoTrackIds.forEach((trackId) => {
-      const trackClips = clipsMap[trackId] || [];
+    activeVideoTracks.forEach((track) => {
+      const trackClips = clipsMap[track.id] || [];
       const active = trackClips.filter(
         (clip) => playheadTime >= clip.startTime && playheadTime < clip.startTime + clip.duration
       );
@@ -46,35 +50,42 @@ export default function PreviewMonitor() {
       });
     });
 
-    setActiveVideoClip(videoClip);
-    setActiveTextClips(textClips);
-    setActiveOverlayClips(overlayClips);
+    return {
+      activeVideoClip: videoClip as TimelineClip | null,
+      activeTextClips: textClips,
+      activeOverlayClips: overlayClips,
+    };
   }, [playheadTime, tracks, clipsMap]);
 
-  // Synchronize state values to refs to make the 60fps timer loop dependency-free and avoid stuttering seeking triggers
+  // Synchronize state values to refs to make the 60fps timer loop dependency-free
   const isPlayingRef = useRef(isPlaying);
   const playheadTimeRef = useRef(playheadTime);
   const activeVideoClipRef = useRef(activeVideoClip);
+  const totalDurationRef = useRef(totalDuration);
 
   useEffect(() => {
     isPlayingRef.current = isPlaying;
     playheadTimeRef.current = playheadTime;
     activeVideoClipRef.current = activeVideoClip;
-  }, [isPlaying, playheadTime, activeVideoClip]);
+    totalDurationRef.current = totalDuration;
+  }, [isPlaying, playheadTime, activeVideoClip, totalDuration]);
 
-  // Synchronize HTML5 video playback, volume and timecode with playhead
+  // Synchronize HTML5 video playback, playbackRate, sourceStart offset, volume and timecode
   useEffect(() => {
     const video = videoRef.current;
     if (!video || !activeVideoClip) return;
 
-    // Sync volume level (convert 0-100 range to 0.0-1.0 float)
+    const rate = getClipPlaybackRate(activeVideoClip);
     video.volume = (activeVideoClip.volume ?? 100) / 100;
     video.muted = false;
+    if (video.playbackRate !== rate) {
+      video.playbackRate = rate;
+    }
 
-    const targetVideoTime = playheadTime - activeVideoClip.startTime;
+    const sourceStart = activeVideoClip.sourceStart ?? 0;
+    const targetVideoTime = sourceStart + (playheadTime - activeVideoClip.startTime) * rate;
 
     if (!isPlaying) {
-      // While paused or scrubbing, seek to target time
       if (Math.abs(video.currentTime - targetVideoTime) > 0.1) {
         video.currentTime = Math.max(0, targetVideoTime);
       }
@@ -82,9 +93,7 @@ export default function PreviewMonitor() {
         video.pause();
       }
     } else {
-      // If playing, ensure it is playing, but do NOT seek (seeking stutters playback)
       if (video.paused && video.readyState >= 2) {
-        // Sync timecode once before triggering play
         if (Math.abs(video.currentTime - targetVideoTime) > 0.15) {
           video.currentTime = Math.max(0, targetVideoTime);
         }
@@ -93,20 +102,19 @@ export default function PreviewMonitor() {
     }
   }, [playheadTime, isPlaying, activeVideoClip]);
 
-  // Synchronize dynamic timeline audio tracks (A1 & A2)
+  // Synchronize dynamic timeline audio tracks (A1, A2, etc.), respecting track mute and sourceStart
   useEffect(() => {
-    const audioTrackIds = tracks.filter((t) => t.type === 'audio').map((t) => t.id);
+    const activeAudioTracks = tracks.filter((t) => t.type === 'audio' && !t.muted);
     const activeAudios: TimelineClip[] = [];
 
-    audioTrackIds.forEach((trackId) => {
-      const trackClips = clipsMap[trackId] || [];
+    activeAudioTracks.forEach((track) => {
+      const trackClips = clipsMap[track.id] || [];
       const active = trackClips.filter(
         (clip) => playheadTime >= clip.startTime && playheadTime < clip.startTime + clip.duration
       );
       activeAudios.push(...active);
     });
 
-    // 1. Pause and destroy any audio elements that are no longer active
     const activeIds = new Set(activeAudios.map((c) => c.id));
     Object.keys(audioElementsRef.current).forEach((id) => {
       if (!activeIds.has(id)) {
@@ -116,9 +124,8 @@ export default function PreviewMonitor() {
       }
     });
 
-    // 2. Synchronize active audios
     activeAudios.forEach((clip) => {
-      if (!clip.assetUrl) return; // skip mock clips with no url
+      if (!clip.assetUrl) return;
 
       let audio = audioElementsRef.current[clip.id];
       if (!audio) {
@@ -126,16 +133,20 @@ export default function PreviewMonitor() {
         audioElementsRef.current[clip.id] = audio;
       }
 
-      // Sync volume
       const volumeLevel = (clip.volume ?? 100) / 100;
       if (audio.volume !== volumeLevel) {
         audio.volume = volumeLevel;
       }
 
-      const targetTime = playheadTime - clip.startTime;
+      const rate = getClipPlaybackRate(clip);
+      if (audio.playbackRate !== rate) {
+        audio.playbackRate = rate;
+      }
+
+      const sourceStart = clip.sourceStart ?? 0;
+      const targetTime = sourceStart + (playheadTime - clip.startTime) * rate;
 
       if (!isPlaying) {
-        // While paused or scrubbing, seek to target time
         if (Math.abs(audio.currentTime - targetTime) > 0.1) {
           audio.currentTime = Math.max(0, targetTime);
         }
@@ -144,20 +155,16 @@ export default function PreviewMonitor() {
         }
       } else {
         if (audio.paused) {
-          // Sync timecode once before starting audio playback
           audio.currentTime = Math.max(0, targetTime);
           audio.play().catch(() => {});
-        } else {
-          // While playing natively, check if there is a drift (> 0.4s) before seeking
-          if (Math.abs(audio.currentTime - targetTime) > 0.4) {
-            audio.currentTime = Math.max(0, targetTime);
-          }
+        } else if (Math.abs(audio.currentTime - targetTime) > 0.4) {
+          audio.currentTime = Math.max(0, targetTime);
         }
       }
     });
   }, [playheadTime, isPlaying, tracks, clipsMap]);
 
-  // Clean up all audios on component unmount to prevent resource leak
+  // Clean up all audios on component unmount
   useEffect(() => {
     return () => {
       Object.values(audioElementsRef.current).forEach((audio) => {
@@ -167,7 +174,7 @@ export default function PreviewMonitor() {
     };
   }, []);
 
-  // Continuous 60fps Playback timer loop running exactly once on mount
+  // Continuous 60fps Playback timer loop running once on mount
   useEffect(() => {
     let animFrame: number;
     let lastTime = performance.now();
@@ -181,12 +188,23 @@ export default function PreviewMonitor() {
         const activeClip = activeVideoClipRef.current;
 
         if (video && activeClip && !video.paused && video.readyState >= 2) {
-          // Master Clock Sync: read native video currentTime to progress playhead smoothly
-          const videoPlayhead = activeClip.startTime + video.currentTime;
-          editorStore.setPlayheadTime(videoPlayhead);
+          const rate = getClipPlaybackRate(activeClip);
+          const sourceStart = activeClip.sourceStart ?? 0;
+          const elapsedTimeline = (video.currentTime - sourceStart) / rate;
+          const videoPlayhead = activeClip.startTime + elapsedTimeline;
+          if (videoPlayhead >= totalDurationRef.current) {
+            editorStore.setPlaying(false);
+          } else {
+            editorStore.setPlayheadTime(videoPlayhead);
+          }
         } else {
-          // Delta fallback if no video is playing
-          editorStore.setPlayheadTime(playheadTimeRef.current + delta);
+          const nextTime = playheadTimeRef.current + delta;
+          if (nextTime >= totalDurationRef.current) {
+            editorStore.setPlayheadTime(totalDurationRef.current);
+            editorStore.setPlaying(false);
+          } else {
+            editorStore.setPlayheadTime(nextTime);
+          }
         }
       }
 
@@ -207,10 +225,8 @@ export default function PreviewMonitor() {
 
     const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
     const clickX = clientX - rect.left;
-    const percent = clickX / rect.width;
-    const totalDuration = 30; // standard 30s timeline limit
-    const targetTime = percent * totalDuration;
-    editorStore.setPlayheadTime(targetTime);
+    const percent = Math.max(0, Math.min(1, clickX / rect.width));
+    editorStore.setPlayheadTime(percent * totalDuration);
   };
 
   // Convert playhead time to frames (23.976 fps)
@@ -221,10 +237,11 @@ export default function PreviewMonitor() {
     const secs = Math.floor(timeInSecs % 60);
     const frames = Math.floor((timeInSecs % 1) * fps);
 
-    return `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}:${frames.toString().padStart(2, '0')}`;
+    return `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs
+      .toString()
+      .padStart(2, '0')}:${frames.toString().padStart(2, '0')}`;
   };
 
-  // Get CSS filters mapping for visual effects
   const getVideoFilters = (clip: TimelineClip) => {
     const filters = [];
     if (clip.appliedEffects?.includes('Chromatic Aberration')) {
@@ -242,6 +259,42 @@ export default function PreviewMonitor() {
     return filters.length > 0 ? filters.join(' ') : undefined;
   };
 
+  const getContentEndTime = () => {
+    let maxEnd = 0;
+    Object.values(clipsMap).forEach((list) => {
+      list.forEach((c) => {
+        if (c.startTime + c.duration > maxEnd) maxEnd = c.startTime + c.duration;
+      });
+    });
+    return maxEnd || totalDuration;
+  };
+
+  const cycleAspectRatio = () => {
+    const nextIdx = (ASPECT_RATIOS.indexOf(aspectRatio) + 1) % ASPECT_RATIOS.length;
+    editorStore.updateExportConfig({ aspectRatio: ASPECT_RATIOS[nextIdx] });
+  };
+
+  const getClipTransitionOpacity = (clip: TimelineClip): number => {
+    const baseOpacity = clip.opacity !== undefined ? clip.opacity / 100 : 1;
+    if (!clip.transitionIn || clip.transitionIn === 'none') return baseOpacity;
+    const dur = Math.min(clip.duration * 0.45, clip.transitionDuration ?? 0.35);
+    if (dur <= 0) return baseOpacity;
+    const elapsed = Math.max(0, playheadTime - clip.startTime);
+    if (elapsed < dur) {
+      return baseOpacity * Math.min(1, elapsed / dur);
+    }
+    return baseOpacity;
+  };
+
+  const aspectContainerClass =
+    aspectRatio === '9:16'
+      ? 'aspect-[9/16] h-full max-h-full w-auto'
+      : aspectRatio === '1:1'
+      ? 'aspect-square h-full max-h-full w-auto'
+      : aspectRatio === '4:5'
+      ? 'aspect-[4/5] h-full max-h-full w-auto'
+      : 'aspect-video w-full h-full max-w-4xl';
+
   return (
     <section className="flex-grow flex-shrink flex flex-col bg-surface-container-lowest relative select-none">
       {/* Preview Toolbar */}
@@ -251,7 +304,13 @@ export default function PreviewMonitor() {
             {formatTimecode(playheadTime)}
           </span>
           <div className="h-4 w-px bg-outline-variant"></div>
-          <span className="font-mono-data text-label-caps text-primary cursor-pointer hover:text-white">FIT</span>
+          <button
+            onClick={cycleAspectRatio}
+            className="font-mono-data text-label-caps text-primary cursor-pointer hover:text-white px-1.5 py-0.5 rounded bg-primary/10 border border-primary/20"
+            title="Click to switch canvas aspect ratio (16:9 / 9:16 / 1:1 / 4:5)"
+          >
+            {aspectRatio}
+          </button>
         </div>
         <div className="flex items-center gap-2">
           <button className="material-symbols-outlined text-on-surface-variant text-sm p-1 hover:bg-surface-container-high rounded cursor-pointer block font-sans">
@@ -265,18 +324,26 @@ export default function PreviewMonitor() {
 
       {/* Monitor Display Canvas */}
       <div className="flex-grow flex-shrink flex items-center justify-center p-4 relative min-h-0 bg-[#0e0e0e]">
-        <div className="relative w-full h-full max-w-4xl shadow-2xl overflow-hidden rounded bg-black flex items-center justify-center aspect-video">
+        <div
+          className={`relative shadow-2xl overflow-hidden rounded bg-black flex items-center justify-center ${aspectContainerClass}`}
+        >
           {/* Active Video Player */}
           {activeVideoClip ? (
             <video
               ref={videoRef}
               src={activeVideoClip.assetUrl}
               playsInline
-              className="w-full h-full object-contain pointer-events-none"
+              className={`w-full h-full pointer-events-none ${
+                aspectRatio === '16:9' ? 'object-contain' : 'object-cover'
+              }`}
               style={{
                 filter: getVideoFilters(activeVideoClip),
-                transform: `scale(${activeVideoClip.scale ? activeVideoClip.scale / 100 : 1}) translate(${activeVideoClip.positionX || 0}px, ${activeVideoClip.positionY || 0}px) rotate(${activeVideoClip.rotation || 0}deg)`,
-                opacity: activeVideoClip.opacity ? activeVideoClip.opacity / 100 : 1,
+                transform: `scale(${
+                  activeVideoClip.scale ? activeVideoClip.scale / 100 : 1
+                }) translate(${activeVideoClip.positionX || 0}px, ${
+                  activeVideoClip.positionY || 0
+                }px) rotate(${activeVideoClip.rotation || 0}deg)`,
+                opacity: getClipTransitionOpacity(activeVideoClip),
               }}
             />
           ) : (
@@ -296,19 +363,20 @@ export default function PreviewMonitor() {
                   alt={overlay.name}
                   className="absolute inset-0 w-full h-full object-cover pointer-events-none mix-blend-screen"
                   style={{
-                    opacity: overlay.opacity ? overlay.opacity / 100 : 0.4,
-                    transform: `scale(${overlay.scale ? overlay.scale / 100 : 1}) translate(${overlay.positionX || 0}px, ${overlay.positionY || 0}px) rotate(${overlay.rotation || 0}deg)`,
+                    opacity: overlay.opacity !== undefined ? overlay.opacity / 100 : 0.4,
+                    transform: `scale(${overlay.scale ? overlay.scale / 100 : 1}) translate(${
+                      overlay.positionX || 0
+                    }px, ${overlay.positionY || 0}px) rotate(${overlay.rotation || 0}deg)`,
                   }}
                 />
               );
             }
-            // Default mock gradient fallback if url is empty
             return (
               <div
                 key={overlay.id}
                 className="absolute inset-0 pointer-events-none mix-blend-screen bg-gradient-to-tr from-cyan-500/10 via-transparent to-purple-500/15"
                 style={{
-                  opacity: overlay.opacity ? overlay.opacity / 100 : 0.4,
+                  opacity: overlay.opacity !== undefined ? overlay.opacity / 100 : 0.4,
                 }}
               />
             );
@@ -329,16 +397,24 @@ export default function PreviewMonitor() {
             <div
               key={textClip.id}
               className={`absolute pointer-events-none transition-all ${
-                textClip.id === selectedClipId ? 'outline outline-dashed outline-primary/60 outline-offset-4' : ''
+                textClip.id === selectedClipId
+                  ? 'outline outline-dashed outline-primary/60 outline-offset-4'
+                  : ''
               }`}
               style={{
                 left: `calc(50% + ${textClip.positionX || 0}px)`,
                 top: `calc(50% + ${textClip.positionY || 0}px)`,
-                transform: `translate(-50%, -50%) scale(${textClip.scale ? textClip.scale / 100 : 1}) rotate(${textClip.rotation || 0}deg)`,
-                opacity: textClip.opacity ? textClip.opacity / 100 : 1,
+                transform: `translate(-50%, -50%) scale(${
+                  textClip.scale ? textClip.scale / 100 : 1
+                }) rotate(${textClip.rotation || 0}deg)`,
+                opacity: textClip.opacity !== undefined ? textClip.opacity / 100 : 1,
               }}
             >
-              <div className={textClip.color || 'text-white text-lg font-bold drop-shadow-md text-center'}>
+              <div
+                className={
+                  textClip.color || 'text-white text-lg font-bold drop-shadow-md text-center'
+                }
+              >
                 {textClip.text}
               </div>
             </div>
@@ -380,7 +456,7 @@ export default function PreviewMonitor() {
           <button
             onClick={handleTogglePlay}
             className="w-10 h-10 rounded-full bg-primary text-on-primary flex items-center justify-center shadow-lg hover:scale-105 active:scale-95 transition-all cursor-pointer"
-            title={isPlaying ? 'Pause' : 'Play'}
+            title={isPlaying ? 'Pause (Space)' : 'Play (Space)'}
           >
             <span className="material-symbols-outlined text-2xl block font-bold font-sans">
               {isPlaying ? 'pause' : 'play_arrow'}
@@ -396,7 +472,7 @@ export default function PreviewMonitor() {
           </button>
 
           <button
-            onClick={() => editorStore.setPlayheadTime(28)}
+            onClick={() => editorStore.setPlayheadTime(getContentEndTime())}
             className="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors cursor-pointer text-xl block font-sans"
             title="Go to end"
           >
@@ -412,11 +488,11 @@ export default function PreviewMonitor() {
         >
           <div
             className="absolute h-full bg-primary rounded-full"
-            style={{ width: `${(playheadTime / 30) * 100}%` }}
+            style={{ width: `${Math.min(100, (playheadTime / totalDuration) * 100)}%` }}
           ></div>
           <div
             className="absolute h-3.5 w-3.5 bg-white rounded-full -top-1 shadow-md border-2 border-primary -translate-x-1/2 group-hover:scale-110 transition-transform pointer-events-none"
-            style={{ left: `${(playheadTime / 30) * 100}%` }}
+            style={{ left: `${Math.min(100, (playheadTime / totalDuration) * 100)}%` }}
           ></div>
         </div>
       </div>

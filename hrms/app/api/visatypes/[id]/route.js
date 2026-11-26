@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { initDb, VisaType, ImmigrationRecord } from '@/lib/db/models/index';
 import { requirePermission } from '@/lib/auth/rbac';
+import { apiErrorResponse } from '@/lib/apiError';
 
 export async function PUT(request, { params }) {
   try {
@@ -20,7 +21,7 @@ export async function PUT(request, { params }) {
     await visaType.update(payload);
     return NextResponse.json({ success: true, visaType });
   } catch (error) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 400 });
+    return apiErrorResponse(error, { context: 'VisaType PUT' });
   }
 }
 

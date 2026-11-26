@@ -7,6 +7,7 @@ import {
   Department,
 } from '@/lib/db/models/index';
 import { requirePermission, hasSessionPermission } from '@/lib/auth/rbac';
+import { apiErrorResponse } from '@/lib/apiError';
 
 function calculateHours(start, end, breakMin = 0) {
   if (!start || !end) return 0;
@@ -94,6 +95,28 @@ export async function POST(request) {
     await initDb();
     const body = await request.json();
 
+    if (!body.employeeId || !body.workDate || !body.clockIn || !body.clockOut) {
+      return NextResponse.json(
+        { success: false, error: 'Employee, Work Date, Clock In, and Clock Out are required.' },
+        { status: 400 }
+      );
+    }
+
+    const existingTimesheet = await Timesheet.findOne({
+      where: {
+        employeeId: body.employeeId,
+        workDate: body.workDate,
+        clockIn: body.clockIn,
+        clockOut: body.clockOut,
+      },
+    });
+    if (existingTimesheet) {
+      return NextResponse.json(
+        { success: false, error: 'Duplicate timesheet: an identical timesheet entry already exists for this employee and date.' },
+        { status: 400 }
+      );
+    }
+
     const dayName = body.dayName || getDayName(body.workDate);
     const breakMinutes = parseInt(body.breakMinutes, 10) || 0;
     const paidHours = body.paidHours !== undefined
@@ -134,7 +157,6 @@ export async function POST(request) {
       }
     );
   } catch (error) {
-    console.error('Timesheets POST error:', error);
-    return NextResponse.json({ success: false, error: error.message }, { status: 400 });
+    return apiErrorResponse(error, { context: 'Timesheets POST' });
   }
 }

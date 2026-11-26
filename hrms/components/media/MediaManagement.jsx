@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
+import { toast } from 'sonner';
 import {
   Image as ImageIcon,
   Upload,
@@ -70,7 +71,7 @@ export default function MediaManagement() {
     const file = fileList[0];
 
     if (file.size > 10 * 1024 * 1024) {
-      alert('File size exceeds 10MB limit.');
+      toast.error('File size exceeds 10MB limit.');
       return;
     }
 
@@ -86,12 +87,13 @@ export default function MediaManagement() {
       });
       const data = await res.json();
       if (data.success) {
+        toast.success('File uploaded successfully');
         fetchMedia();
       } else {
-        alert('Upload failed: ' + (data.error || 'Unknown error'));
+        toast.error('Upload failed: ' + (data.error || 'Unknown error'));
       }
     } catch (err) {
-      alert('Upload error: ' + err.message);
+      toast.error('Upload error: ' + err.message);
     } finally {
       setUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
@@ -104,13 +106,14 @@ export default function MediaManagement() {
       const res = await fetch(`/api/media/${id}`, { method: 'DELETE' });
       const data = await res.json();
       if (data.success) {
+        toast.success('Media file deleted');
         setFiles((prev) => prev.filter((f) => f.id !== id));
         if (previewFile?.id === id) setPreviewFile(null);
       } else {
-        alert('Delete failed: ' + data.error);
+        toast.error('Delete failed: ' + data.error);
       }
     } catch (err) {
-      alert('Delete error: ' + err.message);
+      toast.error('Delete error: ' + err.message);
     }
   };
 

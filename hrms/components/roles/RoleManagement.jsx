@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { toast } from 'sonner';
 import {
   Shield,
   Plus,
@@ -176,14 +177,15 @@ export default function RoleManagement({ onUpdated }) {
       });
       const data = await res.json();
       if (data.success) {
+        toast.success(editingRole ? 'Role updated successfully' : 'Role created successfully');
         setIsModalOpen(false);
         fetchRoles();
         if (onUpdated) onUpdated();
       } else {
-        alert('Error: ' + data.error);
+        toast.error(data.error || 'Failed to save role');
       }
     } catch (err) {
-      alert(err.message);
+      toast.error(err.message);
     } finally {
       setSaving(false);
     }
@@ -195,13 +197,14 @@ export default function RoleManagement({ onUpdated }) {
       const res = await fetch(`/api/roles/${id}`, { method: 'DELETE' });
       const data = await res.json();
       if (data.success) {
+        toast.success('Role deleted');
         fetchRoles();
         if (onUpdated) onUpdated();
       } else {
-        alert('Error: ' + data.error);
+        toast.error(data.error || 'Delete failed');
       }
     } catch (err) {
-      alert('Delete failed: ' + err.message);
+      toast.error('Delete failed: ' + err.message);
     }
   };
 

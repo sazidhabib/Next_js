@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { toast } from 'sonner';
 import { Building2, Plus, Edit, Trash2, Users, Eye } from 'lucide-react';
 import { Card, Modal } from '../ui';
 import { useAuth } from '@/context/AuthContext';
@@ -43,13 +44,14 @@ export default function DepartmentManagement({ departments, onUpdated }) {
       });
       const data = await res.json();
       if (data.success) {
+        toast.success(editingDept ? 'Department updated successfully' : 'Department created successfully');
         setIsModalOpen(false);
         if (onUpdated) onUpdated();
       } else {
-        alert(data.error);
+        toast.error(data.error || 'Failed to save department');
       }
     } catch (err) {
-      alert(err.message);
+      toast.error(err.message);
     }
   };
 
@@ -60,10 +62,13 @@ export default function DepartmentManagement({ departments, onUpdated }) {
       const res = await fetch(`/api/departments/${id}`, { method: 'DELETE' });
       const data = await res.json();
       if (data.success) {
+        toast.success('Department deleted');
         if (onUpdated) onUpdated();
+      } else {
+        toast.error(data.error || 'Failed to delete department');
       }
     } catch (err) {
-      alert(err.message);
+      toast.error(err.message);
     }
   };
 

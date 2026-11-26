@@ -5,6 +5,7 @@ import {
   User,
 } from '@/lib/db/models/index';
 import { requirePermission } from '@/lib/auth/rbac';
+import { apiErrorResponse } from '@/lib/apiError';
 
 export async function GET() {
   try {
@@ -29,6 +30,6 @@ export async function POST(request) {
     const role = await Role.create(body);
     return NextResponse.json({ success: true, role }, { status: 201 });
   } catch (error) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 400 });
+    return apiErrorResponse(error, { context: 'Roles POST' });
   }
 }

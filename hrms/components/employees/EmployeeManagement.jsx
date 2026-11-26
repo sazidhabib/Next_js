@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { toast } from 'sonner';
 import {
   Users,
   Search,
@@ -184,29 +185,29 @@ export default function EmployeeManagement({ departments, onEmployeeUpdated }) {
     e.preventDefault();
 
     if (!canEditEmp) {
-      alert('You do not have permission to edit or add employee records.');
+      toast.error('You do not have permission to edit or add employee records.');
       return;
     }
 
     // Check mandatory fields
     if (!formData.firstName?.trim()) {
-      alert('First Name is required.');
+      toast.error('First Name is required.');
       return;
     }
     if (!formData.lastName?.trim()) {
-      alert('Last Name is required.');
+      toast.error('Last Name is required.');
       return;
     }
     if (!formData.email?.trim()) {
-      alert('Email is required.');
+      toast.error('Email is required.');
       return;
     }
     if (!formData.phone?.trim()) {
-      alert('Phone No is required.');
+      toast.error('Phone No is required.');
       return;
     }
     if (!formData.dateOfBirth?.trim()) {
-      alert('Date Of Birth is required.');
+      toast.error('Date Of Birth is required.');
       return;
     }
 
@@ -240,21 +241,21 @@ export default function EmployeeManagement({ departments, onEmployeeUpdated }) {
 
       const result = await res.json();
       if (result.success) {
-        alert(isEdit ? 'Employee updated successfully!' : 'Employee added successfully!');
+        toast.success(isEdit ? 'Employee updated successfully!' : 'Employee added successfully!');
         fetchEmployees();
         if (onEmployeeUpdated) onEmployeeUpdated();
         setActiveSubTab('list');
       } else {
-        alert('Error: ' + result.error);
+        toast.error(result.error || 'Failed to save employee');
       }
     } catch (err) {
-      alert('Failed to save employee: ' + err.message);
+      toast.error('Failed to save employee: ' + err.message);
     }
   };
 
   const handleDelete = async () => {
     if (!canDeleteEmp) {
-      alert('You do not have permission to delete employee records.');
+      toast.error('You do not have permission to delete employee records.');
       return;
     }
     if (!selectedEmployee?.id) return;
@@ -268,21 +269,21 @@ export default function EmployeeManagement({ departments, onEmployeeUpdated }) {
       });
       const result = await res.json();
       if (result.success) {
-        alert('Employee deleted successfully');
+        toast.success('Employee deleted successfully');
         fetchEmployees();
         if (onEmployeeUpdated) onEmployeeUpdated();
         setActiveSubTab('list');
       } else {
-        alert('Error: ' + result.error);
+        toast.error(result.error || 'Delete failed');
       }
     } catch (err) {
-      alert('Delete failed: ' + err.message);
+      toast.error('Delete failed: ' + err.message);
     }
   };
 
   const handleExportCSV = () => {
     if (!employees || employees.length === 0) {
-      alert('No employee records to export');
+      toast.warning('No employee records to export');
       return;
     }
 

@@ -6,6 +6,7 @@ import {
   Department,
 } from '@/lib/db/models/index';
 import { requirePermission } from '@/lib/auth/rbac';
+import { apiErrorResponse } from '@/lib/apiError';
 
 function calculateHours(start, end, breakMin = 0) {
   if (!start || !end) return 0;
@@ -88,8 +89,7 @@ export async function PUT(request, { params }) {
       }
     );
   } catch (error) {
-    console.error('Timesheet PUT error:', error);
-    return NextResponse.json({ success: false, error: error.message }, { status: 400 });
+    return apiErrorResponse(error, { context: 'Timesheet PUT' });
   }
 }
 

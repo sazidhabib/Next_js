@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { toast } from 'sonner';
 import { FileBadge, Plus, Edit, Trash2, Search, ShieldCheck, Eye } from 'lucide-react';
 import { Card, Modal, Badge } from '../ui';
 import { useAuth } from '@/context/AuthContext';
@@ -66,11 +67,11 @@ export default function VisaTypeManagement({ visaTypes = [], onUpdated }) {
   const handleSave = async (e) => {
     e.preventDefault();
     if (!canEditVisa) {
-      alert('You do not have permission to add or edit visa types.');
+      toast.error('You do not have permission to add or edit visa types.');
       return;
     }
     if (!form.name.trim()) {
-      alert('Please enter a Visa Name');
+      toast.error('Please enter a Visa Name');
       return;
     }
 
@@ -92,20 +93,21 @@ export default function VisaTypeManagement({ visaTypes = [], onUpdated }) {
       });
       const data = await res.json();
       if (data.success) {
+        toast.success(editingVisa ? 'Visa Type updated successfully' : 'Visa Type created successfully');
         setIsModalOpen(false);
         fetchVisaTypes();
         if (onUpdated) onUpdated();
       } else {
-        alert('Error: ' + data.error);
+        toast.error(data.error || 'Failed to save Visa Type');
       }
     } catch (err) {
-      alert('Save failed: ' + err.message);
+      toast.error('Save failed: ' + err.message);
     }
   };
 
   const handleDelete = async (id, name) => {
     if (!canDeleteVisa) {
-      alert('You do not have permission to delete visa types.');
+      toast.error('You do not have permission to delete visa types.');
       return;
     }
     if (!confirm(`Are you sure you want to delete Visa Type "${name}"?`)) return;
@@ -113,13 +115,14 @@ export default function VisaTypeManagement({ visaTypes = [], onUpdated }) {
       const res = await fetch(`/api/visatypes/${id}`, { method: 'DELETE' });
       const data = await res.json();
       if (data.success) {
+        toast.success('Visa Type deleted');
         fetchVisaTypes();
         if (onUpdated) onUpdated();
       } else {
-        alert('Error: ' + data.error);
+        toast.error(data.error || 'Delete failed');
       }
     } catch (err) {
-      alert('Delete failed: ' + err.message);
+      toast.error('Delete failed: ' + err.message);
     }
   };
 

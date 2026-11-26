@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { useEditorStore } from '../../store/editorStore';
+import { useEditorStore, editorStore } from '../../store/editorStore';
 
 interface EditorHeaderProps {
   onExportClick: () => void;
@@ -10,9 +10,11 @@ interface EditorHeaderProps {
 
 export default function EditorHeader({ onExportClick }: EditorHeaderProps) {
   const currentProjectName = useEditorStore((state) => {
-    // Show the first project's name or custom fallback
-    return state.projects[0]?.name || 'Project Alpha_V1';
+    const active = state.projects.find((p) => p.id === state.activeProjectId);
+    return active?.name || state.projects[0]?.name || 'Project Alpha_V1';
   });
+  const canUndo = useEditorStore((state) => state.canUndo);
+  const canRedo = useEditorStore((state) => state.canRedo);
 
   return (
     <header className="flex justify-between items-center w-full px-panel-padding h-toolbar-height z-50 bg-surface border-b border-outline-variant fixed top-0 left-0 right-0">
@@ -46,6 +48,25 @@ export default function EditorHeader({ onExportClick }: EditorHeaderProps) {
       </div>
 
       <div className="flex items-center gap-3">
+        <div className="flex items-center gap-1 mr-1">
+          <button
+            onClick={() => editorStore.undo()}
+            disabled={!canUndo}
+            title="Undo (Ctrl+Z)"
+            className="material-symbols-outlined text-on-surface-variant hover:bg-surface-container-high p-1.5 rounded transition-all text-lg block cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+          >
+            undo
+          </button>
+          <button
+            onClick={() => editorStore.redo()}
+            disabled={!canRedo}
+            title="Redo (Ctrl+Shift+Z)"
+            className="material-symbols-outlined text-on-surface-variant hover:bg-surface-container-high p-1.5 rounded transition-all text-lg block cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+          >
+            redo
+          </button>
+        </div>
+
         <button className="material-symbols-outlined text-on-surface-variant hover:bg-surface-container-high p-1.5 rounded transition-all text-xl block cursor-pointer">
           notifications
         </button>

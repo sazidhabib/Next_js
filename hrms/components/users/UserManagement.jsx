@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { toast } from 'sonner';
 import { UserCheck, Plus, Edit, Trash2, Key, Search, ShieldCheck } from 'lucide-react';
 import { Card, Modal, Badge } from '../ui';
 
@@ -71,11 +72,11 @@ export default function UserManagement({ employees = [], onUpdated }) {
   const handleSave = async (e) => {
     e.preventDefault();
     if (!form.username.trim() || !form.name.trim()) {
-      alert('Please fill in both User Name and Full Name');
+      toast.error('Please fill in both User Name and Full Name');
       return;
     }
     if (!editingUser && !form.password) {
-      alert('Password is required for a new user');
+      toast.error('Password is required for a new user');
       return;
     }
 
@@ -101,14 +102,15 @@ export default function UserManagement({ employees = [], onUpdated }) {
       });
       const data = await res.json();
       if (data.success) {
+        toast.success(editingUser ? 'User updated successfully' : 'User created successfully');
         setIsModalOpen(false);
         fetchUsersAndRoles();
         if (onUpdated) onUpdated();
       } else {
-        alert('Error: ' + data.error);
+        toast.error(data.error || 'Failed to save user');
       }
     } catch (err) {
-      alert('Save failed: ' + err.message);
+      toast.error('Save failed: ' + err.message);
     }
   };
 
@@ -124,12 +126,12 @@ export default function UserManagement({ employees = [], onUpdated }) {
       });
       const data = await res.json();
       if (data.success) {
-        alert('Password reset successfully');
+        toast.success('Password reset successfully');
       } else {
-        alert('Error: ' + data.error);
+        toast.error(data.error || 'Failed to reset password');
       }
     } catch (err) {
-      alert('Reset failed: ' + err.message);
+      toast.error('Reset failed: ' + err.message);
     }
   };
 
@@ -139,13 +141,14 @@ export default function UserManagement({ employees = [], onUpdated }) {
       const res = await fetch(`/api/users/${id}`, { method: 'DELETE' });
       const data = await res.json();
       if (data.success) {
+        toast.success('User deleted');
         fetchUsersAndRoles();
         if (onUpdated) onUpdated();
       } else {
-        alert('Error: ' + data.error);
+        toast.error(data.error || 'Delete failed');
       }
     } catch (err) {
-      alert('Delete failed: ' + err.message);
+      toast.error('Delete failed: ' + err.message);
     }
   };
 

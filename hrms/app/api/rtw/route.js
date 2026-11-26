@@ -5,6 +5,7 @@ import {
   Employee,
 } from '@/lib/db/models/index';
 import { requirePermission } from '@/lib/auth/rbac';
+import { apiErrorResponse } from '@/lib/apiError';
 
 export async function GET(request) {
   try {
@@ -80,7 +81,6 @@ export async function POST(request) {
 
     return NextResponse.json({ success: true, record: fetched }, { status: 201 });
   } catch (error) {
-    console.error('RTW POST error:', error);
-    return NextResponse.json({ success: false, error: error.message }, { status: 400 });
+    return apiErrorResponse(error, { context: 'RTW POST' });
   }
 }

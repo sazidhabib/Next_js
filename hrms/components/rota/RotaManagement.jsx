@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { toast } from 'sonner';
 import {
   CalendarClock,
   Clock,
@@ -530,7 +531,7 @@ export default function RotaManagement({ employees = [] }) {
       return;
     }
     if (!shiftModal.employeeId || !shiftModal.shiftDate) {
-      alert('Please specify employee and shift date');
+      toast.error('Please specify employee and shift date');
       return;
     }
 
@@ -583,18 +584,19 @@ export default function RotaManagement({ employees = [] }) {
         // Background server re-sync
         fetchWeekShifts();
         fetchMonthShifts();
+        toast.success(isEdit ? 'Shift updated successfully' : 'Shift scheduled successfully');
       } else {
-        alert('Operation failed: ' + (data.error || 'Unknown error'));
+        toast.error(data.error || 'Operation failed');
       }
     } catch (err) {
-      alert('Error saving shift: ' + err.message);
+      toast.error('Error saving shift: ' + err.message);
     }
   };
 
   // Delete shift from modal or grid
   const handleDeleteShift = async (id) => {
     if (!canDeleteRota || isEmployeeUser) {
-      alert('You do not have permission to delete shifts.');
+      toast.error('You do not have permission to delete shifts.');
       return;
     }
     if (!confirm('Are you sure you want to remove this shift from the rota?')) return;
@@ -602,14 +604,15 @@ export default function RotaManagement({ employees = [] }) {
       const res = await fetch(`/api/rota/shifts/${id}`, { method: 'DELETE' });
       const data = await res.json();
       if (data.success) {
+        toast.success('Shift deleted');
         setShiftModal((prev) => ({ ...prev, isOpen: false }));
         setShifts((prev) => prev.filter((s) => s.id !== id));
         setMonthShifts((prev) => prev.filter((s) => s.id !== id));
       } else {
-        alert('Delete failed: ' + data.error);
+        toast.error('Delete failed: ' + data.error);
       }
     } catch (err) {
-      alert('Error deleting shift: ' + err.message);
+      toast.error('Error deleting shift: ' + err.message);
     }
   };
 
@@ -617,13 +620,13 @@ export default function RotaManagement({ employees = [] }) {
   const handleAddShiftFromTable = async (e) => {
     e.preventDefault();
     if (!canEditRota || isEmployeeUser) {
-      alert('You do not have permission to schedule shifts.');
+      toast.error('You do not have permission to schedule shifts.');
       return;
     }
     const empId = shiftForm.employeeId || defaultEmployeeId;
     const shiftDate = shiftForm.shiftDate || formatLocalDate(new Date());
     if (!empId || !shiftDate) {
-      alert('Please select an employee and shift date');
+      toast.error('Please select an employee and shift date');
       return;
     }
 
@@ -666,11 +669,12 @@ export default function RotaManagement({ employees = [] }) {
         setShiftForm((prev) => ({ ...prev, notes: '' }));
         // Background sync
         fetchWeekShifts();
+        toast.success('Shift added successfully');
       } else {
-        alert('Failed to add shift: ' + (data.error || 'Unknown error'));
+        toast.error(data.error || 'Failed to add shift');
       }
     } catch (err) {
-      alert('Error creating shift: ' + err.message);
+      toast.error('Error creating shift: ' + err.message);
     }
   };
 
@@ -678,13 +682,13 @@ export default function RotaManagement({ employees = [] }) {
   const handleAddTimesheet = async (e) => {
     e.preventDefault();
     if (!canEditRota || isEmployeeUser) {
-      alert('You do not have permission to add timesheets.');
+      toast.error('You do not have permission to add timesheets.');
       return;
     }
     const empId = timesheetForm.employeeId || defaultEmployeeId;
     const workDate = timesheetForm.workDate || formatLocalDate(new Date());
     if (!empId || !workDate) {
-      alert('Please select an employee and work date');
+      toast.error('Please select an employee and work date');
       return;
     }
 
@@ -718,11 +722,12 @@ export default function RotaManagement({ employees = [] }) {
         setTimesheetForm((prev) => ({ ...prev, notes: '' }));
         // Background sync
         fetchTimesheets();
+        toast.success('Timesheet added successfully');
       } else {
-        alert('Failed to add timesheet: ' + (data.error || 'Unknown error'));
+        toast.error(data.error || 'Failed to add timesheet');
       }
     } catch (err) {
-      alert('Error creating timesheet: ' + err.message);
+      toast.error('Error creating timesheet: ' + err.message);
     }
   };
 
@@ -741,22 +746,23 @@ export default function RotaManagement({ employees = [] }) {
       });
       const data = await res.json();
       if (data.success && data.timesheet) {
+        toast.success(`Timesheet ${status.toLowerCase()}`);
         setTimesheets((prev) =>
           prev.map((t) => (t.id === id ? data.timesheet : t))
         );
       } else if (!data.success) {
-        alert('Failed to update status: ' + data.error);
+        toast.error('Failed to update status: ' + data.error);
         fetchTimesheets();
       }
     } catch (err) {
-      alert('Error updating status: ' + err.message);
+      toast.error('Error updating status: ' + err.message);
       fetchTimesheets();
     }
   };
 
   const handleDeleteTimesheet = async (id) => {
     if (!canManageTimesheets || isEmployeeUser) {
-      alert('You do not have permission to delete timesheets.');
+      toast.error('You do not have permission to delete timesheets.');
       return;
     }
     if (!confirm('Are you sure you want to delete this timesheet entry?')) return;
@@ -764,12 +770,13 @@ export default function RotaManagement({ employees = [] }) {
       const res = await fetch(`/api/rota/timesheets/${id}`, { method: 'DELETE' });
       const data = await res.json();
       if (data.success) {
+        toast.success('Timesheet deleted');
         setTimesheets((prev) => prev.filter((t) => t.id !== id));
       } else {
-        alert('Delete failed: ' + data.error);
+        toast.error('Delete failed: ' + data.error);
       }
     } catch (err) {
-      alert('Error deleting timesheet: ' + err.message);
+      toast.error('Error deleting timesheet: ' + err.message);
     }
   };
 
@@ -787,6 +794,7 @@ export default function RotaManagement({ employees = [] }) {
       });
       const data = await res.json();
       if (data.success) {
+        toast.success('Timesheet updated successfully');
         const updated = data.timesheet || editingTimesheet;
         setTimesheets((prev) =>
           prev.map((t) => (t.id === updated.id ? updated : t))
@@ -794,10 +802,10 @@ export default function RotaManagement({ employees = [] }) {
         setEditingTimesheet(null);
         fetchTimesheets();
       } else {
-        alert('Failed to update timesheet: ' + data.error);
+        toast.error(data.error || 'Failed to update timesheet');
       }
     } catch (err) {
-      alert('Error updating timesheet: ' + err.message);
+      toast.error('Error updating timesheet: ' + err.message);
     }
   };
 

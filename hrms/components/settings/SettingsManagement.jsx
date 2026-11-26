@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { toast } from 'sonner';
 import {
   Settings as SettingsIcon,
   Shield,
@@ -79,7 +80,7 @@ export default function SettingsManagement({
     if (!file) return;
 
     if (file.size > 5 * 1024 * 1024) {
-      alert('File size exceeds 5MB limit. Please upload a smaller image.');
+      toast.error('File size exceeds 5MB limit. Please upload a smaller image.');
       return;
     }
 
@@ -135,7 +136,7 @@ export default function SettingsManagement({
   const handleSave = async (e) => {
     e.preventDefault();
     if (!isSuperAdmin) {
-      alert('Unauthorized: Only Super Admin can modify system settings.');
+      toast.error('Unauthorized: Only Super Admin can modify system settings.');
       return;
     }
 
@@ -157,16 +158,17 @@ export default function SettingsManagement({
 
       const data = await res.json();
       if (data.success) {
+        toast.success('Settings saved successfully');
         setSaveSuccess(true);
         if (onSettingsUpdated) {
           onSettingsUpdated(data.settings);
         }
         setTimeout(() => setSaveSuccess(false), 3500);
       } else {
-        alert('Error saving settings: ' + data.error);
+        toast.error('Error saving settings: ' + data.error);
       }
     } catch (err) {
-      alert('Save failed: ' + err.message);
+      toast.error('Save failed: ' + err.message);
     } finally {
       setLoading(false);
     }

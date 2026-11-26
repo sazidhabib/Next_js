@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { initDb, Role, User } from '@/lib/db/models/index';
 import { requirePermission } from '@/lib/auth/rbac';
+import { apiErrorResponse } from '@/lib/apiError';
 
 export async function PUT(request, { params }) {
   try {
@@ -15,7 +16,7 @@ export async function PUT(request, { params }) {
     await role.update(body);
     return NextResponse.json({ success: true, role });
   } catch (error) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 400 });
+    return apiErrorResponse(error, { context: 'Role PUT' });
   }
 }
 

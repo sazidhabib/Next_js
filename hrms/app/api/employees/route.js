@@ -9,6 +9,7 @@ import {
 } from '@/lib/db/models/index';
 import { Op } from 'sequelize';
 import { requirePermission, hasSessionPermission } from '@/lib/auth/rbac';
+import { apiErrorResponse } from '@/lib/apiError';
 
 export async function GET(request) {
   try {
@@ -226,7 +227,6 @@ export async function POST(request) {
 
     return NextResponse.json({ success: true, employee: fetched }, { status: 201 });
   } catch (error) {
-    console.error('Employees POST error:', error);
-    return NextResponse.json({ success: false, error: error.message }, { status: 400 });
+    return apiErrorResponse(error, { context: 'Employees POST' });
   }
 }
