@@ -31,33 +31,35 @@ export async function GET(req, { params }) {
     const redirectUri = `${appUrl}/api/auth/${provider}/callback`;
 
     const accountData = await adapter.handleCallback(code, redirectUri);
+    const accountsToSave = [accountData, ...(accountData.extraAccounts || [])];
 
     const dbStatus = await initDB();
     if (dbStatus.isConnected) {
-      // Find or create default user
       let [user] = await User.findOrCreate({
         where: { email: "demo@antigravity.dev" },
         defaults: { name: "Demo User", password_hash: "demo_hash" },
       });
 
-      // Upsert social account
-      await SocialAccount.upsert({
-        user_id: user.id,
-        provider,
-        account_name: accountData.accountName,
-        account_id: accountData.accountId,
-        encrypted_access_token: accountData.accessToken,
-        encrypted_refresh_token: accountData.refreshToken,
-        token_expires_at: accountData.expiresIn
-          ? new Date(Date.now() + accountData.expiresIn * 1000)
-          : null,
-        metadata: accountData.metadata,
-        is_active: true,
-      });
+      for (const acc of accountsToSave) {
+        await SocialAccount.upsert({
+          user_id: user.id,
+          provider,
+          account_name: acc.accountName,
+          account_id: acc.accountId,
+          encrypted_access_token: acc.accessToken,
+          encrypted_refresh_token: acc.refreshToken || null,
+          token_expires_at: acc.expiresIn
+            ? new Date(Date.now() + acc.expiresIn * 1000)
+            : null,
+          metadata: acc.metadata || {},
+          is_active: true,
+        });
+      }
     }
 
-    const response = NextResponse.redirect(`${appUrl}?connected=${provider}`);
-    // Clear state cookie
+    const response = NextResponse.redirect(
+      `${appUrl}?connected=${provider}&count=${accountsToSave.length}`
+    );
     response.cookies.delete(`oauth_state_${provider}`);
     return response;
   } catch (err) {

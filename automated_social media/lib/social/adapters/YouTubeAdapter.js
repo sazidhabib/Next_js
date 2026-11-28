@@ -9,7 +9,7 @@ export default class YouTubeAdapter extends BaseSocialAdapter {
 
   getAuthUrl(state, redirectUri) {
     const scopes = encodeURIComponent(
-      "https://www.googleapis.com/auth/youtube https://www.googleapis.com/auth/userinfo.profile"
+      "https://www.googleapis.com/auth/youtube.upload https://www.googleapis.com/auth/youtube.readonly https://www.googleapis.com/auth/userinfo.profile"
     );
     return `https://accounts.google.com/o/oauth2/v2/auth?client_id=${this.clientId}&redirect_uri=${encodeURIComponent(
       redirectUri
@@ -86,15 +86,23 @@ export default class YouTubeAdapter extends BaseSocialAdapter {
     };
   }
 
-  validate(text, mediaUrl) {
-    if (!text || text.trim().length === 0) {
-      return { isValid: false, error: "Community post text cannot be empty." };
+  validate(text, mediaUrl, options = {}) {
+    if ((!text || text.trim().length === 0) && !options?.mediaBuffer) {
+      return { isValid: false, error: "YouTube post text or video file is required." };
     }
     return { isValid: true, error: null };
   }
 
-  async publish({ text, mediaUrl, accessToken, socialAccount }) {
-    this.validate(text, mediaUrl);
+  async publish({
+    text,
+    title,
+    mediaUrl,
+    mediaBuffer,
+    mediaMimeType,
+    accessToken,
+  }) {
+    const val = this.validate(text, mediaUrl, { mediaBuffer });
+    if (!val.isValid) throw new Error(val.error);
 
     // Development / Simulation Fallback
     if (!this.clientId || this.clientId === "your_google_client_id" || accessToken.startsWith("mock_")) {
@@ -103,34 +111,75 @@ export default class YouTubeAdapter extends BaseSocialAdapter {
       return {
         success: true,
         externalPostId: mockPostId,
-        url: `https://www.youtube.com/post/${mockPostId}`,
+        url: `https://www.youtube.com/shorts/${mockPostId}`,
       };
     }
 
-    // Call YouTube Community / Activity API
-    const res = await fetch("https://www.googleapis.com/youtube/v3/activities?part=snippet", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        snippet: {
-          description: text,
-        },
-      }),
-    });
-
-    if (!res.ok) {
-      const err = await res.text();
-      throw new Error(`YouTube Community publish failed: ${err}`);
+    if (!mediaBuffer) {
+      throw new Error(
+        "YouTube Data API v3 only supports video/Shorts uploads (not text-only Community posts). Use the Reels/Video Drive slot for YouTube."
+      );
     }
 
-    const data = await res.json();
+    const videoTitle = (title || text?.split("\n")[0] || "Daily Short").slice(0, 100);
+    const privacyStatus = process.env.YOUTUBE_PRIVACY_STATUS || "public";
+    const contentType = mediaMimeType || "video/mp4";
+
+    // Step 1: Start resumable upload session
+    const initRes = await fetch(
+      "https://www.googleapis.com/upload/youtube/v3/videos?uploadType=resumable&part=snippet,status",
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json; charset=UTF-8",
+          "X-Upload-Content-Length": String(mediaBuffer.length),
+          "X-Upload-Content-Type": contentType,
+        },
+        body: JSON.stringify({
+          snippet: {
+            title: videoTitle,
+            description: text || videoTitle,
+            categoryId: "22",
+          },
+          status: {
+            privacyStatus,
+            selfDeclaredMadeForKids: false,
+          },
+        }),
+      }
+    );
+
+    if (!initRes.ok) {
+      const err = await initRes.text();
+      throw new Error(`YouTube resumable upload init failed: ${err}`);
+    }
+
+    const uploadUrl = initRes.headers.get("location");
+    if (!uploadUrl) {
+      throw new Error("YouTube did not return a resumable upload Location header.");
+    }
+
+    // Step 2: Upload video bytes
+    const uploadRes = await fetch(uploadUrl, {
+      method: "PUT",
+      headers: {
+        "Content-Type": contentType,
+        "Content-Length": String(mediaBuffer.length),
+      },
+      body: mediaBuffer,
+    });
+
+    if (!uploadRes.ok) {
+      const err = await uploadRes.text();
+      throw new Error(`YouTube video upload failed: ${err}`);
+    }
+
+    const data = await uploadRes.json();
     return {
       success: true,
       externalPostId: data.id,
-      url: `https://www.youtube.com/post/${data.id}`,
+      url: `https://www.youtube.com/shorts/${data.id}`,
     };
   }
 }

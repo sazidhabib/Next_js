@@ -1,4 +1,5 @@
 import { Sequelize } from "sequelize";
+import mysql2 from "mysql2";
 
 let sequelize;
 
@@ -13,9 +14,10 @@ if (process.env.NODE_ENV === "production") {
     host: dbHost,
     port: Number(dbPort),
     dialect: "mysql",
+    dialectModule: mysql2,
     logging: false,
     pool: {
-      max: 10,
+      max: 2,
       min: 0,
       acquire: 30000,
       idle: 10000,
@@ -27,6 +29,7 @@ if (process.env.NODE_ENV === "production") {
       host: dbHost,
       port: Number(dbPort),
       dialect: "mysql",
+      dialectModule: mysql2,
       logging: false,
       pool: {
         max: 5,

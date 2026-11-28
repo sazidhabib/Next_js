@@ -4,8 +4,9 @@ import { getAdapter } from "../social/registry";
 /**
  * Dispatches a post to all pending platform deliveries asynchronously.
  * @param {string} postId - The Post UUID
+ * @param {object} [mediaOptions] - Optional binary media payload { mediaBuffer, mediaMimeType, mediaType, title, isReel }
  */
-export async function dispatchPost(postId) {
+export async function dispatchPost(postId, mediaOptions = {}) {
   try {
     const post = await Post.findByPk(postId, {
       include: [
@@ -26,8 +27,8 @@ export async function dispatchPost(postId) {
     const pendingDeliveries = post.deliveries.filter((d) => d.status === "pending");
 
     // Execute across all channels concurrently with isolated error boundaries
-    const results = await Promise.allSettled(
-      pendingDeliveries.map((delivery) => processSingleDelivery(delivery, post))
+    await Promise.allSettled(
+      pendingDeliveries.map((delivery) => processSingleDelivery(delivery, post, mediaOptions))
     );
 
     // Re-query deliveries to determine overall post status
@@ -58,7 +59,7 @@ export async function dispatchPost(postId) {
 /**
  * Executes delivery to a single social platform account.
  */
-export async function processSingleDelivery(delivery, post) {
+export async function processSingleDelivery(delivery, post, mediaOptions = {}) {
   const account = delivery.socialAccount;
   const adapter = getAdapter(delivery.provider);
 
@@ -91,14 +92,17 @@ export async function processSingleDelivery(delivery, post) {
     // Determine platform-specific customized overrides if present
     const customConfig = post.platform_customizations?.[delivery.provider];
     const effectiveText = delivery.custom_text || customConfig?.text || post.content_text;
-    const effectiveMediaUrl = (delivery.custom_media_url !== undefined && delivery.custom_media_url !== null)
-      ? delivery.custom_media_url
-      : (customConfig && customConfig.mediaUrl !== undefined
+    const effectiveMediaUrl =
+      delivery.custom_media_url !== undefined && delivery.custom_media_url !== null
+        ? delivery.custom_media_url
+        : customConfig && customConfig.mediaUrl !== undefined
         ? customConfig.mediaUrl
-        : post.media_url);
+        : post.media_url;
 
     // 2. Validate platform constraints
-    const validation = adapter.validate(effectiveText, effectiveMediaUrl);
+    const validation = adapter.validate(effectiveText, effectiveMediaUrl, {
+      mediaBuffer: mediaOptions?.mediaBuffer,
+    });
     if (!validation.isValid) {
       throw new Error(validation.error);
     }
@@ -106,7 +110,12 @@ export async function processSingleDelivery(delivery, post) {
     // 3. Publish to platform API with effective content
     const publishResult = await adapter.publish({
       text: effectiveText,
+      title: mediaOptions?.title || post.platform_customizations?._seoTitle || null,
       mediaUrl: effectiveMediaUrl,
+      mediaBuffer: mediaOptions?.mediaBuffer || null,
+      mediaMimeType: mediaOptions?.mediaMimeType || null,
+      mediaType: mediaOptions?.mediaType || null,
+      isReel: Boolean(mediaOptions?.isReel),
       accessToken,
       socialAccount: account,
     });
@@ -145,7 +154,7 @@ export async function retryDelivery(deliveryId) {
     throw new Error(`Delivery ${deliveryId} not found`);
   }
 
-  const result = await processSingleDelivery(delivery, delivery.post);
+  await processSingleDelivery(delivery, delivery.post);
 
   // Update parent post status
   const allDeliveries = await PostDelivery.findAll({ where: { post_id: delivery.post_id } });

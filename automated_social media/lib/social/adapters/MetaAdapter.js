@@ -30,37 +30,111 @@ export default class MetaAdapter extends BaseSocialAdapter {
 
     const res = await fetch(tokenUrl);
     if (!res.ok) {
-      throw new Error("Meta access token exchange failed");
+      const err = await res.text();
+      throw new Error(`Meta access token exchange failed: ${err}`);
     }
     const tokenData = await res.json();
 
-    // 2. Exchange for 60-day long-lived token
+    // 2. Exchange for 60-day long-lived User token
     const longLivedUrl = `https://graph.facebook.com/v19.0/oauth/access_token?grant_type=fb_exchange_token&client_id=${this.appId}&client_secret=${this.appSecret}&fb_exchange_token=${tokenData.access_token}`;
     const longRes = await fetch(longLivedUrl);
     const longData = await longRes.json();
-    const finalToken = longData.access_token || tokenData.access_token;
+    const finalUserToken = longData.access_token || tokenData.access_token;
 
-    // 3. Get User Profile and Pages
-    const meRes = await fetch(`https://graph.facebook.com/v19.0/me?fields=id,name,picture&access_token=${finalToken}`);
+    // 3. Fetch managed Facebook Pages and linked Instagram Business accounts
+    const pagesUrl = `https://graph.facebook.com/v19.0/me/accounts?fields=id,name,access_token,picture,instagram_business_account{id,username,profile_picture_url}&access_token=${finalUserToken}`;
+    const pagesRes = await fetch(pagesUrl);
+    const pagesData = await pagesRes.json();
+    const pages = Array.isArray(pagesData?.data) ? pagesData.data : [];
+
+    if (this.subProvider === "instagram") {
+      const igAccounts = pages
+        .filter((p) => p.instagram_business_account?.id)
+        .map((p) => {
+          const ig = p.instagram_business_account;
+          return {
+            accessToken: p.access_token || finalUserToken,
+            refreshToken: null,
+            expiresIn: null, // Page-linked tokens derived from long-lived user tokens do not expire
+            accountId: ig.id,
+            accountName: `@${ig.username || ig.id} (Instagram)`,
+            metadata: {
+              picture: ig.profile_picture_url || p.picture?.data?.url,
+              handle: ig.username ? `@${ig.username}` : null,
+              linkedPageId: p.id,
+              linkedPageName: p.name,
+              type: "instagram_business",
+            },
+          };
+        });
+
+      if (igAccounts.length === 0) {
+        throw new Error(
+          "No Instagram Business account found linked to your Facebook Pages. Link an Instagram Business/Creator account to a Facebook Page first."
+        );
+      }
+
+      return {
+        ...igAccounts[0],
+        extraAccounts: igAccounts.slice(1),
+      };
+    }
+
+    // Facebook Pages
+    if (pages.length > 0) {
+      const fbPages = pages.map((page) => ({
+        accessToken: page.access_token,
+        refreshToken: null,
+        expiresIn: null, // Page access token derived from long-lived user token does not expire
+        accountId: page.id,
+        accountName: `${page.name} (FB Page)`,
+        metadata: {
+          picture: page.picture?.data?.url,
+          pageName: page.name,
+          type: "facebook_page",
+        },
+      }));
+
+      return {
+        ...fbPages[0],
+        extraAccounts: fbPages.slice(1),
+      };
+    }
+
+    // Fallback to /me if user has no Pages (note: Meta blocks posting to personal profiles)
+    const meRes = await fetch(
+      `https://graph.facebook.com/v19.0/me?fields=id,name,picture&access_token=${finalUserToken}`
+    );
     const me = await meRes.json();
 
     return {
-      accessToken: finalToken,
-      refreshToken: null, // Meta uses long-lived tokens that are renewed via code
-      expiresIn: longData.expires_in || 5184000, // ~60 days
+      accessToken: finalUserToken,
+      refreshToken: null,
+      expiresIn: longData.expires_in || 5184000,
       accountId: me.id,
-      accountName: `${me.name} (${this.subProvider === "instagram" ? "Instagram" : "Facebook"})`,
+      accountName: `${me.name} (Profile - No Page Found)`,
       metadata: {
         picture: me.picture?.data?.url,
-        type: this.subProvider,
+        type: "facebook_profile",
       },
     };
   }
 
   async refreshToken(socialAccount) {
+    // Facebook Page tokens derived from a long-lived user token do not expire
+    const metaType = socialAccount.metadata?.type;
+    if (metaType === "facebook_page" || metaType === "instagram_business") {
+      const { accessToken } = socialAccount.getDecryptedTokens();
+      return {
+        accessToken,
+        refreshToken: null,
+        expiresIn: null,
+      };
+    }
+
     const { accessToken } = socialAccount.getDecryptedTokens();
     const refreshUrl = `https://graph.facebook.com/v19.0/oauth/access_token?grant_type=fb_exchange_token&client_id=${this.appId}&client_secret=${this.appSecret}&fb_exchange_token=${accessToken}`;
-    
+
     const res = await fetch(refreshUrl);
     if (!res.ok) {
       throw new Error("Meta token renewal failed");
@@ -73,8 +147,9 @@ export default class MetaAdapter extends BaseSocialAdapter {
     };
   }
 
-  validate(text, mediaUrl) {
-    if (this.subProvider === "instagram" && !mediaUrl) {
+  validate(text, mediaUrl, options = {}) {
+    const hasMedia = Boolean(mediaUrl || options?.mediaBuffer);
+    if (this.subProvider === "instagram" && !hasMedia) {
       return { isValid: false, error: "Instagram requires an image or media URL for publishing." };
     }
     if (text && text.length > 2200 && this.subProvider === "instagram") {
@@ -83,8 +158,18 @@ export default class MetaAdapter extends BaseSocialAdapter {
     return { isValid: true, error: null };
   }
 
-  async publish({ text, mediaUrl, accessToken, socialAccount }) {
-    const val = this.validate(text, mediaUrl);
+  async publish({
+    text,
+    title,
+    mediaUrl,
+    mediaBuffer,
+    mediaMimeType,
+    mediaType,
+    isReel = false,
+    accessToken,
+    socialAccount,
+  }) {
+    const val = this.validate(text, mediaUrl, { mediaBuffer });
     if (!val.isValid) throw new Error(val.error);
 
     // Development fallback
@@ -102,15 +187,81 @@ export default class MetaAdapter extends BaseSocialAdapter {
     }
 
     const accountId = socialAccount.account_id;
+    const isVideo = mediaType === "video" || (mediaMimeType || "").startsWith("video/");
 
     if (this.subProvider === "facebook") {
+      // Binary Video / Reel upload from Google Drive
+      if (mediaBuffer && isVideo) {
+        if (isReel) {
+          return await this.publishFacebookReel({
+            accountId,
+            accessToken,
+            mediaBuffer,
+            description: text,
+          });
+        }
+
+        const form = new FormData();
+        form.append("access_token", accessToken);
+        form.append("description", text || "");
+        if (title) form.append("title", title);
+        form.append(
+          "source",
+          new Blob([mediaBuffer], { type: mediaMimeType || "video/mp4" }),
+          "video.mp4"
+        );
+
+        const res = await fetch(`https://graph-video.facebook.com/v19.0/${accountId}/videos`, {
+          method: "POST",
+          body: form,
+        });
+        if (!res.ok) {
+          const err = await res.text();
+          throw new Error(`Facebook video upload failed: ${err}`);
+        }
+        const data = await res.json();
+        return {
+          success: true,
+          externalPostId: data.id,
+          url: `https://www.facebook.com/${accountId}/videos/${data.id}`,
+        };
+      }
+
+      // Binary Image upload from Google Drive
+      if (mediaBuffer && !isVideo) {
+        const form = new FormData();
+        form.append("access_token", accessToken);
+        form.append("message", text || "");
+        form.append(
+          "source",
+          new Blob([mediaBuffer], { type: mediaMimeType || "image/jpeg" }),
+          "image.jpg"
+        );
+
+        const res = await fetch(`https://graph.facebook.com/v19.0/${accountId}/photos`, {
+          method: "POST",
+          body: form,
+        });
+        if (!res.ok) {
+          const err = await res.text();
+          throw new Error(`Facebook photo upload failed: ${err}`);
+        }
+        const data = await res.json();
+        return {
+          success: true,
+          externalPostId: data.post_id || data.id,
+          url: `https://facebook.com/${data.post_id || data.id}`,
+        };
+      }
+
+      // URL or text-only publish
       const endpoint = mediaUrl
         ? `https://graph.facebook.com/v19.0/${accountId}/photos`
         : `https://graph.facebook.com/v19.0/${accountId}/feed`;
 
       const params = new URLSearchParams({
         access_token: accessToken,
-        message: text,
+        message: text || "",
       });
       if (mediaUrl) params.append("url", mediaUrl);
 
@@ -126,11 +277,17 @@ export default class MetaAdapter extends BaseSocialAdapter {
         url: `https://facebook.com/${data.id || data.post_id}`,
       };
     } else {
-      // Instagram 2-step container publish
+      // Instagram Graph API requires a publicly reachable URL (cannot accept raw multipart bytes directly)
+      if (!mediaUrl) {
+        throw new Error(
+          "Instagram Graph API requires a public mediaUrl. Provide a public URL or host Drive media publicly before publishing to Instagram."
+        );
+      }
+
       const containerRes = await fetch(
         `https://graph.facebook.com/v19.0/${accountId}/media?image_url=${encodeURIComponent(
           mediaUrl
-        )}&caption=${encodeURIComponent(text)}&access_token=${accessToken}`,
+        )}&caption=${encodeURIComponent(text || "")}&access_token=${accessToken}`,
         { method: "POST" }
       );
       if (!containerRes.ok) {
@@ -154,5 +311,64 @@ export default class MetaAdapter extends BaseSocialAdapter {
         url: `https://instagram.com/p/${published.id}`,
       };
     }
+  }
+
+  /**
+   * 3-Step Facebook Page Reels upload flow.
+   */
+  async publishFacebookReel({ accountId, accessToken, mediaBuffer, description }) {
+    // Step 1: Initialize upload session
+    const startParams = new URLSearchParams({
+      upload_phase: "start",
+      access_token: accessToken,
+    });
+    const startRes = await fetch(
+      `https://graph.facebook.com/v19.0/${accountId}/video_reels`,
+      { method: "POST", body: startParams }
+    );
+    if (!startRes.ok) {
+      const err = await startRes.text();
+      throw new Error(`Facebook Reel start failed: ${err}`);
+    }
+    const { video_id, upload_url } = await startRes.json();
+
+    // Step 2: Upload binary bytes to rupload endpoint
+    const uploadTarget = upload_url || `https://rupload.facebook.com/video-upload/v19.0/${video_id}`;
+    const uploadRes = await fetch(uploadTarget, {
+      method: "POST",
+      headers: {
+        Authorization: `OAuth ${accessToken}`,
+        offset: "0",
+        file_size: String(mediaBuffer.length),
+      },
+      body: mediaBuffer,
+    });
+    if (!uploadRes.ok) {
+      const err = await uploadRes.text();
+      throw new Error(`Facebook Reel binary upload failed: ${err}`);
+    }
+
+    // Step 3: Publish Reel
+    const finishParams = new URLSearchParams({
+      upload_phase: "finish",
+      video_id,
+      video_state: "PUBLISHED",
+      description: description || "",
+      access_token: accessToken,
+    });
+    const finishRes = await fetch(
+      `https://graph.facebook.com/v19.0/${accountId}/video_reels`,
+      { method: "POST", body: finishParams }
+    );
+    if (!finishRes.ok) {
+      const err = await finishRes.text();
+      throw new Error(`Facebook Reel publish finish failed: ${err}`);
+    }
+
+    return {
+      success: true,
+      externalPostId: video_id,
+      url: `https://www.facebook.com/reel/${video_id}`,
+    };
   }
 }

@@ -8,7 +8,13 @@ export default class LinkedInAdapter extends BaseSocialAdapter {
   }
 
   getAuthUrl(state, redirectUri) {
-    const scope = encodeURIComponent("openid profile email w_member_social");
+    const scopes = ["openid", "profile", "email", "w_member_social"];
+    // Enable organization scopes only if LinkedIn App has Community Management API approved
+    if (process.env.LINKEDIN_ENABLE_ORG_SCOPES === "true") {
+      scopes.push("w_organization_social", "r_organization_social", "rw_organization_admin");
+    }
+
+    const scope = encodeURIComponent(scopes.join(" "));
     return `https://www.linkedin.com/oauth/v2/authorization?response_type=code&client_id=${this.clientId}&redirect_uri=${encodeURIComponent(
       redirectUri
     )}&state=${state}&scope=${scope}`;
@@ -33,23 +39,91 @@ export default class LinkedInAdapter extends BaseSocialAdapter {
     }
 
     const data = await response.json();
-    
-    // Fetch profile
+
+    // Fetch personal profile
     const profileRes = await fetch("https://api.linkedin.com/v2/userinfo", {
       headers: { Authorization: `Bearer ${data.access_token}` },
     });
     const profile = await profileRes.json();
 
-    return {
+    const personalAccount = {
       accessToken: data.access_token,
       refreshToken: data.refresh_token || null,
       expiresIn: data.expires_in,
-      accountId: profile.sub,
-      accountName: profile.name || "LinkedIn User",
+      accountId: `urn:li:person:${profile.sub}`,
+      accountName: `${profile.name || "LinkedIn User"} (Personal)`,
       metadata: {
         picture: profile.picture,
         email: profile.email,
+        type: "person",
       },
+    };
+
+    const extraAccounts = [];
+
+    // Optionally fetch administered Company Pages if organization scopes are enabled
+    if (process.env.LINKEDIN_ENABLE_ORG_SCOPES === "true") {
+      try {
+        const aclRes = await fetch(
+          "https://api.linkedin.com/v2/organizationAcls?q=roleAssignee&role=ADMINISTRATOR&state=APPROVED",
+          {
+            headers: {
+              Authorization: `Bearer ${data.access_token}`,
+              "X-Restli-Protocol-Version": "2.0.0",
+            },
+          }
+        );
+
+        if (aclRes.ok) {
+          const aclData = await aclRes.json();
+          const orgUrns = (aclData.elements || [])
+            .map((el) => el.organization)
+            .filter(Boolean);
+
+          for (const orgUrn of orgUrns) {
+            const orgId = orgUrn.split(":").pop();
+            let orgName = `LinkedIn Page ${orgId}`;
+
+            try {
+              const orgRes = await fetch(
+                `https://api.linkedin.com/v2/organizations/${orgId}?projection=(id,localizedName)`,
+                {
+                  headers: {
+                    Authorization: `Bearer ${data.access_token}`,
+                    "X-Restli-Protocol-Version": "2.0.0",
+                  },
+                }
+              );
+              if (orgRes.ok) {
+                const orgInfo = await orgRes.json();
+                if (orgInfo.localizedName) orgName = orgInfo.localizedName;
+              }
+            } catch {
+              // ignore org name fetch error and use fallback
+            }
+
+            extraAccounts.push({
+              accessToken: data.access_token,
+              refreshToken: data.refresh_token || null,
+              expiresIn: data.expires_in,
+              accountId: orgUrn,
+              accountName: `${orgName} (Company Page)`,
+              metadata: {
+                picture: profile.picture,
+                type: "organization",
+                organizationUrn: orgUrn,
+              },
+            });
+          }
+        }
+      } catch (err) {
+        console.warn("LinkedIn organization ACL fetch skipped:", err.message);
+      }
+    }
+
+    return {
+      ...personalAccount,
+      extraAccounts,
     };
   }
 
@@ -90,12 +164,80 @@ export default class LinkedInAdapter extends BaseSocialAdapter {
     return { isValid: true, error: null };
   }
 
-  async publish({ text, mediaUrl, accessToken, socialAccount }) {
-    this.validate(text, mediaUrl);
+  async registerAndUploadMedia({ authorUrn, accessToken, mediaBuffer, mediaMimeType, isVideo }) {
+    const recipe = isVideo
+      ? "urn:li:digitalmediaRecipe:feedshare-video"
+      : "urn:li:digitalmediaRecipe:feedshare-image";
+
+    const registerRes = await fetch("https://api.linkedin.com/v2/assets?action=registerUpload", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+        "X-Restli-Protocol-Version": "2.0.0",
+      },
+      body: JSON.stringify({
+        registerUploadRequest: {
+          recipes: [recipe],
+          owner: authorUrn,
+          serviceRelationships: [
+            {
+              relationshipType: "OWNER",
+              identifier: "urn:li:userGeneratedContent",
+            },
+          ],
+        },
+      }),
+    });
+
+    if (!registerRes.ok) {
+      const err = await registerRes.text();
+      throw new Error(`LinkedIn asset registration failed: ${err}`);
+    }
+
+    const registerData = await registerRes.json();
+    const uploadUrl =
+      registerData?.value?.uploadMechanism?.["com.linkedin.digitalmedia.uploading.MediaUploadHttpRequest"]
+        ?.uploadUrl;
+    const assetUrn = registerData?.value?.asset;
+
+    if (!uploadUrl || !assetUrn) {
+      throw new Error("LinkedIn asset registration returned no uploadUrl or asset URN.");
+    }
+
+    const uploadRes = await fetch(uploadUrl, {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": mediaMimeType || (isVideo ? "video/mp4" : "image/jpeg"),
+      },
+      body: mediaBuffer,
+    });
+
+    if (!uploadRes.ok) {
+      const err = await uploadRes.text();
+      throw new Error(`LinkedIn binary asset upload failed: ${err}`);
+    }
+
+    return assetUrn;
+  }
+
+  async publish({
+    text,
+    title,
+    mediaUrl,
+    mediaBuffer,
+    mediaMimeType,
+    mediaType,
+    accessToken,
+    socialAccount,
+  }) {
+    const val = this.validate(text, mediaUrl);
+    if (!val.isValid) throw new Error(val.error);
 
     // If running in development / test mode or mock credentials
     if (!this.clientId || this.clientId === "your_linkedin_client_id" || accessToken.startsWith("mock_")) {
-      await new Promise((r) => setTimeout(r, 800)); // Simulate API network latency
+      await new Promise((r) => setTimeout(r, 800));
       const mockId = `urn:li:share:${Date.now()}`;
       return {
         success: true,
@@ -104,22 +246,47 @@ export default class LinkedInAdapter extends BaseSocialAdapter {
       };
     }
 
-    const authorUrn = `urn:li:person:${socialAccount.account_id}`;
+    const rawId = socialAccount.account_id;
+    const authorUrn = rawId.startsWith("urn:li:") ? rawId : `urn:li:person:${rawId}`;
+    const isVideo = mediaType === "video" || (mediaMimeType || "").startsWith("video/");
+
+    let shareMediaCategory = "NONE";
+    let mediaArray = [];
+
+    if (mediaBuffer) {
+      const assetUrn = await this.registerAndUploadMedia({
+        authorUrn,
+        accessToken,
+        mediaBuffer,
+        mediaMimeType,
+        isVideo,
+      });
+      shareMediaCategory = isVideo ? "VIDEO" : "IMAGE";
+      mediaArray = [
+        {
+          status: "READY",
+          media: assetUrn,
+          ...(title ? { title: { text: title.slice(0, 200) } } : {}),
+        },
+      ];
+    } else if (mediaUrl) {
+      shareMediaCategory = "IMAGE";
+      mediaArray = [
+        {
+          status: "READY",
+          originalUrl: mediaUrl,
+        },
+      ];
+    }
+
     const payload = {
       author: authorUrn,
       lifecycleState: "PUBLISHED",
       specificContent: {
         "com.linkedin.ugc.ShareContent": {
           shareCommentary: { text },
-          shareMediaCategory: mediaUrl ? "IMAGE" : "NONE",
-          media: mediaUrl
-            ? [
-                {
-                  status: "READY",
-                  originalUrl: mediaUrl,
-                },
-              ]
-            : [],
+          shareMediaCategory,
+          media: mediaArray,
         },
       },
       visibility: {

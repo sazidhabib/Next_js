@@ -3,7 +3,7 @@ import { initDB, SocialAccount, User } from "@/lib/db";
 import { getSupportedProviders } from "@/lib/social/registry";
 import { encryptToken } from "@/lib/security/encryption";
 
-// Demo accounts with standard UUIDs
+// Demo accounts with standard UUIDs (used only when DB is disconnected or ENABLE_DEMO_MODE=true)
 let mockAccounts = [
   {
     id: "a0000000-0000-4000-a000-000000000001",
@@ -78,8 +78,8 @@ export async function GET() {
         order: [["created_at", "DESC"]],
       });
 
-      // Auto-seed demo accounts into database if empty
-      if (accounts.length === 0) {
+      // Only seed demo accounts when explicitly enabled via ENABLE_DEMO_MODE=true
+      if (accounts.length === 0 && process.env.ENABLE_DEMO_MODE === "true") {
         let [defaultUser] = await User.findOrCreate({
           where: { email: "demo@antigravity.dev" },
           defaults: { name: "Demo User", password_hash: "demo_hash" },
@@ -136,7 +136,6 @@ export async function POST(req) {
     const dbStatus = await initDB();
 
     if (dbStatus.isConnected) {
-      // Find or create default demo user
       let [defaultUser] = await User.findOrCreate({
         where: { email: "demo@antigravity.dev" },
         defaults: { name: "Demo User", password_hash: "demo_hash" },
@@ -155,7 +154,6 @@ export async function POST(req) {
       return NextResponse.json({ success: true, account: newAccount });
     }
 
-    // In-memory fallback
     const newMock = {
       id: "acc_" + Date.now(),
       provider,
@@ -168,6 +166,31 @@ export async function POST(req) {
     mockAccounts.push(newMock);
 
     return NextResponse.json({ success: true, account: newMock });
+  } catch (err) {
+    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
+  }
+}
+
+export async function DELETE(req) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get("id");
+
+    if (!id) {
+      return NextResponse.json({ success: false, error: "Account id is required." }, { status: 400 });
+    }
+
+    const dbStatus = await initDB();
+    if (dbStatus.isConnected) {
+      const deleted = await SocialAccount.destroy({ where: { id } });
+      if (!deleted) {
+        return NextResponse.json({ success: false, error: "Account not found." }, { status: 404 });
+      }
+      return NextResponse.json({ success: true, deletedId: id });
+    }
+
+    mockAccounts = mockAccounts.filter((a) => a.id !== id);
+    return NextResponse.json({ success: true, deletedId: id });
   } catch (err) {
     return NextResponse.json({ success: false, error: err.message }, { status: 500 });
   }

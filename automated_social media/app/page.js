@@ -28,6 +28,7 @@ import {
   HelpCircle,
   Hash,
   Wand2,
+  Trash2,
 } from "lucide-react";
 
 export default function SocialDashboard() {
@@ -121,15 +122,52 @@ export default function SocialDashboard() {
     }
   };
 
-  // Fetch accounts and posts
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    fetchData();
-  }, []);
-
   const showNotification = (msg, type = "success") => {
     setNotification({ msg, type });
     setTimeout(() => setNotification(null), 4500);
+  };
+
+  // Fetch accounts and posts + handle OAuth redirect feedback
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchData();
+
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const connected = params.get("connected");
+      const count = params.get("count");
+      const oauthError = params.get("error");
+
+      if (connected) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        showNotification(
+          `Connected ${connected}${count && Number(count) > 1 ? ` (${count} channels)` : ""} successfully!`
+        );
+        window.history.replaceState({}, "", window.location.pathname);
+      } else if (oauthError) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        showNotification(`Connection failed: ${oauthError}`, "error");
+        window.history.replaceState({}, "", window.location.pathname);
+      }
+    }
+  }, []);
+
+  const handleDisconnectAccount = async (accountId, accountName) => {
+    try {
+      const res = await fetch(`/api/accounts?id=${encodeURIComponent(accountId)}`, {
+        method: "DELETE",
+      });
+      const data = await res.json();
+      if (!data.success) {
+        showNotification(data.error || "Failed to disconnect account.", "error");
+        return;
+      }
+      setAccounts((prev) => prev.filter((a) => a.id !== accountId));
+      setSelectedAccountIds((prev) => prev.filter((id) => id !== accountId));
+      showNotification(`Disconnected ${accountName}`);
+    } catch (err) {
+      showNotification("Network error disconnecting account.", "error");
+    }
   };
 
   const handleGenerateAI = async () => {
@@ -1394,53 +1432,72 @@ export default function SocialDashboard() {
               Connect your brand accounts using OAuth2. Once connected, 1-click posting delivers to these channels with automatic token refreshing.
             </p>
 
-            <div className="flex flex-col gap-2.5 max-h-[380px] overflow-y-auto pr-1">
+            <div className="flex flex-col gap-3 max-h-[400px] overflow-y-auto pr-1">
               {[
                 { id: "linkedin", name: "LinkedIn Profile / Company", icon: "in", color: "#0A66C2" },
-                { id: "facebook", name: "Facebook Page", icon: "fb", color: "#1877F2" },
+                { id: "facebook", name: "Facebook Pages", icon: "fb", color: "#1877F2" },
                 { id: "instagram", name: "Instagram Business", icon: "ig", color: "#E4405F" },
                 { id: "twitter", name: "X (Twitter) Profile", icon: "𝕏", color: "#ffffff" },
-                { id: "youtube", name: "YouTube Channel Community", icon: "yt", color: "#FF0000" },
+                { id: "youtube", name: "YouTube Channel", icon: "yt", color: "#FF0000" },
               ].map((provider) => {
-                const connectedAccount = accounts.find((a) => a.provider === provider.id);
+                const providerAccounts = accounts.filter((a) => a.provider === provider.id);
 
                 return (
                   <div
                     key={provider.id}
-                    className="flex items-center justify-between p-3 rounded-xl bg-neutral-900/60 border border-neutral-800/80"
+                    className="p-3 rounded-xl bg-neutral-900/60 border border-neutral-800/80"
                   >
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-lg bg-neutral-800 flex items-center justify-center font-bold text-xs">
-                        {provider.icon}
-                      </div>
-                      <div>
-                        <div className="text-xs font-semibold text-white">{provider.name}</div>
-                        <div className="text-[11px] text-neutral-500">
-                          {connectedAccount ? (
-                            <span className="text-emerald-400 flex items-center gap-1">
-                              <CheckCircle2 className="w-3 h-3" /> Connected as {connectedAccount.account_name}
-                            </span>
-                          ) : (
-                            "Not linked"
-                          )}
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-neutral-800 flex items-center justify-center font-bold text-xs">
+                          {provider.icon}
+                        </div>
+                        <div>
+                          <div className="text-xs font-semibold text-white">{provider.name}</div>
+                          <div className="text-[11px] text-neutral-500">
+                            {providerAccounts.length > 0
+                              ? `${providerAccounts.length} connected channel${providerAccounts.length > 1 ? "s" : ""}`
+                              : "Not linked"}
+                          </div>
                         </div>
                       </div>
+
+                      <a
+                        href={`/api/auth/${provider.id}/connect`}
+                        className="px-3 py-1.5 text-xs font-medium rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white transition-colors"
+                      >
+                        {providerAccounts.length > 0 ? "Reconnect / Add" : "Connect OAuth"}
+                      </a>
                     </div>
 
-                    <div>
-                      {connectedAccount ? (
-                        <span className="px-2.5 py-1 text-[11px] font-medium rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                          Active
-                        </span>
-                      ) : (
-                        <a
-                          href={`/api/auth/${provider.id}/connect`}
-                          className="px-3 py-1.5 text-xs font-medium rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white transition-colors"
-                        >
-                          Connect OAuth
-                        </a>
-                      )}
-                    </div>
+                    {providerAccounts.length > 0 && (
+                      <div className="mt-2.5 pt-2.5 border-t border-neutral-800/70 flex flex-col gap-1.5">
+                        {providerAccounts.map((acc) => (
+                          <div
+                            key={acc.id}
+                            className="flex items-center justify-between px-2.5 py-1.5 rounded-lg bg-neutral-950/60 border border-neutral-800/60"
+                          >
+                            <div className="flex items-center gap-2 min-w-0">
+                              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                              <span className="text-xs text-neutral-200 truncate">
+                                {acc.account_name}
+                              </span>
+                              <span className="text-[10px] text-neutral-500 font-mono truncate hidden sm:inline">
+                                {acc.account_id}
+                              </span>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => handleDisconnectAccount(acc.id, acc.account_name)}
+                              title="Disconnect account"
+                              className="p-1 rounded-md text-neutral-500 hover:text-red-400 hover:bg-red-500/10 transition-colors cursor-pointer shrink-0"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 );
               })}
